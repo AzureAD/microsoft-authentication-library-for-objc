@@ -1,0 +1,823 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D65A6F881E3FF3D900C69FBA /* MSALKeychainTokenCache.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F6A1E3FF3D900C69FBA /* MSALKeychainTokenCache.m */; };
+		D65A6F8B1E3FF3D900C69FBA /* MSALBaseCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F6C1E3FF3D900C69FBA /* MSALBaseCacheItem.m */; };
+		D65A6F8C1E3FF3D900C69FBA /* MSALBaseCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F6C1E3FF3D900C69FBA /* MSALBaseCacheItem.m */; };
+		D65A6F8E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F6E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m */; };
+		D65A6F8F1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F6E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m */; };
+		D65A6F911E3FF3D900C69FBA /* MSALTokenCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F701E3FF3D900C69FBA /* MSALTokenCacheItem.m */; };
+		D65A6F921E3FF3D900C69FBA /* MSALTokenCacheItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F701E3FF3D900C69FBA /* MSALTokenCacheItem.m */; };
+		D65A6F941E3FF3D900C69FBA /* MSALTokenCacheKey.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F721E3FF3D900C69FBA /* MSALTokenCacheKey.m */; };
+		D65A6F951E3FF3D900C69FBA /* MSALTokenCacheKey.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F721E3FF3D900C69FBA /* MSALTokenCacheKey.m */; };
+		D65A6F971E3FF3D900C69FBA /* MSALError.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F741E3FF3D900C69FBA /* MSALError.m */; };
+		D65A6F981E3FF3D900C69FBA /* MSALError.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F741E3FF3D900C69FBA /* MSALError.m */; };
+		D65A6F9A1E3FF3D900C69FBA /* MSALJsonObject.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F761E3FF3D900C69FBA /* MSALJsonObject.m */; };
+		D65A6F9B1E3FF3D900C69FBA /* MSALJsonObject.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F761E3FF3D900C69FBA /* MSALJsonObject.m */; };
+		D65A6F9C1E3FF3D900C69FBA /* MSALLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F771E3FF3D900C69FBA /* MSALLogger.m */; };
+		D65A6F9D1E3FF3D900C69FBA /* MSALLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F771E3FF3D900C69FBA /* MSALLogger.m */; };
+		D65A6F9E1E3FF3D900C69FBA /* MSALPublicClientApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */; };
+		D65A6F9F1E3FF3D900C69FBA /* MSALPublicClientApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */; };
+		D65A6FA01E3FF3D900C69FBA /* MSALResult.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F791E3FF3D900C69FBA /* MSALResult.m */; };
+		D65A6FA11E3FF3D900C69FBA /* MSALResult.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F791E3FF3D900C69FBA /* MSALResult.m */; };
+		D65A6FA21E3FF3D900C69FBA /* MSALUser.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F7A1E3FF3D900C69FBA /* MSALUser.m */; };
+		D65A6FA31E3FF3D900C69FBA /* MSALUser.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F7A1E3FF3D900C69FBA /* MSALUser.m */; };
+		D65A6FA51E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F7D1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m */; };
+		D65A6FA61E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F7D1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m */; };
+		D65A6FA81E3FF3D900C69FBA /* MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F811E3FF3D900C69FBA /* MSAL.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F821E3FF3D900C69FBA /* MSALError.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FAA1E3FF3D900C69FBA /* MSALLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F831E3FF3D900C69FBA /* MSALLogger.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F851E3FF3D900C69FBA /* MSALResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FAD1E3FF3D900C69FBA /* MSALUser.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F861E3FF3D900C69FBA /* MSALUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB01E3FF41500C69FBA /* MSALKeychainTokenCache.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F801E3FF3D900C69FBA /* MSALKeychainTokenCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB11E3FF41D00C69FBA /* MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F811E3FF3D900C69FBA /* MSAL.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F821E3FF3D900C69FBA /* MSALError.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB31E3FF41D00C69FBA /* MSALLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F831E3FF3D900C69FBA /* MSALLogger.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB41E3FF41D00C69FBA /* MSALPublicClientApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB51E3FF41D00C69FBA /* MSALResult.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F851E3FF3D900C69FBA /* MSALResult.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FB61E3FF41D00C69FBA /* MSALUser.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F861E3FF3D900C69FBA /* MSALUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D65A6FC61E3FF47E00C69FBA /* libMSAL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DFF3A21E2579360012891A /* libMSAL.a */; };
+		D65A6FD51E3FF49C00C69FBA /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
+		D65A6FE41E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */; };
+		D65A6FE51E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D65A6F581E3FD48600C69FBA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D6DFF3A11E2579360012891A;
+			remoteInfo = "MSAL (iOS Static Lib)";
+		};
+		D65A6FC71E3FF47E00C69FBA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D6DFF3A11E2579360012891A;
+			remoteInfo = "MSAL (iOS Static Lib)";
+		};
+		D65A6FD61E3FF49C00C69FBA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D6DFF3A01E2579360012891A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D65A6F431E3FD30A00C69FBA /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D65A6F501E3FD32D00C69FBA /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D65A6F6A1E3FF3D900C69FBA /* MSALKeychainTokenCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALKeychainTokenCache.m; sourceTree = "<group>"; };
+		D65A6F6B1E3FF3D900C69FBA /* MSALBaseCacheItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALBaseCacheItem.h; sourceTree = "<group>"; };
+		D65A6F6C1E3FF3D900C69FBA /* MSALBaseCacheItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALBaseCacheItem.m; sourceTree = "<group>"; };
+		D65A6F6D1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALRefreshTokenCacheItem.h; sourceTree = "<group>"; };
+		D65A6F6E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALRefreshTokenCacheItem.m; sourceTree = "<group>"; };
+		D65A6F6F1E3FF3D900C69FBA /* MSALTokenCacheItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTokenCacheItem.h; sourceTree = "<group>"; };
+		D65A6F701E3FF3D900C69FBA /* MSALTokenCacheItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTokenCacheItem.m; sourceTree = "<group>"; };
+		D65A6F711E3FF3D900C69FBA /* MSALTokenCacheKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTokenCacheKey.h; sourceTree = "<group>"; };
+		D65A6F721E3FF3D900C69FBA /* MSALTokenCacheKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTokenCacheKey.m; sourceTree = "<group>"; };
+		D65A6F731E3FF3D900C69FBA /* MSAL_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAL_Internal.h; sourceTree = "<group>"; };
+		D65A6F741E3FF3D900C69FBA /* MSALError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALError.m; sourceTree = "<group>"; };
+		D65A6F751E3FF3D900C69FBA /* MSALJsonObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALJsonObject.h; sourceTree = "<group>"; };
+		D65A6F761E3FF3D900C69FBA /* MSALJsonObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALJsonObject.m; sourceTree = "<group>"; };
+		D65A6F771E3FF3D900C69FBA /* MSALLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALLogger.m; sourceTree = "<group>"; };
+		D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientApplication.m; sourceTree = "<group>"; };
+		D65A6F791E3FF3D900C69FBA /* MSALResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALResult.m; sourceTree = "<group>"; };
+		D65A6F7A1E3FF3D900C69FBA /* MSALUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALUser.m; sourceTree = "<group>"; };
+		D65A6F7C1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALOAuth2ResponseBase.h; sourceTree = "<group>"; };
+		D65A6F7D1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALOAuth2ResponseBase.m; sourceTree = "<group>"; };
+		D65A6F801E3FF3D900C69FBA /* MSALKeychainTokenCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALKeychainTokenCache.h; sourceTree = "<group>"; };
+		D65A6F811E3FF3D900C69FBA /* MSAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAL.h; sourceTree = "<group>"; };
+		D65A6F821E3FF3D900C69FBA /* MSALError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALError.h; sourceTree = "<group>"; };
+		D65A6F831E3FF3D900C69FBA /* MSALLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALLogger.h; sourceTree = "<group>"; };
+		D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALPublicClientApplication.h; sourceTree = "<group>"; };
+		D65A6F851E3FF3D900C69FBA /* MSALResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALResult.h; sourceTree = "<group>"; };
+		D65A6F861E3FF3D900C69FBA /* MSALUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALUser.h; sourceTree = "<group>"; };
+		D65A6FB91E3FF44A00C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D65A6FBB1E3FF44A00C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D65A6FC11E3FF47D00C69FBA /* "MSAL-iOS-Unit-Tests".xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "\"MSAL-iOS-Unit-Tests\".xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D65A6FD01E3FF49C00C69FBA /* "MSAL-Mac-Unit-Tests".xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "\"MSAL-Mac-Unit-Tests\".xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D65A6FE01E3FF71000C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D65A6FE21E3FF71000C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALJsonObjectTests.m; sourceTree = "<group>"; };
+		D65A6FE61E3FFFD300C69FBA /* msal__ios__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__common.xcconfig; sourceTree = "<group>"; };
+		D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__framework.xcconfig; sourceTree = "<group>"; };
+		D65A6FE81E40002800C69FBA /* msal__ios__static_lib.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__static_lib.xcconfig; sourceTree = "<group>"; };
+		D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__unit_test.xcconfig; sourceTree = "<group>"; };
+		D65A6FEA1E40002800C69FBA /* msal__mac__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__common.xcconfig; sourceTree = "<group>"; };
+		D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__framework.xcconfig; sourceTree = "<group>"; };
+		D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__unit_test.xcconfig; sourceTree = "<group>"; };
+		D65A6FEE1E400B1100C69FBA /* msal__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common.xcconfig; sourceTree = "<group>"; };
+		D65A6FEF1E4024C800C69FBA /* msal__mac__common__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__common__framework.xcconfig; sourceTree = "<group>"; };
+		D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__debug.xcconfig; sourceTree = "<group>"; };
+		D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__release.xcconfig; sourceTree = "<group>"; };
+		D65A6FF21E40270600C69FBA /* msal__ios__common__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__common__framework.xcconfig; sourceTree = "<group>"; };
+		D6DFF3A21E2579360012891A /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMSAL.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D65A6F3F1E3FD30A00C69FBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6F4C1E3FD32D00C69FBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FBE1E3FF47D00C69FBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FC61E3FF47E00C69FBA /* libMSAL.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FCD1E3FF49C00C69FBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FD51E3FF49C00C69FBA /* MSAL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D6DFF39F1E2579360012891A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D65A6F671E3FF3D900C69FBA /* src */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F681E3FF3D900C69FBA /* cache */,
+				D65A6F731E3FF3D900C69FBA /* MSAL_Internal.h */,
+				D65A6F741E3FF3D900C69FBA /* MSALError.m */,
+				D65A6F751E3FF3D900C69FBA /* MSALJsonObject.h */,
+				D65A6F761E3FF3D900C69FBA /* MSALJsonObject.m */,
+				D65A6F771E3FF3D900C69FBA /* MSALLogger.m */,
+				D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */,
+				D65A6F791E3FF3D900C69FBA /* MSALResult.m */,
+				D65A6F7A1E3FF3D900C69FBA /* MSALUser.m */,
+				D65A6F7B1E3FF3D900C69FBA /* oauth2 */,
+				D65A6F7E1E3FF3D900C69FBA /* public */,
+				D65A6F871E3FF3D900C69FBA /* requests */,
+			);
+			name = src;
+			path = MSAL/src;
+			sourceTree = "<group>";
+		};
+		D65A6F681E3FF3D900C69FBA /* cache */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F691E3FF3D900C69FBA /* ios */,
+				D65A6F6B1E3FF3D900C69FBA /* MSALBaseCacheItem.h */,
+				D65A6F6C1E3FF3D900C69FBA /* MSALBaseCacheItem.m */,
+				D65A6F6D1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.h */,
+				D65A6F6E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m */,
+				D65A6F6F1E3FF3D900C69FBA /* MSALTokenCacheItem.h */,
+				D65A6F701E3FF3D900C69FBA /* MSALTokenCacheItem.m */,
+				D65A6F711E3FF3D900C69FBA /* MSALTokenCacheKey.h */,
+				D65A6F721E3FF3D900C69FBA /* MSALTokenCacheKey.m */,
+			);
+			path = cache;
+			sourceTree = "<group>";
+		};
+		D65A6F691E3FF3D900C69FBA /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F6A1E3FF3D900C69FBA /* MSALKeychainTokenCache.m */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		D65A6F7B1E3FF3D900C69FBA /* oauth2 */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F7C1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.h */,
+				D65A6F7D1E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m */,
+			);
+			path = oauth2;
+			sourceTree = "<group>";
+		};
+		D65A6F7E1E3FF3D900C69FBA /* public */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F7F1E3FF3D900C69FBA /* ios */,
+				D65A6F811E3FF3D900C69FBA /* MSAL.h */,
+				D65A6F821E3FF3D900C69FBA /* MSALError.h */,
+				D65A6F831E3FF3D900C69FBA /* MSALLogger.h */,
+				D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */,
+				D65A6F851E3FF3D900C69FBA /* MSALResult.h */,
+				D65A6F861E3FF3D900C69FBA /* MSALUser.h */,
+			);
+			path = public;
+			sourceTree = "<group>";
+		};
+		D65A6F7F1E3FF3D900C69FBA /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6F801E3FF3D900C69FBA /* MSALKeychainTokenCache.h */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		D65A6F871E3FF3D900C69FBA /* requests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = requests;
+			sourceTree = "<group>";
+		};
+		D65A6FB71E3FF44A00C69FBA /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FB81E3FF44A00C69FBA /* ios */,
+				D65A6FBA1E3FF44A00C69FBA /* mac */,
+			);
+			name = resources;
+			path = MSAL/resources;
+			sourceTree = "<group>";
+		};
+		D65A6FB81E3FF44A00C69FBA /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FB91E3FF44A00C69FBA /* Info.plist */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		D65A6FBA1E3FF44A00C69FBA /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FBB1E3FF44A00C69FBA /* Info.plist */,
+			);
+			path = mac;
+			sourceTree = "<group>";
+		};
+		D65A6FBC1E3FF46100C69FBA /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FEE1E400B1100C69FBA /* msal__common.xcconfig */,
+				D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */,
+				D65A6FE61E3FFFD300C69FBA /* msal__ios__common.xcconfig */,
+				D65A6FF21E40270600C69FBA /* msal__ios__common__framework.xcconfig */,
+				D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */,
+				D65A6FE81E40002800C69FBA /* msal__ios__static_lib.xcconfig */,
+				D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */,
+				D65A6FEA1E40002800C69FBA /* msal__mac__common.xcconfig */,
+				D65A6FEF1E4024C800C69FBA /* msal__mac__common__framework.xcconfig */,
+				D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */,
+				D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */,
+				D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */,
+			);
+			name = xcconfig;
+			path = MSAL/xcconfig;
+			sourceTree = "<group>";
+		};
+		D65A6FDB1E3FF71000C69FBA /* test */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FDC1E3FF71000C69FBA /* ios */,
+				D65A6FDD1E3FF71000C69FBA /* mac */,
+				D65A6FDE1E3FF71000C69FBA /* resources */,
+				D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */,
+			);
+			name = test;
+			path = MSAL/test;
+			sourceTree = "<group>";
+		};
+		D65A6FDC1E3FF71000C69FBA /* ios */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		D65A6FDD1E3FF71000C69FBA /* mac */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = mac;
+			sourceTree = "<group>";
+		};
+		D65A6FDE1E3FF71000C69FBA /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FDF1E3FF71000C69FBA /* ios */,
+				D65A6FE11E3FF71000C69FBA /* mac */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		D65A6FDF1E3FF71000C69FBA /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FE01E3FF71000C69FBA /* Info.plist */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		D65A6FE11E3FF71000C69FBA /* mac */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FE21E3FF71000C69FBA /* Info.plist */,
+			);
+			path = mac;
+			sourceTree = "<group>";
+		};
+		D6DFF3991E2579360012891A = {
+			isa = PBXGroup;
+			children = (
+				D65A6F671E3FF3D900C69FBA /* src */,
+				D65A6FDB1E3FF71000C69FBA /* test */,
+				D65A6FB71E3FF44A00C69FBA /* resources */,
+				D65A6FBC1E3FF46100C69FBA /* xcconfig */,
+				D6DFF3A31E2579360012891A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D6DFF3A31E2579360012891A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6DFF3A21E2579360012891A /* libMSAL.a */,
+				D65A6F431E3FD30A00C69FBA /* MSAL.framework */,
+				D65A6F501E3FD32D00C69FBA /* MSAL.framework */,
+				D65A6FC11E3FF47D00C69FBA /* "MSAL-iOS-Unit-Tests".xctest */,
+				D65A6FD01E3FF49C00C69FBA /* "MSAL-Mac-Unit-Tests".xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D65A6F401E3FD30A00C69FBA /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FB51E3FF41D00C69FBA /* MSALResult.h in Headers */,
+				D65A6FB61E3FF41D00C69FBA /* MSALUser.h in Headers */,
+				D65A6FB01E3FF41500C69FBA /* MSALKeychainTokenCache.h in Headers */,
+				D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */,
+				D65A6FB41E3FF41D00C69FBA /* MSALPublicClientApplication.h in Headers */,
+				D65A6FB11E3FF41D00C69FBA /* MSAL.h in Headers */,
+				D65A6FB31E3FF41D00C69FBA /* MSALLogger.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6F4D1E3FD32D00C69FBA /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FA81E3FF3D900C69FBA /* MSAL.h in Headers */,
+				D65A6FAD1E3FF3D900C69FBA /* MSALUser.h in Headers */,
+				D65A6FAA1E3FF3D900C69FBA /* MSALLogger.h in Headers */,
+				D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */,
+				D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */,
+				D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D65A6F481E3FD30A00C69FBA /* Build configuration list for PBXNativeTarget "MSAL (iOS Framework)" */;
+			buildPhases = (
+				D65A6F3E1E3FD30A00C69FBA /* Sources */,
+				D65A6F3F1E3FD30A00C69FBA /* Frameworks */,
+				D65A6F401E3FD30A00C69FBA /* Headers */,
+				D65A6F411E3FD30A00C69FBA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D65A6F591E3FD48600C69FBA /* PBXTargetDependency */,
+			);
+			name = "MSAL (iOS Framework)";
+			productName = "MSAL (Framework)";
+			productReference = D65A6F431E3FD30A00C69FBA /* MSAL.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D65A6F551E3FD32D00C69FBA /* Build configuration list for PBXNativeTarget "MSAL (Mac Framework)" */;
+			buildPhases = (
+				D65A6F4B1E3FD32D00C69FBA /* Sources */,
+				D65A6F4C1E3FD32D00C69FBA /* Frameworks */,
+				D65A6F4D1E3FD32D00C69FBA /* Headers */,
+				D65A6F4E1E3FD32D00C69FBA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MSAL (Mac Framework)";
+			productName = "MSAL (Mac Framework)";
+			productReference = D65A6F501E3FD32D00C69FBA /* MSAL.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		D65A6FC01E3FF47D00C69FBA /* MSAL iOS Unit Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D65A6FC91E3FF47E00C69FBA /* Build configuration list for PBXNativeTarget "MSAL iOS Unit Tests" */;
+			buildPhases = (
+				D65A6FBD1E3FF47D00C69FBA /* Sources */,
+				D65A6FBE1E3FF47D00C69FBA /* Frameworks */,
+				D65A6FBF1E3FF47D00C69FBA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D65A6FC81E3FF47E00C69FBA /* PBXTargetDependency */,
+			);
+			name = "MSAL iOS Unit Tests";
+			productName = "MSAL iOS Unit Tests";
+			productReference = D65A6FC11E3FF47D00C69FBA /* "MSAL-iOS-Unit-Tests".xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D65A6FCF1E3FF49C00C69FBA /* MSAL Mac Unit Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D65A6FD81E3FF49C00C69FBA /* Build configuration list for PBXNativeTarget "MSAL Mac Unit Tests" */;
+			buildPhases = (
+				D65A6FCC1E3FF49C00C69FBA /* Sources */,
+				D65A6FCD1E3FF49C00C69FBA /* Frameworks */,
+				D65A6FCE1E3FF49C00C69FBA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D65A6FD71E3FF49C00C69FBA /* PBXTargetDependency */,
+			);
+			name = "MSAL Mac Unit Tests";
+			productName = "MSAL Mac Unit Tests";
+			productReference = D65A6FD01E3FF49C00C69FBA /* "MSAL-Mac-Unit-Tests".xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D6DFF3A11E2579360012891A /* MSAL (iOS Static Lib) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D6DFF3AB1E2579370012891A /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Lib)" */;
+			buildPhases = (
+				D6DFF39E1E2579360012891A /* Sources */,
+				D6DFF39F1E2579360012891A /* Frameworks */,
+				D6DFF3A01E2579360012891A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MSAL (iOS Static Lib)";
+			productName = MSAL;
+			productReference = D6DFF3A21E2579360012891A /* libMSAL.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D6DFF39A1E2579360012891A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = Microsoft;
+				TargetAttributes = {
+					D65A6F421E3FD30A00C69FBA = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+					D65A6F4F1E3FD32D00C69FBA = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+					D65A6FC01E3FF47D00C69FBA = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+					D65A6FCF1E3FF49C00C69FBA = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+					D6DFF3A11E2579360012891A = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D6DFF39D1E2579360012891A /* Build configuration list for PBXProject "MSAL" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = D6DFF3991E2579360012891A;
+			productRefGroup = D6DFF3A31E2579360012891A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D6DFF3A11E2579360012891A /* MSAL (iOS Static Lib) */,
+				D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */,
+				D65A6FC01E3FF47D00C69FBA /* MSAL iOS Unit Tests */,
+				D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */,
+				D65A6FCF1E3FF49C00C69FBA /* MSAL Mac Unit Tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D65A6F411E3FD30A00C69FBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6F4E1E3FD32D00C69FBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FBF1E3FF47D00C69FBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FCE1E3FF49C00C69FBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D65A6F3E1E3FD30A00C69FBA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6F4B1E3FD32D00C69FBA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FA31E3FF3D900C69FBA /* MSALUser.m in Sources */,
+				D65A6F921E3FF3D900C69FBA /* MSALTokenCacheItem.m in Sources */,
+				D65A6F951E3FF3D900C69FBA /* MSALTokenCacheKey.m in Sources */,
+				D65A6FA61E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */,
+				D65A6F9D1E3FF3D900C69FBA /* MSALLogger.m in Sources */,
+				D65A6F8F1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */,
+				D65A6F9B1E3FF3D900C69FBA /* MSALJsonObject.m in Sources */,
+				D65A6F9F1E3FF3D900C69FBA /* MSALPublicClientApplication.m in Sources */,
+				D65A6FA11E3FF3D900C69FBA /* MSALResult.m in Sources */,
+				D65A6F8C1E3FF3D900C69FBA /* MSALBaseCacheItem.m in Sources */,
+				D65A6F981E3FF3D900C69FBA /* MSALError.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FBD1E3FF47D00C69FBA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FE41E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D65A6FCC1E3FF49C00C69FBA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6FE51E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D6DFF39E1E2579360012891A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D65A6F911E3FF3D900C69FBA /* MSALTokenCacheItem.m in Sources */,
+				D65A6F881E3FF3D900C69FBA /* MSALKeychainTokenCache.m in Sources */,
+				D65A6F8B1E3FF3D900C69FBA /* MSALBaseCacheItem.m in Sources */,
+				D65A6FA51E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */,
+				D65A6F971E3FF3D900C69FBA /* MSALError.m in Sources */,
+				D65A6F9C1E3FF3D900C69FBA /* MSALLogger.m in Sources */,
+				D65A6FA21E3FF3D900C69FBA /* MSALUser.m in Sources */,
+				D65A6F9A1E3FF3D900C69FBA /* MSALJsonObject.m in Sources */,
+				D65A6F9E1E3FF3D900C69FBA /* MSALPublicClientApplication.m in Sources */,
+				D65A6FA01E3FF3D900C69FBA /* MSALResult.m in Sources */,
+				D65A6F8E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */,
+				D65A6F941E3FF3D900C69FBA /* MSALTokenCacheKey.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D65A6F591E3FD48600C69FBA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D6DFF3A11E2579360012891A /* MSAL (iOS Static Lib) */;
+			targetProxy = D65A6F581E3FD48600C69FBA /* PBXContainerItemProxy */;
+		};
+		D65A6FC81E3FF47E00C69FBA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D6DFF3A11E2579360012891A /* MSAL (iOS Static Lib) */;
+			targetProxy = D65A6FC71E3FF47E00C69FBA /* PBXContainerItemProxy */;
+		};
+		D65A6FD71E3FF49C00C69FBA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
+			targetProxy = D65A6FD61E3FF49C00C69FBA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D65A6F491E3FD30A00C69FBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		D65A6F4A1E3FD30A00C69FBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D65A6F561E3FD32D00C69FBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		D65A6F571E3FD32D00C69FBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D65A6FCA1E3FF47E00C69FBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		D65A6FCB1E3FF47E00C69FBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D65A6FD91E3FF49C00C69FBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		D65A6FDA1E3FF49C00C69FBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D6DFF3A91E2579370012891A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		D6DFF3AA1E2579370012891A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		D6DFF3AC1E2579370012891A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE81E40002800C69FBA /* msal__ios__static_lib.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		D6DFF3AD1E2579370012891A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D65A6FE81E40002800C69FBA /* msal__ios__static_lib.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D65A6F481E3FD30A00C69FBA /* Build configuration list for PBXNativeTarget "MSAL (iOS Framework)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D65A6F491E3FD30A00C69FBA /* Debug */,
+				D65A6F4A1E3FD30A00C69FBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D65A6F551E3FD32D00C69FBA /* Build configuration list for PBXNativeTarget "MSAL (Mac Framework)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D65A6F561E3FD32D00C69FBA /* Debug */,
+				D65A6F571E3FD32D00C69FBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D65A6FC91E3FF47E00C69FBA /* Build configuration list for PBXNativeTarget "MSAL iOS Unit Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D65A6FCA1E3FF47E00C69FBA /* Debug */,
+				D65A6FCB1E3FF47E00C69FBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D65A6FD81E3FF49C00C69FBA /* Build configuration list for PBXNativeTarget "MSAL Mac Unit Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D65A6FD91E3FF49C00C69FBA /* Debug */,
+				D65A6FDA1E3FF49C00C69FBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D6DFF39D1E2579360012891A /* Build configuration list for PBXProject "MSAL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6DFF3A91E2579370012891A /* Debug */,
+				D6DFF3AA1E2579370012891A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D6DFF3AB1E2579370012891A /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Lib)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6DFF3AC1E2579370012891A /* Debug */,
+				D6DFF3AD1E2579370012891A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D6DFF39A1E2579360012891A /* Project object */;
+}

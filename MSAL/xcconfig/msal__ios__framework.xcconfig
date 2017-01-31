@@ -1,0 +1,9 @@
+#include "msal__ios__common.xcconfig"
+#include "msal__ios__common__framework.xcconfig"
+
+DEFINES_MODULE = YES;
+INFOPLIST_FILE = MSAL/resources/ios/info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL;
+PRODUCT_NAME = MSAL;
+OTHER_LDFLAGS = "-ObjC";
+

@@ -1,0 +1,30 @@
+language: objective-c
+osx_image: xcode8.1
+
+# Set up our rubygems (slather and xcpretty, namely)
+install: 
+ - gem install xcpretty slather -N
+ 
+before_script:
+# Start by nuking any lingering codecov files. These can cause issues when the xcode version changes
+  - find . -name "*.gcda" -print0 | xargs -0 rm
+  
+# Nuke the entire derived data folder while we're at it.
+  - rm -rf ~/Library/Developer/Xcode/DerivedData
+
+# Tell the shell to echo failure codes up the pipe so that Travis will properly fail the
+# build when the xcodebuild command fails
+  - set -o pipefail
+
+script:  
+# Run the ADAL build script
+  - ./build.py
+
+after_success:
+# Run slather once to have it print out the results in the travis log
+#  - slather coverage -s ADAL/ADAL.xcodeproj
+
+notifications:
+  slack:
+    secure: BIziStN+8QJLjdqNbLyRWWw9kI/MQsX+rZq+xz/bfTANk0gbEryLgMSiEoHxdoctu0dOqOet1voYuDKs3RQW3W0yh0AhDwVgWThNkTA0oDXF8zqm9AXettXNtmYHipaYb6+z6L4lpJOkClQp3hAheu8cM2igqye1O0FQla9g/PA=
+
