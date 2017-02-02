@@ -194,7 +194,7 @@
 				D65A6F871E3FF3D900C69FBA /* requests */,
 			);
 			name = src;
-			path = MSAL/src;
+			path = src;
 			sourceTree = "<group>";
 		};
 		D65A6F681E3FF3D900C69FBA /* cache */ = {
@@ -266,7 +266,7 @@
 				D65A6FBA1E3FF44A00C69FBA /* mac */,
 			);
 			name = resources;
-			path = MSAL/resources;
+			path = resources;
 			sourceTree = "<group>";
 		};
 		D65A6FB81E3FF44A00C69FBA /* ios */ = {
@@ -302,7 +302,7 @@
 				D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */,
 			);
 			name = xcconfig;
-			path = MSAL/xcconfig;
+			path = xcconfig;
 			sourceTree = "<group>";
 		};
 		D65A6FDB1E3FF71000C69FBA /* test */ = {
@@ -314,7 +314,7 @@
 				D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */,
 			);
 			name = test;
-			path = MSAL/test;
+			path = test;
 			sourceTree = "<group>";
 		};
 		D65A6FDC1E3FF71000C69FBA /* ios */ = {
