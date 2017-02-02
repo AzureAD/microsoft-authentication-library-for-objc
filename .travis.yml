@@ -9,8 +9,9 @@ before_script:
 # Start by nuking any lingering codecov files. These can cause issues when the xcode version changes
   - find . -name "*.gcda" -print0 | xargs -0 rm
   
-# Nuke the entire derived data folder while we're at it.
-  - rm -rf ~/Library/Developer/Xcode/DerivedData
+# This is to work around travis-ci/travis-ci#7031. There are duplicate iOS Simulator devices
+# on iOS 10.2 for every device type, which causes the build script to fail.
+  - xcrun simctl delete 1FD54EA7-5A25-4D6F-8599-D6F7687DA4EE
 
 # Tell the shell to echo failure codes up the pipe so that Travis will properly fail the
 # build when the xcodebuild command fails
