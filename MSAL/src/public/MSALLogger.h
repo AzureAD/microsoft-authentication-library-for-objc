@@ -40,7 +40,7 @@ typedef NS_ENUM(NSInteger, MSALLogLevel)
 
 
 /*!
-    The LogCallback block for the ADAL logger
+    The LogCallback block for the MSAL logger
  
     @param  logLevel        The level of the log message
     @param  message         A short log message describing the event that occurred, this string will not contain PII.

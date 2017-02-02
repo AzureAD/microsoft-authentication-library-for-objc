@@ -17,12 +17,12 @@ before_script:
   - set -o pipefail
 
 script:  
-# Run the ADAL build script
+# Run the build script
   - ./build.py
 
 after_success:
 # Run slather once to have it print out the results in the travis log
-#  - slather coverage -s ADAL/ADAL.xcodeproj
+#  - slather coverage -s <xcode project here>
 
 notifications:
   slack:
