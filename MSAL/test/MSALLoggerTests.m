@@ -63,6 +63,7 @@ static BOOL s_isPII = false;
 
 - (void)testLogMacros
 {
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelLast];
     LOG_ERROR(nil, @"Error message! %d", 0);
     XCTAssertNotNil(s_message);
     XCTAssertFalse(s_isPII);
@@ -119,6 +120,41 @@ static BOOL s_isPII = false;
     XCTAssertTrue([s_message containsString:@"waiting on response from contoso.com"]);
     XCTAssertEqual(s_level, MSALLogLevelVerbose);
     [self resetLogVars];
+}
+
+- (void)testLogLevel
+{
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
+    s_message = @"dummy message";
+    LOG_ERROR(nil, @"Error message! %d", 0);
+    // Because we set the log level to nothing, the calback should not get hit and
+    // the message should not be overriden.
+    XCTAssertEqualObjects(s_message, @"dummy message");
+    
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelError];
+    LOG_ERROR(nil, @"Error message! %d", 0);
+    XCTAssertTrue([s_message containsString:@"Error message! 0"]);
+    
+    s_message = @"dummy message";
+    LOG_WARN(nil, @"warning");
+    XCTAssertEqualObjects(s_message, @"dummy message");
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelWarning];
+    LOG_WARN(nil, @"warning");
+    XCTAssertTrue([s_message containsString:@"warning"]);
+    
+    s_message = @"dummy message";
+    LOG_INFO(nil, @"info");
+    XCTAssertEqualObjects(s_message, @"dummy message");
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelInfo];
+    LOG_INFO(nil, @"info");
+    XCTAssertTrue([s_message containsString:@"info"]);
+    
+    s_message = @"dummy message";
+    LOG_VERBOSE(nil, @"verbose");
+    XCTAssertEqualObjects(s_message, @"dummy message");
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
+    LOG_VERBOSE(nil, @"verbose");
+    XCTAssertTrue([s_message containsString:@"verbose"]);
 }
 
 

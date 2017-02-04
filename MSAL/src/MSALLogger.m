@@ -184,6 +184,11 @@ static NSDateFormatter* s_dateFormatter = nil;
     {
         return;
     }
+    
+    if (level > _level)
+    {
+        return;
+    }
 
     va_list args;
     va_start(args, format);
