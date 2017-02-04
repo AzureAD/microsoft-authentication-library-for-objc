@@ -1,0 +1,8 @@
+#include "msal__mac__common.xcconfig"
+#include "msal__mac__common__framework.xcconfig"
+
+DEFINES_MODULE = YES;
+INFOPLIST_FILE = resources/mac/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL;
+PRODUCT_NAME = MSAL;
+OTHER_LDFLAGS = "-ObjC";

@@ -1,0 +1,4 @@
+#include "msal__ios__common.xcconfig"
+
+PRODUCT_NAME = MSAL
+

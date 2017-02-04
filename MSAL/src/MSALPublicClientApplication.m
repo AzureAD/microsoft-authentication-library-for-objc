@@ -1,0 +1,164 @@
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+#import "MSALPublicClientApplication.h"
+
+@implementation MSALPublicClientApplication
+
+- (id)initWithClientId:(NSString *)clientId
+{
+    // TODO
+    (void)clientId;
+    
+    return nil;
+}
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSURL *)authority
+{
+    // TODO
+    (void)clientId;
+    (void)authority;
+    
+    return nil;
+}
+
+- (NSArray <MSALUser *> *)users
+{
+    return nil;
+}
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                correlationId:(NSUUID *)correlationId
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)correlationId;
+    (void)completionBlock;
+}
+
+#pragma mark -
+#pragma mark Login Hint
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                    loginHint:(NSString *)loginHint
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)loginHint;
+    (void)completionBlock;
+}
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                    loginHint:(NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)loginHint;
+    (void)uiBehavior;
+    (void)extraQueryParameters;
+    (void)completionBlock;
+}
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+             additionalScopes:(NSArray<NSString *> *)additionalScopes
+                    loginHint:(NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(NSString *)authority
+                       policy:(NSString *)policy
+                correlationId:(NSUUID *)correlationId
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)additionalScopes;
+    (void)loginHint;
+    (void)uiBehavior;
+    (void)extraQueryParameters;
+    (void)authority;
+    (void)policy;
+    (void)correlationId;
+    (void)completionBlock;
+}
+
+#pragma mark -
+#pragma mark User
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                         user:(MSALUser *)user
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)user;
+    (void)uiBehavior;
+    (void)extraQueryParameters;
+    (void)completionBlock;
+}
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+             additionalScopes:(NSArray<NSString *> *)additionalScopes
+                         user:(MSALUser *)user
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(NSURL *)authority
+                       policy:(NSString *)policy
+                correlationId:(NSUUID *)correlationId
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)additionalScopes;
+    (void)user;
+    (void)uiBehavior;
+    (void)extraQueryParameters;
+    (void)authority;
+    (void)policy;
+    (void)correlationId;
+    (void)completionBlock;
+}
+
+#pragma mark Silent
+
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                    completionBlock:(MSALCompletionBlock)completionBlock
+{
+    // TODO
+    (void)scopes;
+    (void)user;
+    (void)completionBlock;
+}
+
+@end

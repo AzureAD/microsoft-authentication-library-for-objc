@@ -1,0 +1,31 @@
+language: objective-c
+osx_image: xcode8.2
+
+# Set up our rubygems (slather and xcpretty, namely)
+install: 
+ - gem install xcpretty slather -N
+ 
+before_script:
+# Start by nuking any lingering codecov files. These can cause issues when the xcode version changes
+  - find . -name "*.gcda" -print0 | xargs -0 rm
+  
+# This is to work around travis-ci/travis-ci#7031. There are duplicate iOS Simulator devices
+# on iOS 10.2 for every device type, which causes the build script to fail.
+  - xcrun simctl delete 1FD54EA7-5A25-4D6F-8599-D6F7687DA4EE
+
+# Tell the shell to echo failure codes up the pipe so that Travis will properly fail the
+# build when the xcodebuild command fails
+  - set -o pipefail
+
+script:  
+# Run the build script
+  - ./build.py
+
+after_success:
+# Run slather once to have it print out the results in the travis log
+#  - slather coverage -s <xcode project here>
+
+notifications:
+  slack:
+    secure: BIziStN+8QJLjdqNbLyRWWw9kI/MQsX+rZq+xz/bfTANk0gbEryLgMSiEoHxdoctu0dOqOet1voYuDKs3RQW3W0yh0AhDwVgWThNkTA0oDXF8zqm9AXettXNtmYHipaYb6+z6L4lpJOkClQp3hAheu8cM2igqye1O0FQla9g/PA=
+

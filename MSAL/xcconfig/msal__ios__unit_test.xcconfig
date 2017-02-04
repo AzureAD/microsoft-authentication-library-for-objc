@@ -1,0 +1,6 @@
+#include "msal__ios__common.xcconfig"
+
+INFOPLIST_FILE = test/resources/ios/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-iOS-Unit-Tests;
+PRODUCT_NAME = "MSAL-iOS-Unit-Tests";
+
