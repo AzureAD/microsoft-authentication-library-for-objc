@@ -66,17 +66,7 @@ static BOOL validBase64Characters(const byte* data, const int size)
     return true;
 }
 
-static NSCharacterSet *nonWhiteCharacterSet()
-{
-    static NSCharacterSet* nonWhiteCharSet;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        nonWhiteCharSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
-    });
-    return nonWhiteCharSet;
-}
-
-@implementation NSString (ADHelperMethods)
+@implementation NSString (MSALHelperMethods)
 
 /// <summary>
 /// Base64 URL decode a set of bytes.
@@ -287,14 +277,20 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
     return [NSString msalBase64EncodeData:decodedData];
 }
 
-+ (BOOL)adIsStringNilOrBlank:(NSString *)string
++ (BOOL)msalIsStringNilOrBlank:(NSString *)string
 {
     if (!string || !string.length)
     {
         return YES;
     }
     
-    return [string rangeOfCharacterFromSet:nonWhiteCharacterSet()].location != NSNotFound;
+    static NSCharacterSet* nonWhiteCharSet;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        nonWhiteCharSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+    });
+    
+    return [string rangeOfCharacterFromSet:nonWhiteCharSet].location == NSNotFound;
 }
 
 - (NSString *)msalTrimmedString
@@ -307,17 +303,22 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
 - (NSString *)msalUrlFormDecode
 {
     // Two step decode: first replace + with a space, then percent unescape
-    NSMutableString* mutableString = [[self stringByRemovingPercentEncoding] mutableCopy];
+    NSMutableString* mutableString = [self mutableCopy];
     [mutableString replaceOccurrencesOfString:@"+"
                                    withString:@" "
                                       options:NSLiteralSearch
-                                        range:NSRangeFromString(self)];
-    return mutableString;
+                                        range:NSMakeRange(0, self.length)];
+    return [mutableString stringByRemovingPercentEncoding];
 }
 
 - (NSString *)msalUrlFormEncode
 {
-    NSCharacterSet* set = [NSCharacterSet characterSetWithCharactersInString:@"!#$&'()*+,/:;=?@[]%"];
+    static NSCharacterSet* set = nil;
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        set = [[NSCharacterSet characterSetWithCharactersInString:@"!#$&'()*+,/:;=?@[]%|^"] invertedSet];
+    });
     NSString* encodedString = [self stringByAddingPercentEncodingWithAllowedCharacters:set];
     return [encodedString stringByReplacingOccurrencesOfString:@" " withString:@"+"];
 }
