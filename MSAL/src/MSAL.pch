@@ -25,48 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
+#ifndef MSAL_pch
+#define MSAL_pch
+
+
+//
+// System APIs
+//
+
 #import <Foundation/Foundation.h>
 
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
-{
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#else
+#import <Cocoa/Cocoa.h>
+#endif
 
 
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     Whether the message contains personally identifiable
-                            information (PII)
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
+// Internal MSAL Files
 
+#import "MSAL_Internal.h"
+#import "MSALLogger+Internal.h"
+#import "NSString+MSALHelperMethods.h"
 
-@interface MSALLogger : NSObject
-
-+ (MSALLogger *)sharedLogger;
-
-/*!
-    The minimum log level for messages to be passed onto the log callback.
- */
-@property (readwrite) MSALLogLevel level;
-
-@property (readwrite) BOOL consoleLogging;
-
-/*!
-    Sets the callback block to send MSAL log messages to.
- 
-    NOTE: Once this is set this can not be unset, and it should be set early in
-          the program's execution.
- */
-- (void)setCallback:(MSALLogCallback)callback;
-
-@end
+#endif /* MSAL_pch */
