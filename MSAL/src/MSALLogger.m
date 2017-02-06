@@ -79,6 +79,11 @@
 {
     static dispatch_once_t once;
     
+    if (self->_callback != nil)
+    {
+        @throw @"MSAL logging callback can only be set once per process and should never changed once set.";
+    }
+    
     dispatch_once(&once, ^{
         self->_callback = callback;
     });
