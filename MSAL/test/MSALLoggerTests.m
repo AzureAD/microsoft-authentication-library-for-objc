@@ -26,135 +26,121 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
+#import "MSALTestLogger.h"
 
 @interface MSALLoggerTests : XCTestCase
 
 @end
 
-static NSString *s_message = nil;
-static MSALLogLevel s_level = -1;
-static BOOL s_isPII = false;
-
 @implementation MSALLoggerTests
-
-- (void)resetLogVars
-{
-    s_message = nil;
-    s_level = -1;
-    s_isPII = false;
-}
 
 - (void)setUp
 {
     [super setUp];
-    
-    [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
-        s_message = message;
-        s_level = level;
-        s_isPII = containsPII;
-    }];
 }
 
 - (void)tearDown
 {
     [super tearDown];
-    [self resetLogVars];
+    [[MSALTestLogger sharedLogger] reset];
 }
 
 - (void)testLogMacros
 {
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelLast];
+    MSALTestLogger* logger = [MSALTestLogger sharedLogger];
+    
     LOG_ERROR(nil, @"Error message! %d", 0);
-    XCTAssertNotNil(s_message);
-    XCTAssertFalse(s_isPII);
-    XCTAssertTrue([s_message containsString:@"Error message! 0"]);
-    XCTAssertEqual(s_level, MSALLogLevelError);
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertFalse(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"Error message! 0"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
     
-    [self resetLogVars];
-    
+    [logger reset];
     LOG_WARN(nil, @"Oh no, a %@ thing happened!", @"bad");
-    XCTAssertNotNil(s_message);
-    XCTAssertFalse(s_isPII);
-    XCTAssertTrue([s_message containsString:@"Oh no, a bad thing happened!"]);
-    XCTAssertEqual(s_level, MSALLogLevelWarning);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertFalse(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"Oh no, a bad thing happened!"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelWarning);
     
+    [logger reset];
     LOG_INFO(nil, @"This informative message has been seen %d times", 20);
-    XCTAssertNotNil(s_message);
-    XCTAssertFalse(s_isPII);
-    XCTAssertTrue([s_message containsString:@"This informative message has been seen 20 times"]);
-    XCTAssertEqual(s_level, MSALLogLevelInfo);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertFalse(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"This informative message has been seen 20 times"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelInfo);
     
+    [logger reset];
     LOG_VERBOSE(nil, @"So much noise, this message is %@ useful", @"barely");
-    XCTAssertNotNil(s_message);
-    XCTAssertFalse(s_isPII);
-    XCTAssertTrue([s_message containsString:@"So much noise, this message is barely useful"]);
-    XCTAssertEqual(s_level, MSALLogLevelVerbose);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertFalse(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"So much noise, this message is barely useful"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelVerbose);
     
+    [logger reset];
     LOG_ERROR_PII(nil, @"userId: %@ failed to sign in", @"user@contoso.com");
-    XCTAssertNotNil(s_message);
-    XCTAssertTrue(s_isPII);
-    XCTAssertTrue([s_message containsString:@"userId: user@contoso.com failed to sign in"]);
-    XCTAssertEqual(s_level, MSALLogLevelError);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertTrue(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"userId: user@contoso.com failed to sign in"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
     
+    [logger reset];
     LOG_WARN_PII(nil, @"%@ pressed the cancel button", @"user@contoso.com");
-    XCTAssertNotNil(s_message);
-    XCTAssertTrue(s_isPII);
-    XCTAssertTrue([s_message containsString:@"user@contoso.com pressed the cancel button"]);
-    XCTAssertEqual(s_level, MSALLogLevelWarning);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertTrue(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"user@contoso.com pressed the cancel button"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelWarning);
     
+    [logger reset];
     LOG_INFO_PII(nil, @"%@ is trying to log in", @"user@contoso.com");
-    XCTAssertNotNil(s_message);
-    XCTAssertTrue(s_isPII);
-    XCTAssertTrue([s_message containsString:@"user@contoso.com is trying to log in"]);
-    XCTAssertEqual(s_level, MSALLogLevelInfo);
-    [self resetLogVars];
-    
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertTrue(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"user@contoso.com is trying to log in"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelInfo);
+     
+    [logger reset];
     LOG_VERBSOE_PII(nil, @"waiting on response from %@", @"contoso.com");
-    XCTAssertNotNil(s_message);
-    XCTAssertTrue(s_isPII);
-    XCTAssertTrue([s_message containsString:@"waiting on response from contoso.com"]);
-    XCTAssertEqual(s_level, MSALLogLevelVerbose);
-    [self resetLogVars];
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertTrue(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"waiting on response from contoso.com"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelVerbose);
 }
 
 - (void)testLogLevel
 {
+    MSALTestLogger* logger = [MSALTestLogger sharedLogger];
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
-    s_message = @"dummy message";
+    
+    logger.lastMessage = @"dummy message";
     LOG_ERROR(nil, @"Error message! %d", 0);
     // Because we set the log level to nothing, the calback should not get hit and
     // the message should not be overriden.
-    XCTAssertEqualObjects(s_message, @"dummy message");
+    XCTAssertEqualObjects(logger.lastMessage, @"dummy message");
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelError];
     LOG_ERROR(nil, @"Error message! %d", 0);
-    XCTAssertTrue([s_message containsString:@"Error message! 0"]);
+    XCTAssertTrue([logger.lastMessage containsString:@"Error message! 0"]);
     
-    s_message = @"dummy message";
+    logger.lastMessage = @"dummy message";
     LOG_WARN(nil, @"warning");
-    XCTAssertEqualObjects(s_message, @"dummy message");
+    XCTAssertEqualObjects(logger.lastMessage, @"dummy message");
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelWarning];
     LOG_WARN(nil, @"warning");
-    XCTAssertTrue([s_message containsString:@"warning"]);
+    XCTAssertTrue([logger.lastMessage containsString:@"warning"]);
     
-    s_message = @"dummy message";
+    logger.lastMessage = @"dummy message";
     LOG_INFO(nil, @"info");
-    XCTAssertEqualObjects(s_message, @"dummy message");
+    XCTAssertEqualObjects(logger.lastMessage, @"dummy message");
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelInfo];
     LOG_INFO(nil, @"info");
-    XCTAssertTrue([s_message containsString:@"info"]);
+    XCTAssertTrue([logger.lastMessage containsString:@"info"]);
     
-    s_message = @"dummy message";
+    logger.lastMessage = @"dummy message";
     LOG_VERBOSE(nil, @"verbose");
-    XCTAssertEqualObjects(s_message, @"dummy message");
+    XCTAssertEqualObjects(logger.lastMessage, @"dummy message");
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
     LOG_VERBOSE(nil, @"verbose");
-    XCTAssertTrue([s_message containsString:@"verbose"]);
+    XCTAssertTrue([logger.lastMessage containsString:@"verbose"]);
 }
 
 
