@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		960B774E1E49174400DDCF1B /* NSDictionary+MSALExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 960B774C1E49174400DDCF1B /* NSDictionary+MSALExtensions.h */; };
-		960B774F1E49174400DDCF1B /* NSDictionary+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 960B774D1E49174400DDCF1B /* NSDictionary+MSALExtensions.m */; };
-		960B77501E49174400DDCF1B /* NSDictionary+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 960B774D1E49174400DDCF1B /* NSDictionary+MSALExtensions.m */; };
 		9631CFFA1E4558770057BE7F /* MSALHttpRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 9631CFF21E4558770057BE7F /* MSALHttpRequest.h */; };
 		9631CFFB1E4558770057BE7F /* MSALHttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9631CFF31E4558770057BE7F /* MSALHttpRequest.m */; };
 		9631CFFC1E4558770057BE7F /* MSALHttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9631CFF31E4558770057BE7F /* MSALHttpRequest.m */; };
@@ -103,8 +100,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		960B774C1E49174400DDCF1B /* NSDictionary+MSALExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+MSALExtensions.h"; sourceTree = "<group>"; };
-		960B774D1E49174400DDCF1B /* NSDictionary+MSALExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+MSALExtensions.m"; sourceTree = "<group>"; };
 		9631CFF21E4558770057BE7F /* MSALHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALHttpRequest.h; sourceTree = "<group>"; };
 		9631CFF31E4558770057BE7F /* MSALHttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALHttpRequest.m; sourceTree = "<group>"; };
 		9631CFF41E4558770057BE7F /* MSALHttpResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALHttpResponse.h; sourceTree = "<group>"; };
@@ -205,19 +200,9 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		960B77461E4916E800DDCF1B /* util */ = {
-			isa = PBXGroup;
-			children = (
-				960B774C1E49174400DDCF1B /* NSDictionary+MSALExtensions.h */,
-				960B774D1E49174400DDCF1B /* NSDictionary+MSALExtensions.m */,
-			);
-			path = util;
-			sourceTree = "<group>";
-		};
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
-				960B77461E4916E800DDCF1B /* util */,
 				D65A6F681E3FF3D900C69FBA /* cache */,
 				D65A6F731E3FF3D900C69FBA /* MSAL_Internal.h */,
 				D65A6F741E3FF3D900C69FBA /* MSALError.m */,
@@ -443,7 +428,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				960B774E1E49174400DDCF1B /* NSDictionary+MSALExtensions.h in Headers */,
 				D65A6FA81E3FF3D900C69FBA /* MSAL.h in Headers */,
 				D65A6FAD1E3FF3D900C69FBA /* MSALUser.h in Headers */,
 				D65A6FAA1E3FF3D900C69FBA /* MSALLogger.h in Headers */,
@@ -657,7 +641,6 @@
 				D65A6FA61E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */,
 				D65A6F9D1E3FF3D900C69FBA /* MSALLogger.m in Sources */,
 				D65A6F8F1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */,
-				960B77501E49174400DDCF1B /* NSDictionary+MSALExtensions.m in Sources */,
 				9631CFFC1E4558770057BE7F /* MSALHttpRequest.m in Sources */,
 				D65A6F9B1E3FF3D900C69FBA /* MSALJsonObject.m in Sources */,
 				9631D0051E4558770057BE7F /* MSALWebAuthResponse.m in Sources */,
@@ -691,7 +674,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				960B774F1E49174400DDCF1B /* NSDictionary+MSALExtensions.m in Sources */,
 				D65A6F911E3FF3D900C69FBA /* MSALTokenCacheItem.m in Sources */,
 				D65A6F881E3FF3D900C69FBA /* MSALKeychainTokenCache.m in Sources */,
 				D65A6F8B1E3FF3D900C69FBA /* MSALBaseCacheItem.m in Sources */,
