@@ -178,7 +178,7 @@ static NSDateFormatter* s_dateFormatter = nil;
     return msalId;
 }
 
-- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALLogContext>)context format:(NSString *)format, ...
+- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ...
 {
     if (!_callback)
     {
