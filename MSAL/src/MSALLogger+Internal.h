@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALLogger.h"
 
-@protocol MSALLogContext
+@protocol MSALRequestContext
 
 - (NSString *)correlationId;
 - (NSString *)component;
@@ -37,7 +37,7 @@
 
 @interface MSALLogger (Internal)
 
-- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALLogContext>)context format:(NSString *)format, ... NS_FORMAT_FUNCTION(4, 5);
+- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ... NS_FORMAT_FUNCTION(4, 5);
 
 @end
 
