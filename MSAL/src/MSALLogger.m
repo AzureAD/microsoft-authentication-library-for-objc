@@ -178,7 +178,7 @@ static NSDateFormatter* s_dateFormatter = nil;
     return msalId;
 }
 
-- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALLogContext>)context format:(NSString *)format, ...
+- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ...
 {
     if (!_callback)
     {
@@ -222,7 +222,8 @@ static NSDateFormatter* s_dateFormatter = nil;
     
     NSString* log = [NSString stringWithFormat:@"MSAL " MSAL_VERSION_STRING " %@ [%@%@]%@ %@", s_OSString, dateString, correlationIdStr, component, message];
     
-    if (_consoleLogging)
+    // Don't log PII out to console.
+    if (_consoleLogging && !isPii)
     {
         NSLog(@"%@", log);
     }
