@@ -25,48 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
+
 #import <Foundation/Foundation.h>
 
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
-{
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
+@interface MSALTestLogger : NSObject
 
+@property (readwrite) BOOL containsPII;
+@property (readwrite, retain) NSString * lastMessage;
+@property (readwrite) MSALLogLevel lastLevel;
 
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     Whether the message contains personally identifiable
-                            information (PII)
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
++ (MSALTestLogger *)sharedLogger;
 
+/*! Resets all of the test logger variables to default state and sets the MSAL log level to MSALLogLevelLast. */
+- (void)reset;
 
-@interface MSALLogger : NSObject
-
-+ (MSALLogger *)sharedLogger;
-
-/*!
-    The minimum log level for messages to be passed onto the log callback.
- */
-@property (readwrite) MSALLogLevel level;
-
-@property (readwrite) BOOL consoleLogging;
-
-/*!
-    Sets the callback block to send MSAL log messages to.
- 
-    NOTE: Once this is set this can not be unset, and it should be set early in
-          the program's execution.
- */
-- (void)setCallback:(MSALLogCallback)callback;
+/*! Resets all of the test logger variables to default state and sets the MSAL log level to the provided log level. */
+- (void)reset:(MSALLogLevel)level;
 
 @end

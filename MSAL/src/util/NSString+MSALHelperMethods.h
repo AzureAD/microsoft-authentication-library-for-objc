@@ -27,46 +27,31 @@
 
 #import <Foundation/Foundation.h>
 
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
-{
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
+@interface NSString (MSALHelperMethods)
 
+/*! Encodes string to the Base64 encoding. */
+- (NSString *)msalBase64UrlEncode;
+/*! Decodes string from the Base64 encoding. */
+- (NSString *)msalBase64UrlDecode;
 
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     Whether the message contains personally identifiable
-                            information (PII)
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
+/*! Converts NSData to base64 String */
++ (NSString *)msalBase64EncodeData:(NSData *)data;
+/*! Converts base64 String to NSData */
++ (NSData *)msalBase64DecodeData:(NSString *)encodedString;
 
+/*! Returns YES if the string is nil, or contains only white space */
++ (BOOL)msalIsStringNilOrBlank:(NSString *)string;
 
-@interface MSALLogger : NSObject
+/*! Returns the same string, but without the leading and trailing whitespace */
+- (NSString *)msalTrimmedString;
 
-+ (MSALLogger *)sharedLogger;
+/*! Decodes a previously URL encoded string. */
+- (NSString *)msalUrlFormDecode;
 
-/*!
-    The minimum log level for messages to be passed onto the log callback.
- */
-@property (readwrite) MSALLogLevel level;
+/*! Encodes the string to pass it as a URL agrument. */
+- (NSString *)msalUrlFormEncode;
 
-@property (readwrite) BOOL consoleLogging;
-
-/*!
-    Sets the callback block to send MSAL log messages to.
- 
-    NOTE: Once this is set this can not be unset, and it should be set early in
-          the program's execution.
- */
-- (void)setCallback:(MSALLogCallback)callback;
+/*! Computes a SHA256 hash of the string */ 
+- (NSString*)msalComputeSHA256;
 
 @end

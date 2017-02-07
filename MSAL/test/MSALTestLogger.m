@@ -25,48 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
 
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
+#import "MSALTestLogger.h"
+
+@implementation MSALTestLogger
+
++ (void)load
 {
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
+    // We want the shared test logger to get created early so it grabs the log callback
+    [MSALTestLogger sharedLogger];
+}
 
++ (MSALTestLogger *)sharedLogger
+{
+    static dispatch_once_t onceToken;
+    static MSALTestLogger * logger;
+    dispatch_once(&onceToken, ^{
+        logger = [MSALTestLogger new];
+        [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
+            [logger logLevel:level isPii:containsPII message:message];
+        }];
+    });
+    
+    return logger;
+}
 
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     Whether the message contains personally identifiable
-                            information (PII)
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
+- (void)logLevel:(MSALLogLevel)level isPii:(BOOL)isPii message:(NSString *)message
+{
+    _lastLevel = level;
+    _containsPII = isPii;
+    _lastMessage = message;
+}
 
+- (void)reset
+{
+    [self reset:MSALLogLevelLast];
+}
 
-@interface MSALLogger : NSObject
-
-+ (MSALLogger *)sharedLogger;
-
-/*!
-    The minimum log level for messages to be passed onto the log callback.
- */
-@property (readwrite) MSALLogLevel level;
-
-@property (readwrite) BOOL consoleLogging;
-
-/*!
-    Sets the callback block to send MSAL log messages to.
- 
-    NOTE: Once this is set this can not be unset, and it should be set early in
-          the program's execution.
- */
-- (void)setCallback:(MSALLogCallback)callback;
+- (void)reset:(MSALLogLevel)level
+{
+    _lastMessage = nil;
+    _lastLevel = -1;
+    _containsPII = NO;
+    [[MSALLogger sharedLogger] setLevel:level];
+}
 
 @end
