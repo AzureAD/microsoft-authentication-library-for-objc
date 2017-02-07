@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALJsonObject.h"
 
 @interface MSALHttpResponse : NSObject
 {
@@ -34,9 +35,12 @@
 
 - (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data;
 
-@property (strong, readonly) NSData * body;
+@property (strong, readonly) NSData *body;
 
 - (NSInteger)statusCode;
 - (NSDictionary *)headers;
+
+
+
 
 @end

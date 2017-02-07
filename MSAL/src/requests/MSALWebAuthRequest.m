@@ -27,6 +27,8 @@
 
 
 #import "MSALWebAuthRequest.h"
+#import "MSALPkeyAuthHelper.h"
+#import "MSALWebAuthResponse.h"
 
 @implementation MSALWebAuthRequest
 
@@ -38,15 +40,45 @@
         return nil;
     }
     
-    [self addValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    [self addValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-type"];
-    
-    //TODO: add pKeyAuth header
-    
+    [self addValue:MSALPKeyAuthHeaderVersion forHTTPHeaderField:MSALPKeyAuthHeader];
     
     _retryIfServerError = YES;
     
     return self;
 }
 
+
+- (void)sendGet:(MSALHttpRequestCallback)completionHandler
+{
+    [super sendGet:^(NSError  *error, MSALHttpResponse *response)
+    {
+        if (error)
+        {
+            completionHandler(error, response);
+        }
+        else
+        {
+            [MSALWebAuthResponse processResponse:response
+                                         request:self
+                               completionHandler:completionHandler];
+        }
+    }];
+}
+
+- (void)sendPost:(MSALHttpRequestCallback)completionHandler
+{
+    [super sendPost:^(NSError  *error, MSALHttpResponse *response)
+    {
+        if (error)
+        {
+            completionHandler(error, response);
+        }
+        else
+        {
+            [MSALWebAuthResponse processResponse:response
+                                         request:self
+                               completionHandler:completionHandler];
+        }
+    }];
+}
 @end

@@ -30,10 +30,8 @@
 #import "MSALHttpRequest.h"
 
 @interface MSALWebAuthRequest : MSALHttpRequest
-//
-//@property BOOL returnRawResponse;
+
 @property BOOL retryIfServerError;
-//@property BOOL acceptOnlyOKResponse;
 
 - (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session;
 

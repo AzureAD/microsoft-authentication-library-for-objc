@@ -34,19 +34,19 @@
 {
     NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
     
-    if ( nil != string && string.length != 0 )
+    if (string && string.length != 0)
     {
         NSArray *pairs = [string componentsSeparatedByString:@"&"];
         
-        for ( NSString *pair in pairs )
+        for (NSString *pair in pairs)
         {
             NSArray *elements = [pair componentsSeparatedByString:@"="];
             
-            if ( elements != nil && elements.count == 2 )
+            if (elements && elements.count == 2)
             {
                 NSString *key     = [[[elements objectAtIndex:0] msalTrimmedString] msalUrlFormDecode];
                 NSString *value   = [[[elements objectAtIndex:1] msalTrimmedString] msalUrlFormDecode];
-                if ( nil != key && key.length != 0 )
+                if (key && key.length != 0)
                     [parameters setObject:value forKey:key];
             }
         }
@@ -63,10 +63,10 @@
     [self enumerateKeysAndObjectsUsingBlock: ^(id key, id value, BOOL *stop)
      {
          (void)stop;
-         NSString* encodedKey = [[((NSString *)key) msalTrimmedString] msalUrlFormEncode];
-         NSString* encodedValue = [[((NSString *)value) msalTrimmedString] msalUrlFormEncode];
+         NSString *encodedKey = [[((NSString *)key) msalTrimmedString] msalUrlFormEncode];
+         NSString *encodedValue = [[((NSString *)value) msalTrimmedString] msalUrlFormEncode];
          
-         if ( parameters == nil )
+         if (parameters == nil)
          {
              parameters = [NSMutableString new];
              [parameters appendFormat:@"%@=%@", encodedKey, encodedValue];

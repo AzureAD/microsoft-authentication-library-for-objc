@@ -29,6 +29,12 @@
 
 @class MSALHttpResponse;
 
+extern NSString *const MSALHttpHeaderAccept;
+extern NSString *const MSALHttpHeaderApplicationJSON;
+
+extern NSString *const MSALHttpHeaderContentType;
+extern NSString *const MSALHttpHeaderFormURLEncoded;
+
 /*! The completion block declaration. */
 typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *response);
 
@@ -36,8 +42,9 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 @interface MSALHttpRequest : NSObject
 
 @property (readonly) NSURLSession *session;
-
 @property (readonly) NSURL *endpointURL;
+
+@property (readonly) BOOL isGetRequest;
 
 // Key/value pairs that is included as a request header
 @property (copy) NSDictionary<NSString *, NSString *> *headers;
@@ -69,6 +76,16 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 - (void)sendPost:(MSALHttpRequestCallback)completionHandler;
 - (void)sendGet:(MSALHttpRequestCallback)completionHandler;
 
+- (void)resend:(MSALHttpRequestCallback)completionHandler;
+
+// Sets Accept:Application/json to the header.
+// This is called by default at init, call setAcceptJSON:NO to remove the header
+- (void)setAcceptJSON:(BOOL)acceptJSON;
+
+// Sets ContentType:application/x-www-form-urlencoded to the header.
+// This is called by default at init, call setContentTypeFormURLEncoded:NO to
+// remove from the header
+- (void)setContentTypeFormURLEncoded:(BOOL)setContentTypeFormURLEncoded;
 
 @end
 

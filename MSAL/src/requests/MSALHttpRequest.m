@@ -27,8 +27,15 @@
 
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
+#import "NSDictionary+MSALExtensions.h"
 
-@interface MSALHttpRequest() <NSURLSessionTaskDelegate, NSURLSessionDataDelegate>
+NSString *const MSALHttpHeaderAccept = @"Accept";
+NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
+
+NSString *const MSALHttpHeaderContentType = @"Content-Type";
+NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencoded";
+
+@interface MSALHttpRequest()
 {
     NSMutableDictionary *_bodyParameters;
     NSMutableDictionary *_headers;
@@ -58,10 +65,14 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     
     _headers = [NSMutableDictionary new];
     _bodyParameters = [NSMutableDictionary new];
+    _queryParameters = [NSMutableDictionary new];
     
     // Default timeout for MSALHttpRequest is 30 seconds
     _timeOutInterval = 30;
     _cachePolicy = NSURLRequestReloadIgnoringCacheData;
+    
+    [self setAcceptJSON:YES];
+    [self setContentTypeFormURLEncoded:YES];
     
     return self;
 }
@@ -124,11 +135,21 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
 
 - (void)sendGet:(MSALHttpRequestCallback)completionHandler
 {
-    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:_endpointURL
+    // attach query parameters
+    NSURL *newURL = nil;
+    
+    if ([_queryParameters allKeys].count > 0)
+    {
+        NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters adURLFormEncode]];
+        newURL = [NSURL URLWithString:newURLString];
+    }
+    
+    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:(newURL)? newURL:_endpointURL
                                                                   cachePolicy:_cachePolicy
                                                               timeoutInterval:_timeOutInterval];
     mutableRequest.HTTPMethod = @"GET";
-    
+    _isGetRequest = YES;
+
     // attach headers
     mutableRequest.allHTTPHeaderFields = _headers;
     
@@ -150,6 +171,7 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
                                                               timeoutInterval:_timeOutInterval];
     
     mutableRequest.HTTPMethod = @"POST";
+    _isGetRequest = NO;
     
     // dictionary to data
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:_bodyParameters options:0 error:nil];
@@ -161,15 +183,51 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     }
     
     mutableRequest.allHTTPHeaderFields = _headers;
-    
+
     NSURLSessionDataTask *task = [_session dataTaskWithRequest:mutableRequest
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
-                                  
                                   {
                                       MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response data:data];
                                       completionHandler(error, msalResponse);
                                   }];
     [task resume];
+}
+
+
+- (void)resend:(MSALHttpRequestCallback)completionHandler
+{
+    if (_isGetRequest)
+    {
+        [self sendGet:completionHandler];
+    }
+    else
+    {
+        [self sendPost:completionHandler];
+    }
+}
+
+- (void)setAcceptJSON:(BOOL)acceptJSON;
+{
+    if (acceptJSON)
+    {
+        [_headers setValue:MSALHttpHeaderApplicationJSON forKey:MSALHttpHeaderAccept];
+    }
+    else
+    {
+        [_headers removeObjectForKey:MSALHttpHeaderAccept];
+    }
+}
+
+- (void)setContentTypeFormURLEncoded:(BOOL)setContentTypeFormURLEncoded
+{
+    if (setContentTypeFormURLEncoded)
+    {
+        [_headers setValue:MSALHttpHeaderFormURLEncoded forKey:MSALHttpHeaderContentType];
+    }
+    else
+    {
+        [_headers removeObjectForKey:MSALHttpHeaderContentType];
+    }
 }
 
 @end

@@ -94,8 +94,11 @@
     NSURL *testURL = [NSURL URLWithString:@"https://enterpriseregistration.windows.net/ngctest.com/EnrollmentServer/Contract?api-version=1.2"];
     
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session];
+    [request setValue:@"testVal" forQueryParameter:@"q1"];
     
     [request sendGet:^(NSError *error, MSALHttpResponse *response) {
+        NSLog(@"%@", request.endpointURL.absoluteString);
+        
         NSLog(@"%@", error);
         NSLog(@"%lu", (long)response.statusCode);
         
@@ -112,6 +115,9 @@
     }];
     
     [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+        NSLog(@"%@", request.endpointURL.absoluteString);
+        
+        
         if (error)
         {
             NSLog(@"TIMEOUT");

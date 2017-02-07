@@ -26,7 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALWebAuthRequest.h"
 
 @interface MSALWebAuthResponse : NSObject
+
+
++ (void)processResponse:(MSALHttpResponse *)response
+                request:(MSALWebAuthRequest *)request
+      completionHandler:(MSALHttpRequestCallback)completionHandler;
 
 @end
