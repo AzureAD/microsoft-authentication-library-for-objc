@@ -30,7 +30,7 @@
 
 // Decodes a www-form-urlencoded string into a dictionary of key/value pairs.
 // Always returns a dictionary, even if the string is nil, empty or contains no pairs
-+ (NSDictionary *)adURLFormDecode:(NSString *)string
++ (NSDictionary *)msalURLFormDecode:(NSString *)string
 {
     NSMutableDictionary *parameters = [[NSMutableDictionary alloc] init];
     
@@ -56,7 +56,7 @@
 
 // Encodes a dictionary consisting of a set of name/values pairs that are strings to www-form-urlencoded
 // Returns nil if the dictionary is empty, otherwise the encoded value
-- (NSString *)adURLFormEncode
+- (NSString *)msalURLFormEncode
 {
     __block NSMutableString *parameters = nil;
     

@@ -140,7 +140,7 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     
     if ([_queryParameters allKeys].count > 0)
     {
-        NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters adURLFormEncode]];
+        NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters msalURLFormEncode]];
         newURL = [NSURL URLWithString:newURLString];
     }
     

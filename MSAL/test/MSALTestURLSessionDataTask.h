@@ -21,16 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#pragma once
+#import <Foundation/Foundation.h>
+#import "MSALTestURLSession.h"
 
-@interface NSDictionary (MSAL)
+@interface MSALTestURLSessionDataTask : NSObject
 
-// Decodes a www-form-urlencoded string into a dictionary of key/value pairs.
-// Always returns a dictionary, even if the string is nil, empty or contains no pairs
-+ (NSDictionary *)msalURLFormDecode:(NSString *)string;
+- (id)initWithRequest:(NSURLRequest *)request
+              session:(MSALTestURLSession *)session
+    completionHandler:(MSALTestHttpCompletionBlock)completionHandler;
 
-// Encodes a dictionary consisting of a set of name/values pairs that are strings to www-form-urlencoded
-// Returns nil if the dictionary is empty, otherwise the encoded value
-- (NSString *)msalURLFormEncode;
 
 @end

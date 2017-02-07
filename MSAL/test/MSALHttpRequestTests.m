@@ -28,6 +28,7 @@
 #import <XCTest/XCTest.h>
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
+#import "MSALTestURLSession.h"
 
 @interface MSALHttpRequestTests : XCTestCase
 
@@ -85,46 +86,43 @@
     
 }
 
-- (void)testToBeDeleted
+- (void)testHttpGetRequest
 {
-    XCTestExpectation *expectation = [self expectationWithDescription:@"High Expectations"];
-
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     NSURLSession *session = [NSURLSession sharedSession];
-    NSURL *testURL = [NSURL URLWithString:@"https://enterpriseregistration.windows.net/ngctest.com/EnrollmentServer/Contract?api-version=1.2"];
+    NSString *testURLString = @"https://somehttprequest.com";
     
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session];
-    [request setValue:@"testVal" forQueryParameter:@"q1"];
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:testURLString
+                                                        responseURLString:@"https://someresponsestring.com"
+                                                             responseCode:200
+                                                         httpHeaderFields:@{}
+                                                         dictionaryAsJSON:@{@"endpoint" : @"valid"}];
+    
+    [MSALTestURLSession addResponse:response];
+    
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
+                                                            session:session];
     
     [request sendGet:^(NSError *error, MSALHttpResponse *response) {
-        NSLog(@"%@", request.endpointURL.absoluteString);
+        XCTAssertNil(error);
         
-        NSLog(@"%@", error);
-        NSLog(@"%lu", (long)response.statusCode);
-        
-        NSLog(@"%@", response.body);
+        XCTAssertEqual(response.statusCode, 200);
         
         NSError *er = nil;
         id json = [NSJSONSerialization JSONObjectWithData:response.body
                                                   options:NSJSONReadingAllowFragments error:&er];
+        XCTAssertNil(er);
+        XCTAssertNotNil(json);
         
-        NSLog(@"%@", er);
-        NSLog(@"%@", json);
+        XCTAssertEqualObjects(@"valid", json[@"endpoint"]);
         
         [expectation fulfill];
     }];
     
     [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
-        NSLog(@"%@", request.endpointURL.absoluteString);
-        
-        
-        if (error)
-        {
-            NSLog(@"TIMEOUT");
-        }
+        XCTAssertNil(error);
     }];
-    
-    
 }
 
 
