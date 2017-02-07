@@ -222,7 +222,8 @@ static NSDateFormatter* s_dateFormatter = nil;
     
     NSString* log = [NSString stringWithFormat:@"MSAL " MSAL_VERSION_STRING " %@ [%@%@]%@ %@", s_OSString, dateString, correlationIdStr, component, message];
     
-    if (_consoleLogging)
+    // Don't log PII out to console.
+    if (_consoleLogging && !isPii)
     {
         NSLog(@"%@", log);
     }
