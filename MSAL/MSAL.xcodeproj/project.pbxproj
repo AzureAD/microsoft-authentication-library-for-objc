@@ -227,19 +227,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		96C9D93F1E4954F900047B93 /* workplacejoin */ = {
+		96C9D93F1E4954F900047B93 /* pkeyauth */ = {
 			isa = PBXGroup;
 			children = (
 				96C9D9401E49553100047B93 /* MSALPkeyAuthHelper.h */,
 				96C9D9411E49553100047B93 /* MSALPkeyAuthHelper.m */,
 			);
+			name = pkeyauth;
 			path = workplacejoin;
 			sourceTree = "<group>";
 		};
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
-				96C9D93F1E4954F900047B93 /* workplacejoin */,
+				96C9D93F1E4954F900047B93 /* pkeyauth */,
 				D65A6F681E3FF3D900C69FBA /* cache */,
 				D65A6F731E3FF3D900C69FBA /* MSAL_Internal.h */,
 				D65A6F741E3FF3D900C69FBA /* MSALError.m */,

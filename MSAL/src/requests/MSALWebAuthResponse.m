@@ -123,7 +123,8 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
         }
         default:
         {
-            // TODO: Error construction
+            // TODO: Check for right error code and details.
+            //   Perhaps a utility class to generate NSError would be nice
             NSString *body = [[NSString alloc] initWithData:response.body encoding:NSUTF8StringEncoding];
             NSString *errorData = [NSString stringWithFormat:@"Full response: %@", body];
             
@@ -132,7 +133,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             NSDictionary *userInfo = @{NSLocalizedDescriptionKey: message};
             
             NSError *error = [NSError errorWithDomain:MSALErrorDomain
-                                                 code:0
+                                                 code:MSALErrorNetworkFailure
                                              userInfo:userInfo];
             
             completionHandler(error, response);
