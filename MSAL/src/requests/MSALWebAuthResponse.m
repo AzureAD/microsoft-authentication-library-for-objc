@@ -34,7 +34,7 @@
 
 {
     MSALWebAuthRequest *_request;
-    
+    id<MSALRequestContext> _context;
 }
 
 @end
@@ -46,12 +46,12 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
 
 + (void)processResponse:(MSALHttpResponse *)response
                 request:(MSALWebAuthRequest *)request
+                context:(id<MSALRequestContext>)context
       completionHandler:(MSALHttpRequestCallback)completionHandler
 {
     MSALWebAuthResponse *webAuthResponse = [MSALWebAuthResponse new];
     webAuthResponse->_request = request;
-    
-    // TODO: Add correlation ID
+    webAuthResponse->_context = context;
     
     [webAuthResponse handleResponse:response
                   completionHandler:completionHandler];
@@ -73,9 +73,6 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
 - (void)handleResponse:(MSALHttpResponse *)response
      completionHandler:(MSALHttpRequestCallback)completionHandler
 {
-    (void)response;
-    (void)completionHandler;
-    
     switch (response.statusCode) {
         case 200:
             completionHandler(nil, response);
@@ -135,6 +132,8 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             NSError *error = [NSError errorWithDomain:@"Domain"
                                                  code:MSALErrorNetworkFailure
                                              userInfo:userInfo];
+            
+            LOG_WARN(_context, @"%@", message);
             
             completionHandler(error, response);
             

@@ -28,6 +28,10 @@
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "NSDictionary+MSALExtensions.h"
+#import "MSALLogger+Internal.h"
+#import "MSALOAuth2Constants.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryEventStrings.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -53,12 +57,15 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
 
 static NSString * const s_kHttpHeaderDelimeter = @",";
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session
+- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context
 {
     if (!(self = [super init]))
     {
         return nil;
     }
+    
+    
+    _context = context;
     
     _endpointURL = endpoint;
     _session = session;
@@ -131,32 +138,53 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
 }
 
 #pragma mark - Send
-//TODO: Add correlation id
 
-- (void)sendGet:(MSALHttpRequestCallback)completionHandler
+- (void)send:(MSALHttpRequestCallback)completionHandler
 {
-    // attach query parameters
-    NSURL *newURL = nil;
+    // Telemetry
+    [[MSALTelemetry sharedInstance] startEvent:[_context telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST];
     
-    if ([_queryParameters allKeys].count > 0)
+    [_headers addEntriesFromDictionary:[MSALLogger msalId]];
+    
+    if (_context)
+    {
+        [_headers addEntriesFromDictionary:@{OAUTH2_CORRELATION_ID_REQUEST:@"true",
+                                             OAUTH2_CORRELATION_ID_REQUEST_VALUE:[_context correlationId]}];
+    }
+    
+    NSURL *newURL = nil;
+    if (_isGetRequest && [_queryParameters allKeys].count > 0)
     {
         NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters msalURLFormEncode]];
         newURL = [NSURL URLWithString:newURLString];
     }
     
-    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:(newURL)? newURL:_endpointURL
-                                                                  cachePolicy:_cachePolicy
-                                                              timeoutInterval:_timeOutInterval];
-    mutableRequest.HTTPMethod = @"GET";
-    _isGetRequest = YES;
-
-    // attach headers
-    mutableRequest.allHTTPHeaderFields = _headers;
+    NSData *bodyData = nil;
+    if (!_isGetRequest && _bodyParameters)
+    {
+        bodyData = [NSJSONSerialization dataWithJSONObject:_bodyParameters options:0 error:nil];
+        if (bodyData)
+        {
+            [_headers setValue:[NSString stringWithFormat:@"%ld", (unsigned long)bodyData.length] forKey:@"Content-Length"];
+        }
+    }
     
-    NSURLSessionDataTask *task = [_session dataTaskWithRequest:mutableRequest
+    // TODO: Add client version to URL
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:newURL? newURL : _endpointURL
+                                                           cachePolicy:_cachePolicy
+                                                       timeoutInterval:_timeOutInterval];
+    request.HTTPMethod = _isGetRequest ? @"GET" : @"POST";
+    request.allHTTPHeaderFields = _headers;
+    request.HTTPBody = bodyData;
+    
+    LOG_INFO(_context, @"HTTP %@: %@", request.HTTPMethod, request.URL.absoluteString);
+    
+    NSURLSessionDataTask *task = [_session dataTaskWithRequest:request
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
                                   {
-                                      MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response data:data];
+                                      MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response
+                                                                                                             data:data];
                                       completionHandler(error, msalResponse);
                                   }];
     [task resume];
@@ -164,33 +192,17 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
 
 
 
+- (void)sendGet:(MSALHttpRequestCallback)completionHandler
+{
+    _isGetRequest = YES;
+    [self send:completionHandler];
+}
+
+
 - (void)sendPost:(MSALHttpRequestCallback)completionHandler
 {
-    NSMutableURLRequest *mutableRequest = [NSMutableURLRequest requestWithURL:_endpointURL
-                                                                  cachePolicy:_cachePolicy
-                                                              timeoutInterval:_timeOutInterval];
-    
-    mutableRequest.HTTPMethod = @"POST";
     _isGetRequest = NO;
-    
-    // dictionary to data
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:_bodyParameters options:0 error:nil];
-    mutableRequest.HTTPBody = jsonData;
-    
-    if (jsonData)
-    {
-        [_headers setValue:[NSString stringWithFormat:@"%ld", (unsigned long)jsonData.length] forKey:@"Content-Length"];
-    }
-    
-    mutableRequest.allHTTPHeaderFields = _headers;
-
-    NSURLSessionDataTask *task = [_session dataTaskWithRequest:mutableRequest
-                                             completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
-                                  {
-                                      MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response data:data];
-                                      completionHandler(error, msalResponse);
-                                  }];
-    [task resume];
+    [self send:completionHandler];
 }
 
 

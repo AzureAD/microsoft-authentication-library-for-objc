@@ -30,9 +30,9 @@
 
 @interface MSALWebAuthResponse : NSObject
 
-
 + (void)processResponse:(MSALHttpResponse *)response
                 request:(MSALWebAuthRequest *)request
+                context:(id<MSALRequestContext>)context
       completionHandler:(MSALHttpRequestCallback)completionHandler;
 
 @end

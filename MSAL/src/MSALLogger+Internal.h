@@ -32,11 +32,13 @@
 
 - (NSString *)correlationId;
 - (NSString *)component;
+- (NSString *)telemetryRequestId;
 
 @end
 
 @interface MSALLogger (Internal)
 
++ (NSDictionary *)msalId;
 - (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ... NS_FORMAT_FUNCTION(4, 5);
 
 @end

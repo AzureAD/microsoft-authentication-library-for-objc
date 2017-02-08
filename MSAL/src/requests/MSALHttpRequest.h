@@ -41,6 +41,8 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 
 @interface MSALHttpRequest : NSObject
 
+@property (readonly) id<MSALRequestContext> context;
+
 @property (readonly) NSURLSession *session;
 @property (readonly) NSURL *endpointURL;
 
@@ -53,7 +55,7 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 // Key/value pairs that is included in GET request
 @property (copy) NSDictionary<NSString *, NSString *> *queryParameters;
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session;
+- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context;
 
 // Add value to header field of the request. If a value was previously set, the
 // supplied value is appeneded with comma delimeter

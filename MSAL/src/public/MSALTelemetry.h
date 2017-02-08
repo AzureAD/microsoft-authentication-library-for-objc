@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,22 +15,32 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+
+////////////////////////////////////////////////////////////////////////////
 //
-//------------------------------------------------------------------------------
+// TODO: This class has not been implemented/completed
+//
+////////////////////////////////////////////////////////////////////////////
 
+/*!
+ @class MSALTelemetry
+ 
+ The central class for MSAL telemetry.
+ 
+ Usage: Get a singleton instance of MSALTelemetry; register a dispatcher for receiving telemetry events.
+ */
+@interface MSALTelemetry : NSObject
 
-#import <Foundation/Foundation.h>
-#import "MSALHttpRequest.h"
+/*!
+ Get a singleton instance of ADTelemetry.
+ */
++ (nonnull MSALTelemetry *)sharedInstance;
 
-@interface MSALWebAuthRequest : MSALHttpRequest
-
-@property BOOL retryIfServerError;
-
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context;
 
 @end

@@ -32,9 +32,9 @@
 
 @implementation MSALWebAuthRequest
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session
+- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context
 {
-    self = [super initWithURL:endpoint session:session];
+    self = [super initWithURL:endpoint session:session context:context];
     if (!self)
     {
         return nil;
@@ -60,6 +60,7 @@
         {
             [MSALWebAuthResponse processResponse:response
                                          request:self
+                                         context:self.context
                                completionHandler:completionHandler];
         }
     }];
@@ -77,6 +78,7 @@
         {
             [MSALWebAuthResponse processResponse:response
                                          request:self
+                                         context:self.context
                                completionHandler:completionHandler];
         }
     }];

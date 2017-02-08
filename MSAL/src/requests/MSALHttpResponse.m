@@ -27,6 +27,10 @@
 
 
 #import "MSALHttpResponse.h"
+#import "MSALLogger+Internal.h"
+#import "MSALOAuth2Constants.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryEventStrings.h"
 
 @implementation MSALHttpResponse
 

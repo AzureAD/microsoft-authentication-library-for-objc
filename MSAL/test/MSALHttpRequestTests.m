@@ -29,6 +29,7 @@
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
+#import "MSALTestSimpleRequestContext.h"
 
 @interface MSALHttpRequestTests : XCTestCase
 
@@ -54,7 +55,7 @@
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
     NSURLSession *session = [[NSURLSession alloc] init];
     
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session context:nil];
     
     [request setValue:@"value1" forHTTPHeaderField:@"header1"];
     [request setValue:@"value2" forHTTPHeaderField:@"header2"];
@@ -73,7 +74,7 @@
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
     NSURLSession *session = [[NSURLSession alloc] init];
     
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session context:nil];
     
     [request setValue:@"value1" forBodyParameter:@"bodyParam1"];
     
@@ -102,7 +103,8 @@
     [MSALTestURLSession addResponse:response];
     
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
-                                                            session:session];
+                                                            session:session
+                                                            context:[MSALTestSimpleRequestContext new]];
     
     [request sendGet:^(NSError *error, MSALHttpResponse *response) {
         XCTAssertNil(error);
