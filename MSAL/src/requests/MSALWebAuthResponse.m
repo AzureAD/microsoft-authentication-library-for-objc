@@ -145,10 +145,6 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
 - (void)handlePKeyAuthChallange:(NSString *)wwwAuthHeaderValue
               completionHandler:(MSALHttpRequestCallback)completionHandler
 {
-    (void)wwwAuthHeaderValue;
-    (void)completionHandler;
-    
-    
     //pkeyauth word length=8 + 1 whitespace
     wwwAuthHeaderValue = [wwwAuthHeaderValue substringFromIndex:[MSALPKeyAuthName length] + 1];
     
@@ -190,11 +186,11 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
 
 - (NSDictionary *)authHeaderParams:(NSString *)headerValue
 {
-    NSMutableDictionary* params = [NSMutableDictionary new];
+    NSMutableDictionary *params = [NSMutableDictionary new];
     NSUInteger strLength = [headerValue length];
     NSRange currentRange = NSMakeRange(0, strLength);
-    NSCharacterSet* whiteChars = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-    NSCharacterSet* alphaNum = [NSCharacterSet alphanumericCharacterSet];
+    NSCharacterSet *whiteChars = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    NSCharacterSet *alphaNum = [NSCharacterSet alphanumericCharacterSet];
     
     while (currentRange.location < strLength)
     {
@@ -231,15 +227,14 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             return params;
         }
         NSUInteger length = found - currentRange.location;
-        NSString* key = [headerValue substringWithRange:NSMakeRange(currentRange.location, length)];
+        NSString *key = [headerValue substringWithRange:NSMakeRange(currentRange.location, length)];
         
         // don't want the '='
         ++length;
         currentRange.location += length;
         currentRange.length -= length;
         
-        NSString* value = nil;
-        
+        NSString *value = nil;
         
         if ([headerValue characterAtIndex:currentRange.location] == '"')
         {
@@ -290,7 +285,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             value = [headerValue substringWithRange:NSMakeRange(currentRange.location, length)];
         }
         
-        NSString* existingValue = [params valueForKey:key];
+        NSString *existingValue = [params valueForKey:key];
         if (existingValue)
         {
             [params setValue:[existingValue stringByAppendingFormat:@".%@", value] forKey:key];
@@ -304,7 +299,6 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
         currentRange.location += length;
         currentRange.length -= length;
     }
-    
     
     return params;
 }

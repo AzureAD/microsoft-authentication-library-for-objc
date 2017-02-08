@@ -69,7 +69,6 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 - (void)setValue:(NSString *)value forQueryParameter:(NSString *)parameter;
 - (void)removeQueryParameter:(NSString *)parameter;
 
-
 // Body parameter setters
 - (void)setValue:(NSString *)value forBodyParameter:(NSString *)parameter;
 - (void)removeBodyParameter:(NSString *)parameter;

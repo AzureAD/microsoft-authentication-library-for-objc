@@ -23,10 +23,10 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString *const MSALPKeyAuthURN;
-extern NSString *const MSALPKeyAuthHeader;
-extern NSString *const MSALPKeyAuthHeaderVersion;
-extern NSString *const MSALPKeyAuthName;
+extern NSString * __nonnull const MSALPKeyAuthURN;
+extern NSString * __nonnull const MSALPKeyAuthHeader;
+extern NSString * __nonnull const MSALPKeyAuthHeaderVersion;
+extern NSString * __nonnull const MSALPKeyAuthName;
 
 typedef enum
 {
@@ -36,13 +36,12 @@ typedef enum
 
 @interface MSALPkeyAuthHelper : NSObject
 
-+ (NSString *)createDeviceAuthResponse:(NSString *)authorizationServer
-                         challengeData:(NSDictionary *)challengeData
-                         correlationId:(NSString *)correlationId
-                                 error:(NSError **)error;
++ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
+                                  challengeData:(nullable NSDictionary *)challengeData
+                                  correlationId:(nullable NSString *)correlationId
+                                          error:(NSError * __nullable * __nullable)error;
 
-+ (NSString *)computeThumbprint:(NSData *)data
-                         isSha2:(BOOL)isSha2;
-
++ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
+                                 isSha2:(BOOL)isSha2;
 
 @end

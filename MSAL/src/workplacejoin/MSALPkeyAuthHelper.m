@@ -36,10 +36,10 @@ NSString *const MSALPKeyAuthName = @"PKeyAuth";
 
 @implementation MSALPkeyAuthHelper
 
-+ (NSString *)createDeviceAuthResponse:(NSString *)authorizationServer
-                        challengeData:(NSDictionary *)challengeData
-                        correlationId:(NSString *)correlationId
-                                error:(NSError **)error
++ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
+                                  challengeData:(nullable NSDictionary *)challengeData
+                                  correlationId:(nullable NSString *)correlationId
+                                          error:(NSError * __nullable * __nullable)error
 {
     (void)authorizationServer;
     (void)challengeData;
@@ -48,8 +48,8 @@ NSString *const MSALPKeyAuthName = @"PKeyAuth";
     return @"";
 }
 
-+ (NSString *)computeThumbprint:(NSData *)data
-                         isSha2:(BOOL)isSha2
++ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
+                                 isSha2:(BOOL)isSha2
 {
     (void)data;
     (void)isSha2;

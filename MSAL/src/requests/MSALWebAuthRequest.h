@@ -33,6 +33,7 @@
 
 @property BOOL retryIfServerError;
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context;
+- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session
+          context:(id<MSALRequestContext>)context;
 
 @end

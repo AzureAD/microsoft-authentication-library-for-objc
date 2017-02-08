@@ -32,7 +32,8 @@
 
 @implementation MSALWebAuthRequest
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context
+- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session
+          context:(id<MSALRequestContext>)context
 {
     self = [super initWithURL:endpoint session:session context:context];
     if (!self)
@@ -40,7 +41,7 @@
         return nil;
     }
     
-    [self addValue:MSALPKeyAuthHeaderVersion forHTTPHeaderField:MSALPKeyAuthHeader];
+    [self.headers setValue:MSALPKeyAuthHeaderVersion forKey:MSALPKeyAuthHeader];
     
     _retryIfServerError = YES;
     

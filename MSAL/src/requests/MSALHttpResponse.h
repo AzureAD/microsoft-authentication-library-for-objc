@@ -40,7 +40,4 @@
 - (NSInteger)statusCode;
 - (NSDictionary *)headers;
 
-
-
-
 @end

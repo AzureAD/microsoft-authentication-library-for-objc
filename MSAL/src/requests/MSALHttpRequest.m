@@ -45,10 +45,9 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
     NSMutableDictionary *_headers;
     NSMutableDictionary *_queryParameters;
     
-    //TODO: move to seperate settings? - ADAuthenticationSettings.h
+    //TODO: move to seperate settings? - MSALAuthenticationSettings.h
     NSTimeInterval _timeOutInterval;
     NSURLRequestCachePolicy _cachePolicy;
-    
 }
 
 @end
@@ -64,7 +63,6 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
         return nil;
     }
     
-    
     _context = context;
     
     _endpointURL = endpoint;
@@ -78,7 +76,9 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     _timeOutInterval = 30;
     _cachePolicy = NSURLRequestReloadIgnoringCacheData;
     
+    // Accept JSON by default
     [self setAcceptJSON:YES];
+    // Set content-type as form url encoded as default
     [self setContentTypeFormURLEncoded:YES];
     
     return self;
@@ -107,7 +107,6 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
         [_headers setValue:value forKey:field];
     }
 }
-
 
 - (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field
 {
@@ -178,7 +177,7 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     request.allHTTPHeaderFields = _headers;
     request.HTTPBody = bodyData;
     
-    LOG_INFO(_context, @"HTTP %@: %@", request.HTTPMethod, request.URL.absoluteString);
+    LOG_INFO(_context, @"HTTP request %@", request.URL.absoluteString);
     
     NSURLSessionDataTask *task = [_session dataTaskWithRequest:request
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)

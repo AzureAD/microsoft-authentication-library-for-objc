@@ -35,7 +35,7 @@
 + (MSALTelemetry *)sharedInstance
 {
     static dispatch_once_t once;
-    static MSALTelemetry* singleton = nil;
+    static MSALTelemetry *singleton = nil;
     
     dispatch_once(&once, ^{
         singleton = [[MSALTelemetry alloc] init];
