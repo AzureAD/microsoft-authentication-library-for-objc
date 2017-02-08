@@ -21,6 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+////////////////////////////////////////////////////////////////////////////
+//
+// TODO: This class has not been implemented/completed
+//
+////////////////////////////////////////////////////////////////////////////
+
 #import "MSALPkeyAuthHelper.h"
 
 NSString *const MSALPKeyAuthURN = @"urn:http-auth:PKeyAuth?";
@@ -29,5 +35,25 @@ NSString *const MSALPKeyAuthHeaderVersion = @"1.0";
 NSString *const MSALPKeyAuthName = @"PKeyAuth";
 
 @implementation MSALPkeyAuthHelper
+
++ (NSString *)createDeviceAuthResponse:(NSString *)authorizationServer
+                        challengeData:(NSDictionary *)challengeData
+                        correlationId:(NSString *)correlationId
+                                error:(NSError **)error
+{
+    (void)authorizationServer;
+    (void)challengeData;
+    (void)correlationId;
+    (void)error;
+    return @"";
+}
+
++ (NSString *)computeThumbprint:(NSData *)data
+                         isSha2:(BOOL)isSha2
+{
+    (void)data;
+    (void)isSha2;
+    return @"";
+}
 
 @end
