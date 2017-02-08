@@ -29,10 +29,10 @@
 
 #import "MSALPkeyAuthHelper.h"
 
-NSString *const MSALPKeyAuthURN = @"urn:http-auth:PKeyAuth?";
-NSString *const MSALPKeyAuthHeader = @"x-ms-PkeyAuth";
+NSString *const MSALPKeyAuthURN           = @"urn:http-auth:PKeyAuth?";
+NSString *const MSALPKeyAuthHeader        = @"x-ms-PkeyAuth";
 NSString *const MSALPKeyAuthHeaderVersion = @"1.0";
-NSString *const MSALPKeyAuthName = @"PKeyAuth";
+NSString *const MSALPKeyAuthName          = @"PKeyAuth";
 
 @implementation MSALPkeyAuthHelper
 

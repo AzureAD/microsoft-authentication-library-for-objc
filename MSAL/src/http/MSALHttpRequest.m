@@ -76,11 +76,6 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     _timeOutInterval = 30;
     _cachePolicy = NSURLRequestReloadIgnoringCacheData;
     
-    // Accept JSON by default
-    [self setAcceptJSON:YES];
-    // Set content-type as form url encoded as default
-    [self setContentTypeFormURLEncoded:YES];
-    
     return self;
 }
 
@@ -217,28 +212,14 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     }
 }
 
-- (void)setAcceptJSON:(BOOL)acceptJSON;
+- (void)setAcceptJSON;
 {
-    if (acceptJSON)
-    {
         [_headers setValue:MSALHttpHeaderApplicationJSON forKey:MSALHttpHeaderAccept];
-    }
-    else
-    {
-        [_headers removeObjectForKey:MSALHttpHeaderAccept];
-    }
 }
 
-- (void)setContentTypeFormURLEncoded:(BOOL)setContentTypeFormURLEncoded
+- (void)setContentTypeFormURLEncoded;
 {
-    if (setContentTypeFormURLEncoded)
-    {
-        [_headers setValue:MSALHttpHeaderFormURLEncoded forKey:MSALHttpHeaderContentType];
-    }
-    else
-    {
-        [_headers removeObjectForKey:MSALHttpHeaderContentType];
-    }
+    [_headers setValue:MSALHttpHeaderFormURLEncoded forKey:MSALHttpHeaderContentType];
 }
 
 @end

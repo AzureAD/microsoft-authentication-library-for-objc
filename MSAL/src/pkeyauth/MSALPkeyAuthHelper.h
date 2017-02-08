@@ -39,7 +39,7 @@ typedef enum
 + (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
                                   challengeData:(nullable NSDictionary *)challengeData
                                   correlationId:(nullable NSString *)correlationId
-                                          error:(NSError * __nullable * __nullable)error;
+                                          error:(NSError * __nullable * __nullable)error; 
 
 + (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
                                  isSha2:(BOOL)isSha2;

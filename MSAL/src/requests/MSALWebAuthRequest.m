@@ -43,6 +43,9 @@
     
     [self.headers setValue:MSALPKeyAuthHeaderVersion forKey:MSALPKeyAuthHeader];
     
+    [self setAcceptJSON];
+    [self setContentTypeFormURLEncoded];
+    
     _retryIfServerError = YES;
     
     return self;

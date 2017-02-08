@@ -80,13 +80,10 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 - (void)resend:(MSALHttpRequestCallback)completionHandler;
 
 // Sets Accept:Application/json to the header.
-// This is called by default at init, call setAcceptJSON:NO to remove the header
-- (void)setAcceptJSON:(BOOL)acceptJSON;
+- (void)setAcceptJSON;
 
 // Sets ContentType:application/x-www-form-urlencoded to the header.
-// This is called by default at init, call setContentTypeFormURLEncoded:NO to
-// remove from the header
-- (void)setContentTypeFormURLEncoded:(BOOL)setContentTypeFormURLEncoded;
+- (void)setContentTypeFormURLEncoded;
 
 @end
 
