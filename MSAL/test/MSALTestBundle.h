@@ -25,26 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-
 #import <Foundation/Foundation.h>
 
 /*!
-    This class provides a logging callback for the MSAL logger and allows tests
-    to inspect the last log message sent to the logger. It is automatically reset
-    at the beginning of each test by MSALTestCase.
+    This class allows tests to override values returned by various NSBundle
+    methods. It is automatically reset at the beginning of each test case in
+    subclasses of MSALTestCase.
  */
-@interface MSALTestLogger : NSObject
+ 
+@interface MSALTestBundle : NSObject
 
-@property (readwrite) BOOL containsPII;
-@property (readwrite, retain) NSString * lastMessage;
-@property (readwrite) MSALLogLevel lastLevel;
++ (void)reset;
 
-+ (MSALTestLogger *)sharedLogger;
+/*!
+    Objects set with this method will override values returned by -[NSBundle
+    objectForInfoDictionaryKey:]
+ */
++ (void)overrideObject:(id)object
+                forKey:(NSString *)key;
 
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to MSALLogLevelLast. */
-- (void)reset;
-
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to the provided log level. */
-- (void)reset:(MSALLogLevel)level;
+/*!
+    Overrides the string returned by -[NSBundle bundleIdentifier]
+ */
++ (void)overrideBundleId:(NSString *)bundleId;
 
 @end

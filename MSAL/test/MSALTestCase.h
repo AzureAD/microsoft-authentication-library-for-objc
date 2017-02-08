@@ -25,26 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-
-#import <Foundation/Foundation.h>
+#import <XCTest/XCTest.h>
 
 /*!
-    This class provides a logging callback for the MSAL logger and allows tests
-    to inspect the last log message sent to the logger. It is automatically reset
-    at the beginning of each test by MSALTestCase.
+    A base test case class for all MSAL tests that will reset all our test
+    helper objects. All MSAL unit tests should be a subclass of MSALTestCase.
  */
-@interface MSALTestLogger : NSObject
-
-@property (readwrite) BOOL containsPII;
-@property (readwrite, retain) NSString * lastMessage;
-@property (readwrite) MSALLogLevel lastLevel;
-
-+ (MSALTestLogger *)sharedLogger;
-
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to MSALLogLevelLast. */
-- (void)reset;
-
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to the provided log level. */
-- (void)reset:(MSALLogLevel)level;
+@interface MSALTestCase : XCTestCase
 
 @end
+

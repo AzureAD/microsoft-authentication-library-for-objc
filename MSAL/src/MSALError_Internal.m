@@ -25,57 +25,42 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestCase.h"
-#import "MSALJsonObject.h"
+#import "MSALError_Internal.h"
 
-@interface MSALJsonObject (TestUtils)
+#define STRING_CASE(_CASE) case _CASE: return @#_CASE
 
-- (NSMutableDictionary *)json;
-
-@end
-
-@implementation MSALJsonObject (TestUtils)
-
-- (NSMutableDictionary *)json
+NSString *MSALStringForErrorCode(MSALErrorCode code)
 {
-    return _json;
+    switch (code)
+    {
+        STRING_CASE(MSALErrorInvalidParameter);
+        STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
+        STRING_CASE(MSALErrorMismatchedUser);
+        STRING_CASE(MSALErrorNetworkFailure);
+        STRING_CASE(MSALErrorKeychainFailure);
+        STRING_CASE(MSALErrorInteractionRequired);
+    }
 }
 
-@end
-
-@interface MSALJsonObjectTests : MSALTestCase
-
-@end
-
-@implementation MSALJsonObjectTests
-
-- (void)setUp
+void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *filename, int line)
 {
-    [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    NSString* codeString = MSALStringForErrorCode(code);
+    if (oauthError)
+    {
+        LOG_ERROR(ctx, @"%@ from \"%@\" - %@ (%s:%d)", codeString, oauthError, errorDescription, filename, line);
+    }
+    else
+    {
+        LOG_ERROR(ctx, @"%@ - %@ (%s:%d)", codeString, errorDescription, filename, line);
+    }
 }
 
-- (void)tearDown
+NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSError* underlyingError)
 {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
-
-- (void)testInitDeserialize
-{
-    NSString* testJson = @"{ \"testKey\" : \"testValue\" }";
-    NSData* testJsonData = [testJson dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableDictionary* userInfo = [NSMutableDictionary new];
+    userInfo[MSALErrorDescriptionKey] = errorDescription;
+    userInfo[MSALOAuthErrorKey] = oauthError;
+    userInfo[NSUnderlyingErrorKey]  = underlyingError;
     
-    NSError* error = nil;
-    MSALJsonObject* obj = [[MSALJsonObject alloc] initWithData:testJsonData error:&error];
-    XCTAssertNotNil(obj);
-    XCTAssertNil(error);
-    XCTAssertEqualObjects(obj.json, @{ @"testKey" : @"testValue"} );
+    return [NSError errorWithDomain:MSALErrorDomain code:code userInfo:userInfo];
 }
-
-- (void)testSerialize
-{
-    // TODO
-}
-
-@end

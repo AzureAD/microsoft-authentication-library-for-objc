@@ -30,7 +30,7 @@
 
 @protocol MSALRequestContext
 
-- (NSString *)correlationId;
+- (NSUUID *)correlationId;
 - (NSString *)component;
 
 @end
@@ -40,6 +40,9 @@
 - (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ... NS_FORMAT_FUNCTION(4, 5);
 
 @end
+
+// Convenience macro for obscuring PII in log macros that don't allow PII.
+#define _PII(_OBJ) _OBJ ? @"(not-nil)" : @"(nil)"
 
 #define _LOG(_LVL, _PII, _CTX, _FMT, ...) [[MSALLogger sharedLogger] logLevel:_LVL isPII:_PII context:_CTX format:_FMT, ##__VA_ARGS__]
 

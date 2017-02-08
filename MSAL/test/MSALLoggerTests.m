@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
 #import "MSALTestLogger.h"
 
-@interface MSALLoggerTests : XCTestCase
+@interface MSALLoggerTests : MSALTestCase
 
 @end
 

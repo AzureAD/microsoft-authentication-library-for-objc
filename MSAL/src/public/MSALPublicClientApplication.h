@@ -26,32 +26,24 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import <MSAL/MSAL.h>
 
 @class MSALResult;
 @class MSALUIOptions;
 @class MSALUser;
 @class MSALTokenRequest;
 
-typedef enum MSALUIBehavior
-{
-    SelectAccount,
-    ForceLogin,
-    ForceConsent,
-    ActAsCurrentUser,
-    
-} MSALUIBehavior;
-
-typedef void (^MSALCompletionBlock)(MSALResult * result, NSError * error);
-
 @interface MSALPublicClientApplication : NSObject
 
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
-@property NSString * componentId;
+@property NSString * component;
 
-- (id)initWithClientId:(NSString *)clientId;
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSURL *)authority;
+                 error:(NSError * __autoreleasing *)error;
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error;
 
 - (NSArray <MSALUser *> *)users;
 
