@@ -28,12 +28,12 @@
 #import <Foundation/Foundation.h>
 
 extern NSString *MSALStringForErrorCode(MSALErrorCode code);
-extern void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *filename, int line);
+extern void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *function, int line);
 extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSError* underlyingError);
 
 // Convenience macro for checking and filling an optional NSError** parameter
 #define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC) \
-    MSALLogError(_CTX, _CODE, _DESC, nil, __BASE_FILE__, __LINE__); \
+    MSALLogError(_CTX, _CODE, _DESC, nil, __FUNCTION__, __LINE__); \
     if (error) { *error = MSALCreateError(_CODE, _DESC, nil, nil); } \
 
 // Convenience macros for checking a false/nil return result and passing along
@@ -45,7 +45,7 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 
 // Check and pass an error back through the completion block
 #define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC) if (!_CHECK) { \
-    MSALLogError(_CTX, _CODE, _DESC, nil, __BASE_FILE__, __LINE__); \
+    MSALLogError(_CTX, _CODE, _DESC, nil, __FUNCTION__, __LINE__); \
     completionBlock(nil, MSALCreateError(_CODE, _DESC, nil, nil); \
     return; \
 }
@@ -62,7 +62,7 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 #define REQUIRED_PARAMETER(_PARAMETER, _CTX) \
     if (!_PARAMETER) { \
         NSString* _ERROR_DESCR = @#_PARAMETER " is a required parameter and must not be nil."; \
-        MSALLogError(_CTX, MSALErrorInvalidParameter, _ERROR_DESCR , nil, __BASE_FILE__, __LINE__); \
+        MSALLogError(_CTX, MSALErrorInvalidParameter, _ERROR_DESCR , nil, __FUNCTION__, __LINE__); \
         if (error) { *error = MSALCreateError(MSALErrorInvalidParameter, _ERROR_DESCR, nil, nil); } \
         return nil; \
     }
