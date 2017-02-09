@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,33 +17,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestCase.h"
+#import "MSALTestLogger.h"
+#import "MSALTestBundle.h"
 
-extern NSString * __nonnull const MSALPKeyAuthURN;
-extern NSString * __nonnull const MSALPKeyAuthHeader;
-extern NSString * __nonnull const MSALPKeyAuthHeaderVersion;
-extern NSString * __nonnull const MSALPKeyAuthName;
+@implementation MSALTestCase
 
-typedef enum
-{
-    MSAL_ISSUER,
-    MSAL_THUMBPRINT,
-} MSALChallengeType;
+- (void)setUp {
+    [super setUp];
+    [[MSALTestLogger sharedLogger] reset];
+    [MSALTestBundle reset];
+}
 
-@interface MSALPkeyAuthHelper : NSObject
-
-+ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
-                                  challengeData:(nullable NSDictionary *)challengeData
-                                  correlationId:(nullable NSUUID *)correlationId
-                                          error:(NSError * __nullable * __nullable)error; 
-
-+ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
-                                 isSha2:(BOOL)isSha2;
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
 
 @end

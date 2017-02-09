@@ -39,11 +39,17 @@ FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 //! Project version string for MSAL.
 FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
+@class MSALResult;
+
+typedef void (^MSALCompletionBlock)(MSALResult * result, NSError * error);
+
+#import <MSAL/MSALUIBehavior.h>
 #import <MSAL/MSALError.h>
 #import <MSAL/MSALLogger.h>
 #import <MSAL/MSALPublicClientApplication.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALUser.h>
+
 
 #if TARGET_OS_IPHONE
 #import <MSAL/MSALKeychainTokenCache.h>

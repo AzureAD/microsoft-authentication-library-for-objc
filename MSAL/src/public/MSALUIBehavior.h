@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,33 +17,24 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#ifndef MSALUIBEHAVIOR_H
+#define MSALUIBEHAVIOR_H
 
-extern NSString * __nonnull const MSALPKeyAuthURN;
-extern NSString * __nonnull const MSALPKeyAuthHeader;
-extern NSString * __nonnull const MSALPKeyAuthHeaderVersion;
-extern NSString * __nonnull const MSALPKeyAuthName;
+typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+    MSALSelectAccount,
+    MSALForceLogin,
+    MSALForceConsent,
+    MSALUIBehaviorDefault = MSALSelectAccount,
+};
 
-typedef enum
-{
-    MSAL_ISSUER,
-    MSAL_THUMBPRINT,
-} MSALChallengeType;
+extern NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
 
-@interface MSALPkeyAuthHelper : NSObject
-
-+ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
-                                  challengeData:(nullable NSDictionary *)challengeData
-                                  correlationId:(nullable NSUUID *)correlationId
-                                          error:(NSError * __nullable * __nullable)error; 
-
-+ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
-                                 isSha2:(BOOL)isSha2;
-
-@end
+#endif // MSALUIBEHAVIOR_H

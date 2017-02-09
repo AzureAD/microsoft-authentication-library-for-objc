@@ -83,3 +83,6 @@
 
 // Internally scopes usually are passed around as an ordered set of strings
 typedef NSOrderedSet<NSString *> MSALScopes;
+
+#include "MSAL.h"
+#include "MSALLogger+Internal.h"

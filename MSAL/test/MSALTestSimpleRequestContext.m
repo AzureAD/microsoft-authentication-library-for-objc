@@ -24,10 +24,26 @@
 #import "MSALTestSimpleRequestContext.h"
 
 @implementation MSALTestSimpleRequestContext
-
-- (NSString *)correlationId
 {
-    return [[NSUUID UUID] UUIDString];
+    NSUUID *_correlationId;
+}
+
+- (id)init
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _correlationId = [NSUUID new];
+    
+    return self;
+}
+
+
+- (NSUUID *)correlationId
+{
+    return _correlationId;
 }
 
 - (NSString *)component

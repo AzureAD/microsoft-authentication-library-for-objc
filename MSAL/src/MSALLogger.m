@@ -210,7 +210,7 @@ static NSDateFormatter* s_dateFormatter = nil;
         component = @"";
     }
     
-    NSString* correlationId = [context correlationId];
+    NSString* correlationId = context.correlationId.UUIDString;
     NSString* correlationIdStr = @"";
     if (correlationId)
     {

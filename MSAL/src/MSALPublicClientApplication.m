@@ -26,24 +26,78 @@
 //------------------------------------------------------------------------------
 
 #import "MSALPublicClientApplication.h"
+#import "MSALError.h"
+#import "MSALError_Internal.h"
+
+#define STRING_CASE(_CASE) case _CASE: return @#_CASE
+
+#define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
+
+NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
+{
+    switch (behavior)
+    {
+        STRING_CASE(MSALSelectAccount);
+        STRING_CASE(MSALForceLogin);
+        STRING_CASE(MSALForceConsent);
+    }
+    
+    @throw @"Unrecognized MSALUIBehavior";
+}
 
 @implementation MSALPublicClientApplication
+{
+    NSString *_authority;
+    NSURL *_redirectUri;
+    NSString *_clientId;
+}
+
+- (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
+{
+    (void)error; // TODO
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];
+    
+    NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
+    
+    for (NSDictionary* urlRole in urlTypes)
+    {
+        NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
+        if ([urlSchemes containsObject:scheme])
+        {
+            NSString *redirectUri = [NSString stringWithFormat:@"x-msauth-%@://%@/msal", scheme, bundleId];
+            _redirectUri = [NSURL URLWithString:redirectUri];
+            return YES;
+        }
+    }
+    
+    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme is not registered in the app's info.plist file.");
+    
+    return NO;
+}
 
 - (id)initWithClientId:(NSString *)clientId
+                 error:(NSError * __autoreleasing *)error
 {
-    // TODO
-    (void)clientId;
-    
-    return nil;
+    return [self initWithClientId:clientId authority:nil error:error];
 }
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSURL *)authority
+             authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error
 {
-    // TODO
-    (void)clientId;
-    (void)authority;
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    REQUIRED_PARAMETER(clientId, nil);
+    _clientId = clientId;
     
-    return nil;
+    // TODO: Passed in authority validation
+    _authority = authority ? authority : DEFAULT_AUTHORITY;
+    
+    CHECK_RETURN_NIL([self generateRedirectUri:error]);
+    
+    return self;
 }
 
 - (NSArray <MSALUser *> *)users

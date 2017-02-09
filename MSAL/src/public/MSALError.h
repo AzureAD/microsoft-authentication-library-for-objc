@@ -35,13 +35,43 @@ extern NSString * MSALErrorDomain;
 extern NSString * MSALOAuthErrorKey;
 
 /*!
-    The extded error description returned by the service. Note that this string
-    can change ands should not be relied upon for any error handling logic.
+    The extded error description. Note that this string can change ands should
+    not be relied upon for any error handling logic.
  */
-extern NSString * MSALOAuthErrorDescriptionKey;
+extern NSString * MSALErrorDescriptionKey;
 
-NS_ENUM(NSInteger)
+typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
+    /*!
+        A required parameter was not provided, or a passed in parameter was
+        invalid. See MSALErrorDescriptionKey for more information.
+     */
+    MSALErrorInvalidParameter = -1000,
+    
+    /*!
+        The required MSAL URL scheme is not registered in the app's info.plist.
+        The scheme "x-msauth-<bundle-id-with-hyphens-instead-of-periods>"
+     
+        e.g. an app with the bundle ID "com.microsoft.testapp" would need to
+        register the scheme "x-msauth-com-microsoft-testapp" and add the
+        following to the info.plist file:
+     
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleURLName</key>
+                <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>x-msauth-com-microsoft-testapp</string>
+                </array>
+            </dict>
+
+     */
+    MSALErrorRedirectSchemeNotRegistered = -1001,
+    
     /*!
         Interaction required errors occur because of a wide variety of errors
         returned by the authentication service. In all cases the proper response
@@ -49,10 +79,10 @@ NS_ENUM(NSInteger)
         For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
         in the userInfo dictionary.
      */
-    MSALErrorInteractionRequired    = -1000,
-    MSALErrorMismatchedUser = -1001,
+    MSALErrorInteractionRequired    = -1002,
+    MSALErrorMismatchedUser = -1003,
     
-    MSALErrorKeychainFailure = -1002,
-    MSALErrorNetworkFailure = -1003,
+    MSALErrorKeychainFailure = -1004,
+    MSALErrorNetworkFailure = -1005,
 };
 

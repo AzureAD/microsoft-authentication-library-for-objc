@@ -38,7 +38,7 @@ NSString *const MSALPKeyAuthName          = @"PKeyAuth";
 
 + (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
                                   challengeData:(nullable NSDictionary *)challengeData
-                                  correlationId:(nullable NSString *)correlationId
+                                  correlationId:(nullable NSUUID *)correlationId
                                           error:(NSError * __nullable * __nullable)error
 {
     (void)authorizationServer;
