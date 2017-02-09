@@ -25,31 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALLogger.h"
 
-@protocol MSALRequestContext
+#import "MSALHttpResponse.h"
+#import "MSALLogger+Internal.h"
 
-- (NSString *)correlationId;
-- (NSString *)component;
-- (NSString *)telemetryRequestId;
+@implementation MSALHttpResponse
+
+- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data
+{
+    if (response == nil)
+    {
+        NSAssert(false, @"Invalid Parameters");
+        return nil;
+    }
+    
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    _response = response;
+    _body     = data;
+    
+    return self;
+}
+
+
+- (NSInteger)statusCode
+{
+    return _response.statusCode;
+}
+
+- (NSDictionary *)headers
+{
+    return _response.allHeaderFields;
+}
 
 @end
-
-@interface MSALLogger (Internal)
-
-+ (NSDictionary *)msalId;
-- (void)logLevel:(MSALLogLevel)level isPII:(BOOL)isPii context:(id<MSALRequestContext>)context format:(NSString *)format, ... NS_FORMAT_FUNCTION(4, 5);
-
-@end
-
-#define _LOG(_LVL, _PII, _CTX, _FMT, ...) [[MSALLogger sharedLogger] logLevel:_LVL isPII:_PII context:_CTX format:_FMT, ##__VA_ARGS__]
-
-#define LOG_ERROR(ctx, fmt, ...)            _LOG(MSALLogLevelError, NO, ctx, fmt, ##__VA_ARGS__)
-#define LOG_ERROR_PII(ctx, fmt, ...)        _LOG(MSALLogLevelError, YES, ctx, fmt, ##__VA_ARGS__)
-#define LOG_WARN(ctx, fmt, ...)             _LOG(MSALLogLevelWarning, NO, ctx, fmt, ##__VA_ARGS__)
-#define LOG_WARN_PII(ctx, fmt, ...)         _LOG(MSALLogLevelWarning, YES, ctx, fmt, ##__VA_ARGS__)
-#define LOG_INFO(ctx, fmt, ...)             _LOG(MSALLogLevelInfo, NO, ctx, fmt, ##__VA_ARGS__)
-#define LOG_INFO_PII(ctx, fmt, ...)         _LOG(MSALLogLevelInfo, YES, ctx, fmt, ##__VA_ARGS__)
-#define LOG_VERBOSE(ctx, fmt, ...)          _LOG(MSALLogLevelVerbose, NO, ctx, fmt, ##__VA_ARGS__)
-#define LOG_VERBSOE_PII(ctx, fmt, ...)      _LOG(MSALLogLevelVerbose, YES, ctx, fmt, ##__VA_ARGS__)
