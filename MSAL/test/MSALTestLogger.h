@@ -28,6 +28,11 @@
 
 #import <Foundation/Foundation.h>
 
+/*!
+    This class provides a logging callback for the MSAL logger and allows tests
+    to inspect the last log message sent to the logger. It is automatically reset
+    at the beginning of each test by MSALTestCase.
+ */
 @interface MSALTestLogger : NSObject
 
 @property (readwrite) BOOL containsPII;

@@ -27,3 +27,6 @@
 
 #import "MSALError.h"
 
+NSString *MSALErrorDomain = @"MSALErrorDomain";
+NSString *MSALOAuthErrorKey = @"MSALOAuthErrorKey";
+NSString *MSALErrorDescriptionKey = @"MSALErrorDescriptionKey";

@@ -42,7 +42,7 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
 @interface MSALHttpRequest()
 {
     NSMutableDictionary *_bodyParameters;
-    NSMutableDictionary *_headers;
+    NSMutableDictionary<NSString *, NSString *> *_headers;
     NSMutableDictionary *_queryParameters;
     
     //TODO: move to seperate settings? - MSALAuthenticationSettings.h
@@ -142,8 +142,8 @@ static NSString * const s_kHttpHeaderDelimeter = @",";
     
     if (_context)
     {
-        [_headers addEntriesFromDictionary:@{OAUTH2_CORRELATION_ID_REQUEST:@"true",
-                                             OAUTH2_CORRELATION_ID_REQUEST_VALUE:[_context correlationId]}];
+        _headers[OAUTH2_CORRELATION_ID_REQUEST] = @"true";
+        _headers[OAUTH2_CORRELATION_ID_REQUEST_VALUE] = [_context.correlationId UUIDString];
     }
     
     NSURL *newURL = nil;

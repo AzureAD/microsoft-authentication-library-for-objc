@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,20 +17,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-////////////////////////////////////////////////////////////////////////////
 //
-// TODO: This class has not been implemented/completed
-//
-////////////////////////////////////////////////////////////////////////////
-#import <Foundation/Foundation.h>
+//------------------------------------------------------------------------------
 
-extern NSString * __nonnull const MSALPKeyAuthURN;
-extern NSString * __nonnull const MSALPKeyAuthHeader;
-extern NSString * __nonnull const MSALPKeyAuthHeaderVersion;
-extern NSString * __nonnull const MSALPKeyAuthName;
+#import "MSALTestCase.h"
+#import "MSALTestLogger.h"
+#import "MSALTestBundle.h"
+
+@implementation MSALTestCase
+
+- (void)setUp {
+    [super setUp];
+    [[MSALTestLogger sharedLogger] reset];
+    [MSALTestBundle reset];
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+@end
