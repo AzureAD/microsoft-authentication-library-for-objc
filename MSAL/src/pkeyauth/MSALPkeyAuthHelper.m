@@ -34,26 +34,3 @@ NSString *const MSALPKeyAuthHeader        = @"x-ms-PkeyAuth";
 NSString *const MSALPKeyAuthHeaderVersion = @"1.0";
 NSString *const MSALPKeyAuthName          = @"PKeyAuth";
 
-@implementation MSALPkeyAuthHelper
-
-+ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
-                                  challengeData:(nullable NSDictionary *)challengeData
-                                  correlationId:(nullable NSUUID *)correlationId
-                                          error:(NSError * __nullable * __nullable)error
-{
-    (void)authorizationServer;
-    (void)challengeData;
-    (void)correlationId;
-    (void)error;
-    return @"";
-}
-
-+ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
-                                 isSha2:(BOOL)isSha2
-{
-    (void)data;
-    (void)isSha2;
-    return @"";
-}
-
-@end

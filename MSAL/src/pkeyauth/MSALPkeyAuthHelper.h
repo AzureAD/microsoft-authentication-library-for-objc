@@ -27,21 +27,3 @@ extern NSString * __nonnull const MSALPKeyAuthURN;
 extern NSString * __nonnull const MSALPKeyAuthHeader;
 extern NSString * __nonnull const MSALPKeyAuthHeaderVersion;
 extern NSString * __nonnull const MSALPKeyAuthName;
-
-typedef enum
-{
-    MSAL_ISSUER,
-    MSAL_THUMBPRINT,
-} MSALChallengeType;
-
-@interface MSALPkeyAuthHelper : NSObject
-
-+ (nullable NSString *)createDeviceAuthResponse:(nonnull NSString *)authorizationServer
-                                  challengeData:(nullable NSDictionary *)challengeData
-                                  correlationId:(nullable NSUUID *)correlationId
-                                          error:(NSError * __nullable * __nullable)error; 
-
-+ (nonnull NSString *)computeThumbprint:(nonnull NSData *)data
-                                 isSha2:(BOOL)isSha2;
-
-@end

@@ -81,6 +81,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
         case 400:
         case 401:
         {
+#if PKEYAUTH_IMPLEMENTED
             NSString *wwwAuthValue = [response.headers valueForKey:s_kWwwAuthenticateHeader];
             
             if (![NSString msalIsStringNilOrBlank:wwwAuthValue])
@@ -94,7 +95,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
                     return;
                 }
             }
-            
+#endif
             completionHandler(nil, response);
             break;
         }
@@ -142,6 +143,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
     }
 }
 
+#if PKEYAUTH_IMPLEMENTED
 - (void)handlePKeyAuthChallange:(NSString *)wwwAuthHeaderValue
               completionHandler:(MSALHttpRequestCallback)completionHandler
 {
@@ -173,7 +175,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
     
     [_request resend:completionHandler];
 }
-
+#endif
 
 // Decodes the parameters that come in the Authorization header. We expect them in the following
 // format:
