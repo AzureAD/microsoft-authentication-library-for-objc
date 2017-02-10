@@ -44,8 +44,6 @@
 		96D9A5331E4A6EFF00674A85 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5311E4A6EFF00674A85 /* MSALTestURLSessionDataTask.m */; };
 		96D9A5391E4AA56E00674A85 /* MSALOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */; };
 		96D9A53A1E4AA56F00674A85 /* MSALOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */; };
-		96D9A53D1E4AABA400674A85 /* MSALTestSimpleRequestContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A53C1E4AABA400674A85 /* MSALTestSimpleRequestContext.m */; };
-		96D9A53E1E4AABA400674A85 /* MSALTestSimpleRequestContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A53C1E4AABA400674A85 /* MSALTestSimpleRequestContext.m */; };
 		96D9A5411E4AACC000674A85 /* MSALOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */; };
 		96D9A5421E4AACC300674A85 /* MSALOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */; };
 		96D9A5441E4AB1DC00674A85 /* MSALTelemetry.h in Headers */ = {isa = PBXBuildFile; fileRef = 96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */; };
@@ -171,8 +169,6 @@
 		96D9A5311E4A6EFF00674A85 /* MSALTestURLSessionDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestURLSessionDataTask.m; sourceTree = "<group>"; };
 		96D9A5361E4AA56800674A85 /* MSALOAuth2Constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALOAuth2Constants.h; sourceTree = "<group>"; };
 		96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALOAuth2Constants.m; sourceTree = "<group>"; };
-		96D9A53B1E4AABA400674A85 /* MSALTestSimpleRequestContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestSimpleRequestContext.h; sourceTree = "<group>"; };
-		96D9A53C1E4AABA400674A85 /* MSALTestSimpleRequestContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestSimpleRequestContext.m; sourceTree = "<group>"; };
 		96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetry.h; sourceTree = "<group>"; };
 		96D9A5471E4AB22900674A85 /* MSALTelemetry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetry.m; sourceTree = "<group>"; };
 		96D9A54C1E4AB3BD00674A85 /* MSALTelemetry+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALTelemetry+Internal.h"; sourceTree = "<group>"; };
@@ -476,8 +472,6 @@
 				D673F0831E4BA4540018BA91 /* MSALTestCase.m */,
 				94E876C01E49187400FB96ED /* MSALTestLogger.h */,
 				94E876C11E49187400FB96ED /* MSALTestLogger.m */,
-				96D9A53B1E4AABA400674A85 /* MSALTestSimpleRequestContext.h */,
-				96D9A53C1E4AABA400674A85 /* MSALTestSimpleRequestContext.m */,
 				96D9A52C1E4A6EEF00674A85 /* MSALTestURLSession.h */,
 				96D9A52D1E4A6EEF00674A85 /* MSALTestURLSession.m */,
 				96D9A5301E4A6EFF00674A85 /* MSALTestURLSessionDataTask.h */,
@@ -833,7 +827,6 @@
 				D673F07D1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m in Sources */,
 				96D455D71E4AB7AF002C9C3C /* MSALTelemetryEventStrings.m in Sources */,
 				94E876B81E45745C00FB96ED /* MSALLoggerTests.m in Sources */,
-				96D9A53D1E4AABA400674A85 /* MSALTestSimpleRequestContext.m in Sources */,
 				D65A6FE41E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -853,7 +846,6 @@
 				D673F07E1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m in Sources */,
 				96D455D81E4AB7B0002C9C3C /* MSALTelemetryEventStrings.m in Sources */,
 				94E876B91E45745C00FB96ED /* MSALLoggerTests.m in Sources */,
-				96D9A53E1E4AABA400674A85 /* MSALTestSimpleRequestContext.m in Sources */,
 				D65A6FE51E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
