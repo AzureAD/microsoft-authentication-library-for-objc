@@ -27,7 +27,6 @@
 
 
 #import "MSALWebAuthRequest.h"
-#import "MSALPkeyAuthHelper.h"
 #import "MSALWebAuthResponse.h"
 
 @implementation MSALWebAuthRequest
@@ -41,7 +40,9 @@
         return nil;
     }
     
+#if PKEYAUTH_IMPLEMENTED
     [self.headers setValue:MSALPKeyAuthHeaderVersion forKey:MSALPKeyAuthHeader];
+#endif
     
     [self setAcceptJSON];
     [self setContentTypeFormURLEncoded];
