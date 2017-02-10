@@ -185,15 +185,7 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
-    if (authority)
-    {
-        params.unvalidatedAuthority = authority;
-    }
-    else
-    {
-        params.unvalidatedAuthority = authority;
-    }
-    
+    params.unvalidatedAuthority = authority ? authority : _authority;
     params.redirectUri = _redirectUri;
     
     [MSALInteractiveRequest startRequest:params
