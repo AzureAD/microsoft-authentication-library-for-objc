@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALPublicClientApplication.h"
+#import "MSALRequestParameters.h"
+#import "MSALInteractiveRequest.h"
 #import "MSALError.h"
 #import "MSALError_Internal.h"
 
@@ -106,13 +108,16 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)correlationId;
-    (void)completionBlock;
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                      loginHint:nil
+                     uiBehavior:MSALUIBehaviorDefault
+           extraQueryParameters:nil
+                      authority:nil
+                  correlationId:nil
+                completionBlock:completionBlock];
 }
 
 #pragma mark -
@@ -122,10 +127,14 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
                     loginHint:(NSString *)loginHint
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)loginHint;
-    (void)completionBlock;
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                      loginHint:loginHint
+                     uiBehavior:MSALUIBehaviorDefault
+           extraQueryParameters:nil
+                      authority:nil
+                  correlationId:nil
+                completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -134,12 +143,14 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)loginHint;
-    (void)uiBehavior;
-    (void)extraQueryParameters;
-    (void)completionBlock;
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                      loginHint:loginHint
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                      authority:nil
+                  correlationId:nil
+                completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -148,20 +159,47 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSString *)authority
-                       policy:(NSString *)policy
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)additionalScopes;
-    (void)loginHint;
-    (void)uiBehavior;
-    (void)extraQueryParameters;
-    (void)authority;
-    (void)policy;
-    (void)correlationId;
-    (void)completionBlock;
+    MSALRequestParameters* params = [MSALRequestParameters new];
+    params.correlationId = correlationId ? correlationId : [NSUUID new];
+    params.component = _component;
+    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+                      "                                   additionalScopes:%@\n"
+                      "                                          loginHint:%@\n"
+                      "                                         uiBehavior:%@\n"
+                      "                               extraQueryParameters:%@\n"
+                      "                                          authority:%@\n"
+                      "                                      correlationId:%@]",
+             scopes, additionalScopes, _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
+    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+                          "                                   additionalScopes:%@\n"
+                          "                                          loginHint:%@\n"
+                          "                                         uiBehavior:%@\n"
+                          "                               extraQueryParameters:%@\n"
+                          "                                          authority:%@\n"
+                          "                                      correlationId:%@]",
+             scopes, additionalScopes, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+    
+    [params setScopesFromArray:scopes];
+    params.loginHint = loginHint;
+    params.extraQueryParameters = extraQueryParameters;
+    if (authority)
+    {
+        params.unvalidatedAuthority = authority;
+    }
+    else
+    {
+        params.unvalidatedAuthority = authority;
+    }
+    
+    params.redirectUri = _redirectUri;
+    
+    [MSALInteractiveRequest startRequest:params
+                        additionalScopes:additionalScopes
+                                behavior:uiBehavior
+                         completionBlock:completionBlock];
 }
 
 #pragma mark -
@@ -187,7 +225,6 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSURL *)authority
-                       policy:(NSString *)policy
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -198,7 +235,6 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     (void)uiBehavior;
     (void)extraQueryParameters;
     (void)authority;
-    (void)policy;
     (void)correlationId;
     (void)completionBlock;
 }

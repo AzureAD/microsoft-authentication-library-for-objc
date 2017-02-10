@@ -48,7 +48,6 @@
 - (NSArray <MSALUser *> *)users;
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
@@ -70,7 +69,6 @@
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSString *)authority
-                       policy:(NSString *)policy
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -89,7 +87,6 @@
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSURL *)authority
-                       policy:(NSString *)policy
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
