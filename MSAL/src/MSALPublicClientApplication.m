@@ -38,16 +38,6 @@
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
 @implementation MSALPublicClientApplication
-{
-    NSURL *_authority;
-    NSURL *_redirectUri;
-    NSString *_clientId;
-}
-
-- (NSString *)redirectUri
-{
-    return [_redirectUri absoluteString];
-}
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
 {

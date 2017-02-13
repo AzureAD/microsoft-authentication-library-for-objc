@@ -38,7 +38,7 @@
 @property BOOL validateAuthority;
 @property (readonly) NSURL *authority;
 @property (readonly) NSString *clientId;
-@property (readonly) NSString *redirectUri;
+@property (readonly) NSURL *redirectUri;
 
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */

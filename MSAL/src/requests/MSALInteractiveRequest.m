@@ -69,7 +69,7 @@
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
     parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
     
-    NSDictionary* msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSALLogger msalId];
     [parameters addEntriesFromDictionary:msalId];
     [parameters addEntriesFromDictionary:MSALParametersForBehavior(_uiBehavior)];
     

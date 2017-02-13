@@ -92,7 +92,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-    XCTAssertEqualObjects(application.redirectUri, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
 }
 
 @end

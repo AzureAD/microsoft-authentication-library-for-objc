@@ -30,7 +30,7 @@
 
 #define STRING_CASE(_CASE) case _CASE: return @#_CASE
 
-NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
+NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
 {
     switch (behavior)
     {
