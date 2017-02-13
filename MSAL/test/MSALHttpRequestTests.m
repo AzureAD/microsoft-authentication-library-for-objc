@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
 
-@interface MSALHttpRequestTests : XCTestCase
+@interface MSALHttpRequestTests : MSALTestCase
 
 @end
 

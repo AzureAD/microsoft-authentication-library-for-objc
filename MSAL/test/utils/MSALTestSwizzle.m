@@ -25,21 +25,61 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestCase.h"
-#import "MSALTestLogger.h"
-#import "MSALTestBundle.h"
+#import "MSALTestSwizzle.h"
 
-@implementation MSALTestCase
+#import <objc/runtime.h>
 
-- (void)setUp {
-    [super setUp];
-    [[MSALTestLogger sharedLogger] reset];
-    [MSALTestBundle reset];
+
+static NSMutableArray<MSALTestSwizzle *> *s_currentMonkeyPatches = nil;
+
+
+@implementation MSALTestSwizzle
+{
+    Method _m;
+    IMP _originalImp;
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
++ (void)initialize
+{
+    s_currentMonkeyPatches = [NSMutableArray new];
+}
+
++ (void)reset
+{
+    @synchronized (s_currentMonkeyPatches)
+    {
+        // We want to go through this backwards like a stack in case someone
+        // changed a method multiple times and it gets restored to its
+        // original implementation
+        for (NSInteger i = s_currentMonkeyPatches.count - 1; i >= 0; i--)
+        {
+            MSALTestSwizzle *patch = s_currentMonkeyPatches[i];
+            method_setImplementation(patch->_m, patch->_originalImp);
+        }
+        
+        [s_currentMonkeyPatches removeAllObjects];
+    }
+}
+
++ (void)instanceMethodClass:(Class)cls
+                   selector:(SEL)sel
+                       impl:(IMP)impl
+{
+    Method method = class_getInstanceMethod(cls, sel);
+    if (!method)
+    {
+        return;
+    }
+    @synchronized (s_currentMonkeyPatches)
+    {
+    
+        MSALTestSwizzle *patch = [MSALTestSwizzle new];
+        patch->_m = method;
+        patch->_originalImp = method_setImplementation(method, impl);
+    
+    
+        [s_currentMonkeyPatches addObject:patch];
+    }
 }
 
 @end

@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
 
-@interface MSALStringHelperMethodTests : XCTestCase
+@interface MSALStringHelperMethodTests : MSALTestCase
 
 @end
 

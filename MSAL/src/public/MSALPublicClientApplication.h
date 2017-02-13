@@ -35,9 +35,14 @@
 
 @interface MSALPublicClientApplication : NSObject
 
+@property BOOL validateAuthority;
+@property (readonly) NSURL *authority;
+@property (readonly) NSString *clientId;
+@property (readonly) NSString *redirectUri;
+
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
-@property NSString * component;
+@property NSString *component;
 
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error;

@@ -29,17 +29,39 @@
 
 @implementation MSALAuthority
 
-+ (MSALAuthority *)authorityWithString:(NSString *)string
-                              validate:(BOOL)validate
-                                 error:(NSError * __autoreleasing *)error
++ (void)resolveEndpoints:(NSString *)upn
+      validatedAuthority:(NSURL *)unvalidatedAuthority
+                validate:(BOOL)validate
+                 context:(id<MSALRequestContext>)context
+         completionBlock:(MSALAuthorityCompletion)completionBlock
+
 {
-    (void)string;
+    // TOOD: Authority discovery and validation
+    (void)upn;
     (void)validate;
-    (void)error;
+    (void)context;
     
-    @throw @"TODO";
+    MSALAuthority *authority = [MSALAuthority new];
+    authority.authorityType = AADAuthority;
+    authority.canonicalAuthority = unvalidatedAuthority;
+    authority.isTenantless = YES;
+    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2/authorize"];
+    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2/token"];
     
-    return nil;
+    completionBlock(authority, nil);
+}
+
++ (NSURL *)checkAuthorityString:(NSString *)authority
+                          error:(NSError * __autoreleasing *)error
+{
+    REQUIRED_STRING_PARAMETER(authority, nil);
+    
+    NSURL *authorityUrl = [NSURL URLWithString:authority];
+    CHECK_ERROR_RETURN_NIL(authorityUrl, nil, MSALErrorInvalidParameter, @"\"authority\" must be a valid URI");
+    CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
+    CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
+    
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.host, authorityUrl.pathComponents[1]]];
 }
 
 @end

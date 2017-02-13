@@ -26,31 +26,28 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALOAuth2Constants.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+#define STRING_CASE(_CASE) case _CASE: return @#_CASE
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
+{
+    switch (behavior)
+    {
+            STRING_CASE(MSALSelectAccount);
+            STRING_CASE(MSALForceLogin);
+            STRING_CASE(MSALForceConsent);
+    }
+    
+    @throw @"Unrecognized MSALUIBehavior";
+}
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-@class MSALResult;
-
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALUser.h>
-
-
-#if TARGET_OS_IPHONE
-#import <MSAL/MSALKeychainTokenCache.h>
-#endif // TARGET_PLATFORM_IPHONE
+NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior)
+{
+    switch (behavior)
+    {
+        case MSALForceLogin : return @{ @"prompt" : @"login" };
+        case MSALForceConsent : return @{ @"prompt" : @"consent" };
+        case MSALSelectAccount : return @{ @"prompt" : @"select_content" };
+    }
+}

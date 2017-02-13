@@ -25,33 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
+
 #import "MSALPublicClientApplication.h"
-#import "MSALRequestParameters.h"
-#import "MSALInteractiveRequest.h"
+
+#import "MSALAuthority.h"
 #import "MSALError.h"
 #import "MSALError_Internal.h"
-
-#define STRING_CASE(_CASE) case _CASE: return @#_CASE
+#import "MSALInteractiveRequest.h"
+#import "MSALRequestParameters.h"
+#import "MSALUIBehavior_Internal.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
-NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
-{
-    switch (behavior)
-    {
-        STRING_CASE(MSALSelectAccount);
-        STRING_CASE(MSALForceLogin);
-        STRING_CASE(MSALForceConsent);
-    }
-    
-    @throw @"Unrecognized MSALUIBehavior";
-}
-
 @implementation MSALPublicClientApplication
 {
-    NSString *_authority;
+    NSURL *_authority;
     NSURL *_redirectUri;
     NSString *_clientId;
+}
+
+- (NSString *)redirectUri
+{
+    return [_redirectUri absoluteString];
 }
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
@@ -67,7 +62,7 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
         NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
         if ([urlSchemes containsObject:scheme])
         {
-            NSString *redirectUri = [NSString stringWithFormat:@"x-msauth-%@://%@/msal", scheme, bundleId];
+            NSString *redirectUri = [NSString stringWithFormat:@"%@://%@/msal", scheme, bundleId];
             _redirectUri = [NSURL URLWithString:redirectUri];
             return YES;
         }
@@ -94,8 +89,8 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     REQUIRED_PARAMETER(clientId, nil);
     _clientId = clientId;
     
-    // TODO: Passed in authority validation
-    _authority = authority ? authority : DEFAULT_AUTHORITY;
+    _authority = [MSALAuthority checkAuthorityString:authority ? authority : DEFAULT_AUTHORITY error:error];
+    CHECK_RETURN_NIL(_authority);
     
     CHECK_RETURN_NIL([self generateRedirectUri:error]);
     
@@ -185,13 +180,37 @@ NSString* MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
-    params.unvalidatedAuthority = authority ? authority : _authority;
+    if (authority)
+    {
+        NSError *error = nil;
+        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:&error];
+        if (!authorityUrl)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        params.unvalidatedAuthority = authorityUrl;
+    }
+    else
+    {
+        params.unvalidatedAuthority = _authority;
+    }
     params.redirectUri = _redirectUri;
+    params.clientId = _clientId;
     
-    [MSALInteractiveRequest startRequest:params
-                        additionalScopes:additionalScopes
-                                behavior:uiBehavior
-                         completionBlock:completionBlock];
+    NSError *error = nil;
+    MSALInteractiveRequest *request =
+    [[MSALInteractiveRequest alloc] initWithParameters:params
+                                      additionalScopes:additionalScopes
+                                              behavior:uiBehavior
+                                                 error:&error];
+    if (!request)
+    {
+        completionBlock(nil, error);
+        return;
+    }
+    
+    [request run:completionBlock];
 }
 
 #pragma mark -

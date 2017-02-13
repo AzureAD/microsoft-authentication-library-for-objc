@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,20 +17,31 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALTestURLSession.h"
+#import "MSALTestCase.h"
+#import "MSALTestLogger.h"
+#import "MSALTestBundle.h"
+#import "MSALTestSwizzle.h"
 
-@interface MSALTestURLSessionDataTask : NSObject
+@implementation MSALTestCase
 
-- (id)initWithRequest:(NSURLRequest *)request
-              session:(MSALTestURLSession *)session
-    completionHandler:(MSALTestHttpCompletionBlock)completionHandler;
+- (void)setUp {
+    [super setUp];
+    [[MSALTestLogger sharedLogger] reset];
+    [MSALTestBundle reset];
+    [MSALTestSwizzle reset];
+}
 
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
 
 @end

@@ -27,10 +27,35 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSInteger, MSALAuthorityType)
+{
+    AADAuthority,
+    ADFSAuthority
+};
+
+typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
+
 @interface MSALAuthority : NSObject
 
-+ (MSALAuthority *)authorityWithString:(NSString *)string
-                              validate:(BOOL)validate
-                                 error:(NSError * __autoreleasing *)error;
+@property MSALAuthorityType authorityType;
+@property NSURL *canonicalAuthority;
+@property BOOL isTenantless;
+@property NSURL *authorizationEndpoint;
+@property NSURL *tokenEndpoint;
+@property NSURL *endSessionEndpoint;
+@property NSString *selfSignedJwtAudience;
+
+/*!
+    Performs cursory validation on the passed in authority string to make sure it is
+    a proper HTTPS URL and contains a tenant or common.
+ */
++ (NSURL *)checkAuthorityString:(NSString *)authority
+                          error:(NSError * __autoreleasing *)error;
+
++ (void)resolveEndpoints:(NSString *)upn
+      validatedAuthority:(NSURL *)unvalidatedAuthority
+                validate:(BOOL)validate
+                 context:(id<MSALRequestContext>)context
+         completionBlock:(MSALAuthorityCompletion)completionBlock;
 
 @end
