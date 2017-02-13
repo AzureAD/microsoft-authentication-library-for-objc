@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,15 +17,39 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALLogger+Internal.h"
+#import "MSALRequestParameters.h"
+#import "MSALUIBehavior.h"
+#import "MSALError_Internal.h"
 
-@interface MSALTestSimpleRequestContext : NSObject <MSALRequestContext>
+@implementation MSALRequestParameters
+
+- (void)setScopesFromArray:(NSArray<NSString *> *)array
+{
+    self.scopes = [[NSOrderedSet alloc] initWithArray:array copyItems:YES];
+}
+
+- (BOOL)setRedirectUri:(NSString *)string
+                 error:(NSError * __autoreleasing *)error
+{
+    self.redirectUri = [NSURL URLWithString:string];
+    CHECK_ERROR_RETURN_NIL(self.redirectUri, self, MSALErrorInvalidParameter, @"redirectUri is not a valid URI");
+    
+    return YES;
+}
+
+- (BOOL)validateParameters:(NSError * __autoreleasing *)error
+{
+    (void)error;
+    @throw @"TODO";
+    return false;
+}
 
 @end

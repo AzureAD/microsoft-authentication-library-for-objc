@@ -54,8 +54,5 @@ NSString *const OAUTH2_ID_TOKEN                     = @"id_token";
 NSString *const OAUTH2_CORRELATION_ID_RESPONSE      = @"correlation_id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST       = @"return-client-request-id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST_VALUE = @"client-request-id";
-NSString *const OAUTH2_ASSERTION                    = @"assertion";
-NSString *const OAUTH2_SAML11_BEARER_VALUE          = @"urn:ietf:params:oauth:grant-type:saml1_1-bearer";
-NSString *const OAUTH2_SAML2_BEARER_VALUE           = @"urn:ietf:params:oauth:grant-type:saml2-bearer";
 NSString *const OAUTH2_SCOPE_OPENID_VALUE           = @"openid";
 

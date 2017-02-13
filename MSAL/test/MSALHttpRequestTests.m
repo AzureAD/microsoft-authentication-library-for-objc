@@ -29,7 +29,6 @@
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
-#import "MSALTestSimpleRequestContext.h"
 
 @interface MSALHttpRequestTests : XCTestCase
 
@@ -104,7 +103,7 @@
     
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
                                                             session:session
-                                                            context:[MSALTestSimpleRequestContext new]];
+                                                            context:nil];
     
     [request sendGet:^(NSError *error, MSALHttpResponse *response) {
         XCTAssertNil(error);
