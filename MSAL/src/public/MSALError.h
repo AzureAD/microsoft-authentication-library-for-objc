@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorInteractionRequired    = -42100,
     MSALErrorMismatchedUser = -42101,
     
-    MSALErrorKeychainFailure = -27200,
-    MSALErrorNetworkFailure = -27300,
+    MSALErrorKeychainFailure = -42200,
+    MSALErrorNetworkFailure = -42300,
 };
 
