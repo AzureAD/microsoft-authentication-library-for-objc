@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
+// Use this as a NSURLSession delegate for logging the redirect.
+// TODO: Add checking or append custom headers if needed for redirects
 @interface MSALURLSessionDelegate : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
 @end
