@@ -29,13 +29,14 @@
 
 @interface MSALUser : NSObject
 
-@property (readonly) NSString * uniqueId;
-@property (readonly) NSString * displayableId;
-@property (readonly) NSString * name;
-@property (readonly) NSString * identityProvider;
-@property (readonly) NSString * clientId;
-@property (readonly) NSString * authority;
-@property (readonly) NSString * homeObjectId;
+@property (readonly) NSString *upn;
+@property (readonly) NSString *uniqueId;
+@property (readonly) NSString *displayableId;
+@property (readonly) NSString *name;
+@property (readonly) NSString *identityProvider;
+@property (readonly) NSString *clientId;
+@property (readonly) NSString *authority;
+@property (readonly) NSString *homeObjectId;
 
 - (void)signOut;
 

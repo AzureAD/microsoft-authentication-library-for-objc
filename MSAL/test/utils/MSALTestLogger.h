@@ -25,32 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
+
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+/*!
+    This class provides a logging callback for the MSAL logger and allows tests
+    to inspect the last log message sent to the logger. It is automatically reset
+    at the beginning of each test by MSALTestCase.
+ */
+@interface MSALTestLogger : NSObject
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+@property (readwrite) BOOL containsPII;
+@property (readwrite, retain) NSString *lastMessage;
+@property (readwrite) MSALLogLevel lastLevel;
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
++ (MSALTestLogger *)sharedLogger;
 
-@class MSALResult;
+/*! Resets all of the test logger variables to default state and sets the MSAL log level to MSALLogLevelLast. */
+- (void)reset;
 
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
+/*! Resets all of the test logger variables to default state and sets the MSAL log level to the provided log level. */
+- (void)reset:(MSALLogLevel)level;
 
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALUser.h>
-
-
-#if TARGET_OS_IPHONE
-#import <MSAL/MSALKeychainTokenCache.h>
-#endif // TARGET_PLATFORM_IPHONE
+@end

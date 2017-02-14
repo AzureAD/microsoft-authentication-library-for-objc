@@ -25,21 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestCase.h"
+
 #import "MSALTestLogger.h"
-#import "MSALTestBundle.h"
 
-@implementation MSALTestCase
+@implementation MSALTestLogger
 
-- (void)setUp {
-    [super setUp];
-    [[MSALTestLogger sharedLogger] reset];
-    [MSALTestBundle reset];
++ (void)load
+{
+    // We want the shared test logger to get created early so it grabs the log callback
+    [MSALTestLogger sharedLogger];
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
++ (MSALTestLogger *)sharedLogger
+{
+    static dispatch_once_t onceToken;
+    static MSALTestLogger *logger;
+    dispatch_once(&onceToken, ^{
+        logger = [MSALTestLogger new];
+        [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
+            [logger logLevel:level isPii:containsPII message:message];
+        }];
+    });
+    
+    return logger;
+}
+
+- (void)logLevel:(MSALLogLevel)level isPii:(BOOL)isPii message:(NSString *)message
+{
+    _lastLevel = level;
+    _containsPII = isPii;
+    _lastMessage = message;
+}
+
+- (void)reset
+{
+    [self reset:MSALLogLevelLast];
+}
+
+- (void)reset:(MSALLogLevel)level
+{
+    _lastMessage = nil;
+    _lastLevel = -1;
+    _containsPII = NO;
+    [[MSALLogger sharedLogger] setLevel:level];
 }
 
 @end

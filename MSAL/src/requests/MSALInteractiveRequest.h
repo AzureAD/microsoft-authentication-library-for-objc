@@ -29,10 +29,15 @@
 #import "MSALBaseRequest.h"
 
 @interface MSALInteractiveRequest : MSALBaseRequest
+{
+    MSALScopes *_additionalScopes;
+    MSALUIBehavior _uiBehavior;
+    NSString *_state;
+}
 
-+ (MSALInteractiveRequest *)startRequest:(MSALRequestParameters *)parameters
-                        additionalScopes:(NSArray<NSString *> *)additionalScopes
-                                behavior:(MSALUIBehavior)behavior
-                         completionBlock:(MSALCompletionBlock)completionBlock;
+- (id)initWithParameters:(MSALRequestParameters *)parameters
+        additionalScopes:(NSArray<NSString *> *)additionalScopes
+                behavior:(MSALUIBehavior)behavior
+                   error:(NSError * __autoreleasing *)error;
 
 @end

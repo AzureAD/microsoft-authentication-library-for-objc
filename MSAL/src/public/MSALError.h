@@ -27,18 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString * MSALErrorDomain;
+extern NSString *MSALErrorDomain;
 
 /*!
     The OAuth error returned by the service.
  */
-extern NSString * MSALOAuthErrorKey;
+extern NSString *MSALOAuthErrorKey;
 
 /*!
     The extded error description. Note that this string can change ands should
     not be relied upon for any error handling logic.
  */
-extern NSString * MSALErrorDescriptionKey;
+extern NSString *MSALErrorDescriptionKey;
 
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
@@ -46,7 +46,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         A required parameter was not provided, or a passed in parameter was
         invalid. See MSALErrorDescriptionKey for more information.
      */
-    MSALErrorInvalidParameter = -1000,
+    MSALErrorInvalidParameter = -42000,
     
     /*!
         The required MSAL URL scheme is not registered in the app's info.plist.
@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
             </dict>
 
      */
-    MSALErrorRedirectSchemeNotRegistered = -1001,
+    MSALErrorRedirectSchemeNotRegistered = -42001,
     
     /*!
         Interaction required errors occur because of a wide variety of errors
@@ -79,10 +79,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
         in the userInfo dictionary.
      */
-    MSALErrorInteractionRequired    = -1002,
-    MSALErrorMismatchedUser = -1003,
+    MSALErrorInteractionRequired    = -42100,
+    MSALErrorMismatchedUser = -42101,
     
-    MSALErrorKeychainFailure = -1004,
-    MSALErrorNetworkFailure = -1005,
+    MSALErrorKeychainFailure = -42200,
+    MSALErrorNetworkFailure = -42300,
 };
 

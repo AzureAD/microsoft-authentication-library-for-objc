@@ -33,10 +33,26 @@
 @class MSALTokenCacheItem;
 
 @interface MSALBaseRequest : NSObject
+{
+    @protected
+    MSALRequestParameters *_parameters;
+    MSALAuthority *_authority;
+}
 
-@property MSALAuthority * authority;
-@property MSALTokenCache * tokenCache;
-@property MSALTokenResponse * response;
-@property MSALTokenCacheItem * accessTokenItem;
+@property (nullable) MSALTokenCache *tokenCache;
+@property (nullable) MSALTokenResponse *response;
+@property (nullable) MSALTokenCacheItem *accessTokenItem;
+
+/* Returns the complete set of scopes to be sent out with a token request */
+- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
+
+- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
+                            error:(NSError * __nullable __autoreleasing * __nullable)error;
+
+- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
+                     error:(NSError * __nullable __autoreleasing * __nullable)error;
+
+- (void)run:(nonnull MSALCompletionBlock)completionBlock;
+- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 @end

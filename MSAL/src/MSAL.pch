@@ -47,5 +47,7 @@
 #import "MSAL_Internal.h"
 #import "MSALLogger+Internal.h"
 #import "NSString+MSALHelperMethods.h"
+#import "NSDictionary+MSALExtensions.h"
+#import "NSOrderedSet+MSALExtensions.h"
 
 #endif /* MSAL_pch */

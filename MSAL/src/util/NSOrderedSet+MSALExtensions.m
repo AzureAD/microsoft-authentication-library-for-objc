@@ -25,32 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "NSOrderedSet+MSALExtensions.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+@implementation NSOrderedSet (MSALExtensions)
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+- (NSString *)msalToString
+{
+    NSInteger cSet = self.count;
+    if (cSet == 0)
+    {
+        return @"";
+    }
+    
+    NSMutableString *queryString = [[self objectAtIndex:0] mutableCopy];
+    
+    for (NSInteger i = 1; i < cSet; i++)
+    {
+        [queryString appendString:@","];
+        [queryString appendString:[self objectAtIndex:i]];
+    }
+    
+    return queryString;
+}
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-@class MSALResult;
-
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALUser.h>
-
-
-#if TARGET_OS_IPHONE
-#import <MSAL/MSALKeychainTokenCache.h>
-#endif // TARGET_PLATFORM_IPHONE
+@end

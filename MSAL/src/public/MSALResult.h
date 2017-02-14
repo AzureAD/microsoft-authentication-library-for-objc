@@ -31,10 +31,10 @@
 
 @interface MSALResult : NSObject
 
-@property (readonly) NSString * token;
-@property (readonly) NSDate * expiresOn;
-@property (readonly) NSString * tenantId;
-@property (readonly) MSALUser * user;
-@property (readonly) NSArray<NSString *> * scopes;
+@property (readonly) NSString *token;
+@property (readonly) NSDate *expiresOn;
+@property (readonly) NSString *tenantId;
+@property (readonly) MSALUser *user;
+@property (readonly) NSArray<NSString *> *scopes;
 
 @end

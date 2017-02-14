@@ -25,49 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
+#import "MSALOAuth2Constants.h"
 
-#import "MSALTestLogger.h"
+#define STRING_CASE(_CASE) case _CASE: return @#_CASE
 
-@implementation MSALTestLogger
-
-+ (void)load
+NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
 {
-    // We want the shared test logger to get created early so it grabs the log callback
-    [MSALTestLogger sharedLogger];
-}
-
-+ (MSALTestLogger *)sharedLogger
-{
-    static dispatch_once_t onceToken;
-    static MSALTestLogger * logger;
-    dispatch_once(&onceToken, ^{
-        logger = [MSALTestLogger new];
-        [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
-            [logger logLevel:level isPii:containsPII message:message];
-        }];
-    });
+    switch (behavior)
+    {
+            STRING_CASE(MSALSelectAccount);
+            STRING_CASE(MSALForceLogin);
+            STRING_CASE(MSALForceConsent);
+    }
     
-    return logger;
+    @throw @"Unrecognized MSALUIBehavior";
 }
 
-- (void)logLevel:(MSALLogLevel)level isPii:(BOOL)isPii message:(NSString *)message
+NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior)
 {
-    _lastLevel = level;
-    _containsPII = isPii;
-    _lastMessage = message;
+    switch (behavior)
+    {
+        case MSALForceLogin : return @{ @"prompt" : @"login" };
+        case MSALForceConsent : return @{ @"prompt" : @"consent" };
+        case MSALSelectAccount : return @{ @"prompt" : @"select_content" };
+    }
 }
-
-- (void)reset
-{
-    [self reset:MSALLogLevelLast];
-}
-
-- (void)reset:(MSALLogLevel)level
-{
-    _lastMessage = nil;
-    _lastLevel = -1;
-    _containsPII = NO;
-    [[MSALLogger sharedLogger] setLevel:level];
-}
-
-@end

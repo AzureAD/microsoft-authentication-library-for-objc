@@ -26,24 +26,73 @@
 //------------------------------------------------------------------------------
 
 #import "MSALInteractiveRequest.h"
+#import "MSALOAuth2Constants.h"
+#import "MSALUIBehavior_Internal.h"
 
 @implementation MSALInteractiveRequest
+
+- (id)initWithParameters:(MSALRequestParameters *)parameters
+        additionalScopes:(NSArray<NSString *> *)additionalScopes
+                behavior:(MSALUIBehavior)behavior
+                   error:(NSError * __autoreleasing *)error
 {
-    MSALScopes * _additionalScopes;
-    MSALUIBehavior _uiBehavior;
+    if (!(self = [super initWithParameters:parameters
+                                     error:error]))
+    {
+        return nil;
+    }
+    
+    if (additionalScopes)
+    {
+        _additionalScopes = [[NSOrderedSet alloc] initWithArray:additionalScopes];
+        if (![self validateScopeInput:_additionalScopes error:error])
+        {
+            return nil;
+        }
+    }
+    
+    _uiBehavior = behavior;
+    
+    return self;
 }
 
-+ (MSALInteractiveRequest *)startRequest:(MSALRequestParameters *)parameters
-                        additionalScopes:(NSArray<NSString *> *)additionalScopes
-                                behavior:(MSALUIBehavior)behavior
-                         completionBlock:(MSALCompletionBlock)completionBlock
+- (NSMutableDictionary<NSString *, NSString *> *)authorizationParameters
 {
-    (void)parameters;
-    (void)completionBlock;
-    (void)additionalScopes;
-    (void)behavior;
+    NSMutableDictionary<NSString *, NSString *> *parameters = [NSMutableDictionary new];
+    if (_parameters.extraQueryParameters)
+    {
+        [parameters addEntriesFromDictionary:_parameters.extraQueryParameters];
+    }
+    MSALScopes *allScopes = [self requestScopes:_additionalScopes];
+    parameters[OAUTH2_SCOPE] = [allScopes msalToString];
+    parameters[OAUTH2_RESPONSE_TYPE] = OAUTH2_CODE;
+    parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
     
-    @throw @"TODO";
+    NSDictionary *msalId = [MSALLogger msalId];
+    [parameters addEntriesFromDictionary:msalId];
+    [parameters addEntriesFromDictionary:MSALParametersForBehavior(_uiBehavior)];
+    
+    return parameters;
+}
+
+- (NSURL *)authorizationUrl
+{
+    NSDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
+    // TODO: PKCE Support
+    
+    _state = [[NSUUID UUID] UUIDString];
+    
+    
+    (void)parameters;
+    return nil;
+}
+
+- (void)acquireToken:(MSALCompletionBlock)completionBlock
+{
+    NSURL *authorizationUrl = [self authorizationUrl];
+    (void)authorizationUrl;
+    (void)completionBlock;
 }
 
 @end

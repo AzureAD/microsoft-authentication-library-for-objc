@@ -34,20 +34,21 @@
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
-@property NSString * unvalidatedAuthority;
-@property MSALAuthority * authority;
-@property MSALScopes * scopes;
-@property MSALTokenCache * tokenCache;
-@property NSURL * redirectUri;
-@property NSString * loginHint;
-@property NSDictionary<NSString *, NSString *>* extraQueryParameters;
-@property NSString * prompt;
-@property MSALUser * user;
+@property NSURL *unvalidatedAuthority;
+@property BOOL validateAuthority;
+@property MSALScopes *scopes;
+@property MSALTokenCache *tokenCache;
+@property NSURL *redirectUri;
+@property NSString *loginHint;
+@property NSString *clientId;
+@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
+@property NSString *prompt;
+@property MSALUser *user;
 
 #pragma mark MSALRequestContext properties
-@property NSUUID * correlationId;
-@property NSString * component;
-@property NSString * telemetryRequestId;
+@property NSUUID *correlationId;
+@property NSString *component;
+@property NSString *telemetryRequestId;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

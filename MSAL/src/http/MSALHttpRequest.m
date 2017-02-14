@@ -54,7 +54,7 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
 
 @implementation MSALHttpRequest
 
-static NSString * const s_kHttpHeaderDelimeter = @",";
+static NSString *const s_kHttpHeaderDelimeter = @",";
 
 - (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context
 {

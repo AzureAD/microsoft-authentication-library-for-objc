@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,11 +17,13 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 #import "MSALTestURLSession.h"
 #import "MSALTestURLSessionDataTask.h"
@@ -47,7 +51,7 @@
                   code:(NSInteger)code
           headerFields:(NSDictionary *)headerFields
 {
-    NSHTTPURLResponse * response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:urlString]
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:urlString]
                                                                statusCode:code
                                                               HTTPVersion:@"1.1"
                                                              headerFields:headerFields];
@@ -194,7 +198,7 @@
 
 @implementation MSALTestURLSession
 
-static NSMutableArray * s_responses = nil;
+static NSMutableArray *s_responses = nil;
 
 - (id)initWithDelegate:(id)delegate delegateQueue:(NSOperationQueue *)delegateQueue
 {

@@ -25,26 +25,61 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSALTestSwizzle.h"
 
-#import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 
-/*!
-    This class provides a logging callback for the MSAL logger and allows tests
-    to inspect the last log message sent to the logger. It is automatically reset
-    at the beginning of each test by MSALTestCase.
- */
-@interface MSALTestLogger : NSObject
 
-@property (readwrite) BOOL containsPII;
-@property (readwrite, retain) NSString * lastMessage;
-@property (readwrite) MSALLogLevel lastLevel;
+static NSMutableArray<MSALTestSwizzle *> *s_currentMonkeyPatches = nil;
 
-+ (MSALTestLogger *)sharedLogger;
 
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to MSALLogLevelLast. */
-- (void)reset;
+@implementation MSALTestSwizzle
+{
+    Method _m;
+    IMP _originalImp;
+}
 
-/*! Resets all of the test logger variables to default state and sets the MSAL log level to the provided log level. */
-- (void)reset:(MSALLogLevel)level;
++ (void)initialize
+{
+    s_currentMonkeyPatches = [NSMutableArray new];
+}
+
++ (void)reset
+{
+    @synchronized (s_currentMonkeyPatches)
+    {
+        // We want to go through this backwards like a stack in case someone
+        // changed a method multiple times and it gets restored to its
+        // original implementation
+        for (NSInteger i = s_currentMonkeyPatches.count - 1; i >= 0; i--)
+        {
+            MSALTestSwizzle *patch = s_currentMonkeyPatches[i];
+            method_setImplementation(patch->_m, patch->_originalImp);
+        }
+        
+        [s_currentMonkeyPatches removeAllObjects];
+    }
+}
+
++ (void)instanceMethodClass:(Class)cls
+                   selector:(SEL)sel
+                       impl:(IMP)impl
+{
+    Method method = class_getInstanceMethod(cls, sel);
+    if (!method)
+    {
+        return;
+    }
+    @synchronized (s_currentMonkeyPatches)
+    {
+    
+        MSALTestSwizzle *patch = [MSALTestSwizzle new];
+        patch->_m = method;
+        patch->_originalImp = method_setImplementation(method, impl);
+    
+    
+        [s_currentMonkeyPatches addObject:patch];
+    }
+}
 
 @end
