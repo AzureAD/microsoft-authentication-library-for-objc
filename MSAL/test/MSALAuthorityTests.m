@@ -99,8 +99,8 @@
         XCTAssertNil(error);
         XCTAssertNotNil(authority);
         
-        XCTAssertEqualObjects(authority.authorizationEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2/authorize"]);
-        XCTAssertEqualObjects(authority.tokenEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2/token"]);
+        XCTAssertEqualObjects(authority.authorizationEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"]);
+        XCTAssertEqualObjects(authority.tokenEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"]);
         
         dispatch_semaphore_signal(dsem);
     }];
