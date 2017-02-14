@@ -45,8 +45,8 @@
     authority.authorityType = AADAuthority;
     authority.canonicalAuthority = unvalidatedAuthority;
     authority.isTenantless = YES;
-    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2/authorize"];
-    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2/token"];
+    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
+    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
     
     completionBlock(authority, nil);
 }
