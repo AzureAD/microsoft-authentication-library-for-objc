@@ -28,6 +28,9 @@
 #import <Foundation/Foundation.h>
 
 // Use this as a NSURLSession delegate for logging the redirect.
+// Intended usage would be to use it per acquire-token-call basis
+// and no singleton.
+
 // TODO: Add checking or append custom headers if needed for redirects
 @interface MSALURLSessionDelegate : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
