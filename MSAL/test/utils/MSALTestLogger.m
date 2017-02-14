@@ -39,7 +39,7 @@
 + (MSALTestLogger *)sharedLogger
 {
     static dispatch_once_t onceToken;
-    static MSALTestLogger * logger;
+    static MSALTestLogger *logger;
     dispatch_once(&onceToken, ^{
         logger = [MSALTestLogger new];
         [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {

@@ -36,7 +36,7 @@
 @interface MSALTestLogger : NSObject
 
 @property (readwrite) BOOL containsPII;
-@property (readwrite, retain) NSString * lastMessage;
+@property (readwrite, retain) NSString *lastMessage;
 @property (readwrite) MSALLogLevel lastLevel;
 
 + (MSALTestLogger *)sharedLogger;

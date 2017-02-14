@@ -29,11 +29,11 @@
 
 @interface MSALOAuth2ResponseBase : NSObject
 {
-    NSMutableDictionary * _response;
+    NSMutableDictionary *_response;
 }
 
-@property NSString * tokenType;
-@property NSString * accessToken;
-@property NSString * refreshToken;
+@property NSString *tokenType;
+@property NSString *accessToken;
+@property NSString *refreshToken;
 
 @end

@@ -27,18 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString * MSALErrorDomain;
+extern NSString *MSALErrorDomain;
 
 /*!
     The OAuth error returned by the service.
  */
-extern NSString * MSALOAuthErrorKey;
+extern NSString *MSALOAuthErrorKey;
 
 /*!
     The extded error description. Note that this string can change ands should
     not be relied upon for any error handling logic.
  */
-extern NSString * MSALErrorDescriptionKey;
+extern NSString *MSALErrorDescriptionKey;
 
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {

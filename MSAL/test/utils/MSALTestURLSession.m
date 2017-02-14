@@ -51,7 +51,7 @@
                   code:(NSInteger)code
           headerFields:(NSDictionary *)headerFields
 {
-    NSHTTPURLResponse * response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:urlString]
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:urlString]
                                                                statusCode:code
                                                               HTTPVersion:@"1.1"
                                                              headerFields:headerFields];
@@ -198,7 +198,7 @@
 
 @implementation MSALTestURLSession
 
-static NSMutableArray * s_responses = nil;
+static NSMutableArray *s_responses = nil;
 
 - (id)initWithDelegate:(id)delegate delegateQueue:(NSOperationQueue *)delegateQueue
 {

@@ -34,16 +34,16 @@
 
 @interface MSALBaseCacheItem : MSALJsonObject
 
-@property MSALUser * user;
+@property MSALUser *user;
 
-@property NSString * authority;
-@property NSString * clientId;
-@property NSString * policy;
-@property NSString * tenantId;
-@property NSString * rawIdToken;
-@property (readonly) NSString * uniqueId;
-@property (readonly) NSString * displayableId;
-@property (readonly) NSString * homeObjectId;
+@property NSString *authority;
+@property NSString *clientId;
+@property NSString *policy;
+@property NSString *tenantId;
+@property NSString *rawIdToken;
+@property (readonly) NSString *uniqueId;
+@property (readonly) NSString *displayableId;
+@property (readonly) NSString *homeObjectId;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

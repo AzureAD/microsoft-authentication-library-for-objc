@@ -30,7 +30,7 @@
 
 @interface MSALInteractiveRequest : MSALBaseRequest
 {
-    MSALScopes * _additionalScopes;
+    MSALScopes *_additionalScopes;
     MSALUIBehavior _uiBehavior;
     NSString *_state;
 }

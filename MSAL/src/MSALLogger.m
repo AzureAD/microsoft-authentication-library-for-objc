@@ -66,7 +66,7 @@
 + (MSALLogger *)sharedLogger
 {
     static dispatch_once_t once;
-    static MSALLogger * s_logger;
+    static MSALLogger *s_logger;
     
     dispatch_once(&once, ^{
         s_logger = [MSALLogger new];
@@ -93,8 +93,8 @@
 
 @implementation MSALLogger (Internal)
 
-static NSString * s_OSString = nil;
-static NSDateFormatter* s_dateFormatter = nil;
+static NSString *s_OSString = nil;
+static NSDateFormatter *s_dateFormatter = nil;
 
 + (void)initialize
 {
