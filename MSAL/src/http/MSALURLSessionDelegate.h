@@ -27,37 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, MSALAuthorityType)
-{
-    AADAuthority,
-    ADFSAuthority
-};
+// Use this as a NSURLSession delegate for logging the redirect.
+// Intended usage would be to use it per acquire-token-call basis
+// and no singleton.
 
-typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
+// TODO: Add checking or append custom headers if needed for redirects
+@interface MSALURLSessionDelegate : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
-@interface MSALAuthority : NSObject
+- (id)initWithContext:(id<MSALRequestContext>)context;
 
-@property MSALAuthorityType authorityType;
-@property NSURL *canonicalAuthority;
-@property BOOL isTenantless;
-@property NSURL *authorizationEndpoint;
-@property NSURL *tokenEndpoint;
-@property NSURL *endSessionEndpoint;
-@property NSString *selfSignedJwtAudience;
-
-/*!
-    Performs cursory validation on the passed in authority string to make sure it is
-    a proper HTTPS URL and contains a tenant or common.
- */
-+ (NSURL *)checkAuthorityString:(NSString *)authority
-                          error:(NSError * __autoreleasing *)error;
-
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock;
-
-+ (BOOL)isKnownHost:(NSURL *)url;
+@property (readonly) id<MSALRequestContext> context;
 
 @end

@@ -64,4 +64,12 @@
     return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.host, authorityUrl.pathComponents[1]]];
 }
 
++ (BOOL)isKnownHost:(NSURL *)url
+{
+    (void)url;
+    @throw @"TODO";
+    return NO;
+}
+
+
 @end

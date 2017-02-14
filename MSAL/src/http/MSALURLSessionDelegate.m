@@ -25,39 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALURLSessionDelegate.h"
+#import "MSALLogger+Internal.h"
+#import "NSString+MSALHelperMethods.h"
+#import "MSALAuthority.h"
 
-typedef NS_ENUM(NSInteger, MSALAuthorityType)
+@implementation MSALURLSessionDelegate
+
+- (id)initWithContext:(id<MSALRequestContext>)context
 {
-    AADAuthority,
-    ADFSAuthority
-};
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _context = context;
+    
+    return self;
+}
 
-typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
-
-@interface MSALAuthority : NSObject
-
-@property MSALAuthorityType authorityType;
-@property NSURL *canonicalAuthority;
-@property BOOL isTenantless;
-@property NSURL *authorizationEndpoint;
-@property NSURL *tokenEndpoint;
-@property NSURL *endSessionEndpoint;
-@property NSString *selfSignedJwtAudience;
-
-/*!
-    Performs cursory validation on the passed in authority string to make sure it is
-    a proper HTTPS URL and contains a tenant or common.
- */
-+ (NSURL *)checkAuthorityString:(NSString *)authority
-                          error:(NSError * __autoreleasing *)error;
-
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock;
-
-+ (BOOL)isKnownHost:(NSURL *)url;
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+willPerformHTTPRedirection:(NSHTTPURLResponse *)response
+        newRequest:(NSURLRequest *)request
+ completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
+{
+    (void)session;
+    (void)response;
+    (void)task;
+    
+    NSString *requestHost = request.URL.host;
+    
+    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256] );
+    LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
+    
+    completionHandler(request);
+}
 
 @end
