@@ -31,4 +31,8 @@
 // TODO: Add checking or append custom headers if needed for redirects
 @interface MSALURLSessionDelegate : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
+- (id)initWithContext:(id<MSALRequestContext>)context;
+
+@property (readonly) id<MSALRequestContext> context;
+
 @end

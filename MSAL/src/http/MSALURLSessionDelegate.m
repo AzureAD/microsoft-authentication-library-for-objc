@@ -28,16 +28,37 @@
 #import "MSALURLSessionDelegate.h"
 #import "MSALLogger+Internal.h"
 #import "NSString+MSALHelperMethods.h"
+#import "MSALAuthority.h"
 
 @implementation MSALURLSessionDelegate
 
-- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task willPerformHTTPRedirection:(NSHTTPURLResponse *)response newRequest:(NSURLRequest *)request completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
+- (id)initWithContext:(id<MSALRequestContext>)context
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _context = context;
+    
+    return self;
+}
+
+- (void)URLSession:(NSURLSession *)session
+              task:(NSURLSessionTask *)task
+willPerformHTTPRedirection:(NSHTTPURLResponse *)response
+        newRequest:(NSURLRequest *)request
+ completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
 {
     (void)session;
     (void)response;
     (void)task;
     
-    LOG_INFO(nil, @"Redirection: %@", request.URL.host.msalComputeSHA256);
+    NSString *requestHost = request.URL.host;
+    
+    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256] );
+    LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
+    
     completionHandler(request);
 }
 

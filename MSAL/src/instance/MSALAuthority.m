@@ -42,4 +42,12 @@
     return nil;
 }
 
++ (BOOL)isKnownHost:(NSURL *)url
+{
+    (void)url;
+    @throw @"TODO";
+    return NO;
+}
+
+
 @end

@@ -33,4 +33,6 @@
                               validate:(BOOL)validate
                                  error:(NSError * __autoreleasing *)error;
 
++ (BOOL)isKnownHost:(NSURL *)url;
+
 @end
