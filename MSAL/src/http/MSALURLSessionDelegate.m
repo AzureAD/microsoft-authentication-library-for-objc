@@ -27,6 +27,7 @@
 
 #import "MSALURLSessionDelegate.h"
 #import "MSALLogger+Internal.h"
+#import "NSString+MSALHelperMethods.h"
 
 @implementation MSALURLSessionDelegate
 
@@ -36,7 +37,7 @@
     (void)response;
     (void)task;
     
-    LOG_INFO(nil, @"Redirection to %@", request.URL.absoluteString);
+    LOG_INFO(nil, @"Redirection: %@", request.URL.host.msalComputeSHA256);
     completionHandler(request);
 }
 
