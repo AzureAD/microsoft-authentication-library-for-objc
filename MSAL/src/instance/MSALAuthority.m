@@ -26,29 +26,23 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthority.h"
+#import "MSALError_Internal.h"
+#import "MSALAadAuthority.h"
 
 @implementation MSALAuthority
 
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock
-
+BOOL isTenantless(NSURL *authority)
 {
-    // TOOD: Authority discovery and validation
-    (void)upn;
-    (void)validate;
-    (void)context;
+    NSArray *authorityURLPaths = authority.pathComponents;
     
-    MSALAuthority *authority = [MSALAuthority new];
-    authority.authorityType = AADAuthority;
-    authority.canonicalAuthority = unvalidatedAuthority;
-    authority.isTenantless = YES;
-    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
-    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
-    
-    completionBlock(authority, nil);
+    NSString *tenameName = [authorityURLPaths[1] lowercaseString];
+    if ([tenameName isEqualToString:@"common"] ||
+        [tenameName isEqualToString:@"organizations"] ||
+        [tenameName isEqualToString:@"consumers"] )
+    {
+        return YES;
+    }
+    return NO;
 }
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
@@ -64,12 +58,85 @@
     return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.host, authorityUrl.pathComponents[1]]];
 }
 
+
++ (void)createAndResolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                            userPrincipalName:(NSString *)userPrincipalName
+                                     validate:(BOOL)validate
+                                      context:(id<MSALRequestContext>)context
+                              completionBlock:(MSALAuthorityCompletion)completionBlock
+{
+    (void)userPrincipalName;
+    (void)context;
+    
+    // Check whether if it is ADFS or AAD or B2C
+    // TODO: Handle ADFS and B2C
+    //
+    // B2C  : path (1)tfp,  (2)policy
+    // ADFS : path (1)adfs
+    // AAD  : else?
+    
+    NSArray *authorityURLPaths = unvalidatedAuthority.pathComponents;
+    
+    if (authorityURLPaths.count < 2)
+    {
+        NSError *error = MSALCreateError(MSALErrorInvalidParameter, @"Authority URL must contain a host and at least one path", nil, nil);
+        completionBlock(nil, error);
+        return;
+    }
+    
+    MSALAuthority *authorityToValidate = nil;
+    NSURL *updatedAuthority = nil;
+    
+    if (authorityURLPaths.count >= 3 &&
+        [[authorityURLPaths[1] lowercaseString] isEqualToString:@"tfp"] &&
+        [[authorityURLPaths[2] lowercaseString] isEqualToString:@"policy"])
+    {
+        // B2C : Keep upto /tfp/policy
+        @throw @"Todo";
+        return;
+    }
+    else
+    {
+        NSString *newAuthorityString = [NSString stringWithFormat:@"%@://%@/%@/", unvalidatedAuthority.scheme, authorityURLPaths[0], authorityURLPaths[1]];
+        updatedAuthority = [NSURL URLWithString:newAuthorityString];
+        
+        if ([[authorityURLPaths[1] lowercaseString] isEqualToString:@"adfs"])
+        {
+            // ADFS
+            @throw @"Todo";
+            return;
+        }
+        else
+        {
+            MSALAadAuthority *authority = [MSALAadAuthority new];
+            
+            authority.authorityType = AADAuthority;
+            authority.validateAuthority = validate;
+            authority.canonicalAuthority = updatedAuthority;
+            
+            authorityToValidate = authority;
+        }
+    }
+
+    MSALAuthority *authority = [MSALAuthority new];
+    authority.authorityType = AADAuthority;
+    authority.canonicalAuthority = unvalidatedAuthority;
+    authority.isTenantless = YES;
+    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
+    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
+    
+    completionBlock(authority, nil);
+}
+
 + (BOOL)isKnownHost:(NSURL *)url
 {
     (void)url;
     @throw @"TODO";
     return NO;
 }
+
+
+
 
 
 @end

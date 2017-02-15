@@ -27,10 +27,20 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MSALAuthorityValidatorProtocol
+
+- (void)openIdConfigurationEndpointForHost:(NSString *)host
+                                    tenant:(NSString *)tenant
+                         userPrincipalName:(NSString *)userPrincipalName
+                          compltionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
+
+@end
+
 typedef NS_ENUM(NSInteger, MSALAuthorityType)
 {
     AADAuthority,
-    ADFSAuthority
+    ADFSAuthority,
+    B2CAuthority
 };
 
 typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
@@ -39,6 +49,7 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
+@property BOOL validateAuthority;
 @property BOOL isTenantless;
 @property NSURL *authorizationEndpoint;
 @property NSURL *tokenEndpoint;
@@ -52,11 +63,11 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error;
 
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock;
++ (void)createAndResolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                            userPrincipalName:(NSString *)userPrincipalName
+                                     validate:(BOOL)validate
+                                      context:(id<MSALRequestContext>)context
+                              completionBlock:(MSALAuthorityCompletion)completionBlock;
 
 + (BOOL)isKnownHost:(NSURL *)url;
 
