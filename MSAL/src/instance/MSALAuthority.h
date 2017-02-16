@@ -27,15 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol MSALAuthorityValidatorProtocol
-
-- (void)openIdConfigurationEndpointForHost:(NSString *)host
-                                    tenant:(NSString *)tenant
-                         userPrincipalName:(NSString *)userPrincipalName
-                          compltionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
-
-@end
-
 typedef NS_ENUM(NSInteger, MSALAuthorityType)
 {
     AADAuthority,
@@ -56,6 +47,9 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 @property NSURL *endSessionEndpoint;
 @property NSString *selfSignedJwtAudience;
 
+@property (readonly) NSURLSession *session;
+@property (readonly) id<MSALRequestContext> context;
+
 /*!
     Performs cursory validation on the passed in authority string to make sure it is
     a proper HTTPS URL and contains a tenant or common.
@@ -71,4 +65,16 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 + (BOOL)isKnownHost:(NSURL *)url;
 
+
+
+- (id)initWithContext:(id<MSALRequestContext>)context session:(NSURLSession *)session;
+
+
+- (void)openIdConfigurationEndpointForUserPrincipalName:(NSString *)userPrincipalName
+                                      completionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
+
+- (void)addToValidatedAuthorityCache:(NSString *)userPrincipalName;
+- (BOOL)retrieveFromValidatedAuthorityCache:(NSString *)userPrincipalName;
+
+- (NSString *)defaultOpenIdConfigurationEndpoint;
 @end

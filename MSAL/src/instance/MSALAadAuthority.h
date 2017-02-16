@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
-@interface MSALAadAuthority : MSALAuthority <MSALAuthorityValidatorProtocol>
+@interface MSALAadAuthority : MSALAuthority
+
 
 @end

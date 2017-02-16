@@ -28,9 +28,20 @@
 #import "MSALAuthority.h"
 #import "MSALError_Internal.h"
 #import "MSALAadAuthority.h"
+#import "MSALHttpRequest.h"
+#import "MSALHttpResponse.h"
+#import "MSALURLSession.h"
+#import "MSALTenantDiscoveryResponse.h"
+
+#define mustOverride() \
+[NSException exceptionWithName:NSGenericException \
+                        reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)] \
+                      userInfo:nil]
+
 
 @implementation MSALAuthority
 
+#pragma mark - helper functions
 BOOL isTenantless(NSURL *authority)
 {
     NSArray *authorityURLPaths = authority.pathComponents;
@@ -45,6 +56,11 @@ BOOL isTenantless(NSURL *authority)
     return NO;
 }
 
+
+
+#pragma mark - class methods
+
+
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
 {
@@ -55,6 +71,14 @@ BOOL isTenantless(NSURL *authority)
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
     CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
     
+    // B2C
+    if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])
+    {
+        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 2), nil, MSALErrorInvalidParameter, @"authority must specify a tenant");
+        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/tfp/%@", authorityUrl.host, authorityUrl.pathComponents[2]]];
+    }
+    
+    // ADFS and AAD
     return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.host, authorityUrl.pathComponents[1]]];
 }
 
@@ -66,67 +90,94 @@ BOOL isTenantless(NSURL *authority)
                               completionBlock:(MSALAuthorityCompletion)completionBlock
 {
     (void)userPrincipalName;
-    (void)context;
+    (void)validate;
     
-    // Check whether if it is ADFS or AAD or B2C
-    // TODO: Handle ADFS and B2C
-    //
-    // B2C  : path (1)tfp,  (2)policy
-    // ADFS : path (1)adfs
-    // AAD  : else?
-    
-    NSArray *authorityURLPaths = unvalidatedAuthority.pathComponents;
-    
-    if (authorityURLPaths.count < 2)
+    // update the authority URL
+    NSError *error = nil;
+    NSURL *updatedAuthority = [self checkAuthorityString:unvalidatedAuthority.absoluteString error:&error];
+    if (error)
     {
-        NSError *error = MSALCreateError(MSALErrorInvalidParameter, @"Authority URL must contain a host and at least one path", nil, nil);
         completionBlock(nil, error);
-        return;
     }
     
-    MSALAuthority *authorityToValidate = nil;
-    NSURL *updatedAuthority = nil;
-    
-    if (authorityURLPaths.count >= 3 &&
-        [[authorityURLPaths[1] lowercaseString] isEqualToString:@"tfp"] &&
-        [[authorityURLPaths[2] lowercaseString] isEqualToString:@"policy"])
+    // Check for authority type and create an updated URL
+    MSALAuthority *authority = nil;
+    MSALAuthorityType authorityType;
+
+    NSString *firstPathComponent = unvalidatedAuthority.pathComponents[1];
+    if ([firstPathComponent isEqualToString:@"tfp"])
     {
-        // B2C : Keep upto /tfp/policy
+        // TODO: B2C
+        authorityType = B2CAuthority;
+        @throw @"Todo";
+        return;
+    }
+    else if ([firstPathComponent isEqualToString:@"adfs"])
+    {
+        // TODO: ADFS
+        authorityType = ADFSAuthority;
         @throw @"Todo";
         return;
     }
     else
     {
-        NSString *newAuthorityString = [NSString stringWithFormat:@"%@://%@/%@/", unvalidatedAuthority.scheme, authorityURLPaths[0], authorityURLPaths[1]];
-        updatedAuthority = [NSURL URLWithString:newAuthorityString];
+        authorityType = AADAuthority;
         
-        if ([[authorityURLPaths[1] lowercaseString] isEqualToString:@"adfs"])
+        NSURLSession *session = [MSALURLSession createSesssionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]
+                                                                        context:context];
+        authority = [[MSALAadAuthority alloc] initWithContext:context session:session];
+        authority.canonicalAuthority = updatedAuthority;
+    }
+    
+    // If exists in cache, return
+    if ([authority retrieveFromValidatedAuthorityCache:userPrincipalName])
+    {
+        // YES!
+        completionBlock(authority, nil);
+        return;
+    }
+    
+    // If not, continue.
+    authority.isTenantless = isTenantless(unvalidatedAuthority);
+    [authority openIdConfigurationEndpointForUserPrincipalName:userPrincipalName
+                                             completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        CHECK_COMPLETION(!error);
+        
+        NSURL *endpointURL = [NSURL URLWithString:endpoint];
+        CHECK_ERROR_COMPLETION(endpointURL, authority.context, MSALErrorInvalidParameter, @"qwe");
+        
+        [authority tenantDiscoveryEndpoint:endpointURL
+                           completionBlock:^(MSALTenantDiscoveryResponse *response, NSError *url) {
+                               (void)response;
+                               (void)url;
+                           }];
+    }];
+}
+
+- (void)tenantDiscoveryEndpoint:(NSURL *)url
+                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *url))completionBlock
+{
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:url
+                                                            session:self.session
+                                                            context:self.context];
+    
+    [request sendGet:^(NSError *error, MSALHttpResponse *response) {
+        CHECK_COMPLETION(!error);
+        
+        NSError *jsonError = nil;
+        MSALTenantDiscoveryResponse *tenantDiscoveryResponse = [[MSALTenantDiscoveryResponse alloc] initWithData:response.body
+                                                                                                           error:&jsonError];
+        if (jsonError)
         {
-            // ADFS
-            @throw @"Todo";
+            completionBlock(nil, jsonError);
             return;
         }
-        else
-        {
-            MSALAadAuthority *authority = [MSALAadAuthority new];
-            
-            authority.authorityType = AADAuthority;
-            authority.validateAuthority = validate;
-            authority.canonicalAuthority = updatedAuthority;
-            
-            authorityToValidate = authority;
-        }
-    }
-
-    MSALAuthority *authority = [MSALAuthority new];
-    authority.authorityType = AADAuthority;
-    authority.canonicalAuthority = unvalidatedAuthority;
-    authority.isTenantless = YES;
-    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
-    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
-    
-    completionBlock(authority, nil);
+        
+        completionBlock(tenantDiscoveryResponse, nil);
+    }];
 }
+
 
 + (BOOL)isKnownHost:(NSURL *)url
 {
@@ -135,8 +186,44 @@ BOOL isTenantless(NSURL *authority)
     return NO;
 }
 
+#pragma mark - Instance methods
+
+- (id)initWithContext:(id<MSALRequestContext>)context session:(NSURLSession *)session
+{
+    self = [super init];
+    if (self) {
+        _session = session;
+        _context = context;
+    }
+    return self;
+}
+
+- (void)openIdConfigurationEndpointForUserPrincipalName:(NSString *)userPrincipalName
+                                      completionHandler:(void (^)(NSString *, NSError *))completionHandler
+{
+    (void)userPrincipalName;
+    (void)completionHandler;
+    mustOverride();
+}
 
 
+- (void)addToValidatedAuthorityCache:(NSString *)userPrincipalName
+{
+    (void)userPrincipalName;
+    mustOverride();
+}
 
+- (BOOL)retrieveFromValidatedAuthorityCache:(NSString *)userPrincipalName
+{
+    (void)userPrincipalName;
+    mustOverride();
+    return NO;
+}
+
+- (NSString *)defaultOpenIdConfigurationEndpoint
+{
+    mustOverride();
+    return nil;
+}
 
 @end
