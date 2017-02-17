@@ -34,6 +34,7 @@
 #import "MSALInteractiveRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
+#import "MSALWebUI.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
@@ -91,6 +92,42 @@
 {
     return nil;
 }
+
+#pragma SafariViewController Support
+
++ (BOOL)isMSALResponse:(NSURL *)response
+{
+    if (!response)
+    {
+        return NO;
+    }
+    
+    NSArray *components = response.path.pathComponents;
+    if (!components)
+    {
+        return NO;
+    }
+    
+    if (components.count < 1)
+    {
+        return NO;
+    }
+    
+    if (![components.firstObject isEqualToString:@"msal"])
+    {
+        return NO;
+    }
+    
+    return YES;
+}
+
++ (void)handleMSALResponse:(NSURL *)response
+{
+    [MSALWebUI handleResponse:response];
+}
+
+#pragma mark -
+#pragma mark acquireToken
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
