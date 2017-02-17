@@ -81,9 +81,9 @@ static void MSALBaseRequestFakeRun(MSALInteractiveRequest *obj, SEL cmd, MSALCom
 - (void)testScopeOnlyRequestCreation
 {
     // Set up
-    [MSALTestSwizzle instanceMethodClass:[MSALBaseRequest class]
-                                selector:@selector(run:)
-                                    impl:(IMP)MSALBaseRequestFakeRun];
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                               impl:(IMP)MSALBaseRequestFakeRun];
     
     NSError *error = nil;
     
@@ -129,9 +129,9 @@ static void MSALBaseRequestFakeRun(MSALInteractiveRequest *obj, SEL cmd, MSALCom
 - (void)testComplexRequestCreation
 {
     // Set up
-    [MSALTestSwizzle instanceMethodClass:[MSALBaseRequest class]
-                                selector:@selector(run:)
-                                    impl:(IMP)MSALBaseRequestFakeRun];
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                               impl:(IMP)MSALBaseRequestFakeRun];
     
     NSError *error = nil;
     

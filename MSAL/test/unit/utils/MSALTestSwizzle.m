@@ -32,11 +32,34 @@
 
 static NSMutableArray<MSALTestSwizzle *> *s_currentMonkeyPatches = nil;
 
+@interface MSALTestSwizzle ()
+{
+@public
+    dispatch_block_t _block;
+    IMP _originalImp;
+}
+
+- (BOOL)matchesObject:(id)obj
+             selector:(SEL)sel;
+
+@end
 
 @implementation MSALTestSwizzle
 {
+    Class _class;
+    SEL _sel;
     Method _m;
-    IMP _originalImp;
+    BOOL _instance;
+}
+
+- (void)dealoc
+{
+    if (_block)
+    {
+        IMP mockImp = imp_implementationWithBlock(_block);
+        imp_removeBlock(mockImp);
+        _block = nil;
+    }
 }
 
 + (void)initialize
@@ -61,25 +84,93 @@ static NSMutableArray<MSALTestSwizzle *> *s_currentMonkeyPatches = nil;
     }
 }
 
-+ (void)instanceMethodClass:(Class)cls
-                   selector:(SEL)sel
-                       impl:(IMP)impl
++ (MSALTestSwizzle *)instanceMethod:(SEL)sel class:(Class)class impl:(IMP)impl
 {
-    Method method = class_getInstanceMethod(cls, sel);
-    if (!method)
+    return [[MSALTestSwizzle instanceMethod:sel class:class] swizzle:impl];
+}
+
++ (MSALTestSwizzle *)classMethod:(SEL)sel class:(Class)cls impl:(IMP)impl
+{
+    return [[MSALTestSwizzle classMethod:sel class:cls] swizzle:impl];
+}
+
+
++ (MSALTestSwizzle *)instanceMethod:(SEL)sel class:(Class)cls block:(id)block
+{
+    return [[MSALTestSwizzle instanceMethod:sel class:cls] swizzle:imp_implementationWithBlock(block)];
+}
+
++ (MSALTestSwizzle *)classMethod:(SEL)sel class:(Class)cls block:(id)block
+{
+    return [[MSALTestSwizzle classMethod:sel class:cls] swizzle:imp_implementationWithBlock(block)];
+}
+
++ (MSALTestSwizzle *)instanceMethod:(SEL)sel
+                              class:(Class)class
+{
+    MSALTestSwizzle *p = [MSALTestSwizzle new];
+    p->_m = class_getInstanceMethod(class, sel);
+    if (!p->_m)
     {
-        return;
+        @throw @"Instance method not found";
     }
+    p->_sel = sel;
+    p->_class = class;
+    p->_instance = YES;
+    return p;
+}
+
++ (MSALTestSwizzle *)classMethod:(SEL)sel
+                           class:(Class)class
+{
+    MSALTestSwizzle *p = [MSALTestSwizzle new];
+    p->_m = class_getClassMethod(class, sel);
+    if (!p->_m)
+    {
+        @throw @"Class method not found";
+    }
+    p->_sel = sel;
+    p->_class = class;
+    p->_instance = NO;
+    return p;
+}
+
+- (MSALTestSwizzle *)swizzle:(IMP)impl
+{
     @synchronized (s_currentMonkeyPatches)
     {
-    
-        MSALTestSwizzle *patch = [MSALTestSwizzle new];
-        patch->_m = method;
-        patch->_originalImp = method_setImplementation(method, impl);
-    
-    
-        [s_currentMonkeyPatches addObject:patch];
+        _originalImp = method_setImplementation(_m, impl);
+        [s_currentMonkeyPatches addObject:self];
     }
+    
+    return self;
+}
+
+- (BOOL)matchesObject:(id)obj selector:(SEL)sel
+{
+    if (!sel_isEqual(sel, _sel))
+    {
+        return NO;
+    }
+    
+    if (_instance)
+    {
+        return [obj isKindOfClass:_class];
+    }
+    else
+    {
+        return obj == _class;
+    }
+}
+
+- (IMP)originalIMP
+{
+    return _originalImp;
+}
+
+- (SEL)sel
+{
+    return _sel;
 }
 
 @end
