@@ -48,7 +48,7 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 #define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { \
     NSString* _ERROR_STRING = [NSString stringWithFormat:_DESC, ##__VA_ARGS__]; \
     MSALLogError(_CTX, _CODE, _ERROR_STRING, nil, __FUNCTION__, __LINE__); \
-    completionBlock(nil, MSALCreateError(_CODE, _DESC, nil, nil); \
+    completionBlock(nil, MSALCreateError(_CODE, _DESC, nil, nil)); \
     return; \
 }
 

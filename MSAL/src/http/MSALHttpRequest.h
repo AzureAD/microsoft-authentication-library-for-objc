@@ -36,7 +36,7 @@ extern NSString *const MSALHttpHeaderContentType;
 extern NSString *const MSALHttpHeaderFormURLEncoded;
 
 /*! The completion block declaration. */
-typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *response);
+typedef void(^MSALHttpRequestCallback)(MSALHttpResponse *response, NSError  *error);
 
 
 @interface MSALHttpRequest : NSObject
@@ -55,7 +55,7 @@ typedef void(^MSALHttpRequestCallback)(NSError  *error, MSALHttpResponse *respon
 // Key/value pairs that is included in GET request
 @property (copy) NSDictionary<NSString *, NSString *> *queryParameters;
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context;
+- (id)initWithURL:(NSURL *)endpoint context:(id<MSALRequestContext>)context;
 
 // Add value to header field of the request. If a value was previously set, the
 // supplied value is appeneded with comma delimeter

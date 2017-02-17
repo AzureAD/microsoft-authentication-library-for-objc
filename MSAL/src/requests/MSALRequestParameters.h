@@ -49,6 +49,7 @@
 @property NSUUID *correlationId;
 @property NSString *component;
 @property NSString *telemetryRequestId;
+@property NSURLSession *urlSession;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

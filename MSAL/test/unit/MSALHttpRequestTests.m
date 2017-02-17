@@ -52,9 +52,7 @@
 - (void)testHeaderManipulation
 {
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
-    NSURLSession *session = [[NSURLSession alloc] init];
-    
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session context:nil];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
     
     [request setValue:@"value1" forHTTPHeaderField:@"header1"];
     [request setValue:@"value2" forHTTPHeaderField:@"header2"];
@@ -71,9 +69,7 @@
 - (void)testBodyParameters
 {
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
-    NSURLSession *session = [[NSURLSession alloc] init];
-    
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL session:session context:nil];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
     
     [request setValue:@"value1" forBodyParameter:@"bodyParam1"];
     
@@ -89,8 +85,10 @@
 - (void)testHttpGetRequest
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession sharedSession];
     
-    NSURLSession *session = [NSURLSession sharedSession];
     NSString *testURLString = @"https://somehttprequest.com";
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:testURLString
@@ -102,10 +100,9 @@
     [MSALTestURLSession addResponse:response];
     
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
-                                                            session:session
-                                                            context:nil];
+                                                            context:params];
     
-    [request sendGet:^(NSError *error, MSALHttpResponse *response) {
+    [request sendGet:^(MSALHttpResponse *response, NSError *error) {
         XCTAssertNil(error);
         
         XCTAssertEqual(response.statusCode, 200);
