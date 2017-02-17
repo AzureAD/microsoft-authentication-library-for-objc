@@ -56,7 +56,7 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
 
 static NSString *const s_kHttpHeaderDelimeter = @",";
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session context:(id<MSALRequestContext>)context
+- (id)initWithURL:(NSURL *)endpoint context:(id<MSALRequestContext>)context
 {
     if (!(self = [super init]))
     {
@@ -66,7 +66,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     _context = context;
     
     _endpointURL = endpoint;
-    _session = session;
+    _session = [context urlSession];
     
     _headers = [NSMutableDictionary new];
     _bodyParameters = [NSMutableDictionary new];
@@ -179,7 +179,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                   {
                                       MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response
                                                                                                              data:data];
-                                      completionHandler(error, msalResponse);
+                                      completionHandler(msalResponse, error);
                                   }];
     [task resume];
 }

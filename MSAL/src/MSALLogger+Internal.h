@@ -33,6 +33,7 @@
 - (NSUUID *)correlationId;
 - (NSString *)component;
 - (NSString *)telemetryRequestId;
+- (NSURLSession *)urlSession;
 
 @end
 

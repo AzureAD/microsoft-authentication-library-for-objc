@@ -31,10 +31,9 @@
 
 @implementation MSALWebAuthRequest
 
-- (id)initWithURL:(NSURL *)endpoint session:(NSURLSession *)session
-          context:(id<MSALRequestContext>)context
+- (id)initWithURL:(NSURL *)endpoint context:(id<MSALRequestContext>)context
 {
-    self = [super initWithURL:endpoint session:session context:context];
+    self = [super initWithURL:endpoint context:context];
     if (!self)
     {
         return nil;
@@ -55,11 +54,11 @@
 
 - (void)sendGet:(MSALHttpRequestCallback)completionHandler
 {
-    [super sendGet:^(NSError  *error, MSALHttpResponse *response)
+    [super sendGet:^(MSALHttpResponse *response, NSError  *error)
     {
         if (error)
         {
-            completionHandler(error, response);
+            completionHandler(response, error);
         }
         else
         {
@@ -73,11 +72,11 @@
 
 - (void)sendPost:(MSALHttpRequestCallback)completionHandler
 {
-    [super sendPost:^(NSError  *error, MSALHttpResponse *response)
+    [super sendPost:^(MSALHttpResponse *response, NSError  *error)
     {
         if (error)
         {
-            completionHandler(error, response);
+            completionHandler(response, error);
         }
         else
         {
