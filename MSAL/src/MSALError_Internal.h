@@ -44,13 +44,14 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
     return; \
 }
 
-// Check and pass an error back through the completion block
-#define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { \
+#define ERROR_COMPLETION(_CTX, _CODE, _DESC, ...) \
     NSString* _ERROR_STRING = [NSString stringWithFormat:_DESC, ##__VA_ARGS__]; \
     MSALLogError(_CTX, _CODE, _ERROR_STRING, nil, __FUNCTION__, __LINE__); \
     completionBlock(nil, MSALCreateError(_CODE, _DESC, nil, nil)); \
-    return; \
-}
+    return;
+
+// Check and pass an error back through the completion block
+#define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { ERROR_COMPLETION(_CTX, _CODE, _DESC, ##__VA_ARGS__); }
 
 // Convenience macro for checking a value for false/nil, creating an error
 // based on the parameters passed in and returning 0/false/nil

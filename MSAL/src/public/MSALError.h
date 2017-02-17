@@ -81,8 +81,19 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorInteractionRequired    = -42100,
     MSALErrorMismatchedUser = -42101,
+    MSALErrorNoAuthorizationResponse = -42102,
+    MSALErrorBadAuthorizationResponse = -42103,
+    MSALErrorAuthorizationFailed = -42104,
     
     MSALErrorKeychainFailure = -42200,
     MSALErrorNetworkFailure = -42300,
+    
+    MSALErrorUserCanceled = -42400,
+    MSALErrorInteractiveSessionAlreadyRunning = -42401,
+    MSALErrorNoViewController = -42402,
+    
+    MSALErrorInternal = -42500,
+    MSALErrorInvalidState = -42501,
+    
 };
 

@@ -39,6 +39,14 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorNetworkFailure);
         STRING_CASE(MSALErrorKeychainFailure);
         STRING_CASE(MSALErrorInteractionRequired);
+        STRING_CASE(MSALErrorBadAuthorizationResponse);
+        STRING_CASE(MSALErrorAuthorizationFailed);
+        STRING_CASE(MSALErrorNoAuthorizationResponse);
+        STRING_CASE(MSALErrorUserCanceled);
+        STRING_CASE(MSALErrorInteractiveSessionAlreadyRunning);
+        STRING_CASE(MSALErrorInvalidState);
+        STRING_CASE(MSALErrorNoViewController);
+        STRING_CASE(MSALErrorInternal);
     }
 }
 
