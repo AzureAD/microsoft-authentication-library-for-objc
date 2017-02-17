@@ -31,8 +31,22 @@
 
 + (void)reset;
 
-+ (void)instanceMethodClass:(Class)cls
-                   selector:(SEL)sel
-                       impl:(IMP)impl;
++ (MSALTestSwizzle *)instanceMethod:(SEL)sel
+                              class:(Class)cls
+                               impl:(IMP)impl;
+
++ (MSALTestSwizzle *)classMethod:(SEL)sel
+                           class:(Class)cls
+                            impl:(IMP)impl;
+
++ (MSALTestSwizzle *)instanceMethod:(SEL)sel
+                              class:(Class)cls
+                              block:(id)block;
+
++ (MSALTestSwizzle *)classMethod:(SEL)sel
+                           class:(Class)cls
+                           block:(id)impl;
+- (IMP)originalIMP;
+- (SEL)sel;
 
 @end
