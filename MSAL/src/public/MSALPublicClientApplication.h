@@ -56,6 +56,7 @@
 
 + (BOOL)isMSALResponse:(NSURL *)response;
 + (void)handleMSALResponse:(NSURL *)response;
++ (void)cancelCurrentWebAuthSession;
 
 #pragma mark -
 #pragma mark acquireToken

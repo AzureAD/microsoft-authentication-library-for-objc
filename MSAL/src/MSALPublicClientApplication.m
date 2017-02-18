@@ -126,6 +126,11 @@
     [MSALWebUI handleResponse:response];
 }
 
++ (void)cancelCurrentWebAuthSession
+{
+    [MSALWebUI cancelCurrentWebAuthSession];
+}
+
 #pragma mark -
 #pragma mark acquireToken
 

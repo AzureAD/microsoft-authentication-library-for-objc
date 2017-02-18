@@ -56,7 +56,25 @@ static MSALWebUI *s_currentWebSession = nil;
     [webUI startWithURL:url completionBlock:completionBlock];
 }
 
-- (void)clearCurrentWebSession
++ (MSALWebUI *)currentWebSession
+{
+    MSALWebUI *webSession = nil;
+    @synchronized ([MSALWebUI class])
+    {
+        webSession = s_currentWebSession;
+        s_currentWebSession = nil;
+    }
+    
+    return webSession;
+}
+
++ (void)cancelCurrentWebAuthSession
+{
+    MSALWebUI *webSession = [MSALWebUI currentWebSession];
+    [webSession cancel];
+}
+
+- (BOOL)clearCurrentWebSession
 {
     @synchronized ([MSALWebUI class])
     {
@@ -66,11 +84,24 @@ static MSALWebUI *s_currentWebSession = nil;
             // a developer error somewhere in the code, but that won't necessarily prevent MSAL from otherwise
             // working.
             LOG_ERROR(_context, @"Trying to clear out someone else's session");
-            return;
+            return NO;
         }
         
         s_currentWebSession = nil;
+        return YES;
     }
+}
+
+- (void)cancel
+{
+    [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically")];
+    
+}
+
+- (void)safariViewControllerDidFinish:(SFSafariViewController *)controller
+{
+    (void)controller;
+    [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
 }
 
 - (void)startWithURL:(NSURL *)url
@@ -109,23 +140,18 @@ static MSALWebUI *s_currentWebSession = nil;
         return;
     }
     
-    MSALWebUI *webSession = nil;
-    @synchronized ([MSALWebUI class])
-    {
-        webSession = s_currentWebSession;
-        s_currentWebSession = nil;
-    }
-    
+    MSALWebUI *webSession = [MSALWebUI currentWebSession];
     if (!webSession)
     {
         LOG_ERROR(nil, @"Received MSAL web response without a current session running.");
         return;
     }
     
-    [webSession receivedResponseFromSafari:url];
+    [webSession completeSessionWithResponse:url orError:nil];
 }
 
-- (void)receivedResponseFromSafari:(NSURL *)response
+- (void)completeSessionWithResponse:(NSURL *)response
+                            orError:(NSError *)error
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [_safariViewController dismissViewControllerAnimated:YES completion:nil];;
@@ -144,7 +170,7 @@ static MSALWebUI *s_currentWebSession = nil;
         return;
     }
     
-    completionBlock(response, nil);
+    completionBlock(response, error);
 }
 
 @end

@@ -43,6 +43,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorAuthorizationFailed);
         STRING_CASE(MSALErrorNoAuthorizationResponse);
         STRING_CASE(MSALErrorUserCanceled);
+        STRING_CASE(MSALErrorSessionCanceled);
         STRING_CASE(MSALErrorInteractiveSessionAlreadyRunning);
         STRING_CASE(MSALErrorInvalidState);
         STRING_CASE(MSALErrorNoViewController);
@@ -50,16 +51,16 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     }
 }
 
-void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *filename, int line)
+void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *function, int line)
 {
     NSString* codeString = MSALStringForErrorCode(code);
     if (oauthError)
     {
-        LOG_ERROR(ctx, @"%@ from \"%@\" - %@ (%s:%d)", codeString, oauthError, errorDescription, filename, line);
+        LOG_ERROR(ctx, @"%@ from \"%@\" - %@ (%s:%d)", codeString, oauthError, errorDescription, function, line);
     }
     else
     {
-        LOG_ERROR(ctx, @"%@ - %@ (%s:%d)", codeString, errorDescription, filename, line);
+        LOG_ERROR(ctx, @"%@ - %@ (%s:%d)", codeString, errorDescription, function, line);
     }
 }
 
@@ -71,4 +72,29 @@ NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSStrin
     userInfo[NSUnderlyingErrorKey]  = underlyingError;
     
     return [NSError errorWithDomain:MSALErrorDomain code:code userInfo:userInfo];
+}
+
+NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
+    va_end(args);
+    
+    MSALLogError(ctx, code, description, oauthError, function, line);
+    return MSALCreateError(code, description, oauthError, underlyingError);
+}
+
+void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
+    va_end(args);
+    
+    MSALLogError(ctx, code, description, oauthError, function, line);
+    if (error)
+    {
+        *error = MSALCreateError(code, description, oauthError, underlyingError);
+    }
 }
