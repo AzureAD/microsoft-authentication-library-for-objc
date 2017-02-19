@@ -78,7 +78,6 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 - (void)addToValidatedAuthorityCache:(MSALAuthority *)authority
                    userPrincipalName:(NSString *)userPrincipalName
 {
-    (void)authority;
     (void)userPrincipalName;
     s_validatedAuthorities[authority.canonicalAuthority.absoluteString.lowercaseString] = authority;
 }
@@ -93,7 +92,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
                         userPrincipalName:(NSString *)userPrincipalName
                                  validate:(BOOL)validate
                                   context:(id<MSALRequestContext>)context
-                        completionHandler:(void (^)(NSString *, NSError *))completionHandler
+                        completionHandler:(OpenIDConfigEndpointCallback)completionHandler
 {
     (void)userPrincipalName;
     

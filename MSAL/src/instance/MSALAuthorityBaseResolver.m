@@ -36,7 +36,7 @@
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context
-                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *url))completionBlock
+                completionBlock:(TenantDiscoveryCallback)completionBlock
 {
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:url
                                                             context:context];

@@ -63,7 +63,15 @@
 
 - (void)testOpenIdConfigEndpointWithValidateSuccessTest
 {
-    
+    /*
+     [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+     class:[MSALAadAuthorityResolver class]
+     block:(id)^(id obj, NSURL *authority,
+     NSString *userPrincipalName,
+     BOOL validate, id<MSALRequestContext> context,
+     OpenIDConfigCallback completionHandler)
+
+     */
 }
 
 - (void)testOpenIdConfigEndpointWithValidateFailTest

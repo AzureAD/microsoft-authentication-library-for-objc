@@ -28,19 +28,22 @@
 #import <Foundation/Foundation.h>
 @class MSALTenantDiscoveryResponse;
 
+typedef void(^OpenIDConfigEndpointCallback)(NSString *endpoint, NSError *error);
+typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NSError *error);
+
 @protocol MSALAuthorityResolver
 
 - (void)openIDConfigurationEndpointForURL:(NSURL *)url
                         userPrincipalName:(NSString *)userPrincipalName
                                  validate:(BOOL)validate
                                   context:(id<MSALRequestContext>)context
-                        completionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
+                        completionHandler:(OpenIDConfigEndpointCallback) completionHandler;
 
 - (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context
-                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *error))completionBlock;
+                completionBlock:(TenantDiscoveryCallback) completionBlock;
 
 
 - (MSALAuthority *)authorityFromCache:(NSURL *)authority

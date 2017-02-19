@@ -122,13 +122,13 @@ BOOL isTenantless(NSURL *authority)
         tenant = firstPathComponent;
     }
     
-    void (^tenantDiscoveryCallback)(MSALTenantDiscoveryResponse *, NSError *) = ^void
+    TenantDiscoveryCallback tenantDiscoveryCallback = ^void
     (MSALTenantDiscoveryResponse *response, NSError *error)
     {
         CHECK_COMPLETION(!error);
 
         MSALAuthority *authority = [MSALAuthority new];
-        authority.canonicalAuthority = nil;
+        authority.canonicalAuthority = updatedAuthority;
         authority.authorityType = authorityType;
         authority.validateAuthority = validate;
         authority.isTenantless = isTenantless(updatedAuthority);

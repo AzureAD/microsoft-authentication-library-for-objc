@@ -26,12 +26,14 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
+
 @class MSALTenantDiscoveryResponse;
 
 @interface MSALAuthorityBaseResolver : NSObject
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context
-                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *url))completionBlock;
+                completionBlock:(TenantDiscoveryCallback)completionBlock;
 
 @end
