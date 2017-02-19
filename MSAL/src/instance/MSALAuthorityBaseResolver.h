@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTenantDiscoveryResponse.h"
+#import <Foundation/Foundation.h>
+@class MSALTenantDiscoveryResponse;
 
-@implementation MSALTenantDiscoveryResponse
+@interface MSALAuthorityBaseResolver : NSObject
 
-MSAL_JSON_ACCESSOR(@"issuer", issuer)
-MSAL_JSON_ACCESSOR(@"authorization_endpoint", authorization_endpoint)
-MSAL_JSON_ACCESSOR(@"token_endpoint", token_endpoint)
+- (void)tenantDiscoveryEndpoint:(NSURL *)url
+                        context:(id<MSALRequestContext>)context
+                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *url))completionBlock;
 
 @end

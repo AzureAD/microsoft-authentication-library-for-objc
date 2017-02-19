@@ -26,6 +26,31 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+@class MSALTenantDiscoveryResponse;
+
+@protocol MSALAuthorityResolver
+
+- (void)openIDConfigurationEndpointForURL:(NSURL *)url
+                        userPrincipalName:(NSString *)userPrincipalName
+                                 validate:(BOOL)validate
+                                  context:(id<MSALRequestContext>)context
+                        completionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
+
+- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
+
+- (void)tenantDiscoveryEndpoint:(NSURL *)url
+                        context:(id<MSALRequestContext>)context
+                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *error))completionBlock;
+
+
+- (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
+
+- (void)addToValidatedAuthorityCache:(MSALAuthority *)authority
+                   userPrincipalName:(NSString *)userPrincipalName;
+
+
+@end
 
 typedef NS_ENUM(NSInteger, MSALAuthorityType)
 {
@@ -38,6 +63,7 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 @interface MSALAuthority : NSObject
 
+
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
 @property BOOL validateAuthority;
@@ -45,10 +71,9 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 @property NSURL *authorizationEndpoint;
 @property NSURL *tokenEndpoint;
 @property NSURL *endSessionEndpoint;
+// For AAD, currently, the v2.0 endpoint doesn't support the OpenID Connect end_session_endpoint
+// https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols-oidc
 @property NSString *selfSignedJwtAudience;
-
-@property (readonly) NSURLSession *session;
-@property (readonly) id<MSALRequestContext> context;
 
 /*!
     Performs cursory validation on the passed in authority string to make sure it is
@@ -57,24 +82,12 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error;
 
-+ (void)createAndResolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
-                            userPrincipalName:(NSString *)userPrincipalName
-                                     validate:(BOOL)validate
-                                      context:(id<MSALRequestContext>)context
-                              completionBlock:(MSALAuthorityCompletion)completionBlock;
++ (void)resolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                   userPrincipalName:(NSString *)userPrincipalName
+                            validate:(BOOL)validate
+                             context:(id<MSALRequestContext>)context
+                     completionBlock:(MSALAuthorityCompletion)completionBlock;
 
 + (BOOL)isKnownHost:(NSURL *)url;
 
-
-
-- (id)initWithContext:(id<MSALRequestContext>)context session:(NSURLSession *)session;
-
-
-- (void)openIdConfigurationEndpointForUserPrincipalName:(NSString *)userPrincipalName
-                                      completionHandler:(void (^)(NSString *endpoint, NSError *error))completionHandler;
-
-- (void)addToValidatedAuthorityCache:(NSString *)userPrincipalName;
-- (BOOL)retrieveFromValidatedAuthorityCache:(NSString *)userPrincipalName;
-
-- (NSString *)defaultOpenIdConfigurationEndpoint;
 @end

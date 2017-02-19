@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTenantDiscoveryResponse.h"
+#import "MSALAuthority.h"
+#import "MSALAuthorityBaseResolver.h"
 
-@implementation MSALTenantDiscoveryResponse
+@interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
 
-MSAL_JSON_ACCESSOR(@"issuer", issuer)
-MSAL_JSON_ACCESSOR(@"authorization_endpoint", authorization_endpoint)
-MSAL_JSON_ACCESSOR(@"token_endpoint", token_endpoint)
++ (id)sharedResolver;
 
 @end

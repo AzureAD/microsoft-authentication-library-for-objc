@@ -113,11 +113,11 @@ static MSALScopes *s_reservedScopes = nil;
         upn = _parameters.loginHint;
     }
     
-    [MSALAuthority createAndResolveEndpointsForAuthority:_parameters.unvalidatedAuthority
-                                       userPrincipalName:upn
-                                                validate:_parameters.validateAuthority
-                                                 context:_parameters
-                                         completionBlock:^(MSALAuthority *authority, NSError *error)
+    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority
+                              userPrincipalName:upn
+                                       validate:_parameters.validateAuthority
+                                        context:_parameters
+                                completionBlock:^(MSALAuthority *authority, NSError *error)
      {
         if (error)
         {

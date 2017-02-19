@@ -74,7 +74,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
 {
     switch (response.statusCode) {
         case 200:
-            completionHandler(nil, response);
+            completionHandler(response, nil);
             break;
         
         case 400:
@@ -85,7 +85,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             
             @throw @"to-do";
 #endif
-            completionHandler(nil, response);
+            completionHandler(response, nil);
             break;
         }
             
@@ -125,7 +125,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             
             LOG_WARN(_context, @"%@", message);
             
-            completionHandler(error, response);
+            completionHandler(response, error);
             
             break;
         }

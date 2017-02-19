@@ -27,19 +27,17 @@
 
 #import "MSALAuthority.h"
 #import "MSALError_Internal.h"
-#import "MSALAadAuthority.h"
+#import "MSALAadAuthorityResolver.h"
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
 
-#define mustOverride() \
-[NSException exceptionWithName:NSGenericException \
-                        reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)] \
-                      userInfo:nil]
-
-
 @implementation MSALAuthority
+
+#define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
+
+static NSSet<NSString *> *s_trustedHostList;
 
 #pragma mark - helper functions
 BOOL isTenantless(NSURL *authority)
@@ -59,6 +57,14 @@ BOOL isTenantless(NSURL *authority)
 
 
 #pragma mark - class methods
++ (void)initialize
+{
+    s_trustedHostList = [NSSet setWithObjects: @"login.windows.net",
+                         @"loginchinacloudapi.cn",
+                         @"login.cloudgovapi.us",
+                         @"login.microsoftonline.com",
+                         @"login.microsoftonline.de", nil];
+}
 
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
@@ -83,147 +89,84 @@ BOOL isTenantless(NSURL *authority)
 }
 
 
-+ (void)createAndResolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
-                            userPrincipalName:(NSString *)userPrincipalName
-                                     validate:(BOOL)validate
-                                      context:(id<MSALRequestContext>)context
-                              completionBlock:(MSALAuthorityCompletion)completionBlock
++ (void)resolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                   userPrincipalName:(NSString *)userPrincipalName
+                            validate:(BOOL)validate
+                             context:(id<MSALRequestContext>)context
+                     completionBlock:(MSALAuthorityCompletion)completionBlock
 {
-    (void)userPrincipalName;
-    (void)validate;
-    
-    // update the authority URL
     NSError *error = nil;
     NSURL *updatedAuthority = [self checkAuthorityString:unvalidatedAuthority.absoluteString error:&error];
-    if (error)
-    {
-        completionBlock(nil, error);
-    }
+    CHECK_COMPLETION(!error);
     
-    // Check for authority type and create an updated URL
-    MSALAuthority *authority = nil;
     MSALAuthorityType authorityType;
-
-    NSString *firstPathComponent = unvalidatedAuthority.pathComponents[1];
+    NSString *firstPathComponent = updatedAuthority.pathComponents[1].lowercaseString;
+    NSString *tenant = nil;
+    
+    id<MSALAuthorityResolver> resolver;
+    
     if ([firstPathComponent isEqualToString:@"tfp"])
     {
-        // TODO: B2C
         authorityType = B2CAuthority;
-        @throw @"Todo";
-        return;
+        @throw @"TODO";
     }
     else if ([firstPathComponent isEqualToString:@"adfs"])
     {
-        // TODO: ADFS
         authorityType = ADFSAuthority;
-        @throw @"Todo";
-        return;
+        @throw @"TODO";
     }
     else
     {
         authorityType = AADAuthority;
-        
-        NSURLSession *session = [MSALURLSession createSesssionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]
-                                                                        context:context];
-        authority = [[MSALAadAuthority alloc] initWithContext:context session:session];
-        authority.canonicalAuthority = updatedAuthority;
+        resolver = [MSALAadAuthorityResolver sharedResolver];
+        tenant = firstPathComponent;
     }
     
-    // If exists in cache, return
-    if ([authority retrieveFromValidatedAuthorityCache:userPrincipalName])
+    void (^tenantDiscoveryCallback)(MSALTenantDiscoveryResponse *, NSError *) = ^void
+    (MSALTenantDiscoveryResponse *response, NSError *error)
     {
-        // YES!
+        CHECK_COMPLETION(!error);
+
+        MSALAuthority *authority = [MSALAuthority new];
+        authority.canonicalAuthority = nil;
+        authority.authorityType = authorityType;
+        authority.validateAuthority = validate;
+        authority.isTenantless = isTenantless(updatedAuthority);
+        
+        NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        
+        authority.authorizationEndpoint = [NSURL URLWithString:authorizationEndpoint];
+        authority.tokenEndpoint = [NSURL URLWithString:tokenEndpoint];
+        authority.endSessionEndpoint = nil;
+        authority.selfSignedJwtAudience = issuer;
+     
+        [resolver addToValidatedAuthorityCache:authority userPrincipalName:userPrincipalName];
+        
         completionBlock(authority, nil);
-        return;
-    }
+    };
     
-    // If not, continue.
-    authority.isTenantless = isTenantless(unvalidatedAuthority);
-    [authority openIdConfigurationEndpointForUserPrincipalName:userPrincipalName
-                                             completionHandler:^(NSString *endpoint, NSError *error)
+    [resolver openIDConfigurationEndpointForURL:updatedAuthority
+                              userPrincipalName:userPrincipalName
+                                       validate:validate
+                                        context:context
+                              completionHandler:^(NSString *endpoint, NSError *error)
     {
         CHECK_COMPLETION(!error);
         
-        NSURL *endpointURL = [NSURL URLWithString:endpoint];
-        CHECK_ERROR_COMPLETION(endpointURL, authority.context, MSALErrorInvalidParameter, @"qwe");
+        [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:endpoint]
+                                  context:context completionBlock:tenantDiscoveryCallback];
         
-        [authority tenantDiscoveryEndpoint:endpointURL
-                           completionBlock:^(MSALTenantDiscoveryResponse *response, NSError *url) {
-                               (void)response;
-                               (void)url;
-                           }];
     }];
 }
 
-- (void)tenantDiscoveryEndpoint:(NSURL *)url
-                completionBlock:(void (^)(MSALTenantDiscoveryResponse *response, NSError *url))completionBlock
-{
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:url
-                                                            session:self.session
-                                                            context:self.context];
-    
-    [request sendGet:^(NSError *error, MSALHttpResponse *response) {
-        CHECK_COMPLETION(!error);
-        
-        NSError *jsonError = nil;
-        MSALTenantDiscoveryResponse *tenantDiscoveryResponse = [[MSALTenantDiscoveryResponse alloc] initWithData:response.body
-                                                                                                           error:&jsonError];
-        if (jsonError)
-        {
-            completionBlock(nil, jsonError);
-            return;
-        }
-        
-        completionBlock(tenantDiscoveryResponse, nil);
-    }];
-}
 
 
 + (BOOL)isKnownHost:(NSURL *)url
 {
-    (void)url;
-    @throw @"TODO";
-    return NO;
+    return [s_trustedHostList containsObject:url.host.lowercaseString];
 }
 
-#pragma mark - Instance methods
-
-- (id)initWithContext:(id<MSALRequestContext>)context session:(NSURLSession *)session
-{
-    self = [super init];
-    if (self) {
-        _session = session;
-        _context = context;
-    }
-    return self;
-}
-
-- (void)openIdConfigurationEndpointForUserPrincipalName:(NSString *)userPrincipalName
-                                      completionHandler:(void (^)(NSString *, NSError *))completionHandler
-{
-    (void)userPrincipalName;
-    (void)completionHandler;
-    mustOverride();
-}
-
-
-- (void)addToValidatedAuthorityCache:(NSString *)userPrincipalName
-{
-    (void)userPrincipalName;
-    mustOverride();
-}
-
-- (BOOL)retrieveFromValidatedAuthorityCache:(NSString *)userPrincipalName
-{
-    (void)userPrincipalName;
-    mustOverride();
-    return NO;
-}
-
-- (NSString *)defaultOpenIdConfigurationEndpoint
-{
-    mustOverride();
-    return nil;
-}
 
 @end

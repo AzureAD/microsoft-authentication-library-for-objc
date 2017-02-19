@@ -45,8 +45,10 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 }
 
 // Convenience macro to create invalid response error
-#define MSAL_CREATE_ERROR_INVALID_RESULT(_PARAMETER) \
-    MSALCreateError(MSALErrorInvalidResponse, @#_PARAMETER " is not found in the response.", nil, nil)
+#define MSAL_CREATE_ERROR_INVALID_RESULT(_CTX, _PARAMETER, _ERROR) \
+    NSString *_ERROR_STRING = @#_PARAMETER " is not found in the response."; \
+    MSALLogError(_CTX, MSALErrorInvalidResponse, _ERROR_STRING, nil, __FUNCTION__, __LINE__); \
+    _ERROR = MSALCreateError(MSALErrorInvalidResponse, _ERROR_STRING, nil, nil)
 
 // Check and pass an error back through the completion block
 #define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { \
