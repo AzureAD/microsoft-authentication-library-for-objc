@@ -378,6 +378,14 @@
 			path = telemetry;
 			sourceTree = "<group>";
 		};
+		D61F5B691E53FCA100912CB8 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				D65A6FDB1E3FF71000C69FBA /* unit */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
 		D65A6F671E3FF3D900C69FBA /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -529,7 +537,7 @@
 			path = xcconfig;
 			sourceTree = "<group>";
 		};
-		D65A6FDB1E3FF71000C69FBA /* test */ = {
+		D65A6FDB1E3FF71000C69FBA /* unit */ = {
 			isa = PBXGroup;
 			children = (
 				D65A6FDC1E3FF71000C69FBA /* ios */,
@@ -544,7 +552,7 @@
 				D69ADB1D1E5144EB00952049 /* MSALAuthorityTests.m */,
 				D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */,
 			);
-			path = test;
+			path = unit;
 			sourceTree = "<group>";
 		};
 		D65A6FDC1E3FF71000C69FBA /* ios */ = {
@@ -622,7 +630,7 @@
 			isa = PBXGroup;
 			children = (
 				D65A6F671E3FF3D900C69FBA /* src */,
-				D65A6FDB1E3FF71000C69FBA /* test */,
+				D61F5B691E53FCA100912CB8 /* test */,
 				D65A6FB71E3FF44A00C69FBA /* resources */,
 				D65A6FBC1E3FF46100C69FBA /* xcconfig */,
 				D6DFF3A31E2579360012891A /* Products */,
