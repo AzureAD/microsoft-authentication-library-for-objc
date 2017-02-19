@@ -116,10 +116,10 @@
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
       @"x-client-SKU" : @"iOS",
-#else
-      @"x-client-SKU" : @"Mac",
-#endif
       @"x-client-DM" : msalId[@"x-client-DM"],
+#else
+      @"x-client-SKU" : @"OSX",
+#endif
       @"x-client-OS" : msalId[@"x-client-OS"],
       @"x-client-CPU" : msalId[@"x-client-CPU"],
       @"return-client-request-id" : correlationId.UUIDString,
@@ -183,10 +183,10 @@
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
            @"x-client-SKU" : @"iOS",
-#else
-           @"x-client-SKU" : @"Mac",
-#endif
            @"x-client-DM" : msalId[@"x-client-DM"],
+#else
+           @"x-client-SKU" : @"OSX",
+#endif
            @"x-client-OS" : msalId[@"x-client-OS"],
            @"x-client-CPU" : msalId[@"x-client-CPU"],
            @"return-client-request-id" : correlationId.UUIDString,
