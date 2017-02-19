@@ -31,7 +31,7 @@
 
 @interface MSALResult : NSObject
 
-@property (readonly) NSString *token;
+@property (readonly) NSString *accessToken;
 @property (readonly) NSDate *expiresOn;
 @property (readonly) NSString *tenantId;
 @property (readonly) MSALUser *user;

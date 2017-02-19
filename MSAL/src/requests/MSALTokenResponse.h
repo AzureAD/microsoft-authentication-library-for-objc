@@ -35,9 +35,6 @@
 @property NSString *scope;
 @property (readonly) NSString *familyId;
 @property (readonly) NSString *expiresIn;
-@property (readonly) NSString *idTokenExpiresIn;
-
-@property (readonly) NSDate *accessTokenExpiresOn;
-@property (readonly) NSDate *idTokenExpiresOn;
+@property (readonly) NSDate *expiresOn;
 
 @end

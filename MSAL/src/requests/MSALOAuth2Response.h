@@ -31,7 +31,7 @@
 
 @property (readonly) NSString *error;
 @property (readonly) NSString *errorDescription;
-@property (readonly) NSString *errorCodes;
+@property (readonly) NSString *subError;
 @property (readonly) NSString *correlationId;
 
 @end

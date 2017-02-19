@@ -36,16 +36,10 @@
         return nil;
     }
     
-    NSString *atExpiresIn =  self.accessTokenExpiresIn;
-    if (atExpiresIn)
+    NSString *expiresIn =  self.expiresIn;
+    if (expiresIn)
     {
-        _accessTokenExpiresOn = [NSDate dateWithTimeIntervalSinceNow:-[atExpiresIn doubleValue]];
-    }
-    
-    NSString *idTokenExpiresIn = self.idTokenExpiresIn;
-    if (idTokenExpiresIn)
-    {
-        _idTokenExpiresOn = [NSDate dateWithTimeIntervalSinceNow:-[idTokenExpiresIn doubleValue]];
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:-[expiresIn doubleValue]];
     }
     
     return self;
@@ -55,9 +49,6 @@ MSAL_JSON_ACCESSOR(OAUTH2_TOKEN_TYPE, tokenType)
 MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
 MSAL_JSON_ACCESSOR(OAUTH2_REFRESH_TOKEN, refreshToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scope, setScope)
-MSAL_JSON_ACCESSOR(OAUTH2_FAMILY_ID, familyId)
 MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, expiresIn)
-MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, accessTokenExpiresIn)
-MSAL_JSON_ACCESSOR(OAUTH2_ID_TOKEN_EXPIRES_IN, idTokenExpiresIn)
 
 @end

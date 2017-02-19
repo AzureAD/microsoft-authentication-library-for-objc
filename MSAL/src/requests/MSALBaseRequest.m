@@ -168,7 +168,8 @@ static MSALScopes *s_reservedScopes = nil;
          NSString *oauthError = tokenResponse.error;
          if (oauthError)
          {
-             completionBlock(nil, MSALCreateAndLogError(_parameters, MSALErrorInteractionRequired, oauthError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription));
+             MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
+             completionBlock(nil, MSALCreateAndLogError(_parameters, code, oauthError, tokenResponse.subError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription));
              return;
          }
          
@@ -180,10 +181,11 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          MSALResult *result =
-         [MSALResult resultWithToken:tokenResponse.accessToken
-                           expiresOn:tokenResponse.accessTokenExpiresOn tenantId:nil // TODO: tenantId
-                                user:nil // TODO: user
-                              scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
+         [MSALResult resultWithAccessToken:tokenResponse.accessToken
+                                 expiresOn:tokenResponse.expiresOn
+                                  tenantId:nil // TODO: tenantId
+                                      user:nil // TODO: user
+                                    scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
          completionBlock(result, nil);
      }];
 }

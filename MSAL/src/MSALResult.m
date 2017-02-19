@@ -33,15 +33,15 @@
 
 @implementation MSALResult (Internal)
 
-+ (MSALResult *)resultWithToken:(NSString *)token
-                      expiresOn:(NSDate *)expiresOn
-                       tenantId:(NSString *)tenantId
-                           user:(MSALUser *)user
-                         scopes:(NSArray<NSString *> *)scopes
++ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
+                            expiresOn:(NSDate *)expiresOn
+                             tenantId:(NSString *)tenantId
+                                 user:(MSALUser *)user
+                               scopes:(NSArray<NSString *> *)scopes
 {
     MSALResult *result = [MSALResult new];
     
-    result->_token = token;
+    result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_tenantId = tenantId;
     result->_user = user;

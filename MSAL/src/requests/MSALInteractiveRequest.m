@@ -117,6 +117,7 @@
              // This error case *really* shouldn't occur. If we're seeing it it's almost certainly a developer bug
              ERROR_COMPLETION(_parameters, MSALErrorNoAuthorizationResponse, @"No authorization response received from server.");
          }
+         
          NSDictionary *params = [NSDictionary msalURLFormDecode:response.query];
          CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
          
@@ -133,8 +134,10 @@
          if (authorizationError)
          {
              NSString *errorDescription = params[OAUTH2_ERROR_DESCRIPTION];
-             MSALLogError(_parameters, MSALErrorAuthorizationFailed, errorDescription, authorizationError, __FUNCTION__, __LINE__);
-             completionBlock(nil, MSALCreateError(MSALErrorAuthorizationFailed, errorDescription, authorizationError, nil));
+             NSString *subError = params[OAUTH2_SUB_ERROR];
+             MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
+             MSALLogError(_parameters, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
+             completionBlock(nil, MSALCreateError(code, errorDescription, authorizationError, subError, nil));
              return;
          }
          

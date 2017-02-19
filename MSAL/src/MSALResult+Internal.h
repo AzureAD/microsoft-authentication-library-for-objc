@@ -29,10 +29,10 @@
 
 @interface MSALResult (Internal)
 
-+ (MSALResult *)resultWithToken:(NSString *)token
-                      expiresOn:(NSDate *)expiresOn
-                       tenantId:(NSString *)tenantId
-                           user:(MSALUser *)user
-                         scopes:(NSArray<NSString *> *)scopes;
++ (MSALResult *)resultWithAccessToken:(NSString *)token
+                            expiresOn:(NSDate *)expiresOn
+                             tenantId:(NSString *)tenantId
+                                 user:(MSALUser *)user
+                               scopes:(NSArray<NSString *> *)scopes;
 
 @end
