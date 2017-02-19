@@ -116,6 +116,7 @@ static MSALWebUI *s_currentWebSession = nil;
     dispatch_async(dispatch_get_main_queue(), ^{
         _safariViewController = [[SFSafariViewController alloc] initWithURL:url
                                   entersReaderIfAvailable:NO];
+        _safariViewController.delegate = self;
         UIViewController *viewController = [UIApplication msalCurrentViewController];
         if (!viewController)
         {
@@ -132,25 +133,25 @@ static MSALWebUI *s_currentWebSession = nil;
     });
 }
 
-+ (void)handleResponse:(NSURL *)url
++ (BOOL)handleResponse:(NSURL *)url
 {
     if (!url)
     {
         LOG_ERROR(nil, @"nil passed into MSAL Web handle response");
-        return;
+        return NO;
     }
     
     MSALWebUI *webSession = [MSALWebUI currentWebSession];
     if (!webSession)
     {
         LOG_ERROR(nil, @"Received MSAL web response without a current session running.");
-        return;
+        return NO;
     }
     
-    [webSession completeSessionWithResponse:url orError:nil];
+    return [webSession completeSessionWithResponse:url orError:nil];
 }
 
-- (void)completeSessionWithResponse:(NSURL *)response
+- (BOOL)completeSessionWithResponse:(NSURL *)response
                             orError:(NSError *)error
 {
     if ([NSThread isMainThread])
@@ -171,13 +172,16 @@ static MSALWebUI *s_currentWebSession = nil;
         _completionBlock = nil;
     }
     
+    _safariViewController = nil;
+    
     if (!completionBlock)
     {
         LOG_ERROR(_context, @"MSAL response received but no completion block saved");
-        return;
+        return NO;
     }
     
     completionBlock(response, error);
+    return YES;
 }
 
 @end

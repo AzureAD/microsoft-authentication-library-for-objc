@@ -108,12 +108,17 @@
         return NO;
     }
     
-    if (components.count < 1)
+    if (components.count < 2)
     {
         return NO;
     }
     
-    if (![components.firstObject isEqualToString:@"msal"])
+    if (![components[1] isEqualToString:@"msal"])
+    {
+        return NO;
+    }
+    
+    if ([NSString msalIsStringNilOrBlank:response.query])
     {
         return NO;
     }

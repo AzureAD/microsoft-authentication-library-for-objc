@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "MSALTestLogger.h"
 #import "MSALWebUI.h"
 #import "UIApplication+MSALExtensions.h"
 #import "MSALFakeViewController.h"
@@ -128,15 +129,15 @@
                          context:nil
                  completionBlock:^(NSURL *response, NSError *error)
      {
-         XCTAssertNotNil(response);
-         XCTAssertNil(error);
+         XCTAssertNil(response);
+         XCTAssertNotNil(error);
+         XCTAssertEqual(error.code, MSALErrorSessionCanceled);
          
-         XCTAssertEqualObjects(response, [NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]);
          dispatch_semaphore_signal(dsem);
      }];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [MSALWebUI handleResponse:[NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]];
+        [MSALWebUI cancelCurrentWebAuthSession];
     });
     
     wait_and_run_main_thread(dsem);
@@ -146,7 +147,59 @@
     XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
-typedef id(*ReturnIdIdBoolPtr)(id, SEL, id, BOOL);
+- (void)testUserCancelSession
+{
+    __block MSALFakeViewController *fakeSvc = nil;
+    [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
+     {
+         fakeSvc = controller;
+         XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"]);
+         XCTAssertFalse(entersReaderIfAvailable);
+     }];
+    
+    NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    [MSALWebUI startWebUIWithURL:testURL
+                         context:nil
+                 completionBlock:^(NSURL *response, NSError *error)
+     {
+         XCTAssertNil(response);
+         XCTAssertNotNil(error);
+         XCTAssertEqual(error.code, MSALErrorUserCanceled);
+         dispatch_semaphore_signal(dsem);
+     }];
+    
+    // A delegate should be set on the Safari View Controller
+    
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        id<SFSafariViewControllerDelegate> delegate = fakeSvc.delegate;
+        XCTAssertNotNil(delegate);
+        [delegate safariViewControllerDidFinish:(SFSafariViewController *)fakeSvc];
+    });
+    
+    wait_and_run_main_thread(dsem);
+    
+    MSALFakeViewController *fakeController = [MSALFakeViewController currentController];
+    XCTAssertTrue(fakeController.wasPresented);
+    XCTAssertTrue(fakeSvc.wasDismissed);
+}
+
+- (void)testNilResponse
+{
+    XCTAssertFalse([MSALWebUI handleResponse:nil]);
+    MSALTestLogger *logger = [MSALTestLogger sharedLogger];
+    XCTAssertTrue([logger.lastMessage containsString:@"nil"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
+}
+
+- (void)testNoCurrentSession
+{
+    XCTAssertFalse([MSALWebUI handleResponse:[NSURL URLWithString:@"https://iamafakeresponse.com"]]);
+    MSALTestLogger *logger = [MSALTestLogger sharedLogger];
+    XCTAssertTrue([logger.lastMessage containsString:@"session"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
+}
 
 - (void)testStartAndHandleCodeResponse
 {

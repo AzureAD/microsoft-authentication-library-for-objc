@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "MSALBaseRequest+TestExtensions.h"
+#import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
 
 @interface MSALPublicClientApplicationTests : MSALTestCase
@@ -93,6 +95,221 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
     XCTAssertEqualObjects(application.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
+}
+
+- (void)testIsMSALResponse
+{
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:nil]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/resp"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?"]]);
+    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?code=iamacode"]]);
+    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo"]]);
+}
+
+- (void)testAcquireTokenScopes
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
+         XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"]);
+         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertNil(params.loginHint);
+         XCTAssertNil(params.component);
+         XCTAssertNotNil(params.correlationId);
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope"]
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testAcquireScopesLoginHint
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         
+         XCTAssertNil(obj.additionalScopes);
+         XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
+         XCTAssertNotNil(params.correlationId);
+         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testAcquireScopesLoginHintBehaviorEQPs
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         
+         XCTAssertNil(obj.additionalScopes);
+         XCTAssertEqual(obj.uiBehavior, MSALForceLogin);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
+         XCTAssertNotNil(params.correlationId);
+         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                            uiBehavior:MSALForceLogin
+                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testAcquireScopesAddlScopesLoginHintuiBehaviorEQPAuthorityCorrelationId
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block NSUUID *correlationId = [NSUUID new];
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         
+         XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
+         XCTAssertEqual(obj.uiBehavior, MSALForceConsent);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
+         XCTAssertEqualObjects(params.correlationId, correlationId);
+         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                      additionalScopes:@[@"fakescope3"]
+                             loginHint:@"fakeuser@contoso.com"
+                            uiBehavior:MSALForceConsent
+                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
+                             authority:@"https://login.microsoftonline.com/contoso.com"
+                         correlationId:correlationId
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
 }
 
 @end

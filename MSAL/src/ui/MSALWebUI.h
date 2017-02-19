@@ -35,7 +35,7 @@ typedef void (^MSALWebUICompletionBlock)(NSURL *response, NSError *error);
                   context:(id<MSALRequestContext>)context
           completionBlock:(MSALWebUICompletionBlock)completionBlock;
 
-+ (void)handleResponse:(NSURL *)url;
++ (BOOL)handleResponse:(NSURL *)url;
 
 + (void)cancelCurrentWebAuthSession;
 

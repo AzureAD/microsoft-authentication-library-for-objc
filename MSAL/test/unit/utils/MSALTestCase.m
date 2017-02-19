@@ -32,6 +32,7 @@
 
 #if TARGET_OS_IPHONE
 #import "SFSafariViewController+TestOverrides.h"
+#import "MSALFakeViewController.h"
 #endif
 
 @implementation MSALTestCase
@@ -43,6 +44,7 @@
     [MSALTestSwizzle reset];
 #if TARGET_OS_IPHONE
     [SFSafariViewController reset];
+    [MSALFakeViewController reset];
 #endif
 }
 

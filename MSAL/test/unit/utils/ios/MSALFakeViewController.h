@@ -35,5 +35,6 @@
 
 @property BOOL wasPresented;
 @property BOOL wasDismissed;
+@property id delegate;
 
 @end

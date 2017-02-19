@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,30 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALWebUI.h"
+#import "MSALBaseRequest+TestExtensions.h"
 
-@implementation MSALWebUI
+@implementation MSALBaseRequest (TestExtensions)
 
-+ (void)startWebUIWithURL:(NSURL *)url
-                  context:(id<MSALRequestContext>)context
-          completionBlock:(MSALWebUICompletionBlock)completionBlock
+- (MSALRequestParameters *)parameters
 {
-    (void)url;
-    (void)context;
-    (void)completionBlock;
-    
-    @throw @"MSAL is not supported on macOS at this time.";
-}
-
-+ (BOOL)handleResponse:(NSURL *)url
-{
-    (void)url;
-    @throw @"MSAL is not supported on macOS at this time.";
-}
-
-+ (void)cancelCurrentWebAuthSession
-{
-    @throw @"MSAL is not supported on macOS at this time.";
+    return _parameters;
 }
 
 @end
+
+@implementation MSALInteractiveRequest (TestExtensions)
+
+- (MSALScopes *)additionalScopes
+{
+    return _additionalScopes;
+}
+
+- (MSALUIBehavior)uiBehavior
+{
+    return _uiBehavior;
+}
+
+- (NSString *)state
+{
+    return _state;
+}
+
+@end
+
