@@ -26,32 +26,3 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
-
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-@class MSALResult;
-
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALUser.h>
-#import <MSAL/MSALTelemetry.h>
-
-
-#if TARGET_OS_IPHONE
-#import <MSAL/MSALKeychainTokenCache.h>
-#endif // TARGET_PLATFORM_IPHONE
