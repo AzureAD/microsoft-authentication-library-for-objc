@@ -27,28 +27,13 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MSALTestSwizzle : NSObject
+@interface MSALFakeViewController : NSObject
 
++ (void)returnNilForCurrentController;
++ (MSALFakeViewController *)currentController;
 + (void)reset;
 
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                               impl:(IMP)impl;
-
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                            impl:(IMP)impl;
-
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                              block:(id)block;
-
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                           block:(id)impl;
-- (IMP)originalIMP;
-- (SEL)sel;
-
-- (void)makePermanent;
+@property BOOL wasPresented;
+@property BOOL wasDismissed;
 
 @end

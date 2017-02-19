@@ -153,9 +153,16 @@ static MSALWebUI *s_currentWebSession = nil;
 - (void)completeSessionWithResponse:(NSURL *)response
                             orError:(NSError *)error
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_safariViewController dismissViewControllerAnimated:YES completion:nil];;
-    });
+    if ([NSThread isMainThread])
+    {
+        [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+    else
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+        });
+    }
     
     MSALWebUICompletionBlock completionBlock = nil;
     @synchronized (self)

@@ -173,4 +173,12 @@ static NSMutableArray<MSALTestSwizzle *> *s_currentMonkeyPatches = nil;
     return _sel;
 }
 
+- (void)makePermanent
+{
+    @synchronized (s_currentMonkeyPatches)
+    {
+        [s_currentMonkeyPatches removeObject:self];
+    }
+}
+
 @end

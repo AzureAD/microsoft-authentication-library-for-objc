@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+ //------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,33 +27,9 @@
 
 #import "MSALTestCase.h"
 #import "MSALWebUI.h"
-#import "MSALTestSwizzle.h"
 #import "UIApplication+MSALExtensions.h"
-
-#import <SafariServices/SafariServices.h>
-
-@interface MSALFakeViewController : NSObject
-
-@property BOOL wasPresented;
-
-@end
-
-@implementation MSALFakeViewController
-
-- (void)presentViewController:(UIViewController *)viewControllerToPresent animated: (BOOL)flag completion:(void (^ __nullable)(void))completion
-{
-    if (!viewControllerToPresent)
-    {
-        @throw @"no view controller!";
-    }
-    
-    (void)flag;
-    (void)completion;
-    
-    self.wasPresented = YES;
-}
-
-@end
+#import "MSALFakeViewController.h"
+#import "SFSafariViewController+TestOverrides.h"
 
 @interface MSALWebUITestsiOS : MSALTestCase
 
@@ -73,6 +49,7 @@
 
 - (void)testStartNoViewController
 {
+    [MSALFakeViewController returnNilForCurrentController];
     NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     [MSALWebUI startWebUIWithURL:testURL
@@ -85,34 +62,102 @@
          
          dispatch_semaphore_signal(dsem);
      }];
-    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
-    {
-        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
-    }
+    wait_and_run_main_thread(dsem);
+}
+
+- (void)testAlreadyRunningSession
+{
+    __block MSALFakeViewController *fakeSvc = nil;
+    [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
+     {
+         fakeSvc = controller;
+         XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"]);
+         XCTAssertFalse(entersReaderIfAvailable);
+     }];
+    
+    NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
+    dispatch_semaphore_t dsem1 = dispatch_semaphore_create(0);
+    [MSALWebUI startWebUIWithURL:testURL
+                         context:nil
+                 completionBlock:^(NSURL *response, NSError *error)
+     {
+         XCTAssertNotNil(response);
+         XCTAssertNil(error);
+         
+         XCTAssertEqualObjects(response, [NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]);
+         dispatch_semaphore_signal(dsem1);
+     }];
+    
+    dispatch_semaphore_t dsem2 = dispatch_semaphore_create(0);
+    [MSALWebUI startWebUIWithURL:testURL
+                         context:nil
+                 completionBlock:^(NSURL *response, NSError *error)
+     {
+         XCTAssertNil(response);
+         XCTAssertNotNil(error);
+         XCTAssertEqual(error.code, MSALErrorInteractiveSessionAlreadyRunning);
+         dispatch_semaphore_signal(dsem2);
+     }];
+    
+    wait_and_run_main_thread(dsem2);
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [MSALWebUI handleResponse:[NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]];
+    });
+    
+    wait_and_run_main_thread(dsem1);
+    
+    MSALFakeViewController *fakeController = [MSALFakeViewController currentController];
+    XCTAssertTrue(fakeController.wasPresented);
+    XCTAssertTrue(fakeSvc.wasDismissed);
+}
+
+- (void)testCancelSession
+{
+    __block MSALFakeViewController *fakeSvc = nil;
+    [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
+     {
+         fakeSvc = controller;
+         XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"]);
+         XCTAssertFalse(entersReaderIfAvailable);
+     }];
+    
+    NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    [MSALWebUI startWebUIWithURL:testURL
+                         context:nil
+                 completionBlock:^(NSURL *response, NSError *error)
+     {
+         XCTAssertNotNil(response);
+         XCTAssertNil(error);
+         
+         XCTAssertEqualObjects(response, [NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]);
+         dispatch_semaphore_signal(dsem);
+     }];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [MSALWebUI handleResponse:[NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]];
+    });
+    
+    wait_and_run_main_thread(dsem);
+    
+    MSALFakeViewController *fakeController = [MSALFakeViewController currentController];
+    XCTAssertTrue(fakeController.wasPresented);
+    XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
 typedef id(*ReturnIdIdBoolPtr)(id, SEL, id, BOOL);
 
 - (void)testStartAndHandleCodeResponse
 {
-    __block MSALFakeViewController *fakeController = [MSALFakeViewController new];
-    [MSALTestSwizzle classMethod:@selector(msalCurrentViewController)
-                           class:[UIApplication class]
-                           block:(id)^id(id obj)
+    __block MSALFakeViewController *fakeSvc = nil;
+    [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
     {
-#pragma unused (obj)
-        return fakeController;
+        fakeSvc = controller;
+         XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"]);
+        XCTAssertFalse(entersReaderIfAvailable);
     }];
     
-    __block MSALTestSwizzle *swizzle =
-    [MSALTestSwizzle instanceMethod:@selector(initWithURL: entersReaderIfAvailable:)
-                              class:[SFSafariViewController class]
-                              block:(id)^id(id obj, id arg1, BOOL arg2)
-     {
-         XCTAssertEqualObjects(arg1, [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"]);
-         
-         return ((ReturnIdIdBoolPtr)[swizzle originalIMP])(obj, [swizzle sel], arg1, arg2);
-     }];
     NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     [MSALWebUI startWebUIWithURL:testURL
@@ -130,12 +175,11 @@ typedef id(*ReturnIdIdBoolPtr)(id, SEL, id, BOOL);
         [MSALWebUI handleResponse:[NSURL URLWithString:@"https://msal/?code=iamtotallyalegitresponsecode"]];
     });
     
-    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
-    {
-        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
-    }
+    wait_and_run_main_thread(dsem);
     
+    MSALFakeViewController *fakeController = [MSALFakeViewController currentController];
     XCTAssertTrue(fakeController.wasPresented);
+    XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
 @end

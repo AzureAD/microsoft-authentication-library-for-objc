@@ -25,30 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "SFSafariViewController+TestOverrides.h"
+#import "MSALFakeViewController.h"
 
-@interface MSALTestSwizzle : NSObject
 
-+ (void)reset;
+@implementation SFSafariViewController (TestOverrides)
 
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                               impl:(IMP)impl;
++ (void)setValidationBlock:(SVCValidationBlock)block
+{
+    s_svcValidationBlock = block;
+}
 
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                            impl:(IMP)impl;
++ (void)reset
+{
+    s_svcValidationBlock = nil;
+}
 
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                              block:(id)block;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
+- (id)initWithURL:(NSURL *)URL
+{
+    return [self initWithURL:URL entersReaderIfAvailable:NO];
+}
 
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                           block:(id)impl;
-- (IMP)originalIMP;
-- (SEL)sel;
+- (id)initWithURL:(NSURL *)URL entersReaderIfAvailable:(BOOL)entersReaderIfAvailable
+{
+    MSALFakeViewController *fakeController = [MSALFakeViewController new];
+    if (s_svcValidationBlock)
+    {
+        s_svcValidationBlock(fakeController, URL, entersReaderIfAvailable);
+    }
+    return (SFSafariViewController *)fakeController;
+}
+#pragma pop
 
-- (void)makePermanent;
 
 @end

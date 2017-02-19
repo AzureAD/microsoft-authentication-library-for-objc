@@ -25,30 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <SafariServices/SafariServices.h>
 
-@interface MSALTestSwizzle : NSObject
+@class MSALFakeViewController;
+
+typedef void(^SVCValidationBlock)(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable);
+static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, BOOL) = nil;
+
+@interface SFSafariViewController (TestOverrides)
 
 + (void)reset;
 
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                               impl:(IMP)impl;
-
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                            impl:(IMP)impl;
-
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                              block:(id)block;
-
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                           block:(id)impl;
-- (IMP)originalIMP;
-- (SEL)sel;
-
-- (void)makePermanent;
++ (void)setValidationBlock:(SVCValidationBlock)block;
 
 @end
