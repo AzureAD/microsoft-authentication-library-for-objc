@@ -25,12 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseRequest.h"
+#import "MSALOAuth2Response.h"
 
-@class MSALRequestParameters;
+@interface MSALTokenResponse : MSALOAuth2Response
 
-@interface MSALAuthorizationCodeRequest : MSALBaseRequest
+@property (readonly) NSString *tokenType;
+@property (readonly) NSString *accessToken;
+@property (readonly) NSString *refreshToken;
+@property NSString *scope;
+@property (readonly) NSString *familyId;
+@property (readonly) NSString *expiresIn;
+@property (readonly) NSString *idTokenExpiresIn;
 
-+ (MSALAuthorizationCodeRequest *)requestWithParameters:(MSALRequestParameters *)parameters;
+@property (readonly) NSDate *accessTokenExpiresOn;
+@property (readonly) NSDate *idTokenExpiresOn;
 
 @end

@@ -25,33 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
+#import "NSDictionary+MSALTestUtil.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALUser;
+@implementation NSDictionary (MSALTestUtil)
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
-
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCache *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
+- (BOOL)compareDictionary:(NSDictionary *)dictionary
+{
+    BOOL fSame = YES;
+    
+    for (NSString *key in self)
+    {
+        id otherVal = dictionary[key];
+        if (!otherVal)
+        {
+            NSLog(@"\"%@\" missing from result dictionary.", key);
+            fSame = NO;
+        }
+        else if (![self[key] isEqual:otherVal])
+        {
+            NSLog(@"\"%@\" does not match. Expected: \"%@\" Actual: \"%@\"", key, self[key], otherVal);
+            fSame = NO;
+        }
+    }
+    
+    for (NSString *key in dictionary)
+    {
+        if (!self[key])
+        {
+            NSLog(@"Extra key \"%@\" in result dictionary: \"%@\"", key, dictionary[key]);
+            fSame = NO;
+        }
+    }
+    
+    return fSame;
+}
 
 @end

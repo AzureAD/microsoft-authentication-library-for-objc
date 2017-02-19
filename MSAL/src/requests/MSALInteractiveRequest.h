@@ -40,4 +40,6 @@
                 behavior:(MSALUIBehavior)behavior
                    error:(NSError * __autoreleasing *)error;
 
+- (NSURL *)authorizationUrl;
+
 @end

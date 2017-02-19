@@ -25,33 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
+#import "MSALTokenResponse.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALUser;
+@implementation MSALTokenResponse
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+- (id)initWithData:(NSData *)data error:(NSError *__autoreleasing *)error
+{
+    if (!(self = [super initWithData:data error:error]))
+    {
+        return nil;
+    }
+    
+    NSString *atExpiresIn =  self.accessTokenExpiresIn;
+    if (atExpiresIn)
+    {
+        _accessTokenExpiresOn = [NSDate dateWithTimeIntervalSinceNow:-[atExpiresIn doubleValue]];
+    }
+    
+    NSString *idTokenExpiresIn = self.idTokenExpiresIn;
+    if (idTokenExpiresIn)
+    {
+        _idTokenExpiresOn = [NSDate dateWithTimeIntervalSinceNow:-[idTokenExpiresIn doubleValue]];
+    }
+    
+    return self;
+}
 
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCache *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
+MSAL_JSON_ACCESSOR(OAUTH2_TOKEN_TYPE, tokenType)
+MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
+MSAL_JSON_ACCESSOR(OAUTH2_REFRESH_TOKEN, refreshToken)
+MSAL_JSON_RW(OAUTH2_SCOPE, scope, setScope)
+MSAL_JSON_ACCESSOR(OAUTH2_FAMILY_ID, familyId)
+MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, expiresIn)
+MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, accessTokenExpiresIn)
+MSAL_JSON_ACCESSOR(OAUTH2_ID_TOKEN_EXPIRES_IN, idTokenExpiresIn)
 
 @end

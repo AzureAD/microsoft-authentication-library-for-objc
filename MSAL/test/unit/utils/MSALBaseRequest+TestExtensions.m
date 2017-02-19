@@ -29,6 +29,16 @@
 
 @implementation MSALBaseRequest (TestExtensions)
 
+- (MSALAuthority *)authority
+{
+    return _authority;
+}
+
+- (void)setAuthority:(MSALAuthority *)authority
+{
+    _authority = authority;
+}
+
 - (MSALRequestParameters *)parameters
 {
     return _parameters;

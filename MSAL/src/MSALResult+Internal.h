@@ -25,33 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
+#import "MSALResult.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALUser;
+@interface MSALResult (Internal)
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
-
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCache *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
++ (MSALResult *)resultWithToken:(NSString *)token
+                      expiresOn:(NSDate *)expiresOn
+                       tenantId:(NSString *)tenantId
+                           user:(MSALUser *)user
+                         scopes:(NSArray<NSString *> *)scopes;
 
 @end

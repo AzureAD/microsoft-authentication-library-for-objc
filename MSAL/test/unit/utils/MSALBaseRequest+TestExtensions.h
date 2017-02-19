@@ -30,7 +30,9 @@
 
 @interface MSALBaseRequest (TestExtensions)
 
+@property MSALAuthority *authority;
 - (MSALRequestParameters *)parameters;
+
 
 @end
 

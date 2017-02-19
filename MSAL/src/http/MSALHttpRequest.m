@@ -67,7 +67,6 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     
     _endpointURL = endpoint;
     _session = [context urlSession];
-    
     _headers = [NSMutableDictionary new];
     _bodyParameters = [NSMutableDictionary new];
     _queryParameters = [NSMutableDictionary new];

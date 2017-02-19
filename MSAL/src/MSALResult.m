@@ -30,3 +30,24 @@
 @implementation MSALResult
 
 @end
+
+@implementation MSALResult (Internal)
+
++ (MSALResult *)resultWithToken:(NSString *)token
+                      expiresOn:(NSDate *)expiresOn
+                       tenantId:(NSString *)tenantId
+                           user:(MSALUser *)user
+                         scopes:(NSArray<NSString *> *)scopes
+{
+    MSALResult *result = [MSALResult new];
+    
+    result->_token = token;
+    result->_expiresOn = expiresOn;
+    result->_tenantId = tenantId;
+    result->_user = user;
+    result->_scopes = scopes;
+    
+    return result;
+}
+
+@end

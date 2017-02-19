@@ -195,6 +195,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"

@@ -50,6 +50,13 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
                          httpHeaderFields:(NSDictionary *)headerFields
                          dictionaryAsJSON:(NSDictionary *)data;
 
++ (MSALTestURLResponse*)requestURLString:(NSString *)requestUrlString
+                         requestJSONBody:(id)requestJSONBody
+                       responseURLString:(NSString *)responseUrlString
+                            responseCode:(NSInteger)responseCode
+                        httpHeaderFields:(NSDictionary *)headerFields
+                        dictionaryAsJSON:(NSDictionary *)data;
+
 @end
 
 @interface MSALTestURLSession : NSObject

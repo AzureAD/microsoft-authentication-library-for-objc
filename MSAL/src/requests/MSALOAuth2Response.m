@@ -25,33 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
+#import "MSALOAuth2Response.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALUser;
+@implementation MSALOAuth2Response
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+MSAL_JSON_ACCESSOR(OAUTH2_ERROR, error)
+MSAL_JSON_ACCESSOR(OAUTH2_ERROR_DESCRIPTION, errorDescription)
+MSAL_JSON_ACCESSOR(OAUTH2_ERROR_CODES, errorCodes)
+MSAL_JSON_ACCESSOR(OAUTH2_CORRELATION_ID_RESPONSE, correlationId)
 
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCache *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
 
 @end

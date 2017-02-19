@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -20,6 +22,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 #import "MSALOAuth2Constants.h"
 
@@ -34,6 +38,7 @@ NSString *const OAUTH2_CLIENT_ID                    = @"client_id";
 NSString *const OAUTH2_CLIENT_SECRET                = @"client_secret";
 NSString *const OAUTH2_CODE                         = @"code";
 NSString *const OAUTH2_ERROR                        = @"error";
+NSString *const OAUTH2_ERROR_CODES                  = @"error_codes";
 NSString *const OAUTH2_ERROR_DESCRIPTION            = @"error_description";
 NSString *const OAUTH2_EXPIRES_IN                   = @"expires_in";
 NSString *const OAUTH2_GRANT_TYPE                   = @"grant_type";
@@ -41,6 +46,7 @@ NSString *const OAUTH2_PLATFORM_ID                  = @"platform_id";
 NSString *const OAUTH2_REALM                        = @"realm";
 NSString *const OAUTH2_REDIRECT_URI                 = @"redirect_uri";
 NSString *const OAUTH2_REFRESH_TOKEN                = @"refresh_token";
+NSString *const OAUTH2_FAMILY_ID                    = @"foci";
 NSString *const OAUTH2_RESOURCE                     = @"resource";
 NSString *const OAUTH2_RESPONSE_TYPE                = @"response_type";
 NSString *const OAUTH2_SCOPE                        = @"scope";
@@ -51,8 +57,8 @@ NSString *const OAUTH2_INSTANCE_DISCOVERY_SUFFIX    = @"common/discovery/instanc
 NSString *const OAUTH2_TOKEN_TYPE                   = @"token_type";
 NSString *const OAUTH2_LOGIN_HINT                   = @"login_hint";
 NSString *const OAUTH2_ID_TOKEN                     = @"id_token";
+NSString *const OAUTH2_ID_TOKEN_EXPIRES_IN          = @"id_token_expires_in";
 NSString *const OAUTH2_CORRELATION_ID_RESPONSE      = @"correlation_id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST       = @"return-client-request-id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST_VALUE = @"client-request-id";
 NSString *const OAUTH2_SCOPE_OPENID_VALUE           = @"openid";
-
