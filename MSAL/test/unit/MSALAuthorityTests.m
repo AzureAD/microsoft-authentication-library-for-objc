@@ -86,26 +86,46 @@
 
 - (void)testResolveEndpoints
 {
-    // TODO: Authority endpoint discovery
+//    // TODO: Authority endpoint discovery
+//    
+//    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+//    
+//    [MSALAuthority resolveEndpointsForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
+//                              userPrincipalName:@"fakeuser@contoso.com"
+//                                       validate:YES
+//                                        context:nil
+//                                completionBlock:^(MSALAuthority *authority, NSError *error)
+//    {
+//        XCTAssertNil(error);
+//        XCTAssertNotNil(authority);
+//        
+//        XCTAssertEqualObjects(authority.authorizationEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"]);
+//        XCTAssertEqualObjects(authority.tokenEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"]);
+//        
+//        dispatch_semaphore_signal(dsem);
+//    }];
+//    
+//    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+}
+
+- (void)isKnownHostTest
+{
     
-    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+}
+
+- (void)resolveAadEndpointWithValidationSuccessTest
+{
     
-    [MSALAuthority resolveEndpoints:@"fakeuser@contoso.com"
-                 validatedAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
-                           validate:YES
-                            context:nil
-                    completionBlock:^(MSALAuthority *authority, NSError *error)
-    {
-        XCTAssertNil(error);
-        XCTAssertNotNil(authority);
-        
-        XCTAssertEqualObjects(authority.authorizationEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"]);
-        XCTAssertEqualObjects(authority.tokenEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"]);
-        
-        dispatch_semaphore_signal(dsem);
-    }];
+}
+
+- (void)resolveAadEndpointWithValidationFailOpenIdConfigEndpointTest
+{
     
-    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+}
+
+- (void)resolveAadEndpointWithValidationFailTenantDiscoveryTest
+{
+    
 }
 
 @end

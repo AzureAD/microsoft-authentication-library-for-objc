@@ -97,10 +97,6 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 {
     (void)userPrincipalName;
     
-    (void)url;
-    (void)context;
-    (void)completionHandler;
-    
     NSString *host = url.host;
     NSString *tenant = url.pathComponents[1];
     
