@@ -42,6 +42,7 @@
 @property (nullable) MSALTokenCache *tokenCache;
 @property (nullable) MSALTokenResponse *response;
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
+@property (nonnull, readonly) MSALRequestParameters *parameters;
 
 /* Returns the complete set of scopes to be sent out with a token request */
 - (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;

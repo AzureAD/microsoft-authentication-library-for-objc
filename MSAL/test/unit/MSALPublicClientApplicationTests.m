@@ -30,6 +30,17 @@
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
 
+@interface MSALFakeInteractiveRequest : NSObject
+
+@property NSString *state;
+@property MSALRequestParameters *parameters;
+
+@end
+
+@implementation MSALFakeInteractiveRequest
+
+@end
+
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
 @end
@@ -99,13 +110,34 @@
 
 - (void)testIsMSALResponse
 {
+    __block MSALFakeInteractiveRequest *request = nil;
+    [MSALTestSwizzle classMethod:@selector(currentActiveRequest)
+                           class:[MSALInteractiveRequest class]
+                           block:(id)^id(id obj)
+     {
+         (void)obj;
+         return request;
+     }];
+    
     XCTAssertFalse([MSALPublicClientApplication isMSALResponse:nil]);
     XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host"]]);
     XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/resp"]]);
+    
+    request = [MSALFakeInteractiveRequest new];
     XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal"]]);
     XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?"]]);
-    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?code=iamacode"]]);
-    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
+    
+    request.state = @"some_other_state";
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
+    XCTAssertFalse([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
+    
+    request.state = @"fake_state";
+    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
+    XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
 }
 
 - (void)testAcquireTokenScopes

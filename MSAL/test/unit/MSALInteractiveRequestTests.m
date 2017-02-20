@@ -30,30 +30,6 @@
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
 
-@implementation MSALInteractiveRequest (TestExtensions)
-
-- (MSALScopes *)additionalScopes
-{
-    return _additionalScopes;
-}
-
-- (MSALUIBehavior)uiBehavior
-{
-    return _uiBehavior;
-}
-
-- (NSString *)state
-{
-    return _state;
-}
-
-- (MSALRequestParameters *)parameters
-{
-    return _parameters;
-}
-
-@end
-
 @interface MSALInteractiveRequestTests : MSALTestCase
 
 @end

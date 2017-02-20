@@ -48,10 +48,5 @@
     return _uiBehavior;
 }
 
-- (NSString *)state
-{
-    return _state;
-}
-
 @end
 

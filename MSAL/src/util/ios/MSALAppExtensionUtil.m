@@ -64,6 +64,8 @@
     }
     
 #pragma clang diagnostic push
+    // performSelector always causes ARC warnings, due to ARC not knowing the
+    // exact memory semantics of the call being made.
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [[self sharedApplication] performSelector:NSSelectorFromString(@"openURL:") withObject:url];
 #pragma clang diagnostic pop
