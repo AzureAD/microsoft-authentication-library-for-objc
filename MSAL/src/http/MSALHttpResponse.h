@@ -33,7 +33,7 @@
     NSHTTPURLResponse *_response;
 }
 
-- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data;
+- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data error:(NSError * __autoreleasing *)error;
 
 @property (strong, readonly) NSData *body;
 
