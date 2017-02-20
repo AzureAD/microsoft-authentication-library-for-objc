@@ -25,16 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppDelegate.h"
 
-@class MSALTokenCacheKey;
+@interface MSALTestAppDelegate ()
 
-#import "MSALBaseTokenCacheItem.h"
+@property (weak) IBOutlet NSWindow *window;
+@end
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
+@implementation MSALTestAppDelegate
 
-@property (readwrite) NSString * refreshToken;
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
+    // Insert code here to initialize your application
+    (void)aNotification;
+}
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification
+{
+    // Insert code here to tear down your application
+    (void)aNotification;
+}
+
 
 @end

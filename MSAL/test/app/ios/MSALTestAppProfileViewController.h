@@ -25,16 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-@class MSALTokenCacheKey;
+@interface MSALTestAppProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
-#import "MSALBaseTokenCacheItem.h"
-
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
-
-@property (readwrite) NSString * refreshToken;
-
-- (MSALTokenCacheKey *)tokenCacheKey;
++ (MSALTestAppProfileViewController*)sharedProfileViewController;
 
 @end

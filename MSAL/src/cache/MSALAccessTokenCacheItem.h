@@ -27,14 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALTokenCacheKey;
-
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
+@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem
 
-@property (readwrite) NSString * refreshToken;
+@property (readonly) NSString *tokenType;
+@property (readonly) NSString *accessToken;
+@property (readonly) NSDate *expiresOn;
+@property (readonly) MSALScopes *scope;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (BOOL)isExpired;
 
 @end

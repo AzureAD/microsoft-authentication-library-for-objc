@@ -27,14 +27,24 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALTokenCacheKey;
 
-#import "MSALBaseTokenCacheItem.h"
+extern NSString* MSALTestAppCacheChangeNotification;
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
+@interface MSALTestAppSettings : NSObject
 
-@property (readwrite) NSString * refreshToken;
+@property NSString* authority;
+@property NSURL* redirectUri;
+@property NSString* clientId;
+@property NSString* defaultUser;
+@property BOOL validateAuthority;
+@property BOOL enableBroker;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
++ (MSALTestAppSettings*)settings;
++ (NSUInteger)numberOfProfiles;
++ (NSString*)profileTitleForIndex:(NSUInteger)idx;
++ (NSString*)currentProfileTitle;
++ (NSUInteger)currentProfileIdx;
+
+- (void)setProfileFromIndex:(NSInteger)idx;
 
 @end
