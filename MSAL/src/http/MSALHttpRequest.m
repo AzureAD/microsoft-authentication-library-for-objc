@@ -176,8 +176,15 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     NSURLSessionDataTask *task = [_session dataTaskWithRequest:request
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
                                   {
+                                      if (error)
+                                      {
+                                          completionHandler(nil, error);
+                                          return;
+                                      }
+                                      
                                       MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response
-                                                                                                             data:data];
+                                                                                                             data:data
+                                                                                                            error:&error];
                                       completionHandler(msalResponse, error);
                                   }];
     [task resume];

@@ -31,13 +31,9 @@
 
 @implementation MSALHttpResponse
 
-- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data
+- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data error:(NSError * __autoreleasing *)error
 {
-    if (response == nil)
-    {
-        NSAssert(false, @"Invalid Parameters");
-        return nil;
-    }
+    CHECK_ERROR_RETURN_NIL(response, nil, MSALErrorInternal, @"Attempt to initialize MSALHttpResponse with nil response");
     
     if (!(self = [super init]))
     {
