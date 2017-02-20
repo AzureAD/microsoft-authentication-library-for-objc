@@ -134,9 +134,9 @@
          (void)context;
          (void)completionBlock;
       
-         NSDictionary *jsonDict = @{@"authorization_endpoint":@"https://fs.contoso.com/adfs/oauth2/authorize/",
-                                    @"token_endpoint":@"https://fs.contoso.com/adfs/oauth2/token/",
-                                    @"issuer":@"https://fs.contoso.com/adfs/"};
+         NSDictionary *jsonDict = @{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/authorize/",
+                                    @"token_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/token/",
+                                    @"issuer":@"https://fs.contoso.com/{tenantid}/"};
          
          NSData* testJsonData = [NSJSONSerialization dataWithJSONObject:jsonDict options:0 error:nil];
          completionBlock([[MSALTenantDiscoveryResponse alloc] initWithData:testJsonData error:nil], nil);

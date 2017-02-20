@@ -183,6 +183,11 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 @implementation NSURLSession (TestSessionOverride)
 
+- (id)init
+{
+    return (NSURLSession *)[[MSALTestURLSession alloc] initWithDelegate:nil delegateQueue:nil];
+}
+
 + (NSURLSession *)sessionWithConfiguration:(NSURLSessionConfiguration *)configuration
                                   delegate:(id<NSURLSessionDelegate>)delegate
                              delegateQueue:(NSOperationQueue *)queue

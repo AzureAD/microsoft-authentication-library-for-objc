@@ -26,6 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "MSALAuthorityBaseResolver.h"
+#import "MSALHttpRequest.h"
+#import "MSALHttpResponse.h"
+#import "MSALTestURLSession.h"
+#import "MSALTenantDiscoveryResponse.h"
 
 @interface MSALAuthorityBaseResolverTests : MSALTestCase
 
@@ -45,14 +50,76 @@
     [super tearDown];
 }
 
-- (void)tenantDiscoverySuccessTest
+- (void)testTenantDiscoverySuccess
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [[NSURLSession alloc] init];
+    
+    NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+                                                        responseURLString:@"https://someresponseurl.com"
+                                                             responseCode:200
+                                                         httpHeaderFields:@{}
+                                                         dictionaryAsJSON:@{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/authorize",
+                                                                            @"token_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/token",
+                                                                            @"issuer":@"https://fs.contoso.com/{tenantid}/v2.0"}];
+    
+    [MSALTestURLSession addResponse:response];
+    
+    MSALAuthorityBaseResolver *resolver = [MSALAuthorityBaseResolver new];
+    [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:tenantDiscoveryEndpoint]
+                              context:params
+                      completionBlock:^(MSALTenantDiscoveryResponse *response, NSError *error)
+    {
+        XCTAssertNotNil(response);
+        XCTAssertNotNil(response.authorization_endpoint);
+        XCTAssertNotNil(response.issuer);
+        XCTAssertNotNil(response.token_endpoint);
+        
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
 }
 
-- (void)tenantDiscoveryMissingEndpointTest
+- (void)testTenantDiscoveryMissingEndpoint
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [[NSURLSession alloc] init];
+    
+    NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+                                                        responseURLString:@"https://someresponseurl.com"
+                                                             responseCode:200
+                                                         httpHeaderFields:@{}
+                                                         dictionaryAsJSON:@{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/authorize",
+                                                                            @"issuer":@"https://fs.contoso.com/{tenantid}/v2.0"}];
+    
+    [MSALTestURLSession addResponse:response];
+    
+    MSALAuthorityBaseResolver *resolver = [MSALAuthorityBaseResolver new];
+    [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:tenantDiscoveryEndpoint]
+                              context:params
+                      completionBlock:^(MSALTenantDiscoveryResponse *response, NSError *error)
+     {
+         XCTAssertNil(response);
+         
+         XCTAssertNotNil(error);
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
 }
 
 @end
