@@ -29,6 +29,8 @@
 #import "MSALOAuth2Constants.h"
 #import "MSALUIBehavior_Internal.h"
 
+static MSALInteractiveRequest *s_currentRequest = nil;
+
 @implementation MSALInteractiveRequest
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -54,6 +56,11 @@
     _uiBehavior = behavior;
     
     return self;
+}
+
++ (MSALInteractiveRequest *)currentActiveRequest
+{
+    return s_currentRequest;
 }
 
 - (NSMutableDictionary<NSString *, NSString *> *)authorizationParameters

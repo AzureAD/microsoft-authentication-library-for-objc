@@ -30,6 +30,11 @@
 #import "MSALTestBundle.h"
 #import "MSALTestSwizzle.h"
 
+#if TARGET_OS_IPHONE
+#import "SFSafariViewController+TestOverrides.h"
+#import "MSALFakeViewController.h"
+#endif
+
 @implementation MSALTestCase
 
 - (void)setUp {
@@ -37,6 +42,10 @@
     [[MSALTestLogger sharedLogger] reset];
     [MSALTestBundle reset];
     [MSALTestSwizzle reset];
+#if TARGET_OS_IPHONE
+    [SFSafariViewController reset];
+    [MSALFakeViewController reset];
+#endif
 }
 
 - (void)tearDown {
@@ -45,3 +54,11 @@
 }
 
 @end
+
+void wait_and_run_main_thread(dispatch_semaphore_t sem)
+{
+    while (dispatch_semaphore_wait(sem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
+}

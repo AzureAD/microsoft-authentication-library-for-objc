@@ -35,3 +35,4 @@
 
 @end
 
+void wait_and_run_main_thread(dispatch_semaphore_t sem);

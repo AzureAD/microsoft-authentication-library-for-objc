@@ -81,8 +81,64 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorInteractionRequired    = -42100,
     MSALErrorMismatchedUser = -42101,
+    MSALErrorNoAuthorizationResponse = -42102,
+    MSALErrorBadAuthorizationResponse = -42103,
     
+    /*!
+        The user or application failed to authenticate in the interactive flow.
+        Inspect MSALOAuthErrorKey and MSALErrorDescriptionKey in the userInfo
+        dictionary for more detailed information about the specific error.
+     */
+    MSALErrorAuthorizationFailed = -42104,
+    
+    /*!
+        MSAL encounted an error when trying to store or retrieve items from
+        keychain. Inspect NSUnderlyingError from the userInfo dictionary for
+        more information about the specific error. Keychain error codes are
+        documented in Apple's <Security/SecBase.h> header file
+     */
     MSALErrorKeychainFailure = -42200,
+    /*!
+        MSAL encounted a network error while trying to authenticate. Inspect
+        NSUnderlyingError from the userInfo dictionary for more information
+        about the specific error. In most cases the errors will come from the
+        system's network layer and the individual errors will be detailed in
+        Apple's <Foundation/NSURLError.h> header file.
+     */
     MSALErrorNetworkFailure = -42300,
+    
+    /*!
+        The user cancelled the web auth session by tapping the "Done" button on the
+        SFSafariViewController.
+     */
+    MSALErrorUserCanceled = -42400,
+    /*!
+        The authentication request was cancelled programmatically.
+     */
+    MSALErrorSessionCanceled = -42401,
+    /*!
+        An interactive authentication session is already running with the
+        SafariViewController visible. Another authentication session can not be
+        launched yet.
+     */
+    MSALErrorInteractiveSessionAlreadyRunning = -42402,
+    /*!
+        MSAL could not find the current view controller in the view controller
+        heirarchy to display the SFSafariViewController on top of.
+     */
+    MSALErrorNoViewController = -42403,
+    
+    /*!
+        An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
+        in the userInfo dictionary for more detailed information about the specific
+        error.
+     */
+    MSALErrorInternal = -42500,
+    /*!
+        The state returned by the server does not match the state that was sent to
+        the server at the beginning of the authorization attempt.
+     */
+    MSALErrorInvalidState = -42501,
+    
 };
 

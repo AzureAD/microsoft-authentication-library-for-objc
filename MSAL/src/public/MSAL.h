@@ -49,6 +49,7 @@ typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
 #import <MSAL/MSALPublicClientApplication.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALUser.h>
+#import <MSAL/MSALTelemetry.h>
 
 
 #if TARGET_OS_IPHONE
