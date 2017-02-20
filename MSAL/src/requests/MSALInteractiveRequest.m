@@ -32,6 +32,8 @@
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
 
+static MSALInteractiveRequest *s_currentRequest = nil;
+
 @implementation MSALInteractiveRequest
 {
     NSString *_code;
@@ -60,6 +62,11 @@
     _uiBehavior = behavior;
     
     return self;
+}
+
++ (MSALInteractiveRequest *)currentActiveRequest
+{
+    return s_currentRequest;
 }
 
 - (NSMutableDictionary<NSString *, NSString *> *)authorizationParameters

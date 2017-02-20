@@ -36,7 +36,6 @@
 #import "MSALTestURLSession.h"
 #import "MSALWebUI.h"
 
-
 @interface MSALInteractiveRequestTests : MSALTestCase
 
 @end

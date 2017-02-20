@@ -28,6 +28,7 @@
 #import "SFSafariViewController+TestOverrides.h"
 #import "MSALFakeViewController.h"
 
+static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, BOOL) = nil;
 
 @implementation SFSafariViewController (TestOverrides)
 

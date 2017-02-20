@@ -30,7 +30,6 @@
 @class MSALFakeViewController;
 
 typedef void(^SVCValidationBlock)(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable);
-static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, BOOL) = nil;
 
 @interface SFSafariViewController (TestOverrides)
 

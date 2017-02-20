@@ -40,6 +40,4 @@
 
 - (MSALScopes *)additionalScopes;
 - (MSALUIBehavior)uiBehavior;
-- (NSString *)state;
-
 @end
