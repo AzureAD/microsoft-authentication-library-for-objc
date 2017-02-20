@@ -48,6 +48,6 @@ NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior)
     {
         case MSALForceLogin : return @{ @"prompt" : @"login" };
         case MSALForceConsent : return @{ @"prompt" : @"consent" };
-        case MSALSelectAccount : return @{ @"prompt" : @"select_content" };
+        case MSALSelectAccount : return @{ @"prompt" : @"select_account" };
     }
 }

@@ -43,8 +43,9 @@
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
 {
     (void)error; // TODO
-    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];
+    /*NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];*/
+    NSString *scheme = @"adaliosxformsapp";
     
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
     
@@ -53,13 +54,15 @@
         NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
         if ([urlSchemes containsObject:scheme])
         {
-            NSString *redirectUri = [NSString stringWithFormat:@"%@://%@/msal", scheme, bundleId];
+            // TODO Fix this mess
+            //NSString *redirectUri = [NSString stringWithFormat:@"%@://%@/msal", scheme, bundleId];
+            NSString *redirectUri = [NSString stringWithFormat:@"%@://com.yourcompany.xformsapp", scheme];
             _redirectUri = [NSURL URLWithString:redirectUri];
             return YES;
         }
     }
     
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme is not registered in the app's info.plist file.");
+    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file.", scheme);
     
     return NO;
 }
@@ -204,7 +207,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"

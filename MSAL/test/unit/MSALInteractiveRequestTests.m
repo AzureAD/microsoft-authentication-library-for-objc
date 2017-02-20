@@ -95,7 +95,7 @@
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       additionalScopes:@[@"fakescope3"]
-                                              behavior:MSALForceConsent
+                                              behavior:MSALForceLogin
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -123,8 +123,10 @@
       @"x-client-CPU" : msalId[@"x-client-CPU"],
       @"return-client-request-id" : correlationId.UUIDString,
       @"state" : request.state,
-      @"prompt" : @"consent",
-      @"scope" : @"fakescope1,fakescope2,fakescope3,openid,profile,offline_access",
+      @"login_hint" : @"fakeuser@contoso.com",
+      @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+      @"prompt" : @"login",
+      @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
       @"eqp1" : @"val1",
       @"eqp2" : @"val2",
       @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
@@ -191,7 +193,9 @@
            @"return-client-request-id" : correlationId.UUIDString,
            @"state" : request.state,
            @"prompt" : @"consent",
-           @"scope" : @"fakescope1,fakescope2,fakescope3,openid,profile,offline_access",
+           @"login_hint" : @"fakeuser@contoso.com",
+           @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+           @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
            @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
@@ -208,9 +212,9 @@
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                           requestJSONBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
-                                             @"scope" : @"fakescope1,fakescope2",
+                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
-                                             @"grant_type" : @"code"}
+                                             @"grant_type" : @"authorization_code"}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil

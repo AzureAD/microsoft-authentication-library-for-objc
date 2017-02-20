@@ -77,10 +77,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         [parameters addEntriesFromDictionary:_parameters.extraQueryParameters];
     }
     MSALScopes *allScopes = [self requestScopes:_additionalScopes];
+    parameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
     parameters[OAUTH2_SCOPE] = [allScopes msalToString];
     parameters[OAUTH2_RESPONSE_TYPE] = OAUTH2_CODE;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
     parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
+    parameters[OAUTH2_LOGIN_HINT] = _parameters.loginHint;
     
     NSDictionary *msalId = [MSALLogger msalId];
     [parameters addEntriesFromDictionary:msalId];
@@ -109,10 +111,14 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 {
     NSURL *authorizationUrl = [self authorizationUrl];
     
+    LOG_INFO(_parameters, @"Launching Web UI");
+    LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
+    s_currentRequest = self;
     [MSALWebUI startWebUIWithURL:authorizationUrl
                          context:_parameters
                  completionBlock:^(NSURL *response, NSError *error)
      {
+         s_currentRequest = nil;
          if (error)
          {
              completionBlock(nil, error);
@@ -156,7 +162,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
 {
-    parameters[OAUTH2_GRANT_TYPE] = OAUTH2_CODE;
+    parameters[OAUTH2_GRANT_TYPE] = @"authorization_code";
     parameters[OAUTH2_CODE] = _code;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
 }
