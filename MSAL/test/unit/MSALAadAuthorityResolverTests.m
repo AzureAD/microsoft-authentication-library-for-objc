@@ -51,17 +51,29 @@
     // Use XCTAssert and related functions to verify your tests produce the correct results.
 }
 
-- (void)addToCacheTest
+- (void)testValidatedAuthorityCache
 {
+    // Add valid authority
+    
+    // Add non valid authority
+    
+    // Check if valid authority returned
+    
+    // Check if non valid authority was not returned
+    
     
 }
 
-- (void)retrieveCacheTest
+- (void)testDefaultOpenOdConfigurationEndpoint
 {
+    // Test with host and tenant
     
+    // Test with no host
+    
+    // Test with no tenant
 }
 
-- (void)testOpenIdConfigEndpointWithValidateSuccessTest
+- (void)testOpenIdConfigEndpointSucess
 {
     /*
      [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
@@ -74,10 +86,26 @@
      */
 }
 
-- (void)testOpenIdConfigEndpointWithValidateFailTest
+- (void)testOpenIdConfigEndpointNoValidationNeeded
 {
+    // Swizzle defaultOpenId...
+    
     
 }
+
+- (void)testOpenIdConfigEndpointInvalidResponse
+{
+    
+    
+}
+
+- (void)testOpenIdConfigEndpointErrorResponse
+{
+    
+    
+}
+
+
 
 - (void)testOpenIdConfigEndpointWithNoValidateSuccessTest
 {

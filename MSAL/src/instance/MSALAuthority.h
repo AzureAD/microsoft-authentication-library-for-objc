@@ -49,8 +49,8 @@ typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NS
 - (MSALAuthority *)authorityFromCache:(NSURL *)authority
                     userPrincipalName:(NSString *)userPrincipalName;
 
-- (void)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                   userPrincipalName:(NSString *)userPrincipalName;
+- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
 
 
 @end

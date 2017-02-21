@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
 #import "MSALJsonObject.h"
 
 @interface MSALTenantDiscoveryResponse : MSALJsonObject

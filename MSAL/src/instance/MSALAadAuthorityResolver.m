@@ -75,15 +75,25 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     return s_validatedAuthorities[authority.absoluteString.lowercaseString];
 }
 
-- (void)addToValidatedAuthorityCache:(MSALAuthority *)authority
+- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
                    userPrincipalName:(NSString *)userPrincipalName
 {
+    if (!authority)
+    {
+        return NO;
+    }
+    
     (void)userPrincipalName;
     s_validatedAuthorities[authority.canonicalAuthority.absoluteString.lowercaseString] = authority;
+    return YES;
 }
 
 - (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
 {
+    if (!host || !tenant)
+    {
+        return nil;
+    }
     return [NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, DEFAULT_OPENID_CONFIGURATION_ENDPOINT];
     
 }
