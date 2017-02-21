@@ -93,8 +93,8 @@
     XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.windows.net"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://loginchinacloudapi.cn"]]);
-    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"login.microsoftonline.com"]]);
-    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"login.microsoftonline.de"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.com"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.de"]]);
 }
 
 - (void)testResolveEndpointsSuccess

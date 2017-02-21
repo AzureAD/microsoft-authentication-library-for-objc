@@ -27,8 +27,8 @@
 
 #import "MSALTestCase.h"
 #import "MSALAuthorityBaseResolver.h"
-#import "MSALHttpRequest.h"
-#import "MSALHttpResponse.h"
+//#import "MSALHttpRequest.h"
+//#import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
 
@@ -55,7 +55,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [[NSURLSession alloc] init];
+    params.urlSession = [NSURLSession new];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
@@ -93,7 +93,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [[NSURLSession alloc] init];
+    params.urlSession = [NSURLSession new];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     

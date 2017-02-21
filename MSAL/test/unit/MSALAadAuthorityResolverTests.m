@@ -26,6 +26,10 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "MSALAuthority.h"
+#import "MSALAadAuthorityResolver.h"
+#import "MSALTestURLSession.h"
+#import "MSALTestSwizzle.h"
 
 @interface MSALAadAuthorityResolverTests : MSALTestCase
 
@@ -45,77 +49,147 @@
     [super tearDown];
 }
 
-- (void)testExample
-{
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
-}
-
 - (void)testValidatedAuthorityCache
 {
+    MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver sharedResolver];
+    NSURL *validURL = [NSURL URLWithString:@"https://login.windows.net/common/"];
+    
     // Add valid authority
+    MSALAuthority *validAuthority = [MSALAuthority new];
+    validAuthority.canonicalAuthority = validURL;
+    XCTAssertTrue([aadResolver addToValidatedAuthorityCache:validAuthority userPrincipalName:nil]);
     
     // Add non valid authority
+    XCTAssertFalse([aadResolver addToValidatedAuthorityCache:nil userPrincipalName:nil]);
     
     // Check if valid authority returned
+    MSALAuthority *retrivedAuthority = [aadResolver authorityFromCache:validURL userPrincipalName:nil];
+    XCTAssertNotNil(retrivedAuthority);
+    XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:validURL]);
     
     // Check if non valid authority was not returned
-    
-    
+    XCTAssertNil([aadResolver authorityFromCache:[NSURL URLWithString:@"https://notaddedhost.com"] userPrincipalName:nil]);
 }
 
-- (void)testDefaultOpenOdConfigurationEndpoint
+- (void)testDefaultOpenIdConfigurationEndpoint
 {
+    MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver sharedResolver];
+    
     // Test with host and tenant
+    NSString *endpoint = [aadResolver defaultOpenIdConfigurationEndpointForHost:@"somehost.com" tenant:@"sometenant.com"];
+    XCTAssertEqualObjects(endpoint, @"https://somehost.com/sometenant.com/v2.0/.well-known/openid-configuration");
     
     // Test with no host
+    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:nil tenant:@"sometenant.com"]);
+    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"" tenant:@"sometenant.com"]);
     
     // Test with no tenant
+    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"www.somehost.com" tenant:nil]);
+    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"www.somehost.com" tenant:@""]);
+    
 }
 
 - (void)testOpenIdConfigEndpointSucess
 {
-    /*
-     [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
-     class:[MSALAadAuthorityResolver class]
-     block:(id)^(id obj, NSURL *authority,
-     NSString *userPrincipalName,
-     BOOL validate, id<MSALRequestContext> context,
-     OpenIDConfigCallback completionHandler)
+    // From MSALAadAuthorityResolver.m
+    #define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
 
-     */
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession new];
+
+    NSString *responseEndpoint = @"https://someendpoint.com";
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+                                                        responseURLString:@"https://someresponseurl.com"
+                                                             responseCode:200
+                                                         httpHeaderFields:@{}
+                                                         dictionaryAsJSON:@{@"tenant_discovery_endpoint":responseEndpoint}];
+
+    [MSALTestURLSession addResponse:response];
+    
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+                                                               userPrincipalName:nil validate:YES context:params completionHandler:^(NSString *endpoint, NSError *error) {
+                                                                   XCTAssertEqualObjects(endpoint, responseEndpoint);
+                                                                   XCTAssertNil(error);
+                                                                   
+                                                                   [expectation fulfill];
+                                                               }];
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
 }
 
 - (void)testOpenIdConfigEndpointNoValidationNeeded
 {
+    NSString *responseEndpoint = @"https://someendpoint.com";
+    
     // Swizzle defaultOpenId...
+    [MSALTestSwizzle instanceMethod:@selector(defaultOpenIdConfigurationEndpointForHost:tenant:)
+                              class:[MSALAadAuthorityResolver class]
+                               block:(id)^(id obj, NSString *host, NSString *tenant)
+     {
+         (void)obj;
+         (void)host;
+         (void)tenant;
+         
+         return responseEndpoint;
+     }];
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+                                                               userPrincipalName:nil
+                                                                        validate:NO
+                                                                         context:nil
+                                                               completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        XCTAssertEqualObjects(endpoint, responseEndpoint);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
 }
 
 - (void)testOpenIdConfigEndpointInvalidResponse
 {
+    // From MSALAadAuthorityResolver.m
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession new];
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+                                                        responseURLString:@"https://someresponseurl.com"
+                                                             responseCode:200
+                                                         httpHeaderFields:@{}
+                                                         dictionaryAsJSON:@{}];
+    
+    [MSALTestURLSession addResponse:response];
+    
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+                                                               userPrincipalName:nil validate:YES context:params completionHandler:^(NSString *endpoint, NSError *error) {
+                                                                   XCTAssertNil(endpoint);
+                                                                   XCTAssertNotNil(error);
+                                                                   
+                                                                   [expectation fulfill];
+                                                               }];
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
 }
 
 - (void)testOpenIdConfigEndpointErrorResponse
 {
     
-    
 }
 
-
-
-- (void)testOpenIdConfigEndpointWithNoValidateSuccessTest
-{
-    
-}
-
-- (void)testOpenIdConfigEndpointWithNoValidateFailTest
-{
-    
-}
 
 
 @end

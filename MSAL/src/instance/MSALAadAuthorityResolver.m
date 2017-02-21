@@ -90,7 +90,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 
 - (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
 {
-    if (!host || !tenant)
+    if ([NSString msalIsStringNilOrBlank:host] || [NSString msalIsStringNilOrBlank:tenant])
     {
         return nil;
     }

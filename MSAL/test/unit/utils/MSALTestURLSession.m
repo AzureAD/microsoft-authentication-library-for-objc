@@ -47,6 +47,32 @@
     return response;
 }
 
++ (MSALTestURLResponse *)requestURLString:(NSString*)requestUrlString
+                          requestJSONBody:(id)requestJSONBody
+                        responseURLString:(NSString*)responseUrlString
+                             responseCode:(NSInteger)responseCode
+                         httpHeaderFields:(NSDictionary *)headerFields
+                         dictionaryAsJSON:(NSDictionary *)data
+{
+    MSALTestURLResponse *response = [MSALTestURLResponse new];
+    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
+    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
+    response->_requestJSONBody = requestJSONBody;
+    [response setJSONResponse:data];
+    
+    return response;
+}
+
++ (MSALTestURLResponse *)requestURLString:(NSString *)requestUrlString
+                         respondWithError:(NSError *)error
+{
+    MSALTestURLResponse *response = [MSALTestURLResponse new];
+    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
+    response->_error = error;
+    
+    return response;
+}
+
 - (void)setResponseURL:(NSString *)urlString
                   code:(NSInteger)code
           headerFields:(NSDictionary *)headerFields
@@ -262,7 +288,8 @@ static NSMutableArray *s_responses = nil;
             {
                 [subResponses removeObjectAtIndex:0];
                 if ([subResponses count] == 0)
-                {                    [s_responses removeObjectAtIndex:i];
+                {
+                    [s_responses removeObjectAtIndex:i];
                 }
                 return response;
             }

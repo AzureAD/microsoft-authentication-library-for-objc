@@ -161,12 +161,9 @@ BOOL isTenantless(NSURL *authority)
     }];
 }
 
-
-
 + (BOOL)isKnownHost:(NSURL *)url
 {
     return [s_trustedHostList containsObject:url.host.lowercaseString];
 }
-
 
 @end
