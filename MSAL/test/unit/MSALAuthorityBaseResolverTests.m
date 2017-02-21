@@ -83,7 +83,8 @@
         [expectation fulfill];
     }];
     
-    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error)
+    {
         XCTAssertNil(error);
     }];
 }
@@ -117,7 +118,8 @@
          [expectation fulfill];
      }];
     
-    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error)
+    {
         XCTAssertNil(error);
     }];
 }

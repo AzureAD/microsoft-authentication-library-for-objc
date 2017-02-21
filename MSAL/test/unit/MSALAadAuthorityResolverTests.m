@@ -110,13 +110,19 @@
     [MSALTestURLSession addResponse:response];
     
     [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
-                                                               userPrincipalName:nil validate:YES context:params completionHandler:^(NSString *endpoint, NSError *error) {
-                                                                   XCTAssertEqualObjects(endpoint, responseEndpoint);
-                                                                   XCTAssertNil(error);
-                                                                   
-                                                                   [expectation fulfill];
-                                                               }];
-    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+                                                               userPrincipalName:nil
+                                                                        validate:YES
+                                                                         context:params
+                                                               completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        XCTAssertEqualObjects(endpoint, responseEndpoint);
+        XCTAssertNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+    {
         XCTAssertNil(error);
     }];
 }
@@ -150,7 +156,8 @@
         [expectation fulfill];
     }];
     
-    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+    {
         XCTAssertNil(error);
     }];
 }
@@ -174,20 +181,55 @@
     [MSALTestURLSession addResponse:response];
     
     [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
-                                                               userPrincipalName:nil validate:YES context:params completionHandler:^(NSString *endpoint, NSError *error) {
-                                                                   XCTAssertNil(endpoint);
-                                                                   XCTAssertNotNil(error);
-                                                                   
-                                                                   [expectation fulfill];
-                                                               }];
-    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error) {
+                                                               userPrincipalName:nil
+                                                                        validate:YES
+                                                                         context:params
+                                                               completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        XCTAssertNil(endpoint);
+        XCTAssertNotNil(error);
+        
+        [expectation fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+    {
         XCTAssertNil(error);
     }];
 }
 
 - (void)testOpenIdConfigEndpointErrorResponse
 {
+    // From MSALAadAuthorityResolver.m
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession new];
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+                                                         respondWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                              code:NSURLErrorCannotFindHost
+                                                                                          userInfo:nil]];
+    
+    [MSALTestURLSession addResponse:response];
+    
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+                                                               userPrincipalName:nil
+                                                                        validate:YES
+                                                                         context:params
+                                                               completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        XCTAssertNil(endpoint);
+        XCTAssertNotNil(error);
+        
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+    {
+        XCTAssertNil(error);
+    }];
 }
 
 
