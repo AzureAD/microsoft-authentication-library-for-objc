@@ -25,10 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAccessTokenCacheItem.h"
 
-#import "MSALBaseCacheItem.h"
+@implementation MSALAccessTokenCacheItem
 
-@interface MSALTokenCacheItem : MSALBaseCacheItem
+MSAL_JSON_ACCESSOR(OAUTH2_TOKEN_TYPE, tokenType)
+MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
+
+- (NSDate *)expiresOn
+{
+    NSString *expiresOn = _json[@"expires_on"];
+    if (!expiresOn)
+    {
+        return nil;
+    }
+    return [NSDate dateWithTimeIntervalSince1970:[expiresOn doubleValue]];
+}
+
+- (BOOL)isExpired
+{
+    return [self.expiresOn timeIntervalSinceNow] > 0;
+}
 
 @end

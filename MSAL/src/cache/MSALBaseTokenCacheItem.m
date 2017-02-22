@@ -25,8 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheItem.h"
+#import "MSALBaseTokenCacheItem.h"
+#import "MSALUser.h"
+#import "MSAL_Internal.h"
 
-@implementation MSALTokenCacheItem
+@implementation MSALBaseTokenCacheItem
+
+MSAL_JSON_RW(@"authority", authority, setAuthority)
+MSAL_JSON_RW(@"client_id", clientId, setClientId)
+MSAL_JSON_RW(@"policy", policy, setPolicy)
+MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
+MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                 policy:(NSString *)policy
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self.authority = authority;
+    self.clientId = clientId;
+    self.policy = policy;
+    
+    return self;
+}
+
+- (NSString *)uniqueId
+{
+    return _user.uniqueId;
+}
+
+- (NSString *)displayableId
+{
+    return _user.displayableId;
+}
+
+- (NSString *)homeObjectId
+{
+    return _user.homeObjectId;
+}
+
+- (MSALTokenCacheKey *)tokenCacheKey
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
 
 @end

@@ -25,16 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
-@class MSALTokenCacheKey;
+@interface MSALTestAppDelegate : NSObject <NSApplicationDelegate>
 
-#import "MSALBaseTokenCacheItem.h"
-
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
-
-@property (readwrite) NSString * refreshToken;
-
-- (MSALTokenCacheKey *)tokenCacheKey;
 
 @end
+

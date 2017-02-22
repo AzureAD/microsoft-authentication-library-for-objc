@@ -27,14 +27,23 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALTokenCacheKey;
+// Apple provides a lot of this in UIStackView in iOS 9, but prior to that we need to build it by hand
+@interface MSALTestAppAcquireLayoutBuilder : NSObject
+{
+    UIView* _contentView;
+    NSMutableDictionary* _views;
+    NSMutableArray* _keys;
+    CGRect _screenRect;
+}
 
-#import "MSALBaseTokenCacheItem.h"
+- (void)addControl:(UIControl *)control
+             title:(NSString *)title;
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
+- (void)addView:(UIView*)view key:(NSString *)key;
 
-@property (readwrite) NSString * refreshToken;
+- (void)addCenteredView:(UIView *)view
+                    key:(NSString *)key;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (UIView*)contentView;
 
 @end

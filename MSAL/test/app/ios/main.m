@@ -25,16 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import "MSALTestAppDelegate.h"
 
-@class MSALTokenCacheKey;
-
-#import "MSALBaseTokenCacheItem.h"
-
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
-
-@property (readwrite) NSString * refreshToken;
-
-- (MSALTokenCacheKey *)tokenCacheKey;
-
-@end
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([MSALTestAppDelegate class]));
+    }
+}
