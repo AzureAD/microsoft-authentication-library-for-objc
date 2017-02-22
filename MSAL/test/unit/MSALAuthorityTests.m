@@ -79,6 +79,14 @@
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant or common"]);
     
+    url = [MSALAuthority checkAuthorityString:@"https://somehost.com/tfp/" error:&error];
+    XCTAssertNil(url);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant"]);
+    
+    
     url = [MSALAuthority checkAuthorityString:@"https login.microsoftonline.com common" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
