@@ -44,7 +44,6 @@
 #endif
     
     [self setAcceptJSON];
-    [self setContentTypeFormURLEncoded];
     
     _retryIfServerError = YES;
     
