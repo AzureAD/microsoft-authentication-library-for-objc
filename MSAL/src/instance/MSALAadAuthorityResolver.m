@@ -109,48 +109,47 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     NSString *host = url.host;
     NSString *tenant = url.pathComponents[1];
     
-    if (validate && ![MSALAuthority isKnownHost:url])
-    {
-        MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
-                                                                context:context];
-        [request addValue:API_VERSION_VALUE forHTTPHeaderField:API_VERSION];
-        [request addValue:[NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, TOKEN_ENDPOINT_SUFFIX] forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
-        
-        [request sendGet:^(MSALHttpResponse *response, NSError *error)
-        {
-            if (error)
-            {
-                completionHandler(nil, error);
-                return;
-            }
-            
-            NSError *jsonError = nil;
-            MSALInstanceDiscoveryResponse *json = [[MSALInstanceDiscoveryResponse alloc] initWithData:response.body
-                                                                                                error:&jsonError];
-            if (jsonError)
-            {
-                completionHandler(nil, error);
-                return;
-            }
-            
-            NSString *tenantDiscoverEndpoint = json.tenant_discovery_endpoint;
-            
-            if ([NSString msalIsStringNilOrBlank:tenantDiscoverEndpoint])
-            {
-                NSError *tenantDiscoveryError;
-                MSAL_CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
-                completionHandler(nil, tenantDiscoveryError);
-                return;
-            }
-            completionHandler(tenantDiscoverEndpoint, nil);
-            return;
-        }];
-    }
-    else
+    if (!validate || [MSALAuthority isKnownHost:url])
     {
         NSString *endpoint = [self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant];
         completionHandler(endpoint, nil);
     }
+
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
+                                                            context:context];
+    [request addValue:API_VERSION_VALUE forHTTPHeaderField:API_VERSION];
+    [request addValue:[NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, TOKEN_ENDPOINT_SUFFIX] forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
+    
+    [request sendGet:^(MSALHttpResponse *response, NSError *error)
+     {
+         if (error)
+         {
+             completionHandler(nil, error);
+             return;
+         }
+         
+         NSError *jsonError = nil;
+         MSALInstanceDiscoveryResponse *json = [[MSALInstanceDiscoveryResponse alloc] initWithData:response.body
+                                                                                             error:&jsonError];
+         if (jsonError)
+         {
+             completionHandler(nil, error);
+             return;
+         }
+         
+         NSString *tenantDiscoverEndpoint = json.tenant_discovery_endpoint;
+         
+         if ([NSString msalIsStringNilOrBlank:tenantDiscoverEndpoint])
+         {
+             NSError *tenantDiscoveryError;
+             CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
+             completionHandler(nil, tenantDiscoveryError);
+             return;
+         }
+         completionHandler(tenantDiscoverEndpoint, nil);
+         return;
+     }];
+  
 }
 
 @end
