@@ -56,7 +56,7 @@ static MSALWebUI *s_currentWebSession = nil;
     [webUI startWithURL:url completionBlock:completionBlock];
 }
 
-+ (MSALWebUI *)currentWebSession
++ (MSALWebUI *)getAndClearCurrentWebSession
 {
     MSALWebUI *webSession = nil;
     @synchronized ([MSALWebUI class])
@@ -68,10 +68,15 @@ static MSALWebUI *s_currentWebSession = nil;
     return webSession;
 }
 
-+ (void)cancelCurrentWebAuthSession
++ (BOOL)cancelCurrentWebAuthSession
 {
-    MSALWebUI *webSession = [MSALWebUI currentWebSession];
+    MSALWebUI *webSession = [MSALWebUI getAndClearCurrentWebSession];
+    if (!webSession)
+    {
+        return NO;
+    }
     [webSession cancel];
+    return YES;
 }
 
 - (BOOL)clearCurrentWebSession
@@ -101,6 +106,11 @@ static MSALWebUI *s_currentWebSession = nil;
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller
 {
     (void)controller;
+    if (![self clearCurrentWebSession])
+    {
+        return;
+    }
+    
     [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
 }
 
@@ -141,7 +151,7 @@ static MSALWebUI *s_currentWebSession = nil;
         return NO;
     }
     
-    MSALWebUI *webSession = [MSALWebUI currentWebSession];
+    MSALWebUI *webSession = [MSALWebUI getAndClearCurrentWebSession];
     if (!webSession)
     {
         LOG_ERROR(nil, @"Received MSAL web response without a current session running.");

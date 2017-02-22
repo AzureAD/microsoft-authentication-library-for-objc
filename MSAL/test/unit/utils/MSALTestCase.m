@@ -29,6 +29,7 @@
 #import "MSALTestLogger.h"
 #import "MSALTestBundle.h"
 #import "MSALTestSwizzle.h"
+#import "MSALWebUI.h"
 
 #if TARGET_OS_IPHONE
 #import "SFSafariViewController+TestOverrides.h"
@@ -37,7 +38,8 @@
 
 @implementation MSALTestCase
 
-- (void)setUp {
+- (void)setUp
+{
     [super setUp];
     [[MSALTestLogger sharedLogger] reset];
     [MSALTestBundle reset];
@@ -48,8 +50,10 @@
 #endif
 }
 
-- (void)tearDown {
+- (void)tearDown
+{
     // Put teardown code here. This method is called after the invocation of each test method in the class.
+    XCTAssertFalse([MSALWebUI cancelCurrentWebAuthSession]);
     [super tearDown];
 }
 
