@@ -27,33 +27,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@interface MSALAppExtensionUtil : NSObject
 
-@interface MSALBaseRequest : NSObject
-{
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
-}
+/// Determine whether or not the host app is an application extension based on the main bundle path
++ (BOOL)isExecutingInAppExtension;
+/// Application extension safe replacement for `[UIApplication sharedApplication]`. The caller should make sure `isExecutingInAppExtension == NO` before calling this method.
++ (UIApplication*)sharedApplication;
+/// Application extension safe replacement for `[[UIApplication sharedApplication] openURL:]`. The caller should make sure `isExecutingInAppExtension == NO` before calling this method.
++ (void)sharedApplicationOpenURL:(NSURL*)url;
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
-
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
-
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 @end

@@ -25,35 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALBaseRequest+TestExtensions.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@implementation MSALBaseRequest (TestExtensions)
 
-@interface MSALBaseRequest : NSObject
+- (MSALRequestParameters *)parameters
 {
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    return _parameters;
 }
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
+@end
 
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
+@implementation MSALInteractiveRequest (TestExtensions)
 
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
+- (MSALScopes *)additionalScopes
+{
+    return _additionalScopes;
+}
 
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
+- (MSALUIBehavior)uiBehavior
+{
+    return _uiBehavior;
+}
 
 @end
+

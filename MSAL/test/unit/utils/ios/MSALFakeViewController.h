@@ -27,33 +27,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@interface MSALFakeViewController : NSObject
 
-@interface MSALBaseRequest : NSObject
-{
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
-}
++ (void)returnNilForCurrentController;
++ (MSALFakeViewController *)currentController;
++ (void)reset;
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
-
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
-
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
+@property BOOL wasPresented;
+@property BOOL wasDismissed;
+@property id delegate;
 
 @end

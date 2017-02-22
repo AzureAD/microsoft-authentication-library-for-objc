@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,35 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALWebUI.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@implementation MSALWebUI
 
-@interface MSALBaseRequest : NSObject
++ (void)startWebUIWithURL:(NSURL *)url
+                  context:(id<MSALRequestContext>)context
+          completionBlock:(MSALWebUICompletionBlock)completionBlock
 {
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    (void)url;
+    (void)context;
+    (void)completionBlock;
+    
+    @throw @"MSAL is not supported on macOS at this time.";
 }
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
++ (BOOL)handleResponse:(NSURL *)url
+{
+    (void)url;
+    @throw @"MSAL is not supported on macOS at this time.";
+}
 
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
-
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
++ (void)cancelCurrentWebAuthSession
+{
+    @throw @"MSAL is not supported on macOS at this time.";
+}
 
 @end

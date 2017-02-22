@@ -25,35 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "SFSafariViewController+TestOverrides.h"
+#import "MSALFakeViewController.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+static void(^s_svcValidationBlock)(MSALFakeViewController *controller, NSURL *, BOOL) = nil;
 
-@interface MSALBaseRequest : NSObject
+@implementation SFSafariViewController (TestOverrides)
+
++ (void)setValidationBlock:(SVCValidationBlock)block
 {
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    s_svcValidationBlock = block;
 }
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
++ (void)reset
+{
+    s_svcValidationBlock = nil;
+}
 
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+#pragma clang diagnostic ignored "-Wobjc-designated-initializers"
+- (id)initWithURL:(NSURL *)URL
+{
+    return [self initWithURL:URL entersReaderIfAvailable:NO];
+}
 
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
+- (id)initWithURL:(NSURL *)URL entersReaderIfAvailable:(BOOL)entersReaderIfAvailable
+{
+    MSALFakeViewController *fakeController = [MSALFakeViewController new];
+    if (s_svcValidationBlock)
+    {
+        s_svcValidationBlock(fakeController, URL, entersReaderIfAvailable);
+    }
+    return (SFSafariViewController *)fakeController;
+}
+#pragma pop
 
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 @end

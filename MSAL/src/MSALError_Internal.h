@@ -27,15 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
+
 extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 extern void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *function, int line);
-extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSError* underlyingError);
+extern NSError *MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSError* underlyingError);
+
+extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(7, 8);
+extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(8, 9);
 
 // Convenience macro for checking and filling an optional NSError** parameter
-#define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) \
-    NSString* _ERROR_STRING = [NSString stringWithFormat:_DESC, ##__VA_ARGS__]; \
-    MSALLogError(_CTX, _CODE, _ERROR_STRING, nil, __FUNCTION__, __LINE__); \
-    if (error) { *error = MSALCreateError(_CODE, _DESC, nil, nil); } \
+#define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+
+#define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, _CODE, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
 // Convenience macros for checking a false/nil return result and passing along
 // an error to a completion block with quick return
@@ -43,6 +46,9 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
     completionBlock(nil, error); \
     return; \
 }
+#define ERROR_COMPLETION(_CTX, _CODE, _DESC, ...) \
+    completionBlock(nil, CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
+    return; \
 
 // Convenience macro to create invalid response error
 #define MSAL_CREATE_ERROR_INVALID_RESULT(_CTX, _PARAMETER, _ERROR) \
@@ -51,12 +57,7 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
     _ERROR = MSALCreateError(MSALErrorInvalidResponse, _ERROR_STRING, nil, nil)
 
 // Check and pass an error back through the completion block
-#define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { \
-    NSString* _ERROR_STRING = [NSString stringWithFormat:_DESC, ##__VA_ARGS__]; \
-    MSALLogError(_CTX, _CODE, _ERROR_STRING, nil, __FUNCTION__, __LINE__); \
-    completionBlock(nil, MSALCreateError(_CODE, _DESC, nil, nil)); \
-    return; \
-}
+#define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { ERROR_COMPLETION(_CTX, _CODE, _DESC, ##__VA_ARGS__); }
 
 // Convenience macro for checking a value for false/nil, creating an error
 // based on the parameters passed in and returning 0/false/nil
@@ -71,12 +72,4 @@ extern NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 
 #define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
-#define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) \
-    NSString* _ERROR_DESCR = @#_PARAMETER " is a required parameter and must not be nil or empty."; \
-    MSALLogError(_CTX, MSALErrorInvalidParameter, _ERROR_DESCR , nil, __FUNCTION__, __LINE__); \
-    if (error) { *error = MSALCreateError(MSALErrorInvalidParameter, _ERROR_DESCR, nil, nil); }
-
-
-
-
-
+#define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")

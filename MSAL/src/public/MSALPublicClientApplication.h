@@ -52,11 +52,20 @@
 
 - (NSArray <MSALUser *> *)users;
 
+#pragma SafariViewController Support
+
++ (BOOL)isMSALResponse:(NSURL *)response;
++ (void)handleMSALResponse:(NSURL *)response;
++ (void)cancelCurrentWebAuthSession;
+
+#pragma mark -
+#pragma mark acquireToken
+
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
-#pragma mark Login Hint
+#pragma mark acquireToken using Login Hint
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                     loginHint:(NSString *)loginHint
@@ -78,7 +87,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
-#pragma mark User
+#pragma mark acquireToken using User
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                          user:(MSALUser *)user
@@ -95,7 +104,7 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
-#pragma mark Silent
+#pragma mark acquireTokenSilent
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user

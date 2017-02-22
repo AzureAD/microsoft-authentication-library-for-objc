@@ -25,35 +25,43 @@
 //
 //------------------------------------------------------------------------------
 
+#import "UIApplication+MSALExtensions.h"
+#import "MSALAppExtensionUtil.h"
 
-#import "MSALHttpResponse.h"
-#import "MSALLogger+Internal.h"
+@implementation UIApplication (MSALExtensions)
 
-@implementation MSALHttpResponse
-
-- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data error:(NSError * __autoreleasing *)error
++ (UIViewController*)msalCurrentViewController
 {
-    CHECK_ERROR_RETURN_NIL(response, nil, MSALErrorInternal, @"Attempt to initialize MSALHttpResponse with nil response");
-    
-    if (!(self = [super init]))
+    if (![MSALAppExtensionUtil isExecutingInAppExtension])
     {
+        return [self msalCurrentViewControllerWithRootViewController:[MSALAppExtensionUtil sharedApplication].keyWindow.rootViewController];
+    }
+    else {
         return nil;
     }
-    _response = response;
-    _body     = data;
-    
-    return self;
 }
 
-
-- (NSInteger)statusCode
++ (UIViewController*)msalCurrentViewControllerWithRootViewController:(UIViewController*)rootViewController
 {
-    return _response.statusCode;
-}
-
-- (NSDictionary *)headers
-{
-    return _response.allHeaderFields;
+    if ([rootViewController isKindOfClass:[UITabBarController class]])
+    {
+        UITabBarController* tabBarController = (UITabBarController*)rootViewController;
+        return [self msalCurrentViewControllerWithRootViewController:tabBarController.selectedViewController];
+    }
+    else if ([rootViewController isKindOfClass:[UINavigationController class]])
+    {
+        UINavigationController* navigationController = (UINavigationController*)rootViewController;
+        return [self msalCurrentViewControllerWithRootViewController:navigationController.visibleViewController];
+    }
+    else if (rootViewController.presentedViewController)
+    {
+        UIViewController* presentedViewController = rootViewController.presentedViewController;
+        return [self msalCurrentViewControllerWithRootViewController:presentedViewController];
+    }
+    else
+    {
+        return rootViewController;
+    }
 }
 
 @end

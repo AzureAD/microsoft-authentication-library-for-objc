@@ -25,35 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <SafariServices/SafariServices.h>
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@class MSALFakeViewController;
 
-@interface MSALBaseRequest : NSObject
-{
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
-}
+typedef void(^SVCValidationBlock)(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable);
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
+@interface SFSafariViewController (TestOverrides)
 
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
++ (void)reset;
 
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
++ (void)setValidationBlock:(SVCValidationBlock)block;
 
 @end

@@ -32,12 +32,15 @@
 {
     MSALScopes *_additionalScopes;
     MSALUIBehavior _uiBehavior;
-    NSString *_state;
 }
+
+@property NSString *state;
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
         additionalScopes:(NSArray<NSString *> *)additionalScopes
                 behavior:(MSALUIBehavior)behavior
                    error:(NSError * __autoreleasing *)error;
+
++ (MSALInteractiveRequest *)currentActiveRequest;
 
 @end

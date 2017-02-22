@@ -49,4 +49,6 @@
 - (IMP)originalIMP;
 - (SEL)sel;
 
+- (void)makePermanent;
+
 @end

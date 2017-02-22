@@ -34,6 +34,7 @@
 #import "MSALInteractiveRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
+#import "MSALWebUI.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
@@ -91,6 +92,61 @@
 {
     return nil;
 }
+
+#pragma SafariViewController Support
+
++ (BOOL)isMSALResponse:(NSURL *)response
+{
+    if (!response)
+    {
+        return NO;
+    }
+    
+    MSALInteractiveRequest *request = [MSALInteractiveRequest currentActiveRequest];
+    if (!request)
+    {
+        return NO;
+    }
+    
+    if ([NSString msalIsStringNilOrBlank:response.query])
+    {
+        return NO;
+    }
+    
+    NSDictionary *qps = [NSDictionary msalURLFormDecode:response.query];
+    if (!qps)
+    {
+        return NO;
+    }
+    
+    NSString *state = qps[OAUTH2_STATE];
+    if (!state)
+    {
+        return NO;
+    }
+    
+    if (![request.state isEqualToString:state])
+    {
+        LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        return NO;
+    }
+    
+    return YES;
+}
+
++ (void)handleMSALResponse:(NSURL *)response
+{
+    [MSALWebUI handleResponse:response];
+}
+
++ (void)cancelCurrentWebAuthSession
+{
+    [MSALWebUI cancelCurrentWebAuthSession];
+}
+
+#pragma mark -
+#pragma mark acquireToken
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock

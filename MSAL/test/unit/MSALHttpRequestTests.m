@@ -123,5 +123,35 @@
     }];
 }
 
+- (void)testHttpResponseInit
+{
+    NSDictionary *headers = @{ @"ImAHeader" : @"Yes you are"};
+    NSHTTPURLResponse *urlResponse =
+    [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"https://fakeurl"]
+                                statusCode:200
+                               HTTPVersion:@"4.2"
+                              headerFields:headers];
+    
+    
+    NSError *error = nil;
+    MSALHttpResponse *response = [[MSALHttpResponse alloc] initWithResponse:urlResponse data:nil error:&error];
+    XCTAssertNotNil(response);
+    XCTAssertNil(error);
+    
+    XCTAssertEqual(response.statusCode, 200);
+    XCTAssertEqualObjects(response.headers, headers);
+}
+
+- (void)testHttpNilResponseInit
+{
+    NSError *error = nil;
+    MSALHttpResponse *response = [[MSALHttpResponse alloc] initWithResponse:nil data:nil error:&error];
+    XCTAssertNil(response);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"MSALHttpResponse"]);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"nil"]);
+}
+
 
 @end

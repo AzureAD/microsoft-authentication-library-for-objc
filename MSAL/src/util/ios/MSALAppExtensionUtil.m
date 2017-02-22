@@ -25,35 +25,50 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAppExtensionUtil.h"
 
-@class MSALAuthority;
-@class MSALTokenCache;
-@class MSALTokenResponse;
-@class MSALTokenCacheItem;
+@implementation MSALAppExtensionUtil
 
-@interface MSALBaseRequest : NSObject
++ (BOOL)isExecutingInAppExtension
 {
-    @protected
-    MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    NSString* mainBundlePath = [[NSBundle mainBundle] bundlePath];
+    
+    if (mainBundlePath.length == 0)
+    {
+        LOG_ERROR(nil, @"Expected `[[NSBundle mainBundle] bundlePath]` to be non-nil. Defaulting to non-application-extension safe API.");
+        return NO;
+    }
+    
+    return [mainBundlePath hasSuffix:@"appex"];
 }
 
-@property (nullable) MSALTokenCache *tokenCache;
-@property (nullable) MSALTokenResponse *response;
-@property (nullable) MSALTokenCacheItem *accessTokenItem;
-@property (nonnull, readonly) MSALRequestParameters *parameters;
+#pragma mark - UIApplication
 
-/* Returns the complete set of scopes to be sent out with a token request */
-- (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
++ (UIApplication*)sharedApplication
+{
+    if ([self isExecutingInAppExtension])
+    {
+        // The caller should do this check but we will double check to fail safely
+        return nil;
+    }
+    
+    return [UIApplication performSelector:NSSelectorFromString(@"sharedApplication")];
+}
 
-- (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
-                            error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
-                     error:(NSError * __nullable __autoreleasing * __nullable)error;
-
-- (void)run:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
++ (void)sharedApplicationOpenURL:(NSURL*)url
+{
+    if ([self isExecutingInAppExtension])
+    {
+        // The caller should do this check but we will double check to fail safely
+        return;
+    }
+    
+#pragma clang diagnostic push
+    // performSelector always causes ARC warnings, due to ARC not knowing the
+    // exact memory semantics of the call being made.
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    [[self sharedApplication] performSelector:NSSelectorFromString(@"openURL:") withObject:url];
+#pragma clang diagnostic pop
+}
 
 @end
