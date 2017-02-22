@@ -41,6 +41,11 @@
     return _json;
 }
 
+- (void)setJson:(NSDictionary *)json
+{
+    _json = [json mutableCopy];
+}
+
 @end
 
 @interface MSALJsonObjectTests : MSALTestCase
@@ -75,7 +80,37 @@
 
 - (void)testSerialize
 {
-    // TODO
+    NSError *error = nil;
+    NSDictionary *testJson = @{ @"testKey" : @"testValue" };
+    MSALJsonObject *obj = [MSALJsonObject new];
+    obj.json = testJson;
+    NSData *data = [obj serialize:&error];
+    XCTAssertNotNil(data);
+    XCTAssertNil(error);
+    
+    MSALJsonObject *obj2 = [[MSALJsonObject alloc] initWithData:data error:&error];
+    XCTAssertNotNil(obj2);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(obj2.json, testJson);
+}
+
+- (void)testInitNil
+{
+    NSError *error = nil;
+    MSALJsonObject* obj = [[MSALJsonObject alloc] initWithData:nil error:&error];
+    XCTAssertNil(obj);
+    XCTAssertNotNil(error);
+}
+
+- (void)testInitNotJSON
+{
+    NSString* testJson = @"{ sdgahsdujkiohasoldikasjdl;asjmdas }";
+    NSData* testJsonData = [testJson dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError* error = nil;
+    MSALJsonObject* obj = [[MSALJsonObject alloc] initWithData:testJsonData error:&error];
+    XCTAssertNil(obj);
+    XCTAssertNotNil(error);
 }
 
 @end

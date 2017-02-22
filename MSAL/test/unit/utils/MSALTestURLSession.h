@@ -59,6 +59,7 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 
 + (MSALTestURLResponse *)requestURLString:(NSString *)requestUrlString
                          respondWithError:(NSError *)error;
+
 @end
 
 @interface MSALTestURLSession : NSObject

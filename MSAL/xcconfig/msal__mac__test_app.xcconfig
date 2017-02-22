@@ -1,0 +1,6 @@
+#include "msal__mac__common.xcconfig"
+
+INFOPLIST_FILE = test/app/mac/resources/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+PRODUCT_NAME = MSAL Test App;
+OTHER_LDFLAGS = "-ObjC";

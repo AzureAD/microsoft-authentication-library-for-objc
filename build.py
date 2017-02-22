@@ -50,10 +50,22 @@ build_targets = [
 		"platform" : "iOS",
 	},
 	{
+		"name" : "iOS Test App",
+		"scheme" : "MSAL Test App (iOS)",
+		"operations" : [ "build" ],
+		"platform" : "iOS",
+	},
+	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
 		"operations" : [ "build", "test" ],
 		"platform" : "Mac"
+	},
+	{
+		"name" : "Mac Test App",
+		"scheme" : "MSAL Test App (Mac)",
+		"operations" : [ "build" ],
+		"platform" : "Mac",
 	},
 ]
 

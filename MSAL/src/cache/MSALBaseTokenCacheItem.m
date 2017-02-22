@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseCacheItem.h"
+#import "MSALBaseTokenCacheItem.h"
 #import "MSALUser.h"
 #import "MSAL_Internal.h"
 
-@implementation MSALBaseCacheItem
+@implementation MSALBaseTokenCacheItem
 
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)

@@ -25,16 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthorizationCodeRequest.h"
+#import <UIKit/UIKit.h>
 
-@implementation MSALAuthorizationCodeRequest
+@interface MSALTestAppDelegate : UIResponder <UIApplicationDelegate>
 
-
-+ (MSALAuthorizationCodeRequest *)requestWithParameters:(MSALRequestParameters *)parameters
-{
-    (void)parameters;
-    @throw @"TODO";
-    return nil;
-}
+@property (strong, nonatomic) UIWindow *window;
 
 @end

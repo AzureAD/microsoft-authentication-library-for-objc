@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheItem.h"
+#import <UIKit/UIKit.h>
 
-@implementation MSALTokenCacheItem
+@interface MSALTestAppSettingsViewController : UIViewController
 
 @end

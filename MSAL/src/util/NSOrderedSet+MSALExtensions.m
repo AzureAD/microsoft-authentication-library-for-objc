@@ -41,7 +41,7 @@
     
     for (NSInteger i = 1; i < cSet; i++)
     {
-        [queryString appendString:@","];
+        [queryString appendString:@" "];
         [queryString appendString:[self objectAtIndex:i]];
     }
     

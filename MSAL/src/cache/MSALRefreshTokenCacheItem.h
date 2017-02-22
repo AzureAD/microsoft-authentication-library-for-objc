@@ -29,9 +29,9 @@
 
 @class MSALTokenCacheKey;
 
-#import "MSALBaseCacheItem.h"
+#import "MSALBaseTokenCacheItem.h"
 
-@interface MSALRefreshTokenCacheItem : MSALBaseCacheItem
+@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
 
 @property (readwrite) NSString * refreshToken;
 

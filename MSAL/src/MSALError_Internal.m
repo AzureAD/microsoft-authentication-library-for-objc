@@ -34,6 +34,8 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     switch (code)
     {
         STRING_CASE(MSALErrorInvalidParameter);
+        STRING_CASE(MSALErrorInvalidClient);
+        STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
         STRING_CASE(MSALErrorMismatchedUser);
         STRING_CASE(MSALErrorNetworkFailure);
@@ -52,50 +54,70 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     }
 }
 
-void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, const char *function, int line)
+MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode defaultCode)
+{
+    if ([oauthError isEqualToString:@"invalid_request"])
+    {
+        return MSALErrorInvalidRequest;
+    }
+    if ([oauthError isEqualToString:@"invalid_client"])
+    {
+        return MSALErrorInvalidClient;
+    }
+    
+    return defaultCode;
+}
+
+void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSString *subError, const char *function, int line)
 {
     NSString* codeString = MSALStringForErrorCode(code);
+    NSMutableString *message = [codeString mutableCopy];
     if (oauthError)
     {
-        LOG_ERROR(ctx, @"%@ from \"%@\" - %@ (%s:%d)", codeString, oauthError, errorDescription, function, line);
+        [message appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\" Description:\"%@\"}", oauthError, subError, errorDescription];
     }
     else
     {
-        LOG_ERROR(ctx, @"%@ - %@ (%s:%d)", codeString, errorDescription, function, line);
+        [message appendFormat:@": %@", errorDescription];
     }
+    
+    [message appendFormat:@" (%s:%d)", function, line];
+    LOG_ERROR(ctx, @"%@", message);
+    LOG_ERROR_PII(ctx, @"%@", message);
 }
 
-NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSError* underlyingError)
+NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)
 {
     NSMutableDictionary* userInfo = [NSMutableDictionary new];
     userInfo[MSALErrorDescriptionKey] = errorDescription;
     userInfo[MSALOAuthErrorKey] = oauthError;
+    userInfo[MSALOAuthSubErrorKey] = subError;
     userInfo[NSUnderlyingErrorKey]  = underlyingError;
     
-    return [NSError errorWithDomain:MSALErrorDomain code:code userInfo:userInfo];
+    return [NSError errorWithDomain:MSALErrorDomain code:code userInfo:[NSDictionary dictionaryWithDictionary:userInfo]];
 }
 
-NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     
-    MSALLogError(ctx, code, description, oauthError, function, line);
-    return MSALCreateError(code, description, oauthError, underlyingError);
+    MSALLogError(ctx, code, description, oauthError, subError, function, line);
+    return MSALCreateError(code, description, oauthError, subError, underlyingError);
 }
 
-void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
     
-    MSALLogError(ctx, code, description, oauthError, function, line);
+    MSALLogError(ctx, code, description, oauthError, subError, function, line);
     if (error)
     {
-        *error = MSALCreateError(code, description, oauthError, underlyingError);
+        *error = MSALCreateError(code, description, oauthError, subError, underlyingError);
     }
 }

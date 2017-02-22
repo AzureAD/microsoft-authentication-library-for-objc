@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,31 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-#import "MSALJsonObject.h"
+@interface MSALTestAuthority : MSALAuthority
 
-@class MSALUser;
-@class MSALTokenCacheKey;
-
-@interface MSALBaseCacheItem : MSALJsonObject
-
-@property MSALUser *user;
-
-@property NSString *authority;
-@property NSString *clientId;
-@property NSString *policy;
-@property NSString *tenantId;
-@property NSString *rawIdToken;
-@property (readonly) NSString *uniqueId;
-@property (readonly) NSString *displayableId;
-@property (readonly) NSString *homeObjectId;
-
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-                 policy:(NSString *)policy;
-
-// Subclasses *must* override this
-- (MSALTokenCacheKey *)tokenCacheKey;
++ (MSALTestAuthority *)AADAuthority:(NSURL *)unvalidatedAuthority;
 
 @end

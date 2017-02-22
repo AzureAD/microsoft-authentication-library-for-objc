@@ -36,11 +36,13 @@
 
 @property NSString *state;
 
++ (MSALInteractiveRequest *)currentActiveRequest;
+
 - (id)initWithParameters:(MSALRequestParameters *)parameters
         additionalScopes:(NSArray<NSString *> *)additionalScopes
                 behavior:(MSALUIBehavior)behavior
                    error:(NSError * __autoreleasing *)error;
 
-+ (MSALInteractiveRequest *)currentActiveRequest;
+- (NSURL *)authorizationUrl;
 
 @end

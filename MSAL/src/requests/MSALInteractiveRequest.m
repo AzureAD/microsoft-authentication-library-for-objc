@@ -26,12 +26,18 @@
 //------------------------------------------------------------------------------
 
 #import "MSALInteractiveRequest.h"
+
+#import "MSALAuthority.h"
 #import "MSALOAuth2Constants.h"
 #import "MSALUIBehavior_Internal.h"
+#import "MSALWebUI.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
 @implementation MSALInteractiveRequest
+{
+    NSString *_code;
+}
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
         additionalScopes:(NSArray<NSString *> *)additionalScopes
@@ -71,10 +77,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         [parameters addEntriesFromDictionary:_parameters.extraQueryParameters];
     }
     MSALScopes *allScopes = [self requestScopes:_additionalScopes];
+    parameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
     parameters[OAUTH2_SCOPE] = [allScopes msalToString];
     parameters[OAUTH2_RESPONSE_TYPE] = OAUTH2_CODE;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
     parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
+    parameters[OAUTH2_LOGIN_HINT] = _parameters.loginHint;
     
     NSDictionary *msalId = [MSALLogger msalId];
     [parameters addEntriesFromDictionary:msalId];
@@ -85,21 +93,78 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (NSURL *)authorizationUrl
 {
-    NSDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
-    // TODO: PKCE Support
+    NSURLComponents *urlComponents =
+    [[NSURLComponents alloc] initWithURL:_authority.authorizationEndpoint
+                 resolvingAgainstBaseURL:NO];
+    
+    NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
     
     _state = [[NSUUID UUID] UUIDString];
+    parameters[OAUTH2_STATE] = _state;
     
+    urlComponents.percentEncodedQuery = [parameters msalURLFormEncode];
     
-    (void)parameters;
-    return nil;
+    return [urlComponents URL];
 }
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     NSURL *authorizationUrl = [self authorizationUrl];
-    (void)authorizationUrl;
-    (void)completionBlock;
+    
+    LOG_INFO(_parameters, @"Launching Web UI");
+    LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
+    s_currentRequest = self;
+    [MSALWebUI startWebUIWithURL:authorizationUrl
+                         context:_parameters
+                 completionBlock:^(NSURL *response, NSError *error)
+     {
+         s_currentRequest = nil;
+         if (error)
+         {
+             completionBlock(nil, error);
+             return;
+         }
+         
+         if ([NSString msalIsStringNilOrBlank:response.absoluteString])
+         {
+             // This error case *really* shouldn't occur. If we're seeing it it's almost certainly a developer bug
+             ERROR_COMPLETION(_parameters, MSALErrorNoAuthorizationResponse, @"No authorization response received from server.");
+         }
+         
+         NSDictionary *params = [NSDictionary msalURLFormDecode:response.query];
+         CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
+         
+         CHECK_ERROR_COMPLETION([_state isEqualToString:params[OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");
+         
+         _code = params[OAUTH2_CODE];
+         if (_code)
+         {
+             [super acquireToken:completionBlock];
+             return;
+         }
+         
+         NSString *authorizationError = params[OAUTH2_ERROR];
+         if (authorizationError)
+         {
+             NSString *errorDescription = params[OAUTH2_ERROR_DESCRIPTION];
+             NSString *subError = params[OAUTH2_SUB_ERROR];
+             MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
+             MSALLogError(_parameters, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
+             completionBlock(nil, MSALCreateError(code, errorDescription, authorizationError, subError, nil));
+             return;
+         }
+         
+         ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
+     }];
+    
+    
+}
+
+- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
+{
+    parameters[OAUTH2_GRANT_TYPE] = @"authorization_code";
+    parameters[OAUTH2_CODE] = _code;
+    parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
 }
 
 @end

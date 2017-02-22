@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseRequest.h"
+#import <UIKit/UIKit.h>
 
-@class MSALRequestParameters;
+@interface MSALTestAppProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
-@interface MSALAuthorizationCodeRequest : MSALBaseRequest
-
-+ (MSALAuthorizationCodeRequest *)requestWithParameters:(MSALRequestParameters *)parameters;
++ (MSALTestAppProfileViewController*)sharedProfileViewController;
 
 @end

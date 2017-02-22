@@ -29,6 +29,7 @@
 #import "MSALTestURLSessionDataTask.h"
 #import "NSString+MSALHelperMethods.h"
 #import "NSDictionary+MSALExtensions.h"
+#import "NSDictionary+MSALTestUtil.h"
 
 @implementation MSALTestURLResponse
 
@@ -153,6 +154,10 @@
     if (_requestJSONBody)    {
         NSError* error = nil;
         id obj = [NSJSONSerialization JSONObjectWithData:body options:NSJSONReadingAllowFragments error:&error];
+        if ([obj isKindOfClass:[NSDictionary class]] && [_requestJSONBody isKindOfClass:[NSDictionary class]])
+        {
+            return [(NSDictionary *)_requestJSONBody compareDictionary:obj];
+        }
         BOOL match = [obj isEqual:_requestJSONBody];
         return match;
     }
