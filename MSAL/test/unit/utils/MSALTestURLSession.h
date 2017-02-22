@@ -45,19 +45,6 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 }
 
 + (MSALTestURLResponse*)requestURLString:(NSString *)requestUrlString
-                     responseURLString:(NSString *)responseUrlString
-                          responseCode:(NSInteger)responseCode
-                      httpHeaderFields:(NSDictionary *)headerFields
-                      dictionaryAsJSON:(NSDictionary *)data;
-
-+ (MSALTestURLResponse*)requestURLString:(NSString *)requestUrlString
-                       requestJSONBody:(id)requestJSONBody
-                     responseURLString:(NSString *)responseUrlString
-                          responseCode:(NSInteger)responseCode
-                      httpHeaderFields:(NSDictionary *)headerFields
-                      dictionaryAsJSON:(NSDictionary *)data;
-
-+ (MSALTestURLResponse*)requestURLString:(NSString *)requestUrlString
                         requestHeaders:(NSDictionary *)requestHeaders
                      requestParamsBody:(id)requestParams
                      responseURLString:(NSString *)responseUrlString
@@ -66,37 +53,21 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
                       dictionaryAsJSON:(NSDictionary *)data;
 
 + (MSALTestURLResponse*)request:(NSURL *)request
+                 requestHeaders:(NSDictionary *)requestHeaders
+              requestParamsBody:(id)requestParams
+               respondWithError:(NSError *)error;
+
++ (MSALTestURLResponse*)request:(NSURL *)request
                      response:(NSURLResponse *)response
                   reponseData:(NSData *)data;
 
 + (MSALTestURLResponse*)request:(NSURL *)request
                       reponse:(NSURLResponse *)response;
 
-+ (MSALTestURLResponse*)request:(NSURL *)request
-                 requestHeaders:(NSDictionary *)requestHeaders
-              requestParamsBody:(id)requestParams
-             respondWithError:(NSError *)error;
++ (MSALTestURLResponse*)serverNotFoundResponseForURLString:(NSString *)requestUrlString
+                                            requestHeaders:(NSDictionary *)requestHeaders
+                                         requestParamsBody:(id)requestParams;
 
-+ (MSALTestURLResponse*)serverNotFoundResponseForURLString:(NSString *)requestURLString;
-
-+ (MSALTestURLResponse*)responseValidAuthority:(NSString *)authority;
-+ (MSALTestURLResponse*)responseInvalidAuthority:(NSString *)authority;
-
-+ (MSALTestURLResponse*)responseValidDrsPayload:(NSString *)domain
-                                      onPrems:(BOOL)onPrems
-                passiveAuthenticationEndpoint:(NSString *)passiveAuthEndpoint;
-+ (MSALTestURLResponse*)responseInvalidDrsPayload:(NSString *)domain
-                                        onPrems:(BOOL)onPrems;
-+ (MSALTestURLResponse*)responseUnreachableDrsService:(NSString *)domain
-                                            onPrems:(BOOL)onPrems;
-+ (MSALTestURLResponse*)responseValidWebFinger:(NSString *)passiveEndpoint
-                                   authority:(NSString *)authority;
-+ (MSALTestURLResponse*)responseInvalidWebFinger:(NSString *)passiveEndpoint
-                                     authority:(NSString *)authority;
-+ (MSALTestURLResponse*)responseInvalidWebFingerNotTrusted:(NSString *)passiveEndpoint
-                                               authority:(NSString *)authority;
-+ (MSALTestURLResponse*)responseUnreachableWebFinger:(NSString *)passiveEndpoint
-                                         authority:(NSString *)authority;
 
 @end
 

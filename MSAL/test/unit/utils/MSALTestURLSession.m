@@ -33,40 +33,20 @@
 
 @implementation MSALTestURLResponse
 
-+ (MSALTestURLResponse *)request:(NSURL *)request
-               requestJSONBody:(NSDictionary *)requestBody
-                      response:(NSURLResponse *)urlResponse
-                   reponseData:(NSData *)data
++ (MSALTestURLResponse *)requestURLString:(NSString *)requestUrlString
+                           requestHeaders:(NSDictionary *)requestHeaders
+                        requestParamsBody:(id)requestParams
+                        responseURLString:(NSString *)responseUrlString
+                             responseCode:(NSInteger)responseCode
+                         httpHeaderFields:(NSDictionary *)headerFields
+                         dictionaryAsJSON:(NSDictionary *)data
 {
-    MSALTestURLResponse * response = [MSALTestURLResponse new];
-    [response setRequestURL:request];
-    response->_requestJSONBody = requestBody;
-    response->_response = urlResponse;
-    response->_responseData = data;
-    
-    return response;
-}
-
-+ (MSALTestURLResponse *)request:(NSURL *)request
-                      response:(NSURLResponse *)urlResponse
-                   reponseData:(NSData *)data
-{
-    MSALTestURLResponse * response = [MSALTestURLResponse new];
-    
-    [response setRequestURL:request];
-    response->_response = urlResponse;
-    response->_responseData = data;
-    
-    return response;
-}
-
-+ (MSALTestURLResponse *)request:(NSURL *)request
-                       reponse:(NSURLResponse *)urlResponse
-{
-    MSALTestURLResponse * response = [MSALTestURLResponse new];
-    
-    [response setRequestURL:request];
-    response->_response = urlResponse;
+    MSALTestURLResponse *response = [MSALTestURLResponse new];
+    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
+    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
+    response->_requestHeaders = requestHeaders;
+    response->_requestParamsBody = requestParams;
+    [response setJSONResponse:data];
     
     return response;
 }
@@ -74,7 +54,7 @@
 + (MSALTestURLResponse *)request:(NSURL *)request
                   requestHeaders:(NSDictionary *)requestHeaders
                requestParamsBody:(id)requestParams
-              respondWithError:(NSError *)error
+                respondWithError:(NSError *)error
 {
     MSALTestURLResponse * response = [MSALTestURLResponse new];
     
@@ -86,203 +66,41 @@
     return response;
 }
 
-+ (MSALTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestURLString
++ (MSALTestURLResponse *)request:(NSURL *)request
+                        response:(NSURLResponse *)urlResponse
+                     reponseData:(NSData *)data
 {
-    NSURL *requestURL = [NSURL URLWithString:requestURLString];
-    MSALTestURLResponse *response = [MSALTestURLResponse request:requestURL
-                                                  requestHeaders:nil
-                                               requestParamsBody:nil
-                                            respondWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                                 code:NSURLErrorCannotFindHost
-                                                                             userInfo:nil]];
-    return response;
-}
-
-+ (MSALTestURLResponse *)responseValidAuthority:(NSString *)authority
-{
-    NSString* authorityValidationURL = [NSString stringWithFormat:@"https://login.windows.net/common/discovery/instance?api-version=1.0&authorization_endpoint=%@/oauth2/authorize", [authority lowercaseString]];
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:authorityValidationURL
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:200
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{@"tenant_discovery_endpoint" : @"totally valid!"}];
+    MSALTestURLResponse * response = [MSALTestURLResponse new];
+    
+    [response setRequestURL:request];
+    response->_response = urlResponse;
+    response->_responseData = data;
     
     return response;
 }
 
-+ (MSALTestURLResponse *)responseInvalidAuthority:(NSString *)authority
++ (MSALTestURLResponse *)request:(NSURL *)request
+                         reponse:(NSURLResponse *)urlResponse
 {
-    NSString* authorityValidationURL = [NSString stringWithFormat:@"https://login.windows.net/common/discovery/instance?api-version=1.0&authorization_endpoint=%@/oauth2/authorize", [authority lowercaseString]];
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:authorityValidationURL
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:400
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{OAUTH2_ERROR : @"I'm an OAUTH server error!",
-                                                                        OAUTH2_ERROR_DESCRIPTION : @" I'm an OAUTH error description!"}];
+    MSALTestURLResponse * response = [MSALTestURLResponse new];
+    
+    [response setRequestURL:request];
+    response->_response = urlResponse;
     
     return response;
 }
 
-+ (MSALTestURLResponse *)responseValidDrsPayload:(NSString *)domain
-                                       onPrems:(BOOL)onPrems
-                 passiveAuthenticationEndpoint:(NSString *)passiveAuthEndpoint
++ (MSALTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
+                                             requestHeaders:(NSDictionary *)requestHeaders
+                                          requestParamsBody:(id)requestParams
 {
-    NSString* validationPayloadURL = [NSString stringWithFormat:@"%@%@/enrollmentserver/contract?api-version=1.0",
-                                      onPrems ? @"https://enterpriseregistration." : @"https://enterpriseregistration.windows.net/", domain];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:validationPayloadURL
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:200
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{@"DeviceRegistrationService" :
-                                                                            @{@"RegistrationEndpoint" : @"https://idontmatter.com/EnrollmentServer/DeviceEnrollmentWebService.svc",
-                                                                              @"RegistrationResourceId" : @"urn:ms-drs:UUID"
-                                                                              },
-                                                                        @"AuthenticationService" :
-                                                                            @{@"AuthCodeEndpoint" : @"https://idontmatter.com/adfs/oauth2/authorize",
-                                                                              @"TokenEndpoint" : @"https://idontmatter.com/adfs/oauth2/token"
-                                                                              },
-                                                                        @"IdentityProviderService" :
-                                                                            @{@"PassiveAuthEndpoint" : passiveAuthEndpoint}
-                                                                        }];
-    return response;
-}
-
-
-+ (MSALTestURLResponse *)responseInvalidDrsPayload:(NSString *)domain
-                                         onPrems:(BOOL)onPrems
-{
-    NSString* validationPayloadURL = [NSString stringWithFormat:@"%@%@/enrollmentserver/contract?api-version=1.0",
-                                      onPrems ? @"https://enterpriseregistration." : @"https://enterpriseregistration.windows.net/", domain];
-    
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:validationPayloadURL
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:400
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{}];
-    return response;
-}
-
-
-+ (MSALTestURLResponse *)responseUnreachableDrsService:(NSString *)domain
-                                             onPrems:(BOOL)onPrems
-{
-    NSString *drsURL = [NSString stringWithFormat:@"%@%@/enrollmentserver/contract?api-version=1.0",
-                        onPrems ? @"https://enterpriseregistration." : @"https://enterpriseregistration.windows.net/", domain];
-    
-    return [self serverNotFoundResponseForURLString:drsURL];
-}
-
-
-+ (MSALTestURLResponse *)responseValidWebFinger:(NSString *)passiveEndpoint
-                                    authority:(NSString *)authority
-{
-    NSURL *endpointFullUrl = [NSURL URLWithString:passiveEndpoint.lowercaseString];
-    NSString *url = [NSString stringWithFormat:@"https://%@/.well-known/webfinger?resource=%@", endpointFullUrl.host, authority];
-    
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:url
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:200
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{@"subject" : authority,
-                                                                        @"links" : @[@{
-                                                                                         @"rel" : @"http://schemas.microsoft.com/rel/trusted-realm",
-                                                                                         @"href" : authority
-                                                                                         }]
-                                                                        }];
-    return response;
-}
-
-+ (MSALTestURLResponse *)responseInvalidWebFinger:(NSString *)passiveEndpoint
-                                      authority:(NSString *)authority
-{
-    NSURL *endpointFullUrl = [NSURL URLWithString:passiveEndpoint.lowercaseString];
-    NSString *url = [NSString stringWithFormat:@"https://%@/.well-known/webfinger?resource=%@", endpointFullUrl.host, authority];
-    
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:url
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:400
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{}];
-    return response;
-}
-
-+ (MSALTestURLResponse *)responseInvalidWebFingerNotTrusted:(NSString *)passiveEndpoint
-                                                authority:(NSString *)authority
-{
-    NSURL *endpointFullUrl = [NSURL URLWithString:passiveEndpoint.lowercaseString];
-    NSString *url = [NSString stringWithFormat:@"https://%@/.well-known/webfinger?resource=%@", endpointFullUrl.host, authority];
-    
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:url
-                                                    responseURLString:@"https://idontmatter.com"
-                                                         responseCode:200
-                                                     httpHeaderFields:@{}
-                                                     dictionaryAsJSON:@{@"subject" : authority,
-                                                                        @"links" : @[@{
-                                                                                         @"rel" : @"http://schemas.microsoft.com/rel/trusted-realm",
-                                                                                         @"href" : @"idontmatch.com"
-                                                                                         }]
-                                                                        }];
-    return response;
-}
-
-+ (MSALTestURLResponse *)responseUnreachableWebFinger:(NSString *)passiveEndpoint
-                                          authority:(NSString *)authority
-
-{
-    (void)authority;
-    NSURL *endpointFullUrl = [NSURL URLWithString:passiveEndpoint.lowercaseString];
-    NSString *url = [NSString stringWithFormat:@"https://%@/.well-known/webfinger?resource=%@", endpointFullUrl.host, authority];
-    
-    return [self serverNotFoundResponseForURLString:url];
-}
-
-
-+ (MSALTestURLResponse *)requestURLString:(NSString*)requestUrlString
-                      responseURLString:(NSString*)responseUrlString
-                           responseCode:(NSInteger)responseCode
-                       httpHeaderFields:(NSDictionary *)headerFields
-                       dictionaryAsJSON:(NSDictionary *)data
-{
-    MSALTestURLResponse *response = [MSALTestURLResponse new];
-    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
-    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
-    [response setJSONResponse:data];
-    
-    return response;
-}
-
-+ (MSALTestURLResponse *)requestURLString:(NSString*)requestUrlString
-                        requestJSONBody:(id)requestJSONBody
-                      responseURLString:(NSString*)responseUrlString
-                           responseCode:(NSInteger)responseCode
-                       httpHeaderFields:(NSDictionary *)headerFields
-                       dictionaryAsJSON:(NSDictionary *)data
-{
-    MSALTestURLResponse *response = [MSALTestURLResponse new];
-    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
-    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
-    response->_requestJSONBody = requestJSONBody;
-    [response setJSONResponse:data];
-    
-    return response;
-}
-
-+ (MSALTestURLResponse *)requestURLString:(NSString*)requestUrlString
-                         requestHeaders:(NSDictionary *)requestHeaders
-                      requestParamsBody:(id)requestParams
-                      responseURLString:(NSString*)responseUrlString
-                           responseCode:(NSInteger)responseCode
-                       httpHeaderFields:(NSDictionary *)headerFields
-                       dictionaryAsJSON:(NSDictionary *)data
-{
-    MSALTestURLResponse *response = [MSALTestURLResponse new];
-    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
-    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
-    response->_requestHeaders = requestHeaders;
-    response->_requestParamsBody = requestParams;
-    [response setJSONResponse:data];
-    
+    MSALTestURLResponse *response = [MSALTestURLResponse request:[NSURL URLWithString:requestUrlString]
+                                                  requestHeaders:requestHeaders
+                                               requestParamsBody:requestParams
+                                                respondWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                     code:NSURLErrorCannotFindHost
+                                                                                 userInfo:nil]];
     return response;
 }
 
@@ -374,7 +192,7 @@
     
     if (_requestParamsBody)
     {
-        NSString* string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
+        NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
         id obj = [NSDictionary msalURLFormDecode:string];
         return [obj isEqual:_requestParamsBody];
     }
