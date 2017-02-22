@@ -179,17 +179,6 @@
 
 - (BOOL)matchesBody:(NSData *)body
 {
-    if (_requestJSONBody)    {
-        NSError* error = nil;
-        id obj = [NSJSONSerialization JSONObjectWithData:body options:NSJSONReadingAllowFragments error:&error];
-        if ([obj isKindOfClass:[NSDictionary class]] && [_requestJSONBody isKindOfClass:[NSDictionary class]])
-        {
-            return [(NSDictionary *)_requestJSONBody compareDictionary:obj];
-        }
-        BOOL match = [obj isEqual:_requestJSONBody];
-        return match;
-    }
-    
     if (_requestParamsBody)
     {
         NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];

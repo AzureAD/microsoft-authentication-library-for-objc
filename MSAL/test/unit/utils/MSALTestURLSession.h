@@ -33,7 +33,6 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 {
     @public
     NSURL *_requestURL;
-    id _requestJSONBody;
     id _requestParamsBody;
     NSDictionary *_requestHeaders;
     NSData *_requestBody;
