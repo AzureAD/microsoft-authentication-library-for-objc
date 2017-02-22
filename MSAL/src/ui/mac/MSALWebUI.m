@@ -46,9 +46,9 @@
     @throw @"MSAL is not supported on macOS at this time.";
 }
 
-+ (void)cancelCurrentWebAuthSession
++ (BOOL)cancelCurrentWebAuthSession
 {
-    @throw @"MSAL is not supported on macOS at this time.";
+    return NO;
 }
 
 @end

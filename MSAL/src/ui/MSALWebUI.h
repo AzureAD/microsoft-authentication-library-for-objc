@@ -37,6 +37,6 @@ typedef void (^MSALWebUICompletionBlock)(NSURL *response, NSError *error);
 
 + (BOOL)handleResponse:(NSURL *)url;
 
-+ (void)cancelCurrentWebAuthSession;
++ (BOOL)cancelCurrentWebAuthSession;
 
 @end

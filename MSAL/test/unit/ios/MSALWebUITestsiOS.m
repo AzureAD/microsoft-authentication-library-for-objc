@@ -170,8 +170,6 @@
      }];
     
     // A delegate should be set on the Safari View Controller
-    
-    
     dispatch_async(dispatch_get_main_queue(), ^{
         id<SFSafariViewControllerDelegate> delegate = fakeSvc.delegate;
         XCTAssertNotNil(delegate);
