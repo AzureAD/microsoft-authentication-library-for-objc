@@ -155,11 +155,8 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     NSData *bodyData = nil;
     if (!_isGetRequest && _bodyParameters)
     {
-        bodyData = [NSJSONSerialization dataWithJSONObject:_bodyParameters options:0 error:nil];
-        if (bodyData)
-        {
-            [_headers setValue:[NSString stringWithFormat:@"%ld", (unsigned long)bodyData.length] forKey:@"Content-Length"];
-        }
+        bodyData = [[_bodyParameters msalURLFormEncode] dataUsingEncoding:NSUTF8StringEncoding];
+        [self setContentTypeFormURLEncoded];
     }
     
     // TODO: Add client version to URL
@@ -220,7 +217,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
 
 - (void)setAcceptJSON;
 {
-        [_headers setValue:MSALHttpHeaderApplicationJSON forKey:MSALHttpHeaderAccept];
+    [_headers setValue:MSALHttpHeaderApplicationJSON forKey:MSALHttpHeaderAccept];
 }
 
 - (void)setContentTypeFormURLEncoded;

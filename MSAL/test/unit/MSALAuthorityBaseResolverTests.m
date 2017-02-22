@@ -27,8 +27,6 @@
 
 #import "MSALTestCase.h"
 #import "MSALAuthorityBaseResolver.h"
-//#import "MSALHttpRequest.h"
-//#import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
 
@@ -59,7 +57,12 @@
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
                                                          httpHeaderFields:@{}
@@ -98,7 +101,12 @@
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
                                                          httpHeaderFields:@{}

@@ -37,6 +37,9 @@
 
 @implementation MSALAadAuthorityResolverTests
 
+// From MSALAadAuthorityResolver.m
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
+
 - (void)setUp
 {
     [super setUp];
@@ -91,25 +94,29 @@
 
 - (void)testOpenIdConfigEndpointSucess
 {
-    // From MSALAadAuthorityResolver.m
-    #define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
-
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
-    
+   
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
 
     NSString *responseEndpoint = @"https://someendpoint.com";
+    NSString *authorityString = @"https://somehost.com/sometenant.com";
+    
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
+    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
-                                                         httpHeaderFields:@{}
+                                                         httpHeaderFields:nil
                                                          dictionaryAsJSON:@{@"tenant_discovery_endpoint":responseEndpoint}];
-
     [MSALTestURLSession addResponse:response];
     
-    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:authorityString]
                                                                userPrincipalName:nil
                                                                         validate:YES
                                                                          context:params
@@ -164,23 +171,29 @@
 
 - (void)testOpenIdConfigEndpointInvalidResponse
 {
-    // From MSALAadAuthorityResolver.m
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
-    
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
+    NSString *authorityString = @"https://somehost.com/sometenant.com";
+    
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
+    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
-                                                         httpHeaderFields:@{}
+                                                         httpHeaderFields:nil
                                                          dictionaryAsJSON:@{}];
     
     [MSALTestURLSession addResponse:response];
     
-    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+    [[MSALAadAuthorityResolver sharedResolver] openIDConfigurationEndpointForURL:[NSURL URLWithString:authorityString]
                                                                userPrincipalName:nil
                                                                         validate:YES
                                                                          context:params
@@ -199,18 +212,22 @@
 
 - (void)testOpenIdConfigEndpointErrorResponse
 {
-    // From MSALAadAuthorityResolver.m
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
-    
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
-                                                         respondWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                                              code:NSURLErrorCannotFindHost
-                                                                                          userInfo:nil]];
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
+    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+
+    MSALTestURLResponse *response = [MSALTestURLResponse request:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
+                                                  requestHeaders:reqHeaders
+                                               requestParamsBody:nil
+                                                respondWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                     code:NSURLErrorCannotFindHost
+                                                                                 userInfo:nil]];
     
     [MSALTestURLSession addResponse:response];
     

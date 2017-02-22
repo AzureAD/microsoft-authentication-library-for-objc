@@ -207,7 +207,6 @@
          NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
-    
 
     [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
                            class:[MSALAuthority class]
@@ -222,10 +221,16 @@
         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
     }];
     
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
-                          requestJSONBody:@{ @"code" : @"iamafakecode",
+                           requestHeaders:reqHeaders
+                        requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",

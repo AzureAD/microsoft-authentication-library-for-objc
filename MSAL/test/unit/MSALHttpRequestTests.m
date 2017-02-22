@@ -87,14 +87,19 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sharedSession];
+    params.urlSession = [NSURLSession new];
     
     NSString *testURLString = @"https://somehttprequest.com";
     
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:testURLString
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
                                                         responseURLString:@"https://someresponsestring.com"
                                                              responseCode:200
-                                                         httpHeaderFields:@{}
+                                                         httpHeaderFields:nil
                                                          dictionaryAsJSON:@{@"endpoint" : @"valid"}];
     
     [MSALTestURLSession addResponse:response];

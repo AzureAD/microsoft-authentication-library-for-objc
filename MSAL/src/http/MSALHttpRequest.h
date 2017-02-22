@@ -48,11 +48,13 @@ typedef void(^MSALHttpRequestCallback)(MSALHttpResponse *response, NSError  *err
 
 @property (readonly) BOOL isGetRequest;
 
-// Key/value pairs that is included as a request header
+/*! Key/value pairs that are included in the HTTP headers of the request */
 @property (copy) NSDictionary<NSString *, NSString *> *headers;
-// Key/value pairs that is included in the body as a JSON for POST request
+
+/*! Key/value pairs that are url encoded and included in the body of a POST request */
 @property (copy) NSDictionary<NSString *, NSString *> *bodyParameters;
-// Key/value pairs that is included in GET request
+
+/*! Key/value pairs that are included in a GET request */
 @property (copy) NSDictionary<NSString *, NSString *> *queryParameters;
 
 - (id)initWithURL:(NSURL *)endpoint context:(id<MSALRequestContext>)context;
@@ -81,9 +83,6 @@ typedef void(^MSALHttpRequestCallback)(MSALHttpResponse *response, NSError  *err
 
 // Sets Accept:Application/json to the header.
 - (void)setAcceptJSON;
-
-// Sets ContentType:application/x-www-form-urlencoded to the header.
-- (void)setContentTypeFormURLEncoded;
 
 @end
 
