@@ -26,23 +26,56 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+@class MSALTenantDiscoveryResponse;
+
+typedef void(^OpenIDConfigEndpointCallback)(NSString *endpoint, NSError *error);
+typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NSError *error);
+
+@protocol MSALAuthorityResolver
+
+- (void)openIDConfigurationEndpointForURL:(NSURL *)url
+                        userPrincipalName:(NSString *)userPrincipalName
+                                 validate:(BOOL)validate
+                                  context:(id<MSALRequestContext>)context
+                        completionHandler:(OpenIDConfigEndpointCallback) completionHandler;
+
+- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
+
+- (void)tenantDiscoveryEndpoint:(NSURL *)url
+                        context:(id<MSALRequestContext>)context
+                completionBlock:(TenantDiscoveryCallback) completionBlock;
+
+
+- (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
+
+- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
+
+
+@end
 
 typedef NS_ENUM(NSInteger, MSALAuthorityType)
 {
     AADAuthority,
-    ADFSAuthority
+    ADFSAuthority,
+    B2CAuthority
 };
 
 typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
 
 @interface MSALAuthority : NSObject
 
+
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
+@property BOOL validateAuthority;
 @property BOOL isTenantless;
 @property NSURL *authorizationEndpoint;
 @property NSURL *tokenEndpoint;
 @property NSURL *endSessionEndpoint;
+// For AAD, currently, the v2.0 endpoint doesn't support the OpenID Connect end_session_endpoint
+// https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols-oidc
 @property NSString *selfSignedJwtAudience;
 
 /*!
@@ -52,11 +85,11 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error;
 
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock;
++ (void)resolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                   userPrincipalName:(NSString *)userPrincipalName
+                            validate:(BOOL)validate
+                             context:(id<MSALRequestContext>)context
+                     completionBlock:(MSALAuthorityCompletion)completionBlock;
 
 + (BOOL)isKnownHost:(NSURL *)url;
 

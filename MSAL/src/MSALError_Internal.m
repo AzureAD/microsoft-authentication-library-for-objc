@@ -41,6 +41,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorNetworkFailure);
         STRING_CASE(MSALErrorKeychainFailure);
         STRING_CASE(MSALErrorInteractionRequired);
+        STRING_CASE(MSALErrorInvalidResponse);
         STRING_CASE(MSALErrorBadAuthorizationResponse);
         STRING_CASE(MSALErrorAuthorizationFailed);
         STRING_CASE(MSALErrorNoAuthorizationResponse);

@@ -207,6 +207,19 @@
          NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
+
+    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
+                           class:[MSALAuthority class]
+                        block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
+     
+    {
+        (void)obj;
+        (void)context;
+        (void)userPrincipalName;
+        (void)validate;
+        
+        completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
+    }];
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];

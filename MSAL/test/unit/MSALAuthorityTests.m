@@ -27,6 +27,9 @@
 
 #import "MSALTestCase.h"
 #import "MSALAuthority.h"
+#import "MSALTestSwizzle.h"
+#import "MSALAadAuthorityResolver.h"
+#import "MSALTenantDiscoveryResponse.h"
 
 @interface MSALAuthorityTests : MSALTestCase
 
@@ -76,6 +79,14 @@
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant or common"]);
     
+    url = [MSALAuthority checkAuthorityString:@"https://somehost.com/tfp/" error:&error];
+    XCTAssertNil(url);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant"]);
+    
+    
     url = [MSALAuthority checkAuthorityString:@"https login.microsoftonline.com common" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
@@ -84,28 +95,180 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be a valid URI"]);
 }
 
-- (void)testResolveEndpoints
+
+- (void)testIsKnownHost
 {
-    // TODO: Authority endpoint discovery
+    XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.windows.net"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://loginchinacloudapi.cn"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.com"]]);
+    XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.de"]]);
+}
+
+- (void)testResolveEndpointsSuccess
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
     
-    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+                              class:[MSALAadAuthorityResolver class]
+                              block:(id)^(id obj,
+                                          NSURL *authority,
+                                          NSString *userPrincipalName,
+                                          BOOL validate, id<MSALRequestContext> context,
+                                          OpenIDConfigEndpointCallback completionHandler)
+     {
+         (void)obj;
+         (void)userPrincipalName;
+         (void)authority;
+         (void)validate;
+         (void)context;
+         (void)completionHandler;
+         
+         completionHandler(openIdConfigEndpoint, nil);
+     }];
+     
+    [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)
+                              class:[MSALAuthorityBaseResolver class]
+                              block:(id)^(id obj,
+                                          NSURL *authority,
+                                          id<MSALRequestContext> context,
+                                          TenantDiscoveryCallback completionBlock)
+     {
+         (void)obj;
+         (void)authority;
+         (void)context;
+         (void)completionBlock;
+      
+         NSDictionary *jsonDict = @{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/authorize/",
+                                    @"token_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/token/",
+                                    @"issuer":@"https://fs.contoso.com/{tenantid}/"};
+         
+         NSData* testJsonData = [NSJSONSerialization dataWithJSONObject:jsonDict options:0 error:nil];
+         completionBlock([[MSALTenantDiscoveryResponse alloc] initWithData:testJsonData error:nil], nil);
+     }];
     
-    [MSALAuthority resolveEndpoints:@"fakeuser@contoso.com"
-                 validatedAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
-                           validate:YES
-                            context:nil
-                    completionBlock:^(MSALAuthority *authority, NSError *error)
-    {
-        XCTAssertNil(error);
-        XCTAssertNotNil(authority);
-        
-        XCTAssertEqualObjects(authority.authorizationEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/authorize"]);
-        XCTAssertEqualObjects(authority.tokenEndpoint, [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"]);
-        
-        dispatch_semaphore_signal(dsem);
-    }];
+    [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
+                              userPrincipalName:nil
+                                       validate:YES
+                                        context:nil
+                                completionBlock:^(MSALAuthority *authority, NSError *error)
+     {
+         XCTAssertNotNil(authority);
+         XCTAssertNil(error);
+         [expectation fulfill];
+     }];
     
-    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+    [self waitForExpectationsWithTimeout:1.0
+                                 handler:^(NSError * _Nullable error)
+     {
+         
+         (void)error;
+     }];
+}
+
+- (void)testResolveEndpointsOpenIDConfigError
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+                              class:[MSALAadAuthorityResolver class]
+                              block:(id)^(id obj,
+                                          NSURL *authority,
+                                          NSString *userPrincipalName,
+                                          BOOL validate, id<MSALRequestContext> context,
+                                          OpenIDConfigEndpointCallback completionHandler)
+     {
+         (void)obj;
+         (void)userPrincipalName;
+         (void)authority;
+         (void)validate;
+         (void)context;
+         (void)completionHandler;
+         
+         completionHandler(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+     }];
+    
+    [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
+                              userPrincipalName:nil
+                                       validate:YES
+                                        context:nil
+                                completionBlock:^(MSALAuthority *authority, NSError *error)
+     {
+         XCTAssertNil(authority);
+         XCTAssertNotNil(error);
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0
+                                 handler:^(NSError * _Nullable error)
+     {
+         
+         (void)error;
+     }];
+}
+
+- (void)testResolveEndpointWithTenantEndpointError
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
+    
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+                              class:[MSALAadAuthorityResolver class]
+                              block:(id)^(id obj,
+                                          NSURL *authority,
+                                          NSString *userPrincipalName,
+                                          BOOL validate, id<MSALRequestContext> context,
+                                          OpenIDConfigEndpointCallback completionHandler)
+     {
+         (void)obj;
+         (void)userPrincipalName;
+         (void)authority;
+         (void)validate;
+         (void)context;
+         (void)completionHandler;
+         
+         completionHandler(openIdConfigEndpoint, nil);
+     }];
+    
+    [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)
+                              class:[MSALAuthorityBaseResolver class]
+                              block:(id)^(id obj,
+                                          NSURL *authority,
+                                          id<MSALRequestContext> context,
+                                          TenantDiscoveryCallback completionBlock)
+     {
+         (void)obj;
+         (void)authority;
+         (void)context;
+         (void)completionBlock;
+         
+         completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+     }];
+    
+    [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
+                              userPrincipalName:nil
+                                       validate:YES
+                                        context:nil
+                                completionBlock:^(MSALAuthority *authority, NSError *error)
+     {
+         XCTAssertNil(authority);
+         XCTAssertNotNil(error);
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0
+                                 handler:^(NSError * _Nullable error)
+     {
+         
+         (void)error;
+     }];
 }
 
 @end

@@ -148,5 +148,14 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorInvalidState = -42501,
     
+    /*!
+     Response was received in a network call, but the response body was invalid.
+     
+     e.g. Response was to be expected a key-value pair with "key1" and
+     the json response does not contain "key1" elements
+     
+     */
+    MSALErrorInvalidResponse = -42600,
+    
 };
 

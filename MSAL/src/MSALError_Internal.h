@@ -52,6 +52,10 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
     completionBlock(nil, CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
     return; \
 
+// Convenience macro to create invalid response error
+#define CREATE_ERROR_INVALID_RESULT(_CTX, _PARAMETER, _ERROR) \
+    _ERROR = MSALCreateAndLogError(_CTX, MSALErrorInvalidResponse, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is not found in the response.")
+
 // Check and pass an error back through the completion block
 #define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { ERROR_COMPLETION(_CTX, _CODE, _DESC, ##__VA_ARGS__); }
 

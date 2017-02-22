@@ -26,30 +26,46 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthority.h"
+#import "MSALError_Internal.h"
+#import "MSALAadAuthorityResolver.h"
+#import "MSALHttpRequest.h"
+#import "MSALHttpResponse.h"
+#import "MSALURLSession.h"
+#import "MSALTenantDiscoveryResponse.h"
 
 @implementation MSALAuthority
 
-+ (void)resolveEndpoints:(NSString *)upn
-      validatedAuthority:(NSURL *)unvalidatedAuthority
-                validate:(BOOL)validate
-                 context:(id<MSALRequestContext>)context
-         completionBlock:(MSALAuthorityCompletion)completionBlock
+#define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
 
+static NSSet<NSString *> *s_trustedHostList;
+
+#pragma mark - helper functions
+BOOL isTenantless(NSURL *authority)
 {
-    // TOOD: Authority discovery and validation
-    (void)upn;
-    (void)validate;
-    (void)context;
+    NSArray *authorityURLPaths = authority.pathComponents;
     
-    MSALAuthority *authority = [MSALAuthority new];
-    authority.authorityType = AADAuthority;
-    authority.canonicalAuthority = unvalidatedAuthority;
-    authority.isTenantless = YES;
-    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
-    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
-    
-    completionBlock(authority, nil);
+    NSString *tenameName = [authorityURLPaths[1] lowercaseString];
+    if ([tenameName isEqualToString:@"common"] ||
+        [tenameName isEqualToString:@"organizations"] ||
+        [tenameName isEqualToString:@"consumers"] )
+    {
+        return YES;
+    }
+    return NO;
 }
+
+
+
+#pragma mark - class methods
++ (void)initialize
+{
+    s_trustedHostList = [NSSet setWithObjects: @"login.windows.net",
+                         @"loginchinacloudapi.cn",
+                         @"login.cloudgovapi.us",
+                         @"login.microsoftonline.com",
+                         @"login.microsoftonline.de", nil];
+}
+
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
@@ -61,15 +77,93 @@
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
     CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
     
+    // B2C
+    if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])
+    {
+        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 2), nil, MSALErrorInvalidParameter, @"authority must specify a tenant");
+        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/tfp/%@", authorityUrl.host, authorityUrl.pathComponents[2]]];
+    }
+    
+    // ADFS and AAD
     return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.host, authorityUrl.pathComponents[1]]];
+}
+
+
++ (void)resolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
+                   userPrincipalName:(NSString *)userPrincipalName
+                            validate:(BOOL)validate
+                             context:(id<MSALRequestContext>)context
+                     completionBlock:(MSALAuthorityCompletion)completionBlock
+{
+    NSError *error = nil;
+    NSURL *updatedAuthority = [self checkAuthorityString:unvalidatedAuthority.absoluteString error:&error];
+    CHECK_COMPLETION(!error);
+    
+    MSALAuthorityType authorityType;
+    NSString *firstPathComponent = updatedAuthority.pathComponents[1].lowercaseString;
+    NSString *tenant = nil;
+    
+    id<MSALAuthorityResolver> resolver;
+    
+    if ([firstPathComponent isEqualToString:@"tfp"])
+    {
+        authorityType = B2CAuthority;
+        @throw @"TODO";
+    }
+    else if ([firstPathComponent isEqualToString:@"adfs"])
+    {
+        authorityType = ADFSAuthority;
+        @throw @"TODO";
+    }
+    else
+    {
+        authorityType = AADAuthority;
+        resolver = [MSALAadAuthorityResolver sharedResolver];
+        tenant = firstPathComponent;
+    }
+    
+    TenantDiscoveryCallback tenantDiscoveryCallback = ^void
+    (MSALTenantDiscoveryResponse *response, NSError *error)
+    {
+        CHECK_COMPLETION(!error);
+
+        MSALAuthority *authority = [MSALAuthority new];
+        authority.canonicalAuthority = updatedAuthority;
+        authority.authorityType = authorityType;
+        authority.validateAuthority = validate;
+        authority.isTenantless = isTenantless(updatedAuthority);
+        
+        NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        
+        authority.authorizationEndpoint = [NSURL URLWithString:authorizationEndpoint];
+        authority.tokenEndpoint = [NSURL URLWithString:tokenEndpoint];
+        authority.endSessionEndpoint = nil;
+        authority.selfSignedJwtAudience = issuer;
+     
+        [resolver addToValidatedAuthorityCache:authority userPrincipalName:userPrincipalName];
+        
+        completionBlock(authority, nil);
+    };
+    
+    [resolver openIDConfigurationEndpointForURL:updatedAuthority
+                              userPrincipalName:userPrincipalName
+                                       validate:validate
+                                        context:context
+                              completionHandler:^(NSString *endpoint, NSError *error)
+    {
+        CHECK_COMPLETION(!error);
+        
+        [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:endpoint]
+                                  context:context completionBlock:tenantDiscoveryCallback];
+        
+    }];
 }
 
 + (BOOL)isKnownHost:(NSURL *)url
 {
-    (void)url;
-    @throw @"TODO";
-    return NO;
+    return [s_trustedHostList containsObject:url.host.lowercaseString];
 }
-
 
 @end

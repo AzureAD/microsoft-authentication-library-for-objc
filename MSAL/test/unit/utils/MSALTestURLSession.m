@@ -72,12 +72,16 @@
 }
 
 + (MSALTestURLResponse *)request:(NSURL *)request
+                  requestHeaders:(NSDictionary *)requestHeaders
+               requestParamsBody:(id)requestParams
               respondWithError:(NSError *)error
 {
     MSALTestURLResponse * response = [MSALTestURLResponse new];
     
     [response setRequestURL:request];
     response->_error = error;
+    response->_requestHeaders = requestHeaders;
+    response->_requestParamsBody = requestParams;
     
     return response;
 }
@@ -86,6 +90,8 @@
 {
     NSURL *requestURL = [NSURL URLWithString:requestURLString];
     MSALTestURLResponse *response = [MSALTestURLResponse request:requestURL
+                                                  requestHeaders:nil
+                                               requestParamsBody:nil
                                             respondWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                                  code:NSURLErrorCannotFindHost
                                                                              userInfo:nil]];
@@ -483,7 +489,8 @@ static NSMutableArray *s_responses = nil;
             {
                 [subResponses removeObjectAtIndex:0];
                 if ([subResponses count] == 0)
-                {                    [s_responses removeObjectAtIndex:i];
+                {
+                    [s_responses removeObjectAtIndex:i];
                 }
                 return response;
             }

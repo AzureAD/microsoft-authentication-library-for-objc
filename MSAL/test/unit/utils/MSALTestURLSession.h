@@ -73,6 +73,8 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
                       reponse:(NSURLResponse *)response;
 
 + (MSALTestURLResponse*)request:(NSURL *)request
+                 requestHeaders:(NSDictionary *)requestHeaders
+              requestParamsBody:(id)requestParams
              respondWithError:(NSError *)error;
 
 + (MSALTestURLResponse*)serverNotFoundResponseForURLString:(NSString *)requestURLString;
