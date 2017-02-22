@@ -25,29 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "NSDictionary+MSALTestUtil.h"
 
-@implementation MSALResult
+@implementation NSDictionary (MSALTestUtil)
 
-@end
-
-@implementation MSALResult (Internal)
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                               scopes:(NSArray<NSString *> *)scopes
+- (BOOL)compareDictionary:(NSDictionary *)dictionary
 {
-    MSALResult *result = [MSALResult new];
+    BOOL fSame = YES;
     
-    result->_accessToken = accessToken;
-    result->_expiresOn = expiresOn;
-    result->_tenantId = tenantId;
-    result->_user = user;
-    result->_scopes = scopes;
+    for (NSString *key in self)
+    {
+        id otherVal = dictionary[key];
+        if (!otherVal)
+        {
+            NSLog(@"\"%@\" missing from result dictionary.", key);
+            fSame = NO;
+        }
+        else if (![self[key] isEqual:otherVal])
+        {
+            NSLog(@"\"%@\" does not match. Expected: \"%@\" Actual: \"%@\"", key, self[key], otherVal);
+            fSame = NO;
+        }
+    }
     
-    return result;
+    for (NSString *key in dictionary)
+    {
+        if (!self[key])
+        {
+            NSLog(@"Extra key \"%@\" in result dictionary: \"%@\"", key, dictionary[key]);
+            fSame = NO;
+        }
+    }
+    
+    return fSame;
 }
 
 @end

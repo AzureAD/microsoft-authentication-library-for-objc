@@ -35,6 +35,11 @@ extern NSString *MSALErrorDomain;
 extern NSString *MSALOAuthErrorKey;
 
 /*!
+    The suberror returned by the service.
+ */
+extern NSString *MSALOAuthSubErrorKey;
+
+/*!
     The extded error description. Note that this string can change ands should
     not be relied upon for any error handling logic.
  */
@@ -71,6 +76,9 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
 
      */
     MSALErrorRedirectSchemeNotRegistered = -42001,
+    
+    MSALErrorInvalidRequest = -42002,
+    MSALErrorInvalidClient = -42003,
     
     /*!
         Interaction required errors occur because of a wide variety of errors

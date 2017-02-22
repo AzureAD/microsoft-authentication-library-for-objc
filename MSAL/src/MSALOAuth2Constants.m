@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -20,6 +22,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 #import "MSALOAuth2Constants.h"
 
@@ -45,6 +49,7 @@ NSString *const OAUTH2_RESOURCE                     = @"resource";
 NSString *const OAUTH2_RESPONSE_TYPE                = @"response_type";
 NSString *const OAUTH2_SCOPE                        = @"scope";
 NSString *const OAUTH2_STATE                        = @"state";
+NSString *const OAUTH2_SUB_ERROR                    = @"sub_error";
 NSString *const OAUTH2_TOKEN                        = @"token";
 NSString *const OAUTH2_TOKEN_SUFFIX                 = @"/oauth2/token";
 NSString *const OAUTH2_INSTANCE_DISCOVERY_SUFFIX    = @"common/discovery/instance";
@@ -55,4 +60,3 @@ NSString *const OAUTH2_CORRELATION_ID_RESPONSE      = @"correlation_id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST       = @"return-client-request-id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST_VALUE = @"client-request-id";
 NSString *const OAUTH2_SCOPE_OPENID_VALUE           = @"openid";
-

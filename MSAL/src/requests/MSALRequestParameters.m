@@ -36,20 +36,4 @@
     self.scopes = [[NSOrderedSet alloc] initWithArray:array copyItems:YES];
 }
 
-- (BOOL)setRedirectUri:(NSString *)string
-                 error:(NSError * __autoreleasing *)error
-{
-    self.redirectUri = [NSURL URLWithString:string];
-    CHECK_ERROR_RETURN_NIL(self.redirectUri, self, MSALErrorInvalidParameter, @"redirectUri is not a valid URI");
-    
-    return YES;
-}
-
-- (BOOL)validateParameters:(NSError * __autoreleasing *)error
-{
-    (void)error;
-    @throw @"TODO";
-    return false;
-}
-
 @end

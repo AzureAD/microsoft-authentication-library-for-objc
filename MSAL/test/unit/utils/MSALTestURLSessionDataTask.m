@@ -83,8 +83,7 @@
         NSString *requestURLString = self.request.URL.absoluteString;
         NSAssert(response, @"did not find a matching response for %@", requestURLString);
         
-        // TODO: Logging
-        // AD_LOG_ERROR_F(@"No matching response found.", NSURLErrorNotConnectedToInternet, nil, @"request url = %@", self.request.URL);
+        LOG_ERROR(nil, @"No matching response found, request url = %@", self.request.URL);
         
         [self.session dispatchIfNeed:^{
             NSError* error = [NSError errorWithDomain:NSURLErrorDomain

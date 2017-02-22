@@ -29,6 +29,7 @@
 #import "MSALTestURLSessionDataTask.h"
 #import "NSString+MSALHelperMethods.h"
 #import "NSDictionary+MSALExtensions.h"
+#import "NSDictionary+MSALTestUtil.h"
 
 @implementation MSALTestURLResponse
 
@@ -42,6 +43,22 @@
     MSALTestURLResponse *response = [MSALTestURLResponse new];
     [response setRequestURL:[NSURL URLWithString:requestUrlString]];
     [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
+    [response setJSONResponse:data];
+    
+    return response;
+}
+
++ (MSALTestURLResponse *)requestURLString:(NSString*)requestUrlString
+                          requestJSONBody:(id)requestJSONBody
+                        responseURLString:(NSString*)responseUrlString
+                             responseCode:(NSInteger)responseCode
+                         httpHeaderFields:(NSDictionary *)headerFields
+                         dictionaryAsJSON:(NSDictionary *)data
+{
+    MSALTestURLResponse *response = [MSALTestURLResponse new];
+    [response setRequestURL:[NSURL URLWithString:requestUrlString]];
+    [response setResponseURL:responseUrlString code:responseCode headerFields:headerFields];
+    response->_requestJSONBody = requestJSONBody;
     [response setJSONResponse:data];
     
     return response;
@@ -127,6 +144,10 @@
     if (_requestJSONBody)    {
         NSError* error = nil;
         id obj = [NSJSONSerialization JSONObjectWithData:body options:NSJSONReadingAllowFragments error:&error];
+        if ([obj isKindOfClass:[NSDictionary class]] && [_requestJSONBody isKindOfClass:[NSDictionary class]])
+        {
+            return [(NSDictionary *)_requestJSONBody compareDictionary:obj];
+        }
         BOOL match = [obj isEqual:_requestJSONBody];
         return match;
     }
@@ -182,6 +203,11 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 @implementation NSURLSession (TestSessionOverride)
+
+- (id)init
+{
+    return (NSURLSession *)[[MSALTestURLSession alloc] initWithDelegate:nil delegateQueue:nil];
+}
 
 + (NSURLSession *)sessionWithConfiguration:(NSURLSessionConfiguration *)configuration
                                   delegate:(id<NSURLSessionDelegate>)delegate

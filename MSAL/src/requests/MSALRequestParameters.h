@@ -53,9 +53,5 @@
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
-- (BOOL)setRedirectUri:(NSString *)string
-                 error:(NSError * __autoreleasing *)error;
-
-- (BOOL)validateParameters:(NSError * __autoreleasing *)error;
 
 @end

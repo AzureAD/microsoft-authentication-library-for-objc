@@ -25,29 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALTokenResponse.h"
 
-@implementation MSALResult
+@implementation MSALTokenResponse
 
-@end
-
-@implementation MSALResult (Internal)
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                               scopes:(NSArray<NSString *> *)scopes
+- (id)initWithData:(NSData *)data error:(NSError *__autoreleasing *)error
 {
-    MSALResult *result = [MSALResult new];
+    if (!(self = [super initWithData:data error:error]))
+    {
+        return nil;
+    }
     
-    result->_accessToken = accessToken;
-    result->_expiresOn = expiresOn;
-    result->_tenantId = tenantId;
-    result->_user = user;
-    result->_scopes = scopes;
+    NSString *expiresIn =  self.expiresIn;
+    if (expiresIn)
+    {
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:-[expiresIn doubleValue]];
+    }
     
-    return result;
+    return self;
 }
+
+MSAL_JSON_ACCESSOR(OAUTH2_TOKEN_TYPE, tokenType)
+MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
+MSAL_JSON_ACCESSOR(OAUTH2_REFRESH_TOKEN, refreshToken)
+MSAL_JSON_RW(OAUTH2_SCOPE, scope, setScope)
+MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, expiresIn)
 
 @end

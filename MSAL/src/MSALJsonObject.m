@@ -32,6 +32,7 @@
 - (id)initWithData:(NSData *)data
              error:(NSError * __autoreleasing *)error
 {
+    CHECK_ERROR_RETURN_NIL(data, nil, MSALErrorInternal, @"Attempt to initialize JSON object with nil data");
     if (!(self = [super init]))
     {
         return nil;

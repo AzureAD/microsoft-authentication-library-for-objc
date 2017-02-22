@@ -25,29 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALOAuth2Response.h"
 
-@implementation MSALResult
+@implementation MSALOAuth2Response
 
-@end
+MSAL_JSON_ACCESSOR(OAUTH2_ERROR, error)
+MSAL_JSON_ACCESSOR(OAUTH2_ERROR_DESCRIPTION, errorDescription)
+MSAL_JSON_ACCESSOR(OAUTH2_SUB_ERROR, subError);
+MSAL_JSON_ACCESSOR(OAUTH2_CORRELATION_ID_RESPONSE, correlationId)
 
-@implementation MSALResult (Internal)
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                               scopes:(NSArray<NSString *> *)scopes
-{
-    MSALResult *result = [MSALResult new];
-    
-    result->_accessToken = accessToken;
-    result->_expiresOn = expiresOn;
-    result->_tenantId = tenantId;
-    result->_user = user;
-    result->_scopes = scopes;
-    
-    return result;
-}
 
 @end

@@ -26,8 +26,14 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseRequest.h"
+
 #import "MSALAuthority.h"
+#import "MSALHttpResponse.h"
+#import "MSALResult+Internal.h"
+#import "MSALTokenResponse.h"
 #import "MSALUser.h"
+#import "MSALWebAuthRequest.h"
+
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -132,9 +138,61 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
-    (void)completionBlock;
+    NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
-    @throw @"TODO";
+    MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:_authority.tokenEndpoint
+                                                                      context:_parameters];
+    
+    reqParameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
+    reqParameters[OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
+    [self addAdditionalRequestParameters:reqParameters];
+    authRequest.bodyParameters = reqParameters;
+    
+    [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
+     {
+         if (error)
+         {
+             completionBlock(nil, error);
+             return;
+         }
+         
+         MSALTokenResponse *tokenResponse =
+         [[MSALTokenResponse alloc] initWithData:response.body
+                                           error:&error];
+         if (!tokenResponse)
+         {
+             completionBlock(nil, error);
+             return;
+         }
+         
+         NSString *oauthError = tokenResponse.error;
+         if (oauthError)
+         {
+             MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
+             completionBlock(nil, MSALCreateAndLogError(_parameters, code, oauthError, tokenResponse.subError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription));
+             return;
+         }
+         
+         if ([NSString msalIsStringNilOrBlank:tokenResponse.scope])
+         {
+             LOG_INFO(_parameters, @"No scope in server response, using passed in scope instead.");
+             LOG_INFO_PII(_parameters, @"No scope in server response, using passed in scope instead.");
+             tokenResponse.scope = _parameters.scopes.msalToString;
+         }
+         
+         MSALResult *result =
+         [MSALResult resultWithAccessToken:tokenResponse.accessToken
+                                 expiresOn:tokenResponse.expiresOn
+                                  tenantId:nil // TODO: tenantId
+                                      user:nil // TODO: user
+                                    scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
+         completionBlock(result, nil);
+     }];
+}
+
+- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
+{
+    (void)parameters;
 }
 
 @end

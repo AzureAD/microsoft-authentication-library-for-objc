@@ -29,4 +29,5 @@
 
 NSString *MSALErrorDomain = @"MSALErrorDomain";
 NSString *MSALOAuthErrorKey = @"MSALOAuthErrorKey";
+NSString *MSALOAuthSubErrorKey = @"MSALOAuthSubErrorKey";
 NSString *MSALErrorDescriptionKey = @"MSALErrorDescriptionKey";

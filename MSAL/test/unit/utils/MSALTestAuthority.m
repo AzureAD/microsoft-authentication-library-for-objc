@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,29 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALTestAuthority.h"
 
-@implementation MSALResult
+@implementation MSALTestAuthority
 
-@end
-
-@implementation MSALResult (Internal)
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                               scopes:(NSArray<NSString *> *)scopes
++ (MSALTestAuthority *)AADAuthority:(NSURL *)unvalidatedAuthority
 {
-    MSALResult *result = [MSALResult new];
-    
-    result->_accessToken = accessToken;
-    result->_expiresOn = expiresOn;
-    result->_tenantId = tenantId;
-    result->_user = user;
-    result->_scopes = scopes;
-    
-    return result;
+    MSALTestAuthority *authority = [MSALTestAuthority new];
+    authority.authorityType = AADAuthority;
+    authority.canonicalAuthority = unvalidatedAuthority;
+    authority.isTenantless = YES;
+    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
+    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
+    return authority;
 }
-
 @end
