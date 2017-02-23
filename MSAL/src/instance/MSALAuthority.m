@@ -60,8 +60,9 @@ BOOL isTenantless(NSURL *authority)
 + (void)initialize
 {
     s_trustedHostList = [NSSet setWithObjects: @"login.windows.net",
-                         @"loginchinacloudapi.cn",
+                         @"login.chinacloudapi.cn",
                          @"login.cloudgovapi.us",
+                         @"login-us.microsoftonline.com",
                          @"login.microsoftonline.com",
                          @"login.microsoftonline.de", nil];
 }

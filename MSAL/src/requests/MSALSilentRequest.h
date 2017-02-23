@@ -25,42 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
-#import "MSALAccessTokenCacheItem.h"
-
-@implementation MSALResult
-
-@end
-
-@implementation MSALResult (Internal)
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                               scopes:(NSArray<NSString *> *)scopes
+#import "MSAL.h"
+#import "MSALBaseRequest.h"
+@interface MSALSilentRequest : MSALBaseRequest
 {
-    MSALResult *result = [MSALResult new];
-    
-    result->_accessToken = accessToken;
-    result->_expiresOn = expiresOn;
-    result->_tenantId = tenantId;
-    result->_user = user;
-    result->_scopes = scopes;
-    
-    return result;
+    MSALScopes *_additionalScopes;
 }
 
-+ (MSALResult *)resultWithAccessTokenItem:(MSALAccessTokenCacheItem *)cacheItem
-{
-    MSALResult *result = [MSALResult new];
-    result->_accessToken = cacheItem.accessToken;
-    result->_expiresOn = cacheItem.expiresOn;
-    result->_tenantId = cacheItem.tenantId;
-    result->_user = cacheItem.user;
-    result->_scopes = [cacheItem.scope array];
-    
-    return result;
-}
+@property NSString *state;
+
+- (id)initWithParameters:(MSALRequestParameters *)parameters
+            forceRefresh:(BOOL)forceRefresh
+                   error:(NSError *__autoreleasing *)error;
 
 @end
