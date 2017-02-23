@@ -31,7 +31,7 @@
 
 @property (readonly) NSString *tokenType;
 @property (readonly) NSString *accessToken;
-@property (readonly) NSString *refreshToken;
+@property NSString *refreshToken;
 @property NSString *scope;
 @property (readonly) NSString *familyId;
 @property (readonly) NSString *expiresIn;

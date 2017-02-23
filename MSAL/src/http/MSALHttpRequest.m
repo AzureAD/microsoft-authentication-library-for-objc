@@ -32,6 +32,8 @@
 #import "MSALOAuth2Constants.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
+#import "NSString+MSALHelperMethods.h"
+#import "MSALAuthority.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -168,7 +170,8 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     request.allHTTPHeaderFields = _headers;
     request.HTTPBody = bodyData;
     
-    LOG_INFO(_context, @"HTTP request %@", request.URL.absoluteString);
+    LOG_INFO(_context, @"HTTP request %@", [MSALAuthority isKnownHost:request.URL] ? request.URL.absoluteString : [request.URL.absoluteString msalComputeSHA256]);
+    LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
     
     NSURLSessionDataTask *task = [_session dataTaskWithRequest:request
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
