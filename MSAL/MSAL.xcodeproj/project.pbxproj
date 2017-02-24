@@ -217,6 +217,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		60DEF13B1E60AD6600966664 /* MSALKeychainTokenCache+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALKeychainTokenCache+Internal.h"; sourceTree = "<group>"; };
 		94E876B01E4556B400FB96ED /* MSAL.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAL.pch; sourceTree = "<group>"; };
 		94E876B71E45745C00FB96ED /* MSALLoggerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALLoggerTests.m; sourceTree = "<group>"; };
 		94E876BA1E46452A00FB96ED /* MSALStringHelperMethodTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALStringHelperMethodTests.m; sourceTree = "<group>"; };
@@ -662,6 +663,7 @@
 		D65A6F691E3FF3D900C69FBA /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				60DEF13B1E60AD6600966664 /* MSALKeychainTokenCache+Internal.h */,
 				D65A6F6A1E3FF3D900C69FBA /* MSALKeychainTokenCache.m */,
 			);
 			path = ios;
@@ -886,8 +888,8 @@
 				D65A6F501E3FD32D00C69FBA /* MSAL.framework */,
 				D65A6FC11E3FF47D00C69FBA /* "MSAL-iOS-Unit-Tests".xctest */,
 				D65A6FD01E3FF49C00C69FBA /* "MSAL-Mac-Unit-Tests".xctest */,
-				D61A64331E5A29580086D120 /* "MSAL Test App".app */,
-				D61A646C1E5AA7120086D120 /* "MSAL Test App".app */,
+				D61A64331E5A29580086D120 /* MSAL Test App.app */,
+				D61A646C1E5AA7120086D120 /* MSAL Test App.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -930,7 +932,6 @@
 				967317E01E551D17004E6203 /* MSALURLSession.h in Headers */,
 				96D455D41E4AB4DA002C9C3C /* MSALTelemetryEventStrings.h in Headers */,
 				94E876DB1E493DC600FB96ED /* MSALInteractiveRequest.h in Headers */,
-				94E876D61E49391A00FB96ED /* MSALAuthorizationCodeRequest.h in Headers */,
 				967317DB1E54C0E8004E6203 /* MSALTenantDiscoveryResponse.h in Headers */,
 				D61F5BDF1E596F2700912CB8 /* MSALOAuth2Response.h in Headers */,
 				D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */,
@@ -960,7 +961,7 @@
 			);
 			name = "MSAL Test App (iOS)";
 			productName = MSALTestApp;
-			productReference = D61A64331E5A29580086D120 /* "MSAL Test App".app */;
+			productReference = D61A64331E5A29580086D120 /* MSAL Test App.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D61A646B1E5AA7120086D120 /* MSAL Test App (Mac) */ = {
@@ -977,7 +978,7 @@
 			);
 			name = "MSAL Test App (Mac)";
 			productName = "MSAL Test App";
-			productReference = D61A646C1E5AA7120086D120 /* "MSAL Test App".app */;
+			productReference = D61A646C1E5AA7120086D120 /* MSAL Test App.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */ = {
@@ -1270,7 +1271,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9631D00B1E4558980057BE7F /* MSALHttpRequestTests.m in Sources */,
-				96D9A5411E4AACC000674A85 /* MSALOAuth2Constants.m in Sources */,
 				96875DF11E59A3B000D7847F /* MSALAadAuthorityResolverTests.m in Sources */,
 				96875DEE1E59A39C00D7847F /* MSALAuthorityBaseResolverTests.m in Sources */,
 				D61F5BC01E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m in Sources */,

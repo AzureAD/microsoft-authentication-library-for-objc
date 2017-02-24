@@ -25,36 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
+#import "MSALRefreshTokenCacheItem.h"
+#import "MSALRequestParameters.h"
+#import "MSALAccessTokenCacheItem.h"
+#import "MSALTokenResponse.h"
 
-@implementation MSALKeychainTokenCache
+@interface MSALKeychainTokenCache (Internal)
 
 - (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(NSString *)authority
                                                clientId:(NSString *)clientId
-                                               response:(MSALTokenResponse *)response
-{
-    (void)authority;
-    (void)clientId;
-    (void)response;
-    return [MSALAccessTokenCacheItem new];//fill in any information you need for the item
-}
+                                               response:(MSALTokenResponse *)response;
 
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-{
-    (void)requestParam;
-    return [MSALAccessTokenCacheItem new];//fill in any information you need for the item
-}
+- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam;
 
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
-{
-    (void)requestParam;
-    return [MSALRefreshTokenCacheItem new];//fill in any information you need for the item
-}
+- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam;
 
-- (void)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-{
-    (void)rtItem;
-}
+- (void)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem;
 
 @end
