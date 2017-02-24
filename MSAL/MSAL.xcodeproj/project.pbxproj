@@ -33,6 +33,8 @@
 		965B86141E5ED5F1004AEB59 /* MSALSilentRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */; };
 		965B86151E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
 		965B86161E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
+		965BEF7C1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */; };
+		965BEF7D1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */; };
 		966360541E56931F00A8360F /* MSALAuthorityBaseResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 966360521E56931F00A8360F /* MSALAuthorityBaseResolver.h */; };
 		966360551E56931F00A8360F /* MSALAuthorityBaseResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 966360531E56931F00A8360F /* MSALAuthorityBaseResolver.m */; };
 		966360561E56931F00A8360F /* MSALAuthorityBaseResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 966360531E56931F00A8360F /* MSALAuthorityBaseResolver.m */; };
@@ -243,6 +245,7 @@
 		963B4B521E4BAC200025EFC1 /* MSALHttpResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALHttpResponse.m; sourceTree = "<group>"; };
 		965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALSilentRequest.h; sourceTree = "<group>"; };
 		965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALSilentRequest.m; sourceTree = "<group>"; };
+		965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALSilentRequestTests.m; sourceTree = "<group>"; };
 		966360521E56931F00A8360F /* MSALAuthorityBaseResolver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAuthorityBaseResolver.h; sourceTree = "<group>"; };
 		966360531E56931F00A8360F /* MSALAuthorityBaseResolver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAuthorityBaseResolver.m; sourceTree = "<group>"; };
 		967317D91E54C0E8004E6203 /* MSALTenantDiscoveryResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTenantDiscoveryResponse.h; sourceTree = "<group>"; };
@@ -790,6 +793,7 @@
 				D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */,
 				96875DED1E59A39C00D7847F /* MSALAuthorityBaseResolverTests.m */,
 				96875DF01E59A3B000D7847F /* MSALAadAuthorityResolverTests.m */,
+				965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -1288,6 +1292,7 @@
 				D69ADB1E1E5144EB00952049 /* MSALAuthorityTests.m in Sources */,
 				D673F07D1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSALTestURLSession.m in Sources */,
+				965BEF7C1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */,
 				D68A15841E51A82100D923AD /* MSALInteractiveRequestTests.m in Sources */,
 				D61F5BD31E59629200912CB8 /* MSALBaseRequest+TestExtensions.m in Sources */,
 				D61F5B9B1E57959900912CB8 /* MSALWebUITestsiOS.m in Sources */,
@@ -1316,6 +1321,7 @@
 				D69ADB3E1E516F9B00952049 /* MSALTestURLSession.m in Sources */,
 				96875DF21E59A3B000D7847F /* MSALAadAuthorityResolverTests.m in Sources */,
 				D61F5BD81E59682200912CB8 /* MSALTestAuthority.m in Sources */,
+				965BEF7D1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */,
 				94E876BC1E46452B00FB96ED /* MSALStringHelperMethodTests.m in Sources */,
 				D61F5BD41E59629200912CB8 /* MSALBaseRequest+TestExtensions.m in Sources */,
 				94E876B91E45745C00FB96ED /* MSALLoggerTests.m in Sources */,

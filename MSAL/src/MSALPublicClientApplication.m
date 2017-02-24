@@ -32,6 +32,7 @@
 #import "MSALError.h"
 #import "MSALError_Internal.h"
 #import "MSALInteractiveRequest.h"
+#import "MSALSilentRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
@@ -306,10 +307,69 @@
                                user:(MSALUser *)user
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)user;
-    (void)completionBlock;
+    [self acquireTokenSilentForScopes:scopes
+                                 user:user
+                         forceRefresh:NO
+                        correlationId:nil
+                      completionBlock:completionBlock];
+}
+
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(NSUUID *)correlationId
+                    completionBlock:(MSALCompletionBlock)completionBlock
+{
+    MSALRequestParameters* params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.correlationId = correlationId ? correlationId : [NSUUID new];
+    params.user = user;
+    
+    [params setScopesFromArray:scopes];
+    
+    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
+                      "                                                     user:%@\n"
+                      "                                             forceRefresh:%@\n"
+                      "                                            correlationId:%@\n]",
+             scopes, _PII(user), forceRefresh ? @"Yes" : @"No", correlationId);
+    
+    
+    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
+                          "                                                     user:%@\n"
+                          "                                             forceRefresh:%@\n"
+                          "                                            correlationId:%@\n]",
+                 scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
+
+    if (user.authority)
+    {
+        NSError *error = nil;
+        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:user.authority error:&error];
+        if (!authorityUrl)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        params.unvalidatedAuthority = authorityUrl;
+    }
+    else
+    {
+        params.unvalidatedAuthority = _authority;
+    }
+    params.redirectUri = _redirectUri;
+    params.clientId = _clientId;
+    
+    NSError *error = nil;
+    
+    MSALSilentRequest *request =
+    [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
+    
+    if (!request)
+    {
+        completionBlock(nil, error);
+        return;
+    }
+    
+    [request run:completionBlock];
 }
 
 @end
