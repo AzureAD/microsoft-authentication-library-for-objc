@@ -28,9 +28,6 @@
 #import "MSAL.h"
 #import "MSALBaseRequest.h"
 @interface MSALSilentRequest : MSALBaseRequest
-{
-    MSALScopes *_additionalScopes;
-}
 
 @property NSString *state;
 
