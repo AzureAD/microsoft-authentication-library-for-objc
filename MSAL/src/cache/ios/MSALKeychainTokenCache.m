@@ -26,7 +26,21 @@
 //------------------------------------------------------------------------------
 
 #import "MSALKeychainTokenCache.h"
+#import "MSALAccessTokenCacheItem.h"
+#import "MSALRefreshTokenCacheItem.h"
 
 @implementation MSALKeychainTokenCache
+
++ (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
+{
+    (void)requestParam;
+    return [MSALAccessTokenCacheItem new];
+}
+
++ (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam;
+{
+    (void)requestParam;
+    return [MSALRefreshTokenCacheItem new];
+}
 
 @end

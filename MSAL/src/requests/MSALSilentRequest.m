@@ -29,6 +29,7 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
+#import "MSALKeychainTokenCache.h"
 
 @interface MSALSilentRequest()
 {
@@ -51,6 +52,7 @@
     }
     
     _forceRefresh = forceRefresh;
+    _refreshToken = nil;
     
     return self;
 }
@@ -60,9 +62,9 @@
     CHECK_ERROR_COMPLETION(!_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
     
     MSALAccessTokenCacheItem *accessToken = nil;
-    if (_forceRefresh)
+    if (!_forceRefresh)
     {
-    //TODO: retrieve from token cache - [TokenCache accessToken:_parameters]
+        accessToken = [MSALKeychainTokenCache findAccessToken:_parameters];
     }
     
     if (accessToken)
@@ -72,12 +74,12 @@
         return;
     }
     
-    //TODO: [TokenCache refreshToken:_parameters]
-    _refreshToken = nil;
+    _refreshToken = [MSALKeychainTokenCache findRefreshToken:_parameters];
     
     CHECK_ERROR_COMPLETION(!_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     
     LOG_INFO(_parameters, @"Refreshing access token");
+    LOG_INFO_PII(_parameters, @"Refreshing access token");
     
     [super acquireToken:completionBlock];
 }
