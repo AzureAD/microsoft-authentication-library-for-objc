@@ -53,14 +53,11 @@
 
 + (MSALResult *)resultWithAccessTokenItem:(MSALAccessTokenCacheItem *)cacheItem
 {
-    MSALResult *result = [MSALResult new];
-    result->_accessToken = cacheItem.accessToken;
-    result->_expiresOn = cacheItem.expiresOn;
-    result->_tenantId = cacheItem.tenantId;
-    result->_user = cacheItem.user;
-    result->_scopes = [cacheItem.scope array];
-    
-    return result;
+    return [self resultWithAccessToken:cacheItem.accessToken
+                             expiresOn:cacheItem.expiresOn
+                              tenantId:cacheItem.tenantId
+                                  user:cacheItem.user
+                                scopes:[cacheItem.scope array]];
 }
 
 @end
