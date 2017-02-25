@@ -791,9 +791,9 @@
 				94E876BA1E46452A00FB96ED /* MSALStringHelperMethodTests.m */,
 				D69ADB1D1E5144EB00952049 /* MSALAuthorityTests.m */,
 				D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */,
+				965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */,
 				96875DED1E59A39C00D7847F /* MSALAuthorityBaseResolverTests.m */,
 				96875DF01E59A3B000D7847F /* MSALAadAuthorityResolverTests.m */,
-				965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";

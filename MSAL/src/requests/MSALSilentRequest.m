@@ -59,7 +59,7 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(!_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
+    CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
     
     MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
@@ -76,7 +76,7 @@
     
     _refreshToken = [MSALKeychainTokenCache findRefreshToken:_parameters];
     
-    CHECK_ERROR_COMPLETION(!_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
+    CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     
     LOG_INFO(_parameters, @"Refreshing access token");
     LOG_INFO_PII(_parameters, @"Refreshing access token");
@@ -87,7 +87,7 @@
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
 {
     parameters[OAUTH2_GRANT_TYPE] = OAUTH2_REFRESH_TOKEN;
-    parameters[OAUTH2_REFRESH_TOKEN] = _refreshToken.refreshToken;
+    parameters[OAUTH2_REFRESH_TOKEN] = [_refreshToken refreshToken];
 }
 
 
