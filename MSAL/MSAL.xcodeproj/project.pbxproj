@@ -34,7 +34,6 @@
 		965B86151E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
 		965B86161E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
 		965BEF7C1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */; };
-		965BEF7D1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */; };
 		966360541E56931F00A8360F /* MSALAuthorityBaseResolver.h in Headers */ = {isa = PBXBuildFile; fileRef = 966360521E56931F00A8360F /* MSALAuthorityBaseResolver.h */; };
 		966360551E56931F00A8360F /* MSALAuthorityBaseResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 966360531E56931F00A8360F /* MSALAuthorityBaseResolver.m */; };
 		966360561E56931F00A8360F /* MSALAuthorityBaseResolver.m in Sources */ = {isa = PBXBuildFile; fileRef = 966360531E56931F00A8360F /* MSALAuthorityBaseResolver.m */; };
@@ -1321,7 +1320,6 @@
 				D69ADB3E1E516F9B00952049 /* MSALTestURLSession.m in Sources */,
 				96875DF21E59A3B000D7847F /* MSALAadAuthorityResolverTests.m in Sources */,
 				D61F5BD81E59682200912CB8 /* MSALTestAuthority.m in Sources */,
-				965BEF7D1E5FE73C00A61587 /* MSALSilentRequestTests.m in Sources */,
 				94E876BC1E46452B00FB96ED /* MSALStringHelperMethodTests.m in Sources */,
 				D61F5BD41E59629200912CB8 /* MSALBaseRequest+TestExtensions.m in Sources */,
 				94E876B91E45745C00FB96ED /* MSALLoggerTests.m in Sources */,

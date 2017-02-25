@@ -64,7 +64,9 @@
     MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
     {
+#if TARGET_OS_IPHONE
         accessToken = [MSALKeychainTokenCache findAccessToken:_parameters];
+#endif
     }
     
     if (accessToken)
@@ -73,8 +75,14 @@
         completionBlock(result, nil);
         return;
     }
-    
+
+#if TARGET_OS_IPHONE
     _refreshToken = [MSALKeychainTokenCache findRefreshToken:_parameters];
+#else
+    //TODO: Mac support
+    _refreshToken = [MSALRefreshTokenCacheItem new];
+
+#endif
     
     CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     
