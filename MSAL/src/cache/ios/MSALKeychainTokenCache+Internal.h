@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALRequestParameters.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALTokenResponse.h"
+@class MSALRefreshTokenCacheItem;
+@class MSALRequestParameters;
+@class MSALAccessTokenCacheItem;
+@class MSALTokenResponse;
 
 @interface MSALKeychainTokenCache (Internal)
 
@@ -40,6 +40,8 @@
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam;
 
-- (void)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem;
+- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem;
+
+- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem;
 
 @end

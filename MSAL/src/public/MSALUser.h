@@ -27,9 +27,11 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALIdToken;
+
 @interface MSALUser : NSObject
 
-@property (readonly) NSString *upn;
+@property (readonly) NSString *upn;//where to get it?
 @property (readonly) NSString *uniqueId;
 @property (readonly) NSString *displayableId;
 @property (readonly) NSString *name;
@@ -38,6 +40,9 @@
 @property (readonly) NSString *authority;
 @property (readonly) NSString *homeObjectId;
 
+- (id)initWithIdToken:(MSALIdToken *)idToken
+            authority:(NSString *)authority
+             clientId:(NSString *)clientId;
 - (void)signOut;
 
 @end

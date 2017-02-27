@@ -26,8 +26,37 @@
 //------------------------------------------------------------------------------
 
 #import "MSALUser.h"
+#import "MSALIdToken.h"
 
 @implementation MSALUser
+
+- (id)initWithIdToken:(MSALIdToken *)idToken
+            authority:(NSString *)authority
+             clientId:(NSString *)clientId
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    if (idToken.objectId)
+    {
+        _uniqueId = idToken.objectId;
+    }
+    else
+    {
+        _uniqueId = idToken.subject;
+    }
+    
+    _displayableId = idToken.preferredUsername;
+    _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
+    _name = idToken.name;
+    _identityProvider = idToken.issuer;
+    _authority = authority;
+    _clientId = clientId;
+    
+    return self;
+}
 
 - (void)signOut
 {

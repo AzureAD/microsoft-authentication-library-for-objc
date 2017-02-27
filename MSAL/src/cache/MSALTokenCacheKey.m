@@ -29,4 +29,63 @@
 
 @implementation MSALTokenCacheKey
 
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+                   user:(MSALUser *)user
+{
+    return [self initWithAuthority:authority
+                          clientId:clientId
+                             scope:scope
+                          uniqueId:user.uniqueId
+                     displayableId:user.displayableId
+                      homeObjectId:user.homeObjectId];
+}
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+               uniqueId:(NSString *)uniqueId
+          displayableId:(NSString *)displayableId
+           homeObjectId:(NSString *)homeObjectId
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self.authority = [authority lowercaseString];
+    self.clientId = [clientId lowercaseString];
+    self.scope = scope;
+    if (!self.scope)
+    {
+        scope = [NSOrderedSet<NSString *> new];
+    }
+    self.uniqueId = [uniqueId lowercaseString];
+    self.displayableId = [displayableId lowercaseString];
+    self.homeObjectId = [homeObjectId lowercaseString];
+    
+    return self;
+}
+
+- (NSString *)toString {
+    return [NSString stringWithFormat:@"%@$%@$%@$%@$%@$%@",
+            self.authority.msalBase64UrlEncode,
+            self.clientId.msalBase64UrlEncode,
+            self.scope.msalToString.msalBase64UrlEncode,
+            self.displayableId.msalBase64UrlEncode,
+            self.uniqueId.msalBase64UrlEncode,
+            self.homeObjectId.msalBase64UrlEncode];
+}
+
+- (BOOL)matches:(MSALTokenCacheKey *)other
+{
+    return [self.authority isEqualToString:other.authority] &&
+    [self.clientId isEqualToString:other.clientId] &&
+    [other.scope isSubsetOfOrderedSet:self.scope] &&
+    [self.uniqueId isEqualToString:other.uniqueId] &&
+    [self.displayableId isEqualToString:other.displayableId] &&
+    [self.homeObjectId isEqualToString:other.homeObjectId];
+}
+
 @end

@@ -29,6 +29,18 @@
 
 @implementation MSALJsonObject
 
+- (id)init
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _json = [NSMutableDictionary new];
+    
+    return self;
+}
+
 - (id)initWithData:(NSData *)data
              error:(NSError * __autoreleasing *)error
 {

@@ -29,4 +29,6 @@
 
 @interface MSALKeychainTokenCache : NSObject
 
++ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+
 @end

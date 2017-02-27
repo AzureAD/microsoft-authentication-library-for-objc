@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccessTokenCacheItem.h"
+#import "MSALTokenCacheKey.h"
 
 @implementation MSALAccessTokenCacheItem
 
@@ -45,6 +46,14 @@ MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
 - (BOOL)isExpired
 {
     return [self.expiresOn timeIntervalSinceNow] > 0;
+}
+
+- (MSALTokenCacheKey *)tokenCacheKey
+{
+    return [[MSALTokenCacheKey alloc] initWithAuthority:self.authority
+                                               clientId:self.clientId
+                                                  scope:self.scope
+                                                   user:self.user];
 }
 
 @end

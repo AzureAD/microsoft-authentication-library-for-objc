@@ -25,17 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import "MSALJsonObject.h"
 
-@interface MSALTokenResponse : MSALOAuth2Response
+@interface MSALIdToken : MSALJsonObject
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property (readonly) NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *familyId;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+@property (readonly) NSString *issuer;
+@property (readonly) NSString *objectId;
+@property (readonly) NSString *subject;
+@property (readonly) NSString *tenantId;
+@property (readonly) NSString *version;
+@property (readonly) NSString *preferredUsername;
+@property (readonly) NSString *name;
+@property (readonly) NSString *homeObjectId;
+
+- (id)initWithRawIdToken:(NSString *)rawIdToken;
 
 @end

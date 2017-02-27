@@ -37,5 +37,6 @@
 @property (readonly) MSALScopes *scope;
 
 - (BOOL)isExpired;
+- (MSALTokenCacheKey *)tokenCacheKey;
 
 @end

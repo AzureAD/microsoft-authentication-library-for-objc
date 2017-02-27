@@ -27,15 +27,34 @@
 
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
+#import "MSALTokenResponse.h"
 
 @implementation MSALRefreshTokenCacheItem
 
 MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
 
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response
+{
+    if (!(self = [super initWithAuthority:authority clientId:clientId response:response]))
+    {
+        return nil;
+    }
+    
+    self.refreshToken = response.refreshToken;
+    
+    return self;
+}
+
 - (MSALTokenCacheKey *)tokenCacheKey
 {
-    // TODO
-    return nil;
+    return [[MSALTokenCacheKey alloc] initWithAuthority:nil
+                                               clientId:self.clientId
+                                                  scope:nil
+                                               uniqueId:nil
+                                          displayableId:nil
+                                           homeObjectId:self.user.homeObjectId];
 }
 
 @end

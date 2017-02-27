@@ -35,6 +35,10 @@
 
 @property (readwrite) NSString * refreshToken;
 
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response;
+
 - (MSALTokenCacheKey *)tokenCacheKey;
 
 @end

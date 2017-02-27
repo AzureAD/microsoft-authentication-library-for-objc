@@ -28,27 +28,35 @@
 #import "MSALBaseTokenCacheItem.h"
 #import "MSALUser.h"
 #import "MSAL_Internal.h"
+#import "MSALTokenResponse.h"
+#import "MSALIdToken.h"
 
 @implementation MSALBaseTokenCacheItem
 
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"policy", policy, setPolicy)
 MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
 MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
-                 policy:(NSString *)policy
+               response:(MSALTokenResponse *)response
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
+    if (response.idToken)
+    {
+        self.rawIdToken = response.idToken;
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
+        self.tenantId = idToken.tenantId;
+        _user = [[MSALUser alloc] initWithIdToken:idToken authority:authority clientId:clientId];
+    }
+    
     self.authority = authority;
     self.clientId = clientId;
-    self.policy = policy;
     
     return self;
 }
