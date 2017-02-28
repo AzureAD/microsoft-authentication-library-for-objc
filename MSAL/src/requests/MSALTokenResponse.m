@@ -36,10 +36,12 @@
         return nil;
     }
     
+    NSString* a = [data base64EncodedStringWithOptions:0];
+    (void)a;
     NSString *expiresIn =  self.expiresIn;
     if (expiresIn)
     {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:-[expiresIn doubleValue]];
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
     }
     
     return self;

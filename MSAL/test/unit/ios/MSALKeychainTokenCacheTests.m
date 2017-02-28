@@ -25,41 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
-#import "MSALTokenResponse.h"
+#import <XCTest/XCTest.h>
 
-@implementation MSALRefreshTokenCacheItem
+@interface MSALKeychainTokenCacheTests : XCTestCase
 
-MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
+@end
 
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response
-{
-    if (!response.refreshToken)
-    {
-        return nil;
-    }
-    
-    if (!(self = [super initWithAuthority:authority clientId:clientId response:response]))
-    {
-        return nil;
-    }
-    
-    self.refreshToken = response.refreshToken;
-    
-    return self;
+@implementation MSALKeychainTokenCacheTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey
-{
-    return [[MSALTokenCacheKey alloc] initWithAuthority:nil
-                                               clientId:self.clientId
-                                                  scope:nil
-                                               uniqueId:nil
-                                          displayableId:nil
-                                           homeObjectId:self.user.homeObjectId];
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testExample {
+    // This is an example of a functional test case.
+    // Use XCTAssert and related functions to verify your tests produce the correct results.
 }
 
 @end

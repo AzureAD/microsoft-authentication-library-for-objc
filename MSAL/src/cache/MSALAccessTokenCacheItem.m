@@ -27,21 +27,46 @@
 
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
+#import "MSALTokenResponse.h"
+#import "MSALJsonObject.h"
 
 @implementation MSALAccessTokenCacheItem
 
-MSAL_JSON_ACCESSOR(OAUTH2_TOKEN_TYPE, tokenType)
-MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
+MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
+MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
 
-- (NSDate *)expiresOn
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response
 {
-    NSString *expiresOn = _json[@"expires_on"];
-    if (!expiresOn)
+    if (!response.accessToken)
     {
         return nil;
     }
-    return [NSDate dateWithTimeIntervalSince1970:[expiresOn doubleValue]];
+    
+    if (!(self = [super initWithAuthority:authority clientId:clientId response:response]))
+    {
+        return nil;
+    }
+    
+    self.accessToken = response.accessToken;
+    self.tokenType = response.tokenType;
+    self.expiresOn = response.expiresOn;
+    self.scope = [self scopeFromString:response.scope];
+    
+    return self;
 }
+
+
+//- (NSDate *)expiresOn
+//{
+//    NSString *expiresOn = _json[@"expires_on"];
+//    if (!expiresOn)
+//    {
+//        return nil;
+//    }
+//    return [NSDate dateWithTimeIntervalSince1970:[expiresOn doubleValue]];
+//}
 
 - (BOOL)isExpired
 {
@@ -54,6 +79,20 @@ MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
                                                clientId:self.clientId
                                                   scope:self.scope
                                                    user:self.user];
+}
+
+- (MSALScopes *)scopeFromString:(NSString *)scopeString
+{
+    NSMutableOrderedSet<NSString *> *scope = [NSMutableOrderedSet<NSString *> new];
+    NSArray* parts = [scopeString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" "]];
+    for (NSString *part in parts)
+    {
+        if (![NSString msalIsStringNilOrBlank:part])
+        {
+            [scope addObject:part.msalTrimmedString];
+        }
+    }
+    return scope;
 }
 
 @end

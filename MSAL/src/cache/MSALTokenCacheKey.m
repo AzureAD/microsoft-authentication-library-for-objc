@@ -70,12 +70,12 @@
 
 - (NSString *)toString {
     return [NSString stringWithFormat:@"%@$%@$%@$%@$%@$%@",
-            self.authority.msalBase64UrlEncode,
-            self.clientId.msalBase64UrlEncode,
-            self.scope.msalToString.msalBase64UrlEncode,
-            self.displayableId.msalBase64UrlEncode,
-            self.uniqueId.msalBase64UrlEncode,
-            self.homeObjectId.msalBase64UrlEncode];
+            self.authority ? self.authority.msalBase64UrlEncode : @"",
+            self.clientId ? self.clientId.msalBase64UrlEncode : @"",
+            self.scope ? self.scope.msalToString.msalBase64UrlEncode : @"",
+            self.displayableId ? self.displayableId.msalBase64UrlEncode : @"",
+            self.uniqueId ? self.uniqueId.msalBase64UrlEncode : @"",
+            self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @""];
 }
 
 - (BOOL)matches:(MSALTokenCacheKey *)other

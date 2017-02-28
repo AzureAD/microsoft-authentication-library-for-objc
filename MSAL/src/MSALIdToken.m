@@ -61,8 +61,9 @@ MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
         return nil;
     }
     
+    NSData *decoded =  [[parts[1] msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error = nil;
-    if (!(self = [super initWithData:parts[1] error:&error]))
+    if (!(self = [super initWithData:decoded error:&error]))
     {
         if (error)
         {
