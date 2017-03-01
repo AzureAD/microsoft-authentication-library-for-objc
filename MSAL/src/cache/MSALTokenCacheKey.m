@@ -82,12 +82,12 @@
 
 - (BOOL)matches:(MSALTokenCacheKey *)other
 {
-    return (self.authority ? [self.authority isEqualToString:other.authority] : !other.authority)
-    && (self.clientId ? [self.clientId isEqualToString:other.clientId] : !other.clientId)
-    && (self.scope ? [other.scope isSubsetOfOrderedSet:self.scope] : !other.scope)
-    && (self.uniqueId ? [self.uniqueId isEqualToString:other.uniqueId] : !other.uniqueId)
-    && (self.displayableId ? [self.displayableId isEqualToString:other.displayableId] : !other.displayableId)
-    && (self.homeObjectId ? [self.homeObjectId isEqualToString:other.homeObjectId] : !other.homeObjectId);
+    return [self.clientId isEqualToString:other.clientId]
+    && [self.scope isEqualToOrderedSet:other.scope]
+    && (!self.authority || [self.authority isEqualToString:other.authority])
+    && (!self.uniqueId || [self.uniqueId isEqualToString:other.uniqueId])
+    && (!self.displayableId || [self.displayableId isEqualToString:other.displayableId])
+    && (!self.homeObjectId || [self.homeObjectId isEqualToString:other.homeObjectId]);
 }
 
 @end
