@@ -187,8 +187,8 @@ static MSALScopes *s_reservedScopes = nil;
              if (!tokenResponse.refreshToken)
              {
                  tokenResponse.refreshToken = reqParameters[OAUTH2_REFRESH_TOKEN];
-                 LOG_INFO(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-                 LOG_INFO_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                 LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                 LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
              }
          }
          
