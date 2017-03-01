@@ -38,6 +38,6 @@
 @property (readonly) NSString *name;
 @property (readonly) NSString *homeObjectId;
 
-- (id)initWithRawIdToken:(NSString *)rawIdToken;
+- (id)initWithRawIdToken:(NSString *)rawIdTokenString;
 
 @end

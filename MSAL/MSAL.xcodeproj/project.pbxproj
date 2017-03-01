@@ -181,6 +181,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		60DEF1581E67755E00966664 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D61A64321E5A29580086D120;
+			remoteInfo = "MSAL Test App (iOS)";
+		};
 		D61A64B31E5ACC850086D120 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -230,6 +237,7 @@
 		60DEF1401E6501F800966664 /* MSALIdTokenTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALIdTokenTests.m; sourceTree = "<group>"; };
 		60DEF1431E65455A00966664 /* MSALTokenCacheItemTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTokenCacheItemTests.m; sourceTree = "<group>"; };
 		60DEF1481E65DA9200966664 /* MSALKeychainTokenCacheTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALKeychainTokenCacheTests.m; sourceTree = "<group>"; };
+		60DEF15A1E67756800966664 /* MSAL Test App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "MSAL Test App.entitlements"; path = "../../../../MSAL Test App.entitlements"; sourceTree = "<group>"; };
 		94E876B01E4556B400FB96ED /* MSAL.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAL.pch; sourceTree = "<group>"; };
 		94E876B71E45745C00FB96ED /* MSALLoggerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALLoggerTests.m; sourceTree = "<group>"; };
 		94E876BA1E46452A00FB96ED /* MSALStringHelperMethodTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALStringHelperMethodTests.m; sourceTree = "<group>"; };
@@ -538,6 +546,7 @@
 		D61A64821E5AA7C60086D120 /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				60DEF15A1E67756800966664 /* MSAL Test App.entitlements */,
 				D61A64B81E5ADBE80086D120 /* Images.xcassets */,
 				D61A64881E5AA7C60086D120 /* Info.plist */,
 			);
@@ -1047,6 +1056,7 @@
 			);
 			dependencies = (
 				D61F5BC71E59333000912CB8 /* PBXTargetDependency */,
+				60DEF1591E67755E00966664 /* PBXTargetDependency */,
 			);
 			name = "MSAL iOS Unit Tests";
 			productName = "MSAL iOS Unit Tests";
@@ -1101,6 +1111,11 @@
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 					D61A646B1E5AA7120086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1121,6 +1136,7 @@
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
+						TestTargetID = D61A64321E5A29580086D120;
 					};
 					D65A6FCF1E3FF49C00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1391,6 +1407,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		60DEF1591E67755E00966664 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D61A64321E5A29580086D120 /* MSAL Test App (iOS) */;
+			targetProxy = 60DEF1581E67755E00966664 /* PBXContainerItemProxy */;
+		};
 		D61A64B41E5ACC850086D120 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D6DFF3A11E2579360012891A /* MSAL (iOS Static Lib) */;
@@ -1429,6 +1450,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -1436,6 +1461,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
@@ -1485,6 +1514,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
 			buildSettings = {
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MSAL Test App.app/MSAL Test App";
 			};
 			name = Debug;
 		};
@@ -1492,6 +1522,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
 			buildSettings = {
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MSAL Test App.app/MSAL Test App";
 			};
 			name = Release;
 		};

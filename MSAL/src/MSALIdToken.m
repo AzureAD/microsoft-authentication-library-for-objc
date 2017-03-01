@@ -27,14 +27,14 @@
 
 #import "MSALIdToken.h"
 
-NSString* const ID_TOKEN_ISSUER = @"iss";
-NSString* const ID_TOKEN_OBJECT_ID = @"oid";
-NSString* const ID_TOKEN_SUBJECT = @"sub";
-NSString* const ID_TOKEN_TENANT_ID = @"tid";
-NSString* const ID_TOKEN_VERSION = @"ver";
-NSString* const ID_TOKEN_PERFERRED_USERNAME = @"preferred_username";
-NSString* const ID_TOKEN_NAME = @"name";
-NSString* const ID_TOKEN_HOME_OBJECT_ID = @"home_oid";
+#define ID_TOKEN_ISSUER              @"iss"
+#define ID_TOKEN_OBJECT_ID           @"oid"
+#define ID_TOKEN_SUBJECT             @"sub"
+#define ID_TOKEN_TENANT_ID           @"tid"
+#define ID_TOKEN_VERSION             @"ver"
+#define ID_TOKEN_PERFERRED_USERNAME  @"preferred_username"
+#define ID_TOKEN_NAME                @"name"
+#define ID_TOKEN_HOME_OBJECT_ID      @"home_oid"
 
 @implementation MSALIdToken
 
@@ -47,14 +47,14 @@ MSAL_JSON_ACCESSOR(ID_TOKEN_PERFERRED_USERNAME, preferredUsername)
 MSAL_JSON_ACCESSOR(ID_TOKEN_NAME, name)
 MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
 
-- (id)initWithRawIdToken:(NSString *)rawIdToken
+- (id)initWithRawIdToken:(NSString *)rawIdTokenString
 {
-    if ([NSString msalIsStringNilOrBlank:rawIdToken])
+    if ([NSString msalIsStringNilOrBlank:rawIdTokenString])
     {
         return nil;
     }
     
-    NSArray* parts = [rawIdToken componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+    NSArray* parts = [rawIdTokenString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
     if (parts.count != 3)
     {
         LOG_WARN(nil, @"Id token is invalid.");
