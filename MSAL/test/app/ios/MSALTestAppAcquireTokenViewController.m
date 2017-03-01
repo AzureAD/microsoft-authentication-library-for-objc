@@ -28,7 +28,8 @@
 #import "MSALTestAppAcquireTokenViewController.h"
 #import "MSALTestAppSettings.h"
 #import "MSALTestAppAcquireLayoutBuilder.h"
-#import "MSALTestAppProfileViewController.h"
+#import "MSALTestAppAuthorityViewController.h"
+#import "MSALTestAppUserViewController.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -36,19 +37,21 @@
 
 @implementation MSALTestAppAcquireTokenViewController
 {
-    UIView* _acquireSettingsView;
-    UITextField* _userIdField;
+    UIView *_acquireSettingsView;
     
-    UISegmentedControl* _uiBehavior;
+    UIButton *_authorityButton;
+    UISegmentedControl *_validateAuthority;
     
-    UIButton* _profileButton;
-
-    UISegmentedControl* _validateAuthority;
+    UITextField *_loginHintField;
+    UIButton *_userButton;
     
-    UITextView* _resultView;
+    UISegmentedControl *_uiBehavior;
+   
     
-    NSLayoutConstraint* _bottomConstraint;
-    NSLayoutConstraint* _bottomConstraint2;
+    UITextView *_resultView;
+    
+    NSLayoutConstraint *_bottomConstraint;
+    NSLayoutConstraint *_bottomConstraint2;
     
     BOOL _userIdEdited;
 }
@@ -90,9 +93,20 @@
     return view;
 }
 
-- (UIView*)createSettingsAndResultView
+- (UIButton *)buttonWithTitle:(NSString *)title
+                       action:(SEL)action
+{
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
+    button.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+    return button;
+}
+
+- (UIView *)createSettingsAndResultView
 {
     CGRect screenFrame = UIScreen.mainScreen.bounds;
+    
     UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:screenFrame];
     scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     scrollView.scrollEnabled = YES;
@@ -101,23 +115,26 @@
     scrollView.userInteractionEnabled = YES;
     MSALTestAppAcquireLayoutBuilder* layout = [MSALTestAppAcquireLayoutBuilder new];
     
-    _userIdField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 400, 20)];
-    _userIdField.borderStyle = UITextBorderStyleRoundedRect;
-    _userIdField.delegate = self;
-    [layout addControl:_userIdField title:@"userId"];
+    _authorityButton = [self buttonWithTitle:[MSALTestAppAuthorityViewController currentTitle]
+                                      action:@selector(selectAuthority:)];
+    [layout addControl:_authorityButton title:@"authority"];
+    _validateAuthority = [[UISegmentedControl alloc] initWithItems:@[@"Yes", @"No"]];
+    [layout addControl:_validateAuthority title:@"valAuth"];
+    
+    _loginHintField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 400, 20)];
+    _loginHintField.borderStyle = UITextBorderStyleRoundedRect;
+    _loginHintField.delegate = self;
+    [layout addControl:_loginHintField title:@"loginHint"];
+    
+    _userButton = [self buttonWithTitle:[MSALTestAppUserViewController currentTitle]
+                                 action:@selector(selectUser:)];
+    [layout addControl:_userButton title:@"user"];
     
     _uiBehavior = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
     _uiBehavior.selectedSegmentIndex = 0;
     [layout addControl:_uiBehavior title:@"behavior"];
     
-    _profileButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [_profileButton setTitle:MSALTestAppSettings.currentProfileTitle forState:UIControlStateNormal];
-    [_profileButton addTarget:self action:@selector(changeProfile:) forControlEvents:UIControlEventTouchUpInside];
-    _profileButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-    [layout addControl:_profileButton title:@"profile"];
     
-    _validateAuthority = [[UISegmentedControl alloc] initWithItems:@[@"Yes", @"No"]];
-    [layout addControl:_validateAuthority title:@"valAuth"];
     
     UIButton* clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
@@ -280,16 +297,19 @@
 {
     (void)animated;
     MSALTestAppSettings* settings = [MSALTestAppSettings settings];
-    NSString* defaultUser = settings.defaultUser;
-    if (![NSString msalIsStringNilOrBlank:defaultUser])
+    NSString* loginHint = settings.loginHint;
+    if (![NSString msalIsStringNilOrBlank:loginHint])
     {
-        _userIdField.text = defaultUser;
+        _loginHintField.text = loginHint;
     }
     
     self.navigationController.navigationBarHidden = YES;
     _validateAuthority.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
-    [_profileButton setTitle:[MSALTestAppSettings currentProfileTitle] forState:UIControlStateNormal];
     
+    [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
+                      forState:UIControlStateNormal];
+    [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
+                 forState:UIControlStateNormal];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -335,7 +355,7 @@
     (void)sender;
     MSALTestAppSettings* settings = [MSALTestAppSettings settings];
     NSString* authority = [settings authority];
-    NSString* clientId = [settings clientId];
+    NSString* clientId = TEST_APP_CLIENT_ID;
     //NSURL* redirectUri = [settings redirectUri];
     
     //BOOL validateAuthority = _validateAuthority.selectedSegmentIndex == 0;
@@ -420,10 +440,15 @@
     }*/
 }
 
-- (IBAction)changeProfile:(id)sender
+- (IBAction)selectAuthority:(id)sender
 {
     (void)sender;
-    [self.navigationController pushViewController:[MSALTestAppProfileViewController sharedProfileViewController] animated:YES];
+    [self.navigationController pushViewController:[MSALTestAppAuthorityViewController sharedController] animated:YES];
 }
 
+- (IBAction)selectUser:(id)sender
+{
+    (void)sender;
+    [self.navigationController pushViewController:[MSALTestAppUserViewController sharedController] animated:YES];
+}
 @end

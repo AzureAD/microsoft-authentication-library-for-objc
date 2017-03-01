@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import "MSALTestAppSettingViewController.h"
 
-@interface MSALTestAppProfileViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
+@interface MSALTestAppUserViewController : MSALTestAppSettingViewController
 
-+ (MSALTestAppProfileViewController*)sharedProfileViewController;
++ (instancetype)sharedController;
 
 @end

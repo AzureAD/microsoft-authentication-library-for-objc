@@ -25,21 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@interface MSALTestAppSettingViewController : UIViewController
 
-@interface MSALTestAppSettings : NSObject
+#pragma mark -
+#pragma mark Methods for subclasses to override
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
+- (void)refresh;
+- (NSInteger)numberOfRows;
+- (NSString *)labelForRow:(NSInteger)row;
+- (void)rowSelected:(NSInteger)row;
+- (NSInteger)currentRow;
 
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
++ (NSString *)currentTitle;
 
 @end

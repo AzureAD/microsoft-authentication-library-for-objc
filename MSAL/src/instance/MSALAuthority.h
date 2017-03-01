@@ -93,4 +93,6 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 + (BOOL)isKnownHost:(NSURL *)url;
 
++ (NSSet<NSString *> *)trustedHosts;
+
 @end

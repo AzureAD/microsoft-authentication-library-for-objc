@@ -67,6 +67,11 @@ BOOL isTenantless(NSURL *authority)
                          @"login.microsoftonline.de", nil];
 }
 
++ (NSSet<NSString *> *)trustedHosts
+{
+    return s_trustedHostList;
+}
+
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
