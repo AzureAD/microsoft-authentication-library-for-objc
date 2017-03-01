@@ -162,7 +162,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
 {
-    parameters[OAUTH2_GRANT_TYPE] = @"authorization_code";
+    parameters[OAUTH2_GRANT_TYPE] = OAUTH2_AUTHORIZATION_CODE;
     parameters[OAUTH2_CODE] = _code;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
 }

@@ -25,22 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
+#import "MSAL.h"
+#import "MSALBaseRequest.h"
+@interface MSALSilentRequest : MSALBaseRequest
 
-@implementation MSALKeychainTokenCache
+@property NSString *state;
 
-+ (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-{
-    (void)requestParam;
-    return [MSALAccessTokenCacheItem new];
-}
-
-+ (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam;
-{
-    (void)requestParam;
-    return [MSALRefreshTokenCacheItem new];
-}
+- (id)initWithParameters:(MSALRequestParameters *)parameters
+            forceRefresh:(BOOL)forceRefresh
+                   error:(NSError *__autoreleasing *)error;
 
 @end
