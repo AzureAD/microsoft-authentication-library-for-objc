@@ -110,5 +110,12 @@
                                user:(MSALUser *)user
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(NSUUID *)correlationId
+                    completionBlock:(MSALCompletionBlock)completionBlock;
+
+
 
 @end

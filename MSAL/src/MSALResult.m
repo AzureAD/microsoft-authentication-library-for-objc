@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALResult.h"
+#import "MSALAccessTokenCacheItem.h"
 
 @implementation MSALResult
 
@@ -48,6 +49,15 @@
     result->_scopes = scopes;
     
     return result;
+}
+
++ (MSALResult *)resultWithAccessTokenItem:(MSALAccessTokenCacheItem *)cacheItem
+{
+    return [self resultWithAccessToken:cacheItem.accessToken
+                             expiresOn:cacheItem.expiresOn
+                              tenantId:cacheItem.tenantId
+                                  user:cacheItem.user
+                                scopes:[cacheItem.scope array]];
 }
 
 @end

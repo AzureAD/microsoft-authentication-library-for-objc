@@ -180,6 +180,18 @@ static MSALScopes *s_reservedScopes = nil;
              tokenResponse.scope = _parameters.scopes.msalToString;
          }
          
+         // For silent flow, with grant type being OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
+         // In this case, we simply return the refresh token in the request.
+         if ([reqParameters[OAUTH2_GRANT_TYPE] isEqualToString:OAUTH2_REFRESH_TOKEN])
+         {
+             if (!tokenResponse.refreshToken)
+             {
+                 tokenResponse.refreshToken = reqParameters[OAUTH2_REFRESH_TOKEN];
+                 LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                 LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+             }
+         }
+         
          MSALResult *result =
          [MSALResult resultWithAccessToken:tokenResponse.accessToken
                                  expiresOn:tokenResponse.expiresOn

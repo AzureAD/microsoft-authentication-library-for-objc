@@ -113,6 +113,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     {
         NSString *endpoint = [self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant];
         completionHandler(endpoint, nil);
+        return;
     }
 
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]

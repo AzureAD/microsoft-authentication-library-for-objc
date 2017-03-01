@@ -27,6 +27,10 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALRequestParameters;
+@class MSALAccessTokenCacheItem;
+@class MSALRefreshTokenCacheItem;
+
 @interface MSALKeychainTokenCache : NSObject
 
 + (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
