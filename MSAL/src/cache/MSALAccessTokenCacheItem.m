@@ -34,6 +34,8 @@
 
 MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
+MSAL_JSON_RW(@"msalscope", scope, setScope)
+MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -56,17 +58,6 @@ MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
     
     return self;
 }
-
-
-//- (NSDate *)expiresOn
-//{
-//    NSString *expiresOn = _json[@"expires_on"];
-//    if (!expiresOn)
-//    {
-//        return nil;
-//    }
-//    return [NSDate dateWithTimeIntervalSince1970:[expiresOn doubleValue]];
-//}
 
 - (BOOL)isExpired
 {
@@ -93,6 +84,30 @@ MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
         }
     }
     return scope;
+}
+
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+//Serializer
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_json forKey:@"json"];
+}
+
+//Deserializer
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
+    
+    return self;
 }
 
 @end

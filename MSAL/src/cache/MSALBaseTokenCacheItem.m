@@ -37,6 +37,7 @@ MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
 MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
 MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
+MSAL_JSON_RW(@"msaluser", user, setUser)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -52,7 +53,7 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
         self.rawIdToken = response.idToken;
         MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
         self.tenantId = idToken.tenantId;
-        _user = [[MSALUser alloc] initWithIdToken:idToken authority:authority clientId:clientId];
+        self.user = [[MSALUser alloc] initWithIdToken:idToken authority:authority clientId:clientId];
     }
     
     self.authority = authority;
@@ -63,17 +64,17 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (NSString *)uniqueId
 {
-    return _user.uniqueId;
+    return self.user.uniqueId;
 }
 
 - (NSString *)displayableId
 {
-    return _user.displayableId;
+    return self.user.displayableId;
 }
 
 - (NSString *)homeObjectId
 {
-    return _user.homeObjectId;
+    return self.user.homeObjectId;
 }
 
 - (MSALTokenCacheKey *)tokenCacheKey

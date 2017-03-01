@@ -56,14 +56,16 @@
     
     self.authority = [authority lowercaseString];
     self.clientId = [clientId lowercaseString];
-    self.scope = scope;
-    if (!self.scope)
-    {
-        scope = [NSOrderedSet<NSString *> new];
-    }
     self.uniqueId = [uniqueId lowercaseString];
     self.displayableId = [displayableId lowercaseString];
     self.homeObjectId = [homeObjectId lowercaseString];
+    
+    NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
+    for (NSString *item in scope)
+    {
+        [scopeCopy addObject:item.msalTrimmedString.lowercaseString];
+    }
+    self.scope = scopeCopy;
     
     return self;
 }
@@ -80,12 +82,12 @@
 
 - (BOOL)matches:(MSALTokenCacheKey *)other
 {
-    return [self.authority isEqualToString:other.authority] &&
-    [self.clientId isEqualToString:other.clientId] &&
-    [other.scope isSubsetOfOrderedSet:self.scope] &&
-    [self.uniqueId isEqualToString:other.uniqueId] &&
-    [self.displayableId isEqualToString:other.displayableId] &&
-    [self.homeObjectId isEqualToString:other.homeObjectId];
+    return (self.authority ? [self.authority isEqualToString:other.authority] : !other.authority)
+    && (self.clientId ? [self.clientId isEqualToString:other.clientId] : !other.clientId)
+    && (self.scope ? [other.scope isSubsetOfOrderedSet:self.scope] : !other.scope)
+    && (self.uniqueId ? [self.uniqueId isEqualToString:other.uniqueId] : !other.uniqueId)
+    && (self.displayableId ? [self.displayableId isEqualToString:other.displayableId] : !other.displayableId)
+    && (self.homeObjectId ? [self.homeObjectId isEqualToString:other.homeObjectId] : !other.homeObjectId);
 }
 
 @end

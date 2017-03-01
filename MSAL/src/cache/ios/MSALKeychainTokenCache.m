@@ -500,4 +500,15 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
 }
 
+- (void)testRemoveAll
+{
+    LOG_ERROR(nil, @"******** -testRemoveAll: being called in ADKeychainTokenCache. This method should NEVER be called in production code. ********");
+    @synchronized(self)
+    {
+        NSMutableDictionary* query = [self queryDictionaryForKey:nil additional:nil];
+        OSStatus status = SecItemDelete((CFDictionaryRef)query);
+        (void)status;
+    }
+}
+
 @end

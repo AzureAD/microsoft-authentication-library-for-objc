@@ -62,4 +62,28 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
                                            homeObjectId:self.user.homeObjectId];
 }
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+//Serializer
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_json forKey:@"json"];
+}
+
+//Deserializer
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
+    
+    return self;
+}
+
 @end

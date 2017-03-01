@@ -63,4 +63,58 @@
     // TODO
 }
 
++ (BOOL)supportsSecureCoding
+{
+    return YES;
+}
+
+- (id)copyWithZone:(NSZone*) zone
+{
+    MSALUser* user = [[MSALUser allocWithZone:zone] init];
+    
+    user->_upn = [_upn copyWithZone:zone];
+    user->_uniqueId = [_uniqueId copyWithZone:zone];
+    user->_displayableId = [_displayableId copyWithZone:zone];
+    user->_name = [_name copyWithZone:zone];
+    user->_identityProvider = [_identityProvider copyWithZone:zone];
+    user->_clientId = [_clientId copyWithZone:zone];
+    user->_authority = [_authority copyWithZone:zone];
+    user->_homeObjectId = [_homeObjectId copyWithZone:zone];
+    
+    return user;
+}
+
+//Serializer
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:_upn forKey:@"upn"];
+    [aCoder encodeObject:_uniqueId forKey:@"uniqueId"];
+    [aCoder encodeObject:_displayableId forKey:@"displayableId"];
+    [aCoder encodeObject:_name forKey:@"name"];
+    [aCoder encodeObject:_identityProvider forKey:@"identityProvider"];
+    [aCoder encodeObject:_clientId forKey:@"clientId"];
+    [aCoder encodeObject:_authority forKey:@"authority"];
+    [aCoder encodeObject:_homeObjectId forKey:@"homeObjectId"];
+}
+
+//Deserializer
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _upn = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"upn"];
+    _uniqueId = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"uniqueId"];
+    _displayableId = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"displayableId"];
+    _name = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"name"];
+    _identityProvider = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"identityProvider"];
+    _clientId = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"clientId"];
+    _authority = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"authority"];
+    _homeObjectId = [aDecoder decodeObjectOfClass:[NSString class] forKey:@"homeObjectId"];
+    
+    return self;
+}
+
 @end

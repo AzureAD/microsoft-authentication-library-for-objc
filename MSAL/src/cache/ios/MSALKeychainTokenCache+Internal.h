@@ -44,4 +44,8 @@
 
 - (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem;
 
+/*! This method should *only* be called in test code, it should never be called
+ in production code */
+- (void)testRemoveAll;
+
 @end
