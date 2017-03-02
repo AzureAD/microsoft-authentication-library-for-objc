@@ -31,14 +31,14 @@
 
 @interface MSALUser : NSObject <NSCopying, NSSecureCoding>
 
-@property NSString *upn;//where to get it?
-@property NSString *uniqueId;
-@property NSString *displayableId;
-@property NSString *name;
-@property NSString *identityProvider;
-@property NSString *clientId;
-@property NSString *authority;
-@property NSString *homeObjectId;
+@property (readonly) NSString *upn;//where to get it?
+@property (readonly) NSString *uniqueId;
+@property (readonly) NSString *displayableId;
+@property (readonly) NSString *name;
+@property (readonly) NSString *identityProvider;
+@property (readonly) NSString *clientId;
+@property (readonly) NSString *authority;
+@property (readonly) NSString *homeObjectId;
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
             authority:(NSString *)authority
