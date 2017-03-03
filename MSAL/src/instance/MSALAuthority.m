@@ -128,6 +128,14 @@ BOOL isTenantless(NSURL *authority)
         tenant = firstPathComponent;
     }
     
+    MSALAuthority *authorityInCache = [resolver authorityFromCache:updatedAuthority
+                                                 userPrincipalName:userPrincipalName];
+    if (authorityInCache)
+    {
+        completionBlock(authorityInCache, nil);
+        return;
+    }
+
     TenantDiscoveryCallback tenantDiscoveryCallback = ^void
     (MSALTenantDiscoveryResponse *response, NSError *error)
     {
