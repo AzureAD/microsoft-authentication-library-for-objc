@@ -114,7 +114,7 @@
     {
         return 0;
     }
-    return [_authorities indexOfObjectIdenticalTo:currentAuthority];
+    return [_authorities indexOfObjectIdenticalTo:currentAuthority] + 1;
 }
 
 + (NSString *)currentTitle
