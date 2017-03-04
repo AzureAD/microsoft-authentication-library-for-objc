@@ -44,30 +44,10 @@
 
 static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 
-+ (id)sharedResolver
++ (void)initialize
 {
-    static dispatch_once_t once;
-    static MSALAadAuthorityResolver *s_resolver;
-    
-    dispatch_once(&once, ^{
-        s_resolver = [MSALAadAuthorityResolver new];
-    });
-    
-    return s_resolver;
-}
-
-- (id)init
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
     s_validatedAuthorities = [NSMutableDictionary new];
-    return self;
 }
-
-
 
 - (MSALAuthority *)authorityFromCache:(NSURL *)authority userPrincipalName:(NSString *)userPrincipalName
 {

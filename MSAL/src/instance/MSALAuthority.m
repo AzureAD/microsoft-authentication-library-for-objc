@@ -124,7 +124,7 @@ BOOL isTenantless(NSURL *authority)
     else
     {
         authorityType = AADAuthority;
-        resolver = [MSALAadAuthorityResolver sharedResolver];
+        resolver = [MSALAadAuthorityResolver new];
         tenant = firstPathComponent;
     }
     

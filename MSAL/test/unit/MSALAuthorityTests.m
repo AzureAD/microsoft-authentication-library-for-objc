@@ -40,13 +40,6 @@
 - (void)setUp {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
-    
-    [MSALTestSwizzle classMethod:@selector(sharedResolver)
-                           class:[MSALAadAuthorityResolver class]
-                           block:(id)^()
-     {
-         return [MSALAadAuthorityResolver new];
-     }];
 }
 
 - (void)tearDown {
@@ -227,6 +220,17 @@
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
 
+    [MSALTestSwizzle instanceMethod:@selector(authorityFromCache:userPrincipalName:)
+                              class:[MSALAadAuthorityResolver class]
+                              block:(id)^(id obj, MSALAuthority *authority, NSString *userPrincipalName)
+     {
+         (void)obj;
+         (void)authority;
+         (void)userPrincipalName;
+         
+         return nil;
+     }];
+    
     [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
