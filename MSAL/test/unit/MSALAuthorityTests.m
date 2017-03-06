@@ -219,6 +219,17 @@
     
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
+
+    [MSALTestSwizzle instanceMethod:@selector(authorityFromCache:userPrincipalName:)
+                              class:[MSALAadAuthorityResolver class]
+                              block:(id)^(id obj, MSALAuthority *authority, NSString *userPrincipalName)
+     {
+         (void)obj;
+         (void)authority;
+         (void)userPrincipalName;
+         
+         return nil;
+     }];
     
     [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
                               class:[MSALAadAuthorityResolver class]

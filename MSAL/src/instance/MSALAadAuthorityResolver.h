@@ -30,6 +30,4 @@
 
 @interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
 
-+ (id)sharedResolver;
-
 @end
