@@ -35,7 +35,7 @@ NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotificat
 
 static NSArray<NSString *> *s_authorities = nil;
 
-static NSArray<NSString *> *s_scopes_required = nil;
+static NSArray<NSString *> *s_scopes_reserved = nil;
 static NSArray<NSString *> *s_scopes_optional = nil;
 
 @interface MSALTestAppSettings()
@@ -59,7 +59,7 @@ static NSArray<NSString *> *s_scopes_optional = nil;
     
     s_authorities = authorities;
     
-    s_scopes_required = @[MSAL_APP_SCOPE_OPENID, MSAL_APP_SCOPE_PROFILE, MSAL_APP_SCOPE_OFFLINE_ACCESS];
+    s_scopes_reserved = @[MSAL_APP_SCOPE_OPENID, MSAL_APP_SCOPE_PROFILE, MSAL_APP_SCOPE_OFFLINE_ACCESS];
     s_scopes_optional = @[MSAL_APP_SCOPE_USER_READ];
 
 }
@@ -194,9 +194,9 @@ static NSArray<NSString *> *s_scopes_optional = nil;
     return s_scopes_optional;
 }
 
-+ (NSArray<NSString *> *)scopesRequired
++ (NSArray<NSString *> *)scopesReserved
 {
-    return s_scopes_required;
+    return s_scopes_reserved;
 }
 
 - (NSSet<NSString *> *)scopes

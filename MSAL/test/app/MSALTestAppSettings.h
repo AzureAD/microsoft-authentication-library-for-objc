@@ -43,7 +43,7 @@ extern NSString* MSALTestAppCacheChangeNotification;
 
 + (NSArray<NSString *> *)authorities;
 
-+ (NSArray<NSString *> *)scopesRequired;
++ (NSArray<NSString *> *)scopesReserved;
 + (NSArray<NSString *> *)scopesOptional;
 
 - (BOOL)addScope:(NSString *)scope;

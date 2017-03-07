@@ -36,8 +36,7 @@
     
     // View
     UITableView *_tableView;
-    
-    
+
 }
 
 @end
@@ -86,7 +85,7 @@
         return nil;
     }
     
-    _availableScopes = [[MSALTestAppSettings scopesRequired] arrayByAddingObjectsFromArray:[MSALTestAppSettings scopesOptional]];
+    _availableScopes = [[MSALTestAppSettings scopesReserved] arrayByAddingObjectsFromArray:[MSALTestAppSettings scopesOptional]];
 
     return self;
 }
@@ -137,7 +136,7 @@
     }
     
     NSString *scope = _availableScopes[indexPath.row];
-    if ([[_settings scopes] containsObject:scope] || [[MSALTestAppSettings scopesRequired] containsObject:scope])
+    if ([[_settings scopes] containsObject:scope] || [[MSALTestAppSettings scopesReserved] containsObject:scope])
     {
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
     }
