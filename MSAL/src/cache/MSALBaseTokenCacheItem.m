@@ -35,9 +35,6 @@
 
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
-MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
-MSAL_JSON_RW(@"msaluser", user, setUser)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -50,9 +47,7 @@ MSAL_JSON_RW(@"msaluser", user, setUser)
     
     if (response.idToken)
     {
-        self.rawIdToken = response.idToken;
         MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
-        self.tenantId = idToken.tenantId;
         self.user = [[MSALUser alloc] initWithIdToken:idToken authority:authority clientId:clientId];
     }
     

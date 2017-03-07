@@ -153,7 +153,7 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:)
+    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
                               class:[MSALKeychainTokenCache class]
                               block:(id)^(id obj)
      {
@@ -198,7 +198,7 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:)
+    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
                               class:[MSALKeychainTokenCache class]
                               block:(id)^(id obj)
      {
@@ -206,7 +206,7 @@
          return nil;
      }];
     
-    [MSALTestSwizzle instanceMethod:@selector(findRefreshToken:)
+    [MSALTestSwizzle instanceMethod:@selector(findRefreshToken:error:)
                               class:[MSALKeychainTokenCache class]
                               block:(id)^(id obj)
      {

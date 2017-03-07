@@ -31,10 +31,12 @@
 
 @interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding>
 
-@property (readwrite) NSString *tokenType;
-@property (readwrite) NSString *accessToken;
-@property (readwrite) NSDate *expiresOn;
-@property (readwrite) MSALScopes *scope;
+@property NSString *tokenType;
+@property NSString *accessToken;
+@property NSDate *expiresOn;
+@property MSALScopes *scope;
+@property NSString *tenantId;
+@property NSString *rawIdToken;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

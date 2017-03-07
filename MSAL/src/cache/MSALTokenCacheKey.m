@@ -27,6 +27,8 @@
 
 #import "MSALTokenCacheKey.h"
 
+static NSString* const s_cacheVersion = @"MSALv1";
+
 @implementation MSALTokenCacheKey
 
 - (id)initWithAuthority:(NSString *)authority
@@ -37,16 +39,12 @@
     return [self initWithAuthority:authority
                           clientId:clientId
                              scope:scope
-                          uniqueId:user.uniqueId
-                     displayableId:user.displayableId
                       homeObjectId:user.homeObjectId];
 }
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
                   scope:(MSALScopes *)scope
-               uniqueId:(NSString *)uniqueId
-          displayableId:(NSString *)displayableId
            homeObjectId:(NSString *)homeObjectId
 {
     if (!(self = [super init]))
@@ -56,8 +54,6 @@
     
     self.authority = [authority lowercaseString];
     self.clientId = [clientId lowercaseString];
-    self.uniqueId = [uniqueId lowercaseString];
-    self.displayableId = [displayableId lowercaseString];
     self.homeObjectId = [homeObjectId lowercaseString];
     
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
@@ -70,14 +66,23 @@
     return self;
 }
 
-- (NSString *)toString {
-    return [NSString stringWithFormat:@"%@$%@$%@$%@$%@$%@",
+- (NSString *)service {
+    return [NSString stringWithFormat:@"%@$%@$%@|%@",
             self.authority ? self.authority.msalBase64UrlEncode : @"",
             self.clientId ? self.clientId.msalBase64UrlEncode : @"",
             self.scope ? self.scope.msalToString.msalBase64UrlEncode : @"",
-            self.displayableId ? self.displayableId.msalBase64UrlEncode : @"",
-            self.uniqueId ? self.uniqueId.msalBase64UrlEncode : @"",
-            self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @""];
+            s_cacheVersion];
+}
+
+- (NSString *)account {
+    if (!self.homeObjectId)
+    {
+        return nil;
+    }
+    
+    return [NSString stringWithFormat:@"%@|%@",
+            self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @"",
+            s_cacheVersion];
 }
 
 - (BOOL)matches:(MSALTokenCacheKey *)other
@@ -85,8 +90,6 @@
     return [self.clientId isEqualToString:other.clientId]
     && [self.scope isEqualToOrderedSet:other.scope]
     && (!self.authority || [self.authority isEqualToString:other.authority])
-    && (!self.uniqueId || [self.uniqueId isEqualToString:other.uniqueId])
-    && (!self.displayableId || [self.displayableId isEqualToString:other.displayableId])
     && (!self.homeObjectId || [self.homeObjectId isEqualToString:other.homeObjectId]);
 }
 

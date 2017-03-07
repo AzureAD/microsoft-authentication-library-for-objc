@@ -75,7 +75,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         sharedGroup = [[NSBundle mainBundle] bundleIdentifier];
     }
     
-    NSString* teamId = [MSALKeychainTokenCache keychainTeamId];
+    NSString* teamId = [MSALKeychainTokenCache keychainTeamId:nil];
 #if !TARGET_OS_SIMULATOR
     // If we didn't find a team ID and we're on device then the rest of ADAL not only will not work
     // particularly well, we'll probably induce other issues by continuing.
@@ -105,20 +105,21 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     return self;
 }
 
-+ (NSString*)keychainTeamId
++ (NSString*)keychainTeamId:(NSError * __autoreleasing *)error
 {
     static dispatch_once_t s_once;
     static NSString* s_keychainTeamId = nil;
     
     dispatch_once(&s_once, ^{
-        s_keychainTeamId = [self retrieveTeamIDFromKeychain];
+        s_keychainTeamId = [self retrieveTeamIDFromKeychain:error];
         LOG_INFO(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
+        LOG_INFO_PII(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
     });
     
     return s_keychainTeamId;
 }
 
-+ (NSString*)retrieveTeamIDFromKeychain
++ (NSString*)retrieveTeamIDFromKeychain:(NSError * __autoreleasing *)error
 {
     NSDictionary *query = @{ (id)kSecClass : (id)kSecClassGenericPassword,
                              (id)kSecAttrAccount : @"teamIDHint",
@@ -137,6 +138,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (status != errSecSuccess)
     {
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when fetching team ID.");
         return nil;
     }
     
@@ -153,34 +155,53 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 
 @implementation MSALKeychainTokenCache (Internal)
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(NSString *)authority
-                                               clientId:(NSString *)clientId
+- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
                                                response:(MSALTokenResponse *)response
+                                                  error:(NSError * __autoreleasing *)error
 {
-    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:authority
-                                                                                       clientId:clientId
+    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
+                                                                                       clientId:requestParam.clientId
                                                                                        response:response];
-    [self saveAccessToken:accessToken];
+    //delete all cache entries with intersecting scopes
+    //this should not happen but we have this as a safe guard against multiple matches
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:nil];
+    NSMutableArray<MSALAccessTokenCacheItem *> *intersetedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
+    for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
+    {
+        if ([tokenItem.authority isEqualToString:requestParam.unvalidatedAuthority.absoluteString]
+            && [tokenItem.scope intersectsOrderedSet:requestParam.scopes])
+        {
+            [intersetedTokens addObject:tokenItem];
+        }
+    }
+    for (MSALAccessTokenCacheItem *itemToDelete in intersetedTokens)
+    {
+        [self deleteAccessToken:itemToDelete error:nil];
+    }
+    
+    
+    [self saveAccessToken:accessToken error:error];
     
     if (response.refreshToken)
     {
         MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
-                                                                                              clientId:clientId
+                                                                                              clientId:requestParam.clientId
                                                                                               response:response];
-        [self saveRefreshToken:refreshToken];
+        [self saveRefreshToken:refreshToken error:error];
     }
     
     return accessToken;
 }
 
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
+                                        error:(NSError * __autoreleasing *)error
 {
     MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
                                                                  clientId:requestParam.clientId
                                                                     scope:requestParam.scopes
                                                                      user:requestParam.user];
     
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens];
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:error];
     NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
@@ -200,15 +221,14 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
+                                          error:(NSError * __autoreleasing *)error
 {
     MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
                                                                  clientId:requestParam.clientId
                                                                     scope:nil
-                                                                 uniqueId:nil
-                                                            displayableId:nil
                                                              homeObjectId:requestParam.user.homeObjectId];
     
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens];
+    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:requestParam.clientId error:error];
     NSMutableArray<MSALRefreshTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
     
     for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
@@ -228,6 +248,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
+                    error:(NSError * __autoreleasing *)error
 {
     MSALTokenCacheKey *key = [atItem tokenCacheKey];
     if (!key)
@@ -242,12 +263,14 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (deleteStatus != errSecSuccess)
     {
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting access token.");
         return NO;
     }
     return YES;
 }
 
 - (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
+                     error:(NSError * __autoreleasing *)error
 {
     MSALTokenCacheKey *key = [rtItem tokenCacheKey];
     if (!key)
@@ -262,12 +285,14 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (deleteStatus != errSecSuccess)
     {
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting refresh token.");
         return NO;
     }
     return YES;
 }
 
 - (BOOL)saveAccessToken:(MSALAccessTokenCacheItem *)atItem
+                  error:(NSError * __autoreleasing *)error
 {
     @synchronized(self)
     {
@@ -306,12 +331,14 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                 return YES;
             }
         }
+        
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving access token.");
+        return NO;
     }
-    
-    return NO;
 }
 
 - (BOOL)saveRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
+                   error:(NSError * __autoreleasing *)error
 {
     @synchronized(self)
     {
@@ -350,12 +377,14 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                 return YES;
             }
         }
+        
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving refresh token.");
+        return NO;
     }
-    
-    return NO;
 }
 
-- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokens
+- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokens:(NSString *)clientId
+                                                   error:(NSError * __autoreleasing *)error
 {
     NSMutableDictionary* query = [self queryDictionaryForKey:nil
                                                   additional:@{
@@ -366,8 +395,9 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                }];
     CFTypeRef items = nil;
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
-    if (status == errSecItemNotFound)
+    if (status != errSecSuccess && status != errSecItemNotFound)
     {
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving all access tokens.");
         return @[];
     }
     NSArray *accessTokenitems = CFBridgingRelease(items);
@@ -381,14 +411,18 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             continue;
         }
         
-        [accessTokens addObject:item];
+        if (!clientId || [item.clientId isEqualToString:clientId])
+        {
+            [accessTokens addObject:item];
+        }
     }
     
     return accessTokens;
     
 }
 
-- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens
+- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(NSString *)clientId
+                                                     error:(NSError * __autoreleasing *)error
 {
     NSMutableDictionary* query = [self queryDictionaryForKey:nil
                                                   additional:@{
@@ -399,8 +433,9 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                }];
     CFTypeRef items = nil;
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
-    if (status == errSecItemNotFound)
+    if (status != errSecSuccess && status != errSecItemNotFound)
     {
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving all refresh tokens.");
         return @[];
     }
     NSArray *refreshTokenitems = CFBridgingRelease(items);
@@ -414,20 +449,39 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             continue;
         }
         
-        [refreshTokens addObject:item];
+        if (!clientId || [item.clientId isEqualToString:clientId])
+        {
+            [refreshTokens addObject:item];
+        }
     }
     
     return refreshTokens;
     
 }
 
+- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
+{
+    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:clientId error:nil];
+    NSMutableDictionary<NSString *, MSALUser *> *allUsers = [NSMutableDictionary<NSString *, MSALUser *> new];
+    
+    for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
+    {
+        [allUsers setValue:tokenItem.user forKey:tokenItem.homeObjectId];
+    }
+    return allUsers.allValues;
+}
+
 - (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKey *)key
                                    additional:(NSDictionary *)additional
 {
     NSMutableDictionary* query = [NSMutableDictionary dictionaryWithDictionary:_default];
-    if (key)
+    if (key.service)
     {
-        [query setObject:key.toString forKey:(NSString*)kSecAttrService];
+        [query setObject:key.service forKey:(NSString*)kSecAttrService];
+    }
+    if (key.account)
+    {
+        [query setObject:key.account forKey:(NSString*)kSecAttrAccount];
     }
     
     if (additional)
@@ -444,6 +498,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     if (!data)
     {
         LOG_WARN(nil, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN_PII(nil, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -452,6 +507,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         if (!item)
         {
             LOG_WARN(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_WARN_PII(nil, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         //TODO:
@@ -462,6 +518,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         //if (![item isKindOfClass:[MSALAccessTokenCacheItem class]])
         //{
         //    LOG_WARN(nil, @"Unarchived Item was not of expected class");
+        //    LOG_WARN_PII(nil, @"Unarchived Item was not of expected class");
         //    return nil;
         //}
         
@@ -470,6 +527,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     @catch (NSException *exception)
     {
         LOG_WARN(nil, @"Failed to deserialize data from keychain");
+        LOG_WARN_PII(nil, @"Failed to deserialize data from keychain");
         return nil;
     }
 }
@@ -480,6 +538,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     if (!data)
     {
         LOG_WARN(nil, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN_PII(nil, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -488,6 +547,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         if (!item)
         {
             LOG_WARN(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_WARN_PII(nil, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         //TODO:
@@ -506,6 +566,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     @catch (NSException *exception)
     {
         LOG_WARN(nil, @"Failed to deserialize data from keychain");
+        LOG_WARN_PII(nil, @"Failed to deserialize data from keychain");
         return nil;
     }
 }

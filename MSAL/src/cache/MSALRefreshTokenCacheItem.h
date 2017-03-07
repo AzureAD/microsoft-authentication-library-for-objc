@@ -33,7 +33,7 @@
 
 @interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding>
 
-@property (readwrite) NSString * refreshToken;
+@property NSString * refreshToken;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

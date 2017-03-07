@@ -77,26 +77,29 @@
 
 - (void)testSaveAndRetrieveAccessToken {
     
-    //prepare token response and save AT/RT
-    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
-                                                                                  clientId:testClientId
-                                                                                  response:testTokenResponse];
-    [cache saveAccessAndRefreshToken:testAuthority clientId:testClientId response:testTokenResponse];
-    
-    //prepare request parameters and retrieve AT
+    //prepare request parameters
     MSALRequestParameters *requestParam = [MSALRequestParameters new];
     requestParam.unvalidatedAuthority = [NSURL URLWithString:testAuthority];
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-    MSALAccessTokenCacheItem *atItemInCache = [cache findAccessToken:requestParam];
+
+    //prepare token response and save AT/RT
+    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
+                                                                                  clientId:testClientId
+                                                                                  response:testTokenResponse];
+    [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
+    
+    //retrieve AT
+    MSALAccessTokenCacheItem *atItemInCache = [cache findAccessToken:requestParam error:nil];
     
     //compare AT with the AT retrieved from cache
     XCTAssertEqualObjects(atItem.tokenType, atItemInCache.tokenType);
     XCTAssertEqualObjects(atItem.expiresOn.description, atItemInCache.expiresOn.description);
     XCTAssertEqualObjects(atItem.scope.msalToString, atItemInCache.scope.msalToString);
     XCTAssertTrue(atItem.isExpired==atItemInCache.isExpired);
-    XCTAssertEqualObjects(atItem.tokenCacheKey.toString, atItemInCache.tokenCacheKey.toString);
+    XCTAssertEqualObjects(atItem.tokenCacheKey.service, atItemInCache.tokenCacheKey.service);
+    XCTAssertEqualObjects(atItem.tokenCacheKey.account, atItemInCache.tokenCacheKey.account);
     XCTAssertEqualObjects(atItem.authority, atItemInCache.authority);
     XCTAssertEqualObjects(atItem.clientId, atItemInCache.clientId);
     XCTAssertEqualObjects(atItem.tenantId, atItemInCache.tenantId);
@@ -115,26 +118,27 @@
 
 - (void)testSaveAndRetrieveRefreshToken {
     
-    //prepare token response and save AT/RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
-                                                                                  clientId:testClientId
-                                                                                  response:testTokenResponse];
-    [cache saveAccessAndRefreshToken:testAuthority clientId:testClientId response:testTokenResponse];
-    
-    //prepare request parameters and retrieve RT
+    //prepare request parameters
     MSALRequestParameters *requestParam = [MSALRequestParameters new];
     requestParam.unvalidatedAuthority = [NSURL URLWithString:testAuthority];
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-    MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam];
+
+    //prepare token response and save AT/RT
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+                                                                                  clientId:testClientId
+                                                                                  response:testTokenResponse];
+    [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
+    
+    //retrieve RT
+    MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam error:nil];
     
     //compare RT with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.toString, rtItemInCache.tokenCacheKey.toString);
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.service, rtItemInCache.tokenCacheKey.service);
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.account, rtItemInCache.tokenCacheKey.account);
     XCTAssertEqualObjects(rtItem.authority, rtItemInCache.authority);
     XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
-    XCTAssertEqualObjects(rtItem.tenantId, rtItemInCache.tenantId);
-    XCTAssertEqualObjects(rtItem.rawIdToken, rtItemInCache.rawIdToken);
     XCTAssertEqualObjects(rtItem.uniqueId, rtItemInCache.uniqueId);
     XCTAssertEqualObjects(rtItem.displayableId, rtItemInCache.displayableId);
     XCTAssertEqualObjects(rtItem.homeObjectId, rtItemInCache.homeObjectId);
@@ -149,50 +153,94 @@
 
 - (void)testDeleteAccessToken {
     
-    //prepare token response and save AT/RT
-    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
-                                                                                  clientId:testClientId
-                                                                                  response:testTokenResponse];
-    [cache saveAccessAndRefreshToken:testAuthority clientId:testClientId response:testTokenResponse];
-    
-    //prepare request parameters and retrieve AT
+    //prepare request parameters
     MSALRequestParameters *requestParam = [MSALRequestParameters new];
     requestParam.unvalidatedAuthority = [NSURL URLWithString:testAuthority];
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-    MSALAccessTokenCacheItem *atItemInCache = [cache findAccessToken:requestParam];
+
+    //prepare token response and save AT/RT
+    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
+                                                                                  clientId:testClientId
+                                                                                  response:testTokenResponse];
+    [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
+    
+    //retrieve AT
+    MSALAccessTokenCacheItem *atItemInCache = [cache findAccessToken:requestParam error:nil];
     
     //compare AT with the AT retrieved from cache
-    XCTAssertEqualObjects(atItem.tokenCacheKey.toString, atItemInCache.tokenCacheKey.toString);
+    XCTAssertEqualObjects(atItem.tokenCacheKey.service, atItemInCache.tokenCacheKey.service);
+    XCTAssertEqualObjects(atItem.tokenCacheKey.account, atItemInCache.tokenCacheKey.account);
     
     //delete AT
-    [cache deleteAccessToken:atItemInCache];
-    XCTAssertNil([cache findAccessToken:requestParam]);
+    [cache deleteAccessToken:atItemInCache error:nil];
+    XCTAssertNil([cache findAccessToken:requestParam error:nil]);
 }
 
 - (void)testDeleteRefreshToken {
+    
+    //prepare request parameters
+    MSALRequestParameters *requestParam = [MSALRequestParameters new];
+    requestParam.unvalidatedAuthority = [NSURL URLWithString:testAuthority];
+    requestParam.clientId = testClientId;
+    [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
+    requestParam.user = testUser;
     
     //prepare token response and save AT/RT
     MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
                                                                                     clientId:testClientId
                                                                                     response:testTokenResponse];
-    [cache saveAccessAndRefreshToken:testAuthority clientId:testClientId response:testTokenResponse];
+    [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
     
-    //prepare request parameters and retrieve RT
+    //retrieve RT
+    MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam error:nil];
+    
+    //compare RT with the RT retrieved from cache
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.service, rtItemInCache.tokenCacheKey.service);
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.account, rtItemInCache.tokenCacheKey.account);
+    
+    //delete RT
+    [cache deleteRefreshToken:rtItemInCache error:nil];
+    XCTAssertNil([cache findRefreshToken:requestParam error:nil]);
+}
+
+- (void)testGetUsers {
+    //prepare request parameters
     MSALRequestParameters *requestParam = [MSALRequestParameters new];
     requestParam.unvalidatedAuthority = [NSURL URLWithString:testAuthority];
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-    MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam];
     
-    //compare RT with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.toString, rtItemInCache.tokenCacheKey.toString);
+    //save AT/RT
+    [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
     
-    //delete RT
-    [cache deleteRefreshToken:rtItemInCache];
-    XCTAssertNil([cache findRefreshToken:requestParam]);
+    //get all users using client id
+    NSArray<MSALUser *> *users = [cache getUsers:requestParam.clientId];
+    XCTAssertTrue(users.count==1);
+    XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[0].name, @"Simple User");
+    XCTAssertEqualObjects(users[0].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
+    XCTAssertEqualObjects(users[0].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+    XCTAssertEqualObjects(users[0].authority, nil);
+    XCTAssertEqualObjects(users[0].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    
+    //get all users using nil client id
+    users = [cache getUsers:nil];
+    XCTAssertTrue(users.count==1);
+    XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[0].name, @"Simple User");
+    XCTAssertEqualObjects(users[0].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
+    XCTAssertEqualObjects(users[0].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
+    XCTAssertEqualObjects(users[0].authority, nil);
+    XCTAssertEqualObjects(users[0].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    
+    //get all users using non-existant client id
+    users = [cache getUsers:@"fake-client-id"];
+    XCTAssertTrue(users.count==0);
 }
 
 @end

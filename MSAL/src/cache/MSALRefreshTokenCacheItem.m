@@ -57,8 +57,6 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
     return [[MSALTokenCacheKey alloc] initWithAuthority:nil
                                                clientId:self.clientId
                                                   scope:nil
-                                               uniqueId:nil
-                                          displayableId:nil
                                            homeObjectId:self.user.homeObjectId];
 }
 
@@ -71,6 +69,7 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:_json forKey:@"json"];
+    [aCoder encodeObject:self.user forKey:@"user"];
 }
 
 //Deserializer
@@ -82,6 +81,7 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
     }
     
     _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
+    self.user = [aDecoder decodeObjectOfClass:[MSALUser class] forKey:@"user"];
     
     return self;
 }

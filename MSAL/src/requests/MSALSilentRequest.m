@@ -66,7 +66,7 @@
     if (!_forceRefresh)
     {
 #if TARGET_OS_IPHONE
-        accessToken = [[MSALKeychainTokenCache defaultKeychainCache] findAccessToken:_parameters];
+        accessToken = [[MSALKeychainTokenCache defaultKeychainCache] findAccessToken:_parameters error:nil];
 #endif
     }
     
@@ -78,7 +78,7 @@
     }
 
 #if TARGET_OS_IPHONE
-    _refreshToken = [[MSALKeychainTokenCache defaultKeychainCache] findRefreshToken:_parameters];
+    _refreshToken = [[MSALKeychainTokenCache defaultKeychainCache] findRefreshToken:_parameters error:nil];
 #else
     //TODO: Mac support
     _refreshToken = [MSALRefreshTokenCacheItem new];

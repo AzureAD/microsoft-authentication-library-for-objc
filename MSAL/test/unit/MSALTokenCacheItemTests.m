@@ -62,7 +62,8 @@
     XCTAssertTrue([atItem.expiresOn compare:NSDate.date] == NSOrderedDescending);
     XCTAssertEqualObjects(atItem.scope.msalToString, @"mail.read user.read");
     XCTAssertTrue(atItem.isExpired);
-    XCTAssertEqualObjects(atItem.tokenCacheKey.toString, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2NvbW1vbg$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA$dXNlckBtc2RldmV4Lm9ubWljcm9zb2Z0LmNvbQ$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3");
+    XCTAssertEqualObjects(atItem.tokenCacheKey.service, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2NvbW1vbg$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA|MSALv1");
+    XCTAssertEqualObjects(atItem.tokenCacheKey.account, @"MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3|MSALv1");
     XCTAssertEqualObjects(atItem.authority, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(atItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
     XCTAssertEqualObjects(atItem.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
@@ -90,11 +91,10 @@
                                                                                   response:response];
     
     XCTAssertEqualObjects(rtItem.refreshToken, @"OAQABAAAAAADRNYRQ3dhRSrm-4K-adpCJT57HWhfLUrDwgpyo2F74PNxR4AHgWe0tUmtDUuQ-pPKn3Z6PdBTxkvX4sCRzD6GF1eV-TGBdNWCLgumARyvTcAp1BH19EB4_sefB8xHGxyLIF-8oOhL91htjBlZAEfGKQOx9Nf4LGYfnaF22pIGwde_wrHO_3lJq9LhhVxHfrNYQEJgIv9FKMjvPyZJX6qdNQ7h9zwcgvJ5kv3opFsC8lxR6OX_l1a609d635bPsJcBAc3M8W_T9e_8ko0TMR-rUolPFN8s5DmJtW0qEljFkLdZInf9NWebgxns-lOEWQ6ltWwuCKFNFLRFtVXikMxycBuF-b0VLJrMaQLUv6PXbi2pcrycn9kzMY3M-JGQUFppxfb7bGaefgn_183zQvPYw9pE05hH8yq-B_pRRg_ULMdqDVIwggv8LPVuW2AZbgBIx3KRzKDiUNWJagerkwGbvh1lty3BJqfahBbiBG5habMCciznNLR7_sTLlCS3ghvhrgPXjkLzy_TpI2Bj6FsvT850drfRbddh_BYtaP6JE9eZecd9BxIrtOoozUKNTk9EFCF5DP7YvIeUlHjSXnOWkZGdLFSu1vlUH4XduwCS3_25u7xDmLrK4loA0AIPLepCi8eA7ZCBqUzkYPsPXN4_SEc1BRVXZSDMrMeOWPGlUqbNHrRcxXElQL20TX3N4_pEhZ5xzCv6Os4Z_v4vj7N9dIAA");
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.toString, @"$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$$$$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3");
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.service, @"$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$|MSALv1");
+    XCTAssertEqualObjects(rtItem.tokenCacheKey.account, @"MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3|MSALv1");
     XCTAssertEqualObjects(rtItem.authority, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(rtItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(rtItem.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(rtItem.rawIdToken, @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Il9VZ3FYR190TUxkdVNKMVQ4Y2FIeFU3Y090YyJ9.eyJhdWQiOiI1YTQzNDY5MS1jY2IyLTRmZDEtYjk3Yi1iNjRiY2ZiYzAzZmMiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vMDI4N2Y5NjMtMmQ3Mi00MzYzLTllM2EtNTcwNWM1YjBmMDMxL3YyLjAiLCJpYXQiOjE0ODgyNjQxOTEsIm5iZiI6MTQ4ODI2NDE5MSwiZXhwIjoxNDg4MjY4MDkxLCJuYW1lIjoiU2ltcGxlIFVzZXIiLCJvaWQiOiIyOWYzODA3YS00ZmIwLTQyZjItYTQ0YS0yMzZhYTBjYjNmOTciLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ1c2VyQG1zZGV2ZXgub25taWNyb3NvZnQuY29tIiwic3ViIjoiVHFnVHp6V2JWMTZtSWtJRTBzeHNSR1FGbnJPWWxBZU9ZUnhrZHlCaERGbyIsInRpZCI6IjAyODdmOTYzLTJkNzItNDM2My05ZTNhLTU3MDVjNWIwZjAzMSIsInZlciI6IjIuMCJ9.hy_c8tZqksWmtt1ngQlv_3T4ziw2z8dstVsdOB09M5YiXYSGCe6jMddr66gCE7Lgr6UDdaG6eYFZIQvHapiULIZ8V-g0-8Za0KKtIzkGsL0Q2mhWFEDN_OIFMpO0zU8K5WARsCx4JX1cpnqeUjWqgXMTutwIOyGkYvKP0Lmyg1DJ4zgrZrdMUjr0gruK4Hh0xAC6mJg5uslH-xJT7ViWR-QumFoNSuFXH2jxJnPx9YsyxiVptkJeA6eLSQYrj5RZcpFnIetqgDKuGrPwLGiqhk_-Pgeu-RsIdC46uCtUyATIsehkOMy_Blmrg1L79NFIhF1Eizy-gnYcn5e_K0mctw");
     XCTAssertEqualObjects(rtItem.uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
     XCTAssertEqualObjects(rtItem.displayableId, @"user@msdevex.onmicrosoft.com");
     XCTAssertEqualObjects(rtItem.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");

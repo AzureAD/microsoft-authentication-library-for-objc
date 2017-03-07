@@ -29,6 +29,7 @@
 #import "MSALTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALJsonObject.h"
+#import "MSALIdToken.h"
 
 @implementation MSALAccessTokenCacheItem
 
@@ -36,6 +37,8 @@ MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
 MSAL_JSON_RW(@"msalscope", scope, setScope)
 MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
+MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
+MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -55,6 +58,9 @@ MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
     self.tokenType = response.tokenType;
     self.expiresOn = response.expiresOn;
     self.scope = [self scopeFromString:response.scope];
+    self.rawIdToken = response.idToken;
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
+    self.tenantId = idToken.tenantId;
     
     return self;
 }
@@ -95,6 +101,7 @@ MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
     [aCoder encodeObject:_json forKey:@"json"];
+    [aCoder encodeObject:self.user forKey:@"user"];
 }
 
 //Deserializer
@@ -106,6 +113,7 @@ MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
     }
     
     _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
+    self.user = [aDecoder decodeObjectOfClass:[MSALUser class] forKey:@"user"];
     
     return self;
 }

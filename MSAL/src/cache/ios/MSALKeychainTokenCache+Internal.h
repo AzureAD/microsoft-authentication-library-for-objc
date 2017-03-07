@@ -32,17 +32,23 @@
 
 @interface MSALKeychainTokenCache (Internal)
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(NSString *)authority
-                                               clientId:(NSString *)clientId
-                                               response:(MSALTokenResponse *)response;
+- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
+                                               response:(MSALTokenResponse *)response
+                                                  error:(NSError * __autoreleasing *)error;
 
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam;
+- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
+                                        error:(NSError * __autoreleasing *)error;
 
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam;
+- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
+                                          error:(NSError * __autoreleasing *)error;
 
-- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem;
+- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
+                    error:(NSError * __autoreleasing *)error;
 
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem;
+- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
+                     error:(NSError * __autoreleasing *)error;
+
+- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId;
 
 /*! This method should *only* be called in test code, it should never be called
  in production code */
