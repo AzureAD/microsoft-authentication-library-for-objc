@@ -26,9 +26,24 @@
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
+#define MSAL_APP_SCOPE_OPENID           @"openid"
+#define MSAL_APP_SCOPE_PROFILE          @"profile"
+#define MSAL_APP_SCOPE_OFFLINE_ACCESS   @"offline_access"
+#define MSAL_APP_SCOPE_USER_READ        @"User.Read"
+
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
 static NSArray<NSString *> *s_authorities = nil;
+
+static NSArray<NSString *> *s_scopes_required = nil;
+static NSArray<NSString *> *s_scopes_optional = nil;
+
+@interface MSALTestAppSettings()
+{
+    NSMutableSet <NSString *> *_scopes;
+}
+
+@end
 
 @implementation MSALTestAppSettings
 
@@ -43,6 +58,10 @@ static NSArray<NSString *> *s_authorities = nil;
     }
     
     s_authorities = authorities;
+    
+    s_scopes_required = @[MSAL_APP_SCOPE_OPENID, MSAL_APP_SCOPE_PROFILE, MSAL_APP_SCOPE_OFFLINE_ACCESS];
+    s_scopes_optional = @[MSAL_APP_SCOPE_USER_READ];
+
 }
 
 + (MSALTestAppSettings*)settings
@@ -53,6 +72,7 @@ static NSArray<NSString *> *s_authorities = nil;
     dispatch_once(&s_settingsOnce,^{
         s_settings = [MSALTestAppSettings new];
         [s_settings readFromDefaults];
+        s_settings->_scopes = [NSMutableSet new];
     });
     
     return s_settings;
@@ -156,5 +176,55 @@ static NSArray<NSString *> *s_authorities = nil;
             forKey:@"currentUser"];
     _currentUser = currentUser;
 }
+
+- (void)setScope:(NSString *)scope enabled:(BOOL)enabled
+{
+    if (enabled)
+    {
+        [_scopes addObject:scope];
+    }
+    else
+    {
+        [_scopes removeObject:scope];
+    }
+}
+
++ (NSArray<NSString *> *)scopesOptional
+{
+    return s_scopes_optional;
+}
+
++ (NSArray<NSString *> *)scopesRequired
+{
+    return s_scopes_required;
+}
+
+- (NSSet<NSString *> *)scopes
+{
+    return _scopes;
+}
+
+- (BOOL)addScope:(NSString *)scope
+{
+    if (![s_scopes_optional containsObject:scope])
+    {
+        return NO;
+    }
+    
+    [_scopes addObject:scope];
+    return YES;
+}
+
+- (BOOL)removeScope:(NSString *)scope
+{
+    if (![s_scopes_optional containsObject:scope])
+    {
+        return NO;
+    }
+    
+    [_scopes removeObject:scope];
+    return YES;
+}
+
 
 @end

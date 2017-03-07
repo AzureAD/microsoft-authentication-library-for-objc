@@ -30,6 +30,7 @@
 #import "MSALTestAppAcquireLayoutBuilder.h"
 #import "MSALTestAppAuthorityViewController.h"
 #import "MSALTestAppUserViewController.h"
+#import "MSALTestAppScopesViewController.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -44,9 +45,9 @@
     
     UITextField *_loginHintField;
     UIButton *_userButton;
+    UIButton *_scopesButton;
     
     UISegmentedControl *_uiBehavior;
-   
     
     UITextView *_resultView;
     
@@ -129,6 +130,10 @@
     _userButton = [self buttonWithTitle:[MSALTestAppUserViewController currentTitle]
                                  action:@selector(selectUser:)];
     [layout addControl:_userButton title:@"user"];
+    
+    _scopesButton = [self buttonWithTitle:@"scopes"
+                                   action:@selector(selectScope:)];
+    [layout addControl:_scopesButton title:@"scopes"];
     
     _uiBehavior = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
     _uiBehavior.selectedSegmentIndex = 0;
@@ -310,6 +315,10 @@
                       forState:UIControlStateNormal];
     [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
                  forState:UIControlStateNormal];
+
+    [_scopesButton setTitle:(settings.scopes.count == 0) ? @"additional scopes" : [settings.scopes.allObjects componentsJoinedByString:@","]
+                   forState:UIControlStateNormal];
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -372,7 +381,7 @@
     
     __block BOOL fBlockHit = NO;
     
-    [application acquireTokenForScopes:@[@"User.Read"]
+    [application acquireTokenForScopes:[settings.scopes allObjects]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          if (fBlockHit)
@@ -451,4 +460,11 @@
     (void)sender;
     [self.navigationController pushViewController:[MSALTestAppUserViewController sharedController] animated:YES];
 }
+
+- (void)selectScope:(id)sender
+{
+    (void)sender;
+    [self.navigationController pushViewController:[MSALTestAppScopesViewController sharedController] animated:YES];
+}
+
 @end
