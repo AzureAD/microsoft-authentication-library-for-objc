@@ -37,13 +37,13 @@ typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NS
                         userPrincipalName:(NSString *)userPrincipalName
                                  validate:(BOOL)validate
                                   context:(id<MSALRequestContext>)context
-                        completionHandler:(OpenIDConfigEndpointCallback) completionHandler;
+                          completionBlock:(OpenIDConfigEndpointCallback)completionBlock;
 
 - (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback) completionBlock;
+                completionBlock:(TenantDiscoveryCallback)completionBlock;
 
 
 - (MSALAuthority *)authorityFromCache:(NSURL *)authority

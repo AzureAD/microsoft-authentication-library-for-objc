@@ -82,7 +82,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
                         userPrincipalName:(NSString *)userPrincipalName
                                  validate:(BOOL)validate
                                   context:(id<MSALRequestContext>)context
-                        completionHandler:(OpenIDConfigEndpointCallback)completionHandler
+                          completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
     (void)userPrincipalName;
     
@@ -92,7 +92,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     if (!validate || [MSALAuthority isKnownHost:url])
     {
         NSString *endpoint = [self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant];
-        completionHandler(endpoint, nil);
+        completionBlock(endpoint, nil);
         return;
     }
 
@@ -105,7 +105,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
      {
          if (error)
          {
-             completionHandler(nil, error);
+             completionBlock(nil, error);
              return;
          }
          
@@ -114,7 +114,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
                                                                                              error:&jsonError];
          if (jsonError)
          {
-             completionHandler(nil, error);
+             completionBlock(nil, error);
              return;
          }
          
@@ -124,10 +124,10 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
          {
              NSError *tenantDiscoveryError;
              CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
-             completionHandler(nil, tenantDiscoveryError);
+             completionBlock(nil, tenantDiscoveryError);
              return;
          }
-         completionHandler(tenantDiscoverEndpoint, nil);
+         completionBlock(tenantDiscoverEndpoint, nil);
          return;
      }];
   

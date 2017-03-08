@@ -28,6 +28,8 @@
 #import "MSALAuthority.h"
 #import "MSALError_Internal.h"
 #import "MSALAadAuthorityResolver.h"
+#import "MSALAdfsAuthorityResolver.h"
+#import "MSALB2CAuthorityResolver.h"
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALURLSession.h"
@@ -114,12 +116,14 @@ BOOL isTenantless(NSURL *authority)
     if ([firstPathComponent isEqualToString:@"tfp"])
     {
         authorityType = B2CAuthority;
-        @throw @"TODO";
+        resolver = [MSALB2CAuthorityResolver new];
+        tenant = updatedAuthority.pathComponents[2].lowercaseString;
     }
     else if ([firstPathComponent isEqualToString:@"adfs"])
     {
         authorityType = ADFSAuthority;
-        @throw @"TODO";
+        resolver = [MSALAdfsAuthorityResolver new];
+        tenant = nil;
     }
     else
     {
@@ -165,7 +169,7 @@ BOOL isTenantless(NSURL *authority)
                               userPrincipalName:userPrincipalName
                                        validate:validate
                                         context:context
-                              completionHandler:^(NSString *endpoint, NSError *error)
+                                completionBlock:^(NSString *endpoint, NSError *error)
     {
         CHECK_COMPLETION(!error);
         
