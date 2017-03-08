@@ -113,22 +113,22 @@
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(openIdConfigEndpoint, nil);
+         completionBlock(openIdConfigEndpoint, nil);
      }];
      
     [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)
@@ -176,22 +176,22 @@
     
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+         completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
@@ -231,22 +231,22 @@
          return nil;
      }];
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(openIdConfigEndpoint, nil);
+         completionBlock(openIdConfigEndpoint, nil);
      }];
     
     [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)

@@ -120,7 +120,7 @@
                                                     userPrincipalName:nil
                                                              validate:YES
                                                               context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+                                                    completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertEqualObjects(endpoint, responseEndpoint);
          XCTAssertNil(error);
@@ -156,7 +156,7 @@
                                                     userPrincipalName:nil
                                                              validate:NO
                                                               context:nil
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+                                                    completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertEqualObjects(endpoint, responseEndpoint);
          XCTAssertNil(error);
@@ -197,7 +197,7 @@
                                                     userPrincipalName:nil
                                                              validate:YES
                                                               context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+                                                    completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertNil(endpoint);
          XCTAssertNotNil(error);
@@ -235,7 +235,7 @@
                                                     userPrincipalName:nil
                                                              validate:YES
                                                               context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+                                                    completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertNil(endpoint);
          XCTAssertNotNil(error);
