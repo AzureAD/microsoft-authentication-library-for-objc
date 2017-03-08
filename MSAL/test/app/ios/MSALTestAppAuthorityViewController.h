@@ -25,9 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthority.h"
-#import "MSALAuthorityBaseResolver.h"
+#import "MSALTestAppSettingViewController.h"
 
-@interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+@interface MSALTestAppAuthorityViewController : MSALTestAppSettingViewController
+
++ (instancetype)sharedController;
 
 @end

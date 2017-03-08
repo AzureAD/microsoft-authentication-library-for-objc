@@ -25,78 +25,68 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppProfileViewController.h"
-#import "MSALTestAppSettings.h"
+#import "MSALTestAppSettingViewController.h"
 
-@interface MSALTestAppProfileViewController ()
+@interface MSALTestAppSettingViewController () <UITableViewDelegate, UITableViewDataSource>
+{
+    UITableView *_tableView;
+}
 
 @end
 
-@implementation MSALTestAppProfileViewController
-{
-    UITableView* _profileTable;
-}
-
-+ (MSALTestAppProfileViewController*)sharedProfileViewController
-{
-    static MSALTestAppProfileViewController* s_profileViewController = nil;
-    static dispatch_once_t s_once;
-    
-    dispatch_once(&s_once, ^{
-        s_profileViewController = [[MSALTestAppProfileViewController alloc] init];
-    });
-    
-    return s_profileViewController;
-}
+@implementation MSALTestAppSettingViewController
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    
     self.navigationItem.hidesBackButton = NO;
-    self.navigationItem.title = @"Select Application Profile";
     
-    UIView* rootView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    [rootView setAutoresizesSubviews:YES];
-    [rootView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
-    _profileTable = [[UITableView alloc] initWithFrame:rootView.frame];
-    [_profileTable setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
-    [_profileTable setDataSource:self];
+    CGRect screenFrame = UIScreen.mainScreen.bounds;
+    _tableView = [[UITableView alloc] initWithFrame:screenFrame];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.allowsSelection = YES;
     
-    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[MSALTestAppSettings currentProfileIdx] inSection:0];
-    [_profileTable selectRowAtIndexPath:indexPath
-                               animated:NO
-                         scrollPosition:UITableViewScrollPositionNone];
-    [_profileTable setDelegate:self];
-    [rootView addSubview:_profileTable];
-    
-    self.view = rootView;
+    self.view = _tableView;
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     (void)animated;
+    self.navigationController.navigationBarHidden = NO;
     
-     self.navigationController.navigationBarHidden = NO;
+    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
+    [_tableView selectRowAtIndexPath:indexPath
+                            animated:NO
+                      scrollPosition:UITableViewScrollPositionNone];
+    [self refresh];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
+#pragma mark -
+#pragma mark UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     (void)tableView;
-    [[MSALTestAppSettings settings] setProfileFromIndex:indexPath.row];
+    [self rowSelected:[indexPath indexAtPosition:1]];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+#pragma mark -
+#pragma mark UITableViewDataSource
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    (void)tableView;
     (void)section;
-    return [MSALTestAppSettings numberOfProfiles];
+    (void)tableView;
+    return [self numberOfRows];
 }
 
 // Row display. Implementers should *always* try to reuse cells by setting each cell's reuseIdentifier and querying for available reusable cells with dequeueReusableCellWithIdentifier:
@@ -104,17 +94,50 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    (void)tableView;
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"profileCell"];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MSALTestAppTableSettingRowCell"];
     if (!cell)
     {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"profileCell"];
+         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"MSALTestAppTableSettingRowCell"];
     }
-
-    NSString* title = [MSALTestAppSettings profileTitleForIndex:indexPath.row];
-    [[cell textLabel] setText:title];
+    
+    cell.textLabel.text = [self labelForRow:[indexPath indexAtPosition:1]];
     
     return cell;
+}
+
+
+#pragma mark -
+#pragma mark Methods for subclasses to override
+
+- (void)refresh
+{
+    
+}
+
+- (NSInteger)numberOfRows
+{
+    return 0;
+}
+
+- (NSString *)labelForRow:(NSInteger)row
+{
+    (void)row;
+    return nil;
+}
+
+- (void)rowSelected:(NSInteger)row
+{
+    (void)row;
+}
+
+- (NSInteger)currentRow
+{
+    return 0;
+}
+
++ (NSString *)currentTitle
+{
+    return nil;
 }
 
 @end

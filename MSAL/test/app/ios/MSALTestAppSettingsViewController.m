@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestAppSettingsViewController.h"
-#import "MSALTestAppProfileViewController.h"
 #import "MSALTestAppSettings.h"
 
 static NSArray* s_profileRows = nil;
@@ -96,15 +95,11 @@ static NSArray* s_deviceRows = nil;
     NSString* teamId = [ADKeychainUtil keychainTeamId:nil];
     _keychainId = teamId ? teamId : @"<No Team ID>";*/
     
-    MSALTestAppSettingsRow* profileRow = [MSALTestAppSettingsRow rowWithTitle:@"profile"];
-    profileRow.valueBlock = ^NSString *{ return MSALTestAppSettings.currentProfileTitle; };
-    profileRow.action = ^{ [self gotoProfile:nil]; };
+    MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
+    clientIdRow.valueBlock = ^NSString *{ return TEST_APP_CLIENT_ID; };
     SETTING_ROW(authority);
-    SETTING_ROW(clientId);
-    MSALTestAppSettingsRow* redirectUri = [MSALTestAppSettingsRow rowWithTitle:@"redirectUri"];
-    redirectUri.valueBlock = ^NSString *{ return [MSALTestAppSettings.settings.redirectUri absoluteString]; };
     
-    _profileRows = @[ profileRow, authority, clientId, redirectUri ];
+    _profileRows = @[ authority, clientIdRow ];
     
     
     
@@ -246,13 +241,10 @@ static NSArray* s_deviceRows = nil;
 {
     (void)tableView;
     MSALTestAppSettingsRow* row = [self rowForIndexPath:indexPath];
-    row.action();
-}
-
-- (IBAction)gotoProfile:(id)sender
-{
-    (void)sender;
-    [self.navigationController pushViewController:[MSALTestAppProfileViewController sharedProfileViewController] animated:YES];
+    if (row.action)
+    {
+        row.action();
+    }
 }
 
 @end

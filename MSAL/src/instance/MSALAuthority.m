@@ -67,6 +67,11 @@ BOOL isTenantless(NSURL *authority)
                          @"login.microsoftonline.de", nil];
 }
 
++ (NSSet<NSString *> *)trustedHosts
+{
+    return s_trustedHostList;
+}
+
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
@@ -119,10 +124,18 @@ BOOL isTenantless(NSURL *authority)
     else
     {
         authorityType = AADAuthority;
-        resolver = [MSALAadAuthorityResolver sharedResolver];
+        resolver = [MSALAadAuthorityResolver new];
         tenant = firstPathComponent;
     }
     
+    MSALAuthority *authorityInCache = [resolver authorityFromCache:updatedAuthority
+                                                 userPrincipalName:userPrincipalName];
+    if (authorityInCache)
+    {
+        completionBlock(authorityInCache, nil);
+        return;
+    }
+
     TenantDiscoveryCallback tenantDiscoveryCallback = ^void
     (MSALTenantDiscoveryResponse *response, NSError *error)
     {

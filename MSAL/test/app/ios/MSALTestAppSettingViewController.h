@@ -25,9 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthority.h"
-#import "MSALAuthorityBaseResolver.h"
+#import <UIKit/UIKit.h>
 
-@interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+
+@interface MSALTestAppSettingViewController : UIViewController
+
+#pragma mark -
+#pragma mark Methods for subclasses to override
+
+- (void)refresh;
+- (NSInteger)numberOfRows;
+- (NSString *)labelForRow:(NSInteger)row;
+- (void)rowSelected:(NSInteger)row;
+- (NSInteger)currentRow;
+
++ (NSString *)currentTitle;
 
 @end

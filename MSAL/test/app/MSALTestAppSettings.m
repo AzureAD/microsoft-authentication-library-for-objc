@@ -22,95 +22,27 @@
 // THE SOFTWARE.
 
 #import "MSALTestAppSettings.h"
+#import "MSALAuthority.h"
 
-#if __has_include("MSALAdditionalTestAppSettings.h")
-#include "MSALAdditionalTestAppSettings.h"
-#else
-// If you put a header file at ~/aadoverrides/ADAdditionalTestAppSettings.h with
-// function named _addtionalProfiles() that returns an NSDictionary that will
-// be folded into the profiles list without you having to constantly alter your
-// github enlistment!
-static NSDictionary* _additionalProfiles()
-{
-    return nil;
-}
-#endif
-static NSDictionary* s_additionalProfiles = nil;
-
+#define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
-static NSDictionary* s_profiles = nil;
-static NSArray* s_profileTitles = nil;
-static NSUInteger s_currentProfileIdx = 0;
+static NSArray<NSString *> *s_authorities = nil;
 
 @implementation MSALTestAppSettings
-{
-    NSDictionary* _settings;
-}
 
 + (void)initialize
 {
-    s_profiles =
-    @{ @"Test App"    : @{ @"authority" : @"https://login.microsoftonline.com/common",
-                           // NOTE: The settings below should come from your registered application on
-                           //       the azure management portal.
-                           //@"clientId" : @"42e42992-6600-4d12-967a-150b3f0bde2d",
-                           @"clientId" : @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc", }
-       };
+    NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     
-    s_additionalProfiles = _additionalProfiles();
-    
-    NSMutableArray* titles = [[NSMutableArray alloc] initWithCapacity:[s_profiles count] + [s_additionalProfiles count]];
-    
-    for (NSString* profileTitle in s_profiles)
+    NSSet<NSString *> *trustedHosts = [MSALAuthority trustedHosts];
+    for (NSString *host in trustedHosts)
     {
-        [titles addObject:profileTitle];
+        [authorities addObject:[NSString stringWithFormat:@"https://%@/common", host]];
     }
     
-    for (NSString* profileTitle in s_additionalProfiles)
-    {
-        [titles addObject:profileTitle];
-    }
-    
-    [titles sortUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-    
-    s_profileTitles = titles;
-    
-    NSString* currentProfile = [[NSUserDefaults standardUserDefaults] stringForKey:@"CurrentProfile"];
-    if (!currentProfile)
-    {
-        currentProfile = @"Test App";
-    }
-    s_currentProfileIdx = [s_profileTitles indexOfObject:currentProfile];
-    if (s_currentProfileIdx == NSNotFound)
-    {
-        s_currentProfileIdx = [s_profileTitles indexOfObject:@"Test App"];
-    }
-    if (s_currentProfileIdx == NSNotFound)
-    {
-        s_currentProfileIdx = 0;
-    }
-}
-
-+ (NSUInteger)numberOfProfiles;
-{
-    return [s_profileTitles count];
-}
-
-+ (NSString*)profileTitleForIndex:(NSUInteger)idx
-{
-    return [s_profileTitles objectAtIndex:idx];
-}
-
-+ (NSString*)currentProfileTitle
-{
-    return [s_profileTitles objectAtIndex:s_currentProfileIdx];
-}
-
-+ (NSUInteger)currentProfileIdx
-{
-    return s_currentProfileIdx;
+    s_authorities = authorities;
 }
 
 + (MSALTestAppSettings*)settings
@@ -118,42 +50,111 @@ static NSUInteger s_currentProfileIdx = 0;
     static dispatch_once_t s_settingsOnce;
     static MSALTestAppSettings* s_settings = nil;
     
-    dispatch_once(&s_settingsOnce,^{ s_settings = [MSALTestAppSettings new]; });
+    dispatch_once(&s_settingsOnce,^{
+        s_settings = [MSALTestAppSettings new];
+        [s_settings readFromDefaults];
+    });
     
     return s_settings;
 }
 
-- (id)init
++ (NSArray<NSString *> *)authorities
 {
-    if (!(self = [super init]))
+    return s_authorities;
+}
+
+- (MSALUser *)userForHomeObjectId:(NSString *)homeObjectId
+{
+    if (!homeObjectId)
     {
         return nil;
     }
     
-    [self setProfileFromIndex:[MSALTestAppSettings currentProfileIdx]];
-    
-    return self;
-}
-
-- (void)setProfileFromIndex:(NSInteger)idx
-{
-    NSString* title = [s_profileTitles objectAtIndex:idx];
-    s_currentProfileIdx = idx;
-    [[NSUserDefaults standardUserDefaults] setObject:title forKey:@"CurrentProfile"];
-    NSDictionary* settings = [s_additionalProfiles objectForKey:title];
-    if (!settings)
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:TEST_APP_CLIENT_ID
+                                                authority:_authority
+                                                    error:&error];
+    if (application == nil)
     {
-        settings = [s_profiles objectForKey:title];
+        LOG_ERROR(nil, @"failed to create application to get user: %@", error);
+        return nil;
     }
     
-    self.authority = [settings objectForKey:@"authority"];
-    self.clientId = [settings objectForKey:@"clientId"];
-    self.redirectUri = [NSURL URLWithString:[settings objectForKey:@"redirectUri"]];
-    self.defaultUser = [settings objectForKey:@"defaultUser"];
+    NSArray<MSALUser *> *users = [application users];
+    if (!users)
+    {
+        LOG_ERROR(nil, @"no users came back from the application");
+        return nil;
+    }
+    
+    for (MSALUser *user in users)
+    {
+        if ([homeObjectId isEqualToString:user.homeObjectId])
+        {
+            return user;
+        }
+    }
+    
+    LOG_WARN(nil, @"failed to find home object id \"%@\" among users.", homeObjectId);
+    return nil;
+}
+
+- (void)readFromDefaults
+{
+    NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
+    if (!settings)
+    {
+        return;
+    }
+    
+    _authority = [settings objectForKey:@"authority"];
+    _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
-    self.validateAuthority = validate ? [validate boolValue] : YES;
-    NSNumber* enableBroker = [settings objectForKey:@"enableBroker"];
-    self.enableBroker = [enableBroker boolValue];
+    _validateAuthority = validate ? [validate boolValue] : YES;
+    _currentUser = [self userForHomeObjectId:[settings objectForKey:@"currentUser"]];
+    
+}
+
+- (void)setValue:(id)value
+          forKey:(nonnull NSString *)key
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *settings = [[defaults dictionaryForKey:MSAL_APP_SETTINGS_KEY] mutableCopy];
+    if (!settings)
+    {
+        settings = [NSMutableDictionary new];
+    }
+    
+    [settings setValue:value forKey:key];
+    [[NSUserDefaults standardUserDefaults] setObject:settings
+                                              forKey:MSAL_APP_SETTINGS_KEY];
+}
+
+- (void)setAuthority:(NSString *)authority
+{
+    [self setValue:authority forKey:@"authority"];
+    _authority = authority;
+}
+
+- (void)setLoginHint:(NSString *)loginHint
+{
+    [self setValue:loginHint forKey:@"loginHint"];
+    _loginHint = loginHint;
+}
+
+- (void)setValidateAuthority:(BOOL)validateAuthority
+{
+    [self setValue:[NSNumber numberWithBool:validateAuthority]
+            forKey:@"validateAuthority"];
+    _validateAuthority = validateAuthority;
+}
+
+- (void)setCurrentUser:(MSALUser *)currentUser
+{
+    [self setValue:currentUser.homeObjectId
+            forKey:@"currentUser"];
+    _currentUser = currentUser;
 }
 
 @end

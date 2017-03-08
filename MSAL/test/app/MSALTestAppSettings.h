@@ -27,24 +27,19 @@
 
 #import <Foundation/Foundation.h>
 
+#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
 
 extern NSString* MSALTestAppCacheChangeNotification;
 
 @interface MSALTestAppSettings : NSObject
 
-@property NSString* authority;
-@property NSURL* redirectUri;
-@property NSString* clientId;
-@property NSString* defaultUser;
-@property BOOL validateAuthority;
-@property BOOL enableBroker;
+@property (nonatomic) NSString *authority;
+@property (nonatomic) MSALUser *currentUser;
+@property (nonatomic) NSString *loginHint;
+@property (nonatomic) BOOL validateAuthority;
 
 + (MSALTestAppSettings*)settings;
-+ (NSUInteger)numberOfProfiles;
-+ (NSString*)profileTitleForIndex:(NSUInteger)idx;
-+ (NSString*)currentProfileTitle;
-+ (NSUInteger)currentProfileIdx;
 
-- (void)setProfileFromIndex:(NSInteger)idx;
++ (NSArray<NSString *> *)authorities;
 
 @end
