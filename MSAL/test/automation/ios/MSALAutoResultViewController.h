@@ -27,6 +27,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MSALAutoMainViewController : UIViewController
+@interface MSALAutoResultViewController : UIViewController
+
+@property NSString *resultInfoString;
+@property NSString *resultLogsString;
 
 @end

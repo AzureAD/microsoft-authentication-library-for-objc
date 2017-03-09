@@ -25,8 +25,46 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import "MSALAutoRequestViewController.h"
 
-@interface MSALAutoMainViewController : UIViewController
+@interface MSALAutoRequestViewController ()
+
+@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
+@property (strong, nonatomic) IBOutlet UIButton *requestGo;
+
+@end
+
+@implementation MSALAutoRequestViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+- (IBAction)go:(id)sender {
+    
+    (void)sender;
+    
+    self.requestInfo.editable = NO;
+    self.requestGo.enabled = NO;
+    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
+    
+    NSError *error = nil;
+    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    if (!params)
+    {
+        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+        
+        params = @{ @"error" : errorString };
+    }
+    
+    self.completionBlock(params);
+}
 
 @end

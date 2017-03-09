@@ -67,6 +67,8 @@
 		96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */ = {isa = PBXBuildFile; fileRef = 96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96D9A54A1E4AB23100674A85 /* MSALTelemetry.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5471E4AB22900674A85 /* MSALTelemetry.m */; };
 		96D9A54B1E4AB23200674A85 /* MSALTelemetry.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5471E4AB22900674A85 /* MSALTelemetry.m */; };
+		96EA2EF11E721A5200EE2FC6 /* MSALAutoRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EA2EEC1E721A4D00EE2FC6 /* MSALAutoRequestViewController.m */; };
+		96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EA2EEE1E721A4D00EE2FC6 /* MSALAutoResultViewController.m */; };
 		96ED57F41E4D52180063B3EE /* MSALURLSessionDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 96ED57F21E4D52180063B3EE /* MSALURLSessionDelegate.h */; };
 		96ED57F51E4D52180063B3EE /* MSALURLSessionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 96ED57F31E4D52180063B3EE /* MSALURLSessionDelegate.m */; };
 		96ED57F61E4D52180063B3EE /* MSALURLSessionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 96ED57F31E4D52180063B3EE /* MSALURLSessionDelegate.m */; };
@@ -251,6 +253,7 @@
 		94E876DA1E493DC600FB96ED /* MSALInteractiveRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALInteractiveRequest.m; sourceTree = "<group>"; };
 		94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALUIBehavior.h; sourceTree = "<group>"; };
 		962302581E7215170022A778 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		9623025E1E7217740022A778 /* MSALAutomation.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MSALAutomation.entitlements; sourceTree = "<group>"; };
 		962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__automation_app.xcconfig; sourceTree = "<group>"; };
 		962E37BC1E720C5D00DE71FE /* MSAL Test Automation (iOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test Automation (iOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		962E37C01E720E4F00DE71FE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -294,6 +297,11 @@
 		96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetry.h; sourceTree = "<group>"; };
 		96D9A5471E4AB22900674A85 /* MSALTelemetry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetry.m; sourceTree = "<group>"; };
 		96D9A54C1E4AB3BD00674A85 /* MSALTelemetry+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALTelemetry+Internal.h"; sourceTree = "<group>"; };
+		96EA2EEA1E7219FE00EE2FC6 /* MSALAutomation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomation.h; sourceTree = "<group>"; };
+		96EA2EEB1E721A4D00EE2FC6 /* MSALAutoRequestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutoRequestViewController.h; sourceTree = "<group>"; };
+		96EA2EEC1E721A4D00EE2FC6 /* MSALAutoRequestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAutoRequestViewController.m; sourceTree = "<group>"; };
+		96EA2EED1E721A4D00EE2FC6 /* MSALAutoResultViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutoResultViewController.h; sourceTree = "<group>"; };
+		96EA2EEE1E721A4D00EE2FC6 /* MSALAutoResultViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAutoResultViewController.m; sourceTree = "<group>"; };
 		96ED57F21E4D52180063B3EE /* MSALURLSessionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALURLSessionDelegate.h; sourceTree = "<group>"; };
 		96ED57F31E4D52180063B3EE /* MSALURLSessionDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALURLSessionDelegate.m; sourceTree = "<group>"; };
 		D61A63F11E5979200086D120 /* MSALResult+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALResult+Internal.h"; sourceTree = "<group>"; };
@@ -521,13 +529,19 @@
 		962E37BF1E720E4F00DE71FE /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				9623025E1E7217740022A778 /* MSALAutomation.entitlements */,
 				962302581E7215170022A778 /* Launch Screen.storyboard */,
 				962E37E41E720EE000DE71FE /* Main.storyboard */,
-				962E37EB1E72139100DE71FE /* MSALAutoMainViewController.h */,
-				962E37EC1E72139100DE71FE /* MSALAutoMainViewController.m */,
 				962E37C01E720E4F00DE71FE /* main.m */,
+				96EA2EEA1E7219FE00EE2FC6 /* MSALAutomation.h */,
 				962E37C91E720E4F00DE71FE /* MSALAutoAppDelegate.h */,
 				962E37CA1E720E4F00DE71FE /* MSALAutoAppDelegate.m */,
+				962E37EB1E72139100DE71FE /* MSALAutoMainViewController.h */,
+				962E37EC1E72139100DE71FE /* MSALAutoMainViewController.m */,
+				96EA2EEB1E721A4D00EE2FC6 /* MSALAutoRequestViewController.h */,
+				96EA2EEC1E721A4D00EE2FC6 /* MSALAutoRequestViewController.m */,
+				96EA2EED1E721A4D00EE2FC6 /* MSALAutoResultViewController.h */,
+				96EA2EEE1E721A4D00EE2FC6 /* MSALAutoResultViewController.m */,
 				962E37D31E720E4F00DE71FE /* resources */,
 			);
 			path = ios;
@@ -1190,6 +1204,11 @@
 					962E37A61E720C5D00DE71FE = {
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 					D61A64321E5A29580086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -1314,7 +1333,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				96EA2EF11E721A5200EE2FC6 /* MSALAutoRequestViewController.m in Sources */,
 				962E37ED1E72139100DE71FE /* MSALAutoMainViewController.m in Sources */,
+				96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */,
 				962E37E81E7211D200DE71FE /* main.m in Sources */,
 				962E37E91E7211D200DE71FE /* MSALAutoAppDelegate.m in Sources */,
 			);
@@ -1547,6 +1568,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
@@ -1558,6 +1580,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";

@@ -26,7 +26,10 @@
 //------------------------------------------------------------------------------
 
 #import <UIKit/UIKit.h>
+#import "MSALAutomation.h"
 
-@interface MSALAutoMainViewController : UIViewController
+@interface MSALAutoRequestViewController : UIViewController
+
+@property MSALAutoParamBlock completionBlock;
 
 @end

@@ -1,14 +1,42 @@
+//------------------------------------------------------------------------------
 //
-//  MSALAutoMainViewController.m
-//  MSAL
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-//  Created by Jason Kim on 3/9/17.
-//  Copyright © 2017 Microsoft. All rights reserved.
+// This code is licensed under the MIT License.
 //
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+#import "MSAL.h"
+#import "MSALLogger+Internal.h"
 
 #import "MSALAutoMainViewController.h"
+#import "MSALAutoResultViewController.h"
+#import "MSALAutoRequestViewController.h"
 
 @interface MSALAutoMainViewController ()
+{
+    NSMutableString *_resultLogs;
+    
+}
 
 @end
 
@@ -17,6 +45,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
+        (void)level;
+        if (!containsPII)
+        {
+            return;
+        }
+        
+        if (_resultLogs)
+        {
+            [_resultLogs appendString:message];
+        }
+    }];
+    
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -24,14 +67,65 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    (void)sender;
+    
+    if ([segue.identifier isEqualToString:@"showRequest"])
+    {
+        MSALAutoRequestViewController *requestVC = segue.destinationViewController;
+        requestVC.completionBlock = sender[@"completionBlock"];
+    }
+    
+    
+    if ([segue.identifier isEqualToString:@"showResult"])
+    {
+        MSALAutoResultViewController *resultVC = segue.destinationViewController;
+        resultVC.resultInfoString = sender[@"resultInfo"];
+        resultVC.resultLogsString = sender[@"resultLogs"];
+    }
 }
-*/
+
+
+- (IBAction)acquireToken:(id)sender {
+    (void)sender;
+    
+    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
+    {
+        _resultLogs = [NSMutableString new];
+        
+        LOG_INFO_PII(nil, @"Test message");
+        
+        [self dismissViewControllerAnimated:NO completion:^{
+            [self displayResultJson:[self createJsonStringFromDictionary:parameters]];
+        }];
+        
+    };
+    
+    [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
+    
+}
+
+-(void)displayResultJson:(NSString *)resultJson
+{
+    [self performSegueWithIdentifier:@"showResult" sender:@{@"resultInfo":resultJson,
+                                                            @"resultLogs":(_resultLogs) ? _resultLogs : @""}];
+}
+
+- (NSString *)createJsonStringFromDictionary:(NSDictionary *)dictionary
+{
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    
+    if (!jsonData)
+    {
+        return [NSString stringWithFormat:@"{\"error\" : \"%@\"}", error.description];
+    }
+    
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+}
+
 
 @end

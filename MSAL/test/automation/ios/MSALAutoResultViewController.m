@@ -25,8 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import "MSALAutoResultViewController.h"
 
-@interface MSALAutoMainViewController : UIViewController
+@interface MSALAutoResultViewController ()
+
+@property (strong, nonatomic) IBOutlet UITextView *resultInfo;
+@property (strong, nonatomic) IBOutlet UITextView *resultLogs;
+
+@end
+
+@implementation MSALAutoResultViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    self.resultInfo.text = self.resultInfoString;
+    self.resultLogs.text = self.resultLogsString;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (IBAction)done:(id)sender {
+    (void)sender;
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+
 
 @end

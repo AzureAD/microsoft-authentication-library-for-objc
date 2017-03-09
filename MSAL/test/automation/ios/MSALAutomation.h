@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#pragma once
 
-@interface MSALAutoMainViewController : UIViewController
-
-@end
+typedef void (^MSALAutoParamBlock)(NSDictionary<NSString *, NSString *> * parameters);
