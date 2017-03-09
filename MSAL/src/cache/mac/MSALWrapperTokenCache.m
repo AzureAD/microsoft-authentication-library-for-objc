@@ -110,13 +110,9 @@
     NSDictionary *cacheCopy = [_cache mutableCopy];
     pthread_rwlock_unlock(&_lock);
     
-    // Using the dictionary @{ key : value } syntax here causes _cache to leak. Yay legacy runtime!
-    NSDictionary *wrapper = [NSDictionary dictionaryWithObjectsAndKeys:cacheCopy, @"tokenCache",
-                             @CURRENT_WRAPPER_CACHE_VERSION, @"version", nil];
-    
     @try
     {
-        return [NSKeyedArchiver archivedDataWithRootObject:wrapper];
+        return [NSJSONSerialization dataWithJSONObject:cacheCopy options:0 error:nil];
     }
     @catch (id exception)
     {
@@ -165,7 +161,8 @@
         return YES;
     }
     
-    id cache = [self unarchive:data error:error];
+    id cache = [NSJSONSerialization JSONObjectWithData:data
+                                    options:NSJSONReadingAllowFragments error:error];
     if (!cache)
     {
         return NO;
@@ -177,7 +174,7 @@
     //        return NO;
     //    }
     
-    _cache = [cache objectForKey:@"tokenCache"];
+    _cache = cache;
     return YES;
 }
 
