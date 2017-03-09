@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,25 +15,38 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import "MSALTokenCacheDataSource.h"
 
-@class MSALRefreshTokenCacheItem;
-@class MSALRequestParameters;
-@class MSALAccessTokenCacheItem;
 @class MSALTokenResponse;
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
+@interface MSALTokenCacheAccessor : NSObject
 
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
+- (id)initWithDataSource:(id<MSALTokenCacheDataSource>)dataSource;
+
+- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
+                                               response:(MSALTokenResponse *)response
+                                                  error:(NSError * __autoreleasing *)error;
+
+- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
+                                        error:(NSError * __autoreleasing *)error;
+
+- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
+                                          error:(NSError * __autoreleasing *)error;
+
+- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
+                    error:(NSError * __autoreleasing *)error;
+
+- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
+                     error:(NSError * __autoreleasing *)error;
+
+- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId;
+
+- (id<MSALTokenCacheDataSource>)dataSource;
 
 @end

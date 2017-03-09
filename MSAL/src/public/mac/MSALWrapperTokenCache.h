@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,28 +15,41 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+
 
 #import <Foundation/Foundation.h>
 
-@class MSALTokenCacheKey;
+#define CURRENT_WRAPPER_CACHE_VERSION 1.0
 
-#import "MSALBaseTokenCacheItem.h"
+@class MSALWrapperTokenCache;
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding, NSCopying>
+@protocol MSALTokenCacheDelegate <NSObject>
 
-@property NSString * refreshToken;
+- (void)willAccessCache:(nonnull MSALWrapperTokenCache *)cache;
+- (void)didAccessCache:(nonnull MSALWrapperTokenCache *)cache;
+- (void)willWriteCache:(nonnull MSALWrapperTokenCache *)cache;
+- (void)didWriteCache:(nonnull MSALWrapperTokenCache *)cache;
 
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
+@end
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+@interface MSALWrapperTokenCache : NSObject
+{
+    NSMutableDictionary* _cache;
+    id<MSALTokenCacheDelegate> _delegate;
+    pthread_rwlock_t _lock;
+}
+
++ (nonnull MSALWrapperTokenCache *)defaultCache;
+
+- (void)setDelegate:(nullable id<MSALTokenCacheDelegate>)delegate;
+
+- (nullable NSData *)serialize;
+- (BOOL)deserialize:(nullable NSData*)data
+              error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 @end

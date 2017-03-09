@@ -29,7 +29,7 @@
 
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding>
+@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding, NSCopying>
 
 @property NSString *tokenType;
 @property NSString *accessToken;

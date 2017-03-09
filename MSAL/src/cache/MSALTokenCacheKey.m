@@ -67,6 +67,11 @@ static NSString* const s_cacheVersion = @"MSALv1";
 }
 
 - (NSString *)service {
+    if (!self.authority && !self.clientId && self.scope.count==0)
+    {
+        return nil;
+    }
+    
     return [NSString stringWithFormat:@"%@$%@$%@|%@",
             self.authority ? self.authority.msalBase64UrlEncode : @"",
             self.clientId ? self.clientId.msalBase64UrlEncode : @"",

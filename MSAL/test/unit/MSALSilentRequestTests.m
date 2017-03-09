@@ -38,6 +38,7 @@
 #import "MSALKeychainTokenCache+Internal.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
+#import "MSALTokenCacheAccessor.h"
 
 #import "MSALTestURLSession.h"
 
@@ -154,7 +155,7 @@
     XCTAssertNil(error);
     
     [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
-                              class:[MSALKeychainTokenCache class]
+                              class:[MSALTokenCacheAccessor class]
                               block:(id)^(id obj)
      {
          (void)obj;
@@ -199,7 +200,7 @@
     XCTAssertNil(error);
     
     [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
-                              class:[MSALKeychainTokenCache class]
+                              class:[MSALTokenCacheAccessor class]
                               block:(id)^(id obj)
      {
          (void)obj;
@@ -207,7 +208,7 @@
      }];
     
     [MSALTestSwizzle instanceMethod:@selector(findRefreshToken:error:)
-                              class:[MSALKeychainTokenCache class]
+                              class:[MSALTokenCacheAccessor class]
                               block:(id)^(id obj)
      {
          (void)obj;

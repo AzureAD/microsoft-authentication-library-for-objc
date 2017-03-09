@@ -92,7 +92,6 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     NSMutableDictionary* defaultQuery =
     [@{
        (id)kSecClass : (id)kSecClassGenericPassword,
-       //(id)kSecAttrGeneric : [s_libraryString dataUsingEncoding:NSUTF8StringEncoding]
        } mutableCopy];
     
     if (_sharedGroup)
@@ -155,145 +154,83 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 
 @implementation MSALKeychainTokenCache (Internal)
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
-                                               response:(MSALTokenResponse *)response
-                                                  error:(NSError * __autoreleasing *)error
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+                                                                correlationId:(nullable NSUUID * )correlationId
+                                                                        error:(NSError * __autoreleasing *)error
 {
-    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
-                                                                                       clientId:requestParam.clientId
-                                                                                       response:response];
-    //delete all cache entries with intersecting scopes
-    //this should not happen but we have this as a safe guard against multiple matches
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:nil];
-    NSMutableArray<MSALAccessTokenCacheItem *> *intersetedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
-    for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
-    {
-        if ([tokenItem.authority isEqualToString:requestParam.unvalidatedAuthority.absoluteString]
-            && [tokenItem.scope intersectsOrderedSet:requestParam.scopes])
-        {
-            [intersetedTokens addObject:tokenItem];
-        }
-    }
-    for (MSALAccessTokenCacheItem *itemToDelete in intersetedTokens)
-    {
-        [self deleteAccessToken:itemToDelete error:nil];
-    }
-    
-    
-    [self saveAccessToken:accessToken error:error];
-    
-    if (response.refreshToken)
-    {
-        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
-                                                                                              clientId:requestParam.clientId
-                                                                                              response:response];
-        [self saveRefreshToken:refreshToken error:error];
-    }
-    
-    return accessToken;
-}
-
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-                                        error:(NSError * __autoreleasing *)error
-{
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
-                                                                 clientId:requestParam.clientId
-                                                                    scope:requestParam.scopes
-                                                                     user:requestParam.user];
-    
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:error];
-    NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
-    
-    for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
-    {
-        if ([key matches:tokenItem.tokenCacheKey])
-        {
-            [matchedTokens addObject:tokenItem];
-        }
-    }
-    
-    if (matchedTokens.count != 1)
-    {
-        return nil;
-    }
-    
-    return matchedTokens[0];
-}
-
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
-                                          error:(NSError * __autoreleasing *)error
-{
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
-                                                                 clientId:requestParam.clientId
-                                                                    scope:nil
-                                                             homeObjectId:requestParam.user.homeObjectId];
-    
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:requestParam.clientId error:error];
-    NSMutableArray<MSALRefreshTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
-    
-    for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
-    {
-        if ([key matches:tokenItem.tokenCacheKey])
-        {
-            [matchedTokens addObject:tokenItem];
-        }
-    }
-    
-    if (matchedTokens.count != 1)
-    {
-        return nil;
-    }
-    
-    return matchedTokens[0];
-}
-
-- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
-                    error:(NSError * __autoreleasing *)error
-{
-    MSALTokenCacheKey *key = [atItem tokenCacheKey];
-    if (!key)
-    {
-        return NO;
-    }
+    (void)correlationId;
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
+                                                               (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                               (id)kSecMatchLimit : (id)kSecMatchLimitAll,
+                                                               (id)kSecReturnData : @YES,
+                                                               (id)kSecReturnAttributes : @YES
                                                                }];
-    OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
-    
-    if (deleteStatus != errSecSuccess)
+    CFTypeRef items = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
+    if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting access token.");
-        return NO;
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving access tokens.");
+        return @[];
     }
-    return YES;
+    NSArray *accessTokenitems = CFBridgingRelease(items);
+    NSMutableArray<MSALAccessTokenCacheItem *> *accessTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
+    
+    for (NSDictionary *attrs in accessTokenitems)
+    {
+        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs];
+        if (!item)
+        {
+            continue;
+        }
+        [accessTokens addObject:item];
+    }
+    
+    return accessTokens;
 }
 
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                     error:(NSError * __autoreleasing *)error
+- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+                                                                  correlationId:(nullable NSUUID * )correlationId
+                                                                          error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [rtItem tokenCacheKey];
-    if (!key)
-    {
-        return NO;
-    }
+    (void)correlationId;
+    
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
+                                                               (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                               (id)kSecMatchLimit : (id)kSecMatchLimitAll,
+                                                               (id)kSecReturnData : @YES,
+                                                               (id)kSecReturnAttributes : @YES
                                                                }];
-    OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
-    
-    if (deleteStatus != errSecSuccess)
+    CFTypeRef items = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
+    if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting refresh token.");
-        return NO;
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving refresh tokens.");
+        return @[];
     }
-    return YES;
+    NSArray *refreshTokenitems = CFBridgingRelease(items);
+    NSMutableArray<MSALRefreshTokenCacheItem *> *refreshTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
+    
+    for (NSDictionary *attrs in refreshTokenitems)
+    {
+        MSALRefreshTokenCacheItem *item = [self refreshTokenItemFromKeychainAttributes:attrs];
+        if (!item)
+        {
+            continue;
+        }
+        [refreshTokens addObject:item];
+    }
+    
+    return refreshTokens;
+    
 }
 
-- (BOOL)saveAccessToken:(MSALAccessTokenCacheItem *)atItem
-                  error:(NSError * __autoreleasing *)error
+- (BOOL)addOrUpdateAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
+                     correlationId:(nullable NSUUID *)correlationId
+                             error:(NSError * __autoreleasing *)error
 {
+    (void)correlationId;
     @synchronized(self)
     {
         MSALTokenCacheKey *key = [atItem tokenCacheKey];
@@ -332,14 +269,16 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             }
         }
         
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving access token.");
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving access token item.");
         return NO;
     }
 }
 
-- (BOOL)saveRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                   error:(NSError * __autoreleasing *)error
+- (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
+                      correlationId:(nullable NSUUID *)correlationId
+                              error:(NSError * __autoreleasing *)error
 {
+    (void)correlationId;
     @synchronized(self)
     {
         MSALTokenCacheKey *key = [rtItem tokenCacheKey];
@@ -378,97 +317,53 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             }
         }
         
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving refresh token.");
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving refresh token item.");
         return NO;
     }
 }
 
-- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokens:(NSString *)clientId
-                                                   error:(NSError * __autoreleasing *)error
+- (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
+                        error:(NSError * __autoreleasing *)error
 {
-    NSMutableDictionary* query = [self queryDictionaryForKey:nil
+    MSALTokenCacheKey *key = [atItem tokenCacheKey];
+    if (!key)
+    {
+        return NO;
+    }
+    NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
-                                                               (id)kSecMatchLimit : (id)kSecMatchLimitAll,
-                                                               (id)kSecReturnData : @YES,
-                                                               (id)kSecReturnAttributes : @YES
+                                                               (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                }];
-    CFTypeRef items = nil;
-    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
-    if (status != errSecSuccess && status != errSecItemNotFound)
+    OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
+    
+    if (deleteStatus != errSecSuccess)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving all access tokens.");
-        return @[];
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting access token.");
+        return NO;
     }
-    NSArray *accessTokenitems = CFBridgingRelease(items);
-    NSMutableArray<MSALAccessTokenCacheItem *> *accessTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
-    
-    for (NSDictionary *attrs in accessTokenitems)
-    {
-        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs];
-        if (!item)
-        {
-            continue;
-        }
-        
-        if (!clientId || [item.clientId isEqualToString:clientId])
-        {
-            [accessTokens addObject:item];
-        }
-    }
-    
-    return accessTokens;
-    
+    return YES;
 }
 
-- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(NSString *)clientId
-                                                     error:(NSError * __autoreleasing *)error
+- (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
+                         error:(NSError * __nullable __autoreleasing * __nullable)error
 {
-    NSMutableDictionary* query = [self queryDictionaryForKey:nil
+    MSALTokenCacheKey *key = [rtItem tokenCacheKey];
+    if (!key)
+    {
+        return NO;
+    }
+    NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
-                                                               (id)kSecMatchLimit : (id)kSecMatchLimitAll,
-                                                               (id)kSecReturnData : @YES,
-                                                               (id)kSecReturnAttributes : @YES
+                                                               (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                }];
-    CFTypeRef items = nil;
-    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
-    if (status != errSecSuccess && status != errSecItemNotFound)
+    OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
+    
+    if (deleteStatus != errSecSuccess)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving all refresh tokens.");
-        return @[];
+        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting refresh token.");
+        return NO;
     }
-    NSArray *refreshTokenitems = CFBridgingRelease(items);
-    NSMutableArray<MSALRefreshTokenCacheItem *> *refreshTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
-    
-    for (NSDictionary *attrs in refreshTokenitems)
-    {
-        MSALRefreshTokenCacheItem *item = [self refreshTokenItemFromKeychainAttributes:attrs];
-        if (!item)
-        {
-            continue;
-        }
-        
-        if (!clientId || [item.clientId isEqualToString:clientId])
-        {
-            [refreshTokens addObject:item];
-        }
-    }
-    
-    return refreshTokens;
-    
-}
-
-- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
-{
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:clientId error:nil];
-    NSMutableDictionary<NSString *, MSALUser *> *allUsers = [NSMutableDictionary<NSString *, MSALUser *> new];
-    
-    for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
-    {
-        [allUsers setValue:tokenItem.user forKey:tokenItem.homeObjectId];
-    }
-    return allUsers.allValues;
+    return YES;
 }
 
 - (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKey *)key

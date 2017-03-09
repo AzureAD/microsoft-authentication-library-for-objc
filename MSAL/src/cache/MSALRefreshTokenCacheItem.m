@@ -86,4 +86,14 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
     return self;
 }
 
+- (id)copyWithZone:(NSZone*) zone
+{
+    MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];
+    
+    item->_json = [_json copyWithZone:zone];
+    item.user = [self.user copyWithZone:zone];
+    
+    return item;
+}
+
 @end

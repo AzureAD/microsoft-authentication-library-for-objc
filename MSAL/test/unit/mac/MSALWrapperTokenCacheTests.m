@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
+#import "MSALWrapperTokenCache.h"
+#import "MSALWrapperTokenCache+Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
@@ -35,10 +35,10 @@
 #import "MSALIdToken.h"
 #import "MSALTokenCacheAccessor.h"
 
-@interface MSALKeychainTokenCacheTests : XCTestCase
+@interface MSALWrapperTokenCacheTests : XCTestCase
 {
     MSALTokenCacheAccessor *cache;
-    MSALKeychainTokenCache *dataSource;
+    MSALWrapperTokenCache *dataSource;
     MSALTokenResponse *testTokenResponse;
     MSALIdToken *testIdToken;
     MSALUser *testUser;
@@ -48,12 +48,12 @@
 
 @end
 
-@implementation MSALKeychainTokenCacheTests
+@implementation MSALWrapperTokenCacheTests
 
 - (void)setUp {
     [super setUp];
     
-    dataSource = MSALKeychainTokenCache.defaultKeychainCache;
+    dataSource = MSALWrapperTokenCache.defaultCache;
     [dataSource testRemoveAll];
     cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
@@ -66,13 +66,13 @@
     testAuthority = @"https://login.microsoftonline.com/common";
     testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     testUser = [[MSALUser alloc] initWithIdToken:testIdToken
-                                                authority:testAuthority
-                                                 clientId:testClientId];
+                                       authority:testAuthority
+                                        clientId:testClientId];
 }
 
 - (void)tearDown {
     
-    [(MSALKeychainTokenCache *)cache.dataSource testRemoveAll];
+    [(MSALWrapperTokenCache *)cache.dataSource testRemoveAll];
     cache = nil;
     
     [super tearDown];
@@ -86,7 +86,7 @@
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-
+    
     //prepare token response and save AT/RT
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                   clientId:testClientId
@@ -127,11 +127,11 @@
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-
+    
     //prepare token response and save AT/RT
     MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
-                                                                                  clientId:testClientId
-                                                                                  response:testTokenResponse];
+                                                                                    clientId:testClientId
+                                                                                    response:testTokenResponse];
     [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
     
     //retrieve RT
@@ -162,7 +162,7 @@
     requestParam.clientId = testClientId;
     [requestParam setScopesFromArray:@[@"mail.read", @"User.Read"]];
     requestParam.user = testUser;
-
+    
     //prepare token response and save AT/RT
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                   clientId:testClientId

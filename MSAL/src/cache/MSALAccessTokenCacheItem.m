@@ -118,4 +118,14 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     return self;
 }
 
+- (id)copyWithZone:(NSZone*) zone
+{
+    MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem allocWithZone:zone] init];
+    
+    item->_json = [_json copyWithZone:zone];
+    item.user = [self.user copyWithZone:zone];
+    
+    return item;
+}
+
 @end
