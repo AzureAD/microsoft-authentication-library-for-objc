@@ -72,12 +72,12 @@
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
-    NSString *responseEndpoint = @"https://someendpoint.com";
-    NSString *authorityString = @"https://somehost.com/sometenant.com";
+    NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"1.0" forKey:@"api-version"];
-    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
+    [reqHeaders setObject:@"https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
@@ -109,7 +109,8 @@
 
 - (void)testOpenIdConfigEndpointNoValidationNeeded
 {
-    NSString *responseEndpoint = @"https://someendpoint.com";
+    NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
     
     // Swizzle defaultOpenId...
     [MSALTestSwizzle instanceMethod:@selector(defaultOpenIdConfigurationEndpointForAuthority:)
@@ -123,7 +124,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
                                                           userPrincipalName:nil
                                                                    validate:NO
                                                                     context:nil
@@ -140,7 +141,7 @@
      }];
 }
 
-- (void)testOpenIdConfigEndpointInvalidResponse
+- (void)testOpenIdConfigEndpointMissingFields
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -210,6 +211,8 @@
      {
          XCTAssertNil(endpoint);
          XCTAssertNotNil(error);
+         
+         XCTAssertEqual(error.code, NSURLErrorCannotFindHost);
          
          [expectation fulfill];
      }];

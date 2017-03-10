@@ -58,7 +58,6 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 @interface MSALAuthority : NSObject
 
-
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
 @property BOOL validateAuthority;
@@ -92,5 +91,8 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 + (MSALAuthority *)authorityFromCache:(NSURL *)authority
                     userPrincipalName:(NSString *)userPrincipalName;
+
+// This is used in unit testing to reset the validated authorities
++ (void)removeAllValidatedAuthority;
 
 @end
