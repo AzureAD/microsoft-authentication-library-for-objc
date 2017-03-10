@@ -35,12 +35,11 @@
 
 @interface MSALBaseTokenCacheItem : MSALJsonObject
 
-@property (readonly) MSALUser *user;
-
 @property NSString *authority;
 @property NSString *clientId;
 @property NSString *tenantId;
 @property NSString *rawIdToken;
+@property (readonly) MSALUser *user;
 @property (readonly) NSString *uniqueId;
 @property (readonly) NSString *displayableId;
 @property (readonly) NSString *homeObjectId;

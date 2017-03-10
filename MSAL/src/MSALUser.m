@@ -63,11 +63,6 @@
     // TODO
 }
 
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALUser* user = [[MSALUser allocWithZone:zone] init];
