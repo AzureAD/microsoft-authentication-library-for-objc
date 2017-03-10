@@ -40,32 +40,6 @@
 #define API_VERSION_VALUE               @"1.0"
 #define AUTHORIZATION_ENDPOINT          @"authorization_endpoint"
 
-static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
-
-+ (void)initialize
-{
-    s_validatedAuthorities = [NSMutableDictionary new];
-}
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority userPrincipalName:(NSString *)userPrincipalName
-{
-    (void)userPrincipalName;
-    return s_validatedAuthorities[authority.absoluteString.lowercaseString];
-}
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                   userPrincipalName:(NSString *)userPrincipalName
-{
-    if (!authority)
-    {
-        return NO;
-    }
-    
-    (void)userPrincipalName;
-    s_validatedAuthorities[authority.canonicalAuthority.absoluteString.lowercaseString] = authority;
-    return YES;
-}
-
 - (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
 {
     if (!authority)

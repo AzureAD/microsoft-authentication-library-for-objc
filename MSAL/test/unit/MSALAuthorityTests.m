@@ -30,6 +30,7 @@
 #import "MSALTestSwizzle.h"
 #import "MSALAadAuthorityResolver.h"
 #import "MSALTenantDiscoveryResponse.h"
+#import "MSALTestAuthority.h"
 
 @interface MSALAuthorityTests : MSALTestCase
 
@@ -104,6 +105,36 @@
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.com"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.de"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login-us.microsoftonline.com"]]);
+}
+
+
+- (void)testValidatedAuthorityCache
+{
+    MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]];
+    MSALAuthority *b2cAuthority = [MSALTestAuthority B2CAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/tfp"]];
+    MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
+    
+    // Add non valid authority
+    XCTAssertFalse([MSALAuthority addToValidatedAuthority:nil userPrincipalName:nil]);
+    XCTAssertFalse([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:nil]);
+    
+    // Add valid authority
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:aadAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:b2cAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
+
+    // Check if valid authority returned
+    MSALAuthority *retrivedAuthority = [MSALAuthority authorityFromCache:aadAuthority.canonicalAuthority userPrincipalName:nil];
+    XCTAssertNotNil(retrivedAuthority);
+    XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:aadAuthority.canonicalAuthority]);
+    
+    MSALAuthority *retrivedAdfsAuthority = [MSALAuthority authorityFromCache:adfsAuthority.canonicalAuthority userPrincipalName:@"user@contoso.com"];
+    XCTAssertNotNil(retrivedAdfsAuthority);
+    XCTAssertTrue([retrivedAdfsAuthority.canonicalAuthority isEqual:adfsAuthority.canonicalAuthority]);
+    
+    
+    // Check if non valid authority was not returned
+    XCTAssertNil([MSALAuthority authorityFromCache:[NSURL URLWithString:@"https://somehost.com/"] userPrincipalName:nil]);
 }
 
 - (void)testResolveEndpointsSuccess
@@ -220,9 +251,9 @@
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
 
-    [MSALTestSwizzle instanceMethod:@selector(authorityFromCache:userPrincipalName:)
-                              class:[MSALAadAuthorityResolver class]
-                              block:(id)^(id obj, MSALAuthority *authority, NSString *userPrincipalName)
+    [MSALTestSwizzle classMethod:@selector(authorityFromCache:userPrincipalName:)
+                           class:[MSALAuthority class]
+                           block:(id)^(id obj, MSALAuthority *authority, NSString *userPrincipalName)
      {
          (void)obj;
          (void)authority;

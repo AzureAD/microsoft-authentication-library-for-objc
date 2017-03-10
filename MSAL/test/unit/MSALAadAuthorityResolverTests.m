@@ -52,28 +52,6 @@
     [super tearDown];
 }
 
-- (void)testValidatedAuthorityCache
-{
-    MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];
-    NSURL *validURL = [NSURL URLWithString:@"https://login.windows.net/common/"];
-    
-    // Add valid authority
-    MSALAuthority *validAuthority = [MSALAuthority new];
-    validAuthority.canonicalAuthority = validURL;
-    XCTAssertTrue([aadResolver addToValidatedAuthorityCache:validAuthority userPrincipalName:nil]);
-    
-    // Add non valid authority
-    XCTAssertFalse([aadResolver addToValidatedAuthorityCache:nil userPrincipalName:nil]);
-    
-    // Check if valid authority returned
-    MSALAuthority *retrivedAuthority = [aadResolver authorityFromCache:validURL userPrincipalName:nil];
-    XCTAssertNotNil(retrivedAuthority);
-    XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:validURL]);
-    
-    // Check if non valid authority was not returned
-    XCTAssertNil([aadResolver authorityFromCache:[NSURL URLWithString:@"https://notaddedhost.com"] userPrincipalName:nil]);
-}
-
 - (void)testDefaultOpenIdConfigurationEndpoint
 {
     MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];

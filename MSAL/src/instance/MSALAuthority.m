@@ -40,6 +40,8 @@
 #define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
 
 static NSSet<NSString *> *s_trustedHostList;
+static NSMutableDictionary *s_validatedAuthorities;
+static NSMutableDictionary *s_validatedUsersForAuthority;
 
 #pragma mark - helper functions
 BOOL isTenantless(NSURL *authority)
@@ -67,6 +69,9 @@ BOOL isTenantless(NSURL *authority)
                          @"login.cloudgovapi.us",
                          @"login.microsoftonline.com",
                          @"login.microsoftonline.de", nil];
+    
+    s_validatedAuthorities = [NSMutableDictionary new];
+    s_validatedUsersForAuthority = [NSMutableDictionary new];
 }
 
 + (NSSet<NSString *> *)trustedHosts
@@ -135,8 +140,8 @@ BOOL isTenantless(NSURL *authority)
         tenant = firstPathComponent;
     }
     
-    MSALAuthority *authorityInCache = [resolver authorityFromCache:updatedAuthority
-                                                 userPrincipalName:userPrincipalName];
+    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority userPrincipalName:userPrincipalName];
+    
     if (authorityInCache)
     {
         completionBlock(authorityInCache, nil);
@@ -164,7 +169,7 @@ BOOL isTenantless(NSURL *authority)
         authority.endSessionEndpoint = nil;
         authority.selfSignedJwtAudience = issuer;
      
-        [resolver addToValidatedAuthorityCache:authority userPrincipalName:userPrincipalName];
+        [MSALAuthority addToValidatedAuthority:authority userPrincipalName:userPrincipalName];
         
         completionBlock(authority, nil);
     };
@@ -186,6 +191,60 @@ BOOL isTenantless(NSURL *authority)
 + (BOOL)isKnownHost:(NSURL *)url
 {
     return [s_trustedHostList containsObject:url.host.lowercaseString];
+}
+
++ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
+              userPrincipalName:(NSString *)userPrincipalName
+{
+    if (!authority)
+    {
+        return NO;
+    }
+    
+    if (!authority.canonicalAuthority ||
+        (authority.authorityType == ADFSAuthority &&  [NSString msalIsStringNilOrBlank:userPrincipalName]))
+    {
+        return NO;
+    }
+    
+    NSString *authorityKey = authority.canonicalAuthority.absoluteString;
+
+    if (authority.authorityType == ADFSAuthority)
+    {
+        NSMutableSet<NSString *> *usersInDomain = s_validatedUsersForAuthority[authorityKey];
+        if (!usersInDomain)
+        {
+            usersInDomain = [NSMutableSet new];
+            s_validatedUsersForAuthority[authorityKey] = usersInDomain;
+        }
+        [usersInDomain addObject:userPrincipalName];
+        
+    }
+    s_validatedAuthorities[authorityKey] = authority;
+
+    return YES;
+}
+
++ (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName
+{
+    if (!authority)
+    {
+        return nil;
+    }
+    
+    NSString *authorityKey = authority.absoluteString;
+
+    if (userPrincipalName)
+    {
+        NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+        if (![validatedUsers containsObject:userPrincipalName])
+        {
+            return nil;
+        }
+    }
+    
+    return s_validatedAuthorities[authorityKey];
 }
 
 @end

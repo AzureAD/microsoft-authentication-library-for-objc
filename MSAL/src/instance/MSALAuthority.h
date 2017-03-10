@@ -45,14 +45,6 @@ typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NS
                         context:(id<MSALRequestContext>)context
                 completionBlock:(TenantDiscoveryCallback)completionBlock;
 
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority
-                    userPrincipalName:(NSString *)userPrincipalName;
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                    userPrincipalName:(NSString *)userPrincipalName;
-
-
 @end
 
 typedef NS_ENUM(NSInteger, MSALAuthorityType)
@@ -94,5 +86,11 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (BOOL)isKnownHost:(NSURL *)url;
 
 + (NSSet<NSString *> *)trustedHosts;
+
++ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
+              userPrincipalName:(NSString *)userPrincipalName;
+
++ (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
 
 @end

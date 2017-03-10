@@ -27,8 +27,6 @@
 
 #import "MSALAdfsAuthorityResolver.h"
 
-static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
-
 @implementation MSALAdfsAuthorityResolver
 
 - (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
@@ -54,25 +52,5 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     }
     return [authority URLByAppendingPathComponent:@".well-known/openid-configuration"].absoluteString;
 }
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority
-                    userPrincipalName:(NSString *)userPrincipalName
-{
-    (void)authority;
-    (void)userPrincipalName;
-    @throw @"TODO";
-    return nil;
-}
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                   userPrincipalName:(NSString *)userPrincipalName
-{
-    (void)authority;
-    (void)userPrincipalName;
-    @throw @"TODO";
-    return NO;
-}
-
-
 
 @end
