@@ -33,8 +33,12 @@
 
 @implementation MSALBaseTokenCacheItem
 
+@synthesize user = _user;
+
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
+MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
+MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -47,8 +51,9 @@ MSAL_JSON_RW(@"client_id", clientId, setClientId)
     
     if (response.idToken)
     {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
-        self.user = [[MSALUser alloc] initWithIdToken:idToken authority:authority clientId:clientId];
+        self.rawIdToken = response.idToken;
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        self.tenantId = idToken.tenantId;
     }
     
     self.authority = authority;
@@ -70,6 +75,16 @@ MSAL_JSON_RW(@"client_id", clientId, setClientId)
 - (NSString *)homeObjectId
 {
     return self.user.homeObjectId;
+}
+
+- (MSALUser *)user
+{
+    if (!_user)
+    {
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        _user = [[MSALUser alloc] initWithIdToken:idToken authority:self.authority clientId:self.clientId];
+    }
+    return _user;
 }
 
 - (MSALTokenCacheKey *)tokenCacheKey

@@ -33,12 +33,12 @@
 
 @implementation MSALAccessTokenCacheItem
 
+@synthesize expiresOn = _expiresOn;
+@synthesize scope = _scope;
+
 MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
-MSAL_JSON_RW(@"msalscope", scope, setScope)
-MSAL_JSON_RW(@"expires_on", expiresOn, setExpiresOn)
-MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
-MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
+MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -56,13 +56,32 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
-    self.expiresOn = response.expiresOn;
-    self.scope = [self scopeFromString:response.scope];
-    self.rawIdToken = response.idToken;
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
-    self.tenantId = idToken.tenantId;
+    self.expiresIn = response.expiresIn;
+    if (self.expiresIn)
+    {
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[self.expiresIn doubleValue]];
+    }
+    [self setScopeString:response.scope];
     
     return self;
+}
+
+- (MSALScopes *)scope
+{
+    if (!_scope)
+    {
+        _scope = [self scopeFromString:[self scopeString]];
+    }
+    return _scope;
+}
+
+- (NSDate *)expiresOn
+{
+    if (!_expiresOn && self.expiresIn)
+    {
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[self.expiresIn doubleValue]];
+    }
+    return _expiresOn;
 }
 
 - (BOOL)isExpired
@@ -97,35 +116,15 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     return YES;
 }
 
-//Serializer
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [aCoder encodeObject:_json forKey:@"json"];
-    [aCoder encodeObject:self.user forKey:@"user"];
-}
-
-//Deserializer
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
-    self.user = [aDecoder decodeObjectOfClass:[MSALUser class] forKey:@"user"];
-    
-    return self;
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem allocWithZone:zone] init];
     
     item->_json = [_json copyWithZone:zone];
-    item.user = [self.user copyWithZone:zone];
     
     return item;
 }
+
+MSAL_JSON_RW(OAUTH2_EXPIRES_IN, expiresIn, setExpiresIn)
 
 @end

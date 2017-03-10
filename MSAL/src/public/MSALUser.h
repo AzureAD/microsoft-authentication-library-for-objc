@@ -29,7 +29,7 @@
 
 @class MSALIdToken;
 
-@interface MSALUser : NSObject <NSCopying, NSSecureCoding>
+@interface MSALUser : NSObject <NSCopying>
 
 @property (readonly) NSString *upn;//where to get it?
 @property (readonly) NSString *uniqueId;

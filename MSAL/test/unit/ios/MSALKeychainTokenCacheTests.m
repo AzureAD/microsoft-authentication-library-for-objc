@@ -142,6 +142,8 @@
     XCTAssertEqualObjects(rtItem.tokenCacheKey.account, rtItemInCache.tokenCacheKey.account);
     XCTAssertEqualObjects(rtItem.authority, rtItemInCache.authority);
     XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
+    XCTAssertEqualObjects(rtItem.tenantId, rtItemInCache.tenantId);
+    XCTAssertEqualObjects(rtItem.rawIdToken, rtItemInCache.rawIdToken);
     XCTAssertEqualObjects(rtItem.uniqueId, rtItemInCache.uniqueId);
     XCTAssertEqualObjects(rtItem.displayableId, rtItemInCache.displayableId);
     XCTAssertEqualObjects(rtItem.homeObjectId, rtItemInCache.homeObjectId);

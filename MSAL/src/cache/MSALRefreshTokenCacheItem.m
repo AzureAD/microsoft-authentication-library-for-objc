@@ -65,33 +65,11 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
     return YES;
 }
 
-//Serializer
-- (void)encodeWithCoder:(NSCoder *)aCoder
-{
-    [aCoder encodeObject:_json forKey:@"json"];
-    [aCoder encodeObject:self.user forKey:@"user"];
-}
-
-//Deserializer
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _json = [aDecoder decodeObjectOfClass:[NSMutableDictionary class] forKey:@"json"];
-    self.user = [aDecoder decodeObjectOfClass:[MSALUser class] forKey:@"user"];
-    
-    return self;
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];
     
     item->_json = [_json copyWithZone:zone];
-    item.user = [self.user copyWithZone:zone];
     
     return item;
 }

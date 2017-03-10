@@ -30,6 +30,11 @@
 #include <pthread.h>
 
 @implementation MSALWrapperTokenCache
+{
+    NSMutableDictionary* _cache;
+    id<MSALTokenCacheDelegate> _delegate;
+    pthread_rwlock_t _lock;
+}
 
 + (MSALWrapperTokenCache *)defaultCache
 {
@@ -107,12 +112,16 @@
         LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in serialize");
         return nil;
     }
-    NSDictionary *cacheCopy = [_cache mutableCopy];
-    pthread_rwlock_unlock(&_lock);
     
     @try
     {
-        return [NSJSONSerialization dataWithJSONObject:cacheCopy options:0 error:nil];
+        NSMutableDictionary *data = [NSMutableDictionary new];
+        [data setValue:[self serializedAccessTokens] forKey:@"access_tokens"];
+        [data setValue:[self serializedRefreshTokens] forKey:@"refresh_tokens"];
+        
+        pthread_rwlock_unlock(&_lock);
+
+        return [NSJSONSerialization dataWithJSONObject:data options:0 error:nil];
     }
     @catch (id exception)
     {
@@ -123,24 +132,29 @@
     }
 }
 
-- (id)unarchive:(NSData*)data
-          error:(NSError * __autoreleasing *)error
+- (NSArray<NSData *> *)serializedAccessTokens
 {
-    @try
+    NSArray *accessTokens = [self getAccessTokenItemsWithKey:nil correlationId:nil error:nil];
+    NSMutableArray<NSData *> *serializedTokens = [NSMutableArray<NSData *> new];
+    
+    for (MSALAccessTokenCacheItem *item in accessTokens)
     {
-        return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        [serializedTokens addObject:[item serialize:nil]];
     }
-    @catch (id expection)
-    {
-        if (error)
-        {
-            MSALFillAndLogError(error, nil, MSALErrorWrapperCacheFailure, nil, nil, nil, __FUNCTION__, __LINE__, @"Failed to unarchive data blob from -deserialize!");
-        }
-        
-        return nil;
-    }
+    return serializedTokens;
 }
 
+- (NSArray<NSData *> *)serializedRefreshTokens
+{
+    NSArray *refreshTokens = [self getRefreshTokenItemsWithKey:nil correlationId:nil error:nil];
+    NSMutableArray<NSData *> *serializedTokens = [NSMutableArray<NSData *> new];
+    
+    for (MSALRefreshTokenCacheItem *item in refreshTokens)
+    {
+        [serializedTokens addObject:[item serialize:nil]];
+    }
+    return serializedTokens;
+}
 
 - (BOOL)deserialize:(nullable NSData*)data
               error:(NSError * __autoreleasing *)error
@@ -161,9 +175,9 @@
         return YES;
     }
     
-    id cache = [NSJSONSerialization JSONObjectWithData:data
+    NSMutableDictionary *dataJson = [NSJSONSerialization JSONObjectWithData:data
                                     options:NSJSONReadingAllowFragments error:error];
-    if (!cache)
+    if (!dataJson)
     {
         return NO;
     }
@@ -174,7 +188,22 @@
     //        return NO;
     //    }
     
-    _cache = cache;
+    _cache = [NSMutableDictionary new];
+    
+    NSArray<NSData *> *serializedAccessTokens = dataJson[@"access_tokens"];
+    for (NSData *serializedToken in serializedAccessTokens)
+    {
+        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:serializedToken error:nil];
+        [self addOrUpdateAccessTokenItem:item correlationId:nil error:error];
+    }
+    
+    NSArray<NSData *> *serializedRefreshTokens = dataJson[@"refresh_tokens"];
+    for (NSData *serializedToken in serializedRefreshTokens)
+    {
+        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:serializedToken error:nil];
+        [self addOrUpdateRefreshTokenItem:item correlationId:nil error:error];
+    }
+    
     return YES;
 }
 

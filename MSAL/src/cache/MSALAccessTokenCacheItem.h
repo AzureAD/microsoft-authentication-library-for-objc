@@ -29,14 +29,12 @@
 
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding, NSCopying>
+@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
 @property NSString *tokenType;
 @property NSString *accessToken;
-@property NSDate *expiresOn;
-@property MSALScopes *scope;
-@property NSString *tenantId;
-@property NSString *rawIdToken;
+@property (readonly) NSDate *expiresOn;
+@property (readonly) MSALScopes *scope;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

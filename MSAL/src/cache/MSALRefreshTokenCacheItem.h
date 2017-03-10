@@ -31,7 +31,7 @@
 
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSSecureCoding, NSCopying>
+@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
 @property NSString * refreshToken;
 

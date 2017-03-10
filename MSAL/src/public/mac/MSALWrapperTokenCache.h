@@ -38,11 +38,6 @@
 @end
 
 @interface MSALWrapperTokenCache : NSObject
-{
-    NSMutableDictionary* _cache;
-    id<MSALTokenCacheDelegate> _delegate;
-    pthread_rwlock_t _lock;
-}
 
 + (nonnull MSALWrapperTokenCache *)defaultCache;
 

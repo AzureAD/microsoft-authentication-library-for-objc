@@ -178,7 +178,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     for (NSDictionary *attrs in accessTokenitems)
     {
-        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs];
+        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs error:nil];
         if (!item)
         {
             continue;
@@ -214,7 +214,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     for (NSDictionary *attrs in refreshTokenitems)
     {
-        MSALRefreshTokenCacheItem *item = [self refreshTokenItemFromKeychainAttributes:attrs];
+        MSALRefreshTokenCacheItem *item = [self refreshTokenItemFromKeychainAttributes:attrs error:nil];
         if (!item)
         {
             continue;
@@ -244,10 +244,10 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                    (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                    }];
         
-        NSData* itemData = [NSKeyedArchiver archivedDataWithRootObject:atItem];
+        NSData* itemData = [atItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(nil, @"Failed to archive keychain item.");
+            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -292,10 +292,10 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                    (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                    }];
         
-        NSData* itemData = [NSKeyedArchiver archivedDataWithRootObject:rtItem];
+        NSData* itemData = [rtItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(nil, @"Failed to archive keychain item.");
+            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -345,7 +345,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
-                         error:(NSError * __nullable __autoreleasing * __nullable)error
+                         error:(NSError * __autoreleasing *)error
 {
     MSALTokenCacheKey *key = [rtItem tokenCacheKey];
     if (!key)
@@ -388,6 +388,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (MSALAccessTokenCacheItem *)accessTokenItemFromKeychainAttributes:(NSDictionary*)attrs
+                                                              error:(NSError * __autoreleasing *)error
 {
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
@@ -398,11 +399,10 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     @try
     {
-        MSALAccessTokenCacheItem *item = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_WARN(nil, @"Unable to decode item from data stored in keychain.");
-            LOG_WARN_PII(nil, @"Unable to decode item from data stored in keychain.");
+            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         //TODO:
@@ -428,6 +428,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (MSALRefreshTokenCacheItem *)refreshTokenItemFromKeychainAttributes:(NSDictionary*)attrs
+                                                                error:(NSError * __autoreleasing *)error
 {
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
@@ -438,11 +439,10 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     @try
     {
-        MSALRefreshTokenCacheItem *item = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_WARN(nil, @"Unable to decode item from data stored in keychain.");
-            LOG_WARN_PII(nil, @"Unable to decode item from data stored in keychain.");
+            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         //TODO:
