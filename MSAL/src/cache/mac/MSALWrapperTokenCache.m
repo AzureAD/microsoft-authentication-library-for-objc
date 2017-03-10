@@ -139,7 +139,11 @@
     
     for (MSALAccessTokenCacheItem *item in accessTokens)
     {
-        [serializedTokens addObject:[item serialize:nil]];
+        NSData *serializedItem = [item serialize:nil];
+        if (serializedItem)
+        {
+            [serializedTokens addObject:serializedItem];
+        }
     }
     return serializedTokens;
 }
@@ -151,7 +155,11 @@
     
     for (MSALRefreshTokenCacheItem *item in refreshTokens)
     {
-        [serializedTokens addObject:[item serialize:nil]];
+        NSData *serializedItem = [item serialize:nil];
+        if (serializedItem)
+        {
+            [serializedTokens addObject:serializedItem];
+        }
     }
     return serializedTokens;
 }
@@ -175,8 +183,7 @@
         return YES;
     }
     
-    NSMutableDictionary *dataJson = [NSJSONSerialization JSONObjectWithData:data
-                                    options:NSJSONReadingAllowFragments error:error];
+    NSMutableDictionary *dataJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:error];
     if (!dataJson)
     {
         return NO;
@@ -227,8 +234,8 @@
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getItemsWithKey");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getItemsWithKey");
+        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
         return nil;
     }
     NSArray<MSALAccessTokenCacheItem *> *result = [self getAccessTokenImpl:key];
@@ -254,18 +261,18 @@
     
     NSMutableArray *items = [NSMutableArray new];
     
-    NSString *userId = key.service;
-    if (userId)
+    NSString *userKey = key.account;
+    if (userKey)
     {
-        // If we have a specified userId then we only look for that one
-        [self addToItems:items tokens:[tokens objectForKey:userId] key:key];
+        // If we have a specified user key then we only look for that one
+        [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
     }
     else
     {
         // Otherwise we have to traverse all of the users in the cache
-        for (NSString *userId in tokens)
+        for (NSString *userKey in tokens)
         {
-            [self addToItems:items tokens:[tokens objectForKey:userId] key:key];
+            [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
         }
     }
     
@@ -282,9 +289,9 @@
     }
     
     // Add items matching the key for this user
-    if (key.account)
+    if (key.service)
     {
-        id item = [userTokens objectForKey:key.account];
+        id item = [userTokens objectForKey:key.service];
         if (item)
         {
             item = [item copy];
@@ -316,8 +323,8 @@
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getItemsWithKey");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getItemsWithKey");
+        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
         return nil;
     }
     NSArray<MSALRefreshTokenCacheItem *> *result = [self getRefreshTokenImpl:key];
@@ -343,18 +350,18 @@
     
     NSMutableArray *items = [NSMutableArray new];
     
-    NSString *userId = key.service;
-    if (userId)
+    NSString *userKey = key.account;
+    if (userKey)
     {
         // If we have a specified userId then we only look for that one
-        [self addToItems:items tokens:[tokens objectForKey:userId] key:key];
+        [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
     }
     else
     {
         // Otherwise we have to traverse all of the users in the cache
-        for (NSString *userId in tokens)
+        for (NSString *userKey in tokens)
         {
-            [self addToItems:items tokens:[tokens objectForKey:userId] key:key];
+            [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
         }
     }
     
@@ -369,8 +376,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateItem");
+        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
         return NO;
     }
     BOOL result = [self addOrUpdateAccessTokenImpl:item correlationId:correlationId error:error];
@@ -387,10 +394,7 @@
     (void)correlationId;
     if (!item)
     {
-        if (error)
-        {
-            MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdate operation.");
-        }
+        MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdateAccessToken operation.");
         return NO;
     }
     
@@ -419,19 +423,19 @@
     }
 
     
-    // Grab the userId first
-    NSString *userId = key.account;
-    if (!userId)
+    // Grab the userKey first
+    NSString *userKey = key.account;
+    if (!userKey)
     {
-        userId = @"";
+        userKey = @"";
     }
     
     // Grab the token dictionary for this user id.
-    NSMutableDictionary *userDict = [tokens objectForKey:userId];
+    NSMutableDictionary *userDict = [tokens objectForKey:userKey];
     if (!userDict)
     {
         userDict = [NSMutableDictionary new];
-        [tokens setObject:userDict forKey:userId];
+        [tokens setObject:userDict forKey:userKey];
     }
     
     [userDict setObject:item forKey:key.service];
@@ -446,8 +450,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateItem");
+        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
         return NO;
     }
     BOOL result = [self addOrUpdateRefreshTokenImpl:item correlationId:correlationId error:error];
@@ -464,10 +468,7 @@
     (void)correlationId;
     if (!item)
     {
-        if (error)
-        {
-            MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdate operation.");
-        }
+        MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdateRefreshToken operation.");
         return NO;
     }
     
@@ -496,18 +497,18 @@
     }
     
     // Grab the userId first
-    NSString *userId = key.account;
-    if (!userId)
+    NSString *userKey = key.account;
+    if (!userKey)
     {
-        userId = @"";
+        userKey = @"";
     }
     
     // Grab the token dictionary for this user id.
-    NSMutableDictionary *userDict = [tokens objectForKey:userId];
+    NSMutableDictionary *userDict = [tokens objectForKey:userKey];
     if (!userDict)
     {
         userDict = [NSMutableDictionary new];
-        [tokens setObject:userDict forKey:userId];
+        [tokens setObject:userDict forKey:userKey];
     }
     
     [userDict setObject:item forKey:key.service];
@@ -521,8 +522,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeItem");
+        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
         return NO;
     }
     BOOL result = [self removeAccessTokenImpl:item error:error];
@@ -541,10 +542,10 @@
         return NO;
     }
     
-    NSString *userId = key.account;
-    if (!userId)
+    NSString *userKey = key.account;
+    if (!userKey)
     {
-        userId = @"";
+        userKey = @"";
     }
     
     NSMutableDictionary *tokens = [_cache objectForKey:@"access_tokens"];
@@ -553,7 +554,7 @@
         return YES;
     }
     
-    NSMutableDictionary *userTokens = [tokens objectForKey:userId];
+    NSMutableDictionary *userTokens = [tokens objectForKey:userKey];
     if (!userTokens)
     {
         return YES;
@@ -569,7 +570,7 @@
     // Check to see if we need to remove the overall dict
     if (!userTokens.count)
     {
-        [tokens removeObjectForKey:userId];
+        [tokens removeObjectForKey:userKey];
     }
     
     return YES;
@@ -583,8 +584,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeItem");
+        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
     BOOL result = [self removeRefreshTokenImpl:item error:error];
@@ -603,10 +604,10 @@
         return NO;
     }
     
-    NSString *userId = key.account;
-    if (!userId)
+    NSString *userKey = key.account;
+    if (!userKey)
     {
-        userId = @"";
+        userKey = @"";
     }
     
     NSMutableDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
@@ -615,7 +616,7 @@
         return YES;
     }
     
-    NSMutableDictionary *userTokens = [tokens objectForKey:userId];
+    NSMutableDictionary *userTokens = [tokens objectForKey:userKey];
     if (!userTokens)
     {
         return YES;
@@ -631,7 +632,7 @@
     // Check to see if we need to remove the overall dict
     if (!userTokens.count)
     {
-        [tokens removeObjectForKey:userId];
+        [tokens removeObjectForKey:userKey];
     }
     
     return YES;

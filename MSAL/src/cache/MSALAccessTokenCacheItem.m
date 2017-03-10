@@ -39,6 +39,8 @@
 MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
+MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
+
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
@@ -56,12 +58,8 @@ MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
     
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
-    self.expiresIn = response.expiresIn;
-    if (self.expiresIn)
-    {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[self.expiresIn doubleValue]];
-    }
-    [self setScopeString:response.scope];
+    self.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[response.expiresOn timeIntervalSince1970]];
+    self.scopeString = response.scope;
     
     return self;
 }
@@ -70,16 +68,16 @@ MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
 {
     if (!_scope)
     {
-        _scope = [self scopeFromString:[self scopeString]];
+        _scope = [self scopeFromString:self.scopeString];
     }
     return _scope;
 }
 
 - (NSDate *)expiresOn
 {
-    if (!_expiresOn && self.expiresIn)
+    if (!_expiresOn && self.expiresOnString)
     {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[self.expiresIn doubleValue]];
+        _expiresOn = [NSDate dateWithTimeIntervalSince1970:[self.expiresOnString doubleValue]];
     }
     return _expiresOn;
 }
@@ -111,11 +109,6 @@ MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
     return scope;
 }
 
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem allocWithZone:zone] init];
@@ -124,7 +117,5 @@ MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
     
     return item;
 }
-
-MSAL_JSON_RW(OAUTH2_EXPIRES_IN, expiresIn, setExpiresIn)
 
 @end

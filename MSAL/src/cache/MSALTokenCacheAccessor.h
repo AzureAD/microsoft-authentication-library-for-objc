@@ -29,6 +29,8 @@
 
 - (id)initWithDataSource:(id<MSALTokenCacheDataSource>)dataSource;
 
+- (id<MSALTokenCacheDataSource>)dataSource;
+
 - (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
                                                response:(MSALTokenResponse *)response
                                                   error:(NSError * __autoreleasing *)error;
@@ -46,7 +48,5 @@
                      error:(NSError * __autoreleasing *)error;
 
 - (NSArray<MSALUser *> *)getUsers:(NSString *)clientId;
-
-- (id<MSALTokenCacheDataSource>)dataSource;
 
 @end

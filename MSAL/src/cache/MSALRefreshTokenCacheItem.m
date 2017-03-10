@@ -60,11 +60,6 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
                                            homeObjectId:self.user.homeObjectId];
 }
 
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];

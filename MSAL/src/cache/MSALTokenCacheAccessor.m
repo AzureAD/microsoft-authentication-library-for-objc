@@ -44,6 +44,11 @@
     return self;
 }
 
+- (id<MSALTokenCacheDataSource>)dataSource
+{
+    return _dataSource;
+}
+
 - (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
                                                response:(MSALTokenResponse *)response
                                                   error:(NSError * __autoreleasing *)error
@@ -216,11 +221,6 @@
     }
     
     return matchedRefreshTokens;
-}
-
-- (id<MSALTokenCacheDataSource>)dataSource
-{
-    return _dataSource;
 }
 
 @end

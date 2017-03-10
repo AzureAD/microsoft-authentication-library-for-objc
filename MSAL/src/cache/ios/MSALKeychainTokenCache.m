@@ -32,8 +32,6 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
 
-static NSString* const s_nilKey = @"CC3513A0-0E69-4B4D-97FC-DFB6C91EE132";//A special attribute to write, instead of nil/empty one.
-static NSString* const s_delimiter = @"|";
 static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
 static NSString* s_accessTokenFlag = @"MSOpenTech.MSAL.AccessToken";
 static NSString* s_refreshTokenFlag = @"MSOpenTech.MSAL.RefreshToken";
@@ -405,17 +403,6 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
-        //TODO:
-        //the following check will fail if we set the iOS test app as unit test host
-        //It works fine if we create some other host app.
-        //Initial online search shows that it might be caused by one class compiled multiple times in a target.
-        //Probably one in iOS test app and one in test bundle.
-        //if (![item isKindOfClass:[MSALAccessTokenCacheItem class]])
-        //{
-        //    LOG_WARN(nil, @"Unarchived Item was not of expected class");
-        //    LOG_WARN_PII(nil, @"Unarchived Item was not of expected class");
-        //    return nil;
-        //}
         
         return item;
     }
@@ -445,16 +432,6 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
             MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, error ? *error : nil, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
-        //TODO:
-        //the following check will fail if we set the iOS test app as unit test host
-        //It works fine if we create some other host app.
-        //Initial online search shows that it might be caused by one class compiled multiple times in a target.
-        //Probably one in iOS test app and one in test bundle.
-        //if (![item isKindOfClass:[MSALRefreshTokenCacheItem class]])
-        //{
-        //    LOG_WARN(nil, @"Unarchived Item was not of expected class");
-        //    return nil;
-        //}
         
         return item;
     }
