@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthority.h"
-#import "MSALAuthorityBaseResolver.h"
+#import "MSALAadAuthorityResolver.h"
 
-@interface MSALB2CAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+@interface MSALB2CAuthorityResolver : MSALAadAuthorityResolver
 
 @end

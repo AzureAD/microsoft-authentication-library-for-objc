@@ -88,8 +88,11 @@ BOOL isTenantless(NSURL *authority)
     // B2C
     if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])
     {
-        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 2), nil, MSALErrorInvalidParameter, @"authority must specify a tenant");
-        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/tfp/%@", authorityUrl.host, authorityUrl.pathComponents[2]]];
+        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 3), nil, MSALErrorInvalidParameter,
+                               @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
+        
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", authorityUrl.host, authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
+        return [NSURL URLWithString:updatedAuthorityString];
     }
     
     // ADFS and AAD
@@ -113,17 +116,17 @@ BOOL isTenantless(NSURL *authority)
     
     id<MSALAuthorityResolver> resolver;
     
-    if ([firstPathComponent isEqualToString:@"tfp"])
+    if ([firstPathComponent isEqualToString:@"adfs"])
+    {
+        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
+        completionBlock(nil, error);
+        return;
+    }
+    else if ([firstPathComponent isEqualToString:@"tfp"])
     {
         authorityType = B2CAuthority;
         resolver = [MSALB2CAuthorityResolver new];
         tenant = updatedAuthority.pathComponents[2].lowercaseString;
-    }
-    else if ([firstPathComponent isEqualToString:@"adfs"])
-    {
-        authorityType = ADFSAuthority;
-        resolver = [MSALAdfsAuthorityResolver new];
-        tenant = nil;
     }
     else
     {
@@ -151,6 +154,7 @@ BOOL isTenantless(NSURL *authority)
         authority.validateAuthority = validate;
         authority.isTenantless = isTenantless(updatedAuthority);
         
+        // Only happens for AAD authority
         NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
         NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
         NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
@@ -165,11 +169,11 @@ BOOL isTenantless(NSURL *authority)
         completionBlock(authority, nil);
     };
     
-    [resolver openIDConfigurationEndpointForURL:updatedAuthority
-                              userPrincipalName:userPrincipalName
-                                       validate:validate
-                                        context:context
-                                completionBlock:^(NSString *endpoint, NSError *error)
+    [resolver openIDConfigurationEndpointForAuthority:updatedAuthority
+                                    userPrincipalName:userPrincipalName
+                                             validate:validate
+                                              context:context
+                                      completionBlock:^(NSString *endpoint, NSError *error)
     {
         CHECK_COMPLETION(!error);
         

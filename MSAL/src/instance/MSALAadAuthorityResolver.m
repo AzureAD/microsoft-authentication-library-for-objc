@@ -35,12 +35,10 @@
 #define TOKEN_ENDPOINT_SUFFIX           @"oauth2/v2.0/authorize"
 #define AUTHORIZE_ENDPOINT_SUFFIX       @"oauth2/v2.0/token"
 
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoft.com/common/discovery/instance"
 #define API_VERSION                     @"api-version"
 #define API_VERSION_VALUE               @"1.0"
 #define AUTHORIZATION_ENDPOINT          @"authorization_endpoint"
-
-#define DEFAULT_OPENID_CONFIGURATION_ENDPOINT @"v2.0/.well-known/openid-configuration"
 
 static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 
@@ -68,30 +66,26 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     return YES;
 }
 
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
 {
-    if ([NSString msalIsStringNilOrBlank:host] || [NSString msalIsStringNilOrBlank:tenant])
+    if (!authority)
     {
         return nil;
     }
-    return [NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, DEFAULT_OPENID_CONFIGURATION_ENDPOINT];
-    
+    return [authority URLByAppendingPathComponent:@"v2.0/.well-known/openid-configuration"].absoluteString;
 }
 
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                          completionBlock:(OpenIDConfigEndpointCallback)completionBlock
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
     (void)userPrincipalName;
     
-    NSString *host = url.host;
-    NSString *tenant = url.pathComponents[1];
-    
-    if (!validate || [MSALAuthority isKnownHost:url])
+    if (!validate || [MSALAuthority isKnownHost:authority])
     {
-        NSString *endpoint = [self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant];
+        NSString *endpoint = [self defaultOpenIdConfigurationEndpointForAuthority:authority];
         completionBlock(endpoint, nil);
         return;
     }
@@ -99,7 +93,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
                                                             context:context];
     [request addValue:API_VERSION_VALUE forHTTPHeaderField:API_VERSION];
-    [request addValue:[NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, TOKEN_ENDPOINT_SUFFIX] forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
+    [request addValue:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
     
     [request sendGet:^(MSALHttpResponse *response, NSError *error)
      {

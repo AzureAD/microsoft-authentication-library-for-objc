@@ -27,66 +27,26 @@
 
 #import "MSALB2CAuthorityResolver.h"
 
-#define DEFAULT_OPENID_CONFIGURATION_ENDPOINT @"v2.0/.well-known/openid-configuration?p=b2c_1_sign_in"
-
-static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
+#define UNSUPPORTED_AUTHORITY_VALIDATION @"Authority validation is not supported for this type of authority"
 
 @implementation MSALB2CAuthorityResolver
 
-+ (void)initialize
-{
-    s_validatedAuthorities = [NSMutableDictionary new];
-}
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority userPrincipalName:(NSString *)userPrincipalName
-{
-    (void)userPrincipalName;
-    return s_validatedAuthorities[authority.absoluteString.lowercaseString];
-}
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                   userPrincipalName:(NSString *)userPrincipalName
-{
-    if (!authority)
-    {
-        return NO;
-    }
-    
-    (void)userPrincipalName;
-    s_validatedAuthorities[authority.canonicalAuthority.absoluteString.lowercaseString] = authority;
-    return YES;
-}
-
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                        completionBlock:(OpenIDConfigEndpointCallback)completionBlock
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
     (void)userPrincipalName;
     
-    if (validate)
+    if (validate) // And check for !IsInTrustedHostList(authority.Host)
     {
-        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"Authority validation for B2C is not enabled in MSAL");
+        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
         completionBlock(nil, error);
         return;
     }
     
-    NSString *host = url.host;
-    NSString *tenant = url.pathComponents[2];
-    
-    completionBlock([self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant], nil);
-
+    completionBlock([self defaultOpenIdConfigurationEndpointForAuthority:authority], nil);
 }
-
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
-{
-    if ([NSString msalIsStringNilOrBlank:host] || [NSString msalIsStringNilOrBlank:tenant])
-    {
-        return nil;
-    }
-    return [NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, DEFAULT_OPENID_CONFIGURATION_ENDPOINT];
-}
-
 
 @end

@@ -33,13 +33,13 @@ typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NS
 
 @protocol MSALAuthorityResolver
 
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                          completionBlock:(OpenIDConfigEndpointCallback)completionBlock;
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock;
 
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority;
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context

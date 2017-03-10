@@ -113,7 +113,7 @@
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
@@ -176,7 +176,7 @@
     
     NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
@@ -231,7 +231,7 @@
          return nil;
      }];
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,

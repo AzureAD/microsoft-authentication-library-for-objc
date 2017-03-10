@@ -27,41 +27,32 @@
 
 #import "MSALAdfsAuthorityResolver.h"
 
-#define DEFAULT_OPENID_CONFIGURATION_ENDPOINT @".well-known/openid-configuration"
-
 static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
 
 @implementation MSALAdfsAuthorityResolver
 
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                          completionBlock:(OpenIDConfigEndpointCallback)completionBlock
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
-    CHECK_ERROR_COMPLETION(userPrincipalName, context, MSALErrorInvalidParameter, @"User principal name cannot be null");
-    
-    if (validate)
-    {
-        
-        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"Authority validation for AD FS is not enabled in MSAL");
-        completionBlock(nil, error);
-        return;
-    }
-    
-    NSString *host = url.host;
-    NSString *tenant = url.pathComponents[1];
-    
-    completionBlock([self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant], nil);
+    (void)authority;
+    (void)userPrincipalName;
+    (void)validate;
+    (void)context;
+    (void)completionBlock;
+    @throw @"TODO";
+
 }
 
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
 {
-    if ([NSString msalIsStringNilOrBlank:host] || [NSString msalIsStringNilOrBlank:tenant])
+    if (!authority)
     {
         return nil;
     }
-    return [NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, DEFAULT_OPENID_CONFIGURATION_ENDPOINT];
+    return [authority URLByAppendingPathComponent:@".well-known/openid-configuration"].absoluteString;
 }
 
 - (MSALAuthority *)authorityFromCache:(NSURL *)authority
