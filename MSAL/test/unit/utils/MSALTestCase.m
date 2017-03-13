@@ -45,7 +45,7 @@
     [[MSALTestLogger sharedLogger] reset];
     [MSALTestBundle reset];
     [MSALTestSwizzle reset];
-    [MSALAuthority removeAllValidatedAuthorities];
+    [MSALAuthority initialize];
     
 #if TARGET_OS_IPHONE
     [SFSafariViewController reset];

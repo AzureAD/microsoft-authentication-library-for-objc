@@ -247,9 +247,4 @@ BOOL isTenantless(NSURL *authority)
     return s_validatedAuthorities[authorityKey];
 }
 
-+ (void)removeAllValidatedAuthorities
-{
-    [s_validatedAuthorities removeAllObjects];
-    [s_validatedUsersForAuthority removeAllObjects];
-}
 @end
