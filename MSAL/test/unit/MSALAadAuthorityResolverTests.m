@@ -38,7 +38,7 @@
 @implementation MSALAadAuthorityResolverTests
 
 // From MSALAadAuthorityResolver.m
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoft.com/common/discovery/instance"
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoftonline.com/common/discovery/instance"
 
 - (void)setUp
 {

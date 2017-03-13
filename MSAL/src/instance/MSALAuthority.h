@@ -93,6 +93,6 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
                     userPrincipalName:(NSString *)userPrincipalName;
 
 // This is used in unit testing to reset the validated authorities
-+ (void)removeAllValidatedAuthority;
++ (void)removeAllValidatedAuthorities;
 
 @end

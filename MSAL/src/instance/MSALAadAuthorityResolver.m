@@ -35,7 +35,7 @@
 #define TOKEN_ENDPOINT_SUFFIX           @"oauth2/v2.0/authorize"
 #define AUTHORIZE_ENDPOINT_SUFFIX       @"oauth2/v2.0/token"
 
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoft.com/common/discovery/instance"
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoftonline.com/common/discovery/instance"
 #define API_VERSION                     @"api-version"
 #define API_VERSION_VALUE               @"1.0"
 #define AUTHORIZATION_ENDPOINT          @"authorization_endpoint"
@@ -46,6 +46,7 @@
     {
         return nil;
     }
+    
     return [authority URLByAppendingPathComponent:@"v2.0/.well-known/openid-configuration"].absoluteString;
 }
 
