@@ -336,4 +336,17 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
     return toReturn;
 }
 
++ (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size
+{
+    NSMutableData *data = [NSMutableData dataWithLength:size];
+    int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
+    
+    if (result != 0)
+    {
+        return nil;
+    }
+    
+    return [NSString msalBase64EncodeData:data];
+}
+
 @end

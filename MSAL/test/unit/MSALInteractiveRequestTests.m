@@ -35,6 +35,7 @@
 #import "MSALTestBundle.h"
 #import "MSALTestURLSession.h"
 #import "MSALWebUI.h"
+#import "MSALPkce.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -92,6 +93,14 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     
+    NSString *codeChallengeValue = @"codeChallengeValue";
+    
+    [MSALTestSwizzle instanceMethod:@selector(codeChallenge) class:[MSALPkce class] block:(id)^(id obj)
+     {
+         (void)obj;
+         return codeChallengeValue;
+     }];
+    
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       additionalScopes:@[@"fakescope3"]
@@ -131,6 +140,8 @@
       @"eqp2" : @"val2",
       @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
       @"response_type" : @"code",
+      OAUTH2_CODE_CHALLENGE: codeChallengeValue,
+      OAUTH2_CODE_CHALLENGE_METHOD : @"S256"
       };
     NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
     XCTAssertTrue([expectedQPs compareDictionary:QPs]);
@@ -151,6 +162,20 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    
+    NSString *codeChallengeValue = @"codeChallengeValue";
+    NSString *codeVerifierValue = @"codeVerifierValue";
+    
+    [MSALTestSwizzle instanceMethod:@selector(codeChallenge) class:[MSALPkce class] block:(id)^(id obj)
+     {
+         (void)obj;
+         return codeChallengeValue;
+     }];
+    [MSALTestSwizzle instanceMethod:@selector(codeVerifier) class:[MSALPkce class] block:(id)^(id obj)
+     {
+         (void)obj;
+         return codeVerifierValue;
+     }];
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -200,6 +225,8 @@
            @"eqp2" : @"val2",
            @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
            @"response_type" : @"code",
+           OAUTH2_CODE_CHALLENGE: codeChallengeValue,
+           OAUTH2_CODE_CHALLENGE_METHOD : @"S256"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
@@ -234,7 +261,8 @@
                                              @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
-                                             @"grant_type" : @"authorization_code"}
+                                             @"grant_type" : @"authorization_code",
+                                             OAUTH2_CODE_VERIFIER : codeVerifierValue}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil
