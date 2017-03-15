@@ -40,11 +40,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
-    self.requestInfo.text = @"{\"authority\":\"https://login.microsoftonline.com/common\","
-                              "\"client_id\":\"" AUTOMATION_APP_CLIENT_ID "\","
-                              "\"scopes\":[\"User.read\"]}";
-    
 }
 
 - (void)didReceiveMemoryWarning {

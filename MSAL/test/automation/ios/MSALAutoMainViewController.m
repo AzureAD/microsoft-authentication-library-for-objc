@@ -177,7 +177,7 @@
             @{@"access_token":result.accessToken,
               @"scopes":result.scopes,
               @"tenantId":(result.tenantId) ? result.tenantId : @"",
-              @"expires_on":[NSString stringWithFormat:@"%f", result.expiresOn.timeIntervalSince1970]}]; 
+              @"expires_on":[NSString stringWithFormat:@"%f", result.expiresOn.timeIntervalSince1970]}];
 }
 
 @end
