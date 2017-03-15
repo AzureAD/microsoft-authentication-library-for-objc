@@ -37,6 +37,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
     NSMutableArray<MSALDefaultDispatcher *> *_dispatchers;
     NSMutableDictionary *_eventTracking;
     NSMutableDictionary *_events;
+    NSMutableArray *_errorEvents;
 }
 
 @end
@@ -51,6 +52,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
         _eventTracking = [NSMutableDictionary new];
         _dispatchers = [NSMutableArray new];
         _events = [NSMutableDictionary new];
+        _errorEvents = [NSMutableArray new];
     }
     return self;
 }
@@ -85,11 +87,11 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
     @synchronized(self)
     {
-        for(MSALDefaultDispatcher *adDispatcher in _dispatchers)
+        for(MSALDefaultDispatcher *msalDispatcher in _dispatchers)
         {
-            if ([adDispatcher containsDispatcher:dispatcher])
+            if ([msalDispatcher containsDispatcher:dispatcher])
             {
-                [_dispatchers removeObject:adDispatcher];
+                [_dispatchers removeObject:msalDispatcher];
             }
         }
     }
@@ -160,16 +162,17 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     {
         NSMutableArray *eventCollection = [_events objectForKey:requestId];
         
-        if (eventCollection)
-        {
-            // TODO: [olivialu] check if the collection is updated in the array
-            [eventCollection addObject:event];
-        }
-        else
+        if (!eventCollection)
         {
             eventCollection = [NSMutableArray array];
-            [eventCollection addObject:event];
-            [_events setObject:eventCollection forKey:requestId];
+        }
+        
+        [eventCollection addObject:event];
+        [_events setObject:eventCollection forKey:requestId];
+        
+        if ([event errorInEvent] && ![_errorEvents containsObject:requestId])
+        {
+            [_errorEvents addObject:requestId];
         }
     }
 }
@@ -204,13 +207,15 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     @synchronized(self)
     {
         NSArray *events = [_events objectForKey:requestId];
+        BOOL errorInEvent = [_errorEvents containsObject:requestId];
         
         for (MSALDefaultDispatcher *dispatcher in _dispatchers)
         {
-            [dispatcher flush:events];
+            [dispatcher flush:events errorInEvent:errorInEvent];
         }
         
         [_events removeObjectForKey:requestId];
+        [_errorEvents removeObject:requestId];
     }
 }
 

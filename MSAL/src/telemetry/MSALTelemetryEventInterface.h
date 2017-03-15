@@ -31,5 +31,6 @@
 - (void)setStartTime:(NSDate *)time;
 - (void)setStopTime:(NSDate *)time;
 - (void)setResponseTime:(NSTimeInterval)responseTime;
+- (BOOL)errorInEvent;
 
 @end

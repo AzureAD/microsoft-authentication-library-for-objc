@@ -66,13 +66,13 @@
         [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_NAME value:applicationName];
         [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_VERSION value:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
         
-        NSDictionary *adalId = [MSALLogger msalId];
-        for (NSString *key in adalId)
+        NSDictionary *msalIds = [MSALLogger msalId];
+        for (NSString *key in msalIds)
         {
             NSString *propertyName = [NSString stringWithFormat:@"Microsoft.ADAL.%@",
                                       [[key lowercaseString] stringByReplacingOccurrencesOfString:@"-" withString:@"_"]];
             
-            [self setProperty:propertyName value:[adalId objectForKey:key]];
+            [self setProperty:propertyName value:[msalIds objectForKey:key]];
         }
     });
     

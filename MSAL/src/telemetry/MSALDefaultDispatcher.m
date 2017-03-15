@@ -55,8 +55,13 @@
     return _dispatcher == dispatcher;
 }
 
-- (void)flush:(NSArray *)events
+- (void)flush:(NSArray *)events errorInEvent:(BOOL)errorInEvent
 {
+    if (_setTelemetryOnFailure && !errorInEvent)
+    {
+        return;
+    }
+    
     [_dispatcher dispatchEvent:events];
 }
 

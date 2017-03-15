@@ -50,6 +50,8 @@
 
 - (void)setHttpErrorCode:(NSString *)code
 {
+    self.hasError = ![NSString msalIsStringNilOrBlank:code];
+    
     [self setProperty:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE value:code];
 }
 
@@ -68,7 +70,10 @@
         return;
     }
     
-    [self setProperty:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE value:[(NSDictionary*)jsonObject objectForKey:OAUTH2_ERROR]];
+    NSString *oauthError = [(NSDictionary *)jsonObject objectForKey:OAUTH2_ERROR];
+    [self setProperty:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE value:oauthError];
+    
+    self.hasError = ![NSString msalIsStringNilOrBlank:oauthError];
 }
 
 - (void)setHttpResponseMethod:(NSString *)method

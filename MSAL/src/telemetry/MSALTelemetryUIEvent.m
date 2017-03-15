@@ -27,12 +27,12 @@
 
 @implementation MSALTelemetryUIEvent
 
-- (void)setLoginHint:(NSString*)hint
+- (void)setLoginHint:(NSString *)hint
 {
     [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[hint msalComputeSHA256]];
 }
 
-- (void)setNtlm:(NSString*)ntlmHandled
+- (void)setNtlm:(NSString *)ntlmHandled
 {
     [self setProperty:MSAL_TELEMETRY_KEY_NTLM_HANDLED value:ntlmHandled];
 }

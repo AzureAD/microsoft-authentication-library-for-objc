@@ -31,7 +31,7 @@
 - (void)receive:(NSString *)requestId
           event:(id<MSALTelemetryEventInterface>)event;
 
-- (void)flush:(NSArray *)events;
+- (void)flush:(NSArray *)events errorInEvent:(BOOL)errorInEvent;
 
 - (BOOL)containsDispatcher:(id<MSALDispatcher>)dispatcher;
 
