@@ -32,6 +32,8 @@
 #import "MSALAutoResultViewController.h"
 #import "MSALAutoRequestViewController.h"
 
+#import "MSAL.h"
+
 @interface MSALAutoMainViewController ()
 {
     NSMutableString *_resultLogs;
@@ -94,19 +96,60 @@
     {
         _resultLogs = [NSMutableString new];
         
-        LOG_INFO_PII(nil, @"Test message");
+        if(parameters[@"error"])
+        {
+            [self dismissViewControllerAnimated:NO completion:^{
+                [self displayResultJson:parameters[@"error"]];
+            }];
+            return;
+        }
         
-        [self dismissViewControllerAnimated:NO completion:^{
-            [self displayResultJson:[self createJsonStringFromDictionary:parameters]];
+        NSError *error = nil;
+        
+        MSALPublicClientApplication *clientApplication =
+        [[MSALPublicClientApplication alloc] initWithClientId:parameters[@"client_id"]
+                                                    authority:parameters[@"authority"]
+                                                        error:&error];
+        
+        if (error)
+        {
+            [self displayError:error];
+            return;
+        }
+      
+        NSArray *scopes = (NSArray *)parameters[@"scopes"];
+        
+        [clientApplication acquireTokenForScopes:scopes
+                                 completionBlock:^(MSALResult *result, NSError *error)
+        {
+            if (error)
+            {
+                [self dismissViewControllerAnimated:NO
+                                         completion:^{
+                                             [self displayError:error];
+                                         }];
+                return;
+            }
+            
+            [self dismissViewControllerAnimated:NO
+                                     completion:^{
+                                         [self displayResultJson:[self createJsonFromResult:result]];
+                                     }];
         }];
-        
     };
     
     [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
     
 }
 
--(void)displayResultJson:(NSString *)resultJson
+- (void)displayError:(NSError *)error
+{
+    NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+    
+    [self displayResultJson:[NSString stringWithFormat:@"{\"error\" : \"%@\"}", errorString]];
+}
+
+- (void)displayResultJson:(NSString *)resultJson
 {
     [self performSegueWithIdentifier:@"showResult" sender:@{@"resultInfo":resultJson,
                                                             @"resultLogs":(_resultLogs) ? _resultLogs : @""}];
@@ -127,5 +170,14 @@
     return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
+- (NSString *)createJsonFromResult:(MSALResult *)result
+{
+    // TODO: settle on what to show for test to succeed
+    return [self createJsonStringFromDictionary:
+            @{@"access_token":result.accessToken,
+              @"scopes":result.scopes,
+              @"tenantId":(result.tenantId) ? result.tenantId : @"",
+              @"expires_on":[NSString stringWithFormat:@"%f", result.expiresOn.timeIntervalSince1970]}]; 
+}
 
 @end

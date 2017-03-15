@@ -72,4 +72,32 @@
     (void)application;
 }
 
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(nonnull id)annotation
+{
+    (void)app;
+    (void)url;
+    (void)sourceApplication;
+    (void)annotation;
+    NSLog(@"iOS 8 OpenURL Method!");
+    
+    return YES;
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options
+{
+    (void)app;
+    (void)url;
+    (void)options;
+    NSLog(@"iOS 9 OpenURL Method!");
+    
+    if ([MSALPublicClientApplication isMSALResponse:url])
+    {
+        [MSALPublicClientApplication handleMSALResponse:url];
+    }
+    
+    return YES;
+}
+
+
 @end
