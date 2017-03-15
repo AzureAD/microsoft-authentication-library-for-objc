@@ -21,21 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import <Foundation/Foundation.h>
+#import "MSALTelemetryBaseEvent.h"
 
-@interface MSALTelemetry (Internal)
+@interface MSALTelemetryCacheEvent : MSALTelemtryBaseEvent
 
-- (NSString*)registerNewRequest;
-
-- (void)startEvent:(NSString*)requestId
-         eventName:(NSString*)eventName;
-
-- (void)stopEvent:(NSString*)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString*)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString*)requestId;
+- (void)setTokenType:(NSString *)tokenType;
+- (void)setStatus:(NSString *)status;
+- (void)setIsRT:(NSString *)isRT;
+- (void)setIsMRRT:(NSString *)isMRRT;
+- (void)setIsFRT:(NSString *)isFRT;
+- (void)setRTStatus:(NSString *)status;
+- (void)setMRRTStatus:(NSString *)status;
+- (void)setFRTStatus:(NSString *)status;
 
 @end

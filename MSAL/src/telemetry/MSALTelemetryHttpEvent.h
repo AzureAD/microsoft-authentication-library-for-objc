@@ -21,21 +21,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import <Foundation/Foundation.h>
+#import "MSALTelemetryBaseEvent.h"
+#import "MSALHttpResponse.h"
 
-@interface MSALTelemetry (Internal)
+@interface MSALTelemetryHttpEvent : MSALTelemtryBaseEvent
 
-- (NSString*)registerNewRequest;
-
-- (void)startEvent:(NSString*)requestId
-         eventName:(NSString*)eventName;
-
-- (void)stopEvent:(NSString*)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString*)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString*)requestId;
+- (void)setHttpMethod:(NSString *)method;
+- (void)setHttpPath:(NSString *)path;
+- (void)setHttpRequestIdHeader:(NSString *)requestIdHeader;
+- (void)setHttpResponseCode:(NSString *)code;
+- (void)setHttpResponseMethod:(NSString *)method;
+- (void)setHttpRequestQueryParams:(NSString *)params;
+- (void)setHttpUserAgent:(NSString *)userAgent;
+- (void)setHttpErrorCode:(NSString *)code;
+- (void)setOAuthErrorCode:(MSALHttpResponse *)response;
+- (void)setHttpErrorDomain:(NSString *)errorDomain;
 
 @end

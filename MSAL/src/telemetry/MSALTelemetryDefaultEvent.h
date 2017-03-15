@@ -21,21 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import <Foundation/Foundation.h>
+#import "MSALTelemetryBaseEvent.h"
 
-@interface MSALTelemetry (Internal)
-
-- (NSString*)registerNewRequest;
-
-- (void)startEvent:(NSString*)requestId
-         eventName:(NSString*)eventName;
-
-- (void)stopEvent:(NSString*)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString*)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString*)requestId;
+@interface MSALTelemetryDefaultEvent : MSALTelemtryBaseEvent
 
 @end

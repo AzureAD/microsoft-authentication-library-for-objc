@@ -21,21 +21,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import "MSALTelemetryCacheEvent.h"
+#import "MSALTelemetryEventStrings.h"
 
-@interface MSALTelemetry (Internal)
+@implementation MSALTelemetryCacheEvent
 
-- (NSString*)registerNewRequest;
+- (void)setTokenType:(NSString *)tokenType
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_TOKEN_TYPE value:tokenType];
+}
 
-- (void)startEvent:(NSString*)requestId
-         eventName:(NSString*)eventName;
+- (void)setStatus:(NSString *)status
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_RESULT_STATUS value:status];
+}
 
-- (void)stopEvent:(NSString*)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
+- (void)setIsRT:(NSString *)isRT
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_IS_RT value:isRT];
+}
 
-- (void)dispatchEventNow:(NSString*)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
+- (void)setIsMRRT:(NSString *)isMRRT
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_IS_MRRT value:isMRRT];
+}
 
-- (void)flush:(NSString*)requestId;
+- (void)setIsFRT:(NSString *)isFRT
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_IS_FRT value:isFRT];
+}
+
+- (void)setRTStatus:(NSString *)status
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_RT_STATUS value:status];
+}
+
+- (void)setMRRTStatus:(NSString *)status
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_MRRT_STATUS value:status];
+}
+
+- (void)setFRTStatus:(NSString *)status
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_FRT_STATUS value:status];
+}
 
 @end

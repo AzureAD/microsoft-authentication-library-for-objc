@@ -21,21 +21,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import <Foundation/Foundation.h>
+#import "MSALTelemetryBaseEvent.h"
 
-@interface MSALTelemetry (Internal)
+@interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
-- (NSString*)registerNewRequest;
+//- (void)setResultStatus:(MSALAuthenticationResultStatus)status;
+- (void)setCorrelationId:(NSUUID *)correlationId;
+- (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
+//- (void)setPromptBehavior:(MSALPromptBehavior)promptBehavior;
+//- (void)setUserInformation:(MSALUserInformation *)userInfo;
+- (void)setUserId:(NSString *)userId;
+- (void)setClientId:(NSString *)clientId;
+- (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
+- (void)setErrorCode:(NSString *)errorCode;
+- (void)setProtocolCode:(NSString *)protocolCode;
+- (void)setErrorDescription:(NSString *)errorDescription;
+- (void)setErrorDomain:(NSString *)errorDomain;
 
-- (void)startEvent:(NSString*)requestId
-         eventName:(NSString*)eventName;
+- (void)setAuthorityValidationStatus:(NSString *)status;
+- (void)setAuthority:(NSString *)authority;
 
-- (void)stopEvent:(NSString*)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
+- (void)setGrantType:(NSString *)grantType;
+- (void)setAPIStatus:(NSString *)status;
 
-- (void)dispatchEventNow:(NSString*)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString*)requestId;
+- (void)setApiId:(NSString *)apiId;
 
 @end
