@@ -35,6 +35,7 @@
 @implementation MSALTelemtryBaseEvent
 
 @synthesize propertyMap = _propertyMap;
+@synthesize errorInEvent = _errorInEvent;
 
 - (id)initWithName:(NSString *)eventName
          requestId:(NSString *)requestId
@@ -45,7 +46,7 @@
         return nil;
     }
     
-    _hasError = NO;
+    _errorInEvent = NO;
     _propertyMap = [NSMutableDictionary dictionary];
     
     [_propertyMap msalSetObjectIfNotNil:requestId forKey:MSAL_TELEMETRY_KEY_REQUEST_ID];
@@ -112,11 +113,6 @@
 {
     //the property is set in milliseconds
     [_propertyMap setValue:[NSString stringWithFormat:@"%f", responseTime * 1000] forKey:MSAL_TELEMETRY_KEY_RESPONSE_TIME];
-}
-
-- (BOOL)errorInEvent
-{
-    return _hasError;
 }
 
 @end

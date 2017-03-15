@@ -26,11 +26,10 @@
 
 @interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
-//- (void)setResultStatus:(MSALAuthenticationResultStatus)status;
 - (void)setCorrelationId:(NSUUID *)correlationId;
 - (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
-//- (void)setPromptBehavior:(MSALPromptBehavior)promptBehavior;
-//- (void)setUserInformation:(MSALUserInformation *)userInfo;
+- (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
+- (void)setUserInformation:(MSALUser *)user;
 - (void)setUserId:(NSString *)userId;
 - (void)setClientId:(NSString *)clientId;
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;

@@ -24,32 +24,9 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
+#import "MSALHelpers.h"
 
 @implementation MSALTelemetryAPIEvent
-
-//- (void)setResultStatus:(MSALAuthenticationResultStatus)status
-//{
-//    NSString* statusStr = nil;
-//    switch (status) {
-//        case AD_SUCCEEDED:
-//            statusStr = AD_TELEMETRY_VALUE_SUCCEEDED;
-//            [self setProperty:AD_TELEMETRY_KEY_IS_SUCCESSFUL value:AD_TELEMETRY_VALUE_YES];
-//            break;
-//        case AD_FAILED:
-//            statusStr = AD_TELEMETRY_VALUE_FAILED;
-//            [self setProperty:AD_TELEMETRY_KEY_IS_SUCCESSFUL value:AD_TELEMETRY_VALUE_NO];
-//            break;
-//        case AD_USER_CANCELLED:
-//            statusStr = AD_TELEMETRY_VALUE_CANCELLED;
-//            [self setProperty:AD_TELEMETRY_KEY_USER_CANCEL value:AD_TELEMETRY_VALUE_YES];
-//            [self setProperty:AD_TELEMETRY_KEY_IS_SUCCESSFUL value:AD_TELEMETRY_VALUE_NO];
-//            break;
-//        default:
-//            statusStr = AD_TELEMETRY_VALUE_UNKNOWN;
-//    }
-//    
-//    [self setProperty:AD_TELEMETRY_KEY_RESULT_STATUS value:statusStr];
-//}
 
 - (void)setCorrelationId:(NSUUID *)correlationId
 {
@@ -61,12 +38,12 @@
     [self setProperty:MSAL_TELEMETRY_KEY_EXTENDED_EXPIRES_ON_SETTING value:extendedExpiresOnSetting];
 }
 
-//- (void)setUserInformation:(MSALUserInformation *)userInfo
-//{
-//    [self setProperty:AD_TELEMETRY_KEY_USER_ID value:[[userInfo userId] adComputeSHA256]];
-//    [self setProperty:AD_TELEMETRY_KEY_TENANT_ID value:[[userInfo tenantId] adComputeSHA256]];
-//    [self setProperty:AD_TELEMETRY_KEY_IDP value:[userInfo identityProvider]];
-//}
+- (void)setUserInformation:(MSALUser *)user
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256]];
+    //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256]];
+    [self setProperty:MSAL_TELEMETRY_KEY_IDP value:[user identityProvider]];
+}
 
 - (void)setUserId:(NSString *)userId
 {
@@ -83,24 +60,9 @@
     [self setProperty:MSAL_TELEMETRY_KEY_IS_EXTENED_LIFE_TIME_TOKEN value:isExtendedLifeToken];
 }
 
-- (void)setErrorCode:(NSString *)errorCode
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:errorCode];
-}
-
 - (void)setProtocolCode:(NSString *)protocolCode
 {
     [self setProperty:MSAL_TELEMETRY_KEY_PROTOCOL_CODE value:protocolCode];
-}
-
-- (void)setErrorDescription:(NSString *)errorDescription
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DESCRIPTION value:errorDescription];
-}
-
-- (void)setErrorDomain:(NSString *)errorDomain
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DOMAIN value:errorDomain];
 }
 
 - (void)setAuthorityValidationStatus:(NSString *)status
@@ -114,10 +76,10 @@
     
     // set authority type
     NSString *authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
-//    if ([ADHelpers isADFSInstance:authority])
-//    {
-//        authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
-//    }
+    if ([MSALHelpers isADFSInstance:authority])
+    {
+        authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
+    }
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityType];
 }
 
@@ -136,27 +98,43 @@
     [self setProperty:MSAL_TELEMETRY_KEY_API_ID value:apiId];
 }
 
-//- (void)setPromptBehavior:(ADPromptBehavior)promptBehavior
-//{
-//    NSString* promptBehaviorString = nil;
-//    switch (promptBehavior) {
-//        case AD_PROMPT_AUTO:
-//            promptBehaviorString = @"AD_PROMPT_AUTO";
-//            break;
-//        case AD_PROMPT_ALWAYS:
-//            promptBehaviorString = @"AD_PROMPT_ALWAYS";
-//            break;
-//        case AD_PROMPT_REFRESH_SESSION:
-//            promptBehaviorString = @"AD_PROMPT_REFRESH_SESSION";
-//            break;
-//        case AD_FORCE_PROMPT:
-//            promptBehaviorString = @"AD_FORCE_PROMPT";
-//            break;
-//        default:
-//            promptBehaviorString = AD_TELEMETRY_VALUE_UNKNOWN;
-//    }
-//    
-//    [self setProperty:AD_TELEMETRY_KEY_PROMPT_BEHAVIOR value:promptBehaviorString];
-//}
+- (void)setUIBehavior:(MSALUIBehavior)uiBehavior
+{
+    NSString *uiBehaviorString = nil;
+    
+    switch (uiBehavior) {
+        case MSALForceLogin:
+            uiBehaviorString = @"MSAL_Force_Login";
+            break;
+            
+        case MSALForceConsent:
+            uiBehaviorString = @"MSAL_Force_Consent";
+            break;
+            
+        default:
+        case MSALSelectAccount:
+            uiBehaviorString = @"MSAL_Select_Account";
+    }
+    
+    [self setProperty:MSAL_TELEMETRY_KEY_PROMPT_BEHAVIOR value:uiBehaviorString];
+}
+
+#pragma set error
+
+- (void)setErrorCode:(NSString *)errorCode
+{
+    self.errorInEvent = ![NSString msalIsStringNilOrBlank:errorCode];
+    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:errorCode];
+}
+
+- (void)setErrorDescription:(NSString *)errorDescription
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DESCRIPTION value:errorDescription];
+}
+
+- (void)setErrorDomain:(NSString *)errorDomain
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DOMAIN value:errorDomain];
+}
 
 @end

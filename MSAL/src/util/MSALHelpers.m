@@ -21,16 +21,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@protocol MSALTelemetryEventInterface <NSObject>
+#import "MSALHelpers.h"
+#import "NSString+MSALHelperMethods.h"
 
-@property (readonly) NSDictionary *propertyMap;
-@property (assign) BOOL errorInEvent;
+@implementation MSALHelpers
 
-- (void)setProperty:(NSString *)name value:(NSString *)value;
-- (NSDictionary *)getProperties;
++ (BOOL)isADFSInstance:(NSString *)endpoint
+{
+    if([NSString msalIsStringNilOrBlank:endpoint])
+    {
+        return NO;
+    }
+    
+    return[MSALHelpers isADFSInstanceURL:[NSURL URLWithString:endpoint.lowercaseString]];
+}
 
-- (void)setStartTime:(NSDate *)time;
-- (void)setStopTime:(NSDate *)time;
-- (void)setResponseTime:(NSTimeInterval)responseTime;
+
++ (BOOL)isADFSInstanceURL:(NSURL *)endpointUrl
+{
+    NSArray* paths = endpointUrl.pathComponents;
+    if (paths.count >= 2)
+    {
+        NSString *tenant = [paths objectAtIndex:1];
+        return [@"adfs" isEqualToString:tenant];
+    }
+    return false;
+}
 
 @end

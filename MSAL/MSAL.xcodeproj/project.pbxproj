@@ -187,6 +187,7 @@
 		E02396E91E788398004D6278 /* MSALTelemetryDefaultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396E81E788398004D6278 /* MSALTelemetryDefaultEvent.m */; };
 		E02396EC1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */; };
 		E02396EF1E78CC26004D6278 /* MSALIpAddressHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */; };
+		E02396F21E79D977004D6278 /* MSALHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396F11E79D977004D6278 /* MSALHelpers.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -428,6 +429,8 @@
 		E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+MSALExtension.m"; sourceTree = "<group>"; };
 		E02396ED1E78CC26004D6278 /* MSALIpAddressHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALIpAddressHelper.h; sourceTree = "<group>"; };
 		E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALIpAddressHelper.m; sourceTree = "<group>"; };
+		E02396F01E79D977004D6278 /* MSALHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALHelpers.h; sourceTree = "<group>"; };
+		E02396F11E79D977004D6278 /* MSALHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALHelpers.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -895,6 +898,8 @@
 				E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */,
 				E02396ED1E78CC26004D6278 /* MSALIpAddressHelper.h */,
 				E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */,
+				E02396F01E79D977004D6278 /* MSALHelpers.h */,
+				E02396F11E79D977004D6278 /* MSALHelpers.m */,
 			);
 			path = util;
 			sourceTree = "<group>";
@@ -1418,6 +1423,7 @@
 				D65A6FA51E3FF3D900C69FBA /* MSALOAuth2ResponseBase.m in Sources */,
 				963B4B571E4BB0970025EFC1 /* MSALHttpRequest.m in Sources */,
 				D61F5B981E57953D00912CB8 /* MSALWebUI.m in Sources */,
+				E02396F21E79D977004D6278 /* MSALHelpers.m in Sources */,
 				96D9A54B1E4AB23200674A85 /* MSALTelemetry.m in Sources */,
 				D65A6F971E3FF3D900C69FBA /* MSALError.m in Sources */,
 				D69ADB171E50486400952049 /* NSOrderedSet+MSALExtensions.m in Sources */,

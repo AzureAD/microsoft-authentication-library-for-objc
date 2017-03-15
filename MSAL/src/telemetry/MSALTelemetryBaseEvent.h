@@ -27,7 +27,6 @@
 @interface MSALTelemtryBaseEvent : NSObject<MSALTelemetryEventInterface>
 
 @property (nonatomic, strong, readonly) NSDictionary *properties;
-@property (assign) BOOL hasError;
 
 - (id)initWithName:(NSString *)eventName
          requestId:(NSString *)requestId
