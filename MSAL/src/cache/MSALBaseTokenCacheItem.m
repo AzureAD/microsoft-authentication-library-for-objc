@@ -34,10 +34,10 @@
 @implementation MSALBaseTokenCacheItem
 
 @synthesize user = _user;
+@synthesize tenantId = _tenantId;
 
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
 MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (id)initWithAuthority:(NSString *)authority
@@ -52,8 +52,6 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     if (response.idToken)
     {
         self.rawIdToken = response.idToken;
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        self.tenantId = idToken.tenantId;
     }
     
     self.authority = authority;
@@ -85,6 +83,16 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
         _user = [[MSALUser alloc] initWithIdToken:idToken authority:self.authority clientId:self.clientId];
     }
     return _user;
+}
+
+- (NSString *)tenantId
+{
+    if (!_tenantId)
+    {
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        _tenantId = idToken.tenantId;
+    }
+    return _tenantId;
 }
 
 - (MSALTokenCacheKey *)tokenCacheKey

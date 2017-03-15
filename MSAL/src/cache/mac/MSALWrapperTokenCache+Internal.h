@@ -28,6 +28,12 @@
 
 - (nullable id<MSALTokenCacheDelegate>)delegate;
 
+- (nullable NSData *)serializeImpl;
+
+- (BOOL)deserializeImpl:(nullable NSData*)data
+                  error:(NSError * __nullable __autoreleasing * __nullable)error;
+
+
 /*! This method should *only* be called in test code, it should never be called
  in production code */
 - (void)testRemoveAll;

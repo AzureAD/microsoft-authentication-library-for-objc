@@ -112,56 +112,10 @@
         LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in serialize");
         return nil;
     }
+    NSData *data = [self serializeImpl];
+    pthread_rwlock_unlock(&_lock);
     
-    @try
-    {
-        NSMutableDictionary *data = [NSMutableDictionary new];
-        [data setValue:[self serializedAccessTokens] forKey:@"access_tokens"];
-        [data setValue:[self serializedRefreshTokens] forKey:@"refresh_tokens"];
-        
-        pthread_rwlock_unlock(&_lock);
-
-        return [NSJSONSerialization dataWithJSONObject:data options:0 error:nil];
-    }
-    @catch (id exception)
-    {
-        // This should be exceedingly rare as all of the objects in the cache we placed there.
-        LOG_ERROR(nil, @"Failed to serialize the cache!");
-        LOG_ERROR_PII(nil, @"Failed to serialize the cache!");
-        return nil;
-    }
-}
-
-- (NSArray<NSData *> *)serializedAccessTokens
-{
-    NSArray *accessTokens = [self getAccessTokenItemsWithKey:nil correlationId:nil error:nil];
-    NSMutableArray<NSData *> *serializedTokens = [NSMutableArray<NSData *> new];
-    
-    for (MSALAccessTokenCacheItem *item in accessTokens)
-    {
-        NSData *serializedItem = [item serialize:nil];
-        if (serializedItem)
-        {
-            [serializedTokens addObject:serializedItem];
-        }
-    }
-    return serializedTokens;
-}
-
-- (NSArray<NSData *> *)serializedRefreshTokens
-{
-    NSArray *refreshTokens = [self getRefreshTokenItemsWithKey:nil correlationId:nil error:nil];
-    NSMutableArray<NSData *> *serializedTokens = [NSMutableArray<NSData *> new];
-    
-    for (MSALRefreshTokenCacheItem *item in refreshTokens)
-    {
-        NSData *serializedItem = [item serialize:nil];
-        if (serializedItem)
-        {
-            [serializedTokens addObject:serializedItem];
-        }
-    }
-    return serializedTokens;
+    return data;
 }
 
 - (BOOL)deserialize:(nullable NSData*)data
@@ -171,47 +125,6 @@
     BOOL ret = [self deserializeImpl:data error:error];
     pthread_rwlock_unlock(&_lock);
     return ret;
-}
-
-- (BOOL)deserializeImpl:(nullable NSData*)data
-                  error:(NSError * __autoreleasing *)error
-{
-    // If they pass in nil on deserialize that means to drop the cache
-    if (!data)
-    {
-        _cache = nil;
-        return YES;
-    }
-    
-    NSMutableDictionary *dataJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:error];
-    if (!dataJson)
-    {
-        return NO;
-    }
-    
-    //TODO
-    //    if (![self validateCache:cache error:error])
-    //    {
-    //        return NO;
-    //    }
-    
-    _cache = [NSMutableDictionary new];
-    
-    NSArray<NSData *> *serializedAccessTokens = dataJson[@"access_tokens"];
-    for (NSData *serializedToken in serializedAccessTokens)
-    {
-        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:serializedToken error:nil];
-        [self addOrUpdateAccessTokenItem:item correlationId:nil error:error];
-    }
-    
-    NSArray<NSData *> *serializedRefreshTokens = dataJson[@"refresh_tokens"];
-    for (NSData *serializedToken in serializedRefreshTokens)
-    {
-        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:serializedToken error:nil];
-        [self addOrUpdateRefreshTokenItem:item correlationId:nil error:error];
-    }
-    
-    return YES;
 }
 
 @end
@@ -633,6 +546,98 @@
     if (!userTokens.count)
     {
         [tokens removeObjectForKey:userKey];
+    }
+    
+    return YES;
+}
+
+- (NSData *)serializeImpl
+{
+    @try
+    {
+        NSMutableDictionary *data = [NSMutableDictionary new];
+        [data setValue:[self jsonAccessTokens] forKey:@"access_tokens"];
+        [data setValue:[self jsonRefreshTokens] forKey:@"refresh_tokens"];
+        
+        return [NSJSONSerialization dataWithJSONObject:data options:0 error:nil];
+    }
+    @catch (id exception)
+    {
+        // This should be exceedingly rare as all of the objects in the cache we placed there.
+        LOG_ERROR(nil, @"Failed to serialize the cache!");
+        LOG_ERROR_PII(nil, @"Failed to serialize the cache!");
+        return nil;
+    }
+}
+
+- (NSArray<NSDictionary *> *)jsonAccessTokens
+{
+    NSArray *accessTokens = [self getAccessTokenImpl:nil];
+    NSMutableArray<NSDictionary *> *jsonTokens = [NSMutableArray<NSDictionary *> new];
+    
+    for (MSALAccessTokenCacheItem *item in accessTokens)
+    {
+        NSDictionary *jsonToken = [item jsonDictionary];
+        if (jsonToken)
+        {
+            [jsonTokens addObject:jsonToken];
+        }
+    }
+    return jsonTokens;
+}
+
+- (NSArray<NSDictionary *> *)jsonRefreshTokens
+{
+    NSArray *refreshTokens = [self getRefreshTokenImpl:nil];
+    NSMutableArray<NSDictionary *> *jsonTokens = [NSMutableArray<NSDictionary *> new];
+    
+    for (MSALRefreshTokenCacheItem *item in refreshTokens)
+    {
+        NSDictionary *jsonToken = [item jsonDictionary];
+        if (jsonToken)
+        {
+            [jsonTokens addObject:jsonToken];
+        }
+    }
+    return jsonTokens;
+}
+
+- (BOOL)deserializeImpl:(nullable NSData*)data
+                  error:(NSError * __autoreleasing *)error
+{
+    // If they pass in nil on deserialize that means to drop the cache
+    if (!data)
+    {
+        _cache = nil;
+        return YES;
+    }
+    
+    NSMutableDictionary *dataJson = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:error];
+    if (!dataJson)
+    {
+        return NO;
+    }
+    
+    //TODO
+    //    if (![self validateCache:cache error:error])
+    //    {
+    //        return NO;
+    //    }
+    
+    _cache = [NSMutableDictionary new];
+    
+    NSArray<NSDictionary *> *jsonAccessTokens = dataJson[@"access_tokens"];
+    for (NSDictionary *jsonToken in jsonAccessTokens)
+    {
+        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithJson:jsonToken error:nil];
+        [self addOrUpdateAccessTokenImpl:item correlationId:nil error:error];
+    }
+    
+    NSArray<NSDictionary *> *jsonRefreshTokens = dataJson[@"refresh_tokens"];
+    for (NSDictionary *jsonToken in jsonRefreshTokens)
+    {
+        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithJson:jsonToken error:nil];
+        [self addOrUpdateRefreshTokenImpl:item correlationId:nil error:error];
     }
     
     return YES;

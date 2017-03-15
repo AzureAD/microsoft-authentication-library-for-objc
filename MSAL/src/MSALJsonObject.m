@@ -69,4 +69,23 @@
                                              error:error];
 }
 
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error
+{
+    CHECK_ERROR_RETURN_NIL(json, nil, MSALErrorInternal, @"Attempt to initialize JSON object with nil data");
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _json = [json mutableCopy];
+    
+    return self;
+}
+
+- (NSDictionary *)jsonDictionary
+{
+    return _json;
+}
+
 @end
