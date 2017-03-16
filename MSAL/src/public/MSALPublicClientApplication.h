@@ -29,7 +29,6 @@
 #import <MSAL/MSAL.h>
 
 @class MSALResult;
-@class MSALUIOptions;
 @class MSALUser;
 @class MSALTokenRequest;
 
