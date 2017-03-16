@@ -158,7 +158,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -205,7 +205,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -256,7 +256,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -311,7 +311,7 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {

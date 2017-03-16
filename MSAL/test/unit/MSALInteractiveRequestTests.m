@@ -246,7 +246,7 @@
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     __block BOOL fAlreadyHit = NO;
-    [request run:^(MSALResult *result, NSError *error)
+    [request run:MSALTelemetryApiIdAcquire completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertFalse(fAlreadyHit);
          fAlreadyHit = YES;

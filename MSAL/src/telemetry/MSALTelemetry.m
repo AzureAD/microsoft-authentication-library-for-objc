@@ -64,7 +64,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
     
     dispatch_once(&once, ^{
         singleton = [[MSALTelemetry alloc] initInternal];
-        s_defaultEvent = [MSALTelemetryDefaultEvent new];
+        s_defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_DEFAULT_EVENT requestId:nil correlationId:nil];
     });
     
     return singleton;
@@ -167,7 +167,7 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
             eventCollection = [NSMutableArray array];
         }
         
-        [eventCollection addObject:event];
+        [eventCollection addObject:[event getProperties]];
         [_events setObject:eventCollection forKey:requestId];
         
         if ([event errorInEvent] && ![_errorEvents containsObject:requestId])

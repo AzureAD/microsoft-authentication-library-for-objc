@@ -25,17 +25,18 @@
 #import "MSALTelemetryEventStrings.h"
 #import "MSALIpAddressHelper.h"
 
+#if !TARGET_OS_IPHONE
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#endif
+
 @implementation MSALTelemetryDefaultEvent
 
 - (id)initWithName:(NSString *)eventName
          requestId:(NSString *)requestId
      correlationId:(NSUUID *)correlationId
 {
-    (void)eventName;
-    (void)requestId;
-    (void)correlationId;
-    
-    if (!(self = [super init]))
+    if (!(self = [super initWithName:eventName requestId:requestId correlationId:correlationId]))
     {
         return nil;
     }
@@ -78,5 +79,31 @@
     
     [self setProperty:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS value:[MSALIpAddressHelper msalDeviceIpAddress]];
 }
+
+#if !TARGET_OS_IPHONE
+// Returns the serial number as a CFString.
+// It is the caller's responsibility to release the returned CFString when done with it.
+void CopySerialNumber(CFStringRef *serialNumber)
+{
+    if (serialNumber != NULL) {
+        *serialNumber = NULL;
+        
+        io_service_t    platformExpert = IOServiceGetMatchingService(kIOMasterPortDefault,
+                                                                     IOServiceMatching("IOPlatformExpertDevice"));
+        
+        if (platformExpert) {
+            CFTypeRef serialNumberAsCFString =
+            IORegistryEntryCreateCFProperty(platformExpert,
+                                            CFSTR(kIOPlatformSerialNumberKey),
+                                            kCFAllocatorDefault, 0);
+            if (serialNumberAsCFString) {
+                *serialNumber = serialNumberAsCFString;
+            }
+            
+            IOObjectRelease(platformExpert);
+        }
+    }
+}
+#endif
 
 @end
