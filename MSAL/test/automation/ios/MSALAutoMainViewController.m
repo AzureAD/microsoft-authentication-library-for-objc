@@ -37,7 +37,6 @@
 @interface MSALAutoMainViewController ()
 {
     NSMutableString *_resultLogs;
-    
 }
 
 @end
@@ -99,7 +98,8 @@
         if(parameters[@"error"])
         {
             [self dismissViewControllerAnimated:NO completion:^{
-                [self displayResultJson:parameters[@"error"]];
+                [self displayResultJson:parameters[@"error"]
+                                   logs:_resultLogs];
             }];
             return;
         }
@@ -133,7 +133,8 @@
             
             [self dismissViewControllerAnimated:NO
                                      completion:^{
-                                         [self displayResultJson:[self createJsonFromResult:result]];
+                                         [self displayResultJson:[self createJsonFromResult:result]
+                                                            logs:_resultLogs];
                                      }];
         }];
     };
@@ -146,13 +147,14 @@
 {
     NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
     
-    [self displayResultJson:[NSString stringWithFormat:@"{\"error\" : \"%@\"}", errorString]];
+    [self displayResultJson:[NSString stringWithFormat:@"{\"error\" : \"%@\"}", errorString]
+                       logs:_resultLogs];
 }
 
-- (void)displayResultJson:(NSString *)resultJson
+- (void)displayResultJson:(NSString *)resultJson logs:(NSString *)resultLogs
 {
     [self performSegueWithIdentifier:@"showResult" sender:@{@"resultInfo":resultJson,
-                                                            @"resultLogs":(_resultLogs) ? _resultLogs : @""}];
+                                                            @"resultLogs":resultLogs}];
 }
 
 - (NSString *)createJsonStringFromDictionary:(NSDictionary *)dictionary
