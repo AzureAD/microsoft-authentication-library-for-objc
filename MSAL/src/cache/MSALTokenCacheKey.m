@@ -93,7 +93,7 @@ static NSString* const s_cacheVersion = @"MSALv1";
 - (BOOL)matches:(MSALTokenCacheKey *)other
 {
     return [self.clientId isEqualToString:other.clientId]
-    && [self.scope isEqualToOrderedSet:other.scope]
+    && [self.scope isSubsetOfOrderedSet:other.scope]
     && (!self.authority || [self.authority isEqualToString:other.authority])
     && (!self.homeObjectId || [self.homeObjectId isEqualToString:other.homeObjectId]);
 }

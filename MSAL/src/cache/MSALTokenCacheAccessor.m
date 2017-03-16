@@ -63,6 +63,7 @@
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
         if ([tokenItem.authority isEqualToString:requestParam.unvalidatedAuthority.absoluteString]
+            && [tokenItem.homeObjectId isEqualToString:requestParam.user.homeObjectId]
             && [tokenItem.scope intersectsOrderedSet:requestParam.scopes])
         {
             [intersetedTokens addObject:tokenItem];
