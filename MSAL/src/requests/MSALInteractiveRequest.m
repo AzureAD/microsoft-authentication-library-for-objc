@@ -139,7 +139,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          _code = params[OAUTH2_CODE];
          if (_code)
          {
-             [super acquireToken:completionBlock];
+             [super acquireToken:MSALTelemetryApiIdAcquire completionBlock:completionBlock];
              return;
          }
          

@@ -431,6 +431,7 @@
 		E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALIpAddressHelper.m; sourceTree = "<group>"; };
 		E02396F01E79D977004D6278 /* MSALHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALHelpers.h; sourceTree = "<group>"; };
 		E02396F11E79D977004D6278 /* MSALHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALHelpers.m; sourceTree = "<group>"; };
+		E02396F31E79E2F4004D6278 /* MSALTelemetryApiId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryApiId.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -742,6 +743,7 @@
 				D65A6F861E3FF3D900C69FBA /* MSALUser.h */,
 				94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */,
 				96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */,
+				E02396F31E79E2F4004D6278 /* MSALTelemetryApiId.h */,
 			);
 			path = public;
 			sourceTree = "<group>";

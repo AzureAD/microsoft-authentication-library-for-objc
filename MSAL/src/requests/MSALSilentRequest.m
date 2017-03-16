@@ -89,7 +89,7 @@
     LOG_INFO(_parameters, @"Refreshing access token");
     LOG_INFO_PII(_parameters, @"Refreshing access token");
     
-    [super acquireToken:completionBlock];
+    [super acquireToken:MSALTelemetryApiIdAcquire completionBlock:completionBlock];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters

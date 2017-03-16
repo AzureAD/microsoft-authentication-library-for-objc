@@ -36,6 +36,8 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
+#import "MSALTelemetryApiId.h"
+#import "MSALTelemetry.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
@@ -162,6 +164,7 @@
            extraQueryParameters:nil
                       authority:nil
                   correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquire
                 completionBlock:completionBlock];
 }
 
@@ -179,6 +182,7 @@
            extraQueryParameters:nil
                       authority:nil
                   correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquireWithHint
                 completionBlock:completionBlock];
 }
 
@@ -195,6 +199,7 @@
            extraQueryParameters:extraQueryParameters
                       authority:nil
                   correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters
                 completionBlock:completionBlock];
 }
 
@@ -207,61 +212,15 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
-    params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.component = _component;
-    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
-                      "                                   additionalScopes:%@\n"
-                      "                                          loginHint:%@\n"
-                      "                                         uiBehavior:%@\n"
-                      "                               extraQueryParameters:%@\n"
-                      "                                          authority:%@\n"
-                      "                                      correlationId:%@]",
-             scopes, additionalScopes, _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
-    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
-                          "                                   additionalScopes:%@\n"
-                          "                                          loginHint:%@\n"
-                          "                                         uiBehavior:%@\n"
-                          "                               extraQueryParameters:%@\n"
-                          "                                          authority:%@\n"
-                          "                                      correlationId:%@]",
-             scopes, additionalScopes, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
-    
-    [params setScopesFromArray:scopes];
-    params.loginHint = loginHint;
-    params.extraQueryParameters = extraQueryParameters;
-    if (authority)
-    {
-        NSError *error = nil;
-        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:&error];
-        if (!authorityUrl)
-        {
-            completionBlock(nil, error);
-            return;
-        }
-        params.unvalidatedAuthority = authorityUrl;
-    }
-    else
-    {
-        params.unvalidatedAuthority = _authority;
-    }
-    params.redirectUri = _redirectUri;
-    params.clientId = _clientId;
-    
-    NSError *error = nil;
-    MSALInteractiveRequest *request =
-    [[MSALInteractiveRequest alloc] initWithParameters:params
-                                      additionalScopes:additionalScopes
-                                              behavior:uiBehavior
-                                                 error:&error];
-    if (!request)
-    {
-        completionBlock(nil, error);
-        return;
-    }
-    
-    [request run:completionBlock];
+    [self acquireTokenForScopes:scopes
+     additionalScopes:additionalScopes
+                      loginHint:loginHint
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                      authority:authority
+                  correlationId:correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId
+                completionBlock:completionBlock];
 }
 
 #pragma mark -
@@ -311,6 +270,7 @@
                                  user:user
                          forceRefresh:NO
                         correlationId:nil
+                                apiId:MSALTelemetryApiIdAcquireSilentWithUser
                       completionBlock:completionBlock];
 }
 
@@ -318,6 +278,91 @@
                                user:(MSALUser *)user
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
+                    completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:scopes
+                                 user:user
+                         forceRefresh:forceRefresh
+                        correlationId:correlationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId
+                      completionBlock:completionBlock];
+}
+
+#pragma mark -
+#pragma mark private methods
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+             additionalScopes:(NSArray<NSString *> *)additionalScopes
+                    loginHint:(NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(NSString *)authority
+                correlationId:(NSUUID *)correlationId
+                        apiId:(MSALTelemetryApiId)apiId
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    MSALRequestParameters* params = [MSALRequestParameters new];
+    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.correlationId = correlationId ? correlationId : [NSUUID new];
+    params.component = _component;
+    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+             "                                   additionalScopes:%@\n"
+             "                                          loginHint:%@\n"
+             "                                         uiBehavior:%@\n"
+             "                               extraQueryParameters:%@\n"
+             "                                          authority:%@\n"
+             "                                      correlationId:%@]",
+             scopes, additionalScopes, _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
+    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+                 "                                   additionalScopes:%@\n"
+                 "                                          loginHint:%@\n"
+                 "                                         uiBehavior:%@\n"
+                 "                               extraQueryParameters:%@\n"
+                 "                                          authority:%@\n"
+                 "                                      correlationId:%@]",
+                 scopes, additionalScopes, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+    
+    [params setScopesFromArray:scopes];
+    params.loginHint = loginHint;
+    params.extraQueryParameters = extraQueryParameters;
+    if (authority)
+    {
+        NSError *error = nil;
+        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:&error];
+        if (!authorityUrl)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        params.unvalidatedAuthority = authorityUrl;
+    }
+    else
+    {
+        params.unvalidatedAuthority = _authority;
+    }
+    params.redirectUri = _redirectUri;
+    params.clientId = _clientId;
+    
+    NSError *error = nil;
+    MSALInteractiveRequest *request =
+    [[MSALInteractiveRequest alloc] initWithParameters:params
+                                      additionalScopes:additionalScopes
+                                              behavior:uiBehavior
+                                                 error:&error];
+    if (!request)
+    {
+        completionBlock(nil, error);
+        return;
+    }
+    
+    [request run:apiId completionBlock:completionBlock];
+}
+
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(NSUUID *)correlationId
+                              apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
@@ -328,18 +373,18 @@
     [params setScopesFromArray:scopes];
     
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                      "                                                     user:%@\n"
-                      "                                             forceRefresh:%@\n"
-                      "                                            correlationId:%@\n]",
+             "                                                     user:%@\n"
+             "                                             forceRefresh:%@\n"
+             "                                            correlationId:%@\n]",
              scopes, _PII(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
     LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                          "                                                     user:%@\n"
-                          "                                             forceRefresh:%@\n"
-                          "                                            correlationId:%@\n]",
+                 "                                                     user:%@\n"
+                 "                                             forceRefresh:%@\n"
+                 "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
-
+    
     if (user.authority)
     {
         NSError *error = nil;
@@ -369,7 +414,7 @@
         return;
     }
     
-    [request run:completionBlock];
+    [request run:apiId completionBlock:completionBlock];
 }
 
 @end

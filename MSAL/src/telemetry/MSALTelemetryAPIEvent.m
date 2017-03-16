@@ -25,6 +25,7 @@
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
 #import "MSALHelpers.h"
+#import "MSALAuthority.h"
 
 @implementation MSALTelemetryAPIEvent
 
@@ -38,7 +39,7 @@
     [self setProperty:MSAL_TELEMETRY_KEY_EXTENDED_EXPIRES_ON_SETTING value:extendedExpiresOnSetting];
 }
 
-- (void)setUserInformation:(MSALUser *)user
+- (void)setUser:(MSALUser *)user
 {
     [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256]];
     //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256]];
@@ -70,13 +71,15 @@
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_VALIDATION_STATUS value:status];
 }
 
-- (void)setAuthority:(NSString *)authority
+- (void)setAuthority:(MSALAuthority *)authority
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authority];
+    NSString *authorityString = [authority.canonicalAuthority absoluteString];
+    
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authorityString];
     
     // set authority type
     NSString *authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
-    if ([MSALHelpers isADFSInstance:authority])
+    if ([MSALHelpers isADFSInstance:authorityString])
     {
         authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
     }
@@ -93,9 +96,9 @@
     [self setProperty:MSAL_TELEMETRY_KEY_API_STATUS value:status];
 }
 
-- (void)setApiId:(NSString *)apiId
+- (void)setApiId:(MSALTelemetryApiId)apiId
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ID value:apiId];
+    [self setProperty:MSAL_TELEMETRY_KEY_API_ID value:[NSString stringWithFormat:@"%d", (int)apiId]];
 }
 
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior
@@ -119,12 +122,13 @@
     [self setProperty:MSAL_TELEMETRY_KEY_PROMPT_BEHAVIOR value:uiBehaviorString];
 }
 
-#pragma set error
+#pragma mark -
+#pragma mark log error
 
-- (void)setErrorCode:(NSString *)errorCode
+- (void)setErrorCode:(NSInteger)errorCode
 {
-    self.errorInEvent = ![NSString msalIsStringNilOrBlank:errorCode];
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:errorCode];
+    self.errorInEvent = YES;
+    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:[NSString stringWithFormat:@"%ld", (long)errorCode]];
 }
 
 - (void)setErrorDescription:(NSString *)errorDescription

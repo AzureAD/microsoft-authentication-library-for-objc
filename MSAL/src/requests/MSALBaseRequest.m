@@ -33,7 +33,11 @@
 #import "MSALTokenResponse.h"
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
-
+#import "MSALTelemetryAPIEvent.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryEventStrings.h"
+#import "NSString+MSALHelperMethods.h"
+#import "MSALTelemetryApiId.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -55,6 +59,11 @@ static MSALScopes *s_reservedScopes = nil;
     // There's no reason why this should ever be nil.
     THROW_ON_NIL_ARGUMENT(parameters);
     _parameters = parameters;
+    
+    if ([NSString msalIsStringNilOrBlank:_parameters.telemetryRequestId])
+    {
+        _parameters.telemetryRequestId = [[MSALTelemetry sharedInstance] registerNewRequest];
+    }
     
     if (!parameters.scopes || parameters.scopes.count == 0)
     {
@@ -107,7 +116,7 @@ static MSALScopes *s_reservedScopes = nil;
     return requestScopes;
 }
 
-- (void)run:(MSALCompletionBlock)completionBlock
+- (void)run:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
     NSString *upn = nil;
     if (_parameters.user)
@@ -132,12 +141,14 @@ static MSALScopes *s_reservedScopes = nil;
         }
         
         _authority = authority;
-        [self acquireToken:completionBlock];
+         [self acquireToken:apiId completionBlock:completionBlock];
     }];
 }
 
-- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
+- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
+    [[MSALTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_API_EVENT];
+    
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
     MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:_authority.tokenEndpoint
@@ -150,8 +161,17 @@ static MSALScopes *s_reservedScopes = nil;
     
     [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
      {
+         MSALTelemetryAPIEvent* event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
+                                                                          requestId:_parameters.telemetryRequestId
+                                                                      correlationId:_parameters.correlationId];
+         [event setApiId:apiId];
+         [event setCorrelationId:_parameters.correlationId];
+         [event setAuthority:_authority];
+         
          if (error)
          {
+             [self setEventError:event errorCode:error.code errorDomain:error.domain];
+             
              completionBlock(nil, error);
              return;
          }
@@ -161,6 +181,8 @@ static MSALScopes *s_reservedScopes = nil;
                                            error:&error];
          if (!tokenResponse)
          {
+             [self setEventError:event errorCode:error.code errorDomain:error.domain];
+             
              completionBlock(nil, error);
              return;
          }
@@ -169,7 +191,11 @@ static MSALScopes *s_reservedScopes = nil;
          if (oauthError)
          {
              MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
+             
+             [self setEventError:event errorCode:error.code errorDomain:nil];
+             
              completionBlock(nil, MSALCreateAndLogError(_parameters, code, oauthError, tokenResponse.subError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription));
+             
              return;
          }
          
@@ -198,6 +224,12 @@ static MSALScopes *s_reservedScopes = nil;
                                   tenantId:nil // TODO: tenantId
                                       user:nil // TODO: user
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
+
+         [event setClientId:result.user.clientId];
+         [event setUser:result.user];
+
+         [self flushEvent:event];
+         
          completionBlock(result, nil);
      }];
 }
@@ -205,6 +237,20 @@ static MSALScopes *s_reservedScopes = nil;
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
 {
     (void)parameters;
+}
+
+- (void)setEventError:(MSALTelemetryAPIEvent *)event errorCode:(NSInteger)errorCode errorDomain:(NSString *)errorDomain
+{
+    [event setErrorCode:errorCode];
+    [event setErrorDomain:errorDomain];
+    
+    [self flushEvent:event];
+}
+
+- (void)flushEvent:(MSALTelemetryAPIEvent *)event
+{
+    [[MSALTelemetry sharedInstance] stopEvent:_parameters.telemetryRequestId event:event];
+    [[MSALTelemetry sharedInstance] flush:_parameters.telemetryRequestId];
 }
 
 @end

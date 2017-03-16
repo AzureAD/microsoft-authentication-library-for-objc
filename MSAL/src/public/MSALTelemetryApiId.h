@@ -21,30 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
-#import "MSALTelemetryBaseEvent.h"
-#import "MSALTelemetryApiId.h"
+#pragma once
 
-@interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
-
-- (void)setCorrelationId:(NSUUID *)correlationId;
-- (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
-- (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
-- (void)setUser:(MSALUser *)user;
-- (void)setUserId:(NSString *)userId;
-- (void)setClientId:(NSString *)clientId;
-- (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
-- (void)setErrorCode:(NSInteger)errorCode;
-- (void)setProtocolCode:(NSString *)protocolCode;
-- (void)setErrorDescription:(NSString *)errorDescription;
-- (void)setErrorDomain:(NSString *)errorDomain;
-
-- (void)setAuthorityValidationStatus:(NSString *)status;
-- (void)setAuthority:(MSALAuthority *)authority;
-
-- (void)setGrantType:(NSString *)grantType;
-- (void)setAPIStatus:(NSString *)status;
-
-- (void)setApiId:(MSALTelemetryApiId)apiId;
-
-@end
+typedef NS_ENUM(NSInteger, MSALTelemetryApiId)
+{
+    MSALTelemetryApiIdAcquire = 400,
+    MSALTelemetryApiIdAcquireWithHint = 410,
+    MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters = 420,
+    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId = 430,
+    MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters = 440,
+    MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId = 450,
+    MSALTelemetryApiIdAcquireSilentWithUser = 460,
+    MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId = 470
+};

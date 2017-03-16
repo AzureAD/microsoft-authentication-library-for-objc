@@ -57,7 +57,8 @@
     return self;
 }
 
-#pragma - MSALTelemetryEventInterface methods
+#pragma mark -
+#pragma mark MSALTelemetryEventInterface methods
 
 - (void)setProperty:(NSString *)name value:(NSString *)value
 {
