@@ -26,17 +26,13 @@
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
-#define MSAL_APP_SCOPE_OPENID           @"openid"
-#define MSAL_APP_SCOPE_PROFILE          @"profile"
-#define MSAL_APP_SCOPE_OFFLINE_ACCESS   @"offline_access"
 #define MSAL_APP_SCOPE_USER_READ        @"User.Read"
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
 static NSArray<NSString *> *s_authorities = nil;
 
-static NSArray<NSString *> *s_scopes_reserved = nil;
-static NSArray<NSString *> *s_scopes_optional = nil;
+static NSArray<NSString *> *s_scopes_available = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -59,8 +55,7 @@ static NSArray<NSString *> *s_scopes_optional = nil;
     
     s_authorities = authorities;
     
-    s_scopes_reserved = @[MSAL_APP_SCOPE_OPENID, MSAL_APP_SCOPE_PROFILE, MSAL_APP_SCOPE_OFFLINE_ACCESS];
-    s_scopes_optional = @[MSAL_APP_SCOPE_USER_READ];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ];
 
 }
 
@@ -189,14 +184,9 @@ static NSArray<NSString *> *s_scopes_optional = nil;
     }
 }
 
-+ (NSArray<NSString *> *)scopesOptional
++ (NSArray<NSString *> *)availableScopes
 {
-    return s_scopes_optional;
-}
-
-+ (NSArray<NSString *> *)scopesReserved
-{
-    return s_scopes_reserved;
+    return s_scopes_available;
 }
 
 - (NSSet<NSString *> *)scopes
@@ -206,7 +196,7 @@ static NSArray<NSString *> *s_scopes_optional = nil;
 
 - (BOOL)addScope:(NSString *)scope
 {
-    if (![s_scopes_optional containsObject:scope])
+    if (![s_scopes_available containsObject:scope])
     {
         return NO;
     }
@@ -217,7 +207,7 @@ static NSArray<NSString *> *s_scopes_optional = nil;
 
 - (BOOL)removeScope:(NSString *)scope
 {
-    if (![s_scopes_optional containsObject:scope])
+    if (![s_scopes_available containsObject:scope])
     {
         return NO;
     }

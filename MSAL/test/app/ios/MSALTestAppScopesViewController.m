@@ -85,7 +85,7 @@
         return nil;
     }
     
-    _availableScopes = [[MSALTestAppSettings scopesReserved] arrayByAddingObjectsFromArray:[MSALTestAppSettings scopesOptional]];
+    _availableScopes = [MSALTestAppSettings availableScopes];
 
     return self;
 }
@@ -136,7 +136,7 @@
     }
     
     NSString *scope = _availableScopes[indexPath.row];
-    if ([[_settings scopes] containsObject:scope] || [[MSALTestAppSettings scopesReserved] containsObject:scope])
+    if ([[_settings scopes] containsObject:scope])
     {
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
     }

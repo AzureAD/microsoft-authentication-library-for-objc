@@ -316,7 +316,7 @@
     [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
                  forState:UIControlStateNormal];
 
-    [_scopesButton setTitle:(settings.scopes.count == 0) ? @"additional scopes" : [settings.scopes.allObjects componentsJoinedByString:@","]
+    [_scopesButton setTitle:(settings.scopes.count == 0) ? @"select scopes" : [settings.scopes.allObjects componentsJoinedByString:@","]
                    forState:UIControlStateNormal];
     
 }
