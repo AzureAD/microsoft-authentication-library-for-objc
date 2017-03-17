@@ -59,17 +59,17 @@
     //delete all cache entries with intersecting scopes
     //this should not happen but we have this as a safe guard against multiple matches
     NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:nil];
-    NSMutableArray<MSALAccessTokenCacheItem *> *intersetedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
+    NSMutableArray<MSALAccessTokenCacheItem *> *overlappingTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
         if ([tokenItem.authority isEqualToString:requestParam.unvalidatedAuthority.absoluteString]
             && [tokenItem.homeObjectId isEqualToString:requestParam.user.homeObjectId]
             && [tokenItem.scope intersectsOrderedSet:requestParam.scopes])
         {
-            [intersetedTokens addObject:tokenItem];
+            [overlappingTokens addObject:tokenItem];
         }
     }
-    for (MSALAccessTokenCacheItem *itemToDelete in intersetedTokens)
+    for (MSALAccessTokenCacheItem *itemToDelete in overlappingTokens)
     {
         [self deleteAccessToken:itemToDelete error:nil];
     }
