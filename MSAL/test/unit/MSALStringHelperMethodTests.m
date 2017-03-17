@@ -27,6 +27,9 @@
 
 #import "MSALTestCase.h"
 
+// From NSString+MSALHelperMethods.m
+#define RANDOM_STRING_MAX_SIZE 1000
+
 @interface MSALStringHelperMethodTests : MSALTestCase
 
 @end
@@ -159,6 +162,10 @@
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10]);
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:100]);
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:1000]);
-    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10000]);
+    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE]);
+    
+    // test with bigger then max
+    XCTAssertNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE + 1]);
+    
 }
 @end
