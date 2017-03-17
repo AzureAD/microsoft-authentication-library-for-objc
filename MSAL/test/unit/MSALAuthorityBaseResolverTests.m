@@ -52,6 +52,12 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    NSString *filePath = [[[NSBundle bundleForClass:[self class]] resourcePath] stringByAppendingPathComponent:@"OpenIdConfiguration.json"];
+    XCTAssertNotNil(filePath);
+    
+    NSData *data = [NSData dataWithContentsOfFile:filePath options:0 error:nil];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
@@ -66,9 +72,7 @@
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
                                                          httpHeaderFields:@{}
-                                                         dictionaryAsJSON:@{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/authorize",
-                                                                            @"token_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/token",
-                                                                            @"issuer":@"https://fs.contoso.com/{tenantid}/v2.0"}];
+                                                         dictionaryAsJSON:json];
     
     [MSALTestURLSession addResponse:response];
     
@@ -96,6 +100,12 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
+    NSString *filePath = [[[NSBundle bundleForClass:[self class]] resourcePath] stringByAppendingPathComponent:@"OpenIdConfigurationMissingFields.json"];
+    XCTAssertNotNil(filePath);
+    
+    NSData *data = [NSData dataWithContentsOfFile:filePath options:0 error:nil];
+    NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
@@ -110,8 +120,7 @@
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
                                                          httpHeaderFields:@{}
-                                                         dictionaryAsJSON:@{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/v2.0/authorize",
-                                                                            @"issuer":@"https://fs.contoso.com/{tenantid}/v2.0"}];
+                                                         dictionaryAsJSON:json];
     
     [MSALTestURLSession addResponse:response];
     
