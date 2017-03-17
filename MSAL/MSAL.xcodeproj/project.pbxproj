@@ -197,6 +197,9 @@
 		E02397091E7B1C34004D6278 /* MSALTelemetryCacheEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396E21E78806A004D6278 /* MSALTelemetryCacheEvent.m */; };
 		E023970A1E7B1C3B004D6278 /* MSALTelemetryDefaultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396E81E788398004D6278 /* MSALTelemetryDefaultEvent.m */; };
 		E023970B1E7B1C4B004D6278 /* MSALDefaultDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396D21E776F10004D6278 /* MSALDefaultDispatcher.m */; };
+		E023970C1E7C9F23004D6278 /* MSALHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396F11E79D977004D6278 /* MSALHelpers.m */; };
+		E023970D1E7C9F31004D6278 /* MSALIpAddressHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */; };
+		E023970E1E7CA4D1004D6278 /* NSMutableDictionary+MSALExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1334,8 +1337,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E023970D1E7C9F31004D6278 /* MSALIpAddressHelper.m in Sources */,
+				E023970C1E7C9F23004D6278 /* MSALHelpers.m in Sources */,
 				96C9D93E1E49279D00047B93 /* NSDictionary+MSALExtensions.m in Sources */,
 				967317E71E552512004E6203 /* MSALInstanceDiscoveryResponse.m in Sources */,
+				E023970E1E7CA4D1004D6278 /* NSMutableDictionary+MSALExtension.m in Sources */,
 				D61F5BD01E5935B900912CB8 /* MSALOAuth2Constants.m in Sources */,
 				965B86161E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */,
 				D65A6FA31E3FF3D900C69FBA /* MSALUser.m in Sources */,

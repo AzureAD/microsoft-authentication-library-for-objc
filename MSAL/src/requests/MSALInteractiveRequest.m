@@ -31,6 +31,7 @@
 #import "MSALOAuth2Constants.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
+#import "MSALTelemetryApiId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
@@ -107,7 +108,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return [urlComponents URL];
 }
 
-- (void)acquireToken:(MSALCompletionBlock)completionBlock
+- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(MSALCompletionBlock)completionBlock
 {
     NSURL *authorizationUrl = [self authorizationUrl];
     
@@ -139,7 +140,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          _code = params[OAUTH2_CODE];
          if (_code)
          {
-             [super acquireToken:MSALTelemetryApiIdAcquire completionBlock:completionBlock];
+             [super acquireToken:apiId completionBlock:completionBlock];
              return;
          }
          
@@ -156,8 +157,6 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          
          ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
      }];
-    
-    
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

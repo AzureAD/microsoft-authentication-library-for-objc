@@ -30,6 +30,7 @@
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
 #import "MSALKeychainTokenCache.h"
+#import "MSALTelemetryApiId.h"
 
 @interface MSALSilentRequest()
 {
@@ -57,7 +58,7 @@
     return self;
 }
 
-- (void)acquireToken:(MSALCompletionBlock)completionBlock
+- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
     
@@ -89,7 +90,7 @@
     LOG_INFO(_parameters, @"Refreshing access token");
     LOG_INFO_PII(_parameters, @"Refreshing access token");
     
-    [super acquireToken:MSALTelemetryApiIdAcquire completionBlock:completionBlock];
+    [super acquireToken:apiId completionBlock:completionBlock];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters

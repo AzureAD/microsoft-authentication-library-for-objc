@@ -160,8 +160,9 @@
     
     [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
      {
+         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquire);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          MSALRequestParameters *params = [obj parameters];
          XCTAssertNotNil(params);
@@ -207,8 +208,9 @@
     
     [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
      {
+         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHint);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertNil(obj.additionalScopes);
@@ -258,8 +260,9 @@
     
     [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
      {
+         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertNil(obj.additionalScopes);
@@ -313,8 +316,10 @@
     
     [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
      {
+         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId);
+         
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
