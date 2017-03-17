@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,12 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthority.h"
+#import "MSALAutoRequestViewController.h"
+#import "MSALAutoSettings.h"
 
-@interface MSALTestAuthority : MSALAuthority
+@interface MSALAutoRequestViewController ()
 
-+ (MSALTestAuthority *)AADAuthority:(NSURL *)unvalidatedAuthority;
-+ (MSALTestAuthority *)B2CAuthority:(NSURL *)unvalidatedAuthority;
-+ (MSALTestAuthority *)ADFSAuthority:(NSURL *)unvalidatedAuthority;
+@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
+@property (strong, nonatomic) IBOutlet UIButton *requestGo;
+
+@end
+
+@implementation MSALAutoRequestViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+- (IBAction)go:(id)sender {
+    
+    (void)sender;
+    
+    self.requestInfo.editable = NO;
+    self.requestGo.enabled = NO;
+    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
+    
+    NSError *error = nil;
+    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    if (!params)
+    {
+        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+        
+        params = @{ @"error" : errorString };
+    }
+    
+    self.completionBlock(params);
+}
 
 @end

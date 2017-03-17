@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthority.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALTestAuthority : MSALAuthority
+// TODO: Change this for automation app
+#define AUTOMATION_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
 
-+ (MSALTestAuthority *)AADAuthority:(NSURL *)unvalidatedAuthority;
-+ (MSALTestAuthority *)B2CAuthority:(NSURL *)unvalidatedAuthority;
-+ (MSALTestAuthority *)ADFSAuthority:(NSURL *)unvalidatedAuthority;
+@interface MSALAutoSettings : NSObject
 
 @end

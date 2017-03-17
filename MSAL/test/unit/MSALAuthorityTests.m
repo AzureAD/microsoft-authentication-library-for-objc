@@ -30,6 +30,7 @@
 #import "MSALTestSwizzle.h"
 #import "MSALAadAuthorityResolver.h"
 #import "MSALTenantDiscoveryResponse.h"
+#import "MSALTestAuthority.h"
 
 @interface MSALAuthorityTests : MSALTestCase
 
@@ -106,29 +107,59 @@
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login-us.microsoftonline.com"]]);
 }
 
+
+- (void)testValidatedAuthorityCache
+{
+    MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/common"]];
+    MSALAuthority *b2cAuthority = [MSALTestAuthority B2CAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/tfp"]];
+    MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
+    
+    // Add non valid authority
+    XCTAssertFalse([MSALAuthority addToValidatedAuthority:nil userPrincipalName:nil]);
+    XCTAssertFalse([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:nil]);
+    
+    // Add valid authority
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:aadAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:b2cAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
+
+    // Check if valid authority returned
+    MSALAuthority *retrivedAuthority = [MSALAuthority authorityFromCache:aadAuthority.canonicalAuthority userPrincipalName:nil];
+    XCTAssertNotNil(retrivedAuthority);
+    XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:aadAuthority.canonicalAuthority]);
+    
+    MSALAuthority *retrivedAdfsAuthority = [MSALAuthority authorityFromCache:adfsAuthority.canonicalAuthority userPrincipalName:@"user@contoso.com"];
+    XCTAssertNotNil(retrivedAdfsAuthority);
+    XCTAssertTrue([retrivedAdfsAuthority.canonicalAuthority isEqual:adfsAuthority.canonicalAuthority]);
+    
+    
+    // Check if non valid authority was not returned
+    XCTAssertNil([MSALAuthority authorityFromCache:[NSURL URLWithString:@"https://somehost.com/"] userPrincipalName:nil]);
+}
+
 - (void)testResolveEndpointsSuccess
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
-    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.in/mytenant.com"];
+    NSString *openIdConfigEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(openIdConfigEndpoint, nil);
+         completionBlock(openIdConfigEndpoint, nil);
      }];
      
     [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)
@@ -143,11 +174,13 @@
          (void)context;
          (void)completionBlock;
       
-         NSDictionary *jsonDict = @{@"authorization_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/authorize/",
-                                    @"token_endpoint":@"https://fs.contoso.com/{tenantid}/oauth2/token/",
-                                    @"issuer":@"https://fs.contoso.com/{tenantid}/"};
+         NSString *filePath = [[[NSBundle bundleForClass:[self class]] resourcePath] stringByAppendingPathComponent:@"OpenIdConfiguration.json"];
+         XCTAssertNotNil(filePath);
          
-         NSData* testJsonData = [NSJSONSerialization dataWithJSONObject:jsonDict options:0 error:nil];
+         NSData *data = [NSData dataWithContentsOfFile:filePath options:0 error:nil];
+         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+         
+         NSData* testJsonData = [NSJSONSerialization dataWithJSONObject:json options:0 error:nil];
          completionBlock([[MSALTenantDiscoveryResponse alloc] initWithData:testJsonData error:nil], nil);
      }];
     
@@ -158,6 +191,11 @@
                                 completionBlock:^(MSALAuthority *authority, NSError *error)
      {
          XCTAssertNotNil(authority);
+         
+         XCTAssertEqualObjects(authority.authorizationEndpoint.absoluteString, @"https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/authorize");
+         XCTAssertEqualObjects(authority.tokenEndpoint.absoluteString, @"https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/token");
+         XCTAssertEqualObjects(authority.selfSignedJwtAudience, @"https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/");
+         
          XCTAssertNil(error);
          [expectation fulfill];
      }];
@@ -165,7 +203,6 @@
     [self waitForExpectationsWithTimeout:1.0
                                  handler:^(NSError * _Nullable error)
      {
-         
          (void)error;
      }];
 }
@@ -174,24 +211,24 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.in/mytenant.com"];
     
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+         completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
@@ -208,8 +245,7 @@
     [self waitForExpectationsWithTimeout:1.0
                                  handler:^(NSError * _Nullable error)
      {
-         
-         (void)error;
+        (void)error;
      }];
 }
 
@@ -217,36 +253,25 @@
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    NSString *openIdConfigEndpoint = @"https://somopenidconfigendpointurl.com";
+    NSURL *validAadAuthority = [NSURL URLWithString:@"https://login.microsoftonline.in/mytenant.com"];
+    NSString *openIdConfigEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
 
-    [MSALTestSwizzle instanceMethod:@selector(authorityFromCache:userPrincipalName:)
-                              class:[MSALAadAuthorityResolver class]
-                              block:(id)^(id obj, MSALAuthority *authority, NSString *userPrincipalName)
-     {
-         (void)obj;
-         (void)authority;
-         (void)userPrincipalName;
-         
-         return nil;
-     }];
-    
-    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForURL:userPrincipalName:validate:context:completionHandler:)
+    [MSALTestSwizzle instanceMethod:@selector(openIDConfigurationEndpointForAuthority:userPrincipalName:validate:context:completionBlock:)
                               class:[MSALAadAuthorityResolver class]
                               block:(id)^(id obj,
                                           NSURL *authority,
                                           NSString *userPrincipalName,
                                           BOOL validate, id<MSALRequestContext> context,
-                                          OpenIDConfigEndpointCallback completionHandler)
+                                          OpenIDConfigEndpointCallback completionBlock)
      {
          (void)obj;
          (void)userPrincipalName;
          (void)authority;
          (void)validate;
          (void)context;
-         (void)completionHandler;
+         (void)completionBlock;
          
-         completionHandler(openIdConfigEndpoint, nil);
+         completionBlock(openIdConfigEndpoint, nil);
      }];
     
     [MSALTestSwizzle instanceMethod:@selector(tenantDiscoveryEndpoint:context:completionBlock:)
@@ -278,7 +303,6 @@
     [self waitForExpectationsWithTimeout:1.0
                                  handler:^(NSError * _Nullable error)
      {
-         
          (void)error;
      }];
 }

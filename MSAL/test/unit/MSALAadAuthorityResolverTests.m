@@ -38,7 +38,7 @@
 @implementation MSALAadAuthorityResolverTests
 
 // From MSALAadAuthorityResolver.m
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoftonline.com/common/discovery/instance"
 
 - (void)setUp
 {
@@ -52,44 +52,17 @@
     [super tearDown];
 }
 
-- (void)testValidatedAuthorityCache
-{
-    MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];
-    NSURL *validURL = [NSURL URLWithString:@"https://login.windows.net/common/"];
-    
-    // Add valid authority
-    MSALAuthority *validAuthority = [MSALAuthority new];
-    validAuthority.canonicalAuthority = validURL;
-    XCTAssertTrue([aadResolver addToValidatedAuthorityCache:validAuthority userPrincipalName:nil]);
-    
-    // Add non valid authority
-    XCTAssertFalse([aadResolver addToValidatedAuthorityCache:nil userPrincipalName:nil]);
-    
-    // Check if valid authority returned
-    MSALAuthority *retrivedAuthority = [aadResolver authorityFromCache:validURL userPrincipalName:nil];
-    XCTAssertNotNil(retrivedAuthority);
-    XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:validURL]);
-    
-    // Check if non valid authority was not returned
-    XCTAssertNil([aadResolver authorityFromCache:[NSURL URLWithString:@"https://notaddedhost.com"] userPrincipalName:nil]);
-}
-
 - (void)testDefaultOpenIdConfigurationEndpoint
 {
     MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];
+    NSURL *authority = [NSURL URLWithString:@"https://www.somehost.com/sometenant.com"];
     
-    // Test with host and tenant
-    NSString *endpoint = [aadResolver defaultOpenIdConfigurationEndpointForHost:@"somehost.com" tenant:@"sometenant.com"];
-    XCTAssertEqualObjects(endpoint, @"https://somehost.com/sometenant.com/v2.0/.well-known/openid-configuration");
+    // Test with authority
+    NSString *endpoint = [aadResolver defaultOpenIdConfigurationEndpointForAuthority:authority];
+    XCTAssertEqualObjects(endpoint, @"https://www.somehost.com/sometenant.com/v2.0/.well-known/openid-configuration");
     
-    // Test with no host
-    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:nil tenant:@"sometenant.com"]);
-    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"" tenant:@"sometenant.com"]);
-    
-    // Test with no tenant
-    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"www.somehost.com" tenant:nil]);
-    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForHost:@"www.somehost.com" tenant:@""]);
-    
+    // Test with no authority
+    XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForAuthority:nil]);
 }
 
 - (void)testOpenIdConfigEndpointSucess
@@ -99,12 +72,12 @@
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [NSURLSession new];
     
-    NSString *responseEndpoint = @"https://someendpoint.com";
-    NSString *authorityString = @"https://somehost.com/sometenant.com";
+    NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"1.0" forKey:@"api-version"];
-    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
+    [reqHeaders setObject:@"https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
@@ -116,11 +89,11 @@
                                                          dictionaryAsJSON:@{@"tenant_discovery_endpoint":responseEndpoint}];
     [MSALTestURLSession addResponse:response];
     
-    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForURL:[NSURL URLWithString:authorityString]
-                                                    userPrincipalName:nil
-                                                             validate:YES
-                                                              context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
+                                                          userPrincipalName:nil
+                                                                   validate:YES
+                                                                    context:params
+                                                            completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertEqualObjects(endpoint, responseEndpoint);
          XCTAssertNil(error);
@@ -136,27 +109,26 @@
 
 - (void)testOpenIdConfigEndpointNoValidationNeeded
 {
-    NSString *responseEndpoint = @"https://someendpoint.com";
+    NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
     
     // Swizzle defaultOpenId...
-    [MSALTestSwizzle instanceMethod:@selector(defaultOpenIdConfigurationEndpointForHost:tenant:)
+    [MSALTestSwizzle instanceMethod:@selector(defaultOpenIdConfigurationEndpointForAuthority:)
                               class:[MSALAadAuthorityResolver class]
-                              block:(id)^(id obj, NSString *host, NSString *tenant)
+                              block:(id)^(id obj, NSURL *authority)
      {
          (void)obj;
-         (void)host;
-         (void)tenant;
-         
+         (void)authority;
          return responseEndpoint;
      }];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
-                                                    userPrincipalName:nil
-                                                             validate:NO
-                                                              context:nil
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
+                                                          userPrincipalName:nil
+                                                                   validate:NO
+                                                                    context:nil
+                                                            completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertEqualObjects(endpoint, responseEndpoint);
          XCTAssertNil(error);
@@ -169,7 +141,7 @@
      }];
 }
 
-- (void)testOpenIdConfigEndpointInvalidResponse
+- (void)testOpenIdConfigEndpointMissingFields
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -193,11 +165,11 @@
     
     [MSALTestURLSession addResponse:response];
     
-    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForURL:[NSURL URLWithString:authorityString]
-                                                    userPrincipalName:nil
-                                                             validate:YES
-                                                              context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
+                                                          userPrincipalName:nil
+                                                                   validate:YES
+                                                                    context:params
+                                                            completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertNil(endpoint);
          XCTAssertNotNil(error);
@@ -231,14 +203,16 @@
     
     [MSALTestURLSession addResponse:response];
     
-    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForURL:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
-                                                    userPrincipalName:nil
-                                                             validate:YES
-                                                              context:params
-                                                    completionHandler:^(NSString *endpoint, NSError *error)
+    [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
+                                                          userPrincipalName:nil
+                                                                   validate:YES
+                                                                    context:params
+                                                            completionBlock:^(NSString *endpoint, NSError *error)
      {
          XCTAssertNil(endpoint);
          XCTAssertNotNil(error);
+         
+         XCTAssertEqual(error.code, NSURLErrorCannotFindHost);
          
          [expectation fulfill];
      }];
