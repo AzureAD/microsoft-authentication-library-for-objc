@@ -149,4 +149,16 @@
     XCTAssertEqualObjects([encoded msalUrlFormDecode], testString);
 }
 
+- (void)testRandomUrlSafeStringOfSize
+{
+    // test with zero size
+    NSString *stringZero = [NSString randomUrlSafeStringOfSize:0];
+    XCTAssertTrue([NSString msalIsStringNilOrBlank:stringZero]);
+    
+    // test with normal size
+    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10]);
+    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:100]);
+    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:1000]);
+    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10000]);
+}
 @end
