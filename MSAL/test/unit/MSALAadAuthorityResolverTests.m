@@ -73,7 +73,7 @@
     params.urlSession = [NSURLSession new];
     
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
-    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"1.0" forKey:@"api-version"];
@@ -110,7 +110,7 @@
 - (void)testOpenIdConfigEndpointNoValidationNeeded
 {
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
-    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration";
+    NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
     
     // Swizzle defaultOpenId...
     [MSALTestSwizzle instanceMethod:@selector(defaultOpenIdConfigurationEndpointForAuthority:)
