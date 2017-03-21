@@ -58,7 +58,7 @@
                                                                                        response:response];
     //delete all cache entries with intersecting scopes
     //this should not happen but we have this as a safe guard against multiple matches
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:nil];
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId error:nil];
     NSMutableArray<MSALAccessTokenCacheItem *> *overlappingTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
@@ -108,7 +108,7 @@
                                                                     scope:requestParam.scopes
                                                                      user:requestParam.user];
     
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokens:requestParam.clientId error:error];
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId error:error];
     NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
@@ -135,7 +135,7 @@
                                                                     scope:nil
                                                              homeObjectId:requestParam.user.homeObjectId];
     
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:requestParam.clientId error:error];
+    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokensForUser:requestParam.user clientId:requestParam.clientId error:error];
     NSMutableArray<MSALRefreshTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
     
     for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
@@ -180,7 +180,7 @@
 
 - (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
 {
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokens:clientId error:nil];
+    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokensForUser:nil clientId:clientId error:nil];
     NSMutableDictionary<NSString *, MSALUser *> *allUsers = [NSMutableDictionary<NSString *, MSALUser *> new];
     
     for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
@@ -190,10 +190,12 @@
     return allUsers.allValues;
 }
 
-- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokens:(NSString *)clientId
-                                                   error:(NSError * __autoreleasing *)error
+- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokensForUser:(MSALUser *)user
+                                                       clientId:(NSString *)clientId
+                                                          error:(NSError * __autoreleasing *)error
 {
-    NSArray *accessTokens = [_dataSource getAccessTokenItemsWithKey:nil correlationId:nil error:error];
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil clientId:nil scope:nil user:user];
+    NSArray *accessTokens = [_dataSource getAccessTokenItemsWithKey:key correlationId:nil error:error];
     NSMutableArray *matchedAccessTokens = [NSMutableArray new];
     
     for (MSALAccessTokenCacheItem *token in accessTokens)
@@ -207,10 +209,12 @@
     return matchedAccessTokens;
 }
 
-- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(NSString *)clientId
-                                                     error:(NSError * __autoreleasing *)error
+- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokensForUser:(MSALUser *)user
+                                                         clientId:(NSString *)clientId
+                                                            error:(NSError * __autoreleasing *)error
 {
-    NSArray *refreshTokens = [_dataSource getRefreshTokenItemsWithKey:nil correlationId:nil error:error];
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil clientId:nil scope:nil user:user];
+    NSArray *refreshTokens = [_dataSource getRefreshTokenItemsWithKey:key correlationId:nil error:error];
     NSMutableArray *matchedRefreshTokens = [NSMutableArray new];
     
     for (MSALRefreshTokenCacheItem *token in refreshTokens)
