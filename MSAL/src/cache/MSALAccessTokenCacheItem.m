@@ -42,7 +42,7 @@ MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
 MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 
 
-- (id)initWithAuthority:(NSString *)authority
+- (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
                response:(MSALTokenResponse *)response
 {
@@ -51,7 +51,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
         return nil;
     }
     
-    if (!(self = [super initWithAuthority:authority clientId:clientId response:response]))
+    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
     {
         return nil;
     }

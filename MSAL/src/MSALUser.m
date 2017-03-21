@@ -31,7 +31,7 @@
 @implementation MSALUser
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSString *)authority
+            authority:(NSURL *)authority
              clientId:(NSString *)clientId
 {
     if (!(self = [super init]))
@@ -52,7 +52,7 @@
     _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
     _name = idToken.name;
     _identityProvider = idToken.issuer;
-    _authority = authority;
+    _authority = authority.absoluteString;
     _clientId = clientId;
     
     return self;

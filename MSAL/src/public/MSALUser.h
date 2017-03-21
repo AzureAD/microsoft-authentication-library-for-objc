@@ -41,7 +41,7 @@
 @property (readonly) NSString *homeObjectId;
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSString *)authority
+            authority:(NSURL *)authority
              clientId:(NSString *)clientId;
 - (void)signOut;
 

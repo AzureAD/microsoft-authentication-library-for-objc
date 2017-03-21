@@ -53,7 +53,7 @@
                                                response:(MSALTokenResponse *)response
                                                   error:(NSError * __autoreleasing *)error
 {
-    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
+    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority
                                                                                        clientId:requestParam.clientId
                                                                                        response:response];
     //delete all cache entries with intersecting scopes

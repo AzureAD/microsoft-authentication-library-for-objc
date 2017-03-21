@@ -80,7 +80,7 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     if (!_user)
     {
         MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _user = [[MSALUser alloc] initWithIdToken:idToken authority:self.authority clientId:self.clientId];
+        _user = [[MSALUser alloc] initWithIdToken:idToken authority:[NSURL URLWithString:self.authority] clientId:self.clientId];
     }
     return _user;
 }

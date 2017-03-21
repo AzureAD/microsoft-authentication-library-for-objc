@@ -33,7 +33,7 @@
 
 MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
 
-- (id)initWithAuthority:(NSString *)authority
+- (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
                response:(MSALTokenResponse *)response
 {
@@ -42,7 +42,7 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
         return nil;
     }
     
-    if (!(self = [super initWithAuthority:authority clientId:clientId response:response]))
+    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
     {
         return nil;
     }

@@ -35,7 +35,7 @@
 
 @property NSString * refreshToken;
 
-- (id)initWithAuthority:(NSString *)authority
+- (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
                response:(MSALTokenResponse *)response;
 

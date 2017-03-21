@@ -36,7 +36,7 @@
 @property (readonly) NSDate *expiresOn;
 @property (readonly) MSALScopes *scope;
 
-- (id)initWithAuthority:(NSString *)authority
+- (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
                response:(MSALTokenResponse *)response;
 

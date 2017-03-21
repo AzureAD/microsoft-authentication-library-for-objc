@@ -53,7 +53,7 @@
     NSData* responseData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
     MSALTokenResponse *response = [[MSALTokenResponse alloc] initWithData:responseData error:nil];
     
-    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:@"https://login.microsoftonline.com/common"
+    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
                                                                                   clientId:@"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
                                                                                   response:response];
     
@@ -86,7 +86,7 @@
     NSData* responseData = [[NSData alloc] initWithBase64EncodedString:base64String options:0];
     MSALTokenResponse *response = [[MSALTokenResponse alloc] initWithData:responseData error:nil];
     
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:@"https://login.microsoftonline.com/common"
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
                                                                                   clientId:@"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
                                                                                   response:response];
     
