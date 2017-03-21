@@ -25,27 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALB2CAuthorityResolver.h"
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+#define UNSUPPORTED_AUTHORITY_VALIDATION @"Authority validation is not supported for this type of authority"
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@implementation MSALB2CAuthorityResolver
 
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
+{
+    (void)userPrincipalName;
+    
+    if (validate) // And check for !IsInTrustedHostList(authority.Host)
+    {
+        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
+        completionBlock(nil, error);
+        return;
+    }
+    
+    completionBlock([self defaultOpenIdConfigurationEndpointForAuthority:authority], nil);
+}
 
 @end

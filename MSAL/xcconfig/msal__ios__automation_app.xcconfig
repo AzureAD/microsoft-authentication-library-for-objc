@@ -1,0 +1,8 @@
+#include "msal__ios__common.xcconfig"
+
+INFOPLIST_FILE = test/automation/ios/resources/info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+PRODUCT_NAME = MSAL Automation App;
+OTHER_LDFLAGS = "-ObjC";
+

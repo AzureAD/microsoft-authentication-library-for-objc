@@ -25,27 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAutoResultViewController.h"
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+@interface MSALAutoResultViewController ()
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@property (strong, nonatomic) IBOutlet UITextView *resultInfo;
+@property (strong, nonatomic) IBOutlet UITextView *resultLogs;
 
-@interface MSALTestAppSettings : NSObject
+@end
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
+@implementation MSALAutoResultViewController
 
-+ (MSALTestAppSettings*)settings;
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    
+    self.resultInfo.text = self.resultInfoString;
+    self.resultLogs.text = self.resultLogsString;
+}
 
-+ (NSArray<NSString *> *)authorities;
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
-+ (NSArray<NSString *> *)availableScopes;
+- (IBAction)done:(id)sender {
+    (void)sender;
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+
 
 @end

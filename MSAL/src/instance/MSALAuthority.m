@@ -28,6 +28,8 @@
 #import "MSALAuthority.h"
 #import "MSALError_Internal.h"
 #import "MSALAadAuthorityResolver.h"
+#import "MSALAdfsAuthorityResolver.h"
+#import "MSALB2CAuthorityResolver.h"
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALURLSession.h"
@@ -38,6 +40,8 @@
 #define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
 
 static NSSet<NSString *> *s_trustedHostList;
+static NSMutableDictionary *s_validatedAuthorities;
+static NSMutableDictionary *s_validatedUsersForAuthority;
 
 #pragma mark - helper functions
 BOOL isTenantless(NSURL *authority)
@@ -65,6 +69,9 @@ BOOL isTenantless(NSURL *authority)
                          @"login.cloudgovapi.us",
                          @"login.microsoftonline.com",
                          @"login.microsoftonline.de", nil];
+    
+    s_validatedAuthorities = [NSMutableDictionary new];
+    s_validatedUsersForAuthority = [NSMutableDictionary new];
 }
 
 + (NSSet<NSString *> *)trustedHosts
@@ -86,8 +93,11 @@ BOOL isTenantless(NSURL *authority)
     // B2C
     if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])
     {
-        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 2), nil, MSALErrorInvalidParameter, @"authority must specify a tenant");
-        return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/tfp/%@", authorityUrl.host, authorityUrl.pathComponents[2]]];
+        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 3), nil, MSALErrorInvalidParameter,
+                               @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
+        
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", authorityUrl.host, authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
+        return [NSURL URLWithString:updatedAuthorityString];
     }
     
     // ADFS and AAD
@@ -111,15 +121,17 @@ BOOL isTenantless(NSURL *authority)
     
     id<MSALAuthorityResolver> resolver;
     
-    if ([firstPathComponent isEqualToString:@"tfp"])
+    if ([firstPathComponent isEqualToString:@"adfs"])
+    {
+        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
+        completionBlock(nil, error);
+        return;
+    }
+    else if ([firstPathComponent isEqualToString:@"tfp"])
     {
         authorityType = B2CAuthority;
-        @throw @"TODO";
-    }
-    else if ([firstPathComponent isEqualToString:@"adfs"])
-    {
-        authorityType = ADFSAuthority;
-        @throw @"TODO";
+        resolver = [MSALB2CAuthorityResolver new];
+        tenant = updatedAuthority.pathComponents[2].lowercaseString;
     }
     else
     {
@@ -128,8 +140,8 @@ BOOL isTenantless(NSURL *authority)
         tenant = firstPathComponent;
     }
     
-    MSALAuthority *authorityInCache = [resolver authorityFromCache:updatedAuthority
-                                                 userPrincipalName:userPrincipalName];
+    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority userPrincipalName:userPrincipalName];
+    
     if (authorityInCache)
     {
         completionBlock(authorityInCache, nil);
@@ -147,6 +159,7 @@ BOOL isTenantless(NSURL *authority)
         authority.validateAuthority = validate;
         authority.isTenantless = isTenantless(updatedAuthority);
         
+        // Only happens for AAD authority
         NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
         NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
         NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
@@ -156,16 +169,16 @@ BOOL isTenantless(NSURL *authority)
         authority.endSessionEndpoint = nil;
         authority.selfSignedJwtAudience = issuer;
      
-        [resolver addToValidatedAuthorityCache:authority userPrincipalName:userPrincipalName];
+        [MSALAuthority addToValidatedAuthority:authority userPrincipalName:userPrincipalName];
         
         completionBlock(authority, nil);
     };
     
-    [resolver openIDConfigurationEndpointForURL:updatedAuthority
-                              userPrincipalName:userPrincipalName
-                                       validate:validate
-                                        context:context
-                              completionHandler:^(NSString *endpoint, NSError *error)
+    [resolver openIDConfigurationEndpointForAuthority:updatedAuthority
+                                    userPrincipalName:userPrincipalName
+                                             validate:validate
+                                              context:context
+                                      completionBlock:^(NSString *endpoint, NSError *error)
     {
         CHECK_COMPLETION(!error);
         
@@ -178,6 +191,60 @@ BOOL isTenantless(NSURL *authority)
 + (BOOL)isKnownHost:(NSURL *)url
 {
     return [s_trustedHostList containsObject:url.host.lowercaseString];
+}
+
++ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
+              userPrincipalName:(NSString *)userPrincipalName
+{
+    if (!authority)
+    {
+        return NO;
+    }
+    
+    if (!authority.canonicalAuthority ||
+        (authority.authorityType == ADFSAuthority &&  [NSString msalIsStringNilOrBlank:userPrincipalName]))
+    {
+        return NO;
+    }
+    
+    NSString *authorityKey = authority.canonicalAuthority.absoluteString;
+
+    if (authority.authorityType == ADFSAuthority)
+    {
+        NSMutableSet<NSString *> *usersInDomain = s_validatedUsersForAuthority[authorityKey];
+        if (!usersInDomain)
+        {
+            usersInDomain = [NSMutableSet new];
+            s_validatedUsersForAuthority[authorityKey] = usersInDomain;
+        }
+        [usersInDomain addObject:userPrincipalName];
+        
+    }
+    s_validatedAuthorities[authorityKey] = authority;
+
+    return YES;
+}
+
++ (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName
+{
+    if (!authority)
+    {
+        return nil;
+    }
+    
+    NSString *authorityKey = authority.absoluteString;
+
+    if (userPrincipalName)
+    {
+        NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+        if (![validatedUsers containsObject:userPrincipalName])
+        {
+            return nil;
+        }
+    }
+    
+    return s_validatedAuthorities[authorityKey];
 }
 
 @end

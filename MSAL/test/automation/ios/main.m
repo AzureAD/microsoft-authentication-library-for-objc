@@ -25,27 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import "MSALAutoAppDelegate.h"
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
-
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
-
-@end
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([MSALAutoAppDelegate class]));
+    }
+}

@@ -26,9 +26,20 @@
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
+#define MSAL_APP_SCOPE_USER_READ        @"User.Read"
+
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
 static NSArray<NSString *> *s_authorities = nil;
+
+static NSArray<NSString *> *s_scopes_available = nil;
+
+@interface MSALTestAppSettings()
+{
+    NSMutableSet <NSString *> *_scopes;
+}
+
+@end
 
 @implementation MSALTestAppSettings
 
@@ -43,6 +54,9 @@ static NSArray<NSString *> *s_authorities = nil;
     }
     
     s_authorities = authorities;
+    
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ];
+
 }
 
 + (MSALTestAppSettings*)settings
@@ -53,6 +67,7 @@ static NSArray<NSString *> *s_authorities = nil;
     dispatch_once(&s_settingsOnce,^{
         s_settings = [MSALTestAppSettings new];
         [s_settings readFromDefaults];
+        s_settings->_scopes = [NSMutableSet new];
     });
     
     return s_settings;
@@ -156,5 +171,38 @@ static NSArray<NSString *> *s_authorities = nil;
             forKey:@"currentUser"];
     _currentUser = currentUser;
 }
+
++ (NSArray<NSString *> *)availableScopes
+{
+    return s_scopes_available;
+}
+
+- (NSSet<NSString *> *)scopes
+{
+    return _scopes;
+}
+
+- (BOOL)addScope:(NSString *)scope
+{
+    if (![s_scopes_available containsObject:scope])
+    {
+        return NO;
+    }
+    
+    [_scopes addObject:scope];
+    return YES;
+}
+
+- (BOOL)removeScope:(NSString *)scope
+{
+    if (![s_scopes_available containsObject:scope])
+    {
+        return NO;
+    }
+    
+    [_scopes removeObject:scope];
+    return YES;
+}
+
 
 @end

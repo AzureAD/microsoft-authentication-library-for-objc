@@ -25,27 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAutoRequestViewController.h"
+#import "MSALAutoSettings.h"
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+@interface MSALAutoRequestViewController ()
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
+@property (strong, nonatomic) IBOutlet UIButton *requestGo;
 
-@interface MSALTestAppSettings : NSObject
+@end
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
+@implementation MSALAutoRequestViewController
 
-+ (MSALTestAppSettings*)settings;
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+}
 
-+ (NSArray<NSString *> *)authorities;
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
-+ (NSArray<NSString *> *)availableScopes;
 
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (IBAction)go:(id)sender {
+    
+    (void)sender;
+    
+    self.requestInfo.editable = NO;
+    self.requestGo.enabled = NO;
+    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
+    
+    NSError *error = nil;
+    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    if (!params)
+    {
+        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+        
+        params = @{ @"error" : errorString };
+    }
+    
+    self.completionBlock(params);
+}
 
 @end

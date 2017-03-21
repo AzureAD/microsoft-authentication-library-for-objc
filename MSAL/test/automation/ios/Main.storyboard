@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Auto Main View Controller-->
+        <scene sceneID="nHE-Wk-2dN">
+            <objects>
+                <viewController id="O9I-0f-Qbv" customClass="MSALAutoMainViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="MHH-H3-LLP"/>
+                        <viewControllerLayoutGuide type="bottom" id="PLM-hh-fRb"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="5Nn-AV-6He">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="sJS-NG-CXq">
+                                <rect key="frame" x="0.0" y="20" width="375" height="310"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ya-vf-XnD">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="acquireToken"/>
+                                        <state key="normal" title="Acquire Token"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="acquireToken"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="acquireToken:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="Aa8-Db-JPr"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DBC-Vd-CDm">
+                                        <rect key="frame" x="0.0" y="40" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="acquireTokenSilent"/>
+                                        <state key="normal" title="Acquire Token Silent"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="acquireTokenSilent"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t0I-aR-BPj">
+                                        <rect key="frame" x="0.0" y="80" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="readCache"/>
+                                        <state key="normal" title="Expire Access Token"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="expireAccessToken"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pf6-OO-qrL">
+                                        <rect key="frame" x="0.0" y="120" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="clearCache"/>
+                                        <state key="normal" title="Expire AT and invalidate RT"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="invalidateRefreshToken"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C6A-Ww-dPQ">
+                                        <rect key="frame" x="0.0" y="160" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="invalidateAccessToken"/>
+                                        <state key="normal" title="Read Cache"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="readCache"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wbg-Oq-UjV">
+                                        <rect key="frame" x="0.0" y="200" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="invalidateToken"/>
+                                        <state key="normal" title="Clear Cache"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCache"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KCg-uq-e4H">
+                                        <rect key="frame" x="0.0" y="240" width="375" height="30"/>
+                                        <state key="normal" title="Get Users"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="getUsers"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8EH-37-udP">
+                                        <rect key="frame" x="0.0" y="280" width="375" height="30"/>
+                                        <state key="normal" title="Sign Out"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="signOut"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="sJS-NG-CXq" secondAttribute="trailing" id="bnz-gg-Y3u"/>
+                            <constraint firstItem="sJS-NG-CXq" firstAttribute="leading" secondItem="5Nn-AV-6He" secondAttribute="leading" id="nlG-dk-Rhw"/>
+                            <constraint firstItem="sJS-NG-CXq" firstAttribute="top" secondItem="MHH-H3-LLP" secondAttribute="bottom" id="tVn-lo-o0e"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <segue destination="h42-VF-zmw" kind="show" identifier="showRequest" animates="NO" id="Xtt-Y9-QWz"/>
+                        <segue destination="DAi-25-Acg" kind="show" identifier="showResult" animates="NO" id="hBw-Pt-YA6"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="yF3-hm-EZB" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2303" y="-762"/>
+        </scene>
+        <!--Auto Request View Controller-->
+        <scene sceneID="hYu-2t-H81">
+            <objects>
+                <viewController id="h42-VF-zmw" customClass="MSALAutoRequestViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Zso-mo-FK1"/>
+                        <viewControllerLayoutGuide type="bottom" id="TkF-ZL-y37"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6iy-g1-Aj9">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="xnO-V3-gcC">
+                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="200" verticalCompressionResistancePriority="700" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P4Y-KM-t4g">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="25"/>
+                                        <color key="backgroundColor" red="0.1019607843" green="0.73725490199999999" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="25" id="gMl-g4-vhr"/>
+                                        </constraints>
+                                        <state key="normal" title="Go">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="requestGo"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="go:" destination="h42-VF-zmw" eventType="touchUpInside" id="wOI-al-QOO"/>
+                                        </connections>
+                                    </button>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="hNb-4L-KMk">
+                                        <rect key="frame" x="0.0" y="25" width="375" height="622"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="requestInfo"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </textView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="xnO-V3-gcC" firstAttribute="top" secondItem="Zso-mo-FK1" secondAttribute="bottom" id="Bft-6T-n8R"/>
+                            <constraint firstAttribute="trailing" secondItem="xnO-V3-gcC" secondAttribute="trailing" id="RLw-rU-f1U"/>
+                            <constraint firstItem="TkF-ZL-y37" firstAttribute="top" secondItem="xnO-V3-gcC" secondAttribute="bottom" id="XXO-pn-kke"/>
+                            <constraint firstItem="xnO-V3-gcC" firstAttribute="leading" secondItem="6iy-g1-Aj9" secondAttribute="leading" id="fXF-G9-mgY"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="requestGo" destination="P4Y-KM-t4g" id="v4R-Qn-SxP"/>
+                        <outlet property="requestInfo" destination="hNb-4L-KMk" id="zuh-4b-qNF"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4KP-Dc-s7U" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3545" y="-1145"/>
+        </scene>
+        <!--Auto Result View Controller-->
+        <scene sceneID="fN7-td-NMx">
+            <objects>
+                <viewController id="DAi-25-Acg" customClass="MSALAutoResultViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="HDm-uB-v7V"/>
+                        <viewControllerLayoutGuide type="bottom" id="UwP-nN-XXQ"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="hqC-Ew-r8f">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="vzd-4S-HI3">
+                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BQu-gn-day">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="25"/>
+                                        <color key="backgroundColor" red="0.1019607843" green="0.73725490199999999" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="25" id="OvC-gj-3Ju"/>
+                                        </constraints>
+                                        <state key="normal" title="Done">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="resultDone"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="done:" destination="DAi-25-Acg" eventType="touchUpInside" id="iSg-u6-uIB"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="300" verticalCompressionResistancePriority="800" text="Result Info" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgt-aH-ueb">
+                                        <rect key="frame" x="0.0" y="25" width="375" height="18"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Ftg-eU-i9T">
+                                        <rect key="frame" x="0.0" y="43" width="375" height="293"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="resultInfo"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </textView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="300" verticalCompressionResistancePriority="800" text="Result Logs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wHi-aE-ivS">
+                                        <rect key="frame" x="0.0" y="336" width="375" height="18"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="MQP-wu-cMT">
+                                        <rect key="frame" x="0.0" y="354" width="375" height="293"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="resultLogs"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </textView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="Ftg-eU-i9T" firstAttribute="height" secondItem="MQP-wu-cMT" secondAttribute="height" id="hfF-vN-CJ2"/>
+                                </constraints>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="vzd-4S-HI3" firstAttribute="top" secondItem="HDm-uB-v7V" secondAttribute="bottom" id="5ny-so-nIC"/>
+                            <constraint firstAttribute="trailing" secondItem="vzd-4S-HI3" secondAttribute="trailing" id="V9P-Qq-SJI"/>
+                            <constraint firstItem="vzd-4S-HI3" firstAttribute="leading" secondItem="hqC-Ew-r8f" secondAttribute="leading" id="VTh-Ih-DEq"/>
+                            <constraint firstItem="UwP-nN-XXQ" firstAttribute="top" secondItem="vzd-4S-HI3" secondAttribute="bottom" id="mrq-Po-jJw"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="resultInfo" destination="Ftg-eU-i9T" id="Hfr-Jf-OIQ"/>
+                        <outlet property="resultLogs" destination="MQP-wu-cMT" id="b5T-00-VRr"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YFy-Ey-3TD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3545" y="-364"/>
+        </scene>
+    </scenes>
+</document>

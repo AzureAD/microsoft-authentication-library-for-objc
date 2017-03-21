@@ -27,25 +27,9 @@
 
 #import <Foundation/Foundation.h>
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+// TODO: Change this for automation app
+#define AUTOMATION_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
 
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+@interface MSALAutoSettings : NSObject
 
 @end

@@ -30,5 +30,7 @@
 @interface MSALTestAuthority : MSALAuthority
 
 + (MSALTestAuthority *)AADAuthority:(NSURL *)unvalidatedAuthority;
++ (MSALTestAuthority *)B2CAuthority:(NSURL *)unvalidatedAuthority;
++ (MSALTestAuthority *)ADFSAuthority:(NSURL *)unvalidatedAuthority;
 
 @end
