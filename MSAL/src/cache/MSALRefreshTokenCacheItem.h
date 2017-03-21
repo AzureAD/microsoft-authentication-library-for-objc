@@ -39,6 +39,6 @@
                clientId:(NSString *)clientId
                response:(MSALTokenResponse *)response;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

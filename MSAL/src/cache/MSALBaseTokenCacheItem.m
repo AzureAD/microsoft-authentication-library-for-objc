@@ -95,8 +95,9 @@ MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
     return _tenantId;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
 {
+    (void)error;
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }

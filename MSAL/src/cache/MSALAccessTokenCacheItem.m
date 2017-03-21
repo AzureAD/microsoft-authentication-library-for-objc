@@ -87,12 +87,17 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     return [self.expiresOn timeIntervalSinceNow] > 0;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
 {
-    return [[MSALTokenCacheKey alloc] initWithAuthority:self.authority
-                                               clientId:self.clientId
-                                                  scope:self.scope
-                                                   user:self.user];
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:self.authority
+                                                                 clientId:self.clientId
+                                                                    scope:self.scope
+                                                                     user:self.user];
+    if (!key)
+    {
+        MSAL_ERROR_CACHE(nil, MSALErrorTokenCacheItemFailure, nil, @"failed to create token cache key.");
+    }
+    return key;
 }
 
 - (MSALScopes *)scopeFromString:(NSString *)scopeString

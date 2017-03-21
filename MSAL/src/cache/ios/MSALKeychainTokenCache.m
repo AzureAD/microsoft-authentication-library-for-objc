@@ -120,7 +120,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 {
     NSDictionary *query = @{ (id)kSecClass : (id)kSecClassGenericPassword,
                              (id)kSecAttrAccount : @"teamIDHint",
-                             (id)kSecAttrService : @"",
+                             (id)kSecAttrService : @"teamIDHint",
                              (id)kSecReturnAttributes : @YES };
     CFDictionaryRef result = nil;
     
@@ -135,7 +135,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (status != errSecSuccess)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when fetching team ID.");
+        MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when fetching team ID.");
         return nil;
     }
     
@@ -168,8 +168,8 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
     if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving access tokens.");
-        return @[];
+        MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when retrieving access tokens.");
+        return nil;
     }
     NSArray *accessTokenitems = CFBridgingRelease(items);
     NSMutableArray<MSALAccessTokenCacheItem *> *accessTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
@@ -204,8 +204,8 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
     if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when retrieving refresh tokens.");
-        return @[];
+        MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when retrieving refresh tokens.");
+        return nil;
     }
     NSArray *refreshTokenitems = CFBridgingRelease(items);
     NSMutableArray<MSALRefreshTokenCacheItem *> *refreshTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
@@ -231,7 +231,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [atItem tokenCacheKey];
+        MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -242,11 +242,11 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                    (id)kSecAttrGeneric : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                    }];
         
-        NSError *adError = nil;
-        NSData* itemData = [atItem serialize:&adError];
+        NSData* itemData = [atItem serialize:error];
         if (!itemData)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, adError, __FUNCTION__, __LINE__, @"Failed to archive keychain item.");
+            LOG_ERROR(nil, @"Failed to archive keychain item.");
+            LOG_ERROR_PII(nil, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -258,7 +258,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         }
         else if (status != errSecItemNotFound)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving access token item during update operation.");
+            MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when saving access token item during update operation.");
             return NO;
         }
         
@@ -268,7 +268,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving access token item during add operation.");
+            MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when saving access token item during add operation.");
             return NO;
         }
         return YES;
@@ -282,7 +282,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [rtItem tokenCacheKey];
+        MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -293,11 +293,11 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
                                                                    (id)kSecAttrGeneric : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
                                                                    }];
         
-        NSError *adError = nil;
-        NSData* itemData = [rtItem serialize:&adError];
+        NSData* itemData = [rtItem serialize:error];
         if (!itemData)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, adError, __FUNCTION__, __LINE__, @"Failed to archive keychain item.");
+            LOG_ERROR(nil, @"Failed to archive keychain item.");
+            LOG_ERROR_PII(nil, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -309,7 +309,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         }
         else if (status != errSecItemNotFound)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving refresh token item during update operation.");
+            MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when saving refresh token item during update operation.");
             return NO;
         }
         
@@ -319,7 +319,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when saving refresh token item during add operation.");
+            MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil], @"Keychain failed when saving refresh token item during add operation.");
             return NO;
         }
         return YES;
@@ -329,7 +329,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
                         error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [atItem tokenCacheKey];
+    MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -342,7 +342,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (deleteStatus != errSecSuccess)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting access token.");
+        MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], @"Keychain failed when deleting access token.");
         return NO;
     }
     return YES;
@@ -351,7 +351,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
                          error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [rtItem tokenCacheKey];
+    MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -364,7 +364,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     if (deleteStatus != errSecSuccess)
     {
-        MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], __FUNCTION__, __LINE__, @"Keychain failed when deleting refresh token.");
+        MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain code:deleteStatus userInfo:nil], @"Keychain failed when deleting refresh token.");
         return NO;
     }
     return YES;
@@ -373,7 +373,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 - (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKey *)key
                                    additional:(NSDictionary *)additional
 {
-    NSMutableDictionary* query = [NSMutableDictionary dictionaryWithDictionary:_default];
+    NSMutableDictionary* query = [_default mutableCopy];
     if (key.service)
     {
         [query setObject:key.service forKey:(NSString*)kSecAttrService];
@@ -403,11 +403,11 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     @try
     {
-        NSError *adError = nil;
-        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:data error:&adError];
+        MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, adError, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR_PII(nil, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         
@@ -433,11 +433,11 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     @try
     {
-        NSError *adError = nil;
-        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:data error:&adError];
+        MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            MSALFillAndLogError(error, nil, MSALErrorKeychainFailure, nil, nil, adError, __FUNCTION__, __LINE__, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR_PII(nil, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         

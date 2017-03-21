@@ -52,12 +52,17 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
     return self;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
 {
-    return [[MSALTokenCacheKey alloc] initWithAuthority:nil
-                                               clientId:self.clientId
-                                                  scope:nil
-                                           homeObjectId:self.user.homeObjectId];
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
+                                                                 clientId:self.clientId
+                                                                    scope:nil
+                                                             homeObjectId:self.user.homeObjectId];
+    if (!key)
+    {
+        MSAL_ERROR_CACHE(nil, MSALErrorTokenCacheItemFailure, nil, @"failed to create token cache key.");
+    }
+    return key;
 }
 
 - (id)copyWithZone:(NSZone*) zone

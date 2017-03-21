@@ -42,6 +42,6 @@
 
 - (BOOL)isExpired;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

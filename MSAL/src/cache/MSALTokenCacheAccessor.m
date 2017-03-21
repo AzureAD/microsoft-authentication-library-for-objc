@@ -113,7 +113,7 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if ([key matches:tokenItem.tokenCacheKey])
+        if ([key matches:[tokenItem tokenCacheKey:nil]])
         {
             [matchedTokens addObject:tokenItem];
         }
@@ -140,7 +140,7 @@
     
     for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
     {
-        if ([key matches:tokenItem.tokenCacheKey])
+        if ([key matches:[tokenItem tokenCacheKey:nil]])
         {
             [matchedTokens addObject:tokenItem];
         }
@@ -157,7 +157,7 @@
 - (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
                     error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [atItem tokenCacheKey];
+    MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -169,7 +169,7 @@
 - (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
                      error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [rtItem tokenCacheKey];
+    MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
     if (!key)
     {
         return NO;

@@ -307,14 +307,14 @@
     (void)correlationId;
     if (!item)
     {
-        MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdateAccessToken operation.");
+        REQUIRED_PARAMETER_ERROR(item, nil);
         return NO;
     }
     
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
     
-    MSALTokenCacheKey *key = item.tokenCacheKey;
+    MSALTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -381,14 +381,14 @@
     (void)correlationId;
     if (!item)
     {
-        MSALFillAndLogError(error, nil, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @"nil item for addOrUpdateRefreshToken operation.");
+        REQUIRED_PARAMETER_ERROR(item, nil);
         return NO;
     }
     
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
     
-    MSALTokenCacheKey *key = item.tokenCacheKey;
+    MSALTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -449,7 +449,7 @@
                         error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = item.tokenCacheKey;
+    MSALTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -511,7 +511,7 @@
                          error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = item.tokenCacheKey;
+    MSALTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;

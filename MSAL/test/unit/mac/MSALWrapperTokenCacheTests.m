@@ -202,8 +202,8 @@ typedef enum
     XCTAssertEqualObjects(atItem.expiresOn.description, atItemInCache.expiresOn.description);
     XCTAssertEqualObjects(atItem.scope.msalToString, atItemInCache.scope.msalToString);
     XCTAssertTrue(atItem.isExpired==atItemInCache.isExpired);
-    XCTAssertEqualObjects(atItem.tokenCacheKey.service, atItemInCache.tokenCacheKey.service);
-    XCTAssertEqualObjects(atItem.tokenCacheKey.account, atItemInCache.tokenCacheKey.account);
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, [atItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(atItem.authority, atItemInCache.authority);
     XCTAssertEqualObjects(atItem.clientId, atItemInCache.clientId);
     XCTAssertEqualObjects(atItem.tenantId, atItemInCache.tenantId);
@@ -248,26 +248,26 @@ typedef enum
     MSALAccessTokenCacheItem *atItemInCache2 = [cache findAccessToken:requestParam2 error:nil];
     
     //compare AT 2 with the AT retrieved from cache
-    XCTAssertEqualObjects( atItem2.tokenType, atItemInCache2.tokenType);
-    XCTAssertEqualObjects( atItem2.expiresOn.description, atItemInCache2.expiresOn.description);
-    XCTAssertEqualObjects( atItem2.scope.msalToString, atItemInCache2.scope.msalToString);
-    XCTAssertTrue( atItem2.isExpired==atItemInCache2.isExpired);
-    XCTAssertEqualObjects( atItem2.tokenCacheKey.service, atItemInCache2.tokenCacheKey.service);
-    XCTAssertEqualObjects( atItem2.tokenCacheKey.account, atItemInCache2.tokenCacheKey.account);
-    XCTAssertEqualObjects( atItem2.authority, atItemInCache2.authority);
-    XCTAssertEqualObjects( atItem2.clientId, atItemInCache2.clientId);
-    XCTAssertEqualObjects( atItem2.tenantId, atItemInCache2.tenantId);
-    XCTAssertEqualObjects( atItem2.rawIdToken, atItemInCache2.rawIdToken);
-    XCTAssertEqualObjects( atItem2.uniqueId, atItemInCache2.uniqueId);
-    XCTAssertEqualObjects( atItem2.displayableId, atItemInCache2.displayableId);
-    XCTAssertEqualObjects( atItem2.homeObjectId, atItemInCache2.homeObjectId);
-    XCTAssertEqualObjects( atItem2.user.uniqueId, atItemInCache2.user.uniqueId);
-    XCTAssertEqualObjects( atItem2.user.displayableId, atItemInCache2.user.displayableId);
-    XCTAssertEqualObjects( atItem2.user.name, atItemInCache2.user.name);
-    XCTAssertEqualObjects( atItem2.user.identityProvider, atItemInCache2.user.identityProvider);
-    XCTAssertEqualObjects( atItem2.user.clientId, atItemInCache2.user.clientId);
-    XCTAssertEqualObjects( atItem2.user.authority, atItemInCache2.user.authority);
-    XCTAssertEqualObjects( atItem2.user.homeObjectId, atItemInCache2.user.homeObjectId);
+    XCTAssertEqualObjects(atItem2.tokenType, atItemInCache2.tokenType);
+    XCTAssertEqualObjects(atItem2.expiresOn.description, atItemInCache2.expiresOn.description);
+    XCTAssertEqualObjects(atItem2.scope.msalToString, atItemInCache2.scope.msalToString);
+    XCTAssertTrue(atItem2.isExpired==atItemInCache2.isExpired);
+    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].service, [atItemInCache2 tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].account, [atItemInCache2 tokenCacheKey:nil].account);
+    XCTAssertEqualObjects(atItem2.authority, atItemInCache2.authority);
+    XCTAssertEqualObjects(atItem2.clientId, atItemInCache2.clientId);
+    XCTAssertEqualObjects(atItem2.tenantId, atItemInCache2.tenantId);
+    XCTAssertEqualObjects(atItem2.rawIdToken, atItemInCache2.rawIdToken);
+    XCTAssertEqualObjects(atItem2.uniqueId, atItemInCache2.uniqueId);
+    XCTAssertEqualObjects(atItem2.displayableId, atItemInCache2.displayableId);
+    XCTAssertEqualObjects(atItem2.homeObjectId, atItemInCache2.homeObjectId);
+    XCTAssertEqualObjects(atItem2.user.uniqueId, atItemInCache2.user.uniqueId);
+    XCTAssertEqualObjects(atItem2.user.displayableId, atItemInCache2.user.displayableId);
+    XCTAssertEqualObjects(atItem2.user.name, atItemInCache2.user.name);
+    XCTAssertEqualObjects(atItem2.user.identityProvider, atItemInCache2.user.identityProvider);
+    XCTAssertEqualObjects(atItem2.user.clientId, atItemInCache2.user.clientId);
+    XCTAssertEqualObjects(atItem2.user.authority, atItemInCache2.user.authority);
+    XCTAssertEqualObjects(atItem2.user.homeObjectId, atItemInCache2.user.homeObjectId);
 }
 
 - (void)testSaveAndRetrieveRefreshToken {
@@ -289,8 +289,8 @@ typedef enum
     MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam error:nil];
     
     //compare RT with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.service, rtItemInCache.tokenCacheKey.service);
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.account, rtItemInCache.tokenCacheKey.account);
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, [rtItemInCache tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, [rtItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(rtItem.authority, rtItemInCache.authority);
     XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
     XCTAssertEqualObjects(rtItem.tenantId, rtItemInCache.tenantId);
@@ -335,8 +335,8 @@ typedef enum
     MSALRefreshTokenCacheItem *rtItemInCache2 = [cache findRefreshToken:requestParam2 error:nil];
     
     //compare RT 2 with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem2.tokenCacheKey.service, rtItemInCache2.tokenCacheKey.service);
-    XCTAssertEqualObjects(rtItem2.tokenCacheKey.account, rtItemInCache2.tokenCacheKey.account);
+    XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].service, [rtItemInCache2 tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].account, [rtItemInCache2 tokenCacheKey:nil].account);
     XCTAssertEqualObjects(rtItem2.authority, rtItemInCache2.authority);
     XCTAssertEqualObjects(rtItem2.clientId, rtItemInCache2.clientId);
     XCTAssertEqualObjects(rtItem2.tenantId, rtItemInCache2.tenantId);
@@ -386,8 +386,8 @@ typedef enum
     MSALAccessTokenCacheItem *atItemInCache = [cache findAccessToken:requestParam error:nil];
     
     //compare AT with the AT retrieved from cache
-    XCTAssertEqualObjects(atItem.tokenCacheKey.service, atItemInCache.tokenCacheKey.service);
-    XCTAssertEqualObjects(atItem.tokenCacheKey.account, atItemInCache.tokenCacheKey.account);
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, [atItemInCache tokenCacheKey:nil].account);
     
     //delete AT
     [cache deleteAccessToken:atItemInCache error:nil];
@@ -399,8 +399,8 @@ typedef enum
     //retrieve AT 2 and compare it with the AT retrieved from cache
     MSALAccessTokenCacheItem *atItemInCache2 = [cache findAccessToken:requestParam2 error:nil];
     
-    XCTAssertEqualObjects(atItem2.tokenCacheKey.service, atItemInCache2.tokenCacheKey.service);
-    XCTAssertEqualObjects(atItem2.tokenCacheKey.account, atItemInCache2.tokenCacheKey.account);
+    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].service, [atItemInCache2 tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].account, [atItemInCache2 tokenCacheKey:nil].account);
 }
 
 - (void)testDeleteRefreshToken {
@@ -436,8 +436,8 @@ typedef enum
     MSALRefreshTokenCacheItem *rtItemInCache = [cache findRefreshToken:requestParam error:nil];
     
     //compare RT with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.service, rtItemInCache.tokenCacheKey.service);
-    XCTAssertEqualObjects(rtItem.tokenCacheKey.account, rtItemInCache.tokenCacheKey.account);
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, [rtItemInCache tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, [rtItemInCache tokenCacheKey:nil].account);
     
     //delete RT
     [cache deleteRefreshToken:rtItemInCache error:nil];
@@ -449,8 +449,8 @@ typedef enum
     //retrieve RT 2 and compare it with the RT retrieved from cache
     MSALRefreshTokenCacheItem *rtItemInCache2 = [cache findRefreshToken:requestParam2 error:nil];
     
-    XCTAssertEqualObjects(rtItem2.tokenCacheKey.service, rtItemInCache2.tokenCacheKey.service);
-    XCTAssertEqualObjects(rtItem2.tokenCacheKey.account, rtItemInCache2.tokenCacheKey.account);
+    XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].service, [rtItemInCache2 tokenCacheKey:nil].service);
+    XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].account, [rtItemInCache2 tokenCacheKey:nil].account);
 }
 
 - (void)testGetUsers {

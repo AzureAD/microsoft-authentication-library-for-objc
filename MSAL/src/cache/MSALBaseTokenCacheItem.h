@@ -49,6 +49,6 @@
                response:(MSALTokenResponse *)response;
 
 // Subclasses *must* override this
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end
