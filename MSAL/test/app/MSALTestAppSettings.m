@@ -172,18 +172,6 @@ static NSArray<NSString *> *s_scopes_available = nil;
     _currentUser = currentUser;
 }
 
-- (void)setScope:(NSString *)scope enabled:(BOOL)enabled
-{
-    if (enabled)
-    {
-        [_scopes addObject:scope];
-    }
-    else
-    {
-        [_scopes removeObject:scope];
-    }
-}
-
 + (NSArray<NSString *> *)availableScopes
 {
     return s_scopes_available;
