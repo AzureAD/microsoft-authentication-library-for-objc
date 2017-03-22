@@ -67,11 +67,8 @@
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
-#if TARGET_OS_IPHONE
-    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALKeychainTokenCache defaultKeychainCache]];
-#else
-    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALWrapperTokenCache defaultCache]];
-#endif
+
+    MSALTokenCacheAccessor *cache = _parameters.tokenCache;
     (void)cache;
     
     MSALAccessTokenCacheItem *accessToken = nil;

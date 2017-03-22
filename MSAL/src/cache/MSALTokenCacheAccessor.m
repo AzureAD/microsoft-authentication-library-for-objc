@@ -103,7 +103,7 @@
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
                                         error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString//?
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
                                                                  clientId:requestParam.clientId
                                                                     scope:requestParam.scopes
                                                                      user:requestParam.user];

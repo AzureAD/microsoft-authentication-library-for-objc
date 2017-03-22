@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		606461CB1E70DBE30001FACE /* MSALWrapperTokenCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 606461CA1E70DBE30001FACE /* MSALWrapperTokenCache.m */; };
 		606461D01E7140070001FACE /* MSALWrapperTokenCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 606461CE1E713EE00001FACE /* MSALWrapperTokenCacheTests.m */; };
+		60D490F41E8326A800B2E014 /* MSALWrapperTokenCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 606461CA1E70DBE30001FACE /* MSALWrapperTokenCache.m */; };
 		60DEF13E1E633B5300966664 /* MSALIdToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DEF13D1E633B5300966664 /* MSALIdToken.m */; };
 		60DEF13F1E633B5300966664 /* MSALIdToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DEF13D1E633B5300966664 /* MSALIdToken.m */; };
 		60DEF1411E6501F800966664 /* MSALIdTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 60DEF1401E6501F800966664 /* MSALIdTokenTests.m */; };
@@ -1460,6 +1461,7 @@
 				D65A6F8E1E3FF3D900C69FBA /* MSALRefreshTokenCacheItem.m in Sources */,
 				94E876D21E49369500FB96ED /* MSALBaseRequest.m in Sources */,
 				94E876DC1E493DC600FB96ED /* MSALInteractiveRequest.m in Sources */,
+				60D490F41E8326A800B2E014 /* MSALWrapperTokenCache.m in Sources */,
 				94E876C71E492BC300FB96ED /* MSALRequestParameters.m in Sources */,
 				967317DC1E54C0E8004E6203 /* MSALTenantDiscoveryResponse.m in Sources */,
 				965B86151E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */,
