@@ -33,25 +33,17 @@ typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NS
 
 @protocol MSALAuthorityResolver
 
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                        completionHandler:(OpenIDConfigEndpointCallback) completionHandler;
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock;
 
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant;
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority;
 
 - (void)tenantDiscoveryEndpoint:(NSURL *)url
                         context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback) completionBlock;
-
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority
-                    userPrincipalName:(NSString *)userPrincipalName;
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                    userPrincipalName:(NSString *)userPrincipalName;
-
+                completionBlock:(TenantDiscoveryCallback)completionBlock;
 
 @end
 
@@ -65,7 +57,6 @@ typedef NS_ENUM(NSInteger, MSALAuthorityType)
 typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
 
 @interface MSALAuthority : NSObject
-
 
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
@@ -94,5 +85,11 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (BOOL)isKnownHost:(NSURL *)url;
 
 + (NSSet<NSString *> *)trustedHosts;
+
++ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
+              userPrincipalName:(NSString *)userPrincipalName;
+
++ (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                    userPrincipalName:(NSString *)userPrincipalName;
 
 @end

@@ -39,4 +39,24 @@
     authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
     return authority;
 }
+
++ (MSALTestAuthority *)B2CAuthority:(NSURL *)unvalidatedAuthority
+{
+    MSALTestAuthority *authority = [self AADAuthority:unvalidatedAuthority];
+    authority.isTenantless = NO;
+    authority.authorityType = B2CAuthority;
+    return authority;
+}
+
++ (MSALTestAuthority *)ADFSAuthority:(NSURL *)unvalidatedAuthority
+{
+    MSALTestAuthority *authority = [MSALTestAuthority new];
+    authority.authorityType = ADFSAuthority;
+    authority.canonicalAuthority = unvalidatedAuthority;
+    authority.isTenantless = NO;
+    authority.authorizationEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/authorize"];
+    authority.tokenEndpoint = [unvalidatedAuthority URLByAppendingPathComponent:@"oauth2/v2.0/token"];
+    return authority;
+}
+
 @end

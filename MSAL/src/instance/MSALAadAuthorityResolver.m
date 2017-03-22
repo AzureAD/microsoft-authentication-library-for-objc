@@ -35,77 +35,46 @@
 #define TOKEN_ENDPOINT_SUFFIX           @"oauth2/v2.0/authorize"
 #define AUTHORIZE_ENDPOINT_SUFFIX       @"oauth2/v2.0/token"
 
-#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.windows.net/common/discovery/instance"
+#define AAD_INSTANCE_DISCOVERY_ENDPOINT @"https://login.microsoftonline.com/common/discovery/instance"
 #define API_VERSION                     @"api-version"
 #define API_VERSION_VALUE               @"1.0"
 #define AUTHORIZATION_ENDPOINT          @"authorization_endpoint"
 
-#define DEFAULT_OPENID_CONFIGURATION_ENDPOINT @"v2.0/.well-known/openid-configuration"
-
-static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
-
-+ (void)initialize
-{
-    s_validatedAuthorities = [NSMutableDictionary new];
-}
-
-- (MSALAuthority *)authorityFromCache:(NSURL *)authority userPrincipalName:(NSString *)userPrincipalName
-{
-    (void)userPrincipalName;
-    return s_validatedAuthorities[authority.absoluteString.lowercaseString];
-}
-
-- (BOOL)addToValidatedAuthorityCache:(MSALAuthority *)authority
-                   userPrincipalName:(NSString *)userPrincipalName
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
 {
     if (!authority)
     {
-        return NO;
-    }
-    
-    (void)userPrincipalName;
-    s_validatedAuthorities[authority.canonicalAuthority.absoluteString.lowercaseString] = authority;
-    return YES;
-}
-
-- (NSString *)defaultOpenIdConfigurationEndpointForHost:(NSString *)host tenant:(NSString *)tenant
-{
-    if ([NSString msalIsStringNilOrBlank:host] || [NSString msalIsStringNilOrBlank:tenant])
-    {
         return nil;
     }
-    return [NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, DEFAULT_OPENID_CONFIGURATION_ENDPOINT];
     
+    return [authority URLByAppendingPathComponent:@"v2.0/.well-known/openid-configuration"].absoluteString;
 }
 
-- (void)openIDConfigurationEndpointForURL:(NSURL *)url
-                        userPrincipalName:(NSString *)userPrincipalName
-                                 validate:(BOOL)validate
-                                  context:(id<MSALRequestContext>)context
-                        completionHandler:(OpenIDConfigEndpointCallback)completionHandler
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
     (void)userPrincipalName;
     
-    NSString *host = url.host;
-    NSString *tenant = url.pathComponents[1];
-    
-    if (!validate || [MSALAuthority isKnownHost:url])
+    if (!validate || [MSALAuthority isKnownHost:authority])
     {
-        NSString *endpoint = [self defaultOpenIdConfigurationEndpointForHost:host tenant:tenant];
-        completionHandler(endpoint, nil);
+        NSString *endpoint = [self defaultOpenIdConfigurationEndpointForAuthority:authority];
+        completionBlock(endpoint, nil);
         return;
     }
 
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
                                                             context:context];
     [request addValue:API_VERSION_VALUE forHTTPHeaderField:API_VERSION];
-    [request addValue:[NSString stringWithFormat:@"https://%@/%@/%@", host, tenant, TOKEN_ENDPOINT_SUFFIX] forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
+    [request addValue:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
     
     [request sendGet:^(MSALHttpResponse *response, NSError *error)
      {
          if (error)
          {
-             completionHandler(nil, error);
+             completionBlock(nil, error);
              return;
          }
          
@@ -114,7 +83,7 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
                                                                                              error:&jsonError];
          if (jsonError)
          {
-             completionHandler(nil, error);
+             completionBlock(nil, error);
              return;
          }
          
@@ -124,10 +93,10 @@ static NSMutableDictionary<NSString *, MSALAuthority *> *s_validatedAuthorities;
          {
              NSError *tenantDiscoveryError;
              CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
-             completionHandler(nil, tenantDiscoveryError);
+             completionBlock(nil, tenantDiscoveryError);
              return;
          }
-         completionHandler(tenantDiscoverEndpoint, nil);
+         completionBlock(tenantDiscoverEndpoint, nil);
          return;
      }];
   

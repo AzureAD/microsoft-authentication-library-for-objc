@@ -25,27 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAdfsAuthorityResolver.h"
 
-#define TEST_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+@implementation MSALAdfsAuthorityResolver
 
-extern NSString* MSALTestAppCacheChangeNotification;
+- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
+                              userPrincipalName:(NSString *)userPrincipalName
+                                       validate:(BOOL)validate
+                                        context:(id<MSALRequestContext>)context
+                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
+{
+    (void)authority;
+    (void)userPrincipalName;
+    (void)validate;
+    (void)context;
+    (void)completionBlock;
+    @throw @"TODO";
 
-@interface MSALTestAppSettings : NSObject
+}
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
+{
+    if (!authority)
+    {
+        return nil;
+    }
+    return [authority URLByAppendingPathComponent:@".well-known/openid-configuration"].absoluteString;
+}
 
 @end
