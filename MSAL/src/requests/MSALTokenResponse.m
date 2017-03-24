@@ -35,11 +35,11 @@
     {
         return nil;
     }
-    
+
     NSString *expiresIn =  self.expiresIn;
     if (expiresIn)
     {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:-[expiresIn doubleValue]];
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
     }
     
     return self;
@@ -50,5 +50,6 @@ MSAL_JSON_ACCESSOR(OAUTH2_ACCESS_TOKEN, accessToken)
 MSAL_JSON_RW(OAUTH2_REFRESH_TOKEN, refreshToken, setRefreshToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scope, setScope)
 MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, expiresIn)
+MSAL_JSON_ACCESSOR(OAUTH2_ID_TOKEN, idToken)
 
 @end

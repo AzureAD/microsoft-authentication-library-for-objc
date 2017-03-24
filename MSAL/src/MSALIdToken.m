@@ -25,67 +25,54 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALJsonObject.h"
+#import "MSALIdToken.h"
 
-@implementation MSALJsonObject
+#define ID_TOKEN_ISSUER              @"iss"
+#define ID_TOKEN_OBJECT_ID           @"oid"
+#define ID_TOKEN_SUBJECT             @"sub"
+#define ID_TOKEN_TENANT_ID           @"tid"
+#define ID_TOKEN_VERSION             @"ver"
+#define ID_TOKEN_PERFERRED_USERNAME  @"preferred_username"
+#define ID_TOKEN_NAME                @"name"
+#define ID_TOKEN_HOME_OBJECT_ID      @"home_oid"
 
-- (id)init
+@implementation MSALIdToken
+
+MSAL_JSON_ACCESSOR(ID_TOKEN_ISSUER, issuer)
+MSAL_JSON_ACCESSOR(ID_TOKEN_OBJECT_ID, objectId)
+MSAL_JSON_ACCESSOR(ID_TOKEN_SUBJECT, subject)
+MSAL_JSON_ACCESSOR(ID_TOKEN_TENANT_ID, tenantId)
+MSAL_JSON_ACCESSOR(ID_TOKEN_VERSION, version)
+MSAL_JSON_ACCESSOR(ID_TOKEN_PERFERRED_USERNAME, preferredUsername)
+MSAL_JSON_ACCESSOR(ID_TOKEN_NAME, name)
+MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
+
+- (id)initWithRawIdToken:(NSString *)rawIdTokenString
 {
-    if (!(self = [super init]))
+    if ([NSString msalIsStringNilOrBlank:rawIdTokenString])
     {
         return nil;
     }
     
-    _json = [NSMutableDictionary new];
+    NSArray* parts = [rawIdTokenString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+    if (parts.count != 3)
+    {
+        LOG_WARN(nil, @"Id token is invalid.");
+        return nil;
+    }
+    
+    NSData *decoded =  [[parts[1] msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    if (!(self = [super initWithData:decoded error:&error]))
+    {
+        if (error)
+        {
+            LOG_WARN(nil, @"Id token is invalid. Error: %@", error.localizedDescription);
+        }
+        return nil;
+    }
     
     return self;
-}
-
-- (id)initWithData:(NSData *)data
-             error:(NSError * __autoreleasing *)error
-{
-    CHECK_ERROR_RETURN_NIL(data, nil, MSALErrorInternal, @"Attempt to initialize JSON object with nil data");
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _json = [NSJSONSerialization JSONObjectWithData:data
-                                            options:NSJSONReadingMutableContainers
-                                              error:error];
-    
-    if (!_json)
-    {
-        return nil;
-    }
-    
-    return self;
-}
-
-- (NSData *)serialize:(NSError * __autoreleasing *)error
-{
-    return [NSJSONSerialization dataWithJSONObject:_json
-                                           options:0
-                                             error:error];
-}
-
-- (id)initWithJson:(NSDictionary *)json
-             error:(NSError * __autoreleasing *)error
-{
-    CHECK_ERROR_RETURN_NIL(json, nil, MSALErrorInternal, @"Attempt to initialize JSON object with nil data");
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _json = [json mutableCopy];
-    
-    return self;
-}
-
-- (NSDictionary *)jsonDictionary
-{
-    return _json;
 }
 
 @end

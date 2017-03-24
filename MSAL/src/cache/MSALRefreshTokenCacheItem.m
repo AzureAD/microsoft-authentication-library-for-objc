@@ -27,15 +27,51 @@
 
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
+#import "MSALTokenResponse.h"
 
 @implementation MSALRefreshTokenCacheItem
 
 MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
 
-- (MSALTokenCacheKey *)tokenCacheKey
+- (id)initWithAuthority:(NSURL *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response
 {
-    // TODO
-    return nil;
+    if (!response.refreshToken)
+    {
+        return nil;
+    }
+    
+    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
+    {
+        return nil;
+    }
+    
+    self.refreshToken = response.refreshToken;
+    
+    return self;
+}
+
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
+{
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
+                                                                 clientId:self.clientId
+                                                                    scope:nil
+                                                             homeObjectId:self.user.homeObjectId];
+    if (!key)
+    {
+        MSAL_ERROR_CACHE(nil, MSALErrorTokenCacheItemFailure, nil, @"failed to create token cache key.");
+    }
+    return key;
+}
+
+- (id)copyWithZone:(NSZone*) zone
+{
+    MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];
+    
+    item->_json = [_json copyWithZone:zone];
+    
+    return item;
 }
 
 @end

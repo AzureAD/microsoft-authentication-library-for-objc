@@ -40,6 +40,8 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorMismatchedUser);
         STRING_CASE(MSALErrorNetworkFailure);
         STRING_CASE(MSALErrorKeychainFailure);
+        STRING_CASE(MSALErrorTokenCacheItemFailure);
+        STRING_CASE(MSALErrorWrapperCacheFailure);
         STRING_CASE(MSALErrorInteractionRequired);
         STRING_CASE(MSALErrorInvalidResponse);
         STRING_CASE(MSALErrorBadAuthorizationResponse);

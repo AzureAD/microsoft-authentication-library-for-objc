@@ -73,3 +73,6 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 #define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
+
+// Convenience macro for creating a cache error
+#define MSAL_ERROR_CACHE(_CTX, _CODE, _SUBERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, _SUBERROR, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)

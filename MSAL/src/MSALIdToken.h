@@ -25,20 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALJsonObject.h"
 
-@class MSALTokenCacheKey;
+@interface MSALIdToken : MSALJsonObject
 
-#import "MSALBaseTokenCacheItem.h"
+@property (readonly) NSString *issuer;
+@property (readonly) NSString *objectId;
+@property (readonly) NSString *subject;
+@property (readonly) NSString *tenantId;
+@property (readonly) NSString *version;
+@property (readonly) NSString *preferredUsername;
+@property (readonly) NSString *name;
+@property (readonly) NSString *homeObjectId;
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
-
-@property NSString * refreshToken;
-
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
-
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
+- (id)initWithRawIdToken:(NSString *)rawIdTokenString;
 
 @end

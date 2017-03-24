@@ -31,25 +31,24 @@
 
 @class MSALUser;
 @class MSALTokenCacheKey;
+@class MSALTokenResponse;
 
 @interface MSALBaseTokenCacheItem : MSALJsonObject
 
-@property MSALUser *user;
-
 @property NSString *authority;
 @property NSString *clientId;
-@property NSString *policy;
-@property NSString *tenantId;
 @property NSString *rawIdToken;
+@property (readonly) MSALUser *user;
 @property (readonly) NSString *uniqueId;
 @property (readonly) NSString *displayableId;
 @property (readonly) NSString *homeObjectId;
+@property (readonly) NSString *tenantId;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
-                 policy:(NSString *)policy;
+               response:(MSALTokenResponse *)response;
 
 // Subclasses *must* override this
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

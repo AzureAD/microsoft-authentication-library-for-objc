@@ -106,6 +106,8 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         documented in Apple's <Security/SecBase.h> header file
      */
     MSALErrorKeychainFailure = -42200,
+    MSALErrorTokenCacheItemFailure = -42201,
+    MSALErrorWrapperCacheFailure = -42250,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect
         NSUnderlyingError from the userInfo dictionary for more information
