@@ -28,7 +28,7 @@
 #import "MSALTestCase.h"
 
 // From NSString+MSALHelperMethods.m
-#define RANDOM_STRING_MAX_SIZE 1000
+#define RANDOM_STRING_MAX_SIZE 1024
 
 @interface MSALStringHelperMethodTests : MSALTestCase
 

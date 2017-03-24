@@ -66,7 +66,7 @@ static BOOL validBase64Characters(const byte* data, const int size)
     return true;
 }
 
-#define RANDOM_STRING_MAX_SIZE 1000
+#define RANDOM_STRING_MAX_SIZE 1024
 
 @implementation NSString (MSALHelperMethods)
 
