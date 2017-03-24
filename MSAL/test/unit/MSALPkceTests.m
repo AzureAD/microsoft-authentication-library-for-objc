@@ -25,36 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
 
-@interface NSString (MSALHelperMethods)
+#import "MSALTestCase.h"
+#import "MSALPkce.h"
 
-/*! Encodes string to the Base64 encoding. */
-- (NSString *)msalBase64UrlEncode;
-/*! Decodes string from the Base64 encoding. */
-- (NSString *)msalBase64UrlDecode;
+NSUInteger const kCodeVerifierMinLength = 43;
+NSUInteger const kCodeVerifierMaxLength = 128;
 
-/*! Converts NSData to base64 String */
-+ (NSString *)msalBase64EncodeData:(NSData *)data;
-/*! Converts base64 String to NSData */
-+ (NSData *)msalBase64DecodeData:(NSString *)encodedString;
+@interface MSALPkceTests : MSALTestCase
 
-/*! Returns YES if the string is nil, or contains only white space */
-+ (BOOL)msalIsStringNilOrBlank:(NSString *)string;
+@end
 
-/*! Returns the same string, but without the leading and trailing whitespace */
-- (NSString *)msalTrimmedString;
+@implementation MSALPkceTests
 
-/*! Decodes a previously URL encoded string. */
-- (NSString *)msalUrlFormDecode;
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
 
-/*! Encodes the string to pass it as a URL agrument. */
-- (NSString *)msalUrlFormEncode;
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
 
-/*! Computes a SHA256 hash of the string */ 
-- (NSString*)msalComputeSHA256;
+- (void)testPkce
+{
+    MSALPkce *pkce = [MSALPkce new];
+    XCTAssertTrue(pkce.codeVerifier.length >= kCodeVerifierMinLength);
+    XCTAssertTrue(pkce.codeVerifier.length <= kCodeVerifierMaxLength);
+    
+    XCTAssertNotNil(pkce.codeChallenge);
+    
+    XCTAssertEqualObjects(@"S256", pkce.codeChallengeMethod);
+}
 
-/*! Generate a URL-safe string of random data */
-+ (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size;
+
 
 @end
