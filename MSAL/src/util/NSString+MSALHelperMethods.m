@@ -66,6 +66,8 @@ static BOOL validBase64Characters(const byte* data, const int size)
     return true;
 }
 
+#define RANDOM_STRING_MAX_SIZE 1024
+
 @implementation NSString (MSALHelperMethods)
 
 /// <summary>
@@ -334,6 +336,24 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
         [toReturn appendFormat:@"%02x", hash[i]];
     }
     return toReturn;
+}
+
++ (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size
+{
+    if (size > RANDOM_STRING_MAX_SIZE)
+    {
+        return nil;
+    }
+    
+    NSMutableData *data = [NSMutableData dataWithLength:size];
+    int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
+    
+    if (result != 0)
+    {
+        return nil;
+    }
+    
+    return [NSString msalBase64EncodeData:data];
 }
 
 @end

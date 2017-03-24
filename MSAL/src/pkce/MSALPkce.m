@@ -25,36 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALPkce.h"
+#import "NSString+MSALHelperMethods.h"
 
-@interface NSString (MSALHelperMethods)
+#define CHALLENGE_SHA256    @"S256"
 
-/*! Encodes string to the Base64 encoding. */
-- (NSString *)msalBase64UrlEncode;
-/*! Decodes string from the Base64 encoding. */
-- (NSString *)msalBase64UrlDecode;
+static NSUInteger const s_kCodeVerifierByteSize = 32;
 
-/*! Converts NSData to base64 String */
-+ (NSString *)msalBase64EncodeData:(NSData *)data;
-/*! Converts base64 String to NSData */
-+ (NSData *)msalBase64DecodeData:(NSString *)encodedString;
+@implementation MSALPkce
 
-/*! Returns YES if the string is nil, or contains only white space */
-+ (BOOL)msalIsStringNilOrBlank:(NSString *)string;
+- (id)init
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self->_codeVerifier = [self.class createCodeVerifier];
+    self->_codeChallenge = [self.class createChallangeFromCodeVerifier:self->_codeVerifier];
+    
+    return self;
+}
 
-/*! Returns the same string, but without the leading and trailing whitespace */
-- (NSString *)msalTrimmedString;
++ (NSString *)createCodeVerifier
+{
+    return [NSString randomUrlSafeStringOfSize:s_kCodeVerifierByteSize];
+}
 
-/*! Decodes a previously URL encoded string. */
-- (NSString *)msalUrlFormDecode;
++ (NSString *)createChallangeFromCodeVerifier:(NSString *)codeVerifier
+{
+    return [[codeVerifier msalComputeSHA256] msalBase64UrlEncode];
+}
 
-/*! Encodes the string to pass it as a URL agrument. */
-- (NSString *)msalUrlFormEncode;
-
-/*! Computes a SHA256 hash of the string */ 
-- (NSString*)msalComputeSHA256;
-
-/*! Generate a URL-safe string of random data */
-+ (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size;
+- (NSString *)codeChallengeMethod
+{
+    return CHALLENGE_SHA256;
+}
 
 @end
