@@ -103,6 +103,7 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
+#pragma mark -
 #pragma mark acquireTokenSilent
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -115,6 +116,11 @@
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
+#pragma mark -
+#pragma mark signout
+
+- (BOOL)removeUser:(MSALUser *)user
+             error:(NSError * __autoreleasing *)error;
 
 
 @end

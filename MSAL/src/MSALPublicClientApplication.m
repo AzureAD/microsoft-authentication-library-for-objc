@@ -301,6 +301,7 @@
     (void)completionBlock;
 }
 
+#pragma mark -
 #pragma mark Silent
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -370,6 +371,17 @@
     }
     
     [request run:completionBlock];
+}
+
+#pragma mark -
+#pragma mark sign out
+
+- (BOOL)removeUser:(MSALUser *)user
+             error:(NSError * __autoreleasing *)error
+{
+    (void)user;
+    (void)error;
+    return NO;
 }
 
 @end

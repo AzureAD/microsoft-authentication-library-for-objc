@@ -43,6 +43,5 @@
 - (id)initWithIdToken:(MSALIdToken *)idToken
             authority:(NSURL *)authority
              clientId:(NSString *)clientId;
-- (void)signOut;
 
 @end

@@ -58,11 +58,6 @@
     return self;
 }
 
-- (void)signOut
-{
-    // TODO
-}
-
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALUser* user = [[MSALUser allocWithZone:zone] init];
