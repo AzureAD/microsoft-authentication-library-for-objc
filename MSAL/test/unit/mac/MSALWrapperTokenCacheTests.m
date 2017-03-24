@@ -26,14 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALWrapperTokenCache.h"
-#import "MSALWrapperTokenCache+Internal.h"
-#import "MSALTokenResponse.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
-#import "MSALRefreshTokenCacheItem.h"
+#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenResponse.h"
 
 typedef enum
 {

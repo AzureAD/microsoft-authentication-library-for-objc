@@ -26,14 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
-#import "MSALTokenResponse.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
-#import "MSALRefreshTokenCacheItem.h"
+#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenResponse.h"
 
 @interface MSALKeychainTokenCacheTests : XCTestCase
 {
