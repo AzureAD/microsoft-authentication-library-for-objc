@@ -37,7 +37,7 @@
 @property (readonly) NSString *name;
 @property (readonly) NSString *identityProvider;
 @property (readonly) NSString *clientId;
-@property (readonly) NSString *authority;
+@property (readonly) NSURL *authority;
 @property (readonly) NSString *homeObjectId;
 
 - (id)initWithIdToken:(MSALIdToken *)idToken

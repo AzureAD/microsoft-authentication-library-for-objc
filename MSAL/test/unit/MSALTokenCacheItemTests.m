@@ -76,7 +76,7 @@
     XCTAssertEqualObjects(atItem.user.name, @"Simple User");
     XCTAssertEqualObjects(atItem.user.identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(atItem.user.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(atItem.user.authority, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(atItem.user.authority.absoluteString, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(atItem.user.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
 }
 
@@ -105,7 +105,7 @@
     XCTAssertEqualObjects(rtItem.user.name, @"Simple User");
     XCTAssertEqualObjects(rtItem.user.identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(rtItem.user.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(rtItem.user.authority, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(rtItem.user.authority.absoluteString, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(rtItem.user.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
 }
 
