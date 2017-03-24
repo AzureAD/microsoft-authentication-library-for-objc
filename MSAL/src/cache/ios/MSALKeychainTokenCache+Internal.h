@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSALKeychainTokenCache.h"
 #import "MSALTokenCacheDataSource.h"
 
 @class MSALRefreshTokenCacheItem;
