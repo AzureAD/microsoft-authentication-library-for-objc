@@ -44,4 +44,8 @@
              error:(NSError * __autoreleasing *)error;
 - (NSData *)serialize:(NSError * __autoreleasing *)error;
 
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error;
+- (NSDictionary *)jsonDictionary;
+
 @end

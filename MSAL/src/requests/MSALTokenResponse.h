@@ -36,5 +36,6 @@
 @property (readonly) NSString *familyId;
 @property (readonly) NSString *expiresIn;
 @property (readonly) NSDate *expiresOn;
+@property (readonly) NSString *idToken;
 
 @end

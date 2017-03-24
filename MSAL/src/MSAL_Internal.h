@@ -52,7 +52,7 @@
 - (NSString *)GETTER { return [DICT objectForKey:KEY]; }
 
 #define DICTIONARY_WRITE_PROPERTY_IMPL(DICT, KEY, SETTER) \
-- (void)SETTER:(NSString *)value { [DICT setObject:[value copy] forKey:KEY]; }
+- (void)SETTER:(NSString *)value { [DICT setValue:[value copy] forKey:KEY]; }
 
 #define DICTIONARY_RW_PROPERTY_IMPL(DICT, KEY, GETTER, SETTER) \
     DICTIONARY_READ_PROPERTY_IMPL(DICT, KEY, GETTER) \

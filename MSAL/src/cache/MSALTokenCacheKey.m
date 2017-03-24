@@ -27,6 +27,75 @@
 
 #import "MSALTokenCacheKey.h"
 
+static NSString* const s_cacheVersion = @"MSALv1";
+
 @implementation MSALTokenCacheKey
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+                   user:(MSALUser *)user
+{
+    return [self initWithAuthority:authority
+                          clientId:clientId
+                             scope:scope
+                      homeObjectId:user.homeObjectId];
+}
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+           homeObjectId:(NSString *)homeObjectId
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self.authority = [authority lowercaseString];
+    self.clientId = [clientId lowercaseString];
+    self.homeObjectId = [homeObjectId lowercaseString];
+    
+    NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
+    for (NSString *item in scope)
+    {
+        [scopeCopy addObject:item.msalTrimmedString.lowercaseString];
+    }
+    self.scope = scopeCopy;
+    
+    return self;
+}
+
+- (NSString *)service {
+    if (!self.authority && !self.clientId && self.scope.count==0)
+    {
+        return nil;
+    }
+    
+    return [NSString stringWithFormat:@"%@$%@$%@|%@",
+            self.authority ? self.authority.msalBase64UrlEncode : @"",
+            self.clientId ? self.clientId.msalBase64UrlEncode : @"",
+            self.scope ? self.scope.msalToString.msalBase64UrlEncode : @"",
+            s_cacheVersion];
+}
+
+- (NSString *)account {
+    if (!self.homeObjectId)
+    {
+        return nil;
+    }
+    
+    return [NSString stringWithFormat:@"%@|%@",
+            self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @"",
+            s_cacheVersion];
+}
+
+- (BOOL)matches:(MSALTokenCacheKey *)other
+{
+    return [self.clientId isEqualToString:other.clientId]
+    && [self.scope isSubsetOfOrderedSet:other.scope]
+    && (!self.authority || [self.authority isEqualToString:other.authority])
+    && (!self.homeObjectId || [self.homeObjectId isEqualToString:other.homeObjectId]);
+}
 
 @end

@@ -25,20 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALKeychainTokenCache.h"
+#import "MSALTokenCacheDataSource.h"
 
-@class MSALTokenCacheKey;
+@class MSALRefreshTokenCacheItem;
+@class MSALRequestParameters;
+@class MSALAccessTokenCacheItem;
+@class MSALTokenResponse;
 
-#import "MSALBaseTokenCacheItem.h"
+@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
-
-@property NSString * refreshToken;
-
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
-
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
+/*! This method should *only* be called in test code, it should never be called
+ in production code */
+- (void)testRemoveAll;
 
 @end

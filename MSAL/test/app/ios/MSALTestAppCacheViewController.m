@@ -29,6 +29,8 @@
 #import "MSALTestAppSettings.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
+#import "MSALKeychainTokenCache+Internal.h"
+#import "MSALKeychainTokenCache.h"
 
 @interface MSALTestAppCacheRowItem : NSObject
 
@@ -39,6 +41,18 @@
 @end
 
 @implementation MSALTestAppCacheRowItem
+
+@end
+
+@interface MSALAccessTokenCacheItem (TestAppUtil)
+
+@property NSString *expiresOnString;
+
+@end
+
+@implementation MSALAccessTokenCacheItem (TestAppUtil)
+
+MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 
 @end
 
@@ -56,7 +70,7 @@
     NSMutableArray* _userTokens;
     
     NSArray* _tokenRowActions;
-    NSArray* _mrrtRowActions;
+    NSArray* _rtRowActions;
     NSArray* _clientIdRowActions;
 }
 
@@ -81,8 +95,15 @@
 {
     MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
     
-    // TODO: Test App Token Cache
-    (void)rowItem;
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    if ([rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
+    {
+        [cache removeAccessTokenItem:(MSALAccessTokenCacheItem *)rowItem.item error:nil];
+    }
+    else if ([rowItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]])
+    {
+        [cache removeRefreshTokenItem:(MSALRefreshTokenCacheItem *)rowItem.item error:nil];
+    }
     
     [self loadCache];
 }
@@ -96,9 +117,16 @@
 - (void)expireTokenAtPath:(NSIndexPath*)indexPath
 {
     MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
+    if (![rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
+    {
+        return;
+    }
     
-    // TODO: Test App Token Cache
-    (void)rowItem;
+    MSALAccessTokenCacheItem *item = (MSALAccessTokenCacheItem *)rowItem.item;
+    item.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
+    
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    [cache addOrUpdateAccessTokenItem:item correlationId:nil error:nil];
     
     [self loadCache];
 }
@@ -123,9 +151,16 @@
 - (void)invalidateTokenAtPath:(NSIndexPath*)indexPath
 {
     MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
+    if (![rowItem isKindOfClass:[MSALRefreshTokenCacheItem class]])
+    {
+        return;
+    }
     
-    // TODO: Test App Token Cache
-    (void)rowItem;
+    MSALRefreshTokenCacheItem *item = (MSALRefreshTokenCacheItem *)rowItem.item;
+    item.refreshToken = @"bad-refresh-token";
+    
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    [cache addOrUpdateRefreshTokenItem:item correlationId:nil error:nil];
     
     [self loadCache];
 }
@@ -200,7 +235,7 @@
     }];
     
     _tokenRowActions = @[ deleteTokenAction, expireTokenAction ];
-    _mrrtRowActions = @[ tombstoneTokenAction, invalidateAction ];
+    _rtRowActions = @[ tombstoneTokenAction, invalidateAction ];
     _clientIdRowActions = @[ deleteAllAction ];
     
     [[NSNotificationCenter defaultCenter] addObserverForName:MSALTestAppCacheChangeNotification
@@ -222,7 +257,7 @@
 
 - (void)addTokenToCacheMap:(MSALBaseTokenCacheItem*)item
 {
-    NSString* userId = item.user.upn;
+    NSString* userId = item.user.displayableId;
     if (!userId)
     {
         userId = @"<unknown>";
@@ -253,20 +288,17 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         // First create a map heirarchy of userId -> clientId -> tokens to sort
         // through all the itmes we get back
-        
-        // TODO: Test App Token Cache
-        NSArray* allItems = nil;
+        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
         _cacheMap = [NSMutableDictionary new];
-        for (MSALBaseTokenCacheItem* item in allItems)
+        
+        NSArray* allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil correlationId:nil error:nil];
+        for (MSALBaseTokenCacheItem* item in allAccessTokenItems)
         {
             [self addTokenToCacheMap:item];
         }
         
-        
-        // Add the tombstones as well
-        // TODO: Test App Token Cache
-        NSArray* allTombstones = nil;
-        for (MSALBaseTokenCacheItem* item in allTombstones)
+        NSArray* allRefreshTokenItems = [cache getRefreshTokenItemsWithKey:nil correlationId:nil error:nil];
+        for (MSALBaseTokenCacheItem* item in allRefreshTokenItems)
         {
             [self addTokenToCacheMap:item];
         }
@@ -387,20 +419,18 @@
         {
             [[cell textLabel] setTextColor:[UIColor brownColor]];
         }
-        else if ([cacheItem.item.refreshToken isEqualToString:@"<bad-refresh-token>"])
+        else */
+        if ([cacheItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]] &&
+             [((MSALRefreshTokenCacheItem *)cacheItem.item).refreshToken isEqualToString:@"bad-refresh-token"])
         {
             [[cell textLabel] setTextColor:[UIColor yellowColor]];
         }
-        }
-        else
-        {
-            
-        }
-        else if (cacheItem.item.isExpired)
+        else if ([cacheItem.item isKindOfClass:[MSALAccessTokenCacheItem class]] &&
+                 ((MSALAccessTokenCacheItem *)cacheItem.item).isExpired)
         {
             [[cell textLabel] setTextColor:[UIColor orangeColor]];
         }
-        else*/
+        else
         {
             [[cell textLabel] setTextColor:[UIColor blackColor]];
         }
@@ -415,26 +445,26 @@
 - (nullable NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView
                            editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    // TODO: Test App Token Cache
     (void)tableView;
+    
     MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
     (void)rowItem;
-    /*
+    
     if (rowItem.clientId)
     {
         return _clientIdRowActions;
     }
     else
     {
-        if (rowItem.item)
+        if ([rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
         {
             return _tokenRowActions;
         }
-        else
+        else if ([rowItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]])
         {
-            return _mrrtRowActions;
+            return _rtRowActions;
         }
-    }*/
+    }
     
     return nil;
 }

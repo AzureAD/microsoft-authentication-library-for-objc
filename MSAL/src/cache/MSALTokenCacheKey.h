@@ -32,4 +32,23 @@
 
 @interface MSALTokenCacheKey : NSObject
 
+@property NSString *authority;
+@property NSString *clientId;
+@property MSALScopes *scope;
+@property NSString *homeObjectId;
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+                   user:(MSALUser *)user;
+
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+           homeObjectId:(NSString *)homeObjectId;
+
+- (NSString *)service;
+- (NSString *)account;
+- (BOOL)matches:(MSALTokenCacheKey *)key;
+
 @end

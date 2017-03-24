@@ -28,48 +28,76 @@
 #import "MSALBaseTokenCacheItem.h"
 #import "MSALUser.h"
 #import "MSAL_Internal.h"
+#import "MSALTokenResponse.h"
+#import "MSALIdToken.h"
 
 @implementation MSALBaseTokenCacheItem
 
+@synthesize user = _user;
+@synthesize tenantId = _tenantId;
+
 MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"policy", policy, setPolicy)
-MSAL_JSON_RW(@"tenant_id", tenantId, setTenantId)
 MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
-                 policy:(NSString *)policy
+               response:(MSALTokenResponse *)response
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
+    if (response.idToken)
+    {
+        self.rawIdToken = response.idToken;
+    }
+    
     self.authority = authority;
     self.clientId = clientId;
-    self.policy = policy;
     
     return self;
 }
 
 - (NSString *)uniqueId
 {
-    return _user.uniqueId;
+    return self.user.uniqueId;
 }
 
 - (NSString *)displayableId
 {
-    return _user.displayableId;
+    return self.user.displayableId;
 }
 
 - (NSString *)homeObjectId
 {
-    return _user.homeObjectId;
+    return self.user.homeObjectId;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey
+- (MSALUser *)user
 {
+    if (!_user)
+    {
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        _user = [[MSALUser alloc] initWithIdToken:idToken authority:[NSURL URLWithString:self.authority] clientId:self.clientId];
+    }
+    return _user;
+}
+
+- (NSString *)tenantId
+{
+    if (!_tenantId)
+    {
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        _tenantId = idToken.tenantId;
+    }
+    return _tenantId;
+}
+
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
+{
+    (void)error;
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
