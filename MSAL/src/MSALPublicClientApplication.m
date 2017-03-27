@@ -36,6 +36,9 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
+#import "MSALTokenCache.h"
+//TODO:JASON DELETE
+#import "MSALKeychainTokenCache+Internal.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
@@ -344,7 +347,7 @@
     if (user.authority)
     {
         NSError *error = nil;
-        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:user.authority error:&error];
+        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:user.authority.absoluteString error:&error];
         if (!authorityUrl)
         {
             completionBlock(nil, error);
@@ -376,12 +379,47 @@
 #pragma mark -
 #pragma mark sign out
 
+#define RETURN_ON_CACHE_ERROR(_ERROR) \
+   if (_ERROR) { \
+      *error = _ERROR;\
+      return NO;\
+   }
+
 - (BOOL)removeUser:(MSALUser *)user
              error:(NSError * __autoreleasing *)error
 {
     (void)user;
     (void)error;
-    return NO;
+    
+    if (!user)
+    {
+        return NO;
+    }
+    
+    MSALRequestParameters *reqParams = [MSALRequestParameters new];
+    reqParams.unvalidatedAuthority = user.authority;
+    reqParams.clientId = user.clientId;
+    reqParams.user = user;
+    
+#if TARGET_OS_IPHONE
+    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALKeychainTokenCache defaultKeychainCache]];
+
+    NSError *cacheError = nil;
+    MSALAccessTokenCacheItem *atItem = [cache findAccessToken:reqParams error:&cacheError];
+    RETURN_ON_CACHE_ERROR(cacheError);
+    
+    [cache deleteAccessToken:atItem error:&cacheError];
+    RETURN_ON_CACHE_ERROR(cacheError);
+    
+    MSALRefreshTokenCacheItem *rtItem = [cache findRefreshToken:reqParams error:&cacheError];
+    RETURN_ON_CACHE_ERROR(cacheError);
+    
+    [cache deleteRefreshToken:rtItem error:&cacheError];
+    RETURN_ON_CACHE_ERROR(cacheError);
+#else
+    
+#endif
+    return YES;
 }
 
 @end

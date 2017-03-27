@@ -351,4 +351,16 @@
      }];
 }
 
+- (void)testRemoveUser
+{
+    NSError *error = nil;
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+
+    [application removeUser:[MSALUser new] error:nil];
+    
+}
 @end
