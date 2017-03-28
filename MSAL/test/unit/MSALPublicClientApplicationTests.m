@@ -442,7 +442,7 @@
     
     MSALUser *user = parameters.user;
     
-    XCTAssertFalse([application removeUser:user error:&error]);
+    XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
 }
 

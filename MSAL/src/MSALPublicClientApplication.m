@@ -397,9 +397,6 @@
     reqParams.clientId = user.clientId;
     reqParams.user = user;
     
-    BOOL atDeleted = NO;
-    BOOL rtDeleted = NO;
-    
     id<MSALTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
     dataSource = [MSALKeychainTokenCache defaultKeychainCache];
@@ -411,16 +408,16 @@
     MSALAccessTokenCacheItem *atItem = [cache findAccessToken:reqParams error:error];
     RETURN_ON_CACHE_ERROR;
     
-    atDeleted = [cache deleteAccessToken:atItem error:error];
+    [cache deleteAccessToken:atItem error:error];
     RETURN_ON_CACHE_ERROR;
     
     MSALRefreshTokenCacheItem *rtItem = [cache findRefreshToken:reqParams error:error];
     RETURN_ON_CACHE_ERROR;
     
-    rtDeleted = [cache deleteRefreshToken:rtItem error:error];
+    [cache deleteRefreshToken:rtItem error:error];
     RETURN_ON_CACHE_ERROR;
 
-    return atDeleted & rtDeleted;
+    return YES;
 }
 
 @end
