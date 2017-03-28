@@ -25,17 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import "MSALClientInfo.h"
+#import "MSALOAuth2Constants.h"
 
-@interface MSALTokenResponse : MSALOAuth2Response
+@implementation MSALClientInfo
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *clientInfo;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uniqueIdentifier)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
+
+- (id)initWithRawClientInfo:(NSString *)rawClientInfo
+{
+    if ([NSString msalIsStringNilOrBlank:rawClientInfo])
+    {
+        return nil;
+    }
+    
+//    NSArray* parts = [rawIdTokenString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
+//    if (parts.count != 3)
+//    {
+//        LOG_WARN(nil, @"Id token is invalid.");
+//        return nil;
+//    }
+//    
+//    NSData *decoded =  [[parts[1] msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+//    NSError *error = nil;
+//    if (!(self = [super initWithData:decoded error:&error]))
+//    {
+//        if (error)
+//        {
+//            LOG_WARN(nil, @"Id token is invalid. Error: %@", error.localizedDescription);
+//        }
+//        return nil;
+//    }
+    
+    return self;
+}
 
 @end

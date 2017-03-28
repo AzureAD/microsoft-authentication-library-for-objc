@@ -25,17 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import "MSALJsonObject.h"
 
-@interface MSALTokenResponse : MSALOAuth2Response
+@interface MSALClientInfo : MSALJsonObject
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *clientInfo;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+@property (readonly) NSString *uniqueIdentifier;
+@property (readonly) NSString *uniqueTenantIdentifier;
+
+- (id)initWithRawClientInfo:(NSString *)rawClientInfo;
 
 @end
