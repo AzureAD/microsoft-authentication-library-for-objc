@@ -29,6 +29,8 @@
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
+#import "MSALTokenCache.h"
+#import "MSALIdToken.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -354,13 +356,143 @@
 - (void)testRemoveUser
 {
     NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+ 
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                    error:nil];
+    
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    
+    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    parameters.tokenCache = cache;
+    
+    MSALUser *user = parameters.user;
+    
+    //store an access token in cache
+    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
+                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
+                                                                                    @"authority" : @"https://login.microsoftonline.com/common",
+                                                                                    @"scope": @"fakescope1 fakescope2",
+                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                    @"id_token": rawIdToken
+                                                                                    }
+                                                                            error:nil];
+    [parameters.tokenCache.dataSource addOrUpdateAccessTokenItem:at correlationId:nil error:nil];
+    MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
+                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"id_token": rawIdToken,
+                                                                                      @"refresh_token": @"fakeRefreshToken"
+                                                                                      }
+                                                                              error:nil];
+    [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt correlationId:nil error:nil];
+
+    XCTAssertTrue([application removeUser:user error:&error]);
+    XCTAssertNil(error);
+}
+
+- (void)testRemoveNonExistingUser
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
-                                                authority:@"https://login.microsoftonline.com/common"
-                                                    error:&error];
-
-    [application removeUser:[MSALUser new] error:nil];
+                                                    error:nil];
     
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    
+    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    parameters.tokenCache = cache;
+    
+    MSALUser *user = parameters.user;
+    
+    XCTAssertFalse([application removeUser:user error:&error]);
+    XCTAssertNil(error);
 }
+
+- (void)testUserKeychainError
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                    error:nil];
+    
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    
+    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    parameters.tokenCache = cache;
+
+    MSALUser *user = parameters.user;
+    
+    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
+                              class:[MSALTokenCacheAccessor class]
+                              block:(id)^(id obj, MSALRequestParameters *params, NSError **error)
+     {
+         (void)obj;
+         (void)params;
+         MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain
+                                                                             code:0 userInfo:nil], @"Keychain failed when fetching team ID.");
+         return NO;
+     }];
+    
+    XCTAssertFalse([application removeUser:user error:&error]);
+    XCTAssertNotNil(error);
+}
+
+
 @end

@@ -34,13 +34,7 @@
 #import "MSALTestSwizzle.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheAccessor.h"
-#import "MSALWrapperTokenCache.h"
-#import "MSALWrapperTokenCache+Internal.h"
+#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
 
 #import "MSALTestURLSession.h"
@@ -152,7 +146,14 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
-    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALWrapperTokenCache new]];
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -204,7 +205,14 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
-    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALWrapperTokenCache new]];
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
