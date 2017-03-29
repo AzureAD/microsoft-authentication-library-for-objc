@@ -59,7 +59,7 @@
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
@@ -107,7 +107,7 @@
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
