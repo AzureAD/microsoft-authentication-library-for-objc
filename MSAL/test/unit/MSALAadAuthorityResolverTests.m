@@ -70,7 +70,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
@@ -146,7 +146,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *authorityString = @"https://somehost.com/sometenant.com";
     
@@ -187,7 +187,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"1.0" forKey:@"api-version"];
