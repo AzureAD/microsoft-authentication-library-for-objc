@@ -479,12 +479,13 @@
 
     MSALUser *user = parameters.user;
     
-    [MSALTestSwizzle instanceMethod:@selector(findAccessToken:error:)
+    [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:error:)
                               class:[MSALTokenCacheAccessor class]
-                              block:(id)^(id obj, MSALRequestParameters *params, NSError **error)
+                              block:(id)^(id obj, MSALUser *user, NSString *clientId, NSError **error)
      {
          (void)obj;
-         (void)params;
+         (void)user;
+         (void)clientId;
          MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain
                                                                              code:0 userInfo:nil], @"Keychain failed when fetching team ID.");
          return NO;

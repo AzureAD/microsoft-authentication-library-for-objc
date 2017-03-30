@@ -377,23 +377,13 @@
 #pragma mark -
 #pragma mark sign out
 
-#define RETURN_ON_CACHE_ERROR \
-   if (*error) { \
-      return NO;\
-   }
-
 - (BOOL)removeUser:(MSALUser *)user
              error:(NSError * __autoreleasing *)error
 {
     if (!user)
     {
-        return NO;
+        return YES;
     }
-    
-    MSALRequestParameters *reqParams = [MSALRequestParameters new];
-    reqParams.unvalidatedAuthority = user.authority;
-    reqParams.clientId = user.clientId;
-    reqParams.user = user;
     
     id<MSALTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
@@ -402,20 +392,8 @@
     dataSource = [MSALWrapperTokenCache defaultCache];
 #endif
     MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
-
-    MSALAccessTokenCacheItem *atItem = [cache findAccessToken:reqParams error:error];
-    RETURN_ON_CACHE_ERROR;
     
-    [cache deleteAccessToken:atItem error:error];
-    RETURN_ON_CACHE_ERROR;
-    
-    MSALRefreshTokenCacheItem *rtItem = [cache findRefreshToken:reqParams error:error];
-    RETURN_ON_CACHE_ERROR;
-    
-    [cache deleteRefreshToken:rtItem error:error];
-    RETURN_ON_CACHE_ERROR;
-
-    return YES;
+    return [cache deleteAllTokensForUser:user clientId:self.clientId error:error];
 }
 
 @end
