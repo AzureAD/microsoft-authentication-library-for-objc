@@ -95,7 +95,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
                                                                      user:self.user];
     if (!key)
     {
-        MSAL_ERROR_CACHE(nil, MSALErrorTokenCacheItemFailure, nil, @"failed to create token cache key.");
+        MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
     }
     return key;
 }
