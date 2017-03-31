@@ -108,7 +108,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     {
         if (![NSString msalIsStringNilOrBlank:part])
         {
-            [scope addObject:part.msalTrimmedString];
+            [scope addObject:part.msalTrimmedString.lowercaseString];
         }
     }
     return scope;
