@@ -129,8 +129,6 @@ static NSArray* s_deviceRows = nil;
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
-    
     (void)animated;
     
     // TODO: WPJ state
@@ -155,6 +153,7 @@ static NSArray* s_deviceRows = nil;
     self.navigationController.navigationBarHidden = YES;
     
     [_tableView reloadData];
+    [super viewWillAppear:animated];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

@@ -59,8 +59,6 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
-    
     (void)animated;
     self.navigationController.navigationBarHidden = NO;
     
@@ -69,6 +67,7 @@
                             animated:NO
                       scrollPosition:UITableViewScrollPositionNone];
     [self refresh];
+    [super viewWillAppear:animated];
 }
 
 #pragma mark -

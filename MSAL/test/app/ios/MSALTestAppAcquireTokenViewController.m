@@ -297,8 +297,6 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
-    
     (void)animated;
     MSALTestAppSettings* settings = [MSALTestAppSettings settings];
     NSString* loginHint = settings.loginHint;
@@ -317,6 +315,8 @@
 
     [_scopesButton setTitle:(settings.scopes.count == 0) ? @"select scopes" : [settings.scopes.allObjects componentsJoinedByString:@","]
                    forState:UIControlStateNormal];
+    
+    [super viewWillAppear:animated];
     
 }
 
