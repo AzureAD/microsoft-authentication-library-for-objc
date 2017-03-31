@@ -75,6 +75,8 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 @property id delegate;
 @property NSOperationQueue* delegateQueue;
 
++ (NSURLSession *)createMockSession;
+
 - (id)initWithDelegate:(id)delegate delegateQueue:(NSOperationQueue *)delegateQueue;
 
 // This adds an expected request, and response to it.

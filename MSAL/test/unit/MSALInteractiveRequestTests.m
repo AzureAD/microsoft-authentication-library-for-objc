@@ -157,7 +157,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [NSURLSession new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
