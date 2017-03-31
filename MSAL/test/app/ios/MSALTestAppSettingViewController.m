@@ -59,6 +59,8 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     (void)animated;
     self.navigationController.navigationBarHidden = NO;
     

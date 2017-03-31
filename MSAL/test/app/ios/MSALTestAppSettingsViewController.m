@@ -129,6 +129,8 @@ static NSArray* s_deviceRows = nil;
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     (void)animated;
     
     // TODO: WPJ state

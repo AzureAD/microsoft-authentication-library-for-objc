@@ -288,9 +288,6 @@
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
-    CGRect keyboardFrameEnd = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    keyboardFrameEnd = [self.view convertRect:keyboardFrameEnd fromView:nil];
-    
     [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
         _bottomConstraint.constant = 0;
         _bottomConstraint2.constant = 0;
@@ -300,6 +297,8 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     (void)animated;
     MSALTestAppSettings* settings = [MSALTestAppSettings settings];
     NSString* loginHint = settings.loginHint;
