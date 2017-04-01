@@ -27,9 +27,9 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MSALCrypto : NSObject
+@interface MSALCryptoHelper : NSObject
 
 /*! Computes a SHA256 hash of the string */
-+ (NSData *)msalCryptoSHA256fromString:(NSString *)string;
++ (NSData *)msalSHA256fromString:(NSString *)string;
 
 @end

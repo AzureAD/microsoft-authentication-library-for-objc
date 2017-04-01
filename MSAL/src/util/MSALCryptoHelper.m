@@ -25,17 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALCrypto.h"
+#import "MSALCryptoHelper.h"
 #import <CommonCrypto/CommonDigest.h>
 
-@implementation MSALCrypto
+@implementation MSALCryptoHelper
 
-+ (NSData *)msalCryptoSHA256fromString:(NSString *)string;
++ (NSData *)msalSHA256fromString:(NSString *)string;
 {
     NSData *inputData = [string dataUsingEncoding:NSASCIIStringEncoding];
     NSMutableData *outData = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
     
-    NSAssert([inputData length] < UINT32_MAX, @"Input length is too big");
+    if ([inputData length] > UINT32_MAX)
+    {
+       @throw @"Input length is too big";
+    }
+    
     
     CC_SHA256(inputData.bytes, (uint32_t)inputData.length, outData.mutableBytes);
     

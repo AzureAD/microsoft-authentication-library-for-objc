@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSAL_Internal.h"
 #import "MSALLogger+Internal.h"
-#import "MSALCrypto.h"
+#import "MSALCryptoHelper.h"
 
 typedef unsigned char byte;
 
@@ -327,7 +327,7 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
 
 - (NSString *)msalComputeSHA256Hex
 {
-    NSData *hashData = [MSALCrypto msalCryptoSHA256fromString:self];
+    NSData *hashData = [MSALCryptoHelper msalSHA256fromString:self];
     NSUInteger capacity = hashData.length * 2;
     NSMutableString *toReturn = [NSMutableString stringWithCapacity:capacity];
     

@@ -27,7 +27,7 @@
 
 #import "MSALPkce.h"
 #import "NSString+MSALHelperMethods.h"
-#import "MSALCrypto.h"
+#import "MSALCryptoHelper.h"
 
 #define CHALLENGE_SHA256    @"S256"
 
@@ -55,7 +55,7 @@ static NSUInteger const s_kCodeVerifierByteSize = 32;
 
 + (NSString *)createChallangeFromCodeVerifier:(NSString *)codeVerifier
 {
-    return [NSString msalBase64EncodeData:[MSALCrypto msalCryptoSHA256fromString:codeVerifier]];
+    return [NSString msalBase64EncodeData:[MSALCryptoHelper msalSHA256fromString:codeVerifier]];
 }
 
 - (NSString *)codeChallengeMethod
