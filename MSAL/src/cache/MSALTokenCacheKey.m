@@ -27,7 +27,7 @@
 
 #import "MSALTokenCacheKey.h"
 
-static NSString* const s_cacheVersion = @"MSALv1";
+NSString *const MSALTokenCacheVersion = @"MSALv1";
 
 @implementation MSALTokenCacheKey
 
@@ -76,7 +76,7 @@ static NSString* const s_cacheVersion = @"MSALv1";
             self.authority ? self.authority.msalBase64UrlEncode : @"",
             self.clientId ? self.clientId.msalBase64UrlEncode : @"",
             self.scope ? self.scope.msalToString.msalBase64UrlEncode : @"",
-            s_cacheVersion];
+            MSALTokenCacheVersion];
 }
 
 - (NSString *)account {
@@ -87,7 +87,7 @@ static NSString* const s_cacheVersion = @"MSALv1";
     
     return [NSString stringWithFormat:@"%@|%@",
             self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @"",
-            s_cacheVersion];
+            MSALTokenCacheVersion];
 }
 
 - (BOOL)matches:(MSALTokenCacheKey *)other

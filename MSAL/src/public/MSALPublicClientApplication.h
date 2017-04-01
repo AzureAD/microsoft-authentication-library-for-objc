@@ -117,7 +117,7 @@
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
-#pragma mark signout
+#pragma mark remove user from cache
 
 - (BOOL)removeUser:(MSALUser *)user
              error:(NSError * __autoreleasing *)error;

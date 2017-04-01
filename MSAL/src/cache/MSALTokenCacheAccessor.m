@@ -186,36 +186,10 @@
     {
         return YES;
     }
-   
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:user clientId:clientId error:error];
-    if (!allAccessTokens)
-    {
-        return NO;
-    }
     
-    for (MSALAccessTokenCacheItem *token in allAccessTokens)
-    {
-        if (![_dataSource removeAccessTokenItem:token error:error])
-        {
-            return NO;
-        }
-    }
-    
-    NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokensForUser:user clientId:clientId error:error];
-    if (!allRefreshTokens)
-    {
-        return NO;
-    }
-    
-    for (MSALRefreshTokenCacheItem *token in allRefreshTokens)
-    {
-        if (![_dataSource removeRefreshTokenItem:token error:error])
-        {
-            return NO;
-        }
-    }
-    
-    return YES;
+    return [_dataSource removeAllTokensForHomeObjectId:user.homeObjectId
+                                              clientId:clientId
+                                                 error:error];
 }
 
 

@@ -342,21 +342,8 @@
                           "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
-    if (user.authority)
-    {
-        NSError *error = nil;
-        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:user.authority.absoluteString error:&error];
-        if (!authorityUrl)
-        {
-            completionBlock(nil, error);
-            return;
-        }
-        params.unvalidatedAuthority = authorityUrl;
-    }
-    else
-    {
-        params.unvalidatedAuthority = _authority;
-    }
+
+    params.unvalidatedAuthority = user.authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     
