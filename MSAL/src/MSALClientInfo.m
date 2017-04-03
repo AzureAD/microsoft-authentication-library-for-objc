@@ -37,26 +37,22 @@ MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
 {
     if ([NSString msalIsStringNilOrBlank:rawClientInfo])
     {
+        LOG_WARN(nil, @"client_info is empty.");
+        LOG_WARN_PII(nil, @"client_info is empty.");
         return nil;
     }
     
-//    NSArray* parts = [rawIdTokenString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
-//    if (parts.count != 3)
-//    {
-//        LOG_WARN(nil, @"Id token is invalid.");
-//        return nil;
-//    }
-//    
-//    NSData *decoded =  [[parts[1] msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
-//    NSError *error = nil;
-//    if (!(self = [super initWithData:decoded error:&error]))
-//    {
-//        if (error)
-//        {
-//            LOG_WARN(nil, @"Id token is invalid. Error: %@", error.localizedDescription);
-//        }
-//        return nil;
-//    }
+    NSData *decoded =  [[rawClientInfo msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    if (!(self = [super initWithData:decoded error:&error]))
+    {
+        if (error)
+        {
+            LOG_WARN(nil, @"client_info is invalid. Error: %@", error.localizedDescription);
+            LOG_WARN_PII(nil, @"client_info is invalid. Error: %@", error.localizedDescription);
+        }
+        return nil;
+    }
     
     return self;
 }
