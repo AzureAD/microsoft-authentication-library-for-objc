@@ -553,6 +553,7 @@
 
 
 - (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
+                           environment:(NSString *)environment
                               clientId:(NSString *)clientId
                                  error:(NSError * __autoreleasing *)error
 {
@@ -565,6 +566,7 @@
         return NO;
     }
     BOOL result = [self removeAllTokensForHomeObjectIdImp:homeObjectId
+                                              environment:environment
                                                  clientId:clientId
                                                     error:error];
     
@@ -575,12 +577,14 @@
 
 
 - (BOOL)removeAllTokensForHomeObjectIdImp:(NSString *)homeObjectId
+                              environment:(NSString *)environment
                                  clientId:(NSString *)clientId
                                     error:(NSError * __autoreleasing *)error
 {
     (void)homeObjectId;
     (void)clientId;
     (void)error;
+    (void)environment;
     
     // TODO: implement
     @throw @"Todo";

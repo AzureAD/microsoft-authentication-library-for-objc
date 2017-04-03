@@ -33,9 +33,19 @@
 #import "MSALTokenCacheKey.h"
 
 static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
-static NSString* s_accessTokenFlag = @"MSOpenTech.MSAL.AccessToken";
-static NSString* s_refreshTokenFlag = @"MSOpenTech.MSAL.RefreshToken";
+
 static MSALKeychainTokenCache* s_defaultCache = nil;
+
+typedef NS_ENUM(uint32_t, MSALTokenType)
+{
+    ACCESS_TOKEN    = 'acTk',
+    REFRESH_TOKEN   = 'rfTk'
+};
+
+typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
+{
+    MSAL_V1         = 'MSv1'
+};
 
 @implementation MSALKeychainTokenCache
 {
@@ -159,7 +169,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     (void)correlationId;
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrDescription : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                               (id)kSecAttrType : [NSNumber numberWithUnsignedInt:ACCESS_TOKEN],
                                                                (id)kSecMatchLimit : (id)kSecMatchLimitAll,
                                                                (id)kSecReturnData : @YES,
                                                                (id)kSecReturnAttributes : @YES
@@ -195,7 +205,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrDescription : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                               (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN],
                                                                (id)kSecMatchLimit : (id)kSecMatchLimitAll,
                                                                (id)kSecReturnData : @YES,
                                                                (id)kSecReturnAttributes : @YES
@@ -239,8 +249,9 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         
         NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                       additional:@{
-                                                                   (id)kSecAttrDescription : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                                   (id)kSecAttrType : [NSNumber numberWithUnsignedInt:ACCESS_TOKEN],
                                                                    (id)kSecAttrGeneric : key.clientId.msalBase64UrlEncode,
+                                                                   (id)kSecAttrCreator : [NSNumber numberWithUnsignedInt:MSAL_V1]
                                                                    }];
         
         NSData* itemData = [atItem serialize:error];
@@ -291,8 +302,9 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
         
         NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                       additional:@{
-                                                                   (id)kSecAttrDescription : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding],
+                                                                   (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN],
                                                                    (id)kSecAttrGeneric : key.clientId.msalBase64UrlEncode,
+                                                                   (id)kSecAttrCreator : [NSNumber numberWithUnsignedInt:MSAL_V1]
                                                                    }];
         
         NSData* itemData = [rtItem serialize:error];
@@ -338,7 +350,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrDescription : [s_accessTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
+                                                               (id)kSecAttrType : [NSNumber numberWithUnsignedInt:ACCESS_TOKEN]
                                                                }];
     OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
     
@@ -360,7 +372,7 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
     }
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
-                                                               (id)kSecAttrDescription : [s_refreshTokenFlag dataUsingEncoding:NSUTF8StringEncoding]
+                                                               (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN]
                                                                }];
     OSStatus deleteStatus =  SecItemDelete((CFDictionaryRef)query);
     
@@ -373,11 +385,11 @@ static MSALKeychainTokenCache* s_defaultCache = nil;
 }
 
 - (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
+                           environment:(NSString *)environment
                               clientId:(NSString *)clientId
                                  error:(NSError * __autoreleasing *)error
 {
-    NSString *account = [NSString stringWithFormat:@"%@|%@",
-                         homeObjectId ? homeObjectId.msalBase64UrlEncode : @"", MSALTokenCacheVersion];
+    NSString *account = [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, homeObjectId.msalBase64UrlEncode, environment.msalBase64UrlEncode];
                          
     NSMutableDictionary *query = [self queryDictionaryForKey:nil
                                                   additional:@{

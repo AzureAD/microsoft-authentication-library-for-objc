@@ -32,12 +32,11 @@
 
 @interface MSALTokenCacheKey : NSObject
 
-extern NSString *const MSALTokenCacheVersion;
-
 @property NSString *authority;
 @property NSString *clientId;
 @property MSALScopes *scope;
 @property NSString *homeObjectId;
+@property NSString *environment;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

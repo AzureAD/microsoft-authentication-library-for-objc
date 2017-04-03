@@ -362,7 +362,7 @@
 }
 
 #pragma mark -
-#pragma mark sign out
+#pragma mark remove user from cache
 
 - (BOOL)removeUser:(MSALUser *)user
              error:(NSError * __autoreleasing *)error

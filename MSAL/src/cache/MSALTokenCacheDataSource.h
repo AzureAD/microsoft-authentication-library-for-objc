@@ -50,6 +50,7 @@
                          error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)removeAllTokensForHomeObjectId:(nullable NSString *)homeObjectId
+                           environment:(nonnull NSString *)environment
                               clientId:(nonnull NSString *)clientId
                                  error:(NSError * __nullable __autoreleasing * __nullable)error;
 
