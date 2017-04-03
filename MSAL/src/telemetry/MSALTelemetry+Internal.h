@@ -25,7 +25,7 @@
 
 @interface MSALTelemetry (Internal)
 
-- (NSString *)registerNewRequest;
+- (NSString *)telemetryRequestId;
 
 - (void)startEvent:(NSString *)requestId
          eventName:(NSString *)eventName;

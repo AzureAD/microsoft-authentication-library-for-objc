@@ -46,11 +46,6 @@
     [self setProperty:MSAL_TELEMETRY_KEY_IDP value:[user identityProvider]];
 }
 
-- (void)setUserId:(NSString *)userId
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[userId msalComputeSHA256]];
-}
-
 - (void)setClientId:(NSString *)clientId
 {
     [self setProperty:MSAL_TELEMETRY_KEY_CLIENT_ID value:clientId];
@@ -74,8 +69,6 @@
 - (void)setAuthority:(MSALAuthority *)authority
 {
     NSString *authorityString = [authority.canonicalAuthority absoluteString];
-    
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authorityString];
     
     // set authority type
     NSString *authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
@@ -114,7 +107,6 @@
             uiBehaviorString = @"MSAL_Force_Consent";
             break;
             
-        default:
         case MSALSelectAccount:
             uiBehaviorString = @"MSAL_Select_Account";
     }

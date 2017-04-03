@@ -31,7 +31,6 @@
 - (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
 - (void)setUser:(MSALUser *)user;
-- (void)setUserId:(NSString *)userId;
 - (void)setClientId:(NSString *)clientId;
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
 - (void)setErrorCode:(NSInteger)errorCode;

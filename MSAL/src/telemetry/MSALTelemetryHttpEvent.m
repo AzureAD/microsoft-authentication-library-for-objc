@@ -103,20 +103,4 @@
     [self setProperty:MSAL_TELEMETRY_KEY_HTTP_ERROR_DOMAIN value:errorDomain];
 }
 
-- (NSString *)scrubTenantFromUrl:(NSString *)url
-{
-    //Scrub the tenant domain from the url
-    //E.g., "https://login.windows.net/omercantest.onmicrosoft.com"
-    //will become "https://login.windows.net/*.onmicrosoft.com"
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern: @"/[^/.]+.onmicrosoft.com"
-                                                                           options: NSRegularExpressionCaseInsensitive
-                                                                             error: nil];
-    
-    NSString *scrubbedUrl = [regex stringByReplacingMatchesInString:url
-                                                            options:0
-                                                              range:NSMakeRange(0, [url length])
-                                                       withTemplate:@"/*.onmicrosoft.com"];
-    return scrubbedUrl;
-}
-
 @end

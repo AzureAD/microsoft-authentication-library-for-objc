@@ -24,9 +24,9 @@
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "MSALIpAddressHelper.h"
+#include <CoreFoundation/CoreFoundation.h>
 
 #if !TARGET_OS_IPHONE
-#include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #endif
 
@@ -70,7 +70,7 @@
         NSDictionary *msalIds = [MSALLogger msalId];
         for (NSString *key in msalIds)
         {
-            NSString *propertyName = [NSString stringWithFormat:@"Microsoft.ADAL.%@",
+            NSString *propertyName = [NSString stringWithFormat:@"Microsoft.MSAL.%@",
                                       [[key lowercaseString] stringByReplacingOccurrencesOfString:@"-" withString:@"_"]];
             
             [self setProperty:propertyName value:[msalIds objectForKey:key]];

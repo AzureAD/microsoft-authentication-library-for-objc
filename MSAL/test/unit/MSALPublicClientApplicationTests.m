@@ -158,15 +158,15 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
-         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquire);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          MSALRequestParameters *params = [obj parameters];
          XCTAssertNotNil(params);
          
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquire);
          XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
@@ -206,11 +206,10 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
-         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHint);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertNil(obj.additionalScopes);
@@ -219,6 +218,7 @@
          MSALRequestParameters *params = [obj parameters];
          XCTAssertNotNil(params);
          
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHint);
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
@@ -258,11 +258,10 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
-         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters);
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertNil(obj.additionalScopes);
@@ -271,6 +270,7 @@
          MSALRequestParameters *params = [obj parameters];
          XCTAssertNotNil(params);
          
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters);
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
@@ -314,12 +314,10 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:completionBlock:)
+    [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
-                              block:(id)^(MSALInteractiveRequest *obj, MSALTelemetryApiId apiId, MSALCompletionBlock completionBlock)
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
-         XCTAssertEqual(apiId, MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId);
-         
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
          XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
@@ -328,6 +326,7 @@
          MSALRequestParameters *params = [obj parameters];
          XCTAssertNotNil(params);
          
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId);
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");

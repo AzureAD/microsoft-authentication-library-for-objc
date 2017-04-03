@@ -44,7 +44,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
 
 @implementation MSALTelemetry
 
--(id) initInternal
+- (id)initInternal
 {
     self = [super init];
     if (self)
@@ -57,7 +57,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
     return self;
 }
 
-+ (MSALTelemetry*)sharedInstance
++ (MSALTelemetry *)sharedInstance
 {
     static dispatch_once_t once;
     static MSALTelemetry* singleton = nil;
@@ -109,7 +109,7 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 
 @implementation MSALTelemetry (Internal)
 
-- (NSString *)registerNewRequest
+- (NSString *)telemetryRequestId
 {
     return [[NSUUID UUID] UUIDString];
 }

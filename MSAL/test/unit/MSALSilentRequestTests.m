@@ -115,7 +115,7 @@
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    [request run:MSALTelemetryApiIdAcquire completionBlock:^(MSALResult *result, NSError *error)
+    [request run:^(MSALResult *result, NSError *error)
     {
         XCTAssertNil(result);
         XCTAssertNotNil(error);
@@ -162,7 +162,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    [request run:MSALTelemetryApiIdAcquire completionBlock:^(MSALResult *result, NSError *error)
+    [request run:^(MSALResult *result, NSError *error)
      {
          XCTAssertNotNil(result);
          XCTAssertNil(error);
@@ -241,7 +241,7 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
-    [request run:MSALTelemetryApiIdAcquire completionBlock:^(MSALResult *result, NSError *error)
+    [request run:^(MSALResult *result, NSError *error)
      {
          XCTAssertNotNil(result);
          XCTAssertNil(error);

@@ -63,7 +63,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     if ([NSString msalIsStringNilOrBlank:_parameters.telemetryRequestId])
     {
-        _parameters.telemetryRequestId = [[MSALTelemetry sharedInstance] registerNewRequest];
+        _parameters.telemetryRequestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     }
     
     if (!parameters.scopes || parameters.scopes.count == 0)

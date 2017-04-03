@@ -71,16 +71,16 @@
     NSArray *eventPropertyNames = [eventProperties allKeys];
     
     XCTAssertEqual([eventPropertyNames count], 8);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.device_id"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.device_ip_address"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.event_name"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.x_client_cpu"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.x_client_dm"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.x_client_os"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.x_client_sku"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.ADAL.x_client_ver"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_id"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_ip_address"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.event_name"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_cpu"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_dm"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_os"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_sku"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_ver"]);
     
-    XCTAssertTrue([[eventProperties objectForKey:@"Microsoft.ADAL.event_name"] compare:@"Microsoft.MSAL.default_event"
+    XCTAssertTrue([[eventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"Microsoft.MSAL.default_event"
                                                                                options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
@@ -98,7 +98,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     
     // API event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
@@ -124,13 +124,13 @@
     // API event
     NSDictionary *apiEventProperties = [receivedEvents objectAtIndex:0];
     NSArray *apiEventPropertyNames = [apiEventProperties allKeys];
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.ADAL.start_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.ADAL.stop_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.ADAL.correlation_id"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.ADAL.response_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.ADAL.request_id"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.start_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.stop_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.correlation_id"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.response_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.request_id"]);
     
-    XCTAssertTrue([[apiEventProperties objectForKey:@"Microsoft.ADAL.event_name"] compare:@"apiEvent"
+    XCTAssertTrue([[apiEventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"apiEvent"
                                                                                   options:NSCaseInsensitiveSearch] == NSOrderedSame);
     XCTAssertTrue([[apiEventProperties objectForKey:@"api_property"] compare:@"api_value"
                                                                      options:NSCaseInsensitiveSearch] == NSOrderedSame);
@@ -138,13 +138,13 @@
     // HTTP event
     NSDictionary *httpEventProperties = [receivedEvents objectAtIndex:1];
     NSArray *httpEventPropertyNames = [httpEventProperties allKeys];
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.ADAL.start_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.ADAL.stop_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.ADAL.correlation_id"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.ADAL.response_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.ADAL.request_id"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.start_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.stop_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.correlation_id"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.response_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.request_id"]);
     
-    XCTAssertTrue([[httpEventProperties objectForKey:@"Microsoft.ADAL.event_name"] compare:@"httpEvent"
+    XCTAssertTrue([[httpEventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"httpEvent"
                                                                                    options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
@@ -162,7 +162,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     
     // HTTP event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
@@ -194,7 +194,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     
     // HTTP event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
