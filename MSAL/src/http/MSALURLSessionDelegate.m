@@ -56,7 +56,7 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     
     NSString *requestHost = request.URL.host;
     
-    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256] );
+    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256Hex] );
     LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
     
     completionHandler(request);
