@@ -38,6 +38,7 @@
     @protected
     MSALRequestParameters *_parameters;
     MSALAuthority *_authority;
+    MSALTelemetryApiId _apiId;
 }
 
 @property (nullable) MSALTokenCache *tokenCache;
@@ -54,8 +55,8 @@
 - (BOOL)validateScopeInput:(nullable MSALScopes *)scopes
                      error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (void)run:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock;
-- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+- (void)run:(nonnull MSALCompletionBlock)completionBlock;
+- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 - (void)addAdditionalRequestParameters:(nonnull NSMutableDictionary<NSString *, NSString *> *)parameters;
 

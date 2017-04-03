@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALUIBehavior.h"
+#import "MSALTelemetryApiId.h"
 
 @class MSALAuthority;
 @class MSALTokenCache;
@@ -44,6 +45,7 @@
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
 @property NSString *prompt;
 @property MSALUser *user;
+@property MSALTelemetryApiId apiId;
 
 #pragma mark MSALRequestContext properties
 @property NSUUID *correlationId;

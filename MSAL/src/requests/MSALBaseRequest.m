@@ -59,6 +59,7 @@ static MSALScopes *s_reservedScopes = nil;
     // There's no reason why this should ever be nil.
     THROW_ON_NIL_ARGUMENT(parameters);
     _parameters = parameters;
+    _apiId = parameters.apiId;
     
     if ([NSString msalIsStringNilOrBlank:_parameters.telemetryRequestId])
     {
@@ -116,7 +117,7 @@ static MSALScopes *s_reservedScopes = nil;
     return requestScopes;
 }
 
-- (void)run:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock
+- (void)run:(nonnull MSALCompletionBlock)completionBlock
 {
     NSString *upn = nil;
     if (_parameters.user)
@@ -141,11 +142,11 @@ static MSALScopes *s_reservedScopes = nil;
         }
         
         _authority = authority;
-         [self acquireToken:apiId completionBlock:completionBlock];
+         [self acquireToken:completionBlock];
     }];
 }
 
-- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(nonnull MSALCompletionBlock)completionBlock
+- (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
     [[MSALTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_API_EVENT];
     
@@ -164,7 +165,7 @@ static MSALScopes *s_reservedScopes = nil;
          MSALTelemetryAPIEvent* event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
                                                                           requestId:_parameters.telemetryRequestId
                                                                       correlationId:_parameters.correlationId];
-         [event setApiId:apiId];
+         [event setApiId:_apiId];
          [event setCorrelationId:_parameters.correlationId];
          [event setAuthority:_authority];
          

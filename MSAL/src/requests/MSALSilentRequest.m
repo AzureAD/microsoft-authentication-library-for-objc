@@ -58,7 +58,7 @@
     return self;
 }
 
-- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(MSALCompletionBlock)completionBlock
+- (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
     
@@ -90,7 +90,7 @@
     LOG_INFO(_parameters, @"Refreshing access token");
     LOG_INFO_PII(_parameters, @"Refreshing access token");
     
-    [super acquireToken:apiId completionBlock:completionBlock];
+    [super acquireToken:completionBlock];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters

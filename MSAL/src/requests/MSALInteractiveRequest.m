@@ -108,7 +108,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return [urlComponents URL];
 }
 
-- (void)acquireToken:(MSALTelemetryApiId)apiId completionBlock:(MSALCompletionBlock)completionBlock
+- (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     NSURL *authorizationUrl = [self authorizationUrl];
     
@@ -140,7 +140,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          _code = params[OAUTH2_CODE];
          if (_code)
          {
-             [super acquireToken:apiId completionBlock:completionBlock];
+             [super acquireToken:completionBlock];
              return;
          }
          

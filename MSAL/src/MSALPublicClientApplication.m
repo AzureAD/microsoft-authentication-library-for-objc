@@ -305,6 +305,7 @@
     params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
+    params.apiId = apiId;
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
              "                                   additionalScopes:%@\n"
              "                                          loginHint:%@\n"
@@ -355,7 +356,7 @@
         return;
     }
     
-    [request run:apiId completionBlock:completionBlock];
+    [request run:completionBlock];
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -369,6 +370,7 @@
     params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.user = user;
+    params.apiId = apiId;
     
     [params setScopesFromArray:scopes];
     
@@ -414,7 +416,7 @@
         return;
     }
     
-    [request run:apiId completionBlock:completionBlock];
+    [request run:completionBlock];
 }
 
 @end
