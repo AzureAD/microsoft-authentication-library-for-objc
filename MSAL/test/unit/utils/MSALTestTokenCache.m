@@ -70,6 +70,7 @@
     NSDictionary *tokens = [_cache objectForKey:@"access_tokens"];
     if (!tokens)
     {
+        pthread_rwlock_unlock(&_lock);
         return nil;
     }
     
@@ -140,6 +141,7 @@
     NSDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
     if (!tokens)
     {
+        pthread_rwlock_unlock(&_lock);
         return nil;
     }
     
@@ -183,7 +185,6 @@
         tokens = [NSMutableDictionary new];
         [_cache setObject:tokens forKey:@"access_tokens"];
     }
-    
     
     // Grab the userKey first
     NSString *userKey = key.account;
