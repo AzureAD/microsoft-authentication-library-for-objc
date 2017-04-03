@@ -32,6 +32,7 @@
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestAuthority.h"
 #import "MSALTestSwizzle.h"
+#import "MSALTestTokenCache.h"
 #import "MSALSilentRequest.h"
 
 #import "MSALKeychainTokenCache.h"
@@ -39,8 +40,6 @@
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheAccessor.h"
-#import "MSALWrapperTokenCache.h"
-#import "MSALWrapperTokenCache+Internal.h"
 #import "MSALIdToken.h"
 
 #import "MSALTestURLSession.h"
@@ -152,7 +151,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
-    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALWrapperTokenCache new]];
+    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -194,7 +193,7 @@
     NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [NSURLSession new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
@@ -204,7 +203,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
-    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALWrapperTokenCache new]];
+    parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
