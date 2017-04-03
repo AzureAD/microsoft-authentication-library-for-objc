@@ -93,6 +93,11 @@
     [super tearDown];
 }
 
+- (void)testBadInit
+{
+    XCTAssertThrows([MSALKeychainTokenCache new]);
+}
+
 - (void)testSaveAndRetrieveAccessToken {
     
     //prepare request parameters

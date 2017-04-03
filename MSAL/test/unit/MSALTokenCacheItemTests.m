@@ -117,5 +117,21 @@
     XCTAssertEqualObjects(rtItem.user.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
 }
 
+- (void)testBadRefreshTokenInit {
+    MSALTokenResponse *badResponse = [MSALTokenResponse new];
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+                                                                                    clientId:@"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+                                                                                    response:badResponse];
+    XCTAssertNil(rtItem);
+}
+
+- (void)testBaseItemTokenCacheKey
+{
+    MSALBaseTokenCacheItem *item = [[MSALBaseTokenCacheItem alloc] initWithAuthority:nil
+                                                                            clientId:nil
+                                                                            response:nil];
+    
+    XCTAssertThrows([item tokenCacheKey:nil]);
+}
 
 @end
