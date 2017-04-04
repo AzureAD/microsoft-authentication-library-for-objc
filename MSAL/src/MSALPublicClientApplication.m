@@ -35,6 +35,7 @@
 #import "MSALSilentRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
+#import "MSALURLSession.h"
 #import "MSALWebUI.h"
 #import "MSALTokenCache.h"
 
@@ -209,7 +210,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
@@ -323,7 +324,7 @@
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.user = user;
     

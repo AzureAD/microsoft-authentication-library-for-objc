@@ -30,10 +30,12 @@
 
 @implementation MSALURLSession
 
-+ (NSURLSession *)createSesssionWithConfiguration:(NSURLSessionConfiguration *)config
-                                          context:(id<MSALRequestContext>)context
++ (NSURLSession *)createMSALSesssion:(id<MSALRequestContext>)context
 {
     MSALURLSessionDelegate *delegate = [[MSALURLSessionDelegate alloc] initWithContext:context];
+    NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
+    config.TLSMinimumSupportedProtocol = kTLSProtocol12;
+    
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config
                                                           delegate:delegate
                                                      delegateQueue:nil];

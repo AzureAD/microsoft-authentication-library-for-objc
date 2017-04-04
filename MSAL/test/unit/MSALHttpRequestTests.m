@@ -87,7 +87,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession new];
+    params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *testURLString = @"https://somehttprequest.com";
     

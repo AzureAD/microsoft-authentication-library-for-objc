@@ -60,7 +60,7 @@ MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
                                                              homeObjectId:self.user.homeObjectId];
     if (!key)
     {
-        MSAL_ERROR_CACHE(nil, MSALErrorTokenCacheItemFailure, nil, @"failed to create token cache key.");
+        MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
     }
     return key;
 }

@@ -88,6 +88,11 @@
     [super tearDown];
 }
 
+- (void)testBadInit
+{
+    XCTAssertThrows([MSALKeychainTokenCache new]);
+}
+
 - (void)testSaveAndRetrieveAccessToken {
     
     //prepare request parameters
@@ -361,8 +366,14 @@
     [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
     [cache saveAccessAndRefreshToken:requestParam2 response:testTokenResponse2 error:nil];
     
-    //get all users using client id
+    //get all users using client id (sorted by unique id for easy comparison later)
     NSArray<MSALUser *> *users = [cache getUsers:requestParam.clientId];
+    users = [users sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+        NSString *uniqueIdA = [(MSALUser *)a uniqueId];
+        NSString *uniqueIdB = [(MSALUser *)b uniqueId];
+        return [uniqueIdA compare:uniqueIdB];
+    }];
+    
     XCTAssertTrue(users.count==2);
     XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
     XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");
@@ -380,8 +391,13 @@
     XCTAssertEqualObjects(users[1].authority.absoluteString, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(users[1].homeObjectId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
     
-    //get all users using nil client id
-    users = [cache getUsers:nil];
+    //get all users using nil client id (sorted by unique id for easy comparison later)
+    users = [[cache getUsers:nil] sortedArrayUsingComparator:^NSComparisonResult(id a, id b) {
+        NSString *uniqueIdA = [(MSALUser *)a uniqueId];
+        NSString *uniqueIdB = [(MSALUser *)b uniqueId];
+        return [uniqueIdA compare:uniqueIdB];
+    }];
+    
     XCTAssertTrue(users.count==2);
     XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
     XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");

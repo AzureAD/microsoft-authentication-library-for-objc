@@ -486,8 +486,7 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_ERROR_CACHE(nil, MSALErrorKeychainFailure, [NSError errorWithDomain:NSOSStatusErrorDomain
-                                                                             code:0 userInfo:nil], @"Keychain failed when fetching team ID.");
+         MSAL_KEYCHAIN_ERROR_PARAM(nil, MSALErrorKeychainFailure, @"Keychain failed when fetching team ID.");
          return NO;
      }];
     
