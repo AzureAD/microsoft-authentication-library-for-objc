@@ -77,6 +77,8 @@
 {
     // By default the initializer for MSALPublicClientApplication should fail due to the redirect URI
     // not being listed in the info plist
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application =

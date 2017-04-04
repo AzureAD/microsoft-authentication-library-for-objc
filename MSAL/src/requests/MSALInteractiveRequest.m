@@ -33,11 +33,14 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 
+#import "MSALPkce.h"
+
 static MSALInteractiveRequest *s_currentRequest = nil;
 
 @implementation MSALInteractiveRequest
 {
     NSString *_code;
+    MSALPkce *_pkce;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -61,6 +64,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     }
     
     _uiBehavior = behavior;
+    _pkce = [MSALPkce new];
     
     return self;
 }
@@ -84,6 +88,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
     parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
     parameters[OAUTH2_LOGIN_HINT] = _parameters.loginHint;
+
+    // PKCE:
+    parameters[OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
+    parameters[OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
     
     NSDictionary *msalId = [MSALLogger msalId];
     [parameters addEntriesFromDictionary:msalId];
@@ -164,6 +172,9 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[OAUTH2_GRANT_TYPE] = OAUTH2_AUTHORIZATION_CODE;
     parameters[OAUTH2_CODE] = _code;
     parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    
+    // PKCE
+    parameters[OAUTH2_CODE_VERIFIER] = _pkce.codeVerifier;
 }
 
 @end

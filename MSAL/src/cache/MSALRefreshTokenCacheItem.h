@@ -31,10 +31,14 @@
 
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem
+@interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
-@property (readwrite) NSString * refreshToken;
+@property NSString * refreshToken;
 
-- (MSALTokenCacheKey *)tokenCacheKey;
+- (id)initWithAuthority:(NSURL *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response;
+
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

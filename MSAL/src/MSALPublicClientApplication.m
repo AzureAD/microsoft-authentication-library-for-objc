@@ -35,6 +35,7 @@
 #import "MSALSilentRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
+#import "MSALURLSession.h"
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
@@ -47,7 +48,7 @@
 {
     (void)error; // TODO
     /*NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];*/
+     NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];*/
     NSString *scheme = @"adaliosxformsapp";
     
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
@@ -213,7 +214,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-     additionalScopes:additionalScopes
+               additionalScopes:additionalScopes
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -282,14 +283,14 @@
 {
     [self acquireTokenSilentForScopes:scopes
                                  user:user
-                         forceRefresh:forceRefresh
+                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId
                       completionBlock:completionBlock];
 }
 
 #pragma mark -
-#pragma mark private methods
+#pragma mark - private methods
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
              additionalScopes:(NSArray<NSString *> *)additionalScopes
@@ -302,10 +303,11 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     params.apiId = apiId;
+    
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
              "                                   additionalScopes:%@\n"
              "                                          loginHint:%@\n"
@@ -367,7 +369,7 @@
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.user = user;
     params.apiId = apiId;

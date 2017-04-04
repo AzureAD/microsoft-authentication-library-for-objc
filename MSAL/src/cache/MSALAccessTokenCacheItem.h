@@ -29,13 +29,19 @@
 
 #import "MSALBaseTokenCacheItem.h"
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem
+@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
 @property (readonly) NSString *tokenType;
 @property (readonly) NSString *accessToken;
 @property (readonly) NSDate *expiresOn;
 @property (readonly) MSALScopes *scope;
 
+- (id)initWithAuthority:(NSURL *)authority
+               clientId:(NSString *)clientId
+               response:(MSALTokenResponse *)response;
+
 - (BOOL)isExpired;
+
+- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

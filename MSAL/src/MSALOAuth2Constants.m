@@ -60,3 +60,6 @@ NSString *const OAUTH2_CORRELATION_ID_RESPONSE      = @"correlation_id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST       = @"return-client-request-id";
 NSString *const OAUTH2_CORRELATION_ID_REQUEST_VALUE = @"client-request-id";
 NSString *const OAUTH2_SCOPE_OPENID_VALUE           = @"openid";
+NSString *const OAUTH2_CODE_CHALLENGE               = @"code_challenge";
+NSString *const OAUTH2_CODE_CHALLENGE_METHOD        = @"code_challenge_method";
+NSString *const OAUTH2_CODE_VERIFIER                = @"code_verifier";

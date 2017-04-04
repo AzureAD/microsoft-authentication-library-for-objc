@@ -219,13 +219,22 @@
 
 - (id)init
 {
-    return (NSURLSession *)[[MSALTestURLSession alloc] initWithDelegate:nil delegateQueue:nil];
+    @throw @"This constructor should not be used. If you're in test code use +[MSALTestURLSession createMockSession] if you're in product code use +[MSALURLSession createMSALSession:]";
 }
 
 + (NSURLSession *)sessionWithConfiguration:(NSURLSessionConfiguration *)configuration
                                   delegate:(id<NSURLSessionDelegate>)delegate
                              delegateQueue:(NSOperationQueue *)queue
 {
+    // We're not in the context of a test class here, so XCTAssert can't be used,
+    // however I still want to make sure we're not inadvertantly creating any
+    // NSURLSessions without the proper security settings.
+    
+    // If you're hitting this fix whatever code path is creating NSURLSessions
+    // directly instad of using +[MSALURLSession createMSALSession:]
+    assert(configuration != nil);
+    assert(configuration.TLSMinimumSupportedProtocol == kTLSProtocol12);
+    
     (void)configuration;
     return (NSURLSession *)[[MSALTestURLSession alloc] initWithDelegate:delegate delegateQueue:queue];
 }
@@ -236,6 +245,11 @@
 
 
 @implementation MSALTestURLSession
+
++ (NSURLSession *)createMockSession
+{
+    return (NSURLSession *)[[MSALTestURLSession alloc] initWithDelegate:nil delegateQueue:nil];
+}
 
 static NSMutableArray *s_responses = nil;
 

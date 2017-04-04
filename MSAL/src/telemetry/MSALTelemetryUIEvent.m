@@ -29,7 +29,7 @@
 
 - (void)setLoginHint:(NSString *)hint
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[hint msalComputeSHA256]];
+    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[hint msalComputeSHA256Hex]];
 }
 
 - (void)setNtlm:(NSString *)ntlmHandled

@@ -25,6 +25,7 @@
 
 import subprocess
 import sys
+import re
 
 ios_sim_dest = "-destination 'platform=iOS Simulator,name=iPhone 6,OS=latest'"
 ios_sim_flags = "-sdk iphonesimulator CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO"
@@ -42,11 +43,12 @@ class tclr:
 	SKIP = '\033[96m\033[1m'
 	END = '\033[0m'
 
-build_targets = [
+target_specifiers = [
 	{
 		"name" : "iOS Framework",
 		"scheme" : "MSAL (iOS Framework)",
-		"operations" : [ "build", "test" ],
+		"operations" : [ "build", "test", "codecov" ],
+		"min_warn_codecov" : 70.0,
 		"platform" : "iOS",
 	},
 	{
@@ -58,7 +60,8 @@ build_targets = [
 	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
-		"operations" : [ "build", "test" ],
+		"operations" : [ "build", "test", "codecov" ],
+		"min_warn_codecov" : 70.0,
 		"platform" : "Mac"
 	},
 	{
@@ -81,75 +84,170 @@ def print_operation_end(name, operation, exit_code) :
 	else :
 		print tclr.FAIL + name + " [" + operation + "] Failed" + tclr.END
 
-def do_ios_build(target, operation) :
-	name = target["name"]
-	scheme = target["scheme"]
-	project = target.get("project")
-	workspace = target.get("workspace")
-
-	if (workspace == None) :
-		workspace = default_workspace
-
-	print_operation_start(name, operation)
-
-	command = "xcodebuild " + operation
-	if (project != None) :
-		command += " -project " + project
-	else :
-		command += " -workspace " + workspace
+class BuildTarget:
+	def __init__(self, target):
+		self.name = target["name"]
+		self.project = target.get("project")
+		self.workspace = target.get("workspace")
+		if (self.workspace == None and self.project == None) :
+			self.workspace = default_workspace
+		self.scheme = target["scheme"]
+		self.dependencies = target.get("dependencies")
+		self.operations = target["operations"]
+		self.platform = target["platform"]
+		self.build_settings = None
+		self.min_codecov = target.get("min_codecov")
+		self.min_warn_codecov = target.get("min_warn_codecov")
+		self.coverage = None
+		self.failed = False
+		self.skipped = False
+	
+	def xcodebuild_command(self, operation, xcpretty) :
+		"""
+		Generate and return an xcodebuild command string based on the ivars and operation provided.
+		"""
+		command = "xcodebuild "
+		if (operation != None) :
+			command += operation + " "
 		
-	command += " -scheme \"" + scheme + "\" -configuration " + default_config + " " + ios_sim_flags + " " + ios_sim_dest
-	if (use_xcpretty) :
-		command += " | xcpretty"
+		if (self.project != None) :
+			command += " -project " + self.project
+		else :
+			command += " -workspace " + self.workspace
 		
-	print command
-	exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
+		command += " -scheme \"" + self.scheme + "\" -configuration " + default_config
+		
+		if (operation == "test" and "codecov" in self.operations) :
+			command += " -enableCodeCoverage YES"
+		
+		if (self.platform == "iOS") :
+			command += " " + ios_sim_flags + " " + ios_sim_dest
+		
+		if (xcpretty) :
+			command += " | xcpretty"
+		
+		return command
+	
+	def get_build_settings(self) :
+		"""
+		Retrieve the build settings from xcodebuild and return thm in a dictionary
+		"""
+		if (self.build_settings != None) :
+			return self.build_settings
+		
+		command = self.xcodebuild_command(None, False)
+		command += " -showBuildSettings"
+		
+		settings_blob = subprocess.check_output(command, shell=True)
+		settings_blob = settings_blob.decode("utf-8")
+		settings_blob = settings_blob.split("\n")
+		
+		settings = {}
+		
+		for line in settings_blob :
+			split_line = line.split(" = ")
+			if (len(split_line) < 2) :
+				continue
+			key = split_line[0].strip()
+			value = split_line[1].strip()
+			
+			settings[key] = value
+		
+		self.build_settings = settings
+		
+		return settings
+		
+	def print_coverage(self, printName) :
+		"""
+		Print a summary of the code coverage results with the proper coloring and
+		return -1 if the coverage is below the minimum required.
+		"""
+		if (self.coverage == None) :
+			return 0;
+			
+		printed = False
+		
+		if (self.min_warn_codecov != None) :
+			if (self.coverage < self.min_warn_codecov) :
+				sys.stdout.write(tclr.WARN)
+				if (printName) :
+					sys.stdout.write(self.name + ": ")
+				sys.stdout.write(str(self.coverage) + "% coverage is below the recommended minimum requirement: " + str(self.min_warn_codecov) + "%" + tclr.END + "\n")
+				printed = True
+				
+		if (self.min_codecov != None) :
+			if (self.coverage < self.min_codecov) :
+				sys.stdout.write(tclr.FAIL)
+				if (printName) :
+					sys.stdout.write(self.name + ": ")
+				sys.stdout.write(str(self.coverage) + "% coverage is below the minimum requirement: " + str(self.min_codecov) + "%" + tclr.END + "\n")
+				return -1
+		
+		if (not printed) :
+			sys.stdout.write(tclr.OK)
+			if (printName) :
+				sys.stdout.write(self.name + ": ")
+			sys.stdout.write(str(self.coverage) + "%" + tclr.END + "\n")
+			
+		return 0
+		
+	
+	def do_codecov(self) :
+		"""
+		Print a code coverage report using llvm_cov, retrieve the coverage result and
+		print out an error if it is below the minimum requirement
+		"""
+		build_settings = self.get_build_settings();
+		codecov_dir = build_settings["OBJROOT"] + "/CodeCoverage"
+		executable_path = build_settings["EXECUTABLE_PATH"]
+		config = build_settings["CONFIGURATION"]
+		platform_name = build_settings.get("EFFECTIVE_PLATFORM_NAME")
+		if (platform_name == None) :
+			platform_name = ""
+		
+		command = "xcrun llvm-cov report -instr-profile Coverage.profdata -arch=\"x86_64\" -use-color Products/" + config + platform_name + "/" + executable_path
+		p = subprocess.Popen(command, cwd = codecov_dir, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
+		
+		output = p.communicate()
+		
+		last_line = None
+		for line in output[0].split("\n") :
+			if (len(line.strip()) > 0) :
+				last_line = line
+		
+		sys.stdout.write(output[0])
+		sys.stderr.write(output[1])
+		
+		last_line = last_line.split()
+		# Remove everything but 
+		cov_str = re.sub(r"[^0-9.]", "", last_line[3])
+		self.coverage = float(cov_str)
+		return self.print_coverage(False)
+		
+	
+	def do_operation(self, operation) :
+		exit_code = -1;
+		print_operation_start(self.name, operation)
+		
+		try :
+			if (operation == "codecov") :
+				exit_code = self.do_codecov()
+			else :
+				command = self.xcodebuild_command(operation, use_xcpretty)
+				print command
+				exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
+			
+			if (exit_code != 0) :
+				self.failed = True
+		except Exception as inst:
+			self.failed = True
+			print "Failed due to exception in build script"
+			print type(inst)
+			print inst.args
+			print inst
 
-	print_operation_end(name, operation, exit_code)
-	return exit_code
-
-def do_mac_build(target, operation) :
-	arch = target.get("arch")
-	name = target["name"]
-	scheme = target["scheme"]
-
-	print_operation_start(name, operation)
-
-	command = "xcodebuild " + operation + " -workspace " + default_workspace + " -scheme \"" + scheme + "\" -configuration " + default_config
-
-	if (arch != None) :
-		command += " -destination 'arch=" + arch + "'"
-
-	if (use_xcpretty) :
-		command += " | xcpretty"
-
-	print command
-	exit_code = subprocess.call("set -o pipefail;" + command, shell = True)
-
-	print_operation_end(name, operation, exit_code)
-
-	return exit_code
-
-build_status = dict()
-
-def check_dependencies(target) :
-	dependencies = target.get("dependencies")
-	if (dependencies == None) :
-		return True
-
-	for dependency in dependencies :
-		dependency_status = build_status.get(dependency)
-		if (dependency_status == None) :
-			print tclr.SKIP + "Skipping " + name + " dependency " + dependency + " not built yet." + tclr.END
-			build_status[name] = "Skipped"
-			return False
-
-		if (build_status[dependency] != "Succeeded") :
-			print tclr.SKIP + "Skipping " + name + " dependency " + dependency + " failed." + tclr.END
-			build_status[name] = "Skipped"
-			return False
-
-	return True
+		print_operation_end(self.name, operation, exit_code)
+		return exit_code
 
 clean = True
 
@@ -159,53 +257,61 @@ for arg in sys.argv :
 	if (arg == "--no-xcpretty") :
 		use_xcpretty = False
 
+targets = []
+
+for spec in target_specifiers :
+	targets.append(BuildTarget(spec))
+
 # start by cleaning up any derived data that might be lying around
 if (clean) :
-	subprocess.call("rm -rf ~/Library/Developer/Xcode/DerivedData/MSAL-*", shell=True)
+	derived_folders = set()
+	for target in targets :
+		objroot = target.get_build_settings()["OBJROOT"]
+		trailing = "/Build/Intermediates"
+		derived_dir = objroot[:-len(trailing)]
+		derived_folders.add(derived_dir)
+	
+	for dir in derived_folders :
+		print "Deleting " + dir
+		subprocess.call("rm -rf " + dir, shell=True)
 
-for target in build_targets:
+
+for target in targets:
 	exit_code = 0
-	name = target["name"]
-	platform = target["platform"]
 
-	# If we don't have the dependencies for this target built yet skip it.
-	if (not check_dependencies(target)) :
-		continue
-
-	for operation in target["operations"] :
+	for operation in target.operations :
 		if (exit_code != 0) :
 			break; # If one operation fails, then the others are almost certainly going to fail too
 
-		if (platform == "iOS") :
-			exit_code = do_ios_build(target, operation)
-		elif (platform == "Mac") :
-			exit_code = do_mac_build(target, operation)
-		else :
-			raise Exception('Unrecognized platform type ' + platform)
+		exit_code = target.do_operation(operation)
 
+	# Add success/failure state to the build status dictionary
 	if (exit_code == 0) :
-		print tclr.OK + name + " Succeeded" + tclr.END
-		build_status[name] = "Succeeded"
+		print tclr.OK + target.name + " Succeeded" + tclr.END
 	else :
-		print tclr.FAIL + name + " Failed" + tclr.END
-		build_status[name] = "Failed"
+		print tclr.FAIL + target.name + " Failed" + tclr.END
 
 final_status = 0
 
 print "\n"
 
-for target in build_targets :
-	project = target["name"]
-	status = build_status[project]
-	if (status == "Failed") :
-		print tclr.FAIL + project + " failed." + tclr.END
+code_coverage = False
+
+# Traverse the build_status dictionary for all the targets and print out the final
+# result of each operation.
+for target in targets :
+	if (target.failed) :
+		print tclr.FAIL + target.name + " failed." + tclr.END
 		final_status = 1
-	elif (status == "Skipped") :
-		print tclr.SKIP + '\033[93m' + project + " skipped." + tclr.END
-		final_status = 1
-	elif (status == "Succeeded") :
-		print tclr.OK + '\033[92m' + project + " succeeded." + tclr.END
 	else :
-		raise Exception('Unrecognized status: ' + status)
+		if ("codecov" in target.operations) :
+			code_coverage = True
+		print tclr.OK + '\033[92m' + target.name + " succeeded." + tclr.END
+
+if code_coverage :
+	print "\nCode Coverage Results:"
+	for target in targets :
+		if (target.coverage != None) :
+			target.print_coverage(True)
 
 sys.exit(final_status)

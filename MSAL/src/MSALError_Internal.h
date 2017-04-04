@@ -40,6 +40,8 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 // Convenience macro for checking and filling an optional NSError** parameter
 #define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
+#define MSAL_OSERROR_PARAM(_CTX, _CODE, _OSERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSERROR userInfo:nil], __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+
 #define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
 // Convenience macros for checking a false/nil return result and passing along
@@ -73,3 +75,6 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 #define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
+
+// Convenience macro for creating a cache error
+#define MSAL_KEYCHAIN_ERROR_PARAM(_CTX, _OSERROR, _DESC, ...) MSAL_OSERROR_PARAM(_CTX, MSALErrorKeychainFailure, _OSERROR, _DESC, ##__VA_ARGS__)

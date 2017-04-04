@@ -70,7 +70,9 @@
     NSDictionary *eventProperties = [receivedEvents objectAtIndex:0];
     NSArray *eventPropertyNames = [eventProperties allKeys];
     
-    XCTAssertEqual([eventPropertyNames count], 8);
+    XCTAssertEqual([eventPropertyNames count], 10);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.application_name"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.application_version"]);
     XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_id"]);
     XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_ip_address"]);
     XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.event_name"]);

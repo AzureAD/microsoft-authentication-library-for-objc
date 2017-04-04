@@ -29,8 +29,15 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
+#import "MSALTokenCacheAccessor.h"
+#if TARGET_OS_IPHONE
 #import "MSALKeychainTokenCache.h"
 #import "MSALTelemetryApiId.h"
+#import "MSALKeychainTokenCache+Internal.h"
+#else
+#import "MSALWrapperTokenCache.h"
+#import "MSALWrapperTokenCache+Internal.h"
+#endif
 
 @interface MSALSilentRequest()
 {
@@ -61,12 +68,15 @@
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
+
+    MSALTokenCacheAccessor *cache = _parameters.tokenCache;
+    (void)cache;
     
     MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
     {
 #if TARGET_OS_IPHONE
-        accessToken = [MSALKeychainTokenCache findAccessToken:_parameters];
+        accessToken = [cache findAccessToken:_parameters error:nil];
 #endif
     }
     
@@ -78,7 +88,7 @@
     }
 
 #if TARGET_OS_IPHONE
-    _refreshToken = [MSALKeychainTokenCache findRefreshToken:_parameters];
+    _refreshToken = [cache findRefreshToken:_parameters error:nil];
 #else
     //TODO: Mac support
     _refreshToken = [MSALRefreshTokenCacheItem new];

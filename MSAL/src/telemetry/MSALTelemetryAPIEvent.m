@@ -41,8 +41,8 @@
 
 - (void)setUser:(MSALUser *)user
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256]];
-    //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256]];
+    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256Hex]];
+    //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256Hex]];
     [self setProperty:MSAL_TELEMETRY_KEY_IDP value:[user identityProvider]];
 }
 
