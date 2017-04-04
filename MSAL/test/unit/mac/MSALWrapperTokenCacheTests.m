@@ -275,7 +275,7 @@ typedef enum
     requestParam.user = testUser;
     
     //prepare token response and save AT/RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                     clientId:testClientId
                                                                                     response:testTokenResponse];
     [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
@@ -318,7 +318,7 @@ typedef enum
     [requestParam2 setScopesFromArray:@[@"User.Read"]];
     requestParam2.user = testUser2;
     
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                      clientId:testClientId
                                                                                      response:testTokenResponse2];
     [cache saveAccessAndRefreshToken:requestParam2 response:testTokenResponse2 error:nil];
@@ -374,12 +374,12 @@ typedef enum
                                                                                    response:testTokenResponse2];
     [cache saveAccessAndRefreshToken:requestParam2 response:testTokenResponse2 error:nil];
     
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                     clientId:testClientId
                                                                                     response:testTokenResponse];
     [cache saveAccessAndRefreshToken:requestParam response:testTokenResponse error:nil];
     
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:testAuthority
                                                                                      clientId:testClientId
                                                                                      response:testTokenResponse2];
     [cache saveAccessAndRefreshToken:requestParam2 response:testTokenResponse2 error:nil];
@@ -451,40 +451,42 @@ typedef enum
     //get all users using client id
     NSArray<MSALUser *> *users = [cache getUsers:requestParam.clientId];
     XCTAssertTrue(users.count==2);
-    XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");
-    XCTAssertEqualObjects(users[0].name, @"Simple User");
+    XCTAssertEqualObjects(users[0].uniqueId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
+    XCTAssertEqualObjects(users[0].displayableId, @"user2@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[0].name, @"Simple User 2");
     XCTAssertEqualObjects(users[0].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(users[0].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(users[0].authority, nil);
-    XCTAssertEqualObjects(users[0].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[0].authority.absoluteString, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(users[0].homeObjectId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
     
-    XCTAssertEqualObjects(users[1].uniqueId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
-    XCTAssertEqualObjects(users[1].displayableId, @"user2@msdevex.onmicrosoft.com");
-    XCTAssertEqualObjects(users[1].name, @"Simple User 2");
+    XCTAssertEqualObjects(users[1].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[1].displayableId, @"user@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[1].name, @"Simple User");
     XCTAssertEqualObjects(users[1].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(users[1].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(users[1].authority, nil);
-    XCTAssertEqualObjects(users[1].homeObjectId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
+    XCTAssertEqualObjects(users[1].authority.absoluteString, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(users[1].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    
     
     //get all users using nil client id
     users = [cache getUsers:nil];
     XCTAssertTrue(users.count==2);
-    XCTAssertEqualObjects(users[0].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(users[0].displayableId, @"user@msdevex.onmicrosoft.com");
-    XCTAssertEqualObjects(users[0].name, @"Simple User");
+
+    XCTAssertEqualObjects(users[0].uniqueId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
+    XCTAssertEqualObjects(users[0].displayableId, @"user2@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[0].name, @"Simple User 2");
     XCTAssertEqualObjects(users[0].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(users[0].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(users[0].authority, nil);
-    XCTAssertEqualObjects(users[0].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[0].authority.absoluteString, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(users[0].homeObjectId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
     
-    XCTAssertEqualObjects(users[1].uniqueId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
-    XCTAssertEqualObjects(users[1].displayableId, @"user2@msdevex.onmicrosoft.com");
-    XCTAssertEqualObjects(users[1].name, @"Simple User 2");
+    XCTAssertEqualObjects(users[1].uniqueId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(users[1].displayableId, @"user@msdevex.onmicrosoft.com");
+    XCTAssertEqualObjects(users[1].name, @"Simple User");
     XCTAssertEqualObjects(users[1].identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(users[1].clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(users[1].authority, nil);
-    XCTAssertEqualObjects(users[1].homeObjectId, @"7fbfa524-82aa-4e3a-9fb2-dfb4b30af36d");
+    XCTAssertEqualObjects(users[1].authority.absoluteString, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(users[1].homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
     
     users = [cache getUsers:@"fake-client-id"];
     XCTAssertTrue(users.count==0);
