@@ -25,12 +25,12 @@
 
 typedef NS_ENUM(NSInteger, MSALTelemetryApiId)
 {
-    MSALTelemetryApiIdAcquire = 400,
-    MSALTelemetryApiIdAcquireWithHint = 410,
-    MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters = 420,
-    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId = 430,
-    MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters = 440,
-    MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId = 450,
-    MSALTelemetryApiIdAcquireSilentWithUser = 460,
-    MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId = 470
+    MSALTelemetryApiIdAcquire = 160,
+    MSALTelemetryApiIdAcquireWithHint = 161,
+    MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters = 162,
+    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId = 163,
+    MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters = 164,
+    MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId = 165,
+    MSALTelemetryApiIdAcquireSilentWithUser = 30,
+    MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId = 31
 };
