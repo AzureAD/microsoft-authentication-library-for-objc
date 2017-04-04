@@ -234,7 +234,8 @@
                         requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
-                                             @"refresh_token" : @"fakeRefreshToken"}
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil
