@@ -24,7 +24,6 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
-#import "MSALHelpers.h"
 
 @implementation MSALTelemetryAPIEvent
 
