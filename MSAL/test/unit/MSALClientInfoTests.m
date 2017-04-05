@@ -25,17 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import <XCTest/XCTest.h>
+#import "MSALClientInfo.h"
 
-@interface MSALTokenResponse : MSALOAuth2Response
+@interface MSALClientInfoTests : XCTestCase
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *clientInfo;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+@end
+
+@implementation MSALClientInfoTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testClientInfoParse {
+    NSString *base64String = @"eyJ1aWQiOiIyOWYzODA3YS00ZmIwLTQyZjItYTQ0YS0yMzZhYTBjYjNmOTciLCJ1dGlkIjoiMDI4N2Y5NjMtMmQ3Mi00MzYzLTllM2EtNTcwNWM1YjBmMDMxIn0";
+    
+    NSError *error = nil;
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    
+    XCTAssertNil(error);
+    XCTAssertNotNil(clientInfo);
+    XCTAssertEqualObjects(clientInfo.uniqueIdentifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(clientInfo.uniqueTenantIdentifier, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+}
+
+- (void)testBadClientInfo {
+    NSString *base64String = @"badclientinfo";
+    
+    NSError *error = nil;
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    
+    XCTAssertNotNil(error);
+    XCTAssertNil(clientInfo);
+}
 
 @end

@@ -262,7 +262,8 @@
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
                                              @"grant_type" : @"authorization_code",
-                                             @"code_verifier" : pkce.codeVerifier}
+                                             @"code_verifier" : pkce.codeVerifier,
+                                             @"client_info" : @"1"}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil

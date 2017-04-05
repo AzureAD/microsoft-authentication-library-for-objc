@@ -25,17 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import "MSALClientInfo.h"
+#import "MSALOAuth2Constants.h"
 
-@interface MSALTokenResponse : MSALOAuth2Response
+@implementation MSALClientInfo
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *clientInfo;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uniqueIdentifier)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
+
+- (id)initWithRawClientInfo:(NSString *)rawClientInfo
+                      error:(NSError *__autoreleasing *)error
+{
+    NSData *decoded =  [[rawClientInfo msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    if (!(self = [super initWithData:decoded error:error]))
+    {
+        return nil;
+    }
+    
+    return self;
+}
 
 @end
