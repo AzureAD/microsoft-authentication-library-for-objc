@@ -27,35 +27,56 @@
 
 #import "MSALUser.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALUser
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId
+           clientInfo:(MSALClientInfo *)clientInfo
+{
+    NSString *uid;
+    NSString *utid;
+    if (clientInfo)
+    {
+        uid = clientInfo.uniqueIdentifier;
+        utid = clientInfo.uniqueTenantIdentifier;
+    }
+    else
+    {
+        uid = idToken.uniqueId;
+        utid = idToken.tenantId;
+    }
+    
+    return [self initWithDisplayableId:idToken.preferredUsername
+                                  name:idToken.name
+                      identityProvider:idToken.issuer
+                                   uid:uid
+                                  utid:utid];
+}
+
+- (id)initWithDisplayableId:(NSString *)displayableId
+                       name:(NSString *)name
+           identityProvider:(NSString *)identityProvider
+                        uid:(NSString *)uid
+                       utid:(NSString *)utid
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
-    if (idToken.objectId)
-    {
-        _uniqueId = idToken.objectId;
-    }
-    else
-    {
-        _uniqueId = idToken.subject;
-    }
-    
-    _displayableId = idToken.preferredUsername;
-    _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
-    _name = idToken.name;
-    _identityProvider = idToken.issuer;
-    _authority = authority.absoluteString;
-    _clientId = clientId;
+    _displayableId = displayableId;
+    _name = name;
+    _identityProvider = identityProvider;
+    _uid = uid;
+    _utid = utid;
     
     return self;
+}
+
+- (NSString *)userIdentifier
+{
+    return [NSString stringWithFormat:@"%@.%@", [self.uid msalBase64UrlEncode], [self.utid msalBase64UrlEncode]];
 }
 
 - (void)signOut
@@ -66,15 +87,12 @@
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALUser* user = [[MSALUser allocWithZone:zone] init];
-    
-    user->_upn = [_upn copyWithZone:zone];
-    user->_uniqueId = [_uniqueId copyWithZone:zone];
+
     user->_displayableId = [_displayableId copyWithZone:zone];
     user->_name = [_name copyWithZone:zone];
     user->_identityProvider = [_identityProvider copyWithZone:zone];
-    user->_clientId = [_clientId copyWithZone:zone];
-    user->_authority = [_authority copyWithZone:zone];
-    user->_homeObjectId = [_homeObjectId copyWithZone:zone];
+    user->_uid = [_uid copyWithZone:zone];
+    user->_utid = [_utid copyWithZone:zone];
     
     return user;
 }

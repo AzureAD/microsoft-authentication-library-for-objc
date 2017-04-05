@@ -30,76 +30,36 @@
 #import "MSAL_Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALBaseTokenCacheItem
 
-@synthesize user = _user;
-@synthesize tenantId = _tenantId;
+@synthesize clientInfo = _clientInfo;
 
-MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
+MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
 
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response
+- (id)initWithClientId:(NSString *)clientId
+              response:(MSALTokenResponse *)response
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
-    if (response.idToken)
-    {
-        self.rawIdToken = response.idToken;
-    }
-    
-    self.authority = authority;
     self.clientId = clientId;
+    self.rawClientInfo = response.clientInfo;
     
     return self;
 }
 
-- (NSString *)uniqueId
+- (MSALClientInfo *)clientInfo
 {
-    return self.user.uniqueId;
-}
-
-- (NSString *)displayableId
-{
-    return self.user.displayableId;
-}
-
-- (NSString *)homeObjectId
-{
-    return self.user.homeObjectId;
-}
-
-- (MSALUser *)user
-{
-    if (!_user)
+    if (!_clientInfo)
     {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _user = [[MSALUser alloc] initWithIdToken:idToken authority:[NSURL URLWithString:self.authority] clientId:self.clientId];
+        _clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
     }
-    return _user;
-}
-
-- (NSString *)tenantId
-{
-    if (!_tenantId)
-    {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _tenantId = idToken.tenantId;
-    }
-    return _tenantId;
-}
-
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
-{
-    (void)error;
-    [self doesNotRecognizeSelector:_cmd];
-    return nil;
+    return _clientInfo;
 }
 
 @end

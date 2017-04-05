@@ -25,26 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTokenCacheKeyBase.h"
 
-#import "MSALBaseTokenCacheItem.h"
+static NSString* const s_cacheVersion = @"MSALv1";
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
+@implementation MSALTokenCacheKeyBase
 
-@property NSString *authority;
-@property NSString *rawIdToken;
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) MSALScopes *scope;
-@property (readonly) MSALUser *user;
-
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
-
-- (BOOL)isExpired;
-
-- (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
+- (id)initWithClientId:(NSString *)clientId
+        userIdentifier:(NSString *)userIdentifier
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self.clientId = [clientId lowercaseString];
+    self.userIdentifier = [userIdentifier lowercaseString];
+    
+    return self;
+}
 
 @end

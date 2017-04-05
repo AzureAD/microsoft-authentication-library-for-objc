@@ -25,30 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSAL_Internal.h"
+#import "MSALTokenCacheKeyBase.h"
 
-@class MSALUser;
-
-@interface MSALTokenCacheKey : NSObject
+@interface MSALAccessTokenCacheKey : MSALTokenCacheKeyBase
 
 @property NSString *authority;
-@property NSString *clientId;
 @property MSALScopes *scope;
-@property NSString *homeObjectId;
+@property (readonly) NSString *environment;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
                   scope:(MSALScopes *)scope
-                   user:(MSALUser *)user;
+         userIdentifier:(NSString *)userIdentifier;
 
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-                  scope:(MSALScopes *)scope
-           homeObjectId:(NSString *)homeObjectId;
+- (BOOL)matches:(MSALAccessTokenCacheKey *)other;
 
 - (NSString *)service;
 - (NSString *)account;
-- (BOOL)matches:(MSALTokenCacheKey *)key;
 
 @end

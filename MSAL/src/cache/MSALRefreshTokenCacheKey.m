@@ -25,26 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALRefreshTokenCacheKey.h"
 
-#import "MSALBaseTokenCacheItem.h"
+@implementation MSALRefreshTokenCacheKey
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
+- (id)initWithEnvironment:(NSString *)environment
+                 clientId:(NSString *)clientId
+           userIdentifier:(NSString *)userIdentifier
+{
+    if (!(self = [super initWithClientId:clientId userIdentifier:userIdentifier]))
+    {
+        return nil;
+    }
+    
+    self.environment = [environment lowercaseString];
+    
+    return self;
+}
 
-@property NSString *authority;
-@property NSString *rawIdToken;
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) MSALScopes *scope;
-@property (readonly) MSALUser *user;
+- (BOOL)matches:(MSALRefreshTokenCacheKey *)other
+{
+    return [self.clientId isEqualToString:other.clientId]
+    && (!self.environment || [self.environment isEqualToString:other.environment])
+    && (!self.userIdentifier || [self.userIdentifier isEqualToString:other.userIdentifier]);
+}
 
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
+- (NSString *)service {
+    if (!self.clientId)
+    {
+        return nil;
+    }
 
-- (BOOL)isExpired;
+    return self.clientId.msalBase64UrlEncode;
+}
 
-- (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
+- (NSString *)account {
+    if (!self.userIdentifier)
+    {
+        return nil;
+    }
+
+    return [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, self.userIdentifier.msalBase64UrlEncode, self.environment.msalBase64UrlEncode];
+}
 
 @end

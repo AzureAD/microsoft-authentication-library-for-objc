@@ -26,38 +26,71 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
 #import "MSALTokenResponse.h"
+#import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALRefreshTokenCacheItem
 
-MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
+@synthesize user = _user;
 
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response
+MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
+MSAL_JSON_RW(@"environment", environment, setEnvironment)
+MSAL_JSON_RW(@"displayable_id", displayableId, setDisplayableId)
+MSAL_JSON_RW(@"name", name, setName)
+MSAL_JSON_RW(@"identity_provider", identityProvider, setIdentityProvider)
+MSAL_JSON_RW(@"uid", uid, setUid)
+MSAL_JSON_RW(@"utid", utid, setUtid)
+
+- (id)initWithEnvironment:(NSString *)environment
+                 clientId:(NSString *)clientId
+                 response:(MSALTokenResponse *)response
 {
     if (!response.refreshToken)
     {
         return nil;
     }
     
-    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
+    if (!(self = [super initWithClientId:clientId response:response]))
     {
         return nil;
     }
     
+    self.environment = environment;
     self.refreshToken = response.refreshToken;
+    
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:response.clientInfo error:nil];
+    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo];
+    
+    self.displayableId = _user.displayableId;
+    self.name = _user.name;
+    self.identityProvider = _user.identityProvider;
+    self.uid = _user.uid;
+    self.utid = _user.utid;
     
     return self;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
+- (MSALUser *)user
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
-                                                                 clientId:self.clientId
-                                                                    scope:nil
-                                                             homeObjectId:self.user.homeObjectId];
+    if (!_user)
+    {
+        _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
+                                                   name:self.name
+                                       identityProvider:self.identityProvider
+                                                    uid:self.uid
+                                                   utid:self.utid];
+    }
+    return _user;
+}
+
+- (MSALRefreshTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
+{
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:self.environment
+                                                                                 clientId:self.clientId
+                                                                           userIdentifier:self.user.userIdentifier];
     if (!key)
     {
         MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
