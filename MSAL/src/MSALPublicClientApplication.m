@@ -96,7 +96,8 @@
 
 - (NSArray <MSALUser *> *)users
 {
-    return nil;
+    MSALTokenCacheAccessor *cache = [self defaultTokenCache];
+    return [cache getUsers:self.clientId];
 }
 
 #pragma SafariViewController Support
