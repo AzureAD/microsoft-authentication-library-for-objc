@@ -21,21 +21,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSALTelemetry.h"
 #import "MSALTelemetryEventInterface.h"
+#import "MSALDefaultDispatcher.h"
 
-@interface MSALTelemetry (Internal)
+@interface MSALDefaultDispatcher ()
+{
+    NSMutableDictionary* _objectsToBeDispatched;
+    id<MSALDispatcher> _dispatcher;
+    NSLock* _dispatchLock;
+    BOOL _setTelemetryOnFailure;
+}
+@end
 
-- (NSString *)telemetryRequestId;
+@implementation MSALDefaultDispatcher
 
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
+- (id)initWithDispatcher:(id<MSALDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+{
+    self = [super init];
+    if (self)
+    {
+        _objectsToBeDispatched = [NSMutableDictionary new];
+        _dispatchLock = [NSLock new];
+        
+        _dispatcher = dispatcher;
+        _setTelemetryOnFailure = setTelemetryOnFailure;
+    }
+    return self;
+}
 
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
+- (BOOL)containsDispatcher:(id<MSALDispatcher>)dispatcher
+{
+    return _dispatcher == dispatcher;
+}
 
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
+- (void)flush:(NSArray *)events errorInEvent:(BOOL)errorInEvent
+{
+    if (_setTelemetryOnFailure && !errorInEvent)
+    {
+        return;
+    }
+    
+    [_dispatcher dispatchEvent:events];
+}
 
-- (void)flush:(NSString *)requestId;
+- (void)receive:(NSString *)requestId
+          event:(id<MSALTelemetryEventInterface>)event
+{
+    (void)requestId;
+    NSDictionary *properties = [event getProperties];
+    if (properties)
+    {
+        [_dispatcher dispatchEvent:@[properties]];
+    }
+}
 
 @end

@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,43 +15,36 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
+#import "MSALTelemetryBaseEvent.h"
 #import "MSALTelemetryApiId.h"
+#import "MSALAuthority.h"
 
-@class MSALAuthority;
-@class MSALTokenCacheAccessor;
-@class MSALUser;
+@interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+- (void)setCorrelationId:(NSUUID *)correlationId;
+- (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
+- (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
+- (void)setUser:(MSALUser *)user;
+- (void)setClientId:(NSString *)clientId;
+- (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
+- (void)setErrorCode:(NSInteger)errorCode;
+- (void)setProtocolCode:(NSString *)protocolCode;
+- (void)setErrorDescription:(NSString *)errorDescription;
+- (void)setErrorDomain:(NSString *)errorDomain;
 
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCacheAccessor *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-@property MSALTelemetryApiId apiId;
+- (void)setAuthorityValidationStatus:(NSString *)status;
+- (void)setAuthority:(MSALAuthorityType)authorityType;
 
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
+- (void)setGrantType:(NSString *)grantType;
+- (void)setAPIStatus:(NSString *)status;
 
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
+- (void)setApiId:(MSALTelemetryApiId)apiId;
 
 @end

@@ -21,21 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+@interface MSALDefaultDispatcher : NSObject
 
-@interface MSALTelemetry (Internal)
++ (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
+- (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
 
-- (NSString *)telemetryRequestId;
+- (id)initWithDispatcher:(id<MSALDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
 
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
+- (void)receive:(NSString *)requestId
+          event:(id<MSALTelemetryEventInterface>)event;
 
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
+- (void)flush:(NSArray *)events errorInEvent:(BOOL)errorInEvent;
 
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString *)requestId;
+- (BOOL)containsDispatcher:(id<MSALDispatcher>)dispatcher;
 
 @end

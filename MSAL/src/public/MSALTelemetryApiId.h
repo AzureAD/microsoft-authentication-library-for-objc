@@ -21,21 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#pragma once
 
-@interface MSALTelemetry (Internal)
-
-- (NSString *)telemetryRequestId;
-
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
-
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString *)requestId;
-
-@end
+typedef NS_ENUM(NSInteger, MSALTelemetryApiId)
+{
+    MSALTelemetryApiIdAcquire = 160,
+    MSALTelemetryApiIdAcquireWithHint = 161,
+    MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters = 162,
+    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId = 163,
+    MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters = 164,
+    MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId = 165,
+    MSALTelemetryApiIdAcquireSilentWithUser = 30,
+    MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId = 31
+};
