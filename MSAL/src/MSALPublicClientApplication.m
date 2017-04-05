@@ -251,6 +251,14 @@
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    params.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
     NSError *error = nil;
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
@@ -347,7 +355,15 @@
     params.unvalidatedAuthority = user.authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    
+
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    params.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+
     NSError *error = nil;
     
     MSALSilentRequest *request =
