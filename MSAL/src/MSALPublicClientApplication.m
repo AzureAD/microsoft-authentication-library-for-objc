@@ -37,6 +37,7 @@
 #import "MSALUIBehavior_Internal.h"
 #import "MSALURLSession.h"
 #import "MSALWebUI.h"
+#import "MSALTokenCache.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
@@ -302,6 +303,7 @@
     (void)completionBlock;
 }
 
+#pragma mark -
 #pragma mark Silent
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -341,21 +343,8 @@
                           "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
-    if (user.authority)
-    {
-        NSError *error = nil;
-        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:user.authority error:&error];
-        if (!authorityUrl)
-        {
-            completionBlock(nil, error);
-            return;
-        }
-        params.unvalidatedAuthority = authorityUrl;
-    }
-    else
-    {
-        params.unvalidatedAuthority = _authority;
-    }
+
+    params.unvalidatedAuthority = user.authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     
@@ -371,6 +360,28 @@
     }
     
     [request run:completionBlock];
+}
+
+#pragma mark -
+#pragma mark remove user from cache
+
+- (BOOL)removeUser:(MSALUser *)user
+             error:(NSError * __autoreleasing *)error
+{
+    if (!user)
+    {
+        return YES;
+    }
+    
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    return [cache deleteAllTokensForUser:user clientId:self.clientId error:error];
 }
 
 @end

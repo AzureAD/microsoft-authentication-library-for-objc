@@ -41,11 +41,9 @@
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
                                           error:(NSError * __autoreleasing *)error;
 
-- (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
-                    error:(NSError * __autoreleasing *)error;
-
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                     error:(NSError * __autoreleasing *)error;
+- (BOOL)deleteAllTokensForUser:(MSALUser *)user
+                      clientId:(NSString *)clientId
+                         error:(NSError * __autoreleasing *)error;
 
 - (NSArray<MSALUser *> *)getUsers:(NSString *)clientId;
 

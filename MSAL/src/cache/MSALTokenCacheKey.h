@@ -36,6 +36,7 @@
 @property NSString *clientId;
 @property MSALScopes *scope;
 @property NSString *homeObjectId;
+@property NSString *environment;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId

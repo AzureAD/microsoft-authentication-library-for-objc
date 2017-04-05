@@ -350,4 +350,19 @@
     return YES;
 }
 
+- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
+                           environment:(NSString *)environment
+                              clientId:(NSString *)clientId
+                                 error:(NSError * __autoreleasing *)error
+{
+    (void)homeObjectId;
+    (void)clientId;
+    (void)error;
+    (void)environment;
+    
+    // TODO: implement
+    @throw @"Todo";
+}
+
+
 @end

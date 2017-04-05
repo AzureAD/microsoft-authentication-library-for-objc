@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,31 +15,25 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#ifndef MSALCache_h
+#define MSALCache_h
 
-@class MSALIdToken;
+#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheItem.h"
+#import "MSALRefreshTokenCacheItem.h"
+#import "MSALTokenCacheDataSource.h"
 
-@interface MSALUser : NSObject <NSCopying>
+#if TARGET_OS_IPHONE
+#import "MSALKeychainTokenCache+Internal.h"
+#else
+#import "MSALWrapperTokenCache+Internal.h"
+#endif
 
-@property (readonly) NSString *upn;//where to get it?
-@property (readonly) NSString *uniqueId;
-@property (readonly) NSString *displayableId;
-@property (readonly) NSString *name;
-@property (readonly) NSString *identityProvider;
-@property (readonly) NSString *clientId;
-@property (readonly) NSURL *authority;
-@property (readonly) NSString *homeObjectId;
-
-- (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId;
-
-@end
+#endif /* MSALCache_h */
