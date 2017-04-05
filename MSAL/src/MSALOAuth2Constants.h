@@ -66,3 +66,6 @@ extern NSString *const OAUTH2_ASSERTION;
 extern NSString *const OAUTH2_CODE_CHALLENGE;
 extern NSString *const OAUTH2_CODE_CHALLENGE_METHOD;
 extern NSString *const OAUTH2_CODE_VERIFIER;
+extern NSString *const OAUTH2_CLIENT_INFO;
+extern NSString *const OAUTH2_UNIQUE_IDENTIFIER;
+extern NSString *const OAUTH2_UNIQUE_TENANT_IDENTIFIER;

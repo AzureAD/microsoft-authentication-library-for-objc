@@ -27,8 +27,6 @@
 
 #import "MSALTokenCacheKey.h"
 
-static NSString* const s_cacheVersion = @"MSALv1";
-
 @implementation MSALTokenCacheKey
 
 - (id)initWithAuthority:(NSString *)authority
@@ -56,6 +54,9 @@ static NSString* const s_cacheVersion = @"MSALv1";
     self.clientId = [clientId lowercaseString];
     self.homeObjectId = [homeObjectId lowercaseString];
     
+    NSURL *authorityURL = [NSURL URLWithString:authority];
+    self.environment = [NSString stringWithFormat:@"%@://%@", authorityURL.scheme, authorityURL.host];
+    
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
     for (NSString *item in scope)
     {
@@ -66,35 +67,28 @@ static NSString* const s_cacheVersion = @"MSALv1";
     return self;
 }
 
-- (NSString *)service {
-    if (!self.authority && !self.clientId && self.scope.count==0)
+- (NSString *)service
+{
+    if (!self.clientId && self.scope.count==0)
     {
         return nil;
     }
     
-    return [NSString stringWithFormat:@"%@$%@$%@|%@",
-            self.authority ? self.authority.msalBase64UrlEncode : @"",
+    return [NSString stringWithFormat:@"%@$%@",
             self.clientId ? self.clientId.msalBase64UrlEncode : @"",
-            self.scope ? self.scope.msalToString.msalBase64UrlEncode : @"",
-            s_cacheVersion];
+            self.scope ? self.scope.msalToString.msalBase64UrlEncode : @""];
 }
 
-- (NSString *)account {
-    if (!self.homeObjectId)
-    {
-        return nil;
-    }
-    
-    return [NSString stringWithFormat:@"%@|%@",
-            self.homeObjectId ? self.homeObjectId.msalBase64UrlEncode : @"",
-            s_cacheVersion];
+- (NSString *)account
+{
+    return [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, self.homeObjectId.msalBase64UrlEncode, self.environment.msalBase64UrlEncode];
 }
 
 - (BOOL)matches:(MSALTokenCacheKey *)other
 {
     return [self.clientId isEqualToString:other.clientId]
     && [self.scope isSubsetOfOrderedSet:other.scope]
-    && (!self.authority || [self.authority isEqualToString:other.authority])
+    && (!self.environment || [self.environment isEqualToString:other.environment])
     && (!self.homeObjectId || [self.homeObjectId isEqualToString:other.homeObjectId]);
 }
 

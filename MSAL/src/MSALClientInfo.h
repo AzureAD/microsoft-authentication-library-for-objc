@@ -25,53 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALUser.h"
-#import "MSALIdToken.h"
+#import "MSALJsonObject.h"
 
-@implementation MSALUser
+@interface MSALClientInfo : MSALJsonObject
 
-- (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    if (idToken.objectId)
-    {
-        _uniqueId = idToken.objectId;
-    }
-    else
-    {
-        _uniqueId = idToken.subject;
-    }
-    
-    _displayableId = idToken.preferredUsername;
-    _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
-    _name = idToken.name;
-    _identityProvider = idToken.issuer;
-    _authority = authority;
-    _clientId = clientId;
-    
-    return self;
-}
+@property (readonly) NSString *uniqueIdentifier;
+@property (readonly) NSString *uniqueTenantIdentifier;
 
-- (id)copyWithZone:(NSZone*) zone
-{
-    MSALUser* user = [[MSALUser allocWithZone:zone] init];
-    
-    user->_upn = [_upn copyWithZone:zone];
-    user->_uniqueId = [_uniqueId copyWithZone:zone];
-    user->_displayableId = [_displayableId copyWithZone:zone];
-    user->_name = [_name copyWithZone:zone];
-    user->_identityProvider = [_identityProvider copyWithZone:zone];
-    user->_clientId = [_clientId copyWithZone:zone];
-    user->_authority = [_authority copyWithZone:zone];
-    user->_homeObjectId = [_homeObjectId copyWithZone:zone];
-    
-    return user;
-}
+- (id)initWithRawClientInfo:(NSString *)rawClientInfo
+                      error:(NSError *__autoreleasing *)error;
 
 @end

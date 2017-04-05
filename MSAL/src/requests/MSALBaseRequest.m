@@ -157,6 +157,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     reqParameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
     reqParameters[OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
+    reqParameters[OAUTH2_CLIENT_INFO] = @"1";
+
     [self addAdditionalRequestParameters:reqParameters];
     authRequest.bodyParameters = reqParameters;
     

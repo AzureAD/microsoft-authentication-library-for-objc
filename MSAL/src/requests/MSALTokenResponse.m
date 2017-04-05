@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTokenResponse.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALTokenResponse
 
@@ -51,5 +52,6 @@ MSAL_JSON_RW(OAUTH2_REFRESH_TOKEN, refreshToken, setRefreshToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scope, setScope)
 MSAL_JSON_ACCESSOR(OAUTH2_EXPIRES_IN, expiresIn)
 MSAL_JSON_ACCESSOR(OAUTH2_ID_TOKEN, idToken)
+MSAL_JSON_ACCESSOR(OAUTH2_CLIENT_INFO, clientInfo)
 
 @end

@@ -25,53 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
-#import "MSALTokenResponse.h"
+#import "MSALClientInfo.h"
+#import "MSALOAuth2Constants.h"
 
-@implementation MSALRefreshTokenCacheItem
+@implementation MSALClientInfo
 
-MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uniqueIdentifier)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
 
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response
+- (id)initWithRawClientInfo:(NSString *)rawClientInfo
+                      error:(NSError *__autoreleasing *)error
 {
-    if (!response.refreshToken)
+    NSData *decoded =  [[rawClientInfo msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    if (!(self = [super initWithData:decoded error:error]))
     {
         return nil;
     }
-    
-    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
-    {
-        return nil;
-    }
-    
-    self.refreshToken = response.refreshToken;
     
     return self;
-}
-
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
-{
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:self.authority
-                                                                 clientId:self.clientId
-                                                                    scope:nil
-                                                             homeObjectId:self.user.homeObjectId];
-    if (!key)
-    {
-        MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
-    }
-    return key;
-}
-
-- (id)copyWithZone:(NSZone*) zone
-{
-    MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];
-    
-    item->_json = [_json copyWithZone:zone];
-    
-    return item;
 }
 
 @end

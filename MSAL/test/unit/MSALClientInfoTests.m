@@ -25,53 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALUser.h"
-#import "MSALIdToken.h"
+#import <XCTest/XCTest.h>
+#import "MSALClientInfo.h"
 
-@implementation MSALUser
+@interface MSALClientInfoTests : XCTestCase
 
-- (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    if (idToken.objectId)
-    {
-        _uniqueId = idToken.objectId;
-    }
-    else
-    {
-        _uniqueId = idToken.subject;
-    }
-    
-    _displayableId = idToken.preferredUsername;
-    _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
-    _name = idToken.name;
-    _identityProvider = idToken.issuer;
-    _authority = authority;
-    _clientId = clientId;
-    
-    return self;
+@end
+
+@implementation MSALClientInfoTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
-- (id)copyWithZone:(NSZone*) zone
-{
-    MSALUser* user = [[MSALUser allocWithZone:zone] init];
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testClientInfoParse {
+    NSString *base64String = @"eyJ1aWQiOiIyOWYzODA3YS00ZmIwLTQyZjItYTQ0YS0yMzZhYTBjYjNmOTciLCJ1dGlkIjoiMDI4N2Y5NjMtMmQ3Mi00MzYzLTllM2EtNTcwNWM1YjBmMDMxIn0";
     
-    user->_upn = [_upn copyWithZone:zone];
-    user->_uniqueId = [_uniqueId copyWithZone:zone];
-    user->_displayableId = [_displayableId copyWithZone:zone];
-    user->_name = [_name copyWithZone:zone];
-    user->_identityProvider = [_identityProvider copyWithZone:zone];
-    user->_clientId = [_clientId copyWithZone:zone];
-    user->_authority = [_authority copyWithZone:zone];
-    user->_homeObjectId = [_homeObjectId copyWithZone:zone];
+    NSError *error = nil;
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
     
-    return user;
+    XCTAssertNil(error);
+    XCTAssertNotNil(clientInfo);
+    XCTAssertEqualObjects(clientInfo.uniqueIdentifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(clientInfo.uniqueTenantIdentifier, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+}
+
+- (void)testBadClientInfo {
+    NSString *base64String = @"badclientinfo";
+    
+    NSError *error = nil;
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    
+    XCTAssertNotNil(error);
+    XCTAssertNil(clientInfo);
 }
 
 @end

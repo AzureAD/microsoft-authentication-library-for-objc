@@ -62,8 +62,9 @@
     XCTAssertTrue([atItem.expiresOn compare:NSDate.date] == NSOrderedDescending);
     XCTAssertEqualObjects(atItem.scope.msalToString, @"mail.read user.read");
     XCTAssertTrue(atItem.isExpired);
-    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2NvbW1vbg$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA|MSALv1");
-    XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, @"MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3|MSALv1");
+    
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, @"NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA");
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, @"0.0.1-dev$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3@aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29t");
     XCTAssertEqualObjects(atItem.authority, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(atItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
     XCTAssertEqualObjects(atItem.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
@@ -76,7 +77,7 @@
     XCTAssertEqualObjects(atItem.user.name, @"Simple User");
     XCTAssertEqualObjects(atItem.user.identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(atItem.user.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(atItem.user.authority, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(atItem.user.authority.absoluteString, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(atItem.user.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
 }
 
@@ -99,8 +100,8 @@
                                                                                   response:response];
     
     XCTAssertEqualObjects(rtItem.refreshToken, @"OAQABAAAAAADRNYRQ3dhRSrm-4K-adpCJT57HWhfLUrDwgpyo2F74PNxR4AHgWe0tUmtDUuQ-pPKn3Z6PdBTxkvX4sCRzD6GF1eV-TGBdNWCLgumARyvTcAp1BH19EB4_sefB8xHGxyLIF-8oOhL91htjBlZAEfGKQOx9Nf4LGYfnaF22pIGwde_wrHO_3lJq9LhhVxHfrNYQEJgIv9FKMjvPyZJX6qdNQ7h9zwcgvJ5kv3opFsC8lxR6OX_l1a609d635bPsJcBAc3M8W_T9e_8ko0TMR-rUolPFN8s5DmJtW0qEljFkLdZInf9NWebgxns-lOEWQ6ltWwuCKFNFLRFtVXikMxycBuF-b0VLJrMaQLUv6PXbi2pcrycn9kzMY3M-JGQUFppxfb7bGaefgn_183zQvPYw9pE05hH8yq-B_pRRg_ULMdqDVIwggv8LPVuW2AZbgBIx3KRzKDiUNWJagerkwGbvh1lty3BJqfahBbiBG5habMCciznNLR7_sTLlCS3ghvhrgPXjkLzy_TpI2Bj6FsvT850drfRbddh_BYtaP6JE9eZecd9BxIrtOoozUKNTk9EFCF5DP7YvIeUlHjSXnOWkZGdLFSu1vlUH4XduwCS3_25u7xDmLrK4loA0AIPLepCi8eA7ZCBqUzkYPsPXN4_SEc1BRVXZSDMrMeOWPGlUqbNHrRcxXElQL20TX3N4_pEhZ5xzCv6Os4Z_v4vj7N9dIAA");
-    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, @"$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$|MSALv1");
-    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, @"MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3|MSALv1");
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, @"NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$");
+    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, @"0.0.1-dev$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3@aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29t");
     XCTAssertEqualObjects(rtItem.authority, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(rtItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
     XCTAssertEqualObjects(rtItem.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
@@ -113,7 +114,7 @@
     XCTAssertEqualObjects(rtItem.user.name, @"Simple User");
     XCTAssertEqualObjects(rtItem.user.identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
     XCTAssertEqualObjects(rtItem.user.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
-    XCTAssertEqualObjects(rtItem.user.authority, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(rtItem.user.authority.absoluteString, @"https://login.microsoftonline.com/common");
     XCTAssertEqualObjects(rtItem.user.homeObjectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
 }
 

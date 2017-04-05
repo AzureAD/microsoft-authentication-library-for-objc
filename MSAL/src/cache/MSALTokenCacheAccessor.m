@@ -79,7 +79,7 @@
     
     if (response.refreshToken)
     {
-        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:nil
+        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority
                                                                                               clientId:requestParam.clientId
                                                                                               response:response];
         [self saveRefreshToken:refreshToken error:error];
@@ -130,7 +130,7 @@
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
                                           error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
                                                                  clientId:requestParam.clientId
                                                                     scope:nil
                                                              homeObjectId:requestParam.user.homeObjectId];
@@ -178,6 +178,24 @@
     return [_dataSource removeRefreshTokenItem:rtItem error:error];
 }
 
+- (BOOL)deleteAllTokensForUser:(MSALUser *)user
+                      clientId:(NSString *)clientId
+                         error:(NSError * __autoreleasing *)error
+{
+    if (!user)
+    {
+        return YES;
+    }
+    
+    NSString *environment = [NSString stringWithFormat:@"%@://%@", user.authority.scheme, user.authority.host];
+    
+    return [_dataSource removeAllTokensForHomeObjectId:user.homeObjectId
+                                           environment:environment
+                                              clientId:clientId
+                                                 error:error];
+}
+
+
 - (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
 {
     NSArray<MSALRefreshTokenCacheItem *> *allRefreshTokens = [self allRefreshTokensForUser:nil clientId:clientId error:nil];
@@ -194,7 +212,7 @@
                                                        clientId:(NSString *)clientId
                                                           error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil clientId:nil scope:nil user:user];
+    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:user.authority.absoluteString clientId:nil scope:nil user:user];
     NSArray *accessTokens = [_dataSource getAccessTokenItemsWithKey:key correlationId:nil error:error];
     NSMutableArray *matchedAccessTokens = [NSMutableArray new];
     
@@ -213,7 +231,12 @@
                                                          clientId:(NSString *)clientId
                                                             error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:nil clientId:nil scope:nil user:user];
+    MSALTokenCacheKey *key = nil;
+    if (user)
+    {
+        key = [[MSALTokenCacheKey alloc] initWithAuthority:user.authority.absoluteString clientId:nil scope:nil user:user];
+    }
+    
     NSArray *refreshTokens = [_dataSource getRefreshTokenItemsWithKey:key correlationId:nil error:error];
     NSMutableArray *matchedRefreshTokens = [NSMutableArray new];
     

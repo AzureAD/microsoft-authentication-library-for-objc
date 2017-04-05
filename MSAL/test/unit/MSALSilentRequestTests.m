@@ -35,11 +35,7 @@
 #import "MSALTestTokenCache.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
 
 #import "MSALTestURLSession.h"
@@ -152,7 +148,7 @@
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
     parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
-    
+
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
@@ -204,7 +200,7 @@
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
     parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
-    
+
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
     
@@ -215,6 +211,7 @@
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
+                                                                                      @"authority" : @"https://login.microsoftonline.com/common",
                                                                                       @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken"
@@ -234,7 +231,8 @@
                         requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
-                                             @"refresh_token" : @"fakeRefreshToken"}
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil

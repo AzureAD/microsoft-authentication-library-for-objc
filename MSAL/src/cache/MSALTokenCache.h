@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,25 +15,25 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#ifndef MSALCache_h
+#define MSALCache_h
 
-@interface MSALTokenResponse : MSALOAuth2Response
+#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheItem.h"
+#import "MSALRefreshTokenCacheItem.h"
+#import "MSALTokenCacheDataSource.h"
 
-@property (readonly) NSString *tokenType;
-@property (readonly) NSString *accessToken;
-@property NSString *refreshToken;
-@property NSString *scope;
-@property (readonly) NSString *clientInfo;
-@property (readonly) NSString *expiresIn;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) NSString *idToken;
+#if TARGET_OS_IPHONE
+#import "MSALKeychainTokenCache+Internal.h"
+#else
+#import "MSALWrapperTokenCache+Internal.h"
+#endif
 
-@end
+#endif /* MSALCache_h */
