@@ -26,34 +26,12 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
-#import "MSALTelemetryApiId.h"
+#import "MSALTelemetry.h"
 
-@class MSALAuthority;
-@class MSALTokenCacheAccessor;
-@class MSALUser;
+typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *event);
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+@interface MSALTelemetryTestDispatcher : NSObject <MSALDispatcher>
 
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCacheAccessor *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-@property MSALTelemetryApiId apiId;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
+@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
 
 @end

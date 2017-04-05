@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALTelemetryApiId.h"
 
 @class MSALAuthority;
 @class MSALTokenCache;
@@ -37,6 +38,7 @@
     @protected
     MSALRequestParameters *_parameters;
     MSALAuthority *_authority;
+    MSALTelemetryApiId _apiId;
 }
 
 @property (nullable) MSALTokenCache *tokenCache;

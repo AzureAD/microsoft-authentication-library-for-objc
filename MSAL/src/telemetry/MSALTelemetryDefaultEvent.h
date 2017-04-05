@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,43 +15,15 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
-#import "MSALTelemetryApiId.h"
+#import "MSALTelemetryBaseEvent.h"
 
-@class MSALAuthority;
-@class MSALTokenCacheAccessor;
-@class MSALUser;
-
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
-
-@property NSURL *unvalidatedAuthority;
-@property BOOL validateAuthority;
-@property MSALScopes *scopes;
-@property MSALTokenCacheAccessor *tokenCache;
-@property NSURL *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *prompt;
-@property MSALUser *user;
-@property MSALTelemetryApiId apiId;
-
-#pragma mark MSALRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *component;
-@property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
+@interface MSALTelemetryDefaultEvent : MSALTelemtryBaseEvent
 
 @end
