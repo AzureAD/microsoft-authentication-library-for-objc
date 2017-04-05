@@ -25,7 +25,6 @@
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
 #import "MSALHelpers.h"
-#import "MSALAuthority.h"
 
 @implementation MSALTelemetryAPIEvent
 
@@ -66,17 +65,27 @@
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_VALIDATION_STATUS value:status];
 }
 
-- (void)setAuthority:(MSALAuthority *)authority
+- (void)setAuthority:(MSALAuthorityType)authorityType
 {
-    NSString *authorityString = [authority.canonicalAuthority absoluteString];
+    NSString *authorityTypeString;
     
     // set authority type
-    NSString *authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
-    if ([MSALHelpers isADFSInstance:authorityString])
-    {
-        authorityType = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
+    switch (authorityType) {
+        case AADAuthority:
+            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
+            
+            break;
+            
+        case ADFSAuthority:
+            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
+            break;
+            
+        case B2CAuthority:
+            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_B2C;
+            break;
     }
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityType];
+    
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityTypeString];
 }
 
 - (void)setGrantType:(NSString *)grantType

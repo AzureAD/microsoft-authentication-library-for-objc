@@ -167,7 +167,7 @@ static MSALScopes *s_reservedScopes = nil;
                                                                       correlationId:_parameters.correlationId];
          [event setApiId:_apiId];
          [event setCorrelationId:_parameters.correlationId];
-         [event setAuthority:_authority];
+         [event setAuthority:_authority.authorityType];
          
          if (error)
          {

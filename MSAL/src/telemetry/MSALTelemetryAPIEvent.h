@@ -24,6 +24,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryBaseEvent.h"
 #import "MSALTelemetryApiId.h"
+#import "MSALAuthority.h"
 
 @interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
@@ -39,7 +40,7 @@
 - (void)setErrorDomain:(NSString *)errorDomain;
 
 - (void)setAuthorityValidationStatus:(NSString *)status;
-- (void)setAuthority:(MSALAuthority *)authority;
+- (void)setAuthority:(MSALAuthorityType)authorityType;
 
 - (void)setGrantType:(NSString *)grantType;
 - (void)setAPIStatus:(NSString *)status;

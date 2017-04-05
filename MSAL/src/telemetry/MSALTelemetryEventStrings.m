@@ -112,3 +112,4 @@ NSString *const MSAL_TELEMETRY_VALUE_CANCELLED                       = @"cancell
 NSString *const MSAL_TELEMETRY_VALUE_UNKNOWN                         = @"unknown";
 NSString *const MSAL_TELEMETRY_VALUE_AUTHORITY_AAD                   = @"aad";
 NSString *const MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS                  = @"adfs";
+NSString *const MSAL_TELEMETRY_VALUE_AUTHORITY_B2C                   = @"b2c";
