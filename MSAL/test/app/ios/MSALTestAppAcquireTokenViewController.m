@@ -288,9 +288,6 @@
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
-    CGRect keyboardFrameEnd = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    keyboardFrameEnd = [self.view convertRect:keyboardFrameEnd fromView:nil];
-    
     [UIView animateWithDuration:duration delay:0 options:UIViewAnimationOptionBeginFromCurrentState | curve animations:^{
         _bottomConstraint.constant = 0;
         _bottomConstraint2.constant = 0;
@@ -318,6 +315,8 @@
 
     [_scopesButton setTitle:(settings.scopes.count == 0) ? @"select scopes" : [settings.scopes.allObjects componentsJoinedByString:@","]
                    forState:UIControlStateNormal];
+    
+    [super viewWillAppear:animated];
     
 }
 

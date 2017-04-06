@@ -67,6 +67,7 @@
                             animated:NO
                       scrollPosition:UITableViewScrollPositionNone];
     [self refresh];
+    [super viewWillAppear:animated];
 }
 
 #pragma mark -
