@@ -94,6 +94,7 @@
 {
     (void)animated;
     self.navigationController.navigationBarHidden = NO;
+    [super viewWillAppear:animated];
 }
 
 #pragma mark -

@@ -153,6 +153,7 @@ static NSArray* s_deviceRows = nil;
     self.navigationController.navigationBarHidden = YES;
     
     [_tableView reloadData];
+    [super viewWillAppear:animated];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
