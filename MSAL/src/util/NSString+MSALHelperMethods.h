@@ -51,8 +51,8 @@
 /*! Encodes the string to pass it as a URL agrument. */
 - (NSString *)msalUrlFormEncode;
 
-/*! Computes a SHA256 hash of the string */ 
-- (NSString*)msalComputeSHA256;
+/*! Computes a SHA256 hash of the string in hex string */
+- (NSString*)msalComputeSHA256Hex;
 
 /*! Generate a URL-safe string of random data */
 + (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size;

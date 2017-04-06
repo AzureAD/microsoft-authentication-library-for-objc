@@ -21,18 +21,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-////////////////////////////////////////////////////////////////////////////
-//
-// TODO: This class has not been implemented/completed
-//
-////////////////////////////////////////////////////////////////////////////
-
-#import "MSALTelemetry.h"
+#import "MSALTelemetryEventInterface.h"
 
 @interface MSALTelemetry (Internal)
+
+- (NSString *)telemetryRequestId;
 
 - (void)startEvent:(NSString *)requestId
          eventName:(NSString *)eventName;
 
+- (void)stopEvent:(NSString *)requestId
+            event:(id<MSALTelemetryEventInterface>)event;
+
+- (void)dispatchEventNow:(NSString *)requestId
+                   event:(id<MSALTelemetryEventInterface>)event;
+
+- (void)flush:(NSString *)requestId;
 
 @end

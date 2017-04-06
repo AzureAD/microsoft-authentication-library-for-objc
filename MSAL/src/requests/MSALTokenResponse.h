@@ -33,7 +33,7 @@
 @property (readonly) NSString *accessToken;
 @property NSString *refreshToken;
 @property NSString *scope;
-@property (readonly) NSString *familyId;
+@property (readonly) NSString *clientInfo;
 @property (readonly) NSString *expiresIn;
 @property (readonly) NSDate *expiresOn;
 @property (readonly) NSString *idToken;

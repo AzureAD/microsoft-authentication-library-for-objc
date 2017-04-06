@@ -63,3 +63,7 @@ NSString *const OAUTH2_SCOPE_OPENID_VALUE           = @"openid";
 NSString *const OAUTH2_CODE_CHALLENGE               = @"code_challenge";
 NSString *const OAUTH2_CODE_CHALLENGE_METHOD        = @"code_challenge_method";
 NSString *const OAUTH2_CODE_VERIFIER                = @"code_verifier";
+NSString *const OAUTH2_CLIENT_INFO                  = @"client_info";
+NSString *const OAUTH2_UNIQUE_IDENTIFIER            = @"uid";
+NSString *const OAUTH2_UNIQUE_TENANT_IDENTIFIER     = @"utid";
+

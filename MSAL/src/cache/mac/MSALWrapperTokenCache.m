@@ -551,6 +551,48 @@
     return YES;
 }
 
+
+- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
+                           environment:(NSString *)environment
+                              clientId:(NSString *)clientId
+                                 error:(NSError * __autoreleasing *)error
+{
+    [_delegate willWriteCache:self];
+    int err = pthread_rwlock_wrlock(&_lock);
+    if (err != 0)
+    {
+        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        return NO;
+    }
+    BOOL result = [self removeAllTokensForHomeObjectIdImp:homeObjectId
+                                              environment:environment
+                                                 clientId:clientId
+                                                    error:error];
+    
+    pthread_rwlock_unlock(&_lock);
+    [_delegate didWriteCache:self];
+    return result;
+}
+
+
+- (BOOL)removeAllTokensForHomeObjectIdImp:(NSString *)homeObjectId
+                              environment:(NSString *)environment
+                                 clientId:(NSString *)clientId
+                                    error:(NSError * __autoreleasing *)error
+{
+    (void)homeObjectId;
+    (void)clientId;
+    (void)error;
+    (void)environment;
+    
+    // TODO: implement
+    @throw @"Todo";
+    
+    return YES;
+}
+
+
 - (NSData *)serializeImpl
 {
     @try

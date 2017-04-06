@@ -52,15 +52,10 @@
     _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
     _name = idToken.name;
     _identityProvider = idToken.issuer;
-    _authority = authority.absoluteString;
+    _authority = authority;
     _clientId = clientId;
     
     return self;
-}
-
-- (void)signOut
-{
-    // TODO
 }
 
 - (id)copyWithZone:(NSZone*) zone

@@ -21,12 +21,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/*!
+ @protocol MSALDispatcher
+ 
+ Developer should implement it in order to receive telemetry events.
+ 
+ Usage: an instance of MSALDispatcher implementation is required when registerring dispatcher for MSALTelemetry.
+ */
+@protocol MSALDispatcher <NSObject>
 
-////////////////////////////////////////////////////////////////////////////
-//
-// TODO: This class has not been implemented/completed
-//
-////////////////////////////////////////////////////////////////////////////
+/*!
+ Callback function that will be called by MSAL when telemetry events are flushed.
+ @param events events is represented by an array of dictionary of key-value pair of event property name/value.
+ */
+- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events;
+
+@end
 
 /*!
  @class MSALTelemetry
@@ -37,10 +47,32 @@
  */
 @interface MSALTelemetry : NSObject
 
++ (nullable instancetype)new __attribute__((unavailable("new is unavailable, use sharedInstance instead.")));
+- (nullable instancetype)init __attribute__((unavailable("init is unavailable, use sharedInstance instead.")));
+
 /*!
- Get a singleton instance of ADTelemetry.
+ Get a singleton instance of MSALTelemetry.
  */
 + (nonnull MSALTelemetry *)sharedInstance;
 
+/*!
+ Register a telemetry dispatcher for receiving telemetry events.
+ @param dispatcher              An instance of MSALDispatcher implementation.
+ @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
+                                If set NO, MSAL will dispatch will dispatch all events.
+ */
+- (void)addDispatcher:(nonnull id<MSALDispatcher>)dispatcher
+setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+
+/*!
+ Remove a telemetry dispatcher added for receiving telemetry events.
+ @param dispatcher An instance of MSALDispatcher implementation added to the dispatches before.
+ */
+- (void)removeDispatcher:(nonnull id<MSALDispatcher>)dispatcher;
+
+/*!
+ Remove all telemetry dispatchers added to the dispatchers collection.
+ */
+- (void)removeAllDispatchers;
 
 @end
