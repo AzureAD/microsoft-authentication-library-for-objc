@@ -26,13 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseRequest.h"
-
 #import "MSALAuthority.h"
 #import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
+#import "MSALTokenCache.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
@@ -221,6 +221,18 @@ static MSALScopes *s_reservedScopes = nil;
              }
          }
          
+         NSError *cacheError = nil;
+         MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
+         [cache saveAccessAndRefreshToken:self.parameters
+                                 response:tokenResponse
+                                    error:&cacheError];
+         
+         if (cacheError)
+         {
+             completionBlock(nil, cacheError);
+             return;
+         }
+
          MSALResult *result =
          [MSALResult resultWithAccessToken:tokenResponse.accessToken
                                  expiresOn:tokenResponse.expiresOn

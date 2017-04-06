@@ -98,7 +98,8 @@
 
 - (NSArray <MSALUser *> *)users
 {
-    return nil;
+    MSALTokenCacheAccessor *cache = [self defaultTokenCache];
+    return [cache getUsers:self.clientId];
 }
 
 #pragma SafariViewController Support
@@ -347,6 +348,7 @@
     }
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
+    params.tokenCache = [self defaultTokenCache];
     
     NSError *error = nil;
     MSALInteractiveRequest *request =
@@ -394,7 +396,8 @@
     params.unvalidatedAuthority = user.authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    
+    params.tokenCache = [self defaultTokenCache];
+
     NSError *error = nil;
     
     MSALSilentRequest *request =
@@ -420,15 +423,21 @@
         return YES;
     }
     
+    MSALTokenCacheAccessor *cache = [self defaultTokenCache];
+    return [cache deleteAllTokensForUser:user clientId:self.clientId error:error];
+}
+
+#pragma mark -
+#pragma mark token cache getter
+- (MSALTokenCacheAccessor *)defaultTokenCache
+{
     id<MSALTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
     dataSource = [MSALKeychainTokenCache defaultKeychainCache];
 #else
     dataSource = [MSALWrapperTokenCache defaultCache];
 #endif
-    MSALTokenCacheAccessor *cache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
-    
-    return [cache deleteAllTokensForUser:user clientId:self.clientId error:error];
+    return [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
 }
 
 @end
