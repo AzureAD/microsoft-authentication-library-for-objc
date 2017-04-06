@@ -31,6 +31,7 @@
 #import "MSALOAuth2Constants.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
+#import "MSALTelemetryApiId.h"
 
 #import "MSALPkce.h"
 
@@ -164,8 +165,6 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          
          ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
      }];
-    
-    
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

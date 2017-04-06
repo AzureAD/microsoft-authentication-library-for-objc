@@ -21,21 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#pragma once
 
-@interface MSALTelemetry (Internal)
+#import <Foundation/Foundation.h>
 
-- (NSString *)telemetryRequestId;
+@interface MSALIpAddressHelper : NSObject
 
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
-
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString *)requestId;
++ (NSString *)msalDeviceIpAddress;
 
 @end

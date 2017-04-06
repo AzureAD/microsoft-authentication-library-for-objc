@@ -32,6 +32,7 @@
 #import "MSALTokenCacheAccessor.h"
 #if TARGET_OS_IPHONE
 #import "MSALKeychainTokenCache.h"
+#import "MSALTelemetryApiId.h"
 #import "MSALKeychainTokenCache+Internal.h"
 #else
 #import "MSALWrapperTokenCache.h"

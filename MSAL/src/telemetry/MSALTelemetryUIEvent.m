@@ -21,21 +21,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#import "MSALTelemetryUIEvent.h"
+#import "MSALTelemetryEventStrings.h"
+#import "NSString+MSALHelperMethods.h"
 
-@interface MSALTelemetry (Internal)
+@implementation MSALTelemetryUIEvent
 
-- (NSString *)telemetryRequestId;
+- (void)setLoginHint:(NSString *)hint
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[hint msalComputeSHA256Hex]];
+}
 
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
-
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString *)requestId;
+- (void)setNtlm:(NSString *)ntlmHandled
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_NTLM_HANDLED value:ntlmHandled];
+}
 
 @end

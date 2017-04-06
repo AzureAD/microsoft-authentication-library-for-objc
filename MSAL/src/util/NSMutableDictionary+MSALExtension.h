@@ -21,21 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryEventInterface.h"
+#pragma once
 
-@interface MSALTelemetry (Internal)
+@interface NSMutableDictionary (MSALExtension)
 
-- (NSString *)telemetryRequestId;
-
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName;
-
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
-- (void)flush:(NSString *)requestId;
+- (void)msalSetObjectIfNotNil:(id)dictObject forKey:(id<NSCopying>)dictKey;
 
 @end
