@@ -33,6 +33,7 @@
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
            clientInfo:(MSALClientInfo *)clientInfo
+          environment:(NSString *)environment
 {
     NSString *uid;
     NSString *utid;
@@ -51,7 +52,8 @@
                                   name:idToken.name
                       identityProvider:idToken.issuer
                                    uid:uid
-                                  utid:utid];
+                                  utid:utid
+                           environment:environment];
 }
 
 - (id)initWithDisplayableId:(NSString *)displayableId
@@ -59,6 +61,7 @@
            identityProvider:(NSString *)identityProvider
                         uid:(NSString *)uid
                        utid:(NSString *)utid
+                environment:(NSString *)environment
 {
     if (!(self = [super init]))
     {
@@ -70,18 +73,14 @@
     _identityProvider = identityProvider;
     _uid = uid;
     _utid = utid;
+    _environment = environment;
     
     return self;
 }
 
 - (NSString *)userIdentifier
 {
-    return [NSString stringWithFormat:@"%@.%@", [self.uid msalBase64UrlEncode], [self.utid msalBase64UrlEncode]];
-}
-
-- (void)signOut
-{
-    // TODO
+    return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
 }
 
 - (id)copyWithZone:(NSZone*) zone

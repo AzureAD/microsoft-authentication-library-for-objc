@@ -35,12 +35,9 @@
 #import "MSALTestTokenCache.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 #import "MSALTestURLSession.h"
 
@@ -150,17 +147,21 @@
     parameters.correlationId = correlationId;
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.host];
     parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
-    
+
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                    @"authority" : @"https://login.microsoftonline.com/common",
                                                                                    @"scope": @"fakescope1 fakescope2",
                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
-                                                                                   @"id_token": rawIdToken
+                                                                                   @"id_token": rawIdToken,
+                                                                                   @"client_info": rawClientInfo
                                                                                    }
                                                                             error:nil];
     [parameters.tokenCache.dataSource addOrUpdateAccessTokenItem:at correlationId:nil error:nil];
@@ -202,9 +203,11 @@
     parameters.correlationId = correlationId;
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken authority:parameters.unvalidatedAuthority clientId:parameters.clientId];
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.host];
     parameters.tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:[MSALTestTokenCache new]];
-    
+
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
     
@@ -214,10 +217,15 @@
     //store a refresh token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
+                                                                                      @"environment" : @"login.microsoftonline.com",
                                                                                       @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                                                                       @"id_token": rawIdToken,
-                                                                                      @"refresh_token": @"fakeRefreshToken"
+                                                                                      @"refresh_token": @"fakeRefreshToken",
+                                                                                      @"client_info": rawClientInfo,
+                                                                                      @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97",
+                                                                                      @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"
                                                                                       }
                                                                               error:nil];
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt correlationId:nil error:nil];

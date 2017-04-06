@@ -41,4 +41,7 @@
 - (id)initWithClientId:(NSString *)clientId
               response:(MSALTokenResponse *)response;
 
+//this is overriden by subclasses
+- (MSALUser *)user;
+
 @end

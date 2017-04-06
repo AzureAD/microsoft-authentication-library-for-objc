@@ -37,18 +37,19 @@
 @property (readonly) NSString *identityProvider;
 @property (readonly) NSString *uid;
 @property (readonly) NSString *utid;
+@property (readonly) NSString *environment;
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-           clientInfo:(MSALClientInfo *)clientInfo;
+           clientInfo:(MSALClientInfo *)clientInfo
+          environment:(NSString *)environment;
 
 - (id)initWithDisplayableId:(NSString *)displayableId
                        name:(NSString *)name
            identityProvider:(NSString *)identityProvider
                         uid:(NSString *)uid
-                       utid:(NSString *)utid;
+                       utid:(NSString *)utid
+                environment:(NSString *)environment;
 
 - (NSString *)userIdentifier;
-
-- (void)signOut;
 
 @end

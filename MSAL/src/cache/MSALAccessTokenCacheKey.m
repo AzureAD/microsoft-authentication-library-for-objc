@@ -33,6 +33,7 @@
                clientId:(NSString *)clientId
                   scope:(MSALScopes *)scope
          userIdentifier:(NSString *)userIdentifier
+            environment:(NSString *)environment
 {
     if (!(self = [super initWithClientId:clientId userIdentifier:userIdentifier]))
     {
@@ -40,8 +41,7 @@
     }
     
     self.authority = [authority lowercaseString];
-    NSURL *authorityURL = [NSURL URLWithString:self.authority];
-    _environment = [NSString stringWithFormat:@"%@://%@", authorityURL.scheme, authorityURL.host];
+    self.environment = [environment lowercaseString];
     
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
     for (NSString *item in scope)
@@ -62,7 +62,7 @@
 }
 
 - (NSString *)service {
-    if (!self.clientId && self.scope.count==0)
+    if (!self.authority && !self.clientId && self.scope.count==0)
     {
         return nil;
     }

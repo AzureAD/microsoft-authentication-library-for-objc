@@ -21,17 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@class MSALTokenCacheKey;
+@class MSALAccessTokenCacheKey;
+@class MSALRefreshTokenCacheKey;
 @class MSALAccessTokenCacheItem;
 @class MSALRefreshTokenCacheItem;
 
 @protocol MSALTokenCacheDataSource <NSObject>
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
                                                                 correlationId:(nullable NSUUID * )correlationId
                                                                         error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
                                                                   correlationId:(nullable NSUUID * )correlationId
                                                                           error:(NSError * __nullable __autoreleasing * __nullable)error;
 
@@ -48,5 +49,10 @@
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
                          error:(NSError * __nullable __autoreleasing * __nullable)error;
+
+- (BOOL)removeAllTokensForUserIdentifier:(nullable NSString *)userIdentifier
+                             environment:(nonnull NSString *)environment
+                                clientId:(nonnull NSString *)clientId
+                                   error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 @end

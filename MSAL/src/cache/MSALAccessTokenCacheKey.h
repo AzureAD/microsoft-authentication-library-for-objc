@@ -31,16 +31,14 @@
 
 @property NSString *authority;
 @property MSALScopes *scope;
-@property (readonly) NSString *environment;
+@property NSString *environment;
 
 - (id)initWithAuthority:(NSString *)authority
                clientId:(NSString *)clientId
                   scope:(MSALScopes *)scope
-         userIdentifier:(NSString *)userIdentifier;
+         userIdentifier:(NSString *)userIdentifier
+            environment:(NSString *)environment;
 
 - (BOOL)matches:(MSALAccessTokenCacheKey *)other;
-
-- (NSString *)service;
-- (NSString *)account;
 
 @end

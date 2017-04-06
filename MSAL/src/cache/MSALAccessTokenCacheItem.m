@@ -37,6 +37,7 @@
 @synthesize expiresOn = _expiresOn;
 @synthesize scope = _scope;
 @synthesize user = _user;
+@synthesize tenantId = _tenantId;
 
 MSAL_JSON_RW(OAUTH2_AUTHORITY, authority, setAuthority)
 MSAL_JSON_RW(OAUTH2_ID_TOKEN, rawIdToken, setRawIdToken)
@@ -68,7 +69,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:response.clientInfo error:nil];
-    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo];
+    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:authority.host];
     
     return self;
 }
@@ -101,7 +102,8 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:self.authority
                                                                              clientId:self.clientId
                                                                                 scope:self.scope
-                                                                       userIdentifier:self.user.userIdentifier];
+                                                                       userIdentifier:self.user.userIdentifier
+                                                                          environment:self.environment];
     if (!key)
     {
         MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
@@ -128,9 +130,28 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     if (!_user)
     {
         MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:self.clientInfo];
+        _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:self.clientInfo environment:self.environment];
     }
     return _user;
+}
+
+- (NSString *)environment
+{
+    if (!self.authority)
+    {
+        return nil;
+    }
+    return [NSURL URLWithString:self.authority].host;
+}
+
+- (NSString *)tenantId
+{
+    if (!_tenantId)
+    {
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+        _tenantId = idToken.tenantId;
+    }
+    return _tenantId;
 }
 
 - (id)copyWithZone:(NSZone*) zone

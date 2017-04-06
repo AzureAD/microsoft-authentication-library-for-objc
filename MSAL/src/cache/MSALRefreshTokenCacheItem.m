@@ -62,7 +62,7 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
     
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:response.clientInfo error:nil];
-    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo];
+    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:environment];
     
     self.displayableId = _user.displayableId;
     self.name = _user.name;
@@ -81,7 +81,8 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
                                                    name:self.name
                                        identityProvider:self.identityProvider
                                                     uid:self.uid
-                                                   utid:self.utid];
+                                                   utid:self.utid
+                                            environment:self.environment];
     }
     return _user;
 }

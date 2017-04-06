@@ -38,4 +38,8 @@
 - (id)initWithClientId:(NSString *)clientId
         userIdentifier:(NSString *)userIdentifier;
 
+//subclasses must override this
+- (NSString *)service;
+- (NSString *)account;
+
 @end

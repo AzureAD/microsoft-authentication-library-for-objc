@@ -40,9 +40,21 @@ static NSString* const s_cacheVersion = @"MSALv1";
     }
     
     self.clientId = [clientId lowercaseString];
-    self.userIdentifier = [userIdentifier lowercaseString];
+    self.userIdentifier = userIdentifier;
     
     return self;
+}
+
+- (NSString *)service
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (NSString *)account
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 @end

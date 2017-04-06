@@ -62,4 +62,10 @@ MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
     return _clientInfo;
 }
 
+- (MSALUser *)user
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
 @end

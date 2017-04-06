@@ -26,10 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@class MSALTokenCacheKey;
-
 #import "MSALBaseTokenCacheItem.h"
+
+@class MSALRefreshTokenCacheKey;
 
 @interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
