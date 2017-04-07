@@ -33,10 +33,10 @@
 
 @interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
-@property NSString *authority;
-@property NSString *rawIdToken;
-@property (readonly) NSString *tokenType;
+@property (readonly) NSString *authority;
+@property (readonly) NSString *rawIdToken;
 @property (readonly) NSString *accessToken;
+@property (readonly) NSString *tokenType;
 @property (readonly) NSDate *expiresOn;
 @property (readonly) MSALScopes *scope;
 @property (readonly) MSALUser *user;

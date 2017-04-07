@@ -30,6 +30,11 @@
 
 @class MSALUser;
 
+typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
+{
+    MSAL_V1         = 'MSv1'
+};
+
 @interface MSALTokenCacheKeyBase : NSObject
 
 @property NSString *clientId;
@@ -41,5 +46,8 @@
 //subclasses must override this
 - (NSString *)service;
 - (NSString *)account;
+
++ (NSString *)userIdAtEnvironmentBase64:(NSString *)userIdentifier
+                            environment:(NSString *)environment;
 
 @end

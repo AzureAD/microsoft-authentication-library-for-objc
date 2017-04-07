@@ -32,6 +32,7 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
+#import "MSALTokenCacheKeyBase.h"
 
 static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
 
@@ -41,11 +42,6 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
 {
     ACCESS_TOKEN    = 'acTk',
     REFRESH_TOKEN   = 'rfTk'
-};
-
-typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
-{
-    MSAL_V1         = 'MSv1'
 };
 
 @implementation MSALKeychainTokenCache
@@ -390,7 +386,9 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
                                 clientId:(NSString *)clientId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSString *account = [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, userIdentifier.msalBase64UrlEncode, environment.msalBase64UrlEncode];
+    NSString *account = [NSString stringWithFormat:@"%u$%@",
+                         MSAL_V1,
+                         [MSALTokenCacheKeyBase userIdAtEnvironmentBase64:userIdentifier environment:environment]];
                          
     NSMutableDictionary *query = [self queryDictionaryForKey:nil
                                                   additional:@{

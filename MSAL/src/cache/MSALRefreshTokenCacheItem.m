@@ -33,8 +33,6 @@
 
 @implementation MSALRefreshTokenCacheItem
 
-@synthesize user = _user;
-
 MSAL_JSON_RW(@"refresh_token", refreshToken, setRefreshToken)
 MSAL_JSON_RW(@"environment", environment, setEnvironment)
 MSAL_JSON_RW(@"displayable_id", displayableId, setDisplayableId)
@@ -57,34 +55,58 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
         return nil;
     }
     
-    self.environment = environment;
+    //store needed data to _json
     self.refreshToken = response.refreshToken;
-    
+    self.environment = environment;
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:response.clientInfo error:nil];
-    _user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:environment];
+    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:self.clientInfo environment:environment];
+    self.displayableId = user.displayableId;
+    self.name = user.name;
+    self.identityProvider = user.identityProvider;
+    self.uid = user.uid;
+    self.utid = user.utid;
     
-    self.displayableId = _user.displayableId;
-    self.name = _user.name;
-    self.identityProvider = _user.identityProvider;
-    self.uid = _user.uid;
-    self.utid = _user.utid;
+    //init data derived from _json
+    [self initDerivedPropertiesFromJson];
     
     return self;
 }
 
-- (MSALUser *)user
+//init method for deserialization
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error
 {
-    if (!_user)
+    if (!(self = [super initWithJson:json error:error]))
     {
-        _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
-                                                   name:self.name
-                                       identityProvider:self.identityProvider
-                                                    uid:self.uid
-                                                   utid:self.utid
-                                            environment:self.environment];
+        return nil;
     }
-    return _user;
+    
+    [self initDerivedPropertiesFromJson];
+    
+    return self;
+}
+
+- (id)initWithData:(NSData *)data
+             error:(NSError * __autoreleasing *)error
+{
+    if (!(self = [super initWithData:data error:error]))
+    {
+        return nil;
+    }
+    
+    [self initDerivedPropertiesFromJson];
+    
+    return self;
+}
+
+- (void)initDerivedPropertiesFromJson
+{
+    _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
+                                               name:self.name
+                                   identityProvider:self.identityProvider
+                                                uid:self.uid
+                                               utid:self.utid
+                                        environment:self.environment];
 }
 
 - (MSALRefreshTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
@@ -101,9 +123,7 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
 
 - (id)copyWithZone:(NSZone*) zone
 {
-    MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] init];
-    
-    item->_json = [_json copyWithZone:zone];
+    MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem allocWithZone:zone] initWithJson:[_json copyWithZone:zone] error:nil];
     
     return item;
 }

@@ -57,4 +57,10 @@ static NSString* const s_cacheVersion = @"MSALv1";
     return nil;
 }
 
++ (NSString *)userIdAtEnvironmentBase64:(NSString *)userIdentifier
+                            environment:(NSString *)environment
+{
+    return [NSString stringWithFormat:@"%@@%@", userIdentifier.msalBase64UrlEncode, environment.msalBase64UrlEncode];
+}
+
 @end

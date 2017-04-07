@@ -202,7 +202,8 @@
     
     for (MSALRefreshTokenCacheItem *tokenItem in allRefreshTokens)
     {
-        [allUsers setValue:tokenItem.user forKey:[NSString stringWithFormat:@"%@@%@", tokenItem.user.userIdentifier, tokenItem.user.environment]];
+        [allUsers setValue:tokenItem.user
+                    forKey:[MSALTokenCacheKeyBase userIdAtEnvironmentBase64:tokenItem.user.userIdentifier environment:tokenItem.user.environment]];
     }
     return allUsers.allValues;
 }

@@ -34,8 +34,6 @@
 
 @implementation MSALBaseTokenCacheItem
 
-@synthesize clientInfo = _clientInfo;
-
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
 MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
 
@@ -47,19 +45,46 @@ MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
         return nil;
     }
     
+    //store needed data to _json
     self.clientId = clientId;
     self.rawClientInfo = response.clientInfo;
+    
+    //init data derived from _json
+    [self initDerivedBasePropertiesFromJson];
     
     return self;
 }
 
-- (MSALClientInfo *)clientInfo
+//init method for deserialization
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error
 {
-    if (!_clientInfo)
+    if (!(self = [super initWithJson:json error:error]))
     {
-        _clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
+        return nil;
     }
-    return _clientInfo;
+    
+    [self initDerivedBasePropertiesFromJson];
+    
+    return self;
+}
+
+- (id)initWithData:(NSData *)data
+             error:(NSError * __autoreleasing *)error
+{
+    if (!(self = [super initWithData:data error:error]))
+    {
+        return nil;
+    }
+    
+    [self initDerivedBasePropertiesFromJson];
+    
+    return self;
+}
+
+- (void)initDerivedBasePropertiesFromJson
+{
+    _clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
 }
 
 - (MSALUser *)user

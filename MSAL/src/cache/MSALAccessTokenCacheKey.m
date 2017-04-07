@@ -61,7 +61,8 @@
     && (!self.userIdentifier || [self.userIdentifier isEqualToString:other.userIdentifier]);
 }
 
-- (NSString *)service {
+- (NSString *)service
+{
     if (!self.authority && !self.clientId && self.scope.count==0)
     {
         return nil;
@@ -73,13 +74,15 @@
             self.scope ? self.scope.msalToString.msalBase64UrlEncode : @""];
 }
 
-- (NSString *)account {
+- (NSString *)account
+{
     if (!self.userIdentifier)
     {
         return nil;
     }
     
-    return [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, self.userIdentifier.msalBase64UrlEncode, self.environment.msalBase64UrlEncode];
+    return [NSString stringWithFormat:@"%u$%@", MSAL_V1,
+            [MSALTokenCacheKeyBase userIdAtEnvironmentBase64:self.userIdentifier environment:self.environment]];
 }
 
 @end
