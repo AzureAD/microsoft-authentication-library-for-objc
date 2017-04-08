@@ -25,42 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALURLSessionDelegate.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "MSALAuthority.h"
+#import "MSALTestCase.h"
 #import "NSURL+MSALExtensions.h"
 
-@implementation MSALURLSessionDelegate
+@interface NSURL_MSALExtensionsTests : MSALTestCase
 
-- (id)initWithContext:(id<MSALRequestContext>)context
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _context = context;
-    
-    return self;
+@end
+
+@implementation NSURL_MSALExtensionsTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionTask *)task
-willPerformHTTPRedirection:(NSHTTPURLResponse *)response
-        newRequest:(NSURLRequest *)request
- completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testHostWithPort
 {
-    (void)session;
-    (void)response;
-    (void)task;
+    NSURL *urlWithNoPortSpecified = [NSURL URLWithString:@"https://somehost.com"];
+    NSURL *urlWithDefaultPort = [NSURL URLWithString:@"https://somehost.com:443"];
+    NSURL *urlWithCustomPort = [NSURL URLWithString:@"https://somehost.com:88"];
     
-    NSString *requestHost = request.URL.hostWithPort;
+    NSURL *urlWithNoHost = [NSURL new];
     
-    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256Hex] );
-    LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
-    
-    completionHandler(request);
+    XCTAssertEqualObjects(urlWithNoPortSpecified.hostWithPort, @"somehost.com");
+    XCTAssertEqualObjects(urlWithDefaultPort.hostWithPort, @"somehost.com");
+    XCTAssertEqualObjects(urlWithCustomPort.hostWithPort, @"somehost.com:88");
+    XCTAssertEqualObjects(urlWithNoHost.hostWithPort, @"");
 }
 
 @end

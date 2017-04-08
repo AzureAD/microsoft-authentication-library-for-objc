@@ -26,6 +26,7 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheKey.h"
 #import "MSALTokenResponse.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTokenCacheAccessor
 {
@@ -187,7 +188,7 @@
         return YES;
     }
     
-    NSString *environment = [NSString stringWithFormat:@"%@://%@", user.authority.scheme, user.authority.host];
+    NSString *environment = [NSString stringWithFormat:@"%@://%@", user.authority.scheme, user.authority.hostWithPort];
     
     return [_dataSource removeAllTokensForHomeObjectId:user.homeObjectId
                                            environment:environment

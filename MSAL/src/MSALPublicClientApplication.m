@@ -77,6 +77,7 @@
 {
     return [self initWithClientId:clientId authority:nil error:error];
 }
+
 - (id)initWithClientId:(NSString *)clientId
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error

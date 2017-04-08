@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTokenCacheKey.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTokenCacheKey
 
@@ -55,7 +56,7 @@
     self.homeObjectId = [homeObjectId lowercaseString];
     
     NSURL *authorityURL = [NSURL URLWithString:authority];
-    self.environment = [NSString stringWithFormat:@"%@://%@", authorityURL.scheme, authorityURL.host];
+    self.environment = [NSString stringWithFormat:@"%@://%@", authorityURL.scheme, authorityURL.hostWithPort];
     
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
     for (NSString *item in scope)
