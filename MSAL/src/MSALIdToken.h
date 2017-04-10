@@ -40,4 +40,6 @@
 
 - (id)initWithRawIdToken:(NSString *)rawIdTokenString;
 
+- (NSString *)uniqueId;
+
 @end

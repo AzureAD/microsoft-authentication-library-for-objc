@@ -49,7 +49,9 @@
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error;
 
-- (NSArray <MSALUser *> *)users;
+- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error;
+- (MSALUser *)userForIdentifier:(NSString *)identifier
+                          error:(NSError * __autoreleasing *)error;
 
 #pragma SafariViewController Support
 

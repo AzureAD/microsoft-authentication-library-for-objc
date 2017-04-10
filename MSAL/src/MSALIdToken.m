@@ -75,4 +75,9 @@ MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
     return self;
 }
 
+- (NSString *)uniqueId
+{
+    return self.objectId ? self.objectId : self.subject;
+}
+
 @end

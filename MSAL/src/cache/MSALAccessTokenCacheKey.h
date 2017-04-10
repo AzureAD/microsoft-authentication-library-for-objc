@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,25 +17,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#ifndef MSALCache_h
-#define MSALCache_h
+#import "MSALTokenCacheKeyBase.h"
 
-#import "MSALTokenCacheAccessor.h"
-#import "MSALTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
+@interface MSALAccessTokenCacheKey : MSALTokenCacheKeyBase
 
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
+@property NSString *authority;
+@property MSALScopes *scope;
+@property NSString *environment;
 
-#endif /* MSALCache_h */
+- (id)initWithAuthority:(NSString *)authority
+               clientId:(NSString *)clientId
+                  scope:(MSALScopes *)scope
+         userIdentifier:(NSString *)userIdentifier
+            environment:(NSString *)environment;
+
+- (BOOL)matches:(MSALAccessTokenCacheKey *)other;
+
+@end
