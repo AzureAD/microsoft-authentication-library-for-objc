@@ -61,11 +61,11 @@
 }
 
 - (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
-                                                                correlationId:(nullable NSUUID * )correlationId
+                                                                      context:(nullable id<MSALRequestContext>)ctx
                                                                         error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    (void)correlationId;
+    (void)ctx;
     
     pthread_rwlock_rdlock(&_lock);
     
@@ -131,12 +131,35 @@
     }
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
-                                                                  correlationId:(nullable NSUUID * )correlationId
-                                                                          error:(NSError * __autoreleasing *)error
+- (nullable MSALRefreshTokenCacheItem *)getRefreshTokenItemForKey:(nonnull MSALRefreshTokenCacheKey *)key
+                                                          context:(nullable id<MSALRequestContext>)ctx
+                                                            error:(NSError * __nullable __autoreleasing * __nullable)error
 {
     (void)error;
-    (void)correlationId;
+    (void)ctx;
+    
+    pthread_rwlock_rdlock(&_lock);
+    
+    NSDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
+    if (!tokens)
+    {
+        pthread_rwlock_unlock(&_lock);
+        return nil;
+    }
+    
+    MSALRefreshTokenCacheItem *item = [[tokens objectForKey:key.account] objectForKey:key.clientId];
+    
+    pthread_rwlock_unlock(&_lock);
+    
+    return item;
+}
+
+- (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId
+                                                            context:(nullable id<MSALRequestContext>)ctx
+                                                              error:(NSError * __nullable __autoreleasing * __nullable)error
+{
+    (void)error;
+    (void)ctx;
     
     pthread_rwlock_rdlock(&_lock);
     
@@ -149,18 +172,16 @@
     
     NSMutableArray *items = [NSMutableArray new];
     
-    NSString *userKey = key.account;
-    if (userKey)
+    // Otherwise we have to traverse all of the users in the cache
+    for (NSString *userKey in tokens)
     {
-        // If we have a specified userId then we only look for that one
-        [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
-    }
-    else
-    {
-        // Otherwise we have to traverse all of the users in the cache
-        for (NSString *userKey in tokens)
+        if (!clientId)
         {
-            [self addToItems:items tokens:[tokens objectForKey:userKey] key:key];
+            [items addObjectsFromArray:tokens[userKey]];
+        }
+        else
+        {
+            [items addObject:tokens[userKey][clientId]];
         }
     }
     
@@ -170,10 +191,10 @@
 }
 
 - (BOOL)addOrUpdateAccessTokenItem:(MSALAccessTokenCacheItem *)item
-                     correlationId:(nullable NSUUID *)correlationId
+                           context:(nullable id<MSALRequestContext>)ctx
                              error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
+    (void)ctx;
     
     pthread_rwlock_wrlock(&_lock);
     
@@ -211,10 +232,10 @@
 }
 
 - (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
-                      correlationId:(nullable NSUUID *)correlationId
+                            context:(nullable id<MSALRequestContext>)ctx
                               error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
+    (void)ctx;
     pthread_rwlock_wrlock(&_lock);
     
     // Copy the item to make sure it doesn't change under us.
@@ -244,7 +265,7 @@
         [tokens setObject:userDict forKey:userKey];
     }
     
-    [userDict setObject:item forKey:key.service];
+    [userDict setObject:item forKey:key.clientId];
     
     pthread_rwlock_unlock(&_lock);
     
@@ -252,8 +273,10 @@
 }
 
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
+                      context:(nullable id<MSALRequestContext>)ctx
                         error:(NSError * __autoreleasing *)error
 {
+    (void)ctx;
     pthread_rwlock_wrlock(&_lock);
     BOOL result = [self removeAccessTokenImpl:item error:error];
     pthread_rwlock_unlock(&_lock);
@@ -303,8 +326,11 @@
 
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
+                       context:(nullable id<MSALRequestContext>)ctx
                          error:(NSError * __autoreleasing *)error
 {
+    (void)ctx;
+    
     pthread_rwlock_wrlock(&_lock);
     BOOL result = [self removeRefreshTokenImpl:item error:error];
     pthread_rwlock_unlock(&_lock);
@@ -355,10 +381,13 @@
 - (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
                              environment:(NSString *)environment
                                 clientId:(NSString *)clientId
+                                 context:(nullable id<MSALRequestContext>)ctx
                                    error:(NSError * __autoreleasing *)error
 {
+    (void)ctx;
+    (void)error;
     pthread_rwlock_wrlock(&_lock);
-    BOOL result = [self removeAllTokensForUserIdentifierImpl:userIdentifier environment:environment clientId:clientId error:error];
+    BOOL result = [self removeAllTokensForUserIdentifierImpl:userIdentifier environment:environment clientId:clientId];
     pthread_rwlock_unlock(&_lock);
     
     return result;
@@ -367,9 +396,7 @@
 - (BOOL)removeAllTokensForUserIdentifierImpl:(NSString *)userIdentifier
                                  environment:(NSString *)environment
                                     clientId:(NSString *)clientId
-                                       error:(NSError * __autoreleasing *)error
 {
-    (void)error;
     NSMutableDictionary *rts = [_cache objectForKey:@"refresh_tokens"];
     MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment clientId:clientId userIdentifier:userIdentifier];
     [rts removeObjectForKey:key.account];

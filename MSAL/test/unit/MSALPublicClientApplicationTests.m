@@ -371,7 +371,7 @@
     id<MSALTokenCacheDataSource> dataSource = application.tokenCache.dataSource;
     
     // Make sure no users are showing up in the cache
-    XCTAssertEqual([application users].count, 0);
+    XCTAssertEqual([application users:nil].count, 0);
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -393,7 +393,7 @@
                                                      @"client_info": rawClientInfo,
                                                      }
                                              error:nil];
-    [dataSource addOrUpdateAccessTokenItem:at correlationId:nil error:nil];
+    [dataSource addOrUpdateAccessTokenItem:at context:nil error:nil];
     MSALRefreshTokenCacheItem *rt =
     [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
                                                       @"environment" : @"login.microsoftonline.com",
@@ -402,17 +402,17 @@
                                                       @"refresh_token": @"fakeRefreshToken"
                                                       }
                                               error:nil];
-    [dataSource addOrUpdateRefreshTokenItem:rt correlationId:nil error:nil];
+    [dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     // Make sure that the user is properly showing up in the cache
-    XCTAssertEqual([application users].count, 1);
-    XCTAssertEqualObjects([application users][0], user);
+    XCTAssertEqual([application users:nil].count, 1);
+    XCTAssertEqualObjects([application users:nil][0], user);
 
     XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
     
     // Make sure the user is now gone
-    XCTAssertEqual([application users].count, 0);
+    XCTAssertEqual([application users:nil].count, 0);
 }
 
 - (void)testRemoveNonExistingUser
@@ -444,14 +444,14 @@
 
     MSALUser *user = [MSALUser new];
     
-    [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:error:)
+    [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:context:error:)
                               class:[MSALTokenCacheAccessor class]
-                              block:(id)^(id obj, MSALUser *user, NSString *clientId, NSError **error)
+                              block:(id)^(id obj, MSALUser *user, NSString *clientId, id<MSALRequestContext> ctx, NSError **error)
      {
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR_PARAM(nil, MSALErrorKeychainFailure, @"Keychain failed when fetching team ID.");
+         MSAL_KEYCHAIN_ERROR_PARAM(ctx, MSALErrorKeychainFailure, @"Keychain failed when fetching team ID.");
          return NO;
      }];
     

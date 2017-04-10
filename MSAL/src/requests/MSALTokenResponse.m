@@ -30,6 +30,27 @@
 
 @implementation MSALTokenResponse
 
+- (void)initalize
+{
+    NSString *expiresIn =  self.expiresIn;
+    if (expiresIn)
+    {
+        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
+    }
+}
+
+- (id)initWithJson:(NSDictionary *)json error:(NSError *__autoreleasing *)error
+{
+    if (!(self = [super initWithJson:json error:error]))
+    {
+        return nil;
+    }
+    
+    [self initalize];
+    
+    return self;
+}
+
 - (id)initWithData:(NSData *)data error:(NSError *__autoreleasing *)error
 {
     if (!(self = [super initWithData:data error:error]))
@@ -37,11 +58,7 @@
         return nil;
     }
 
-    NSString *expiresIn =  self.expiresIn;
-    if (expiresIn)
-    {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
-    }
+    [self initalize];
     
     return self;
 }

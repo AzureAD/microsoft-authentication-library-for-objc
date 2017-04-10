@@ -98,11 +98,11 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
     if ([rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
     {
-        [cache removeAccessTokenItem:(MSALAccessTokenCacheItem *)rowItem.item error:nil];
+        [cache removeAccessTokenItem:(MSALAccessTokenCacheItem *)rowItem.item context:nil error:nil];
     }
     else if ([rowItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]])
     {
-        [cache removeRefreshTokenItem:(MSALRefreshTokenCacheItem *)rowItem.item error:nil];
+        [cache removeRefreshTokenItem:(MSALRefreshTokenCacheItem *)rowItem.item context:nil error:nil];
     }
     
     [self loadCache];
@@ -126,7 +126,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     item.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
     
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    [cache addOrUpdateAccessTokenItem:item correlationId:nil error:nil];
+    [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
     
     [self loadCache];
 }
@@ -160,7 +160,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     item.refreshToken = @"bad-refresh-token";
     
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    [cache addOrUpdateRefreshTokenItem:item correlationId:nil error:nil];
+    [cache addOrUpdateRefreshTokenItem:item context:nil error:nil];
     
     [self loadCache];
 }
@@ -291,13 +291,13 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
         MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
         _cacheMap = [NSMutableDictionary new];
         
-        NSArray* allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil correlationId:nil error:nil];
+        NSArray* allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
         for (MSALBaseTokenCacheItem* item in allAccessTokenItems)
         {
             [self addTokenToCacheMap:item];
         }
         
-        NSArray* allRefreshTokenItems = [cache getRefreshTokenItemsWithKey:nil correlationId:nil error:nil];
+        NSArray* allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
         for (MSALBaseTokenCacheItem* item in allRefreshTokenItems)
         {
             [self addTokenToCacheMap:item];

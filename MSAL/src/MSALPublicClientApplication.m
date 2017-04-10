@@ -106,14 +106,16 @@
     return self;
 }
 
-- (NSArray <MSALUser *> *)users
+- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
 {
-    return [_tokenCache getUsers:self.clientId];
+    return [_tokenCache getUsers:self.clientId context:nil error:error];
 }
 
 - (MSALUser *)userForIdentifier:(NSString *)identifier
+                          error:(NSError * __autoreleasing *)error
 {
     (void)identifier;
+    (void)error;
     return nil;
 }
 
@@ -438,7 +440,7 @@
         return YES;
     }
     
-    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId error:error];
+    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId context:nil error:error];
 }
 
 @end

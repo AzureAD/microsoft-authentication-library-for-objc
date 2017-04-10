@@ -37,4 +37,6 @@
 
 - (BOOL)matches:(MSALRefreshTokenCacheKey *)other;
 
++ (NSString *)keyForClientId:(NSString *)clientId;
+
 @end

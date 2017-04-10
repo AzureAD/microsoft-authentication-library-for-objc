@@ -26,33 +26,42 @@
 @class MSALAccessTokenCacheItem;
 @class MSALRefreshTokenCacheItem;
 
+@protocol MSALRequestContext;
+
 @protocol MSALTokenCacheDataSource <NSObject>
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
-                                                                correlationId:(nullable NSUUID * )correlationId
-                                                                        error:(NSError * __nullable __autoreleasing * __nullable)error;
+- (nullable NSArray<MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
+                                                                     context:(nullable id<MSALRequestContext>)ctx
+                                                                       error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
-                                                                  correlationId:(nullable NSUUID * )correlationId
-                                                                          error:(NSError * __nullable __autoreleasing * __nullable)error;
+- (nullable MSALRefreshTokenCacheItem *)getRefreshTokenItemForKey:(nonnull MSALRefreshTokenCacheKey *)key
+                                                          context:(nullable id<MSALRequestContext>)ctx
+                                                            error:(NSError * __nullable __autoreleasing * __nullable)error;
+
+- (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId
+                                                            context:(nullable id<MSALRequestContext>)ctx
+                                                              error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)addOrUpdateAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
-                     correlationId:(nullable NSUUID *)correlationId
+                           context:(nullable id<MSALRequestContext>)ctx
                              error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
-                      correlationId:(nullable NSUUID *)correlationId
+                            context:(nullable id<MSALRequestContext>)ctx
                               error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
+                      context:(nullable id<MSALRequestContext>)ctx
                         error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
+                       context:(nullable id<MSALRequestContext>)ctx
                          error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)removeAllTokensForUserIdentifier:(nullable NSString *)userIdentifier
                              environment:(nonnull NSString *)environment
                                 clientId:(nonnull NSString *)clientId
+                                 context:(nullable id<MSALRequestContext>)ctx
                                    error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 @end

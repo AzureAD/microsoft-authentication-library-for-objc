@@ -224,6 +224,7 @@ static MSALScopes *s_reservedScopes = nil;
          MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
          [cache saveAccessAndRefreshToken:self.parameters
                                  response:tokenResponse
+                                  context:_parameters
                                     error:&cacheError];
          
          if (cacheError)
