@@ -138,18 +138,19 @@
 }
 
 - (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
-                                                                correlationId:(nullable NSUUID * )correlationId
+                                                                      context:(nullable id<MSALRequestContext>)ctx
                                                                         error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    (void)correlationId;
     
     [_delegate willAccessCache:self];
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        
+        // TODO pass through error object
         return nil;
     }
     NSArray<MSALAccessTokenCacheItem *> *result = [self getAccessTokenImpl:key];
@@ -226,27 +227,67 @@
     }
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
-                                                                  correlationId:(nullable NSUUID * )correlationId
-                                                                          error:(NSError * __autoreleasing *)error
+- (nullable MSALRefreshTokenCacheItem *)getRefreshTokenItemForKey:(nonnull MSALRefreshTokenCacheKey *)key
+                                                          context:(nullable id<MSALRequestContext>)ctx
+                                                            error:(NSError * __nullable __autoreleasing * __nullable)error
 {
     (void)error;
-    (void)correlationId;
     
     [_delegate willAccessCache:self];
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        // TODO pass through error object
         return nil;
     }
-    NSArray<MSALRefreshTokenCacheItem *> *result = [self getRefreshTokenImpl:key];
+    NSDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
+    MSALRefreshTokenCacheItem *item = [[tokens objectForKey:key.account] objectForKey:key.clientId];
     pthread_rwlock_unlock(&_lock);
     
     [_delegate didAccessCache:self];
     
-    return result;
+    return item;
+}
+
+- (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId
+                                                            context:(nullable id<MSALRequestContext>)ctx
+                                                              error:(NSError * __nullable __autoreleasing * __nullable)error
+{
+    (void)error;
+    (void)ctx;
+    
+    [_delegate willAccessCache:self];
+    pthread_rwlock_rdlock(&_lock);
+    
+    NSDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
+    if (!tokens)
+    {
+        pthread_rwlock_unlock(&_lock);
+        return nil;
+    }
+    
+    NSMutableArray *items = [NSMutableArray new];
+    
+    // Otherwise we have to traverse all of the users in the cache
+    for (NSString *userKey in tokens)
+    {
+        if (!clientId)
+        {
+            [items addObjectsFromArray:tokens[userKey]];
+        }
+        else
+        {
+            [items addObject:tokens[userKey][clientId]];
+        }
+    }
+    
+    pthread_rwlock_unlock(&_lock);
+    
+    [_delegate didAccessCache:self];
+    
+    return items;
 }
 
 - (NSArray<MSALRefreshTokenCacheItem *> *)getRefreshTokenImpl:(nullable MSALRefreshTokenCacheKey *)key
@@ -283,18 +324,18 @@
 }
 
 - (BOOL)addOrUpdateAccessTokenItem:(MSALAccessTokenCacheItem *)item
-                     correlationId:(nullable NSUUID *)correlationId
+                           context:(nullable id<MSALRequestContext>)ctx
                              error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
+        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
         return NO;
     }
-    BOOL result = [self addOrUpdateAccessTokenImpl:item correlationId:correlationId error:error];
+    BOOL result = [self addOrUpdateAccessTokenImpl:item error:error];
     pthread_rwlock_unlock(&_lock);
     [_delegate didWriteCache:self];
     
@@ -302,10 +343,8 @@
 }
 
 - (BOOL)addOrUpdateAccessTokenImpl:(MSALAccessTokenCacheItem *)item
-                     correlationId:(NSUUID *)correlationId
                              error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
     if (!item)
     {
         REQUIRED_PARAMETER_ERROR(item, nil);
@@ -357,18 +396,18 @@
 }
 
 - (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
-                      correlationId:(nullable NSUUID *)correlationId
+                            context:(nullable id<MSALRequestContext>)ctx
                               error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
+        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
         return NO;
     }
-    BOOL result = [self addOrUpdateRefreshTokenImpl:item correlationId:correlationId error:error];
+    BOOL result = [self addOrUpdateRefreshTokenImpl:item context:ctx error:error];
     pthread_rwlock_unlock(&_lock);
     [_delegate didWriteCache:self];
     
@@ -376,13 +415,12 @@
 }
 
 - (BOOL)addOrUpdateRefreshTokenImpl:(MSALRefreshTokenCacheItem *)item
-                      correlationId:(NSUUID *)correlationId
+                            context:(nullable id<MSALRequestContext>)ctx
                               error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
     if (!item)
     {
-        REQUIRED_PARAMETER_ERROR(item, nil);
+        REQUIRED_PARAMETER_ERROR(item, ctx);
         return NO;
     }
     
@@ -430,14 +468,15 @@
 }
 
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
+                      context:(nullable id<MSALRequestContext>)ctx
                         error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
+        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
         return NO;
     }
     BOOL result = [self removeAccessTokenImpl:item error:error];
@@ -492,14 +531,15 @@
 
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
+                       context:(nullable id<MSALRequestContext>)ctx
                          error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
     BOOL result = [self removeRefreshTokenImpl:item error:error];
@@ -556,14 +596,15 @@
 - (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
                              environment:(NSString *)environment
                                 clientId:(NSString *)clientId
+                                 context:(nullable id<MSALRequestContext>)ctx
                                    error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
     BOOL result = [self removeAllTokensForUserIdentifierImp:userIdentifier
@@ -673,14 +714,14 @@
     for (NSDictionary *jsonToken in jsonAccessTokens)
     {
         MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithJson:jsonToken error:nil];
-        [self addOrUpdateAccessTokenImpl:item correlationId:nil error:error];
+        [self addOrUpdateAccessTokenImpl:item error:error];
     }
     
     NSArray<NSDictionary *> *jsonRefreshTokens = dataJson[@"refresh_tokens"];
     for (NSDictionary *jsonToken in jsonRefreshTokens)
     {
         MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithJson:jsonToken error:nil];
-        [self addOrUpdateRefreshTokenImpl:item correlationId:nil error:error];
+        [self addOrUpdateRefreshTokenImpl:item context:nil error:error];
     }
     
     return YES;
