@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-#import "MSALPublicClientApplication.h"
+#import "MSALPublicClientApplication+Internal.h"
 
 #import "MSALAuthority.h"
 #import "MSALError.h"
@@ -39,11 +39,13 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
-#import "MSALTokenCache.h"
 
 #define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
 
 @implementation MSALPublicClientApplication
+{
+    MSALTokenCacheAccessor *_tokenCache;
+}
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
 {
@@ -93,13 +95,26 @@
     
     CHECK_RETURN_NIL([self generateRedirectUri:error]);
     
+    id<MSALTokenCacheDataSource> dataSource;
+#if TARGET_OS_IPHONE
+    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+#else
+    dataSource = [MSALWrapperTokenCache defaultCache];
+#endif
+    _tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
     return self;
 }
 
 - (NSArray <MSALUser *> *)users
 {
-    MSALTokenCacheAccessor *cache = [self defaultTokenCache];
-    return [cache getUsers:self.clientId];
+    return [_tokenCache getUsers:self.clientId];
+}
+
+- (MSALUser *)userForIdentifier:(NSString *)identifier
+{
+    (void)identifier;
+    return nil;
 }
 
 #pragma SafariViewController Support
@@ -348,7 +363,7 @@
     }
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = [self defaultTokenCache];
+    params.tokenCache = _tokenCache;
     
     NSError *error = nil;
     MSALInteractiveRequest *request =
@@ -396,7 +411,7 @@
     params.unvalidatedAuthority = _authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = [self defaultTokenCache];
+    params.tokenCache = _tokenCache;
 
     NSError *error = nil;
     
@@ -423,21 +438,22 @@
         return YES;
     }
     
-    MSALTokenCacheAccessor *cache = [self defaultTokenCache];
-    return [cache deleteAllTokensForUser:user clientId:self.clientId error:error];
+    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId error:error];
 }
 
-#pragma mark -
-#pragma mark token cache getter
-- (MSALTokenCacheAccessor *)defaultTokenCache
+@end
+
+
+@implementation MSALPublicClientApplication (Internal)
+
+- (MSALTokenCacheAccessor *)tokenCache
 {
-    id<MSALTokenCacheDataSource> dataSource;
-#if TARGET_OS_IPHONE
-    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
-#else
-    dataSource = [MSALWrapperTokenCache defaultCache];
-#endif
-    return [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    return _tokenCache;
+}
+
+- (void)setTokenCache:(MSALTokenCacheAccessor *)tokenCache
+{
+    _tokenCache = tokenCache;
 }
 
 @end

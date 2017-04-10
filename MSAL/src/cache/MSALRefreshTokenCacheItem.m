@@ -38,8 +38,6 @@ MSAL_JSON_RW(@"environment", environment, setEnvironment)
 MSAL_JSON_RW(@"displayable_id", displayableId, setDisplayableId)
 MSAL_JSON_RW(@"name", name, setName)
 MSAL_JSON_RW(@"identity_provider", identityProvider, setIdentityProvider)
-MSAL_JSON_RW(@"uid", uid, setUid)
-MSAL_JSON_RW(@"utid", utid, setUtid)
 
 - (id)initWithEnvironment:(NSString *)environment
                  clientId:(NSString *)clientId
@@ -63,8 +61,6 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
     self.displayableId = user.displayableId;
     self.name = user.name;
     self.identityProvider = user.identityProvider;
-    self.uid = user.uid;
-    self.utid = user.utid;
     
     //init data derived from _json
     [self initDerivedPropertiesFromJson];
@@ -104,8 +100,8 @@ MSAL_JSON_RW(@"utid", utid, setUtid)
     _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
                                                name:self.name
                                    identityProvider:self.identityProvider
-                                                uid:self.uid
-                                               utid:self.utid
+                                                uid:self.clientInfo.uniqueIdentifier
+                                               utid:self.clientInfo.uniqueTenantIdentifier
                                         environment:self.environment];
 }
 

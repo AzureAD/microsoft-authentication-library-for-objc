@@ -357,13 +357,77 @@
                                 clientId:(NSString *)clientId
                                    error:(NSError * __autoreleasing *)error
 {
-    (void)userIdentifier;
-    (void)clientId;
-    (void)error;
-    (void)environment;
+    pthread_rwlock_wrlock(&_lock);
+    BOOL result = [self removeAllTokensForUserIdentifierImpl:userIdentifier environment:environment clientId:clientId error:error];
+    pthread_rwlock_unlock(&_lock);
     
-    // TODO: implement
-    @throw @"Todo";
+    return result;
+}
+
+- (BOOL)removeAllTokensForUserIdentifierImpl:(NSString *)userIdentifier
+                                 environment:(NSString *)environment
+                                    clientId:(NSString *)clientId
+                                       error:(NSError * __autoreleasing *)error
+{
+    (void)error;
+    NSMutableDictionary *rts = [_cache objectForKey:@"refresh_tokens"];
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment clientId:clientId userIdentifier:userIdentifier];
+    [rts removeObjectForKey:key.account];
+    NSMutableDictionary *ats = [_cache objectForKey:@"access_tokens"];
+    [ats removeObjectForKey:key.account];
+    
+    return YES;
+}
+
+- (void)removeRTForIdentifier:(NSString *)userIdentifier
+                  environment:(NSString *)environment
+                     clientId:(NSString *)clientId
+{
+    NSMutableDictionary *rts = [_cache objectForKey:@"refresh_tokens"];
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment clientId:clientId userIdentifier:userIdentifier];
+    [rts removeObjectForKey:key.account];
+}
+
++ (MSALTokenCacheAccessor *)createTestAccessor
+{
+    MSALTestTokenCache *testCache = [MSALTestTokenCache new];
+    return [[MSALTokenCacheAccessor alloc] initWithDataSource:testCache];
+}
+
+- (NSArray<MSALRefreshTokenCacheItem *> *)refreshTokens
+{
+    pthread_rwlock_rdlock(&_lock);
+    NSMutableDictionary *rts = [_cache objectForKey:@"refresh_tokens"];
+    NSMutableArray *array = [NSMutableArray new];
+    for (NSString *userKey in rts)
+    {
+        NSDictionary *userTokens = rts[userKey];
+        for (NSString *tokenKey in userTokens)
+        {
+            [array addObject:userTokens[tokenKey]];
+        }
+    }
+    pthread_rwlock_unlock(&_lock);
+    
+    return array;
+}
+
+- (NSArray<MSALAccessTokenCacheItem *> *)accessTokens
+{
+    pthread_rwlock_rdlock(&_lock);
+    NSMutableDictionary *ats = [_cache objectForKey:@"access_tokens"];
+    NSMutableArray *array = [NSMutableArray new];
+    for (NSString *userKey in ats)
+    {
+        NSDictionary *userTokens = ats[userKey];
+        for (NSString *tokenKey in userTokens)
+        {
+            [array addObject:userTokens[tokenKey]];
+        }
+    }
+    pthread_rwlock_unlock(&_lock);
+    
+    return array;
 }
 
 

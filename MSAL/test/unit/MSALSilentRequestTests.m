@@ -35,7 +35,6 @@
 #import "MSALTestTokenCache.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
 
