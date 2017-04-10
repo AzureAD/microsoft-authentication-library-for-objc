@@ -35,24 +35,11 @@
            clientInfo:(MSALClientInfo *)clientInfo
           environment:(NSString *)environment
 {
-    NSString *uid;
-    NSString *utid;
-    if (clientInfo)
-    {
-        uid = clientInfo.uniqueIdentifier;
-        utid = clientInfo.uniqueTenantIdentifier;
-    }
-    else
-    {
-        uid = idToken.uniqueId;
-        utid = idToken.tenantId;
-    }
-    
     return [self initWithDisplayableId:idToken.preferredUsername
                                   name:idToken.name
                       identityProvider:idToken.issuer
-                                   uid:uid
-                                  utid:utid
+                                   uid:clientInfo.uniqueIdentifier
+                                  utid:clientInfo.uniqueTenantIdentifier
                            environment:environment];
 }
 
@@ -92,8 +79,51 @@
     user->_identityProvider = [_identityProvider copyWithZone:zone];
     user->_uid = [_uid copyWithZone:zone];
     user->_utid = [_utid copyWithZone:zone];
+    user->_environment = [_environment copyWithZone:zone];
     
     return user;
+}
+
+- (BOOL)isEqual:(id)object
+{
+    if (![object isKindOfClass:[MSALUser class]])
+    {
+        return NO;
+    }
+    
+    MSALUser *other = (MSALUser *)object;
+    
+    if (_displayableId && ![_displayableId isEqualToString:other->_displayableId])
+    {
+        return NO;
+    }
+    
+    if (_uid && ![_uid isEqualToString:other->_uid])
+    {
+        return NO;
+    }
+    
+    if (_utid && ![_utid isEqualToString:other->_utid])
+    {
+        return NO;
+    }
+    
+    if (_name && ![_name isEqualToString:other->_name])
+    {
+        return NO;
+    }
+    
+    if (_environment && ![_environment isEqualToString:other->_environment])
+    {
+        return NO;
+    }
+    
+    if (_identityProvider && ![_identityProvider isEqualToString:other->_identityProvider])
+    {
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

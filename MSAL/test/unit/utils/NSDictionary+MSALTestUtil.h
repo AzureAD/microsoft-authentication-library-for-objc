@@ -31,4 +31,6 @@
 
 - (BOOL)compareDictionary:(NSDictionary *)dictionary;
 
+- (NSString *)base64UrlJson;
+
 @end

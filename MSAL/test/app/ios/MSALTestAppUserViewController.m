@@ -76,7 +76,7 @@
         return;
     }
     
-    _users = [application users];
+    _users = [application users:nil];
 }
 
 - (NSInteger)numberOfRows

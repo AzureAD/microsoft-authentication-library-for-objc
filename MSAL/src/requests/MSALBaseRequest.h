@@ -41,7 +41,6 @@
     MSALTelemetryApiId _apiId;
 }
 
-@property (nullable) MSALTokenCache *tokenCache;
 @property (nullable) MSALTokenResponse *response;
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
 @property (nonnull, readonly) MSALRequestParameters *parameters;

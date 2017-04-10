@@ -30,14 +30,6 @@
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
 #import "MSALTokenCacheAccessor.h"
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache.h"
-#import "MSALTelemetryApiId.h"
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache.h"
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
 
 @interface MSALSilentRequest()
 {
@@ -75,9 +67,7 @@
     MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
     {
-#if TARGET_OS_IPHONE
-        accessToken = [cache findAccessToken:_parameters error:nil];
-#endif
+        accessToken = [cache findAccessToken:_parameters context:_parameters error:nil];
     }
     
     if (accessToken)
@@ -87,13 +77,7 @@
         return;
     }
 
-#if TARGET_OS_IPHONE
-    _refreshToken = [cache findRefreshToken:_parameters error:nil];
-#else
-    //TODO: Mac support
-    _refreshToken = [MSALRefreshTokenCacheItem new];
-
-#endif
+    _refreshToken = [cache findRefreshToken:_parameters context:_parameters error:nil];
     
     CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     

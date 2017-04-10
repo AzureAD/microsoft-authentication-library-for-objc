@@ -35,7 +35,6 @@
 #import "MSALTestTokenCache.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
 
@@ -164,7 +163,7 @@
                                                                                    @"client_info": rawClientInfo
                                                                                    }
                                                                             error:nil];
-    [parameters.tokenCache.dataSource addOrUpdateAccessTokenItem:at correlationId:nil error:nil];
+    [parameters.tokenCache.dataSource addOrUpdateAccessTokenItem:at context:nil error:nil];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
@@ -228,7 +227,7 @@
                                                                                       @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"
                                                                                       }
                                                                               error:nil];
-    [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt correlationId:nil error:nil];
+    [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];

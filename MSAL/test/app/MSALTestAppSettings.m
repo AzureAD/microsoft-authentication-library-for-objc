@@ -96,7 +96,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
         return nil;
     }
     
-    NSArray<MSALUser *> *users = [application users];
+    NSArray<MSALUser *> *users = [application users:nil];
     if (!users)
     {
         LOG_ERROR(nil, @"no users came back from the application");

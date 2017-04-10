@@ -29,6 +29,11 @@
 
 @implementation MSALRefreshTokenCacheKey
 
++ (NSString *)keyForClientId:(NSString *)clientId
+{
+    return [clientId msalBase64UrlEncode];
+}
+
 - (id)initWithEnvironment:(NSString *)environment
                  clientId:(NSString *)clientId
            userIdentifier:(NSString *)userIdentifier
@@ -52,12 +57,7 @@
 
 - (NSString *)service
 {
-    if (!self.clientId)
-    {
-        return nil;
-    }
-
-    return self.clientId.msalBase64UrlEncode;
+    return [MSALRefreshTokenCacheKey keyForClientId:self.clientId];
 }
 
 - (NSString *)account

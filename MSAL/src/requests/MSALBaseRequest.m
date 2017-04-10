@@ -32,7 +32,6 @@
 #import "MSALTokenResponse.h"
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
-#import "MSALTokenCache.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
@@ -225,6 +224,7 @@ static MSALScopes *s_reservedScopes = nil;
          MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
          [cache saveAccessAndRefreshToken:self.parameters
                                  response:tokenResponse
+                                  context:_parameters
                                     error:&cacheError];
          
          if (cacheError)
