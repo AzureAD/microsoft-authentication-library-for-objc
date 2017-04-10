@@ -115,6 +115,11 @@
                                                                           environment:requestParam.user.environment];
     
     NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
+    if (!allAccessTokens)
+    {
+        return nil;
+    }
+    
     NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
@@ -218,6 +223,11 @@
                                                                           environment:user.environment];
     
     NSArray *accessTokens = [_dataSource getAccessTokenItemsWithKey:key context:ctx error:error];
+    if (!accessTokens)
+    {
+        return nil;
+    }
+    
     NSMutableArray *matchedAccessTokens = [NSMutableArray new];
     
     for (MSALAccessTokenCacheItem *token in accessTokens)

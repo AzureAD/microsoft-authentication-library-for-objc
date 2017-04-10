@@ -335,7 +335,7 @@
         LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
         return NO;
     }
-    BOOL result = [self addOrUpdateAccessTokenImpl:item error:error];
+    BOOL result = [self addOrUpdateAccessTokenImpl:item context:ctx error:error];
     pthread_rwlock_unlock(&_lock);
     [_delegate didWriteCache:self];
     
@@ -343,11 +343,12 @@
 }
 
 - (BOOL)addOrUpdateAccessTokenImpl:(MSALAccessTokenCacheItem *)item
+                           context:(nullable id<MSALRequestContext>)ctx
                              error:(NSError * __autoreleasing *)error
 {
     if (!item)
     {
-        REQUIRED_PARAMETER_ERROR(item, nil);
+        REQUIRED_PARAMETER_ERROR(item, ctx);
         return NO;
     }
     
@@ -714,7 +715,7 @@
     for (NSDictionary *jsonToken in jsonAccessTokens)
     {
         MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithJson:jsonToken error:nil];
-        [self addOrUpdateAccessTokenImpl:item error:error];
+        [self addOrUpdateAccessTokenImpl:item context:nil error:error];
     }
     
     NSArray<NSDictionary *> *jsonRefreshTokens = dataJson[@"refresh_tokens"];
