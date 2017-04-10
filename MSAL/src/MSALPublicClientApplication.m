@@ -393,7 +393,7 @@
                  "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
-    params.unvalidatedAuthority = user.authority;
+    params.unvalidatedAuthority = _authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = [self defaultTokenCache];

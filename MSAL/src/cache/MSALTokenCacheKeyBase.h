@@ -26,28 +26,28 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSAL_Internal.h"
 
-#import "MSALBaseTokenCacheItem.h"
+@class MSALUser;
 
-@class MSALAccessTokenCacheKey;
+typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
+{
+    MSAL_V1         = 'MSv1'
+};
 
-@interface MSALAccessTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
+@interface MSALTokenCacheKeyBase : NSObject
 
-@property (readonly) NSString *authority;
-@property (readonly) NSString *rawIdToken;
-@property (readonly) NSString *accessToken;
-@property (readonly) NSString *tokenType;
-@property (readonly) NSDate *expiresOn;
-@property (readonly) MSALScopes *scope;
-@property (readonly) MSALUser *user;
-@property (readonly) NSString *tenantId;
+@property NSString *clientId;
+@property NSString *userIdentifier;
 
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
+- (id)initWithClientId:(NSString *)clientId
+        userIdentifier:(NSString *)userIdentifier;
 
-- (BOOL)isExpired;
+//subclasses must override this
+- (NSString *)service;
+- (NSString *)account;
 
-- (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
++ (NSString *)userIdAtEnvironmentBase64:(NSString *)userIdentifier
+                            environment:(NSString *)environment;
 
 @end

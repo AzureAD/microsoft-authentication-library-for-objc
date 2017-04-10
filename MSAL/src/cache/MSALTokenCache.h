@@ -25,7 +25,8 @@
 #define MSALCache_h
 
 #import "MSALTokenCacheAccessor.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheDataSource.h"

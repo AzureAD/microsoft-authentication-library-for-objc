@@ -122,7 +122,7 @@ static MSALScopes *s_reservedScopes = nil;
     NSString *upn = nil;
     if (_parameters.user)
     {
-        upn = _parameters.user.upn;
+        upn = _parameters.user.displayableId;//rather than upn?
     }
     else if(_parameters.loginHint)
     {
@@ -240,7 +240,7 @@ static MSALScopes *s_reservedScopes = nil;
                                       user:nil // TODO: user
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
 
-         [event setClientId:result.user.clientId];
+         [event setClientId:_parameters.clientId];
          [event setUser:result.user];
 
          [self flushEvent:event];

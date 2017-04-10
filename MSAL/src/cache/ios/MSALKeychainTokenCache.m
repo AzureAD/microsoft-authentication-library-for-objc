@@ -30,7 +30,9 @@
 #import "MSALTokenResponse.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
+#import "MSALTokenCacheKeyBase.h"
 
 static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
 
@@ -40,11 +42,6 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
 {
     ACCESS_TOKEN    = 'acTk',
     REFRESH_TOKEN   = 'rfTk'
-};
-
-typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
-{
-    MSAL_V1         = 'MSv1'
 };
 
 @implementation MSALKeychainTokenCache
@@ -162,7 +159,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 
 @implementation MSALKeychainTokenCache (Internal)
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
                                                                 correlationId:(nullable NSUUID * )correlationId
                                                                         error:(NSError * __autoreleasing *)error
 {
@@ -197,7 +194,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     return accessTokens;
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
                                                                   correlationId:(nullable NSUUID * )correlationId
                                                                           error:(NSError * __autoreleasing *)error
 {
@@ -241,7 +238,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
+        MSALAccessTokenCacheKey *key = [atItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -294,7 +291,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
+        MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -343,7 +340,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
                         error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [atItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -365,7 +362,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
                          error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -384,12 +381,14 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     return YES;
 }
 
-- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
-                           environment:(NSString *)environment
-                              clientId:(NSString *)clientId
-                                 error:(NSError * __autoreleasing *)error
+- (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
+                             environment:(NSString *)environment
+                                clientId:(NSString *)clientId
+                                   error:(NSError * __autoreleasing *)error
 {
-    NSString *account = [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, homeObjectId.msalBase64UrlEncode, environment.msalBase64UrlEncode];
+    NSString *account = [NSString stringWithFormat:@"%u$%@",
+                         MSAL_V1,
+                         [MSALTokenCacheKeyBase userIdAtEnvironmentBase64:userIdentifier environment:environment]];
                          
     NSMutableDictionary *query = [self queryDictionaryForKey:nil
                                                   additional:@{
@@ -408,7 +407,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 }
 
 
-- (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKey *)key
+- (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKeyBase *)key
                                    additional:(NSDictionary *)additional
 {
     NSMutableDictionary* query = [_default mutableCopy];

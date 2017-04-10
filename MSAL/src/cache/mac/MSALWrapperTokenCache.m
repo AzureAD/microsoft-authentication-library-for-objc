@@ -24,7 +24,8 @@
 #import "MSALWrapperTokenCache.h"
 #import "MSALWrapperTokenCache+Internal.h"
 #import "MSALAccessTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
 #import "MSALRefreshTokenCacheItem.h"
 
 #include <pthread.h>
@@ -136,7 +137,7 @@
     return _delegate;
 }
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
                                                                 correlationId:(nullable NSUUID * )correlationId
                                                                         error:(NSError * __autoreleasing *)error
 {
@@ -159,7 +160,7 @@
     return result;
 }
 
-- (NSArray<MSALAccessTokenCacheItem *> *)getAccessTokenImpl:(nullable MSALTokenCacheKey *)key
+- (NSArray<MSALAccessTokenCacheItem *> *)getAccessTokenImpl:(nullable MSALAccessTokenCacheKey *)key
 {
     if (!_cache)
     {
@@ -194,7 +195,7 @@
 
 - (void)addToItems:(nonnull NSMutableArray *)items
             tokens:(nonnull NSDictionary *)userTokens
-               key:(MSALTokenCacheKey *)key
+               key:(MSALTokenCacheKeyBase *)key
 {
     if (!userTokens)
     {
@@ -225,7 +226,7 @@
     }
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
                                                                   correlationId:(nullable NSUUID * )correlationId
                                                                           error:(NSError * __autoreleasing *)error
 {
@@ -248,7 +249,7 @@
     return result;
 }
 
-- (NSArray<MSALRefreshTokenCacheItem *> *)getRefreshTokenImpl:(nullable MSALTokenCacheKey *)key
+- (NSArray<MSALRefreshTokenCacheItem *> *)getRefreshTokenImpl:(nullable MSALRefreshTokenCacheKey *)key
 {
     if (!_cache)
     {
@@ -314,7 +315,7 @@
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
     
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -388,7 +389,7 @@
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
     
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -449,7 +450,7 @@
                         error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -511,7 +512,7 @@
                          error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [item tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -552,10 +553,10 @@
 }
 
 
-- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
-                           environment:(NSString *)environment
-                              clientId:(NSString *)clientId
-                                 error:(NSError * __autoreleasing *)error
+- (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
+                             environment:(NSString *)environment
+                                clientId:(NSString *)clientId
+                                   error:(NSError * __autoreleasing *)error
 {
     [_delegate willWriteCache:self];
     int err = pthread_rwlock_wrlock(&_lock);
@@ -565,10 +566,10 @@
         LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
-    BOOL result = [self removeAllTokensForHomeObjectIdImp:homeObjectId
-                                              environment:environment
-                                                 clientId:clientId
-                                                    error:error];
+    BOOL result = [self removeAllTokensForUserIdentifierImp:userIdentifier
+                                                environment:environment
+                                                   clientId:clientId
+                                                      error:error];
     
     pthread_rwlock_unlock(&_lock);
     [_delegate didWriteCache:self];
@@ -576,12 +577,12 @@
 }
 
 
-- (BOOL)removeAllTokensForHomeObjectIdImp:(NSString *)homeObjectId
-                              environment:(NSString *)environment
-                                 clientId:(NSString *)clientId
-                                    error:(NSError * __autoreleasing *)error
+- (BOOL)removeAllTokensForUserIdentifierImp:(NSString *)userIdentifier
+                                environment:(NSString *)environment
+                                   clientId:(NSString *)clientId
+                                      error:(NSError * __autoreleasing *)error
 {
-    (void)homeObjectId;
+    (void)userIdentifier;
     (void)clientId;
     (void)error;
     (void)environment;

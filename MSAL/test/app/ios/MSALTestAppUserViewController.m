@@ -90,7 +90,7 @@
     {
         return @"(nil)";
     }
-    return _users[row - 1].upn;
+    return _users[row - 1].displayableId;
 }
 
 - (void)rowSelected:(NSInteger)row
@@ -114,11 +114,11 @@
         return 0;
     }
     
-    NSString *currentHoid = currentUser.homeObjectId;
+    NSString *currentUserId = currentUser.userIdentifier;
     
     for (NSInteger i = 0; i < _users.count; i++)
     {
-        if ([currentHoid isEqualToString:_users[i].homeObjectId])
+        if ([currentUserId isEqualToString:_users[i].userIdentifier])
         {
             return i;
         }

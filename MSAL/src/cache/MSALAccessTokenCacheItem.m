@@ -26,21 +26,23 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccessTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALAccessTokenCacheItem
+{
+    MSALIdToken *_idToken;
+}
 
-@synthesize expiresOn = _expiresOn;
-@synthesize scope = _scope;
-
+MSAL_JSON_RW(OAUTH2_AUTHORITY, authority, setAuthority)
+MSAL_JSON_RW(OAUTH2_ID_TOKEN, rawIdToken, setRawIdToken)
 MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
 MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
-
 
 - (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
@@ -51,35 +53,61 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
         return nil;
     }
     
-    if (!(self = [super initWithAuthority:authority.absoluteString clientId:clientId response:response]))
+    if (!(self = [super initWithClientId:clientId response:response]))
     {
         return nil;
     }
     
+    //store needed data to _json
+    self.authority = authority.absoluteString;
+    self.rawIdToken = response.idToken;
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
     self.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[response.expiresOn timeIntervalSince1970]];
     self.scopeString = response.scope;
     
+    //init data derived from _json
+    [self initDerivedPropertiesFromJson];
+    
     return self;
 }
 
-- (MSALScopes *)scope
+//init method for deserialization
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error
 {
-    if (!_scope)
+    if (!(self = [super initWithJson:json error:error]))
     {
-        _scope = [self scopeFromString:self.scopeString];
+        return nil;
     }
-    return _scope;
+    
+    [self initDerivedPropertiesFromJson];
+    
+    return self;
 }
 
-- (NSDate *)expiresOn
+- (id)initWithData:(NSData *)data
+             error:(NSError * __autoreleasing *)error
 {
-    if (!_expiresOn && self.expiresOnString)
+    if (!(self = [super initWithData:data error:error]))
     {
-        _expiresOn = [NSDate dateWithTimeIntervalSince1970:[self.expiresOnString doubleValue]];
+        return nil;
     }
-    return _expiresOn;
+    
+    [self initDerivedPropertiesFromJson];
+    
+    return self;
+}
+
+- (void)initDerivedPropertiesFromJson
+{
+    _expiresOn = [NSDate dateWithTimeIntervalSince1970:[self.expiresOnString doubleValue]];
+    _scope = [self scopeFromString:self.scopeString];
+    _idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
+    _user = [[MSALUser alloc] initWithIdToken:_idToken
+                                   clientInfo:self.clientInfo
+                                  environment:self.authority ? [NSURL URLWithString:self.authority].host : nil];
+    _tenantId = _idToken.tenantId;
 }
 
 - (BOOL)isExpired
@@ -87,12 +115,13 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     return [self.expiresOn timeIntervalSinceNow] > 0;
 }
 
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
+- (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [[MSALTokenCacheKey alloc] initWithAuthority:self.authority
-                                                                 clientId:self.clientId
-                                                                    scope:self.scope
-                                                                     user:self.user];
+    MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:self.authority
+                                                                             clientId:self.clientId
+                                                                                scope:self.scope
+                                                                       userIdentifier:self.user.userIdentifier
+                                                                          environment:self.environment];
     if (!key)
     {
         MSAL_ERROR_PARAM(nil, MSALErrorTokenCacheItemFailure, @"failed to create token cache key.");
@@ -114,11 +143,18 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     return scope;
 }
 
+- (NSString *)environment
+{
+    if (!self.authority)
+    {
+        return nil;
+    }
+    return [NSURL URLWithString:self.authority].host;
+}
+
 - (id)copyWithZone:(NSZone*) zone
 {
-    MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem allocWithZone:zone] init];
-    
-    item->_json = [_json copyWithZone:zone];
+    MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem allocWithZone:zone] initWithJson:[_json copyWithZone:zone] error:nil];
     
     return item;
 }

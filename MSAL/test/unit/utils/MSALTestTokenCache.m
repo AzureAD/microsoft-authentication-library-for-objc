@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestTokenCache.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
+#import "MSALTokenCacheKeyBase.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 
@@ -58,7 +60,7 @@
     pthread_rwlock_destroy(&_lock);
 }
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
                                                                 correlationId:(nullable NSUUID * )correlationId
                                                                         error:(NSError * __autoreleasing *)error
 {
@@ -98,7 +100,7 @@
 
 - (void)addToItems:(nonnull NSMutableArray *)items
             tokens:(nonnull NSDictionary *)userTokens
-               key:(MSALTokenCacheKey *)key
+               key:(MSALTokenCacheKeyBase *)key
 {
     if (!userTokens)
     {
@@ -129,7 +131,7 @@
     }
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
+- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALRefreshTokenCacheKey *)key
                                                                   correlationId:(nullable NSUUID * )correlationId
                                                                           error:(NSError * __autoreleasing *)error
 {
@@ -177,7 +179,7 @@
     
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [item tokenCacheKey:error];
     
     NSMutableDictionary *tokens = [_cache objectForKey:@"access_tokens"];
     if (!tokens)
@@ -218,7 +220,7 @@
     // Copy the item to make sure it doesn't change under us.
     item = [item copy];
     
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [item tokenCacheKey:error];
     
     NSMutableDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
     if (!tokens)
@@ -263,7 +265,7 @@
                         error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [item tokenCacheKey:error];
     
     NSString *userKey = key.account;
     if (!userKey)
@@ -314,7 +316,7 @@
                          error:(NSError * __autoreleasing *)error
 {
     (void)error;
-    MSALTokenCacheKey *key = [item tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [item tokenCacheKey:error];
     
     NSString *userKey = key.account;
     if (!userKey)
@@ -350,12 +352,12 @@
     return YES;
 }
 
-- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
-                           environment:(NSString *)environment
-                              clientId:(NSString *)clientId
-                                 error:(NSError * __autoreleasing *)error
+- (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
+                             environment:(NSString *)environment
+                                clientId:(NSString *)clientId
+                                   error:(NSError * __autoreleasing *)error
 {
-    (void)homeObjectId;
+    (void)userIdentifier;
     (void)clientId;
     (void)error;
     (void)environment;

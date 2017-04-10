@@ -28,20 +28,28 @@
 #import <Foundation/Foundation.h>
 
 @class MSALIdToken;
+@class MSALClientInfo;
 
 @interface MSALUser : NSObject <NSCopying>
 
-@property (readonly) NSString *upn;//where to get it?
-@property (readonly) NSString *uniqueId;
 @property (readonly) NSString *displayableId;
 @property (readonly) NSString *name;
 @property (readonly) NSString *identityProvider;
-@property (readonly) NSString *clientId;
-@property (readonly) NSURL *authority;
-@property (readonly) NSString *homeObjectId;
+@property (readonly) NSString *uid;
+@property (readonly) NSString *utid;
+@property (readonly) NSString *environment;
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId;
+           clientInfo:(MSALClientInfo *)clientInfo
+          environment:(NSString *)environment;
+
+- (id)initWithDisplayableId:(NSString *)displayableId
+                       name:(NSString *)name
+           identityProvider:(NSString *)identityProvider
+                        uid:(NSString *)uid
+                       utid:(NSString *)utid
+                environment:(NSString *)environment;
+
+- (NSString *)userIdentifier;
 
 @end
