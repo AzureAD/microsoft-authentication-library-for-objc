@@ -34,6 +34,8 @@
 #import "MSALTelemetryEventStrings.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALAuthority.h"
+#import "MSALTelemetryHttpEvent.h"
+#import "MSALTelemetry+Internal.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -139,6 +141,10 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     // Telemetry
     [[MSALTelemetry sharedInstance] startEvent:[_context telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST];
     
+    MSALTelemetryHttpEvent *event = [[MSALTelemetryHttpEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST
+                                                                       requestId:[_context telemetryRequestId]
+                                                                   correlationId:_context.correlationId];
+    
     [_headers addEntriesFromDictionary:[MSALLogger msalId]];
     
     if (_context)
@@ -163,12 +169,16 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     
     // TODO: Add client version to URL
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:newURL? newURL : _endpointURL
+    newURL = newURL? newURL : _endpointURL;
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:newURL
                                                            cachePolicy:_cachePolicy
                                                        timeoutInterval:_timeOutInterval];
     request.HTTPMethod = _isGetRequest ? @"GET" : @"POST";
     request.allHTTPHeaderFields = _headers;
     request.HTTPBody = bodyData;
+    
+    [event setHttpMethod:request.HTTPMethod];
+    [event setHttpPath:[NSString stringWithFormat:@"%@://%@/%@", newURL.scheme, newURL.host, newURL.path]];
     
     LOG_INFO(_context, @"HTTP request %@", [MSALAuthority isKnownHost:request.URL] ? request.URL.absoluteString : [request.URL.absoluteString msalComputeSHA256Hex]);
     LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
@@ -178,6 +188,10 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                   {
                                       if (error)
                                       {
+                                          [event setHttpErrorCode:[NSString stringWithFormat: @"%ld", (long)[error code]]];
+                                          [event setHttpErrorDomain:[error domain]];
+                                          [[MSALTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
+                                          
                                           completionHandler(nil, error);
                                           return;
                                       }
@@ -185,12 +199,16 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                       MSALHttpResponse *msalResponse = [[MSALHttpResponse alloc] initWithResponse:(NSHTTPURLResponse *)response
                                                                                                              data:data
                                                                                                             error:&error];
+                                      
+                                      [event setHttpResponseCode:[NSString stringWithFormat: @"%ld", (long)[msalResponse statusCode]]];
+                                      [event setHttpRequestIdHeader:[msalResponse.headers objectForKey:OAUTH2_CORRELATION_ID_REQUEST_VALUE]];
+                                      
+                                      [[MSALTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
+                                      
                                       completionHandler(msalResponse, error);
                                   }];
     [task resume];
 }
-
-
 
 - (void)sendGet:(MSALHttpRequestCallback)completionHandler
 {

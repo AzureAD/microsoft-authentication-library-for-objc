@@ -29,7 +29,10 @@
 
 #import "MSALWebUI.h"
 #import "UIApplication+MSALExtensions.h"
-
+#import "MSALTelemetry.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryUIEvent.h"
+#import "MSALTelemetryEventStrings.h"
 
 static MSALWebUI *s_currentWebSession = nil;
 
@@ -43,6 +46,8 @@ static MSALWebUI *s_currentWebSession = nil;
     SFSafariViewController *_safariViewController;
     MSALWebUICompletionBlock _completionBlock;
     id<MSALRequestContext> _context;
+    NSString *_telemetryRequestId;
+    MSALTelemetryUIEvent *_telemetryEvent;
 }
 
 + (void)startWebUIWithURL:(NSURL *)url
@@ -99,8 +104,8 @@ static MSALWebUI *s_currentWebSession = nil;
 
 - (void)cancel
 {
+    [_telemetryEvent setIsCancelled:YES];
     [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically")];
-    
 }
 
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller
@@ -111,6 +116,7 @@ static MSALWebUI *s_currentWebSession = nil;
         return;
     }
     
+    [_telemetryEvent setIsCancelled:NO];
     [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
 }
 
@@ -122,6 +128,13 @@ static MSALWebUI *s_currentWebSession = nil;
         CHECK_ERROR_COMPLETION((!s_currentWebSession), _context, MSALErrorInteractiveSessionAlreadyRunning, @"Only one interactive session is allowed at a time.");
         s_currentWebSession = self;
     }
+    
+    _telemetryRequestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    
+    [[MSALTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_UI_EVENT];
+    _telemetryEvent = [[MSALTelemetryUIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_UI_EVENT
+                                                       requestId:_telemetryRequestId
+                                                   correlationId:nil];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         _safariViewController = [[SFSafariViewController alloc] initWithURL:url
@@ -189,6 +202,8 @@ static MSALWebUI *s_currentWebSession = nil;
         LOG_ERROR(_context, @"MSAL response received but no completion block saved");
         return NO;
     }
+    
+    [[MSALTelemetry sharedInstance] stopEvent:_telemetryRequestId event:_telemetryEvent];
     
     completionBlock(response, error);
     return YES;
