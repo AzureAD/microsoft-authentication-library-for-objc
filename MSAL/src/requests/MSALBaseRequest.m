@@ -32,7 +32,6 @@
 #import "MSALTokenResponse.h"
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
-#import "MSALTokenCache.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"

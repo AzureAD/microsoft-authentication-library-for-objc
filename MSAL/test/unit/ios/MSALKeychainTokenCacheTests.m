@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALTokenResponse.h"
 #import "MSALClientInfo.h"
