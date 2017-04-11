@@ -44,17 +44,27 @@
     [super tearDown];
 }
 
-- (void)testHostWithPort
+- (void)testHostWithNoPortSpecified
 {
     NSURL *urlWithNoPortSpecified = [NSURL URLWithString:@"https://somehost.com"];
-    NSURL *urlWithDefaultPort = [NSURL URLWithString:@"https://somehost.com:443"];
-    NSURL *urlWithCustomPort = [NSURL URLWithString:@"https://somehost.com:88"];
-    
-    NSURL *urlWithNoHost = [NSURL new];
-    
     XCTAssertEqualObjects(urlWithNoPortSpecified.hostWithPort, @"somehost.com");
-    XCTAssertEqualObjects(urlWithDefaultPort.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithCustomPort
+{
+    NSURL *urlWithCustomPort = [NSURL URLWithString:@"https://somehost.com:88"];
     XCTAssertEqualObjects(urlWithCustomPort.hostWithPort, @"somehost.com:88");
+}
+
+- (void)testHostWithDefaultPort
+{
+    NSURL *urlWithDefaultPort = [NSURL URLWithString:@"https://somehost.com:443"];
+    XCTAssertEqualObjects(urlWithDefaultPort.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithNoHost
+{
+    NSURL *urlWithNoHost = [NSURL new];
     XCTAssertEqualObjects(urlWithNoHost.hostWithPort, @"");
 }
 

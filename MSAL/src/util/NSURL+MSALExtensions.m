@@ -32,8 +32,14 @@
         return @"";
     }
     
-    BOOL defaultPort = (self.port == nil) || (self.port.intValue == 443);
-    return [NSString stringWithFormat:@"%@%@%@", self.host, defaultPort ? @"" : @":", defaultPort ? @"" : self.port];
+    if (self.port == nil || self.port.intValue == 443)
+    {
+        return self.host;
+    }
+    else
+    {
+        return [NSString stringWithFormat:@"%@:%@", self.host, self.port];
+    }
 }
 
 @end
