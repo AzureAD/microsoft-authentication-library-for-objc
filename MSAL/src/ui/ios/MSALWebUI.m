@@ -116,7 +116,7 @@ static MSALWebUI *s_currentWebSession = nil;
         return;
     }
     
-    [_telemetryEvent setIsCancelled:NO];
+    [_telemetryEvent setIsCancelled:YES];
     [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
 }
 

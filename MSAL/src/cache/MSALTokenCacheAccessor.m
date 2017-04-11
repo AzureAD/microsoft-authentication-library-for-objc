@@ -150,6 +150,9 @@
     NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
     if (!allAccessTokens)
     {
+        [event setStatus:MSAL_TELEMETRY_VALUE_NOT_FOUND];
+        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        
         return nil;
     }
     
