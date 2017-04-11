@@ -130,10 +130,17 @@
         }
     }
     
-    if (matchedTokens.count != 1)
+    if (matchedTokens.count == 0)
     {
-        LOG_WARN(ctx, @"Found more than 1 access tokens!");
-        LOG_WARN_PII(ctx, @"Found more than 1 access tokens!");
+        LOG_WARN(ctx, @"No access token found.");
+        LOG_WARN_PII(ctx, @"No access token found.");
+        return nil;
+    }
+    
+    if (matchedTokens.count > 1)
+    {
+        LOG_WARN(ctx, @"Found multiple access tokens, please specify which token to return!");
+        LOG_WARN_PII(ctx, @"Found multiple access tokens, please specify which token to return!");
         return nil;
     }
     
@@ -176,7 +183,7 @@
     
     if (matchedTokens.count > 1)
     {
-        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. No access token is found.");
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. Found multiple access tokens, please specify which token to return!");
         return nil;
     }
     
