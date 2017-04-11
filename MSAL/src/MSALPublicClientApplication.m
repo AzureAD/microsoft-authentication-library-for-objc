@@ -45,6 +45,7 @@
 @implementation MSALPublicClientApplication
 {
     MSALTokenCacheAccessor *_tokenCache;
+    BOOL _isAuthorityProvided;
 }
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
@@ -90,7 +91,8 @@
     REQUIRED_PARAMETER(clientId, nil);
     _clientId = clientId;
     
-    _authority = [MSALAuthority checkAuthorityString:authority ? authority : DEFAULT_AUTHORITY error:error];
+    _isAuthorityProvided = (authority != nil);
+    _authority = [MSALAuthority checkAuthorityString:_isAuthorityProvided ? authority : DEFAULT_AUTHORITY error:error];
     CHECK_RETURN_NIL(_authority);
     
     CHECK_RETURN_NIL([self generateRedirectUri:error]);
@@ -419,6 +421,7 @@
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
+    [request setIsAuthorityProvided:_isAuthorityProvided];
     
     if (!request)
     {

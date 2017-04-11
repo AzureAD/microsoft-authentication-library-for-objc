@@ -25,12 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
+
+static uint32_t s_expirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
 
 @implementation MSALAccessTokenCacheItem
 {
@@ -112,7 +115,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 
 - (BOOL)isExpired
 {
-    return [self.expiresOn timeIntervalSinceNow] > 0;
+    return [self.expiresOn compare:[NSDate dateWithTimeIntervalSinceNow:s_expirationBuffer]] == NSOrderedAscending;
 }
 
 - (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error

@@ -53,6 +53,7 @@
     
     _forceRefresh = forceRefresh;
     _refreshToken = nil;
+    _isAuthorityProvided = YES;
     
     return self;
 }
@@ -62,18 +63,32 @@
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
 
     MSALTokenCacheAccessor *cache = _parameters.tokenCache;
-    (void)cache;
     
     MSALAccessTokenCacheItem *accessToken = nil;
+    NSError *error = nil;
     if (!_forceRefresh)
     {
-        accessToken = [cache findAccessToken:_parameters context:_parameters error:nil];
+        if (self.isAuthorityProvided)
+        {
+            accessToken = [cache findAccessToken:_parameters context:_parameters error:&error];
+        }
+        else
+        {
+            accessToken = [cache findAccessTokenWithNoAuthorityProvided:_parameters context:_parameters error:&error];
+        }
     }
     
     if (accessToken)
     {
         MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
         completionBlock(result, nil);
+        return;
+    }
+    
+    // for this particular error, we need to return the error immediately
+    if ([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorMultipleMatchesNoAuthoritySpecified)
+    {
+        completionBlock(nil, error);
         return;
     }
 

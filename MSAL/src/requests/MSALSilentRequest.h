@@ -30,6 +30,7 @@
 @interface MSALSilentRequest : MSALBaseRequest
 
 @property NSString *state;
+@property BOOL isAuthorityProvided;
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh

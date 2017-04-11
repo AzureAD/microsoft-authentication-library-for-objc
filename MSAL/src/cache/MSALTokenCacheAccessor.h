@@ -24,6 +24,7 @@
 #import "MSALTokenCacheDataSource.h"
 
 @class MSALTokenResponse;
+@class MSALRequestParameters;
 @protocol MSALRequestContext;
 
 @interface MSALTokenCacheAccessor : NSObject
@@ -40,6 +41,10 @@
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
                                       context:(id<MSALRequestContext>)ctx
                                         error:(NSError * __autoreleasing *)error;
+
+- (MSALAccessTokenCacheItem *)findAccessTokenWithNoAuthorityProvided:(MSALRequestParameters *)requestParam
+                                                             context:(id<MSALRequestContext>)ctx
+                                                               error:(NSError * __autoreleasing *)error;
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
                                         context:(id<MSALRequestContext>)ctx

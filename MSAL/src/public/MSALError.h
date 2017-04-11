@@ -105,9 +105,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         more information about the specific error. Keychain error codes are
         documented in Apple's <Security/SecBase.h> header file
      */
-    MSALErrorKeychainFailure = -42200,
-    MSALErrorTokenCacheItemFailure = -42201,
-    MSALErrorWrapperCacheFailure = -42250,
+    MSALErrorTokenCacheItemFailure = -42200,
+    MSALErrorMultipleMatchesNoAuthoritySpecified = -42201,
+    MSALErrorKeychainFailure = -422040,
+    MSALErrorWrapperCacheFailure = -42270,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect
         NSUnderlyingError from the userInfo dictionary for more information

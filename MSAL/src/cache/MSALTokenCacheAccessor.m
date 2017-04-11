@@ -132,6 +132,58 @@
     
     if (matchedTokens.count != 1)
     {
+        LOG_WARN(ctx, @"Found more than 1 access tokens!");
+        LOG_WARN_PII(ctx, @"Found more than 1 access tokens!");
+        return nil;
+    }
+    
+    if (matchedTokens[0].isExpired)
+    {
+        LOG_WARN(ctx, @"Access token found in cache is already expired.");
+        LOG_WARN_PII(ctx, @"Access token found in cache is already expired.");
+        return nil;
+    }
+    
+    return matchedTokens[0];
+}
+
+- (MSALAccessTokenCacheItem *)findAccessTokenWithNoAuthorityProvided:(MSALRequestParameters *)requestParam
+                                                             context:(nullable id<MSALRequestContext>)ctx
+                                                               error:(NSError * __autoreleasing *)error
+{
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
+    if (!allAccessTokens)
+    {
+        return nil;
+    }
+    
+    NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
+    
+    for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
+    {
+        if ([requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
+        {
+            [matchedTokens addObject:tokenItem];
+        }
+    }
+    
+    if (matchedTokens.count == 0)
+    {
+        LOG_WARN(ctx, @"Authority is not provided. No access token matching scopes and user found.");
+        LOG_WARN_PII(ctx, @"Authority is not provided. No access token matching scopes and user found.");
+        return nil;
+    }
+    
+    if (matchedTokens.count > 1)
+    {
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. No access token is found.");
+        return nil;
+    }
+    
+    if (matchedTokens[0].isExpired)
+    {
+        LOG_WARN(ctx, @"Access token found in cache is already expired.");
+        LOG_WARN_PII(ctx, @"Access token found in cache is already expired.");
         return nil;
     }
     

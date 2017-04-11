@@ -64,7 +64,7 @@
     XCTAssertEqualObjects(atItem.accessToken, @"fake-access-token");
     XCTAssertTrue([atItem.expiresOn compare:NSDate.date] == NSOrderedDescending);
     XCTAssertEqualObjects(atItem.scope.msalToString, @"mail.read user.read");
-    XCTAssertTrue(atItem.isExpired);
+    XCTAssertFalse(atItem.isExpired);
     
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2NvbW1vbg$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA");
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, @"1297315377$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3LjAyODdmOTYzLTJkNzItNDM2My05ZTNhLTU3MDVjNWIwZjAzMQ@bG9naW4ubWljcm9zb2Z0b25saW5lLmNvbQ");

@@ -160,7 +160,8 @@
                                                                                    @"scope": @"fakescope1 fakescope2",
                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                                                                    @"id_token": rawIdToken,
-                                                                                   @"client_info": rawClientInfo
+                                                                                   @"client_info": rawClientInfo,
+                                                                                   @"expires_on" : [NSString stringWithFormat:@"%d", (uint32_t)[[NSDate dateWithTimeIntervalSinceNow:6000] timeIntervalSince1970]]
                                                                                    }
                                                                             error:nil];
     [parameters.tokenCache.dataSource addOrUpdateAccessTokenItem:at context:nil error:nil];
