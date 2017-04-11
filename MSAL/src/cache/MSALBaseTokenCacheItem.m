@@ -30,74 +30,65 @@
 #import "MSAL_Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALBaseTokenCacheItem
 
-@synthesize user = _user;
-@synthesize tenantId = _tenantId;
-
-MSAL_JSON_RW(@"authority", authority, setAuthority)
 MSAL_JSON_RW(@"client_id", clientId, setClientId)
-MSAL_JSON_RW(@"id_token", rawIdToken, setRawIdToken)
+MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
 
-- (id)initWithAuthority:(NSString *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response
+- (id)initWithClientId:(NSString *)clientId
+              response:(MSALTokenResponse *)response
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
-    if (response.idToken)
-    {
-        self.rawIdToken = response.idToken;
-    }
-    
-    self.authority = authority;
+    //store needed data to _json
     self.clientId = clientId;
+    self.rawClientInfo = response.clientInfo;
+    
+    //init data derived from _json
+    [self initDerivedBasePropertiesFromJson];
     
     return self;
 }
 
-- (NSString *)uniqueId
+//init method for deserialization
+- (id)initWithJson:(NSDictionary *)json
+             error:(NSError * __autoreleasing *)error
 {
-    return self.user.uniqueId;
+    if (!(self = [super initWithJson:json error:error]))
+    {
+        return nil;
+    }
+    
+    [self initDerivedBasePropertiesFromJson];
+    
+    return self;
 }
 
-- (NSString *)displayableId
+- (id)initWithData:(NSData *)data
+             error:(NSError * __autoreleasing *)error
 {
-    return self.user.displayableId;
+    if (!(self = [super initWithData:data error:error]))
+    {
+        return nil;
+    }
+    
+    [self initDerivedBasePropertiesFromJson];
+    
+    return self;
 }
 
-- (NSString *)homeObjectId
+- (void)initDerivedBasePropertiesFromJson
 {
-    return self.user.homeObjectId;
+    _clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
 }
 
 - (MSALUser *)user
 {
-    if (!_user)
-    {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _user = [[MSALUser alloc] initWithIdToken:idToken authority:[NSURL URLWithString:self.authority] clientId:self.clientId];
-    }
-    return _user;
-}
-
-- (NSString *)tenantId
-{
-    if (!_tenantId)
-    {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
-        _tenantId = idToken.tenantId;
-    }
-    return _tenantId;
-}
-
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error
-{
-    (void)error;
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }

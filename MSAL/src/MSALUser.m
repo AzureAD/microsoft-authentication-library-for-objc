@@ -27,51 +27,103 @@
 
 #import "MSALUser.h"
 #import "MSALIdToken.h"
+#import "MSALClientInfo.h"
 
 @implementation MSALUser
 
 - (id)initWithIdToken:(MSALIdToken *)idToken
-            authority:(NSURL *)authority
-             clientId:(NSString *)clientId
+           clientInfo:(MSALClientInfo *)clientInfo
+          environment:(NSString *)environment
+{
+    return [self initWithDisplayableId:idToken.preferredUsername
+                                  name:idToken.name
+                      identityProvider:idToken.issuer
+                                   uid:clientInfo.uniqueIdentifier
+                                  utid:clientInfo.uniqueTenantIdentifier
+                           environment:environment];
+}
+
+- (id)initWithDisplayableId:(NSString *)displayableId
+                       name:(NSString *)name
+           identityProvider:(NSString *)identityProvider
+                        uid:(NSString *)uid
+                       utid:(NSString *)utid
+                environment:(NSString *)environment
 {
     if (!(self = [super init]))
     {
         return nil;
     }
     
-    if (idToken.objectId)
-    {
-        _uniqueId = idToken.objectId;
-    }
-    else
-    {
-        _uniqueId = idToken.subject;
-    }
-    
-    _displayableId = idToken.preferredUsername;
-    _homeObjectId = idToken.homeObjectId ? idToken.homeObjectId : _uniqueId;
-    _name = idToken.name;
-    _identityProvider = idToken.issuer;
-    _authority = authority;
-    _clientId = clientId;
+    _displayableId = displayableId;
+    _name = name;
+    _identityProvider = identityProvider;
+    _uid = uid;
+    _utid = utid;
+    _environment = environment;
     
     return self;
+}
+
+- (NSString *)userIdentifier
+{
+    return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
 }
 
 - (id)copyWithZone:(NSZone*) zone
 {
     MSALUser* user = [[MSALUser allocWithZone:zone] init];
-    
-    user->_upn = [_upn copyWithZone:zone];
-    user->_uniqueId = [_uniqueId copyWithZone:zone];
+
     user->_displayableId = [_displayableId copyWithZone:zone];
     user->_name = [_name copyWithZone:zone];
     user->_identityProvider = [_identityProvider copyWithZone:zone];
-    user->_clientId = [_clientId copyWithZone:zone];
-    user->_authority = [_authority copyWithZone:zone];
-    user->_homeObjectId = [_homeObjectId copyWithZone:zone];
+    user->_uid = [_uid copyWithZone:zone];
+    user->_utid = [_utid copyWithZone:zone];
+    user->_environment = [_environment copyWithZone:zone];
     
     return user;
+}
+
+- (BOOL)isEqual:(id)object
+{
+    if (![object isKindOfClass:[MSALUser class]])
+    {
+        return NO;
+    }
+    
+    MSALUser *other = (MSALUser *)object;
+    
+    if (_displayableId && ![_displayableId isEqualToString:other->_displayableId])
+    {
+        return NO;
+    }
+    
+    if (_uid && ![_uid isEqualToString:other->_uid])
+    {
+        return NO;
+    }
+    
+    if (_utid && ![_utid isEqualToString:other->_utid])
+    {
+        return NO;
+    }
+    
+    if (_name && ![_name isEqualToString:other->_name])
+    {
+        return NO;
+    }
+    
+    if (_environment && ![_environment isEqualToString:other->_environment])
+    {
+        return NO;
+    }
+    
+    if (_identityProvider && ![_identityProvider isEqualToString:other->_identityProvider])
+    {
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

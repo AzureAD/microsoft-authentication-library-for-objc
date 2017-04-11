@@ -78,9 +78,9 @@ static NSArray<NSString *> *s_scopes_available = nil;
     return s_authorities;
 }
 
-- (MSALUser *)userForHomeObjectId:(NSString *)homeObjectId
+- (MSALUser *)userForUserIdentifier:(NSString *)userIdentifier
 {
-    if (!homeObjectId)
+    if (!userIdentifier)
     {
         return nil;
     }
@@ -96,7 +96,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
         return nil;
     }
     
-    NSArray<MSALUser *> *users = [application users];
+    NSArray<MSALUser *> *users = [application users:nil];
     if (!users)
     {
         LOG_ERROR(nil, @"no users came back from the application");
@@ -105,13 +105,13 @@ static NSArray<NSString *> *s_scopes_available = nil;
     
     for (MSALUser *user in users)
     {
-        if ([homeObjectId isEqualToString:user.homeObjectId])
+        if ([userIdentifier isEqualToString:user.userIdentifier])
         {
             return user;
         }
     }
     
-    LOG_WARN(nil, @"failed to find home object id \"%@\" among users.", homeObjectId);
+    LOG_WARN(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
     return nil;
 }
 
@@ -127,7 +127,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
     _validateAuthority = validate ? [validate boolValue] : YES;
-    _currentUser = [self userForHomeObjectId:[settings objectForKey:@"currentUser"]];
+    _currentUser = [self userForUserIdentifier:[settings objectForKey:@"currentUser"]];
     
 }
 
@@ -167,7 +167,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 - (void)setCurrentUser:(MSALUser *)currentUser
 {
-    [self setValue:currentUser.homeObjectId
+    [self setValue:currentUser.userIdentifier
             forKey:@"currentUser"];
     _currentUser = currentUser;
 }

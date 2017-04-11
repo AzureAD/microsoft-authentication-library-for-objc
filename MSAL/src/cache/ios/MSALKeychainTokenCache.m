@@ -30,7 +30,9 @@
 #import "MSALTokenResponse.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheKey.h"
+#import "MSALAccessTokenCacheKey.h"
+#import "MSALRefreshTokenCacheKey.h"
+#import "MSALTokenCacheKeyBase.h"
 
 static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
 
@@ -40,11 +42,6 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
 {
     ACCESS_TOKEN    = 'acTk',
     REFRESH_TOKEN   = 'rfTk'
-};
-
-typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
-{
-    MSAL_V1         = 'MSv1'
 };
 
 @implementation MSALKeychainTokenCache
@@ -162,11 +159,10 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 
 @implementation MSALKeychainTokenCache (Internal)
 
-- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
-                                                                correlationId:(nullable NSUUID * )correlationId
+- (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
+                                                                      context:(nullable id<MSALRequestContext>)ctx
                                                                         error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
     NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                   additional:@{
                                                                (id)kSecAttrType : [NSNumber numberWithUnsignedInt:ACCESS_TOKEN],
@@ -178,7 +174,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
     if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when retrieving access tokens.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving access tokens.");
         return nil;
     }
     NSArray *accessTokenitems = CFBridgingRelease(items);
@@ -186,7 +182,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     
     for (NSDictionary *attrs in accessTokenitems)
     {
-        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs error:nil];
+        // TODO: Do we want to silently ignore ATs we can't parse? If so should we apply this logic everywhere?
+        MSALAccessTokenCacheItem *item = [self accessTokenItemFromKeychainAttributes:attrs context:ctx error:nil];
         if (!item)
         {
             continue;
@@ -197,51 +194,90 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     return accessTokens;
 }
 
-- (nullable NSArray <MSALRefreshTokenCacheItem *> *)getRefreshTokenItemsWithKey:(nullable MSALTokenCacheKey *)key
-                                                                  correlationId:(nullable NSUUID * )correlationId
-                                                                          error:(NSError * __autoreleasing *)error
+- (nullable MSALRefreshTokenCacheItem *)getRefreshTokenItemForKey:(nonnull MSALRefreshTokenCacheKey *)key
+                                                          context:(nullable id<MSALRequestContext>)ctx
+                                                            error:(NSError * __nullable __autoreleasing * __nullable)error
 {
-    (void)correlationId;
-    
-    NSMutableDictionary* query = [self queryDictionaryForKey:key
-                                                  additional:@{
-                                                               (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN],
-                                                               (id)kSecMatchLimit : (id)kSecMatchLimitAll,
-                                                               (id)kSecReturnData : @YES,
-                                                               (id)kSecReturnAttributes : @YES
-                                                               }];
-    CFTypeRef items = nil;
-    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
-    if (status != errSecSuccess && status != errSecItemNotFound)
+    NSMutableDictionary *query =
+    [self queryDictionaryForKey:key
+                     additional:@{
+                                  (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN],
+                                  (id)kSecMatchLimit : (id)kSecMatchLimitOne,
+                                  (id)kSecReturnData : @YES,
+                                  (id)kSecReturnAttributes : @YES
+                                  }];
+    CFTypeRef item = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &item);
+    if (status == errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when retrieving refresh tokens.");
+        // We don't print out or return errors if we don't find anything, just return nil.
         return nil;
     }
-    NSArray *refreshTokenitems = CFBridgingRelease(items);
-    NSMutableArray<MSALRefreshTokenCacheItem *> *refreshTokens = [NSMutableArray<MSALRefreshTokenCacheItem *> new];
     
-    for (NSDictionary *attrs in refreshTokenitems)
+    if (status != errSecSuccess)
     {
-        MSALRefreshTokenCacheItem *item = [self refreshTokenItemFromKeychainAttributes:attrs error:nil];
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving refresh token.");
+        return nil;
+    }
+    
+    return [MSALKeychainTokenCache refreshTokenItemFromKeychainAttributes:(__bridge NSDictionary *)item context:ctx error:error];;
+}
+
+- (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId
+                                                            context:(id<MSALRequestContext>)ctx
+                                                              error:(NSError * __nullable __autoreleasing * __nullable)error
+{
+    NSMutableDictionary *query = [_default mutableCopy];
+    query[(id)kSecAttrType] = [NSNumber numberWithUnsignedInt:REFRESH_TOKEN];
+    query[(id)kSecMatchLimit] = (id)kSecMatchLimitAll;
+    query[(id)kSecReturnData] = @YES;
+    query[(id)kSecReturnAttributes] = @YES;
+    if (clientId)
+    {
+        query[(id)kSecAttrService] = [MSALRefreshTokenCacheKey keyForClientId:clientId];
+    }
+    
+    CFTypeRef items = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
+    if (status == errSecItemNotFound)
+    {
+        return @[];
+    }
+    
+    if (status != errSecSuccess)
+    {
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving refresh tokens.");
+        return nil;
+    }
+    
+    NSMutableArray *refreshTokens = [NSMutableArray new];
+    
+    for (NSDictionary *attrs in (__bridge NSArray *)items)
+    {
+        MSALRefreshTokenCacheItem *item =
+        [MSALKeychainTokenCache refreshTokenItemFromKeychainAttributes:attrs
+                                                               context:ctx
+                                                                 error:error];
         if (!item)
         {
-            continue;
+            return nil;
         }
         [refreshTokens addObject:item];
     }
     
-    return refreshTokens;
+    CFRelease(items);
     
+    return refreshTokens;
 }
 
+
 - (BOOL)addOrUpdateAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
-                     correlationId:(nullable NSUUID *)correlationId
+                           context:(nullable id<MSALRequestContext>)ctx
                              error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
+        MSALAccessTokenCacheKey *key = [atItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -257,8 +293,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         NSData* itemData = [atItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(nil, @"Failed to archive keychain item.");
-            LOG_ERROR_PII(nil, @"Failed to archive keychain item.");
+            LOG_ERROR(ctx, @"Failed to archive keychain item.");
+            LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -270,7 +306,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when saving access token item during update operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving access token item during update operation.");
             return NO;
         }
         
@@ -280,7 +316,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when saving access token item during add operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving access token item during add operation.");
             return NO;
         }
         return YES;
@@ -288,13 +324,12 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 }
 
 - (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
-                      correlationId:(nullable NSUUID *)correlationId
+                            context:(nullable id<MSALRequestContext>)ctx
                               error:(NSError * __autoreleasing *)error
 {
-    (void)correlationId;
     @synchronized(self)
     {
-        MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
+        MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
         if (!key)
         {
             return NO;
@@ -310,8 +345,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         NSData* itemData = [rtItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(nil, @"Failed to archive keychain item.");
-            LOG_ERROR_PII(nil, @"Failed to archive keychain item.");
+            LOG_ERROR(ctx, @"Failed to archive keychain item.");
+            LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -323,7 +358,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(nil,status, @"Keychain failed when saving refresh token item during update operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx,status, @"Keychain failed when saving refresh token item during update operation.");
             return NO;
         }
         
@@ -333,7 +368,7 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when saving refresh token item during add operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving refresh token item during add operation.");
             return NO;
         }
         return YES;
@@ -341,9 +376,10 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 }
 
 - (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)atItem
+                      context:(nullable id<MSALRequestContext>)ctx
                         error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [atItem tokenCacheKey:error];
+    MSALAccessTokenCacheKey *key = [atItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -356,16 +392,17 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, deleteStatus, @"Keychain failed when deleting access token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting access token.");
         return NO;
     }
     return YES;
 }
 
 - (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)rtItem
+                       context:(id<MSALRequestContext>)ctx
                          error:(NSError * __autoreleasing *)error
 {
-    MSALTokenCacheKey *key = [rtItem tokenCacheKey:error];
+    MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
     if (!key)
     {
         return NO;
@@ -378,18 +415,21 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, deleteStatus, @"Keychain failed when deleting refresh token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting refresh token.");
         return NO;
     }
     return YES;
 }
 
-- (BOOL)removeAllTokensForHomeObjectId:(NSString *)homeObjectId
-                           environment:(NSString *)environment
-                              clientId:(NSString *)clientId
-                                 error:(NSError * __autoreleasing *)error
+- (BOOL)removeAllTokensForUserIdentifier:(NSString *)userIdentifier
+                             environment:(NSString *)environment
+                                clientId:(NSString *)clientId
+                                 context:(nullable id<MSALRequestContext>)ctx
+                                   error:(NSError * __autoreleasing *)error
 {
-    NSString *account = [NSString stringWithFormat:@"%@$%@@%@", MSAL_VERSION_NSSTRING, homeObjectId.msalBase64UrlEncode, environment.msalBase64UrlEncode];
+    NSString *account = [NSString stringWithFormat:@"%u$%@",
+                         MSAL_V1,
+                         [MSALTokenCacheKeyBase userIdAtEnvironmentBase64:userIdentifier environment:environment]];
                          
     NSMutableDictionary *query = [self queryDictionaryForKey:nil
                                                   additional:@{
@@ -401,14 +441,14 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     
     if (deleteStatus != errSecSuccess && deleteStatus != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, deleteStatus, @"Keychain failed when deleting token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting token.");
         return NO;
     }
     return YES;
 }
 
 
-- (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKey *)key
+- (NSMutableDictionary*)queryDictionaryForKey:(MSALTokenCacheKeyBase *)key
                                    additional:(NSDictionary *)additional
 {
     NSMutableDictionary* query = [_default mutableCopy];
@@ -430,13 +470,14 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
 }
 
 - (MSALAccessTokenCacheItem *)accessTokenItemFromKeychainAttributes:(NSDictionary*)attrs
+                                                            context:(nullable id<MSALRequestContext>)ctx
                                                               error:(NSError * __autoreleasing *)error
 {
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
     {
-        LOG_WARN(nil, @"Retrieved item with key that did not have generic item data!");
-        LOG_WARN_PII(nil, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -444,8 +485,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_ERROR(nil, @"Unable to decode item from data stored in keychain.");
-            LOG_ERROR_PII(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         
@@ -453,20 +494,21 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     }
     @catch (NSException *exception)
     {
-        LOG_WARN(nil, @"Failed to deserialize data from keychain");
-        LOG_WARN_PII(nil, @"Failed to deserialize data from keychain");
+        LOG_WARN(ctx, @"Failed to deserialize data from keychain");
+        LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
         return nil;
     }
 }
 
-- (MSALRefreshTokenCacheItem *)refreshTokenItemFromKeychainAttributes:(NSDictionary*)attrs
++ (MSALRefreshTokenCacheItem *)refreshTokenItemFromKeychainAttributes:(NSDictionary*)attrs
+                                                              context:(nullable id<MSALRequestContext>)ctx
                                                                 error:(NSError * __autoreleasing *)error
 {
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
     {
-        LOG_WARN(nil, @"Retrieved item with key that did not have generic item data!");
-        LOG_WARN_PII(nil, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
+        LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -474,8 +516,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
         MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_ERROR(nil, @"Unable to decode item from data stored in keychain.");
-            LOG_ERROR_PII(nil, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
+            LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         
@@ -483,8 +525,8 @@ typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
     }
     @catch (NSException *exception)
     {
-        LOG_WARN(nil, @"Failed to deserialize data from keychain");
-        LOG_WARN_PII(nil, @"Failed to deserialize data from keychain");
+        LOG_WARN(ctx, @"Failed to deserialize data from keychain");
+        LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
         return nil;
     }
 }

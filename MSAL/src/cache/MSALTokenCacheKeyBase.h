@@ -25,44 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
-
-
-//
-// System APIs
-//
-
 #import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
-
-// Internal MSAL Files
-
 #import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
 
-#import "MSALTokenCacheAccessor.h"
-#import "MSALAccessTokenCacheKey.h"
-#import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
+@class MSALUser;
 
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
+typedef NS_ENUM(uint32_t, MSALTokenCacheVersion)
+{
+    MSAL_V1         = 'MSv1'
+};
 
+@interface MSALTokenCacheKeyBase : NSObject
 
-#endif /* MSAL_pch */
+@property NSString *clientId;
+@property NSString *userIdentifier;
+
+- (id)initWithClientId:(NSString *)clientId
+        userIdentifier:(NSString *)userIdentifier;
+
+//subclasses must override this
+- (NSString *)service;
+- (NSString *)account;
+
++ (NSString *)userIdAtEnvironmentBase64:(NSString *)userIdentifier
+                            environment:(NSString *)environment;
+
+@end

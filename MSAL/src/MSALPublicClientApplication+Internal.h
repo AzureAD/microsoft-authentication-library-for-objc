@@ -25,44 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
+#import "MSALPublicClientApplication.h"
 
+@class MSALTokenCacheAccessor;
 
-//
-// System APIs
-//
+@interface MSALPublicClientApplication (Internal)
 
-#import <Foundation/Foundation.h>
+@property (nullable) MSALTokenCacheAccessor *tokenCache;
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
-
-// Internal MSAL Files
-
-#import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
-
-#import "MSALTokenCacheAccessor.h"
-#import "MSALAccessTokenCacheKey.h"
-#import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
-
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
-
-
-#endif /* MSAL_pch */
+@end

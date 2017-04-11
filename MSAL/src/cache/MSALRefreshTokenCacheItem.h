@@ -26,19 +26,24 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@class MSALTokenCacheKey;
-
 #import "MSALBaseTokenCacheItem.h"
+
+@class MSALRefreshTokenCacheKey;
 
 @interface MSALRefreshTokenCacheItem : MSALBaseTokenCacheItem <NSCopying>
 
-@property NSString * refreshToken;
+@property NSString *refreshToken;
+@property NSString *environment;
+@property (readonly) MSALUser *user;
+@property (readonly) NSString *displayableId;
+@property (readonly) NSString *name;
+@property (readonly) NSString *identityProvider;
 
-- (id)initWithAuthority:(NSURL *)authority
-               clientId:(NSString *)clientId
-               response:(MSALTokenResponse *)response;
 
-- (MSALTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
+- (id)initWithEnvironment:(NSString *)environment
+                 clientId:(NSString *)clientId
+                 response:(MSALTokenResponse *)response;
+
+- (MSALRefreshTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error;
 
 @end

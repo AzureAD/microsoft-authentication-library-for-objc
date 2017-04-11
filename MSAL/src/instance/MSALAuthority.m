@@ -51,8 +51,7 @@ BOOL isTenantless(NSURL *authority)
     
     NSString *tenameName = [authorityURLPaths[1] lowercaseString];
     if ([tenameName isEqualToString:@"common"] ||
-        [tenameName isEqualToString:@"organizations"] ||
-        [tenameName isEqualToString:@"consumers"] )
+        [tenameName isEqualToString:@"organizations"])
     {
         return YES;
     }

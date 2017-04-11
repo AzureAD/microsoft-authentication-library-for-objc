@@ -25,44 +25,42 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
+#import "MSALTokenCacheKeyBase.h"
 
+static NSString* const s_cacheVersion = @"MSALv1";
 
-//
-// System APIs
-//
+@implementation MSALTokenCacheKeyBase
 
-#import <Foundation/Foundation.h>
+- (id)initWithClientId:(NSString *)clientId
+        userIdentifier:(NSString *)userIdentifier
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    self.clientId = [clientId lowercaseString];
+    self.userIdentifier = userIdentifier;
+    
+    return self;
+}
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+- (NSString *)service
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
 
+- (NSString *)account
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
 
-// Internal MSAL Files
++ (NSString *)userIdAtEnvironmentBase64:(NSString *)userIdentifier
+                            environment:(NSString *)environment
+{
+    return [NSString stringWithFormat:@"%@@%@", userIdentifier.msalBase64UrlEncode, environment.msalBase64UrlEncode];
+}
 
-#import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
-
-#import "MSALTokenCacheAccessor.h"
-#import "MSALAccessTokenCacheKey.h"
-#import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
-
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
-
-
-#endif /* MSAL_pch */
+@end

@@ -24,6 +24,7 @@
 #import "MSALTokenCacheDataSource.h"
 
 @class MSALTokenResponse;
+@protocol MSALRequestContext;
 
 @interface MSALTokenCacheAccessor : NSObject
 
@@ -33,18 +34,24 @@
 
 - (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
                                                response:(MSALTokenResponse *)response
+                                                context:(id<MSALRequestContext>)ctx
                                                   error:(NSError * __autoreleasing *)error;
 
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
+                                      context:(id<MSALRequestContext>)ctx
                                         error:(NSError * __autoreleasing *)error;
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
+                                        context:(id<MSALRequestContext>)ctx
                                           error:(NSError * __autoreleasing *)error;
 
 - (BOOL)deleteAllTokensForUser:(MSALUser *)user
                       clientId:(NSString *)clientId
+                       context:(id<MSALRequestContext>)ctx
                          error:(NSError * __autoreleasing *)error;
 
-- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId;
+- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
+                          context:(id<MSALRequestContext>)ctx
+                            error:(NSError * __autoreleasing *)error;
 
 @end

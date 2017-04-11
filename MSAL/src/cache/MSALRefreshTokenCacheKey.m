@@ -25,44 +25,50 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
-
-
-//
-// System APIs
-//
-
-#import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
-
-// Internal MSAL Files
-
-#import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
-
-#import "MSALTokenCacheAccessor.h"
-#import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
 
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
+@implementation MSALRefreshTokenCacheKey
 
++ (NSString *)keyForClientId:(NSString *)clientId
+{
+    return [clientId msalBase64UrlEncode];
+}
 
-#endif /* MSAL_pch */
+- (id)initWithEnvironment:(NSString *)environment
+                 clientId:(NSString *)clientId
+           userIdentifier:(NSString *)userIdentifier
+{
+    if (!(self = [super initWithClientId:clientId userIdentifier:userIdentifier]))
+    {
+        return nil;
+    }
+    
+    self.environment = [environment lowercaseString];
+    
+    return self;
+}
+
+- (BOOL)matches:(MSALRefreshTokenCacheKey *)other
+{
+    return [self.clientId isEqualToString:other.clientId]
+    && (!self.environment || [self.environment isEqualToString:other.environment])
+    && (!self.userIdentifier || [self.userIdentifier isEqualToString:other.userIdentifier]);
+}
+
+- (NSString *)service
+{
+    return [MSALRefreshTokenCacheKey keyForClientId:self.clientId];
+}
+
+- (NSString *)account
+{
+    if (!self.userIdentifier)
+    {
+        return nil;
+    }
+
+    return [NSString stringWithFormat:@"%u$%@", MSAL_V1,
+            [MSALTokenCacheKeyBase userIdAtEnvironmentBase64:self.userIdentifier environment:self.environment]];
+}
+
+@end
