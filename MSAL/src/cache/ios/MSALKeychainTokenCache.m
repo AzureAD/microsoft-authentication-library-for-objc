@@ -26,15 +26,12 @@
 //------------------------------------------------------------------------------
 
 #import "MSALKeychainTokenCache.h"
-#import "MSALKeychainTokenCache+Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALTokenCacheKeyBase.h"
-
-static NSString* s_defaultKeychainGroup = @"com.microsoft.msalcache";
 
 static MSALKeychainTokenCache* s_defaultCache = nil;
 
@@ -55,7 +52,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     static dispatch_once_t s_once;
     
     dispatch_once(&s_once, ^{
-        s_defaultCache = [[MSALKeychainTokenCache alloc] initWithGroup:s_defaultKeychainGroup];
+        s_defaultCache = [[MSALKeychainTokenCache alloc] initWithGroup:nil];
     });
     
     return s_defaultCache;

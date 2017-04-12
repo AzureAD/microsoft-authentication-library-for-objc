@@ -59,7 +59,7 @@
 #import "MSALTokenCacheDataSource.h"
 
 #if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache+Internal.h"
+#import "MSALKeychainTokenCache.h"
 #else
 #import "MSALWrapperTokenCache+Internal.h"
 #endif
