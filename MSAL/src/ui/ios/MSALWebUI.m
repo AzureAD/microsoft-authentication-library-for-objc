@@ -133,8 +133,7 @@ static MSALWebUI *s_currentWebSession = nil;
     
     [[MSALTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_UI_EVENT];
     _telemetryEvent = [[MSALTelemetryUIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_UI_EVENT
-                                                       requestId:_telemetryRequestId
-                                                   correlationId:nil];
+                                                       context:_context];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         _safariViewController = [[SFSafariViewController alloc] initWithURL:url

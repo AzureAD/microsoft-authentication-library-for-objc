@@ -64,7 +64,7 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
     
     dispatch_once(&once, ^{
         singleton = [[MSALTelemetry alloc] initInternal];
-        s_defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_DEFAULT_EVENT requestId:nil correlationId:nil];
+        s_defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
     });
     
     return singleton;

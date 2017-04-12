@@ -77,17 +77,17 @@
     }
     for (MSALAccessTokenCacheItem *itemToDelete in overlappingTokens)
     {
-        [self deleteAccessToken:itemToDelete context:ctx telemetryRequestId:requestParam.telemetryRequestId error:nil];
+        [self deleteAccessToken:itemToDelete context:ctx error:nil];
     }
     
-    [self saveAccessToken:accessToken context:ctx telemetryRequestId:requestParam.telemetryRequestId error:error];
+    [self saveAccessToken:accessToken context:ctx error:error];
     
     if (response.refreshToken)
     {
         MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
                                                                                                 clientId:requestParam.clientId
                                                                                                 response:response];
-        [self saveRefreshToken:refreshToken context:ctx telemetryRequestId:requestParam.telemetryRequestId error:error];
+        [self saveRefreshToken:refreshToken context:ctx error:error];
     }
     
     return accessToken;
@@ -95,38 +95,34 @@
 
 - (BOOL)saveRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
                  context:(nullable id<MSALRequestContext>)ctx
-      telemetryRequestId:(NSString *)telemetryRequestId
                    error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
-                                                                         requestId:telemetryRequestId
-                                                                     correlationId:nil];
+                                                                         context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
 
     BOOL result = [_dataSource addOrUpdateRefreshTokenItem:rtItem context:ctx error:error];
     
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
-    [[MSALTelemetry sharedInstance] stopEvent:telemetryRequestId event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }
 
 - (BOOL)saveAccessToken:(MSALAccessTokenCacheItem *)atItem
                 context:(nullable id<MSALRequestContext>)ctx
-     telemetryRequestId:(NSString *)telemetryRequestId
                   error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
-                                                                         requestId:telemetryRequestId
-                                                                     correlationId:nil];
+                                                                           context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
     BOOL result = [_dataSource addOrUpdateAccessTokenItem:atItem context:ctx error:error];
     
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
-    [[MSALTelemetry sharedInstance] stopEvent:telemetryRequestId event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }
@@ -135,10 +131,9 @@
                                       context:(nullable id<MSALRequestContext>)ctx
                                         error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[requestParam telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
-                                                                         requestId:[requestParam telemetryRequestId]
-                                                                     correlationId:[requestParam correlationId]];
+                                                                           context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
 
     MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
@@ -187,8 +182,7 @@
 {
     [[MSALTelemetry sharedInstance] startEvent:[requestParam telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
-                                                                         requestId:[requestParam telemetryRequestId]
-                                                                     correlationId:[requestParam correlationId]];
+                                                                         context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
 
     MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
@@ -205,7 +199,6 @@
 
 - (BOOL)deleteAccessToken:(MSALAccessTokenCacheItem *)atItem
                   context:(nullable id<MSALRequestContext>)ctx
-       telemetryRequestId:(NSString *)telemetryRequestId
                     error:(NSError * __autoreleasing *)error
 {
     MSALAccessTokenCacheKey *key = [atItem tokenCacheKey:error];
@@ -214,22 +207,20 @@
         return NO;
     }
     
-    [[MSALTelemetry sharedInstance] startEvent:telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
-                                                                         requestId:telemetryRequestId
-                                                                     correlationId:nil];
+                                                                         context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
     BOOL result=  [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
     
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
-    [[MSALTelemetry sharedInstance] stopEvent:telemetryRequestId event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }
 
 - (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-        telemetryRequestId:(NSString *)telemetryRequestId
                    context:(nullable id<MSALRequestContext>)ctx
                      error:(NSError * __autoreleasing *)error
 {
@@ -238,16 +229,15 @@
     {
         return NO;
     }
-    [[MSALTelemetry sharedInstance] startEvent:telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
-                                                                         requestId:telemetryRequestId
-                                                                     correlationId:nil];
+                                                                         context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
     
     BOOL result=  [_dataSource removeRefreshTokenItem:rtItem context:ctx error:error];
     
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
-    [[MSALTelemetry sharedInstance] stopEvent:telemetryRequestId event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }

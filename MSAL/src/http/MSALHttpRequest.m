@@ -142,8 +142,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     [[MSALTelemetry sharedInstance] startEvent:[_context telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST];
     
     MSALTelemetryHttpEvent *event = [[MSALTelemetryHttpEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST
-                                                                       requestId:[_context telemetryRequestId]
-                                                                   correlationId:_context.correlationId];
+                                                                       context:_context];
     
     [_headers addEntriesFromDictionary:[MSALLogger msalId]];
     

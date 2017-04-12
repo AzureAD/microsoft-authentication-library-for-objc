@@ -38,8 +38,7 @@
 @synthesize errorInEvent = _errorInEvent;
 
 - (id)initWithName:(NSString *)eventName
-         requestId:(NSString *)requestId
-     correlationId:(NSUUID *)correlationId
+           context:(id<MSALRequestContext>)context
 {
     if (!(self = [super init]))
     {
@@ -49,8 +48,8 @@
     _errorInEvent = NO;
     _propertyMap = [NSMutableDictionary dictionary];
     
-    [_propertyMap msalSetObjectIfNotNil:requestId forKey:MSAL_TELEMETRY_KEY_REQUEST_ID];
-    [_propertyMap msalSetObjectIfNotNil:[correlationId UUIDString] forKey:MSAL_TELEMETRY_KEY_CORRELATION_ID];
+    [_propertyMap msalSetObjectIfNotNil:[context telemetryRequestId] forKey:MSAL_TELEMETRY_KEY_REQUEST_ID];
+    [_propertyMap msalSetObjectIfNotNil:[[context correlationId] UUIDString] forKey:MSAL_TELEMETRY_KEY_CORRELATION_ID];
     
     [_propertyMap msalSetObjectIfNotNil:eventName forKey:MSAL_TELEMETRY_KEY_EVENT_NAME];
     
