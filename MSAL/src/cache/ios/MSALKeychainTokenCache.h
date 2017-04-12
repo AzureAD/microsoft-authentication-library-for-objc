@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALKeychainTokenCache.h"
 #import "MSALTokenCacheDataSource.h"
 
-@class MSALRefreshTokenCacheItem;
-@class MSALRequestParameters;
-@class MSALAccessTokenCacheItem;
-@class MSALTokenResponse;
+@interface MSALKeychainTokenCache : NSObject
+
++ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+
+@end
 
 @interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
 
