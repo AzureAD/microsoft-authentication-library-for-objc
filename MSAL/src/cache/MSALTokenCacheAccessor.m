@@ -27,6 +27,7 @@
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALTokenResponse.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTokenCacheAccessor
 {

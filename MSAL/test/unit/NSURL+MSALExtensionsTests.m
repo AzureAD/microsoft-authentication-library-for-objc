@@ -25,42 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALURLSessionDelegate.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "MSALAuthority.h"
+#import "MSALTestCase.h"
 #import "NSURL+MSALExtensions.h"
 
-@implementation MSALURLSessionDelegate
+@interface NSURL_MSALExtensionsTests : MSALTestCase
 
-- (id)initWithContext:(id<MSALRequestContext>)context
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _context = context;
-    
-    return self;
+@end
+
+@implementation NSURL_MSALExtensionsTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionTask *)task
-willPerformHTTPRedirection:(NSHTTPURLResponse *)response
-        newRequest:(NSURLRequest *)request
- completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testHostWithNoPortSpecified
 {
-    (void)session;
-    (void)response;
-    (void)task;
-    
-    NSString *requestHost = request.URL.hostWithPort;
-    
-    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256Hex] );
-    LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
-    
-    completionHandler(request);
+    NSURL *urlWithNoPortSpecified = [NSURL URLWithString:@"https://somehost.com"];
+    XCTAssertEqualObjects(urlWithNoPortSpecified.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithCustomPort
+{
+    NSURL *urlWithCustomPort = [NSURL URLWithString:@"https://somehost.com:88"];
+    XCTAssertEqualObjects(urlWithCustomPort.hostWithPort, @"somehost.com:88");
+}
+
+- (void)testHostWithDefaultPort
+{
+    NSURL *urlWithDefaultPort = [NSURL URLWithString:@"https://somehost.com:443"];
+    XCTAssertEqualObjects(urlWithDefaultPort.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithNoHost
+{
+    NSURL *urlWithNoHost = [NSURL new];
+    XCTAssertEqualObjects(urlWithNoHost.hostWithPort, @"");
 }
 
 @end
