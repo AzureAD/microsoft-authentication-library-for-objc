@@ -50,8 +50,3 @@ typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALUser.h>
 #import <MSAL/MSALTelemetry.h>
-
-
-#if TARGET_OS_IPHONE
-#import <MSAL/MSALKeychainTokenCache.h>
-#endif // TARGET_PLATFORM_IPHONE
