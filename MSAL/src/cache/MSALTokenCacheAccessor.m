@@ -139,16 +139,16 @@
     
     if (matchedTokens.count > 1)
     {
-        LOG_WARN(ctx, @"Found multiple access tokens, please specify which token to return!");
-        LOG_WARN_PII(ctx, @"Found multiple access tokens, please specify which token to return!");
+        LOG_WARN(ctx, @"Found multiple access tokens, which token to return is ambiguous!");
+        LOG_WARN_PII(ctx, @"Found multiple access tokens, which token to return is ambiguous!");
         return nil;
     }
     
+    // if the token is expired, we still return it as we need the authority stored in it
     if (matchedTokens[0].isExpired)
     {
-        LOG_WARN(ctx, @"Access token found in cache is already expired.");
-        LOG_WARN_PII(ctx, @"Access token found in cache is already expired.");
-        return nil;
+        LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
     }
     
     return matchedTokens[0];
@@ -183,15 +183,15 @@
     
     if (matchedTokens.count > 1)
     {
-        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. Found multiple access tokens, please specify which token to return!");
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. Found multiple access tokens, which token to return is ambiguous!");
         return nil;
     }
     
+    // if the token is expired, we still return it as we need the authority stored in it
     if (matchedTokens[0].isExpired)
     {
-        LOG_WARN(ctx, @"Access token found in cache is already expired.");
-        LOG_WARN_PII(ctx, @"Access token found in cache is already expired.");
-        return nil;
+        LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
     }
     
     return matchedTokens[0];

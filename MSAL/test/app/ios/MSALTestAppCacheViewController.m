@@ -123,7 +123,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     }
     
     MSALAccessTokenCacheItem *item = (MSALAccessTokenCacheItem *)rowItem.item;
-    item.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
+    item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
     
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
     [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
