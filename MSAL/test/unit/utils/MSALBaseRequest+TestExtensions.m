@@ -60,3 +60,11 @@
 
 @end
 
+@implementation MSALSilentRequest (TestExtensions)
+
+- (BOOL)forceRefresh
+{
+    return _forceRefresh;
+}
+
+@end

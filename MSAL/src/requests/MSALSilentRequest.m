@@ -33,7 +33,6 @@
 
 @interface MSALSilentRequest()
 {
-    BOOL _forceRefresh;
     MSALRefreshTokenCacheItem *_refreshToken;
 }
 
