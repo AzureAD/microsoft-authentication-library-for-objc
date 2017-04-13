@@ -151,7 +151,11 @@ static MSALScopes *s_reservedScopes = nil;
     
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
-    MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:_authority.tokenEndpoint
+    // TODO: Remove once uid+utid work hits PROD
+    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
+    tokenEndpoint.query = @"slice=testslice&uid=true";
+    
+    MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
                                                                       context:_parameters];
     
     reqParameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
