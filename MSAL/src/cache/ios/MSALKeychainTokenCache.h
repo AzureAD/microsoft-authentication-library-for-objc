@@ -25,44 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
-
-
-//
-// System APIs
-//
-
-#import <Foundation/Foundation.h>
-
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
-
-// Internal MSAL Files
-
-#import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
-
-#import "MSALTokenCacheAccessor.h"
-#import "MSALAccessTokenCacheKey.h"
-#import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheDataSource.h"
 
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
+@interface MSALKeychainTokenCache : NSObject
 
++ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
 
-#endif /* MSAL_pch */
+@end
+
+@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
+
+/*! This method should *only* be called in test code, it should never be called
+ in production code */
+- (void)testRemoveAll;
+
+@end

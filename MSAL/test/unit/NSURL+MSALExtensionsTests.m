@@ -25,14 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestCase.h"
+#import "NSURL+MSALExtensions.h"
 
-@class MSALRequestParameters;
-@class MSALAccessTokenCacheItem;
-@class MSALRefreshTokenCacheItem;
+@interface NSURL_MSALExtensionsTests : MSALTestCase
 
-@interface MSALKeychainTokenCache : NSObject
+@end
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+@implementation NSURL_MSALExtensionsTests
+
+- (void)setUp {
+    [super setUp];
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [super tearDown];
+}
+
+- (void)testHostWithNoPortSpecified
+{
+    NSURL *urlWithNoPortSpecified = [NSURL URLWithString:@"https://somehost.com"];
+    XCTAssertEqualObjects(urlWithNoPortSpecified.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithCustomPort
+{
+    NSURL *urlWithCustomPort = [NSURL URLWithString:@"https://somehost.com:88"];
+    XCTAssertEqualObjects(urlWithCustomPort.hostWithPort, @"somehost.com:88");
+}
+
+- (void)testHostWithDefaultPort
+{
+    NSURL *urlWithDefaultPort = [NSURL URLWithString:@"https://somehost.com:443"];
+    XCTAssertEqualObjects(urlWithDefaultPort.hostWithPort, @"somehost.com");
+}
+
+- (void)testHostWithNoHost
+{
+    NSURL *urlWithNoHost = [NSURL new];
+    XCTAssertEqualObjects(urlWithNoHost.hostWithPort, @"");
+}
 
 @end

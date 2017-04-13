@@ -30,6 +30,7 @@
 #import "NSString+MSALHelperMethods.h"
 #import "NSDictionary+MSALExtensions.h"
 #import "NSDictionary+MSALTestUtil.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTestURLResponse
 
@@ -147,7 +148,7 @@
         return NO;
     }
     
-    if ([url.host caseInsensitiveCompare:_requestURL.host] != NSOrderedSame)
+    if ([url.hostWithPort caseInsensitiveCompare:_requestURL.hostWithPort] != NSOrderedSame)
     {
         return NO;
     }

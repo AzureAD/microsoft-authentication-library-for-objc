@@ -31,6 +31,7 @@
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryCacheEvent.h"
 #import "MSALTelemetryEventStrings.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTokenCacheAccessor
 {
