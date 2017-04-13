@@ -77,4 +77,4 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
 
 // Convenience macro for creating a cache error
-#define MSAL_KEYCHAIN_ERROR_PARAM(_CTX, _OSERROR, _OPERATION) MSAL_OSERROR_PARAM(_CTX, MSALErrorKeychainFailure, _OSERROR, @"Keychain failure (%d) while %@", _OSERROR, _OPERATION)
+#define MSAL_KEYCHAIN_ERROR_PARAM(_CTX, _OSERROR, _OPERATION) MSAL_OSERROR_PARAM(_CTX, MSALErrorKeychainFailure, _OSERROR, @"Keychain failure (%d) while %@", (int)_OSERROR, _OPERATION)
