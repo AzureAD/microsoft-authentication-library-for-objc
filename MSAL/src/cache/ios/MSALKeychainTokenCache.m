@@ -139,7 +139,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"Keychain failed when fetching team ID.");
+        MSAL_KEYCHAIN_ERROR_PARAM(nil, status, @"fetching team ID");
         return nil;
     }
     
@@ -171,7 +171,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
     if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving access tokens.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"retreieve access tokens");
         return nil;
     }
     NSArray *accessTokenitems = CFBridgingRelease(items);
@@ -213,7 +213,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving refresh token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"retreieve refresh token");
         return nil;
     }
     
@@ -243,7 +243,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when retrieving refresh tokens.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"retreieve refresh tokens");
         return nil;
     }
     
@@ -303,7 +303,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving access token item during update operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"updating access token");
             return NO;
         }
         
@@ -313,7 +313,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving access token item during add operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"adding access token item");
             return NO;
         }
         return YES;
@@ -355,7 +355,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(ctx,status, @"Keychain failed when saving refresh token item during update operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx,status, @"updating refresh token");
             return NO;
         }
         
@@ -365,7 +365,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"Keychain failed when saving refresh token item during add operation.");
+            MSAL_KEYCHAIN_ERROR_PARAM(ctx, status, @"adding refresh token");
             return NO;
         }
         return YES;
@@ -389,7 +389,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting access token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"deleting access token");
         return NO;
     }
     return YES;
@@ -412,7 +412,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting refresh token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"deleting refresh token.");
         return NO;
     }
     return YES;
@@ -438,7 +438,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess && deleteStatus != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"Keychain failed when deleting token.");
+        MSAL_KEYCHAIN_ERROR_PARAM(ctx, deleteStatus, @"deleting all user tokens");
         return NO;
     }
     return YES;

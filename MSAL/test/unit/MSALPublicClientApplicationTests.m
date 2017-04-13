@@ -451,7 +451,7 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR_PARAM(ctx, MSALErrorKeychainFailure, @"Keychain failed when fetching team ID.");
+         MSAL_KEYCHAIN_ERROR_PARAM(ctx, -34018, @"fetching team ID.");
          return NO;
      }];
     
