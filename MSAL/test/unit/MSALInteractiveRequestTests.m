@@ -62,7 +62,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -87,7 +87,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -141,7 +141,7 @@
       @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
       @"eqp1" : @"val1",
       @"eqp2" : @"val2",
-      @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+      @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
       @"response_type" : @"code",
       @"code_challenge": pkce.codeChallenge,
       @"code_challenge_method" : @"S256"
@@ -160,7 +160,7 @@
     parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -223,7 +223,7 @@
            @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
-           @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+           @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256"
@@ -231,7 +231,7 @@
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal?code=%@&state=%@", @"iamafakecode", request.state];
+         NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
@@ -260,7 +260,7 @@
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+                                             @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : pkce.codeVerifier,
                                              @"client_info" : @"1"}
