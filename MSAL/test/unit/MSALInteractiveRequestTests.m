@@ -30,12 +30,16 @@
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestAuthority.h"
-#import "MSALTestSwizzle.h"
-#import "MSALTestBundle.h"
-#import "MSALTestURLSession.h"
-#import "MSALWebUI.h"
 #import "MSALPkce.h"
+#import "MSALTestAuthority.h"
+#import "MSALTestBundle.h"
+#import "MSALTestIdTokenUtil.h"
+#import "MSALTestTokenCache.h"
+#import "MSALTestSwizzle.h"
+#import "MSALTestURLSession.h"
+#import "MSALUser.h"
+#import "MSALWebUI.h"
+
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -165,6 +169,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -267,10 +272,12 @@
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil
-                         dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
+                         dictionaryAsJSON:@{ @"access_token" : @"i am a access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token_expires_in" : @"1200"}];
+                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
     [MSALTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
@@ -280,6 +287,16 @@
          XCTAssertFalse(fAlreadyHit);
          fAlreadyHit = YES;
          XCTAssertNotNil(result);
+         XCTAssertNil(error);
+         XCTAssertNotNil(result.user);
+         XCTAssertEqualObjects(result.user.uid, @"1");
+         XCTAssertEqualObjects(result.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(result.user.name, [MSALTestIdTokenUtil defaultName]);
+         XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertNotNil(result.tenantId);
+         XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
+         XCTAssertNotNil(result.accessToken);
+         XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
          XCTAssertNil(error);
          
          dispatch_semaphore_signal(dsem);

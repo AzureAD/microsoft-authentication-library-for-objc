@@ -222,22 +222,23 @@ static MSALScopes *s_reservedScopes = nil;
          
          NSError *cacheError = nil;
          MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
+         MSALAccessTokenCacheItem *atItem =
          [cache saveAccessAndRefreshToken:self.parameters
                                  response:tokenResponse
                                   context:_parameters
                                     error:&cacheError];
          
-         if (cacheError)
+         if (!atItem)
          {
              completionBlock(nil, cacheError);
              return;
          }
 
          MSALResult *result =
-         [MSALResult resultWithAccessToken:tokenResponse.accessToken
-                                 expiresOn:tokenResponse.expiresOn
-                                  tenantId:nil // TODO: tenantId
-                                      user:nil // TODO: user
+         [MSALResult resultWithAccessToken:atItem.accessToken
+                                 expiresOn:atItem.expiresOn
+                                  tenantId:atItem.tenantId
+                                      user:atItem.user
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
 
          [event setClientId:_parameters.clientId];
