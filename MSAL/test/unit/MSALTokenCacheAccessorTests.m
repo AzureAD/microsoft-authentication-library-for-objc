@@ -31,6 +31,7 @@
 #import "MSALTokenResponse.h"
 #import "MSALClientInfo.h"
 #import "NSDictionary+MSALTestUtil.h"
+#import "MSALTestIdTokenUtil.h"
 
 @interface MSALTokenCacheAccessorTests : XCTestCase
 {
@@ -53,16 +54,6 @@
 
 @end
 
-static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
-{
-    NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} base64UrlJson];
-    NSString *idTokenp2 = [@{ @"iss" : @"issuer",
-                              @"name" : name,
-                              @"preferred_username" : preferredUsername,
-                              @"tid" : @"1234-5678-90abcdefg"} base64UrlJson];
-    return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
-}
-
 @implementation MSALTokenCacheAccessorTests
 
 - (void)setUp {
@@ -74,7 +65,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     _testEnvironment = _testAuthority.host;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
-    NSString *idToken1 = MakeIdToken(@"User 1", @"user1@contoso.com");
+    NSString *idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
     NSString *clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken1]
@@ -98,7 +89,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNotNil(_testTokenResponse);
     XCTAssertNil(error);
     
-    NSString *idToken2 = MakeIdToken(@"User 2", @"user2@contoso.com");
+    NSString *idToken2 = [MSALTestIdTokenUtil idTokenWithName:@"User 2" preferredUsername:@"user2@contoso.com"];
     NSString *clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken2]
@@ -144,9 +135,11 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
     
     //retrieve AT
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:requestParam context:nil error:nil];
+    NSString *authorityFound;
+    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:requestParam context:nil authorityFound:&authorityFound error:nil];
     
     //compare AT with the AT retrieved from cache
+    XCTAssertNil(authorityFound);
     XCTAssertEqualObjects(atItem.jsonDictionary, atItemInCache.jsonDictionary);
     XCTAssertEqualObjects(atItem.authority, atItemInCache.authority);
     XCTAssertEqualObjects(atItem.rawIdToken, atItemInCache.rawIdToken);
@@ -177,7 +170,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     
     //change the scope and retrive the AT again
     [requestParam setScopesFromArray:@[@"User.Read", @"scope.notexist"]];
-    XCTAssertNil([_cache findAccessToken:requestParam context:nil error:nil]);
+    XCTAssertNil([_cache findAccessToken:requestParam context:nil authorityFound:nil error:nil]);
     
     //save a second AT
     MSALRequestParameters *requestParam2 = [MSALRequestParameters new];
@@ -195,7 +188,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_cache.dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 2);
     
     //retrieve AT 2
-    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessToken:requestParam2 context:nil error:nil];
+    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessToken:requestParam2 context:nil authorityFound:nil error:nil];
     
     //compare AT 2 with the AT retrieved from cache
     XCTAssertEqualObjects(atItem2.jsonDictionary, atItemInCache2.jsonDictionary);
@@ -347,7 +340,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_cache.dataSource allRefreshTokens:nil context:nil error:nil].count, 2);
     
     //retrieve AT
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:requestParam context:nil error:nil];
+    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:requestParam context:nil authorityFound:nil error:nil];
     
     //compare AT with the AT retrieved from cache
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
@@ -364,7 +357,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertTrue([_cache deleteAllTokensForUser:_user1 clientId:_testClientId context:nil error:nil]);
     
     //deleted RT and AT, both should return nil
-    XCTAssertNil([_cache findAccessToken:requestParam context:nil error:nil]);
+    XCTAssertNil([_cache findAccessToken:requestParam context:nil authorityFound:nil error:nil]);
     XCTAssertNil([_cache findRefreshToken:requestParam context:nil error:nil]);
     
     //there should be one AT and one RT left in cache
@@ -372,7 +365,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_cache.dataSource allRefreshTokens:nil context:nil error:nil].count, 1);
     
     //retrieve AT 2 and compare it with the AT retrieved from cache
-    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessToken:requestParam2 context:nil error:nil];
+    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessToken:requestParam2 context:nil authorityFound:nil error:nil];
     
     XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].service, [atItemInCache2 tokenCacheKey:nil].service);
     XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].account, [atItemInCache2 tokenCacheKey:nil].account);
@@ -472,7 +465,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     //remove user specifier to make the query ambigious
     requestParam2.user = nil;
     
-    XCTAssertNil([_cache findAccessToken:requestParam2 context:nil error:nil]);
+    XCTAssertNil([_cache findAccessToken:requestParam2 context:nil authorityFound:nil error:nil]);
 }
 
 - (void)testFindExpiredAccessToken {
@@ -490,9 +483,8 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
     
-    //token is returned but expired 
-    XCTAssertNotNil([_cache findAccessToken:requestParam context:nil error:nil]);
-    XCTAssertTrue([[_cache findAccessToken:requestParam context:nil error:nil] isExpired]);
+    //token is returned so it is not returned
+    XCTAssertNil([_cache findAccessToken:requestParam context:nil authorityFound:nil error:nil]);
 }
 
 - (void)testFindAccessTokenWithoutAuthority {
@@ -510,68 +502,45 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     [requestParam2 setScopesFromArray:@[@"User.Read"]];
     requestParam2.user = _user2;
     
-    //empty cache
+    //retrieve without authority in empty cache
+    requestParam.unvalidatedAuthority = nil;
     NSString *authorityFound;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithNoAuthorityProvided:requestParam context:nil authorityFound:&authorityFound error:nil];
+    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:requestParam context:nil authorityFound:&authorityFound error:nil];
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
     
     //store AT 1
+    requestParam.unvalidatedAuthority = _testAuthority;
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
     
-    //one token in cache
-    atItemInCache = [_cache findAccessTokenWithNoAuthorityProvided:requestParam context:nil authorityFound:&authorityFound error:nil];
+    //retrieve with one token in cache
+    authorityFound = nil;
+    requestParam.unvalidatedAuthority = nil;
+    atItemInCache = [_cache findAccessToken:requestParam context:nil authorityFound:&authorityFound error:nil];
     XCTAssertNotNil(atItemInCache);
     XCTAssertNil(authorityFound);
     
     //save a AT 2
+    requestParam2.unvalidatedAuthority = _testAuthority;
     [_cache saveAccessAndRefreshToken:requestParam2 response:_testTokenResponse2 context:nil error:nil];
     
     //remove user specifier such that multiple matched tokens could be found
     requestParam.user = nil;
+    requestParam.unvalidatedAuthority = nil;
+    authorityFound = nil;
     NSError *error;
-    atItemInCache = [_cache findAccessTokenWithNoAuthorityProvided:requestParam context:nil authorityFound:&authorityFound error:&error];
+    atItemInCache = [_cache findAccessToken:requestParam context:nil authorityFound:&authorityFound error:&error];
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
     XCTAssertEqual(error.code, MSALErrorMultipleMatchesNoAuthoritySpecified);
     
     //no match but can find a unique authority in cache
+    requestParam2.unvalidatedAuthority = nil;
     [requestParam2 setScopesFromArray:@[@"nonexist"]];
-    atItemInCache = [_cache findAccessTokenWithNoAuthorityProvided:requestParam2 context:nil authorityFound:&authorityFound error:nil];
+    authorityFound = nil;
+    atItemInCache = [_cache findAccessToken:requestParam2 context:nil authorityFound:&authorityFound error:nil];
     XCTAssertNil(atItemInCache);
     XCTAssertEqualObjects(authorityFound, _testAuthority.absoluteString);
-
-
-    
-//
-//    //there should be two ATs in cache
-//    XCTAssertEqual([_cache.dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 2);
-//    
-//    //retrieve AT 2
-//    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessToken:requestParam2 context:nil error:nil];
-//    
-//    //compare AT 2 with the AT retrieved from cache
-//    XCTAssertEqualObjects(atItem2.jsonDictionary, atItemInCache2.jsonDictionary);
-//    XCTAssertEqualObjects(atItem2.authority, atItemInCache2.authority);
-//    XCTAssertEqualObjects(atItem2.rawIdToken, atItemInCache2.rawIdToken);
-//    XCTAssertEqualObjects(atItem2.tokenType, atItemInCache2.tokenType);
-//    XCTAssertEqualObjects(atItem2.accessToken, atItemInCache2.accessToken);
-//    XCTAssertEqualObjects(atItem2.expiresOn.description, atItemInCache2.expiresOn.description);
-//    XCTAssertEqualObjects(atItem2.scope.msalToString, atItemInCache2.scope.msalToString);
-//    XCTAssertEqualObjects(atItem2.user.displayableId, atItemInCache2.user.displayableId);
-//    XCTAssertEqualObjects(atItem2.user.name, atItemInCache2.user.name);
-//    XCTAssertEqualObjects(atItem2.user.identityProvider, atItemInCache2.user.identityProvider);
-//    XCTAssertEqualObjects(atItem2.user.uid, atItemInCache2.user.uid);
-//    XCTAssertEqualObjects(atItem2.user.utid, atItemInCache2.user.utid);
-//    XCTAssertEqualObjects(atItem2.user.environment, atItemInCache2.user.environment);
-//    XCTAssertEqualObjects(atItem2.user.userIdentifier, atItemInCache2.user.userIdentifier);
-//    XCTAssertEqualObjects(atItem2.tenantId, atItemInCache2.tenantId);
-//    XCTAssertTrue(atItem2.isExpired==atItemInCache2.isExpired);
-//    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].service, [atItemInCache2 tokenCacheKey:nil].service);
-//    XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].account, [atItemInCache2 tokenCacheKey:nil].account);
-//    XCTAssertEqualObjects(atItem2.clientId, atItemInCache2.clientId);
-//    XCTAssertEqualObjects(atItem2.clientInfo.uniqueIdentifier, atItemInCache2.clientInfo.uniqueIdentifier);
-//    XCTAssertEqualObjects(atItem2.clientInfo.uniqueTenantIdentifier, atItemInCache2.clientInfo.uniqueTenantIdentifier);
 }
 
 @end

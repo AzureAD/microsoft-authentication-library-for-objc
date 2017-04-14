@@ -107,6 +107,7 @@
 
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
                                       context:(nullable id<MSALRequestContext>)ctx
+                               authorityFound:(NSString * __autoreleasing *)authorityFound
                                         error:(NSError * __autoreleasing *)error
 {
     MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
@@ -125,7 +126,11 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if ([key matches:[tokenItem tokenCacheKey:nil]])
+        if (requestParam.unvalidatedAuthority && [key matches:[tokenItem tokenCacheKey:nil]])
+        {
+            [matchedTokens addObject:tokenItem];
+        }
+        else if (!requestParam.unvalidatedAuthority && [requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
         {
             [matchedTokens addObject:tokenItem];
         }
@@ -135,53 +140,8 @@
     {
         LOG_WARN(ctx, @"No access token found.");
         LOG_WARN_PII(ctx, @"No access token found.");
-        return nil;
-    }
-    
-    if (matchedTokens.count > 1)
-    {
-        LOG_WARN(ctx, @"Found multiple access tokens, which token to return is ambiguous!");
-        LOG_WARN_PII(ctx, @"Found multiple access tokens, which token to return is ambiguous!");
-        return nil;
-    }
-    
-    // if the token is expired, we still return it as we need the authority stored in it
-    if (matchedTokens[0].isExpired)
-    {
-        LOG_INFO(ctx, @"Access token found in cache is already expired.");
-        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
-    }
-    
-    return matchedTokens[0];
-}
-
-- (MSALAccessTokenCacheItem *)findAccessTokenWithNoAuthorityProvided:(MSALRequestParameters *)requestParam
-                                                             context:(nullable id<MSALRequestContext>)ctx
-                                                      authorityFound:(NSString * __autoreleasing *)authorityFound
-                                                               error:(NSError * __autoreleasing *)error
-{
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
-    if (!allAccessTokens)
-    {
-        return nil;
-    }
-    
-    NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
-    
-    for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
-    {
-        if ([requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
-        {
-            [matchedTokens addObject:tokenItem];
-        }
-    }
-    
-    if (matchedTokens.count == 0)
-    {
-        LOG_WARN(ctx, @"Authority is not provided. No access token matching scopes and user found.");
-        LOG_WARN_PII(ctx, @"Authority is not provided. No access token matching scopes and user found.");
         
-        if (authorityFound)
+        if (!requestParam.unvalidatedAuthority && authorityFound)
         {
             *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
         }
@@ -191,7 +151,7 @@
     
     if (matchedTokens.count > 1)
     {
-        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Authority is not provided. Found multiple access tokens, which token to return is ambiguous!");
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
         return nil;
     }
     
@@ -200,6 +160,13 @@
     {
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
+        
+        if (!requestParam.unvalidatedAuthority && authorityFound)
+        {
+            *authorityFound = matchedTokens[0].authority;
+        }
+        
+        return nil;
     }
     
     return matchedTokens[0];
