@@ -49,10 +49,8 @@
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
 {
-    (void)error; // TODO
-    /*NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-     NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];*/
-    NSString *scheme = @"adaliosxformsapp";
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];
     
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
     
@@ -61,9 +59,7 @@
         NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
         if ([urlSchemes containsObject:scheme])
         {
-            // TODO Fix this mess
-            //NSString *redirectUri = [NSString stringWithFormat:@"%@://%@/msal", scheme, bundleId];
-            NSString *redirectUri = [NSString stringWithFormat:@"%@://com.yourcompany.xformsapp", scheme];
+            NSString *redirectUri = [NSString stringWithFormat:@"%@://%@", scheme, bundleId];
             _redirectUri = [NSURL URLWithString:redirectUri];
             return YES;
         }
@@ -79,6 +75,7 @@
 {
     return [self initWithClientId:clientId authority:nil error:error];
 }
+
 - (id)initWithClientId:(NSString *)clientId
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error

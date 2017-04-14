@@ -156,6 +156,11 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
 
 @implementation MSALKeychainTokenCache (Internal)
 
+- (NSDictionary *)defaultKeychainQuery
+{
+    return _default;
+}
+
 - (nullable NSArray <MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
                                                                       context:(nullable id<MSALRequestContext>)ctx
                                                                         error:(NSError * __autoreleasing *)error
