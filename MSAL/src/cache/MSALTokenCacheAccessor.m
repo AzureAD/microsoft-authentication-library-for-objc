@@ -107,6 +107,7 @@
 
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
                                       context:(nullable id<MSALRequestContext>)ctx
+                               authorityFound:(NSString * __autoreleasing *)authorityFound
                                         error:(NSError * __autoreleasing *)error
 {
     MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
@@ -125,18 +126,68 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if ([key matches:[tokenItem tokenCacheKey:nil]])
+        if (requestParam.unvalidatedAuthority && [key matches:[tokenItem tokenCacheKey:nil]])
+        {
+            [matchedTokens addObject:tokenItem];
+        }
+        else if (!requestParam.unvalidatedAuthority && [requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
         {
             [matchedTokens addObject:tokenItem];
         }
     }
     
-    if (matchedTokens.count != 1)
+    if (matchedTokens.count == 0)
     {
+        LOG_WARN(ctx, @"No access token found.");
+        LOG_WARN_PII(ctx, @"No access token found.");
+        
+        if (!requestParam.unvalidatedAuthority && authorityFound)
+        {
+            *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
+        }
+        
+        return nil;
+    }
+    
+    if (matchedTokens.count > 1)
+    {
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
+        return nil;
+    }
+    
+    if (matchedTokens[0].isExpired)
+    {
+        LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
+        
+        // if authority is not provided, return authority for later use
+        if (!requestParam.unvalidatedAuthority && authorityFound)
+        {
+            *authorityFound = matchedTokens[0].authority;
+        }
+        
         return nil;
     }
     
     return matchedTokens[0];
+}
+
+- (NSString *)findUniqueAuthorityInAccessTokens:(NSArray<MSALAccessTokenCacheItem *> *)accessTokens
+{
+    NSMutableSet<NSString *> *authorities = [[NSMutableSet<NSString *> alloc] init];
+    for (MSALAccessTokenCacheItem *accessToken in accessTokens)
+    {
+        if (accessToken.authority)
+        {
+            [authorities addObject:accessToken.authority];
+        }
+    }
+    
+    if (authorities.count > 1 || authorities.count == 0)
+    {
+        return nil;
+    }
+    return authorities.allObjects[0];
 }
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
@@ -160,19 +211,6 @@
     }
     
     return [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
-}
-
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                   context:(nullable id<MSALRequestContext>)ctx
-                     error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
-    if (!key)
-    {
-        return NO;
-    }
-    
-    return [_dataSource removeRefreshTokenItem:rtItem context:ctx error:error];
 }
 
 - (BOOL)deleteAllTokensForUser:(MSALUser *)user
@@ -240,18 +278,6 @@
     }
     
     return matchedAccessTokens;
-}
-
-- (MSALRefreshTokenCacheItem *)refreshTokenForUser:(MSALUser *)user
-                                          clientId:(NSString *)clientId
-                                           context:(id<MSALRequestContext>)ctx
-                                             error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:user.environment
-                                                                                 clientId:clientId
-                                                                           userIdentifier:user.userIdentifier];
-    
-    return [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];;
 }
 
 @end

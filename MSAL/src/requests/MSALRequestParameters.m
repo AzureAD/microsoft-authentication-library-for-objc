@@ -31,9 +31,14 @@
 
 @implementation MSALRequestParameters
 
-- (void)setScopesFromArray:(NSArray<NSString *> *)array
+- (void)setScopesFromArray:(NSArray<NSString *> *)scopes
 {
-    self.scopes = [[NSOrderedSet alloc] initWithArray:array copyItems:YES];
+    NSMutableArray *scopesLowercase = [NSMutableArray new];
+    for (NSString *scope in scopes)
+    {
+        [scopesLowercase addObject:scope.lowercaseString];
+    }
+    self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
 }
 
 @end
