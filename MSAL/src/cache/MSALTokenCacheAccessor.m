@@ -155,12 +155,12 @@
         return nil;
     }
     
-    // if the token is expired, we still return it as we need the authority stored in it
     if (matchedTokens[0].isExpired)
     {
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         
+        // if authority is not provided, return authority for later use
         if (!requestParam.unvalidatedAuthority && authorityFound)
         {
             *authorityFound = matchedTokens[0].authority;
