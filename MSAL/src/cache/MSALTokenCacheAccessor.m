@@ -156,6 +156,7 @@
 
 - (MSALAccessTokenCacheItem *)findAccessTokenWithNoAuthorityProvided:(MSALRequestParameters *)requestParam
                                                              context:(nullable id<MSALRequestContext>)ctx
+                                                      authorityFound:(NSString * __autoreleasing *)authorityFound
                                                                error:(NSError * __autoreleasing *)error
 {
     NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
@@ -178,6 +179,12 @@
     {
         LOG_WARN(ctx, @"Authority is not provided. No access token matching scopes and user found.");
         LOG_WARN_PII(ctx, @"Authority is not provided. No access token matching scopes and user found.");
+        
+        if (authorityFound)
+        {
+            *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
+        }
+        
         return nil;
     }
     
@@ -195,6 +202,24 @@
     }
     
     return matchedTokens[0];
+}
+
+- (NSString *)findUniqueAuthorityInAccessTokens:(NSArray<MSALAccessTokenCacheItem *> *)accessTokens
+{
+    NSMutableSet<NSString *> *authorities = [[NSMutableSet<NSString *> alloc] init];
+    for (MSALAccessTokenCacheItem *accessToken in accessTokens)
+    {
+        if (accessToken.authority)
+        {
+            [authorities addObject:accessToken.authority];
+        }
+    }
+    
+    if (authorities.count > 1 || authorities.count == 0)
+    {
+        return nil;
+    }
+    return authorities.allObjects[0];
 }
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
@@ -218,19 +243,6 @@
     }
     
     return [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
-}
-
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                   context:(nullable id<MSALRequestContext>)ctx
-                     error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
-    if (!key)
-    {
-        return NO;
-    }
-    
-    return [_dataSource removeRefreshTokenItem:rtItem context:ctx error:error];
 }
 
 - (BOOL)deleteAllTokensForUser:(MSALUser *)user
@@ -298,18 +310,6 @@
     }
     
     return matchedAccessTokens;
-}
-
-- (MSALRefreshTokenCacheItem *)refreshTokenForUser:(MSALUser *)user
-                                          clientId:(NSString *)clientId
-                                           context:(id<MSALRequestContext>)ctx
-                                             error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:user.environment
-                                                                                 clientId:clientId
-                                                                           userIdentifier:user.userIdentifier];
-    
-    return [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];;
 }
 
 @end

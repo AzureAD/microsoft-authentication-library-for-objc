@@ -261,7 +261,7 @@
     [_delegate willAccessCache:self];
     pthread_rwlock_rdlock(&_lock);
     
-    NSDictionary *tokens = [_cache objectForKey:@"refresh_tokens"];
+    NSDictionary<NSString *, NSMutableDictionary*> *tokens = [_cache objectForKey:@"refresh_tokens"];
     if (!tokens)
     {
         pthread_rwlock_unlock(&_lock);
@@ -275,9 +275,11 @@
     {
         if (!clientId)
         {
-            [items addObjectsFromArray:tokens[userKey]];
+            [items addObjectsFromArray:tokens[userKey].allValues];
+            continue;
         }
-        else
+        
+        if (tokens[userKey][clientId])
         {
             [items addObject:tokens[userKey][clientId]];
         }

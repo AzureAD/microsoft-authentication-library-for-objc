@@ -44,6 +44,7 @@
 
 - (MSALAccessTokenCacheItem *)findAccessTokenWithNoAuthorityProvided:(MSALRequestParameters *)requestParam
                                                              context:(id<MSALRequestContext>)ctx
+                                                      authorityFound:(NSString * __autoreleasing *)authorityFound
                                                                error:(NSError * __autoreleasing *)error;
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
