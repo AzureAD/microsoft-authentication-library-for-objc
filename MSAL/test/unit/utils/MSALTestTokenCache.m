@@ -163,7 +163,7 @@
     
     pthread_rwlock_rdlock(&_lock);
     
-    NSDictionary<NSString *, NSMutableDictionary*> *tokens = [_cache objectForKey:@"refresh_tokens"];
+    NSDictionary<NSString *, NSMutableDictionary *> *tokens = [_cache objectForKey:@"refresh_tokens"];
     if (!tokens)
     {
         pthread_rwlock_unlock(&_lock);
