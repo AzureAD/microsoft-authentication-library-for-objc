@@ -28,9 +28,6 @@
 #import "MSALTestAppSettingViewController.h"
 
 @interface MSALTestAppSettingViewController () <UITableViewDelegate, UITableViewDataSource>
-{
-    UITableView *_tableView;
-}
 
 @end
 
@@ -61,11 +58,7 @@
 {
     (void)animated;
     self.navigationController.navigationBarHidden = NO;
-    
-    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
-    [_tableView selectRowAtIndexPath:indexPath
-                            animated:NO
-                      scrollPosition:UITableViewScrollPositionNone];
+
     [self refresh];
     [super viewWillAppear:animated];
 }
@@ -102,6 +95,7 @@
     }
     
     cell.textLabel.text = [self labelForRow:[indexPath indexAtPosition:1]];
+    cell.detailTextLabel.text = [self subLabelForRow:[indexPath indexAtPosition:1]];
     
     return cell;
 }
@@ -112,7 +106,11 @@
 
 - (void)refresh
 {
-    
+    [_tableView reloadData];
+    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
+    [_tableView selectRowAtIndexPath:indexPath
+                            animated:NO
+                      scrollPosition:UITableViewScrollPositionNone];
 }
 
 - (NSInteger)numberOfRows
@@ -121,6 +119,12 @@
 }
 
 - (NSString *)labelForRow:(NSInteger)row
+{
+    (void)row;
+    return nil;
+}
+
+- (NSString *)subLabelForRow:(NSInteger)row
 {
     (void)row;
     return nil;
