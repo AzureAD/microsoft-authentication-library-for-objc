@@ -160,10 +160,14 @@
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         
-        // if authority is not provided, return authority for later use
-        if (!requestParam.unvalidatedAuthority && authorityFound)
+        MSALAccessTokenCacheItem *token = matchedTokens[0];
+        NSLog(@"%@", token.authority);
+        
+        if (authorityFound)
         {
-            *authorityFound = matchedTokens[0].authority;
+            // if authority is not provided, set authorityFound with the token's authority
+            // if not, set authorityFound with the passed in authority
+            *authorityFound = requestParam.unvalidatedAuthority ? requestParam.unvalidatedAuthority.absoluteString : matchedTokens[0].authority;
         }
         
         return nil;

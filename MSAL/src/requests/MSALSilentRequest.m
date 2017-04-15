@@ -61,7 +61,7 @@
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
 
     MSALTokenCacheAccessor *cache = _parameters.tokenCache;
-
+    
     if (!_forceRefresh)
     {
         NSString *updatedAuthority = nil;
@@ -71,7 +71,7 @@
                                                         authorityFound:&updatedAuthority
                                                                  error:&error];
         
-        if (accessToken && !accessToken.isExpired)
+        if (accessToken)
         {
             MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
             completionBlock(result, nil);
@@ -83,6 +83,8 @@
             completionBlock(nil, error);
             return;
         }
+        
+        _parameters.unvalidatedAuthority = [NSURL URLWithString:updatedAuthority];
     }
     
     _refreshToken = [cache findRefreshToken:_parameters context:_parameters error:nil];
