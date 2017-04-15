@@ -45,7 +45,7 @@ static NSMutableDictionary *s_validatedAuthorities;
 static NSMutableDictionary *s_validatedUsersForAuthority;
 
 #pragma mark - helper functions
-BOOL isTenantless(NSURL *authority)
++ (BOOL)isTenantless:(NSURL *)authority
 {
     NSArray *authorityURLPaths = authority.pathComponents;
     
@@ -58,6 +58,26 @@ BOOL isTenantless(NSURL *authority)
     return NO;
 }
 
++ (NSURL *)cacheUrlForAuthority:(NSURL *)authority
+                       tenantId:(NSString *)tenantId
+{
+    if (![MSALAuthority isTenantless:authority])
+    {
+        return authority;
+    }
+    
+    NSString * authorityString = nil;
+    if (authority.port)
+    {
+        authorityString = [NSString stringWithFormat:@"https://%@:%d/%@", authority.host, authority.port.intValue, tenantId];
+    }
+    else
+    {
+        authorityString = [NSString stringWithFormat:@"https://%@/%@", authority.host, tenantId];
+    }
+    
+    return [NSURL URLWithString:authorityString];
+}
 
 
 #pragma mark - class methods
@@ -157,7 +177,7 @@ BOOL isTenantless(NSURL *authority)
         authority.canonicalAuthority = updatedAuthority;
         authority.authorityType = authorityType;
         authority.validateAuthority = validate;
-        authority.isTenantless = isTenantless(updatedAuthority);
+        authority.isTenantless = [self isTenantless:updatedAuthority];
         
         // Only happens for AAD authority
         NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];

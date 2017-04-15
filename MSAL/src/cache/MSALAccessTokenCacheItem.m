@@ -32,6 +32,7 @@
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
+#import "MSALAuthority.h"
 
 static uint64_t s_expirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
 
@@ -62,7 +63,8 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     }
     
     //store needed data to _json
-    self.authority = authority.absoluteString;
+    _idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
+    self.authority = [[MSALAuthority cacheUrlForAuthority:authority tenantId:_idToken.tenantId] absoluteString];
     self.rawIdToken = response.idToken;
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
