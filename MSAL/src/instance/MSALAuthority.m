@@ -66,17 +66,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         return authority;
     }
     
-    NSString * authorityString = nil;
-    if (authority.port)
-    {
-        authorityString = [NSString stringWithFormat:@"https://%@:%d/%@", authority.host, authority.port.intValue, tenantId];
-    }
-    else
-    {
-        authorityString = [NSString stringWithFormat:@"https://%@/%@", authority.host, tenantId];
-    }
-    
-    return [NSURL URLWithString:authorityString];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authority msalHostWithPort], tenantId]];
 }
 
 
@@ -116,12 +106,12 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 3), nil, MSALErrorInvalidParameter,
                                @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
         
-        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", authorityUrl.hostWithPort, authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
         return [NSURL URLWithString:updatedAuthorityString];
     }
     
     // ADFS and AAD
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.hostWithPort, authorityUrl.pathComponents[1]]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[1]]];
 }
 
 
