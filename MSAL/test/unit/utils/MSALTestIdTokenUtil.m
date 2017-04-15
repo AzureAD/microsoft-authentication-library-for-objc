@@ -25,27 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestIdTokenUtil.h"
+#import "NSDictionary+MSALTestUtil.h"
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@implementation MSALTestIdTokenUtil
 
-extern NSString* MSALTestAppCacheChangeNotification;
++ (NSString *)defaultName
+{
+    return @"User";
+}
 
-@interface MSALTestAppSettings : NSObject
++ (NSString *)defaultUsername
+{
+    return @"user@contoso.com";
+}
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
++ (NSString *)defaultTenantId
+{
+    return @"1234-5678-90abcdefg";
+}
 
-+ (MSALTestAppSettings*)settings;
++ (NSString *)defaultIdToken
+{
+    return [self idTokenWithName:[self defaultName] preferredUsername:[self defaultUsername]];
+}
 
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
++ (NSString *)idTokenWithName:(NSString *)name
+            preferredUsername:(NSString *)preferredUsername
+{
+    NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} base64UrlJson];
+    NSString *idTokenp2 = [@{ @"iss" : @"issuer",
+                              @"name" : name,
+                              @"preferred_username" : preferredUsername,
+                              @"tid" : [self defaultTenantId]} base64UrlJson];
+    return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
+}
 
 @end

@@ -25,27 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTokenCacheDataSource.h"
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@interface MSALKeychainTokenCache : NSObject
 
-extern NSString* MSALTestAppCacheChangeNotification;
++ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
 
-@interface MSALTestAppSettings : NSObject
+@end
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
+@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
 
-+ (MSALTestAppSettings*)settings;
+- (nonnull NSDictionary *)defaultKeychainQuery;
 
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+/*! This method should *only* be called in test code, it should never be called
+ in production code */
+- (void)testRemoveAll;
 
 @end

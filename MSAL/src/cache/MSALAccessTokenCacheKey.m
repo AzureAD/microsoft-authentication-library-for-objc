@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#import "NSURL+MSALExtensions.h"
 #import "MSALAccessTokenCacheKey.h"
 
 @implementation MSALAccessTokenCacheKey
@@ -42,7 +43,7 @@
     
     self.authority = [authority lowercaseString];
     self.environment = [environment lowercaseString];
-    
+
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
     for (NSString *item in scope)
     {

@@ -64,26 +64,23 @@
 
     if (!_forceRefresh)
     {
-        BOOL isAuthorityProvided = _parameters.unvalidatedAuthority != nil;
-        MSALAccessTokenCacheItem *accessToken = nil;
+        NSString *updatedAuthority = nil;
+        NSError *error = nil;
+        MSALAccessTokenCacheItem *accessToken = [cache findAccessToken:_parameters
+                                                               context:_parameters
+                                                        authorityFound:&updatedAuthority
+                                                                 error:&error];
         
-        if (isAuthorityProvided)
-        {
-            accessToken = [cache findAccessToken:_parameters context:_parameters error:nil];
-        }
-        else
-        {
-            // OR find access token with no authority provided
-        }
-        
-        if (accessToken.isExpired)
-        {
-            _parameters.unvalidatedAuthority = [NSURL URLWithString:accessToken.authority];
-        }
-        else
+        if (accessToken && !accessToken.isExpired)
         {
             MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
             completionBlock(result, nil);
+            return;
+        }
+        
+        if (!accessToken && !updatedAuthority)
+        {
+            completionBlock(nil, error);
             return;
         }
     }

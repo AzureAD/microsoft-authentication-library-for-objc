@@ -25,18 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALKeychainTokenCache.h"
-#import "MSALTokenCacheDataSource.h"
+#import <Foundation/Foundation.h>
 
-@class MSALRefreshTokenCacheItem;
-@class MSALRequestParameters;
-@class MSALAccessTokenCacheItem;
-@class MSALTokenResponse;
+@interface MSALTestIdTokenUtil : NSObject
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
++ (NSString *)defaultIdToken;
++ (NSString *)defaultName;
++ (NSString *)defaultUsername;
++ (NSString *)defaultTenantId;
 
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
++ (NSString *)idTokenWithName:(NSString *)name
+            preferredUsername:(NSString *)preferredUsername;
 
 @end

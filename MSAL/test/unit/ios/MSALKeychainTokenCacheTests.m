@@ -31,6 +31,8 @@
 #import "MSALTokenResponse.h"
 #import "MSALClientInfo.h"
 
+#import "MSALTestIdTokenUtil.h"
+
 #import "NSDictionary+MSALTestUtil.h"
 
 @interface MSALKeychainTokenCacheTests : XCTestCase
@@ -55,12 +57,7 @@
 
 static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
 {
-    NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} base64UrlJson];
-    NSString *idTokenp2 = [@{ @"iss" : @"issuer",
-                              @"name" : name,
-                              @"preferred_username" : preferredUsername,
-                              @"tid" : @"1234-5678-90abcdefg"} base64UrlJson];
-    return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
+    return [MSALTestIdTokenUtil idTokenWithName:name preferredUsername:preferredUsername];
 }
 
 @implementation MSALKeychainTokenCacheTests

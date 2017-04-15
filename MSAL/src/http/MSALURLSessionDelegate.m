@@ -29,6 +29,7 @@
 #import "MSALLogger+Internal.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALAuthority.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALURLSessionDelegate
 
@@ -54,7 +55,7 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     (void)response;
     (void)task;
     
-    NSString *requestHost = request.URL.host;
+    NSString *requestHost = request.URL.hostWithPort;
     
     LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalComputeSHA256Hex] );
     LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);

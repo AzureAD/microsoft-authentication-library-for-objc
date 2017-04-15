@@ -30,12 +30,16 @@
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestAuthority.h"
-#import "MSALTestSwizzle.h"
-#import "MSALTestBundle.h"
-#import "MSALTestURLSession.h"
-#import "MSALWebUI.h"
 #import "MSALPkce.h"
+#import "MSALTestAuthority.h"
+#import "MSALTestBundle.h"
+#import "MSALTestIdTokenUtil.h"
+#import "MSALTestTokenCache.h"
+#import "MSALTestSwizzle.h"
+#import "MSALTestURLSession.h"
+#import "MSALUser.h"
+#import "MSALWebUI.h"
+
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -62,7 +66,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -87,7 +91,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -141,10 +145,12 @@
       @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
       @"eqp1" : @"val1",
       @"eqp2" : @"val2",
-      @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+      @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
       @"response_type" : @"code",
       @"code_challenge": pkce.codeChallenge,
-      @"code_challenge_method" : @"S256"
+      @"code_challenge_method" : @"S256",
+      @"uid" : @"true",
+      @"slice" : @"testslice"
       };
     NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
     XCTAssertTrue([expectedQPs compareDictionary:QPs]);
@@ -160,11 +166,12 @@
     parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"];
     parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -223,15 +230,17 @@
            @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
-           @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+           @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
-           @"code_challenge_method" : @"S256"
+           @"code_challenge_method" : @"S256",
+           @"uid" : @"true",
+           @"slice" : @"testslice"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal?code=%@&state=%@", @"iamafakecode", request.state];
+         NSString *responseString = [NSString stringWithFormat:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
@@ -255,22 +264,24 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal",
+                                             @"redirect_uri" : @"x-msauth-com-microsoft-unittests://com.microsoft.unittests",
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : pkce.codeVerifier,
                                              @"client_info" : @"1"}
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil
-                         dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
+                         dictionaryAsJSON:@{ @"access_token" : @"i am a access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token_expires_in" : @"1200"}];
+                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
     [MSALTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
@@ -280,6 +291,16 @@
          XCTAssertFalse(fAlreadyHit);
          fAlreadyHit = YES;
          XCTAssertNotNil(result);
+         XCTAssertNil(error);
+         XCTAssertNotNil(result.user);
+         XCTAssertEqualObjects(result.user.uid, @"1");
+         XCTAssertEqualObjects(result.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(result.user.name, [MSALTestIdTokenUtil defaultName]);
+         XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertNotNil(result.tenantId);
+         XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
+         XCTAssertNotNil(result.accessToken);
+         XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
          XCTAssertNil(error);
          
          dispatch_semaphore_signal(dsem);

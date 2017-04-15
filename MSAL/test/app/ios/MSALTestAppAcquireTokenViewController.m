@@ -47,6 +47,8 @@
     UIButton *_userButton;
     UIButton *_scopesButton;
     
+    UIButton *_acquireSilentButton;
+    
     UISegmentedControl *_uiBehavior;
     
     UITextView *_resultView;
@@ -175,6 +177,8 @@
     UIButton* acquireSilentButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [acquireSilentButton setTitle:@"acquireTokenSilent" forState:UIControlStateNormal];
     [acquireSilentButton addTarget:self action:@selector(acquireTokenSilent:) forControlEvents:UIControlEventTouchUpInside];
+    
+    _acquireSilentButton = acquireSilentButton;
     
     UIView* acquireButtonsView = [self createTwoItemLayoutView:acquireButton item2:acquireSilentButton];
     UIVisualEffect* blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
@@ -386,10 +390,10 @@
          if (fBlockHit)
          {
              dispatch_async(dispatch_get_main_queue(), ^{
-                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
                                                                                 message:@"Completion block was hit multiple times!"
                                                                          preferredStyle:UIAlertControllerStyleAlert];
-                 
+                 [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
                  [self presentViewController:alert animated:YES completion:nil];
              });
              
@@ -420,32 +424,91 @@
 - (IBAction)acquireTokenSilent:(id)sender
 {
     (void)sender;
-    /*
+    
     MSALTestAppSettings* settings = [MSALTestAppSettings settings];
+    
+    if (!settings.currentUser)
+    {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                       message:@"User needs to be selected for acquire token silent call"
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    
     NSString* authority = [settings authority];
-    NSString* clientId = [settings clientId];
-    NSURL* redirectUri = [settings redirectUri];
-    BOOL validateAuthority = _validateAuthority.selectedSegmentIndex == 0;
-    */
-    // TODO
+    NSString* clientId = TEST_APP_CLIENT_ID;
+    
+    NSError *error = nil;
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    if (!application)
+    {
+        NSString* resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [_resultView setText:resultText];
+        return;
+    }
+    
+    __block BOOL fBlockHit = NO;
+    _acquireSilentButton.enabled = NO;
+    
+    [application acquireTokenSilentForScopes:[settings.scopes allObjects]
+                                        user:settings.currentUser
+                             completionBlock:^(MSALResult *result, NSError *error)
+    {
+        if (fBlockHit)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _acquireSilentButton.enabled = YES;
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                               message:@"Completion block was hit multiple times!"
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:YES completion:nil];
+            });
+            
+            return;
+        }
+        fBlockHit = YES;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            _acquireSilentButton.enabled = YES;
+            if (result)
+            {
+                [self updateResultView:result];
+            }
+            else
+            {
+                [self updateResultViewError:error];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    }];
 }
 
 - (IBAction)clearCache:(id)sender
 {
     (void)sender;
-    // TODO
-    /*
-    NSDictionary* query = [[ADKeychainTokenCache defaultKeychainCache] defaultKeychainQuery];
+    
+    NSDictionary *query = [[MSALKeychainTokenCache defaultKeychainCache] defaultKeychainQuery];
     OSStatus status = SecItemDelete((CFDictionaryRef)query);
     
     if (status == errSecSuccess || status == errSecItemNotFound)
     {
         _resultView.text = @"Successfully cleared cache.";
+        
+        MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+        settings.currentUser = nil;
+        
+        [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
+                     forState:UIControlStateNormal];
     }
     else
     {
         _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %d", (int)status];
-    }*/
+    }
 }
 
 - (IBAction)selectAuthority:(id)sender

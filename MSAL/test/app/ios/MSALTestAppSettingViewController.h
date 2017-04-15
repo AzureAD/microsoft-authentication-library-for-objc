@@ -29,6 +29,9 @@
 
 
 @interface MSALTestAppSettingViewController : UIViewController
+{
+    UITableView *_tableView;
+}
 
 #pragma mark -
 #pragma mark Methods for subclasses to override
@@ -36,6 +39,7 @@
 - (void)refresh;
 - (NSInteger)numberOfRows;
 - (NSString *)labelForRow:(NSInteger)row;
+- (NSString *)subLabelForRow:(NSInteger)row;
 - (void)rowSelected:(NSInteger)row;
 - (NSInteger)currentRow;
 

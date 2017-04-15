@@ -108,6 +108,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
     
+    // TODO: Remove once uid+utid is in prod
+    parameters[@"slice"] = @"testslice";
+    parameters[@"uid"] = @"true";
+    
     _state = [[NSUUID UUID] UUIDString];
     parameters[OAUTH2_STATE] = _state;
     
