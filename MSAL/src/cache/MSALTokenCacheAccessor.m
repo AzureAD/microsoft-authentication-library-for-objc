@@ -82,7 +82,7 @@
     
     if (response.refreshToken)
     {
-        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
+        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.hostWithPort
                                                                                                 clientId:requestParam.clientId
                                                                                                 response:response];
         [self saveRefreshToken:refreshToken context:ctx error:error];
@@ -198,7 +198,7 @@
                                         context:(nullable id<MSALRequestContext>)ctx
                                           error:(NSError * __autoreleasing *)error
 {
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.hostWithPort
                                                                                  clientId:requestParam.clientId
                                                                            userIdentifier:requestParam.user.userIdentifier];
     return [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
