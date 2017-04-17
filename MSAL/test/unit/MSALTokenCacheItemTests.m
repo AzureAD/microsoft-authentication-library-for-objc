@@ -64,11 +64,11 @@
     XCTAssertEqualObjects(atItem.accessToken, @"fake-access-token");
     XCTAssertTrue([atItem.expiresOn compare:NSDate.date] == NSOrderedDescending);
     XCTAssertEqualObjects(atItem.scope.msalToString, @"mail.read user.read");
-    XCTAssertTrue(atItem.isExpired);
+    XCTAssertFalse(atItem.isExpired);
     
-    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tL2NvbW1vbg$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA");
+    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, @"aHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tLzAyODdmOTYzLTJkNzItNDM2My05ZTNhLTU3MDVjNWIwZjAzMQ$NWE0MzQ2OTEtY2NiMi00ZmQxLWI5N2ItYjY0YmNmYmMwM2Zj$bWFpbC5yZWFkIHVzZXIucmVhZA");
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, @"1297315377$MjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3LjAyODdmOTYzLTJkNzItNDM2My05ZTNhLTU3MDVjNWIwZjAzMQ@bG9naW4ubWljcm9zb2Z0b25saW5lLmNvbQ");
-    XCTAssertEqualObjects(atItem.authority, @"https://login.microsoftonline.com/common");
+    XCTAssertEqualObjects(atItem.authority, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031");
     XCTAssertEqualObjects(atItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
     XCTAssertEqualObjects(atItem.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
     XCTAssertEqualObjects(atItem.rawIdToken, @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImEzUU4wQlpTN3M0bk4tQmRyamJGMFlfTGRNTSJ9.eyJhdWQiOiI1YTQzNDY5MS1jY2IyLTRmZDEtYjk3Yi1iNjRiY2ZiYzAzZmMiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vMDI4N2Y5NjMtMmQ3Mi00MzYzLTllM2EtNTcwNWM1YjBmMDMxL3YyLjAiLCJpYXQiOjE0OTE0OTE5MjcsIm5iZiI6MTQ5MTQ5MTkyNywiZXhwIjoxNDkxNDk1ODI3LCJhaW8iOiJZMlpnWUhCMGJYblErSEladzFyRmF5YzdGeGgrZFp5dkttR3U5OGI5d2xLTEwzRlNzUklBIiwibmFtZSI6IlNpbXBsZSBVc2VyIiwib2lkIjoiMjlmMzgwN2EtNGZiMC00MmYyLWE0NGEtMjM2YWEwY2IzZjk3IiwicHJlZmVycmVkX3VzZXJuYW1lIjoidXNlckBtc2RldmV4Lm9ubWljcm9zb2Z0LmNvbSIsInN1YiI6IlRxZ1R6eldiVjE2bUlrSUUwc3hzUkdRRm5yT1lsQWVPWVJ4a2R5QmhERm8iLCJ0aWQiOiIwMjg3Zjk2My0yZDcyLTQzNjMtOWUzYS01NzA1YzViMGYwMzEiLCJ2ZXIiOiIyLjAifQ.Z0Yfyw9cNe9Wm3w9CGauskmAu4ziujcL_cXHmkOY5XDbQAAOZidIlDmUC0dNY51uNtwvtFniW0HlfxMDNGb3esBXO7ywwyl-ToVMHb64N8bGvNn1Imxdm8XTDGGp-hOhX1AXjDMI7f9gs1KvJRUJkxGpw0PkrHY6sonO71X2QPMm-6QEnHkML4KD0wsFLoB8uhlVGkjj7BSpd6HECjYrwOHoNDchfSXOBrKrc2WDJgw0I9cfYMvjK82h0nyFtFvCuuXLWOVbPvVuAyGMC8tkC1KdEd-OoPhohDw83k2P3Gb2NTcHVj7f7HrQXCUNiyAbYeSkijGug8mqZTJvgfZUcA");

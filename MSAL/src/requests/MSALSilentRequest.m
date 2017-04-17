@@ -67,7 +67,7 @@
     MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
     {
-        accessToken = [cache findAccessToken:_parameters context:_parameters error:nil];
+        accessToken = [cache findAccessToken:_parameters context:_parameters authorityFound:nil error:nil];
     }
     
     if (accessToken)

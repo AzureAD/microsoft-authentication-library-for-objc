@@ -32,6 +32,7 @@
 #import "MSALTelemetryCacheEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "NSURL+MSALExtensions.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTokenCacheAccessor
 {
@@ -100,14 +101,14 @@
 {
     [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
-                                                                         context:ctx];
+                                                                           context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
 
     BOOL result = [_dataSource addOrUpdateRefreshTokenItem:rtItem context:ctx error:error];
-    
+
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
     [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-    
+
     return result;
 }
 
@@ -130,20 +131,24 @@
 
 - (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
                                       context:(nullable id<MSALRequestContext>)ctx
+                               authorityFound:(NSString * __autoreleasing *)authorityFound
                                         error:(NSError * __autoreleasing *)error
 {
     [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
-
+    
     MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
                                                                              clientId:requestParam.clientId
                                                                                 scope:requestParam.scopes
                                                                        userIdentifier:requestParam.user.userIdentifier
                                                                           environment:requestParam.user.environment];
     
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user clientId:requestParam.clientId context:ctx error:error];
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user
+                                                                               clientId:requestParam.clientId
+                                                                                context:ctx
+                                                                                  error:error];
     if (!allAccessTokens)
     {
         [event setStatus:MSAL_TELEMETRY_VALUE_NOT_FOUND];
@@ -156,25 +161,83 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if ([key matches:[tokenItem tokenCacheKey:nil]])
+        if (requestParam.unvalidatedAuthority && [key matches:[tokenItem tokenCacheKey:nil]])
+        {
+            [matchedTokens addObject:tokenItem];
+        }
+        else if (!requestParam.unvalidatedAuthority && [requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
         {
             [matchedTokens addObject:tokenItem];
         }
     }
     
-    if (matchedTokens.count != 1)
+    [event setIsRT:MSAL_TELEMETRY_VALUE_NO];
+    
+    if (matchedTokens.count == 0)
     {
+        LOG_WARN(ctx, @"No access token found.");
+        LOG_WARN_PII(ctx, @"No access token found.");
+        
         [event setStatus:MSAL_TELEMETRY_VALUE_NOT_FOUND];
         [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
-
+        
+        if (!requestParam.unvalidatedAuthority && authorityFound)
+        {
+            *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
+        }
+        
         return nil;
     }
     
-    [event setIsRT:MSAL_TELEMETRY_VALUE_NO];
+    if (matchedTokens.count > 1)
+    {
+        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
+        
+        [event setStatus:MSAL_TELEMETRY_VALUE_MULTIPLE];
+        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        
+        return nil;
+    }
+    
+    if (matchedTokens[0].isExpired)
+    {
+        LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
+        
+        // if authority is not provided, return authority for later use
+        if (!requestParam.unvalidatedAuthority && authorityFound)
+        {
+            *authorityFound = matchedTokens[0].authority;
+        }
+        
+        [event setStatus:MSAL_TELEMETRY_VALUE_EXPIRED];
+        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        
+        return nil;
+    }
+    
     [event setStatus:MSAL_TELEMETRY_VALUE_TRIED];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
-
+    
     return matchedTokens[0];
+}
+
+- (NSString *)findUniqueAuthorityInAccessTokens:(NSArray<MSALAccessTokenCacheItem *> *)accessTokens
+{
+    NSMutableSet<NSString *> *authorities = [[NSMutableSet<NSString *> alloc] init];
+    for (MSALAccessTokenCacheItem *accessToken in accessTokens)
+    {
+        if (accessToken.authority)
+        {
+            [authorities addObject:accessToken.authority];
+        }
+    }
+    
+    if (authorities.count > 1 || authorities.count == 0)
+    {
+        return nil;
+    }
+    return authorities.allObjects[0];
 }
 
 - (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
@@ -183,9 +246,9 @@
 {
     [[MSALTelemetry sharedInstance] startEvent:[requestParam telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
-                                                                         context:ctx];
+                                                                           context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
-
+    
     MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
                                                                                  clientId:requestParam.clientId
                                                                            userIdentifier:requestParam.user.userIdentifier];
@@ -194,7 +257,7 @@
     [event setIsRT:MSAL_TELEMETRY_VALUE_YES];
     [event setRTStatus:item ? MSAL_TELEMETRY_VALUE_TRIED : MSAL_TELEMETRY_VALUE_NOT_FOUND];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
-
+    
     return item;
 }
 
@@ -210,32 +273,11 @@
     
     [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
-                                                                         context:ctx];
+                                                                           context:ctx];
+    
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
-    BOOL result=  [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
-    
-    [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-    
-    return result;
-}
-
-- (BOOL)deleteRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
-                   context:(nullable id<MSALRequestContext>)ctx
-                     error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [rtItem tokenCacheKey:error];
-    if (!key)
-    {
-        return NO;
-    }
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
-                                                                         context:ctx];
-    [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
-    
-    BOOL result=  [_dataSource removeRefreshTokenItem:rtItem context:ctx error:error];
+    BOOL result = [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
     
     [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
     [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
@@ -308,18 +350,6 @@
     }
     
     return matchedAccessTokens;
-}
-
-- (MSALRefreshTokenCacheItem *)refreshTokenForUser:(MSALUser *)user
-                                          clientId:(NSString *)clientId
-                                           context:(id<MSALRequestContext>)ctx
-                                             error:(NSError * __autoreleasing *)error
-{
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:user.environment
-                                                                                 clientId:clientId
-                                                                           userIdentifier:user.userIdentifier];
-    
-    return [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];;
 }
 
 @end

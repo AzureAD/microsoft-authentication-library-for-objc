@@ -148,7 +148,7 @@
         return NO;
     }
     
-    if ([url.hostWithPort caseInsensitiveCompare:_requestURL.hostWithPort] != NSOrderedSame)
+    if ([[url msalHostWithPort] caseInsensitiveCompare:[_requestURL msalHostWithPort]] != NSOrderedSame)
     {
         return NO;
     }

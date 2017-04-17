@@ -45,7 +45,7 @@ static NSMutableDictionary *s_validatedAuthorities;
 static NSMutableDictionary *s_validatedUsersForAuthority;
 
 #pragma mark - helper functions
-BOOL isTenantless(NSURL *authority)
++ (BOOL)isTenantless:(NSURL *)authority
 {
     NSArray *authorityURLPaths = authority.pathComponents;
     
@@ -58,6 +58,16 @@ BOOL isTenantless(NSURL *authority)
     return NO;
 }
 
++ (NSURL *)cacheUrlForAuthority:(NSURL *)authority
+                       tenantId:(NSString *)tenantId
+{
+    if (![MSALAuthority isTenantless:authority])
+    {
+        return authority;
+    }
+    
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authority msalHostWithPort], tenantId]];
+}
 
 
 #pragma mark - class methods
@@ -96,12 +106,12 @@ BOOL isTenantless(NSURL *authority)
         CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 3), nil, MSALErrorInvalidParameter,
                                @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
         
-        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", authorityUrl.hostWithPort, authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
         return [NSURL URLWithString:updatedAuthorityString];
     }
     
     // ADFS and AAD
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", authorityUrl.hostWithPort, authorityUrl.pathComponents[1]]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[1]]];
 }
 
 
@@ -157,7 +167,7 @@ BOOL isTenantless(NSURL *authority)
         authority.canonicalAuthority = updatedAuthority;
         authority.authorityType = authorityType;
         authority.validateAuthority = validate;
-        authority.isTenantless = isTenantless(updatedAuthority);
+        authority.isTenantless = [self isTenantless:updatedAuthority];
         
         // Only happens for AAD authority
         NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];

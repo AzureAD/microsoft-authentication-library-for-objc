@@ -98,7 +98,9 @@ NSString *const MSAL_TELEMETRY_KEY_USER_CANCEL                  = @"Microsoft.MS
 // Telemetry property value
 NSString *const MSAL_TELEMETRY_VALUE_YES                             = @"yes";
 NSString *const MSAL_TELEMETRY_VALUE_NO                              = @"no";
+NSString *const MSAL_TELEMETRY_VALUE_MULTIPLE                        = @"multiple";
 NSString *const MSAL_TELEMETRY_VALUE_TRIED                           = @"tried";
+NSString *const MSAL_TELEMETRY_VALUE_EXPIRED                         = @"expired";
 NSString *const MSAL_TELEMETRY_VALUE_USER_CANCELLED                  = @"user_cancelled";
 NSString *const MSAL_TELEMETRY_VALUE_NOT_FOUND                       = @"not_found";
 NSString *const MSAL_TELEMETRY_VALUE_ACCESS_TOKEN                    = @"access_token";

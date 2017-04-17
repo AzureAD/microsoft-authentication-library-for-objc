@@ -27,25 +27,14 @@
 
 #import <Foundation/Foundation.h>
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@interface MSALTestIdTokenUtil : NSObject
 
-extern NSString* MSALTestAppCacheChangeNotification;
++ (NSString *)defaultIdToken;
++ (NSString *)defaultName;
++ (NSString *)defaultUsername;
++ (NSString *)defaultTenantId;
 
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<NSString *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
++ (NSString *)idTokenWithName:(NSString *)name
+            preferredUsername:(NSString *)preferredUsername;
 
 @end

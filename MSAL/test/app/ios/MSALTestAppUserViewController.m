@@ -77,6 +77,8 @@
     }
     
     _users = [application users:nil];
+    
+    [super refresh];
 }
 
 - (NSInteger)numberOfRows
@@ -91,6 +93,15 @@
         return @"(nil)";
     }
     return _users[row - 1].displayableId;
+}
+
+- (NSString *)subLabelForRow:(NSInteger)row
+{
+    if (row == 0)
+    {
+        return @"";
+    }
+    return _users[row - 1].environment;
 }
 
 - (void)rowSelected:(NSInteger)row
@@ -120,7 +131,7 @@
     {
         if ([currentUserId isEqualToString:_users[i].userIdentifier])
         {
-            return i;
+            return i + 1;
         }
     }
     

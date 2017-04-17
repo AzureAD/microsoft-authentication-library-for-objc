@@ -25,12 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
+#import "MSALAuthority.h"
+
+static uint64_t s_expirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
 
 @implementation MSALAccessTokenCacheItem
 {
@@ -59,11 +63,12 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     }
     
     //store needed data to _json
-    self.authority = authority.absoluteString;
+    _idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
+    self.authority = [[MSALAuthority cacheUrlForAuthority:authority tenantId:_idToken.tenantId] absoluteString];
     self.rawIdToken = response.idToken;
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
-    self.expiresOnString = [NSString stringWithFormat:@"%d", (uint32_t)[response.expiresOn timeIntervalSince1970]];
+    self.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[response.expiresOn timeIntervalSince1970]];
     self.scopeString = response.scope;
     
     //init data derived from _json
@@ -112,7 +117,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 
 - (BOOL)isExpired
 {
-    return [self.expiresOn timeIntervalSinceNow] > 0;
+    return [self.expiresOn compare:[NSDate dateWithTimeIntervalSinceNow:s_expirationBuffer]] == NSOrderedAscending;
 }
 
 - (MSALAccessTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error

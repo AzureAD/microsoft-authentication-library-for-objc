@@ -111,8 +111,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-    //XCTAssertEqualObjects(application.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
-    XCTAssertEqualObjects(application.redirectUri.absoluteString, @"adaliosxformsapp://com.yourcompany.xformsapp");
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
 }
 
 - (void)testIsMSALResponse
@@ -176,8 +175,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-         //XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"]);
-         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"adaliosxformsapp://com.yourcompany.xformsapp"]);
+         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests"]);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.component);
@@ -228,8 +226,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-         //XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
-         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"adaliosxformsapp://com.yourcompany.xformsapp"]);
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -280,8 +277,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-         //XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
-         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"adaliosxformsapp://com.yourcompany.xformsapp"]);
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -336,8 +332,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
-         //XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal");
-         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:@"adaliosxformsapp://com.yourcompany.xformsapp"]);
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -451,7 +446,7 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR_PARAM(ctx, MSALErrorKeychainFailure, @"Keychain failed when fetching team ID.");
+         MSAL_KEYCHAIN_ERROR_PARAM(ctx, -34018, @"fetching team ID.");
          return NO;
      }];
     
