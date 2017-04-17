@@ -47,7 +47,7 @@ MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
 
 - (NSString *)uniqueUserIdentifier
 {
-    return [NSString stringWithFormat:@"%@.%@", self.uniqueIdentifier, self.uniqueUserIdentifier];
+    return [NSString stringWithFormat:@"%@.%@", self.uniqueIdentifier, self.uniqueTenantIdentifier];
 }
 
 @end

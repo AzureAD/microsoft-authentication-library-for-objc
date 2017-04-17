@@ -250,7 +250,9 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token_expires_in" : @"1200"}];
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             }];
     [MSALTestURLSession addResponse:response];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
