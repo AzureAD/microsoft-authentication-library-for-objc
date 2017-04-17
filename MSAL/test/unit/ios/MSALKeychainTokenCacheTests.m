@@ -71,7 +71,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     [_dataSource testRemoveAll];
     
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    _testEnvironment = _testAuthority.hostWithPort;
+    _testEnvironment = _testAuthority.msalHostWithPort;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
     NSString *idToken1 = MakeIdToken(@"User 1", @"user1@contoso.com");
@@ -249,7 +249,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
 - (void)testSaveAndRetrieveRefreshToken
 {
     //prepare token response and save AT/RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.hostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     NSError *error = nil;
@@ -314,7 +314,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_dataSource allRefreshTokens:_testClientId context:nil error:&error].count, 0);
     XCTAssertNil(error);
     
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.hostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:&error]);

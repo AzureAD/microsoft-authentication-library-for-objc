@@ -163,8 +163,7 @@ static MSALScopes *s_reservedScopes = nil;
     [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
      {
          MSALTelemetryAPIEvent* event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
-                                                                          requestId:_parameters.telemetryRequestId
-                                                                      correlationId:_parameters.correlationId];
+                                                                          context:_parameters];
          [event setApiId:_apiId];
          [event setCorrelationId:_parameters.correlationId];
          [event setAuthority:_authority.authorityType];

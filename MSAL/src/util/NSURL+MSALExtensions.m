@@ -25,7 +25,7 @@
 
 @implementation NSURL (MSAL)
 
-- (NSString *)hostWithPort
+- (NSString *)msalHostWithPort
 {
     if (!self.host)
     {

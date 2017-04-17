@@ -122,7 +122,7 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.hostWithPort, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
     NSDictionary *msalId = [MSALLogger msalId];
@@ -207,7 +207,7 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.hostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
          NSDictionary *msalId = [MSALLogger msalId];

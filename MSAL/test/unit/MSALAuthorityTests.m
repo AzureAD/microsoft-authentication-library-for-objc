@@ -48,7 +48,7 @@
     [super tearDown];
 }
 
-- (void)testCheckAuthorityString
+- (void)testCheckAuthorityString_whenCommon_shouldPass
 {
     NSError *error = nil;
     NSURL *url = nil;
@@ -57,43 +57,100 @@
     XCTAssertNotNil(url);
     XCTAssertNil(error);
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
+}
+
+- (void)testCheckAuthorityString_whenNil_shouldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:nil error:&error];
     
-    url = [MSALAuthority checkAuthorityString:nil error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"nil"]);
+}
+
+- (void)testCheckAuthorityString_whenHttp_shouldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:@"http://login.microsoftonline.com/common" error:&error];
     
-    url = [MSALAuthority checkAuthorityString:@"http://login.microsoftonline.com/common" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"HTTPS"]);
     error = nil;
+}
+
+- (void)testCheckAuthorityString_whenNoTenant_shouldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:@"https://login.microsoftonline.com" error:&error];
     
-    url = [MSALAuthority checkAuthorityString:@"https://login.microsoftonline.com" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant or common"]);
+}
+
+- (void)testCheckAuthorityString_whenB2CNoPolicy_shouldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:@"https://somehost.com/tfp/" error:&error];
     
-    url = [MSALAuthority checkAuthorityString:@"https://somehost.com/tfp/" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant"]);
+}
+
+- (void)testCheckAuthorityString_whenNotValidUri_shouldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:@"https login.microsoftonline.com common" error:&error];
     
-    
-    url = [MSALAuthority checkAuthorityString:@"https login.microsoftonline.com common" error:&error];
     XCTAssertNil(url);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be a valid URI"]);
+}
+
+
+- (void)testCacheURLAuthority_whenCommon
+{
+    NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] tenantId:@"tenant"];
+    
+    XCTAssertNotNil(url);
+    XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tenant"]);
+}
+
+- (void)testCacheURLAuthority_whenCommonWithPort
+{
+    NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com:8080/common"] tenantId:@"tenant"];
+    
+    XCTAssertNotNil(url);
+    XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com:8080/tenant"]);
+}
+
+- (void)testCacheURLAuthority_whenTenantSpecified
+{
+    NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/tenant2"] tenantId:@"tenant1"];
+    
+    XCTAssertNotNil(url);
+    XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tenant2"]);
+}
+
+- (void)testCacheURLAuthority_whenTenantSpecifiedWithPort
+{
+    NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com:8080/tenant2"] tenantId:@"tenant1"];
+    
+    XCTAssertNotNil(url);
+    XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com:8080/tenant2"]);
 }
 
 
