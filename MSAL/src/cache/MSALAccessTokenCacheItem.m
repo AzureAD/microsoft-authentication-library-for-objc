@@ -32,6 +32,7 @@
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
+#import "NSURL+MSALExtensions.h"
 #import "MSALAuthority.h"
 
 static uint64_t s_expirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
@@ -111,7 +112,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     _idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
     _user = [[MSALUser alloc] initWithIdToken:_idToken
                                    clientInfo:self.clientInfo
-                                  environment:self.authority ? [NSURL URLWithString:self.authority].host : nil];
+                                  environment:self.authority ? [NSURL URLWithString:self.authority].msalHostWithPort : nil];
     _tenantId = _idToken.tenantId;
 }
 
@@ -154,7 +155,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     {
         return nil;
     }
-    return [NSURL URLWithString:self.authority].host;
+    return [NSURL URLWithString:self.authority].msalHostWithPort;
 }
 
 - (id)copyWithZone:(NSZone*) zone

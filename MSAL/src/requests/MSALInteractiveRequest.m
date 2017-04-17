@@ -122,6 +122,20 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
+    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
+        if (error)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        
+        _authority = authority;
+        [self acquireTokenImpl:completionBlock];
+    }];
+}
+
+- (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
+{
     NSURL *authorizationUrl = [self authorizationUrl];
     
     LOG_INFO(_parameters, @"Launching Web UI");
@@ -169,6 +183,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          
          ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
      }];
+
+    
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

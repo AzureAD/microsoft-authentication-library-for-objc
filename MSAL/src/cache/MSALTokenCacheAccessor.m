@@ -86,7 +86,7 @@
     
     if (response.refreshToken)
     {
-        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
+        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.msalHostWithPort
                                                                                                 clientId:requestParam.clientId
                                                                                                 response:response];
         [self saveRefreshToken:refreshToken context:ctx error:error];
@@ -204,10 +204,14 @@
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         
-        // if authority is not provided, return authority for later use
-        if (!requestParam.unvalidatedAuthority && authorityFound)
+        MSALAccessTokenCacheItem *token = matchedTokens[0];
+        NSLog(@"%@", token.authority);
+        
+        if (authorityFound)
         {
-            *authorityFound = matchedTokens[0].authority;
+            // if authority is not provided, set authorityFound with the token's authority
+            // if not, set authorityFound with the passed in authority
+            *authorityFound = requestParam.unvalidatedAuthority ? requestParam.unvalidatedAuthority.absoluteString : matchedTokens[0].authority;
         }
         
         [event setStatus:MSAL_TELEMETRY_VALUE_EXPIRED];
@@ -249,7 +253,7 @@
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
     
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.host
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.msalHostWithPort
                                                                                  clientId:requestParam.clientId
                                                                            userIdentifier:requestParam.user.userIdentifier];
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
