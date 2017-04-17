@@ -28,5 +28,6 @@
 
 - (void)setLoginHint:(NSString *)hint;
 - (void)setNtlm:(NSString *)ntlmHandled;
+- (void)setIsCancelled:(BOOL)cancelled;
 
 @end

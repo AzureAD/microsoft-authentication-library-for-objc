@@ -37,4 +37,9 @@
     [self setProperty:MSAL_TELEMETRY_KEY_NTLM_HANDLED value:ntlmHandled];
 }
 
+- (void)setIsCancelled:(BOOL)cancelled
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_UI_CANCELLED value:cancelled ? MSAL_TELEMETRY_VALUE_YES : MSAL_TELEMETRY_VALUE_NO];
+}
+
 @end
