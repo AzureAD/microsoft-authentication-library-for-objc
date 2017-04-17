@@ -26,6 +26,6 @@
 @interface NSURL (MSAL)
 
 // Returns a string that contains host and the port, if specified
-- (NSString *)hostWithPort;
+- (NSString *)msalHostWithPort;
 
 @end
