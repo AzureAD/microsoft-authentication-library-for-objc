@@ -119,6 +119,11 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)run:(nonnull MSALCompletionBlock)completionBlock
 {
+    [self acquireToken:completionBlock];
+}
+
+- (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
+{
     NSString *upn = nil;
     if (_parameters.user)
     {
@@ -133,17 +138,7 @@ static MSALScopes *s_reservedScopes = nil;
                               userPrincipalName:upn
                                        validate:_parameters.validateAuthority
                                         context:_parameters
-                                completionBlock:^(MSALAuthority *authority, NSError *error)
-     {
-        if (error)
-        {
-            completionBlock(nil, error);
-            return;
-        }
-        
-        _authority = authority;
-         [self acquireToken:completionBlock];
-    }];
+                                completionBlock:completionBlock];
 }
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
@@ -169,8 +164,7 @@ static MSALScopes *s_reservedScopes = nil;
     [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
      {
          MSALTelemetryAPIEvent* event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
-                                                                          requestId:_parameters.telemetryRequestId
-                                                                      correlationId:_parameters.correlationId];
+                                                                          context:_parameters];
          [event setApiId:_apiId];
          [event setCorrelationId:_parameters.correlationId];
          [event setAuthority:_authority.authorityType];

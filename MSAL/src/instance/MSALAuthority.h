@@ -84,6 +84,18 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 + (BOOL)isKnownHost:(NSURL *)url;
 
+/*!
+    Returns YES if the URL includes a specific tenant NO if it does not.
+ */
++ (BOOL)isTenantless:(NSURL *)authority;
+
+/*!
+    Returns the URL to use in the cache key for a given authority input string
+    and tenant ID returned with the token response.
+ */
++ (NSURL *)cacheUrlForAuthority:(NSURL *)authority
+                       tenantId:(NSString *)tenantId;
+
 + (NSSet<NSString *> *)trustedHosts;
 
 + (BOOL)addToValidatedAuthority:(MSALAuthority *)authority

@@ -33,6 +33,53 @@
 #import "MSALTelemetryHttpEvent.h"
 #import "MSALTelemetryEventStrings.h"
 
+@interface MSALTestRequestContext : NSObject<MSALRequestContext>
+{
+    NSString *_requestId;
+    NSUUID *_correlationId;
+}
+
+- (instancetype)initWithTelemetryRequestId:(NSString *)requestId correlationId:(NSUUID *)correlationId;
+
+@end
+
+@implementation MSALTestRequestContext
+
+- (instancetype)initWithTelemetryRequestId:(NSString *)requestId correlationId:(NSUUID *)correlationId
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    _requestId = requestId;
+    _correlationId = correlationId;
+    
+    return self;
+}
+
+- (NSUUID *)correlationId
+{
+    return _correlationId;
+}
+
+- (NSString *)telemetryRequestId
+{
+    return _requestId;
+}
+
+- (NSString *)component
+{
+    return nil;
+}
+
+- (NSURLSession *)urlSession
+{
+    return nil;
+}
+
+@end
+
 @interface MSALTelemetryDispatcherTests : MSALTestCase
 
 @end
@@ -91,7 +138,6 @@
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    NSUUID* correlationId = [NSUUID UUID];
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
@@ -101,12 +147,13 @@
      }];
     
     NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSUUID* correlationId = [NSUUID UUID];
+    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+                                                                               correlationId:correlationId];
     
     // API event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
-    MSALTelemetryAPIEvent *apiEvent = [[MSALTelemetryAPIEvent alloc] initWithName:@"apiEvent"
-                                                                      requestId:requestId
-                                                                  correlationId:correlationId];
+    MSALTelemetryAPIEvent *apiEvent = [[MSALTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:ctx];
     [apiEvent setProperty:@"api_property" value:@"api_value"];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:apiEvent];
     
@@ -114,9 +161,7 @@
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
     
     [[MSALTelemetry sharedInstance] stopEvent:requestId
-                                        event:[[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent"
-                                                                                 requestId:requestId
-                                                                             correlationId:correlationId]];
+                                        event:[[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx]];
     
     [[MSALTelemetry sharedInstance] flush:requestId];
     
@@ -155,7 +200,6 @@
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    NSUUID* correlationId = [NSUUID UUID];
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:YES];
     
@@ -165,12 +209,13 @@
      }];
     
     NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSUUID* correlationId = [NSUUID UUID];
+    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+                                                                               correlationId:correlationId];
     
     // HTTP event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
-    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent"
-                                                                           requestId:requestId
-                                                                       correlationId:correlationId];
+    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
     [httpEvent setHttpErrorCode:@"error_code_123"];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
     
@@ -187,7 +232,6 @@
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    NSUUID* correlationId = [NSUUID UUID];
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:YES];
     
@@ -197,12 +241,13 @@
      }];
     
     NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSUUID* correlationId = [NSUUID UUID];
+    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+                                                                               correlationId:correlationId];
     
     // HTTP event
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
-    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent"
-                                                                      requestId:requestId
-                                                                  correlationId:correlationId];
+    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
     
     [[MSALTelemetry sharedInstance] flush:requestId];

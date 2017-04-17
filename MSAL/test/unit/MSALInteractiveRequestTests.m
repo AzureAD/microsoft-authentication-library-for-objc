@@ -39,7 +39,7 @@
 #import "MSALTestURLSession.h"
 #import "MSALUser.h"
 #import "MSALWebUI.h"
-
+#import "NSURL+MSALExtensions.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -122,7 +122,7 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.host, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
     NSDictionary *msalId = [MSALLogger msalId];
@@ -207,7 +207,7 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.host, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
          NSDictionary *msalId = [MSALLogger msalId];

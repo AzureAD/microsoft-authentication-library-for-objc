@@ -28,6 +28,9 @@
 #import "MSAL.h"
 #import "MSALBaseRequest.h"
 @interface MSALSilentRequest : MSALBaseRequest
+{
+    BOOL _forceRefresh;
+}
 
 @property NSString *state;
 
