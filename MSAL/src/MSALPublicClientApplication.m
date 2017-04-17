@@ -111,9 +111,10 @@
 - (MSALUser *)userForIdentifier:(NSString *)identifier
                           error:(NSError * __autoreleasing *)error
 {
-    (void)identifier;
-    (void)error;
-    return nil;
+    return [_tokenCache getUserForIdentifier:identifier
+                                    clientId:self.clientId
+                                 environment:[self.authority host]
+                                       error:error];
 }
 
 #pragma SafariViewController Support
