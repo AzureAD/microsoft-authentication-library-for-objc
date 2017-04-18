@@ -89,6 +89,10 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     return s_trustedHostList;
 }
 
++ (NSURL *)defaultAuthority
+{
+    return [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+}
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error

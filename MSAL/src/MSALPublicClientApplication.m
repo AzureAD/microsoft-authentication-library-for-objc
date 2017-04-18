@@ -40,8 +40,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 
-#define DEFAULT_AUTHORITY @"https://login.microsoftonline.com/common"
-
 @implementation MSALPublicClientApplication
 {
     MSALTokenCacheAccessor *_tokenCache;
@@ -87,8 +85,16 @@
     REQUIRED_PARAMETER(clientId, nil);
     _clientId = clientId;
     
-    _authority = [MSALAuthority checkAuthorityString:authority ? authority : DEFAULT_AUTHORITY error:error];
-    CHECK_RETURN_NIL(_authority);
+    if (authority)
+    {
+        _authority = [MSALAuthority checkAuthorityString:authority error:error];
+        CHECK_RETURN_NIL(_authority);
+    }
+    else
+    {
+        // TODO: Rationalize our default authority behavior (#93)
+        _authority = [MSALAuthority defaultAuthority];
+    }
     
     CHECK_RETURN_NIL([self generateRedirectUri:error]);
     
@@ -263,7 +269,7 @@
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSURL *)authority
+                    authority:(NSString *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -296,7 +302,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
-                          authority:(NSURL *)authority
+                          authority:(NSString *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
@@ -310,7 +316,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
-                          authority:(NSURL *)authority
+                          authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
@@ -363,26 +369,22 @@
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
-    if (authority)
+    NSError *error = nil;
+    if (!authority)
     {
-        NSError *error = nil;
-        NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:&error];
-        if (!authorityUrl)
-        {
-            completionBlock(nil, error);
-            return;
-        }
-        params.unvalidatedAuthority = authorityUrl;
+        // TODO: Rationalize default authority behavior (#93)
+        params.unvalidatedAuthority = [MSALAuthority defaultAuthority];
     }
-    else
+    else if (![params setAuthorityFromString:authority error:&error])
     {
-        params.unvalidatedAuthority = _authority;
+        completionBlock(nil, error);
+        return;
     }
+    
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
     
-    NSError *error = nil;
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       additionalScopes:additionalScopes
@@ -399,7 +401,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
-                          authority:(NSURL *)authority
+                          authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
@@ -426,12 +428,15 @@
                  "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
-    params.unvalidatedAuthority = authority;
+    NSError *error = nil;
+    if (![params setAuthorityFromString:authority error:&error])
+    {
+        completionBlock(nil, error);
+        return;
+    }
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
-
-    NSError *error = nil;
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
