@@ -247,6 +247,24 @@
 #pragma mark -
 #pragma mark User
 
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                         user:(MSALUser *)user
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                           user:user
+                      loginHint:nil
+                     uiBehavior:MSALUIBehaviorDefault
+           extraQueryParameters:nil
+                      authority:nil
+                  correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
+                completionBlock:completionBlock];
+    
+}
+
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
@@ -259,7 +277,7 @@
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                      authority:MSALUIBehaviorDefault
+                      authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
                 completionBlock:completionBlock];
