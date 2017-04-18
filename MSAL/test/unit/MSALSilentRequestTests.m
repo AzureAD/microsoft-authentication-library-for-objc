@@ -131,7 +131,6 @@
      }];
 }
 
-
 - (void)testAtsATFound
 {
     NSError *error = nil;
@@ -204,7 +203,7 @@
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
@@ -231,8 +230,8 @@
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
-                                                                                      @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97",
-                                                                                      @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"
+                                                                                      @"uid" : @"1",
+                                                                                      @"utid" : @"1234-5678-90abcdefg"
                                                                                       }
                                                                               error:nil];
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
@@ -258,7 +257,8 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token_expires_in" : @"1200"}];
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
     [MSALTestURLSession addResponse:response];
     
     MSALSilentRequest *request =
@@ -299,7 +299,7 @@
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
@@ -326,8 +326,8 @@
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
-                                                                                      @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97",
-                                                                                      @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"
+                                                                                      @"uid" : @"1",
+                                                                                      @"utid" : @"1234-5678-90abcdefg"
                                                                                       }
                                                                               error:nil];
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
@@ -353,7 +353,8 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token_expires_in" : @"1200"}];
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
     [MSALTestURLSession addResponse:response];
     
     parameters.unvalidatedAuthority = nil;
@@ -396,7 +397,7 @@
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
@@ -439,6 +440,135 @@
 }
 
 - (void)testAtsAuthorityForceUpdate
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+    
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
+    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
+    
+    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
+                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+    
+    //store a refresh token in cache
+    MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
+                                                                                      @"environment" : @"login.microsoftonline.com",
+                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"id_token": rawIdToken,
+                                                                                      @"refresh_token": @"fakeRefreshToken",
+                                                                                      @"client_info": rawClientInfo,
+                                                                                      @"uid" : @"1",
+                                                                                      @"utid" : @"1234-5678-90abcdefg"
+                                                                                      }
+                                                                              error:nil];
+    [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
+    
+    
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
+    
+    MSALTestURLResponse *response =
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+                           requestHeaders:reqHeaders
+                        requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
+                                             @"grant_type" : @"refresh_token",
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
+                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
+                                             @"expires_in" : @"600",
+                                             @"refresh_token" : @"i am a refresh token",
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             }];
+    [MSALTestURLSession addResponse:response];
+    
+    MSALSilentRequest *request =
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];
+    
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [request run:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNotNil(result);
+         XCTAssertNil(error);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testAtsAuthorityForceUpdateRTNotFound
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+    
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
+    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
+    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
+    
+    MSALSilentRequest *request =
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];
+    
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [request run:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testAtsAuthorityForceUpdateUserNotMatch
 {
     NSError *error = nil;
     NSUUID *correlationId = [NSUUID new];
@@ -498,7 +628,7 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
                                              }];
     [MSALTestURLSession addResponse:response];
     
@@ -512,51 +642,10 @@
     
     [request run:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNotNil(result);
-         XCTAssertNil(error);
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
-}
-
-- (void)testAtsAuthorityForceUpdateRTNotFound
-{
-    NSError *error = nil;
-    NSUUID *correlationId = [NSUUID new];
-    
-    MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
-    parameters.loginHint = @"fakeuser@contoso.com";
-    parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
-    
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msalHostWithPort];
-    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
-    
-    MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];
-    
-    XCTAssertNotNil(request);
-    XCTAssertNil(error);
-    
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
-    
-    [request run:^(MSALResult *result, NSError *error)
-     {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
+         
+         XCTAssertEqual(error.code, MSALErrorMismatchedUser);
          
          [expectation fulfill];
      }];

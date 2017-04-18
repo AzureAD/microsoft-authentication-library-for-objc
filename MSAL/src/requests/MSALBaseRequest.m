@@ -224,11 +224,13 @@ static MSALScopes *s_reservedScopes = nil;
                                                                                error:&error];
          if (!clientInfo)
          {
+             LOG_ERROR(_parameters, @"Client info was not returned in the server response");
+             LOG_ERROR_PII(_parameters, @"Client info was not returned in the server response");
              completionBlock(nil, error);
              return;
          }
          if (_parameters.user != nil &&
-             [_parameters.user.userIdentifier isEqualToString:clientInfo.uniqueUserIdentifier])
+             ![_parameters.user.userIdentifier isEqualToString:clientInfo.uniqueUserIdentifier])
          {
              NSError *userMismatchError = CREATE_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);
