@@ -31,6 +31,7 @@
 #import "MSALTestAppAuthorityViewController.h"
 #import "MSALTestAppUserViewController.h"
 #import "MSALTestAppScopesViewController.h"
+#import "MSALTestAppTelemetryViewController.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -70,7 +71,14 @@
     
     [self setEdgesForExtendedLayout:UIRectEdgeTop];
     
+    [[MSALTestAppTelemetryViewController sharedController] startTracking];
+    
     return self;
+}
+
+- (void)dealloc
+{
+    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
 }
 
 - (UIView*)createTwoItemLayoutView:(UIView*)item1
@@ -148,6 +156,12 @@
     [clearCache addTarget:self action:@selector(clearCache:) forControlEvents:UIControlEventTouchUpInside];
 
     [layout addCenteredView:clearCache key:@"clearCache"];
+    
+    UIButton* telemetryButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [telemetryButton setTitle:@"Show telemetry" forState:UIControlStateNormal];
+    [telemetryButton addTarget:self action:@selector(showTelemetry:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [layout addCenteredView:telemetryButton key:@"telemetry"];
     
     _resultView = [[UITextView alloc] init];
     _resultView.layer.borderWidth = 1.0f;
@@ -509,6 +523,12 @@
     {
         _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %d", (int)status];
     }
+}
+
+- (IBAction)showTelemetry:(id)sender
+{
+    (void)sender;
+    [self.navigationController pushViewController:[MSALTestAppTelemetryViewController sharedController] animated:YES];
 }
 
 - (IBAction)selectAuthority:(id)sender
