@@ -118,18 +118,18 @@
     NSArray *eventPropertyNames = [eventProperties allKeys];
     
     XCTAssertEqual([eventPropertyNames count], 10);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.application_name"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.application_version"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_id"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.device_ip_address"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.event_name"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_cpu"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_dm"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_os"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_sku"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"Microsoft.MSAL.x_client_ver"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.application_name"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.application_version"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.device_id"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.device_ip_address"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.event_name"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_cpu"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_dm"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_os"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_sku"]);
+    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_ver"]);
     
-    XCTAssertTrue([[eventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"Microsoft.MSAL.default_event"
+    XCTAssertTrue([[eventProperties objectForKey:@"msal.event_name"] compare:@"msal.default_event"
                                                                                options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
@@ -171,13 +171,13 @@
     // API event
     NSDictionary *apiEventProperties = [receivedEvents objectAtIndex:0];
     NSArray *apiEventPropertyNames = [apiEventProperties allKeys];
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.start_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.stop_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.correlation_id"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.response_time"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"Microsoft.MSAL.request_id"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.start_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.stop_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.correlation_id"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.request_id"]);
     
-    XCTAssertTrue([[apiEventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"apiEvent"
+    XCTAssertTrue([[apiEventProperties objectForKey:@"msal.event_name"] compare:@"apiEvent"
                                                                                   options:NSCaseInsensitiveSearch] == NSOrderedSame);
     XCTAssertTrue([[apiEventProperties objectForKey:@"api_property"] compare:@"api_value"
                                                                      options:NSCaseInsensitiveSearch] == NSOrderedSame);
@@ -185,13 +185,13 @@
     // HTTP event
     NSDictionary *httpEventProperties = [receivedEvents objectAtIndex:1];
     NSArray *httpEventPropertyNames = [httpEventProperties allKeys];
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.start_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.stop_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.correlation_id"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.response_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"Microsoft.MSAL.request_id"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.start_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.stop_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.correlation_id"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.request_id"]);
     
-    XCTAssertTrue([[httpEventProperties objectForKey:@"Microsoft.MSAL.event_name"] compare:@"httpEvent"
+    XCTAssertTrue([[httpEventProperties objectForKey:@"msal.event_name"] compare:@"httpEvent"
                                                                                    options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
