@@ -120,7 +120,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be a valid URI"]);
 }
 
-- (void)testCheckAuthorityString_whenLoginWindowsNet_houldFail
+- (void)testCheckAuthorityString_whenLoginWindowsNet_shouldFail
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"https://login.windows.net/common" error:&error];
