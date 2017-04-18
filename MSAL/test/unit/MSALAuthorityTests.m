@@ -120,6 +120,25 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be a valid URI"]);
 }
 
+- (void)testCheckAuthorityString_whenLoginWindowsNet_houldFail
+{
+    NSError *error = nil;
+    NSURL *url = [MSALAuthority checkAuthorityString:@"https://login.windows.net/common" error:&error];
+    
+    XCTAssertNil(url);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"deprecated"]);
+
+    url = [MSALAuthority checkAuthorityString:@"https://login.windows.net:44/common" error:&error];
+    
+    XCTAssertNil(url);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"deprecated"]);
+}
 
 - (void)testCacheURLAuthority_whenCommon
 {
