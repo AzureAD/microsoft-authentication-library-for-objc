@@ -28,6 +28,7 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
+#import "MSALAuthority.h"
 
 @implementation MSALRequestParameters
 
@@ -39,6 +40,25 @@
         [scopesLowercase addObject:scope.lowercaseString];
     }
     self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
+}
+
+- (BOOL)setAuthorityFromString:(NSString *)authority
+                         error:(NSError * __autoreleasing *)error
+{
+    if (!authority)
+    {
+        return YES;
+    }
+    
+    NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:error];
+    if (!authorityUrl)
+    {
+        return NO;
+    }
+    
+    self.unvalidatedAuthority = authorityUrl;
+    
+    return YES;
 }
 
 @end

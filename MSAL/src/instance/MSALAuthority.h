@@ -89,6 +89,8 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
  */
 + (BOOL)isTenantless:(NSURL *)authority;
 
++ (NSURL *)defaultAuthority;
+
 /*!
     Returns the URL to use in the cache key for a given authority input string
     and tenant ID returned with the token response.
