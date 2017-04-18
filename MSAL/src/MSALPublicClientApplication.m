@@ -305,7 +305,7 @@
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                      authority:authority
+                      authority:authority.absoluteString
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
