@@ -92,6 +92,10 @@
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                          user:(MSALUser *)user
+              completionBlock:(MSALCompletionBlock)completionBlock;
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                         user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock;

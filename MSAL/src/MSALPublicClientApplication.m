@@ -183,6 +183,7 @@
 {
     [self acquireTokenForScopes:scopes
                additionalScopes:nil
+                           user:nil
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
@@ -201,6 +202,7 @@
 {
     [self acquireTokenForScopes:scopes
                additionalScopes:nil
+                           user:nil
                       loginHint:loginHint
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
@@ -218,6 +220,7 @@
 {
     [self acquireTokenForScopes:scopes
                additionalScopes:nil
+                           user:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -238,6 +241,7 @@
 {
     [self acquireTokenForScopes:scopes
                additionalScopes:additionalScopes
+                           user:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -250,18 +254,40 @@
 #pragma mark -
 #pragma mark User
 
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                         user:(MSALUser *)user
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                           user:user
+                      loginHint:nil
+                     uiBehavior:MSALUIBehaviorDefault
+           extraQueryParameters:nil
+                      authority:nil
+                  correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
+                completionBlock:completionBlock];
+    
+}
+
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)user;
-    (void)uiBehavior;
-    (void)extraQueryParameters;
-    (void)completionBlock;
+    [self acquireTokenForScopes:scopes
+               additionalScopes:nil
+                           user:user
+                      loginHint:nil
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                      authority:nil
+                  correlationId:nil
+                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
+                completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -273,15 +299,17 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    // TODO
-    (void)scopes;
-    (void)additionalScopes;
-    (void)user;
-    (void)uiBehavior;
-    (void)extraQueryParameters;
-    (void)authority;
-    (void)correlationId;
-    (void)completionBlock;
+    [self acquireTokenForScopes:scopes
+               additionalScopes:additionalScopes
+                           user:user
+                      loginHint:nil
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                      authority:authority
+                  correlationId:correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
+                completionBlock:completionBlock];
+    
 }
 
 #pragma mark -
@@ -335,6 +363,7 @@
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
              additionalScopes:(NSArray<NSString *> *)additionalScopes
+                         user:(MSALUser *)user
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
@@ -348,23 +377,26 @@
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     params.apiId = apiId;
+    params.user = user;
     
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
              "                                   additionalScopes:%@\n"
+             "                                               user:%@\n"
              "                                          loginHint:%@\n"
              "                                         uiBehavior:%@\n"
              "                               extraQueryParameters:%@\n"
              "                                          authority:%@\n"
              "                                      correlationId:%@]",
-             scopes, additionalScopes, _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
+             scopes, additionalScopes, _PII(user.userIdentifier), _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
     LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                  "                                   additionalScopes:%@\n"
+                 "                                               user:%@\n"
                  "                                          loginHint:%@\n"
                  "                                         uiBehavior:%@\n"
                  "                               extraQueryParameters:%@\n"
                  "                                          authority:%@\n"
                  "                                      correlationId:%@]",
-                 scopes, additionalScopes, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+                 scopes, additionalScopes, user.userIdentifier, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
     
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;

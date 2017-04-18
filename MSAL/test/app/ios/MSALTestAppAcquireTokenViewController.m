@@ -387,7 +387,7 @@
     //BOOL validateAuthority = _validateAuthority.selectedSegmentIndex == 0;
     
     NSError *error = nil;
-    MSALPublicClientApplication *application =
+    MSALPublicClientApplication *application = 
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     if (!application)
     {
@@ -399,6 +399,9 @@
     __block BOOL fBlockHit = NO;
     
     [application acquireTokenForScopes:[settings.scopes allObjects]
+                                  user:settings.currentUser
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:nil
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          if (fBlockHit)

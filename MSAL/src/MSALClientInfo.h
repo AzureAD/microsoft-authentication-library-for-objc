@@ -32,6 +32,8 @@
 @property (readonly) NSString *uniqueIdentifier;
 @property (readonly) NSString *uniqueTenantIdentifier;
 
+@property (readonly) NSString *uniqueUserIdentifier;
+
 - (id)initWithRawClientInfo:(NSString *)rawClientInfo
                       error:(NSError *__autoreleasing *)error;
 

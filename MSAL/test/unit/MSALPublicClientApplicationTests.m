@@ -146,6 +146,9 @@
     XCTAssertTrue([MSALPublicClientApplication isMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
 }
 
+#pragma 
+#pragma mark - acquireToken
+
 - (void)testAcquireTokenScopes
 {
     NSError *error = nil;
@@ -191,6 +194,9 @@
          XCTAssertNil(error);
      }];
 }
+
+#pragma
+#pragma mark - acquireToken using Login Hint
 
 - (void)testAcquireScopesLoginHint
 {
@@ -353,6 +359,198 @@
          XCTAssertNil(error);
      }];
 }
+
+#pragma
+#pragma mark - acquireToken using User
+
+- (void)testAcquireScopesUser
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests", @"adaliosxformsapp"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+                                                        name:@"user@contoso.com"
+                                            identityProvider:@"identifyProvider"
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
+                                                 environment:@"https://login.microsoftonline.com"];
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         XCTAssertNil(obj.additionalScopes);
+         XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters);
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
+         XCTAssertNotNil(params.correlationId);
+         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertNil(params.loginHint);
+         XCTAssertEqualObjects(params.user, user);
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                                  user:user
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+}
+
+
+- (void)testAcquireScopesUserUiBehaviorEQP
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests", @"adaliosxformsapp"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+                                                        name:@"user@contoso.com"
+                                            identityProvider:@"identifyProvider"
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
+                                                 environment:@"https://login.microsoftonline.com"];
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         XCTAssertNil(obj.additionalScopes);
+         XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters);
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
+         XCTAssertNotNil(params.correlationId);
+         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertNil(params.loginHint);
+         XCTAssertEqualObjects(params.user, user);
+         
+         completionBlock(nil, nil);
+     }];
+    
+     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                                  user:user
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
+                       completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNil(error);
+    }];
+}
+
+- (void)testAcquireScopesAddlScopesUserUiBehaviorEQPAuthorityCorrelationId
+{
+    NSError *error = nil;
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests", @"adaliosxformsapp"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block NSUUID *correlationId = [NSUUID new];
+    
+    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+                                                        name:@"user@contoso.com"
+                                            identityProvider:@"identifyProvider"
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
+                                                 environment:@"https://login.microsoftonline.com"];
+    
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
+         
+         XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
+         XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
+         
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId);
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
+         XCTAssertEqualObjects(params.redirectUri.absoluteString, @"x-msauth-com-microsoft-unittests://com.microsoft.unittests");
+         XCTAssertEqualObjects(params.correlationId, correlationId);
+         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertNil(params.loginHint);
+         XCTAssertEqualObjects(params.user, user);
+         
+         completionBlock(nil, nil);
+     }];
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                      additionalScopes:@[@"fakescope3"]
+                                  user:user
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
+                             authority:@"https://login.microsoftonline.com/contoso.com"
+                         correlationId:correlationId
+                       completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(result);
+        XCTAssertNil(error);
+    }];
+   
+}
+
+#pragma
+#pragma mark - acquireTokenSilent
 
 - (void)testAcquireSilentScopesUser
 {
@@ -550,11 +748,10 @@
          XCTAssertNil(error);
      }];
     
-
-    
 }
 
-
+#pragma
+#pragma mark - remove user
 
 - (void)testRemoveUser
 {

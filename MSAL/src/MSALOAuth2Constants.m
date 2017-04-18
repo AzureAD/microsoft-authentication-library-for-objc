@@ -66,4 +66,6 @@ NSString *const OAUTH2_CODE_VERIFIER                = @"code_verifier";
 NSString *const OAUTH2_CLIENT_INFO                  = @"client_info";
 NSString *const OAUTH2_UNIQUE_IDENTIFIER            = @"uid";
 NSString *const OAUTH2_UNIQUE_TENANT_IDENTIFIER     = @"utid";
+NSString *const OAUTH2_DOMAIN_REQ                   = @"domain_req";
+NSString *const OAUTH2_LOGIN_REQ                    = @"login_req";
 

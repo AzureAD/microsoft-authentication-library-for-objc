@@ -112,6 +112,14 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[@"slice"] = @"testslice";
     parameters[@"uid"] = @"true";
     
+    MSALUser *user = _parameters.user;
+    if (user)
+    {
+        parameters[OAUTH2_LOGIN_HINT] = user.displayableId;
+        parameters[OAUTH2_LOGIN_REQ] = user.uid;
+        parameters[OAUTH2_DOMAIN_REQ] = user.utid;
+    }
+    
     _state = [[NSUUID UUID] UUIDString];
     parameters[OAUTH2_STATE] = _state;
     
