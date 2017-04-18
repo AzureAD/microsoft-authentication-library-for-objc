@@ -539,7 +539,7 @@
                                   user:user
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                             authority:[NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]
+                             authority:@"https://login.microsoftonline.com/contoso.com"
                          correlationId:correlationId
                        completionBlock:^(MSALResult *result, NSError *error)
     {
