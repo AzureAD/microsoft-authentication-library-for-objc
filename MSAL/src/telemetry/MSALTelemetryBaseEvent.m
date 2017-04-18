@@ -112,7 +112,7 @@
 - (void)setResponseTime:(NSTimeInterval)responseTime
 {
     //the property is set in milliseconds
-    [_propertyMap setValue:[NSString stringWithFormat:@"%f", responseTime * 1000] forKey:MSAL_TELEMETRY_KEY_RESPONSE_TIME];
+    [_propertyMap setValue:[NSString stringWithFormat:@"%f", responseTime * 1000] forKey:MSAL_TELEMETRY_KEY_ELAPSED_TIME];
 }
 
 @end

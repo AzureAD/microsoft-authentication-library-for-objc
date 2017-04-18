@@ -108,15 +108,15 @@
     
     switch (uiBehavior) {
         case MSALForceLogin:
-            uiBehaviorString = @"MSAL_Force_Login";
+            uiBehaviorString = @"force_login";
             break;
             
         case MSALForceConsent:
-            uiBehaviorString = @"MSAL_Force_Consent";
+            uiBehaviorString = @"force_consent";
             break;
             
         case MSALSelectAccount:
-            uiBehaviorString = @"MSAL_Select_Account";
+            uiBehaviorString = @"select_account";
     }
     
     [self setProperty:MSAL_TELEMETRY_KEY_PROMPT_BEHAVIOR value:uiBehaviorString];

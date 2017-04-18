@@ -129,7 +129,7 @@
     XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_sku"]);
     XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_ver"]);
     
-    XCTAssertTrue([[eventProperties objectForKey:@"msal.event_name"] compare:@"msal.default_event"
+    XCTAssertTrue([[eventProperties objectForKey:@"msal.event_name"] compare:@"default_event"
                                                                                options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
@@ -174,7 +174,7 @@
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.stop_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.correlation_id"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.elapsed_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.request_id"]);
     
     XCTAssertTrue([[apiEventProperties objectForKey:@"msal.event_name"] compare:@"apiEvent"
@@ -188,7 +188,7 @@
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.stop_time"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.correlation_id"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.elapsed_time"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.request_id"]);
     
     XCTAssertTrue([[httpEventProperties objectForKey:@"msal.event_name"] compare:@"httpEvent"

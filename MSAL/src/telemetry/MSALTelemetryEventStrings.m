@@ -24,18 +24,18 @@
 #import "MSALTelemetryEventStrings.h"
 
 // Telemetry event name
-NSString *const MSAL_TELEMETRY_EVENT_DEFAULT_EVENT          = @"msal.default_event";
-NSString *const MSAL_TELEMETRY_EVENT_API_EVENT              = @"msal.api_event";
-NSString *const MSAL_TELEMETRY_EVENT_UI_EVENT               = @"msal.ui_event";
-NSString *const MSAL_TELEMETRY_EVENT_HTTP_REQUEST           = @"msal.http_event";
-NSString *const MSAL_TELEMETRY_EVENT_LAUNCH_BROKER          = @"msal.broker_event";
-NSString *const MSAL_TELEMETRY_EVENT_TOKEN_GRANT            = @"msal.token_grant";
-NSString *const MSAL_TELEMETRY_EVENT_AUTHORITY_VALIDATION   = @"msal.authority_validation";
-NSString *const MSAL_TELEMETRY_EVENT_ACQUIRE_TOKEN_SILENT   = @"msal.acquire_token_silent_handler";
-NSString *const MSAL_TELEMETRY_EVENT_AUTHORIZATION_CODE     = @"msal.authorization_code";
-NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP     = @"msal.token_cache_lookup";
-NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE      = @"msal.token_cache_write";
-NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE     = @"msal.token_cache_delete";
+NSString *const MSAL_TELEMETRY_EVENT_DEFAULT_EVENT          = @"default_event";
+NSString *const MSAL_TELEMETRY_EVENT_API_EVENT              = @"api_event";
+NSString *const MSAL_TELEMETRY_EVENT_UI_EVENT               = @"ui_event";
+NSString *const MSAL_TELEMETRY_EVENT_HTTP_REQUEST           = @"http_event";
+NSString *const MSAL_TELEMETRY_EVENT_LAUNCH_BROKER          = @"broker_event";
+NSString *const MSAL_TELEMETRY_EVENT_TOKEN_GRANT            = @"token_grant";
+NSString *const MSAL_TELEMETRY_EVENT_AUTHORITY_VALIDATION   = @"authority_validation";
+NSString *const MSAL_TELEMETRY_EVENT_ACQUIRE_TOKEN_SILENT   = @"acquire_token_silent_handler";
+NSString *const MSAL_TELEMETRY_EVENT_AUTHORIZATION_CODE     = @"authorization_code";
+NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP     = @"token_cache_lookup";
+NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE      = @"token_cache_write";
+NSString *const MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE     = @"token_cache_delete";
 
 // Telemetry property name, only alphabetic letters, dots, and underscores are allowed.
 NSString *const MSAL_TELEMETRY_KEY_EVENT_NAME                   = @"msal.event_name";
@@ -49,7 +49,7 @@ NSString *const MSAL_TELEMETRY_KEY_TENANT_ID                    = @"msal.tenant_
 NSString *const MSAL_TELEMETRY_KEY_USER_ID                      = @"msal.user_id";
 NSString *const MSAL_TELEMETRY_KEY_START_TIME                   = @"msal.start_time";
 NSString *const MSAL_TELEMETRY_KEY_END_TIME                     = @"msal.stop_time";
-NSString *const MSAL_TELEMETRY_KEY_RESPONSE_TIME                = @"msal.response_time";
+NSString *const MSAL_TELEMETRY_KEY_ELAPSED_TIME                = @"msal.elapsed_time";
 NSString *const MSAL_TELEMETRY_KEY_DEVICE_ID                    = @"msal.device_id";
 NSString *const MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS            = @"msal.device_ip_address";
 NSString *const MSAL_TELEMETRY_KEY_APPLICATION_NAME             = @"msal.application_name";
@@ -103,8 +103,8 @@ NSString *const MSAL_TELEMETRY_VALUE_TRIED                           = @"tried";
 NSString *const MSAL_TELEMETRY_VALUE_EXPIRED                         = @"expired";
 NSString *const MSAL_TELEMETRY_VALUE_USER_CANCELLED                  = @"user_cancelled";
 NSString *const MSAL_TELEMETRY_VALUE_NOT_FOUND                       = @"not_found";
-NSString *const MSAL_TELEMETRY_VALUE_ACCESS_TOKEN                    = @"access_token";
-NSString *const MSAL_TELEMETRY_VALUE_REFRESH_TOKEN                   = @"refresh_token";
+NSString *const MSAL_TELEMETRY_VALUE_ACCESS_TOKEN                    = @"at";
+NSString *const MSAL_TELEMETRY_VALUE_REFRESH_TOKEN                   = @"rt";
 NSString *const MSAL_TELEMETRY_VALUE_MULTI_RESOURCE_REFRESH_TOKEN    = @"multi_resource_refresh_token";
 NSString *const MSAL_TELEMETRY_VALUE_FAMILY_REFRESH_TOKEN            = @"family_refresh_token";
 NSString *const MSAL_TELEMETRY_VALUE_ADFS_TOKEN                      = @"ADFS_access_token_refresh_token";

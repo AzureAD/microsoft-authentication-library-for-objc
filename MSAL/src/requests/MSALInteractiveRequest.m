@@ -35,6 +35,10 @@
 
 #import "MSALPkce.h"
 
+#import "MSALTelemetryAPIEvent.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryEventStrings.h"
+
 static MSALInteractiveRequest *s_currentRequest = nil;
 
 @implementation MSALInteractiveRequest
@@ -125,6 +129,9 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)
         {
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [self stopTelemetryEvent:event error:error];
+            
             completionBlock(nil, error);
             return;
         }
@@ -141,6 +148,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     LOG_INFO(_parameters, @"Launching Web UI");
     LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
     s_currentRequest = self;
+    
     [MSALWebUI startWebUIWithURL:authorizationUrl
                          context:_parameters
                  completionBlock:^(NSURL *response, NSError *error)
@@ -148,6 +156,9 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          s_currentRequest = nil;
          if (error)
          {
+             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+             [self stopTelemetryEvent:event error:error];
+             
              completionBlock(nil, error);
              return;
          }
@@ -177,7 +188,13 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              NSString *subError = params[OAUTH2_SUB_ERROR];
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
              MSALLogError(_parameters, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
-             completionBlock(nil, MSALCreateError(code, errorDescription, authorizationError, subError, nil));
+             
+             NSError *msalError = MSALCreateError(code, errorDescription, authorizationError, subError, nil);
+                          
+             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+             [self stopTelemetryEvent:event error:msalError];
+             
+             completionBlock(nil, msalError);
              return;
          }
          
@@ -195,6 +212,13 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     
     // PKCE
     parameters[OAUTH2_CODE_VERIFIER] = _pkce.codeVerifier;
+}
+
+- (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
+{
+    MSALTelemetryAPIEvent *event = [super getTelemetryAPIEvent];
+    [event setUIBehavior:_uiBehavior];
+    return event;
 }
 
 @end
