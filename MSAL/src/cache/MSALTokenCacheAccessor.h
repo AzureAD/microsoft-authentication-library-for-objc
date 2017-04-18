@@ -56,4 +56,9 @@
                           context:(id<MSALRequestContext>)ctx
                             error:(NSError * __autoreleasing *)error;
 
+- (MSALUser *)getUserForIdentifier:(NSString *)userIdentifier
+                          clientId:(NSString *)clientId
+                       environment:(NSString *)environment
+                             error:(NSError * __autoreleasing *)error;
+
 @end

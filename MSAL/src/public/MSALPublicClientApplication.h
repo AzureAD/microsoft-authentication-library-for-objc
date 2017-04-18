@@ -105,7 +105,7 @@
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSURL *)authority
+                    authority:(NSString *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -118,12 +118,12 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
-                          authority:(NSURL *)authority
+                          authority:(NSString *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
-                          authority:(NSURL *)authority
+                          authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;

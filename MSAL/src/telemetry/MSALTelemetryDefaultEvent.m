@@ -70,7 +70,7 @@
         NSDictionary *msalIds = [MSALLogger msalId];
         for (NSString *key in msalIds)
         {
-            NSString *propertyName = [NSString stringWithFormat:@"Microsoft.MSAL.%@",
+            NSString *propertyName = [NSString stringWithFormat:@"msal.%@",
                                       [[key lowercaseString] stringByReplacingOccurrencesOfString:@"-" withString:@"_"]];
             
             [self setProperty:propertyName value:[msalIds objectForKey:key]];

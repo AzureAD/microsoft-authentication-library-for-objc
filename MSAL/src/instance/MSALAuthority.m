@@ -89,6 +89,10 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     return s_trustedHostList;
 }
 
++ (NSURL *)defaultAuthority
+{
+    return [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+}
 
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
@@ -99,6 +103,9 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     CHECK_ERROR_RETURN_NIL(authorityUrl, nil, MSALErrorInvalidParameter, @"\"authority\" must be a valid URI");
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
     CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
+    
+    CHECK_ERROR_RETURN_NIL(![authorityUrl.host.lowercaseString isEqualToString:@"login.windows.net"], nil, MSALErrorInvalidParameter, @"login.windows.net has been deprecated. Use login.microsoftonline.com instead.");
+    
     
     // B2C
     if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])

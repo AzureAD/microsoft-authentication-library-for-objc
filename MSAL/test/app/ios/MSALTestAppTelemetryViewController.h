@@ -25,40 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRequestParameters.h"
-#import "MSALUIBehavior.h"
-#import "MSALError_Internal.h"
-#import "MSALAuthority.h"
+#import "MSALTestAppSettingViewController.h"
 
-@implementation MSALRequestParameters
+@interface MSALTestAppTelemetryViewController : MSALTestAppSettingViewController
 
-- (void)setScopesFromArray:(NSArray<NSString *> *)scopes
-{
-    NSMutableArray *scopesLowercase = [NSMutableArray new];
-    for (NSString *scope in scopes)
-    {
-        [scopesLowercase addObject:scope.lowercaseString];
-    }
-    self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
-}
++ (instancetype)sharedController;
 
-- (BOOL)setAuthorityFromString:(NSString *)authority
-                         error:(NSError * __autoreleasing *)error
-{
-    if (!authority)
-    {
-        return YES;
-    }
-    
-    NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:error];
-    if (!authorityUrl)
-    {
-        return NO;
-    }
-    
-    self.unvalidatedAuthority = authorityUrl;
-    
-    return YES;
-}
+- (void)startTracking;
+- (void)stopTracking;
 
 @end

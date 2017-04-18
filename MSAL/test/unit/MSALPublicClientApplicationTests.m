@@ -580,12 +580,12 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
-         XCTAssertEqual(params.user.displayableId, @"displayableId");
-         XCTAssertEqual(params.user.name, @"user@contoso.com");
-         XCTAssertEqual(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqual(params.user.uid, @"1");
-         XCTAssertEqual(params.user.utid, @"1234-5678-90abcdefg");
-         XCTAssertEqual(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
+         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          
          XCTAssertNil(params.unvalidatedAuthority);
          
@@ -643,14 +643,14 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAndAuthority);
-         XCTAssertEqual(params.user.displayableId, @"displayableId");
-         XCTAssertEqual(params.user.name, @"user@contoso.com");
-         XCTAssertEqual(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqual(params.user.uid, @"1");
-         XCTAssertEqual(params.user.utid, @"1234-5678-90abcdefg");
-         XCTAssertEqual(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
+         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          
-         XCTAssertEqual(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -671,7 +671,7 @@
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                         user:user
-                                   authority:[NSURL URLWithString:@"https://login.microsoft.com/common"]
+                                   authority:@"https://login.microsoft.com/common"
                              completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
@@ -710,18 +710,18 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId);
-         XCTAssertEqual(params.user.displayableId, @"displayableId");
-         XCTAssertEqual(params.user.name, @"user@contoso.com");
-         XCTAssertEqual(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqual(params.user.uid, @"1");
-         XCTAssertEqual(params.user.utid, @"1234-5678-90abcdefg");
-         XCTAssertEqual(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
+         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          
-         XCTAssertEqual(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
          
          XCTAssertTrue(obj.forceRefresh);
          
-         XCTAssertEqual(params.correlationId, correlationId);
+         XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, @"b92e0ba5-f86e-4411-8e18-6b5f928d968a");
          
@@ -739,7 +739,7 @@
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                         user:user
-                                   authority:[NSURL URLWithString:@"https://login.microsoft.com/common"]
+                                   authority:@"https://login.microsoft.com/common"
                                 forceRefresh:YES
                                correlationId:correlationId
                              completionBlock:^(MSALResult *result, NSError *error)
