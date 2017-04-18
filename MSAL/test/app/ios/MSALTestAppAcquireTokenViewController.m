@@ -66,7 +66,7 @@
     {
         return nil;
     }
-    UITabBarItem* tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Acquire" image:nil tag:0];
+    UITabBarItem *tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Acquire" image:nil tag:0];
     [self setTabBarItem:tabBarItem];
     
     [self setEdgesForExtendedLayout:UIRectEdgeTop];
@@ -81,21 +81,21 @@
     [[MSALTestAppTelemetryViewController sharedController] stopTracking];
 }
 
-- (UIView*)createTwoItemLayoutView:(UIView*)item1
-                             item2:(UIView*)item2
+- (UIView *)createTwoItemLayoutView:(UIView *)item1
+                             item2:(UIView *)item2
 {
     item1.translatesAutoresizingMaskIntoConstraints = NO;
     item2.translatesAutoresizingMaskIntoConstraints = NO;
     
-    UIView* view = [[UIView alloc] init];
+    UIView *view = [[UIView alloc] init];
     view.translatesAutoresizingMaskIntoConstraints = NO;
     [view addSubview:item1];
     [view addSubview:item2];
     
-    NSDictionary* views = @{@"item1" : item1, @"item2" : item2 };
-    NSArray* verticalConstraints1 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[item1(20)]|" options:0 metrics:NULL views:views];
-    NSArray* verticalConstraints2 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[item2(20)]|" options:0 metrics:NULL views:views];
-    NSArray* horizontalConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[item1]-[item2]|" options:0 metrics:NULL views:views];
+    NSDictionary *views = @{@"item1" : item1, @"item2" : item2 };
+    NSArray *verticalConstraints1 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[item1(20)]|" options:0 metrics:NULL views:views];
+    NSArray *verticalConstraints2 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[item2(20)]|" options:0 metrics:NULL views:views];
+    NSArray *horizontalConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[item1]-[item2]|" options:0 metrics:NULL views:views];
     
     [view addConstraints:verticalConstraints1];
     [view addConstraints:verticalConstraints2];
@@ -118,13 +118,13 @@
 {
     CGRect screenFrame = UIScreen.mainScreen.bounds;
     
-    UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:screenFrame];
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:screenFrame];
     scrollView.translatesAutoresizingMaskIntoConstraints = NO;
     scrollView.scrollEnabled = YES;
     scrollView.showsVerticalScrollIndicator = YES;
     scrollView.showsHorizontalScrollIndicator = NO;
     scrollView.userInteractionEnabled = YES;
-    MSALTestAppAcquireLayoutBuilder* layout = [MSALTestAppAcquireLayoutBuilder new];
+    MSALTestAppAcquireLayoutBuilder *layout = [MSALTestAppAcquireLayoutBuilder new];
     
     _authorityButton = [self buttonWithTitle:[MSALTestAppAuthorityViewController currentTitle]
                                       action:@selector(selectAuthority:)];
@@ -151,13 +151,13 @@
     
     
     
-    UIButton* clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIButton *clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
     [clearCache addTarget:self action:@selector(clearCache:) forControlEvents:UIControlEventTouchUpInside];
 
     [layout addCenteredView:clearCache key:@"clearCache"];
     
-    UIButton* telemetryButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIButton *telemetryButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [telemetryButton setTitle:@"Show telemetry" forState:UIControlStateNormal];
     [telemetryButton addTarget:self action:@selector(showTelemetry:) forControlEvents:UIControlEventTouchUpInside];
     
@@ -171,10 +171,10 @@
     _resultView.editable = NO;
     [layout addView:_resultView key:@"result"];
     
-    UIView* contentView = [layout contentView];
+    UIView *contentView = [layout contentView];
     [scrollView addSubview:contentView];
     
-    NSDictionary* views = @{ @"contentView" : contentView, @"scrollView" : scrollView };
+    NSDictionary *views = @{ @"contentView" : contentView, @"scrollView" : scrollView };
     [scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[contentView]|" options:0 metrics:nil views:views]];
     [scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[contentView]|" options:0 metrics:nil views:views]];
     [scrollView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"[contentView(==scrollView)]" options:0 metrics:nil views:views]];
@@ -184,19 +184,19 @@
 
 - (UIView *)createAcquireButtonsView
 {
-    UIButton* acquireButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIButton *acquireButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [acquireButton setTitle:@"acquireToken" forState:UIControlStateNormal];
     [acquireButton addTarget:self action:@selector(acquireTokenInteractive:) forControlEvents:UIControlEventTouchUpInside];
     
-    UIButton* acquireSilentButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIButton *acquireSilentButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [acquireSilentButton setTitle:@"acquireTokenSilent" forState:UIControlStateNormal];
     [acquireSilentButton addTarget:self action:@selector(acquireTokenSilent:) forControlEvents:UIControlEventTouchUpInside];
     
     _acquireSilentButton = acquireSilentButton;
     
-    UIView* acquireButtonsView = [self createTwoItemLayoutView:acquireButton item2:acquireSilentButton];
-    UIVisualEffect* blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
-    UIVisualEffectView* acquireBlurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    UIView *acquireButtonsView = [self createTwoItemLayoutView:acquireButton item2:acquireSilentButton];
+    UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    UIVisualEffectView *acquireBlurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
     acquireBlurView.translatesAutoresizingMaskIntoConstraints = NO;
     [acquireBlurView.contentView addSubview:acquireButtonsView];
     
@@ -208,7 +208,7 @@
                                                                 attribute:NSLayoutAttributeCenterX
                                                                multiplier:1.0
                                                                  constant:0.0]];
-    NSDictionary* views = @{ @"buttons" : acquireButtonsView };
+    NSDictionary *views = @{ @"buttons" : acquireButtonsView };
     [acquireBlurView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-6-[buttons]-6-|" options:0 metrics:nil views:views]];
     
     return acquireBlurView;
@@ -218,17 +218,17 @@
 - (void)loadView
 {
     CGRect screenFrame = UIScreen.mainScreen.bounds;
-    UIView* mainView = [[UIView alloc] initWithFrame:screenFrame];
+    UIView *mainView = [[UIView alloc] initWithFrame:screenFrame];
     
-    UIView* settingsView = [self createSettingsAndResultView];
+    UIView *settingsView = [self createSettingsAndResultView];
     [mainView addSubview:settingsView];
     
-    UIView* acquireBlurView = [self createAcquireButtonsView];
+    UIView *acquireBlurView = [self createAcquireButtonsView];
     [mainView addSubview:acquireBlurView];
     
     self.view = mainView;
     
-    NSDictionary* views = @{ @"settings" : settingsView, @"acquire" : acquireBlurView };
+    NSDictionary *views = @{ @"settings" : settingsView, @"acquire" : acquireBlurView };
     // Set up constraints for the web overlay
     
     // Set up constraints to make the settings scroll view take up the whole screen
@@ -287,7 +287,7 @@
 
 - (void)keyboardWillShow:(NSNotification *)aNotification
 {
-    NSDictionary* userInfo = aNotification.userInfo;
+    NSDictionary *userInfo = aNotification.userInfo;
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     
@@ -316,8 +316,8 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     (void)animated;
-    MSALTestAppSettings* settings = [MSALTestAppSettings settings];
-    NSString* loginHint = settings.loginHint;
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSString *loginHint = settings.loginHint;
     if (![NSString msalIsStringNilOrBlank:loginHint])
     {
         _loginHintField.text = loginHint;
@@ -354,7 +354,7 @@
 
 - (void)updateResultView:(MSALResult *)result
 {
-    NSString* resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
                             [[result.accessToken msalComputeSHA256Hex] substringToIndex:8], result.expiresOn, result.tenantId, result.user, result.scopes];
     
     [_resultView setText:resultText];
@@ -364,7 +364,7 @@
 
 - (MSALUIBehavior)uiBehavior
 {
-    NSString* label = [_uiBehavior titleForSegmentAtIndex:_uiBehavior.selectedSegmentIndex];
+    NSString *label = [_uiBehavior titleForSegmentAtIndex:_uiBehavior.selectedSegmentIndex];
     
     if ([label isEqualToString:@"Select"])
         return MSALSelectAccount;
@@ -379,9 +379,9 @@
 - (void)acquireTokenInteractive:(id)sender
 {
     (void)sender;
-    MSALTestAppSettings* settings = [MSALTestAppSettings settings];
-    NSString* authority = [settings authority];
-    NSString* clientId = TEST_APP_CLIENT_ID;
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
     //NSURL* redirectUri = [settings redirectUri];
     
     //BOOL validateAuthority = _validateAuthority.selectedSegmentIndex == 0;
@@ -391,7 +391,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     if (!application)
     {
-        NSString* resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
@@ -439,7 +439,7 @@
 {
     (void)sender;
     
-    MSALTestAppSettings* settings = [MSALTestAppSettings settings];
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     if (!settings.currentUser)
     {
@@ -451,8 +451,8 @@
         return;
     }
     
-    NSString* authority = [settings authority];
-    NSString* clientId = TEST_APP_CLIENT_ID;
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;
     
@@ -460,7 +460,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     if (!application)
     {
-        NSString* resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
