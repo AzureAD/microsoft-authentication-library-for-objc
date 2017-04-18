@@ -27,6 +27,7 @@
 
 #import "MSALBaseRequest.h"
 #import "MSALInteractiveRequest.h"
+#import "MSALSilentRequest.h"
 
 @interface MSALBaseRequest (TestExtensions)
 
@@ -41,3 +42,10 @@
 - (MSALScopes *)additionalScopes;
 - (MSALUIBehavior)uiBehavior;
 @end
+
+@interface MSALSilentRequest (TestExtensions)
+
+- (BOOL)forceRefresh;
+
+@end
+

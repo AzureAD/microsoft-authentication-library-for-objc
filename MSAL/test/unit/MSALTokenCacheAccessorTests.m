@@ -33,6 +33,7 @@
 #import "NSDictionary+MSALTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestLogger.h"
+#import "NSURL+MSALExtensions.h"
 
 @interface MSALTokenCacheAccessorTests : XCTestCase
 {
@@ -63,7 +64,7 @@
     _cache = [MSALTestTokenCache createTestAccessor];
     
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    _testEnvironment = _testAuthority.host;
+    _testEnvironment = _testAuthority.msalHostWithPort;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
     NSString *idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
@@ -71,7 +72,7 @@
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken1]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:clientInfo1 error:nil]
-                                   environment:_testAuthority.host];
+                                   environment:_testAuthority.msalHostWithPort];
     
     _testResponse1Claims =
     @{ @"token_type" : @"Bearer",
@@ -95,7 +96,7 @@
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken2]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:clientInfo2 error:nil]
-                                   environment:_testAuthority.host];
+                                   environment:_testAuthority.msalHostWithPort];
     
     _testResponse2Claims =
     @{ @"token_type" : @"Bearer",
@@ -225,7 +226,7 @@
     requestParam.user = _user1;
     
     //prepare token response and save AT/RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.host
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
@@ -270,7 +271,7 @@
     [requestParam2 setScopesFromArray:@[@"User.Read"]];
     requestParam2.user = _user2;
     
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.host
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                        clientId:_testClientId
                                                                                        response:_testTokenResponse2];
     [_cache saveAccessAndRefreshToken:requestParam2 response:_testTokenResponse2 context:nil error:nil];
@@ -321,7 +322,7 @@
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                   clientId:_testClientId
                                                                                   response:_testTokenResponse];
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.host
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
@@ -329,7 +330,7 @@
     MSALAccessTokenCacheItem *atItem2 = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                    clientId:_testClientId
                                                                                    response:_testTokenResponse2];
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.host
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                        clientId:_testClientId
                                                                                        response:_testTokenResponse2];
     [_cache saveAccessAndRefreshToken:requestParam2 response:_testTokenResponse2 context:nil error:nil];

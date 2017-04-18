@@ -287,6 +287,7 @@
 {
     [self acquireTokenSilentForScopes:scopes
                                  user:user
+                            authority:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
@@ -295,15 +296,31 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
+                          authority:(NSURL *)authority
+                    completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:scopes
+                                 user:user
+                            authority:authority
+                         forceRefresh:NO
+                        correlationId:nil
+                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAndAuthority
+                      completionBlock:completionBlock];
+}
+
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                          authority:(NSURL *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
                                  user:user
+                            authority:authority
                           forceRefresh:forceRefresh
                         correlationId:correlationId
-                                apiId:MSALTelemetryApiIdAcquireSilentWithUserForceRefreshAndCorrelationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
                       completionBlock:completionBlock];
 }
 
@@ -382,6 +399,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
+                          authority:(NSURL *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
@@ -408,7 +426,7 @@
                  "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
-    params.unvalidatedAuthority = _authority;
+    params.unvalidatedAuthority = authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;

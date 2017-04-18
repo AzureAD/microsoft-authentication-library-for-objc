@@ -33,7 +33,6 @@
 
 @interface MSALSilentRequest()
 {
-    BOOL _forceRefresh;
     MSALRefreshTokenCacheItem *_refreshToken;
 }
 
@@ -62,29 +61,49 @@
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
 
     MSALTokenCacheAccessor *cache = _parameters.tokenCache;
-    (void)cache;
     
-    MSALAccessTokenCacheItem *accessToken = nil;
     if (!_forceRefresh)
     {
-        accessToken = [cache findAccessToken:_parameters context:_parameters authorityFound:nil error:nil];
+        NSString *updatedAuthority = nil;
+        NSError *error = nil;
+        MSALAccessTokenCacheItem *accessToken = [cache findAccessToken:_parameters
+                                                               context:_parameters
+                                                        authorityFound:&updatedAuthority
+                                                                 error:&error];
+        
+        if (accessToken)
+        {
+            MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
+            completionBlock(result, nil);
+            return;
+        }
+        
+        if (!accessToken && !updatedAuthority)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        
+        _parameters.unvalidatedAuthority = [NSURL URLWithString:updatedAuthority];
     }
     
-    if (accessToken)
-    {
-        MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
-        completionBlock(result, nil);
-        return;
-    }
-
     _refreshToken = [cache findRefreshToken:_parameters context:_parameters error:nil];
-    
     CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     
-    LOG_INFO(_parameters, @"Refreshing access token");
-    LOG_INFO_PII(_parameters, @"Refreshing access token");
-    
-    [super acquireToken:completionBlock];
+    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
+        if (error)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        
+        LOG_INFO(_parameters, @"Refreshing access token");
+        LOG_INFO_PII(_parameters, @"Refreshing access token");
+        
+        _authority = authority;
+        
+        [super acquireToken:completionBlock];
+    }];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters

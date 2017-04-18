@@ -27,8 +27,8 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryApiId.h"
+#import "MSALAuthority.h"
 
-@class MSALAuthority;
 @class MSALTokenCache;
 @class MSALTokenResponse;
 @class MSALTokenCacheItem;
@@ -58,5 +58,7 @@
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 - (void)addAdditionalRequestParameters:(nonnull NSMutableDictionary<NSString *, NSString *> *)parameters;
+
+- (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
 @end

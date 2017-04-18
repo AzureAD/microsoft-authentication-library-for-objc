@@ -114,6 +114,12 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                                user:(MSALUser *)user
+                          authority:(NSURL *)authority
+                    completionBlock:(MSALCompletionBlock)completionBlock;
+
+- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
+                               user:(MSALUser *)user
+                          authority:(NSURL *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;

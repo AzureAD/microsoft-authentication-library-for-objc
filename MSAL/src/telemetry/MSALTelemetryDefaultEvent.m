@@ -24,6 +24,7 @@
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "MSALIpAddressHelper.h"
+#import "MSALLogger+Internal.h"
 #include <CoreFoundation/CoreFoundation.h>
 
 #if !TARGET_OS_IPHONE
@@ -33,10 +34,9 @@
 @implementation MSALTelemetryDefaultEvent
 
 - (id)initWithName:(NSString *)eventName
-         requestId:(NSString *)requestId
-     correlationId:(NSUUID *)correlationId
+         context:(id<MSALRequestContext>)context
 {
-    if (!(self = [super initWithName:eventName requestId:requestId correlationId:correlationId]))
+    if (!(self = [super initWithName:eventName context:context]))
     {
         return nil;
     }

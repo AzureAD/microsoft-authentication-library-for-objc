@@ -23,13 +23,13 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryEventInterface.h"
+#import "MSALLogger+Internal.h"
 
 @interface MSALTelemtryBaseEvent : NSObject<MSALTelemetryEventInterface>
 
 @property (nonatomic, strong, readonly) NSDictionary *properties;
 
 - (id)initWithName:(NSString *)eventName
-         requestId:(NSString *)requestId
-     correlationId:(NSUUID *)correlationId;
+           context:(id<MSALRequestContext>)context;
 
 @end
