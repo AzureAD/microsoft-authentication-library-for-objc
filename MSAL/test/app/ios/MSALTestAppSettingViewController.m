@@ -91,7 +91,10 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MSALTestAppTableSettingRowCell"];
     if (!cell)
     {
-         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"MSALTestAppTableSettingRowCell"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"MSALTestAppTableSettingRowCell"];
+        
+        cell.textLabel.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        cell.textLabel.numberOfLines = 0;
     }
     
     cell.textLabel.text = [self labelForRow:[indexPath indexAtPosition:1]];
