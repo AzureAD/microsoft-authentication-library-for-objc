@@ -100,8 +100,8 @@ MSAL_JSON_RW(@"identity_provider", identityProvider, setIdentityProvider)
     _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
                                                name:self.name
                                    identityProvider:self.identityProvider
-                                                uid:self.clientInfo.uniqueIdentifier
-                                               utid:self.clientInfo.uniqueTenantIdentifier
+                                                uid:self.clientInfo.uid
+                                               utid:self.clientInfo.utid
                                         environment:self.environment];
 }
 
