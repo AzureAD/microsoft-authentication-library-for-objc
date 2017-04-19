@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SampleLoginViewController">
+            <connections>
+                <outlet property="view" destination="Iqr-il-dY4" id="RWP-No-knY"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="Iqr-il-dY4">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kf9-RJ-z60">
+                    <rect key="frame" x="72.5" y="313.5" width="230" height="40"/>
+                    <state key="normal" image="sign-in-with-microsoft-light"/>
+                    <connections>
+                        <action selector="signIn:" destination="-1" eventType="touchUpInside" id="9S7-r4-fmX"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" red="0.26324986760000002" green="0.56124190409999997" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="Kf9-RJ-z60" firstAttribute="centerY" secondItem="Iqr-il-dY4" secondAttribute="centerY" id="7m3-Q6-cYS"/>
+                <constraint firstItem="Kf9-RJ-z60" firstAttribute="centerX" secondItem="Iqr-il-dY4" secondAttribute="centerX" id="hZt-UB-1UR"/>
+            </constraints>
+        </view>
+    </objects>
+    <resources>
+        <image name="sign-in-with-microsoft-light" width="230" height="40"/>
+    </resources>
+</document>
