@@ -46,11 +46,6 @@
     [self setProperty:MSAL_TELEMETRY_KEY_IS_FRT value:isFRT];
 }
 
-- (void)setRTStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_RT_STATUS value:status];
-}
-
 - (void)setMRRTStatus:(NSString *)status
 {
     [self setProperty:MSAL_TELEMETRY_KEY_MRRT_STATUS value:status];

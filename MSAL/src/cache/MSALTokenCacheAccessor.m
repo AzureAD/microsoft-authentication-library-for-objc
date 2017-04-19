@@ -252,7 +252,6 @@
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
     
     [event setIsRT:MSAL_TELEMETRY_VALUE_YES];
-    [event setRTStatus:item ? MSAL_TELEMETRY_VALUE_TRIED : MSAL_TELEMETRY_VALUE_NOT_FOUND];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
     
     return item;
