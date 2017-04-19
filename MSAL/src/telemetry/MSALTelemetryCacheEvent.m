@@ -31,11 +31,6 @@
     [self setProperty:MSAL_TELEMETRY_KEY_TOKEN_TYPE value:tokenType];
 }
 
-- (void)setStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_RESULT_STATUS value:status];
-}
-
 - (void)setIsRT:(NSString *)isRT
 {
     [self setProperty:MSAL_TELEMETRY_KEY_IS_RT value:isRT];

@@ -27,7 +27,6 @@
 @interface MSALTelemetryCacheEvent : MSALTelemtryBaseEvent
 
 - (void)setTokenType:(NSString *)tokenType;
-- (void)setStatus:(NSString *)status;
 - (void)setIsRT:(NSString *)isRT;
 - (void)setIsMRRT:(NSString *)isMRRT;
 - (void)setIsFRT:(NSString *)isFRT;
