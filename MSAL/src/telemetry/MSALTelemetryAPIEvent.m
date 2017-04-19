@@ -27,6 +27,11 @@
 
 @implementation MSALTelemetryAPIEvent
 
+- (void)setRequestId:(NSString *)requestId
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_ID value:requestId];
+}
+
 - (void)setCorrelationId:(NSUUID *)correlationId
 {
     [self setProperty:MSAL_TELEMETRY_KEY_CORRELATION_ID value:[correlationId UUIDString]];

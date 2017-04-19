@@ -28,6 +28,7 @@
 
 @interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
+- (void)setRequestId:(NSString *)requestId;
 - (void)setCorrelationId:(NSUUID *)correlationId;
 - (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;

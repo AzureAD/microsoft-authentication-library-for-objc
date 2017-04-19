@@ -256,6 +256,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     [event setApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
+    [event setRequestId:_parameters.telemetryRequestId];
     [event setAuthority:_authority.authorityType];
     [event setClientId:_parameters.clientId];
     
