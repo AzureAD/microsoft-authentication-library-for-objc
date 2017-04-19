@@ -25,40 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRequestParameters.h"
-#import "MSALUIBehavior.h"
-#import "MSALError_Internal.h"
-#import "MSALAuthority.h"
+#import "MSALTestAppTelemetryDispatcher.h"
 
-@implementation MSALRequestParameters
+@implementation MSALTestAppTelemetryDispatcher
 
-- (void)setScopesFromArray:(NSArray<NSString *> *)scopes
+- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
 {
-    NSMutableArray *scopesLowercase = [NSMutableArray new];
-    for (NSString *scope in scopes)
+    if (_dispatcherCallback)
     {
-        [scopesLowercase addObject:scope.lowercaseString];
+        _dispatcherCallback(events);
     }
-    self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
-}
-
-- (BOOL)setAuthorityFromString:(NSString *)authority
-                         error:(NSError * __autoreleasing *)error
-{
-    if (!authority)
-    {
-        return YES;
-    }
-    
-    NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:error];
-    if (!authorityUrl)
-    {
-        return NO;
-    }
-    
-    self.unvalidatedAuthority = authorityUrl;
-    
-    return YES;
 }
 
 @end

@@ -32,6 +32,7 @@
 #import "MSALClientInfo.h"
 #import "NSDictionary+MSALTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
+#import "MSALTestLogger.h"
 #import "NSURL+MSALExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
@@ -638,6 +639,105 @@
     MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessToken:_requestParam1 context:nil authorityFound:&authorityFound error:nil];
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
+}
+
+- (void)testUserForIdentifier_whenIdentifierNil_shouldFail
+{
+    NSError *error = nil;
+    
+    XCTAssertNil([_cache getUserForIdentifier:nil
+                                     clientId:@"12345"
+                                  environment:@"environment.com"
+                                        error:&error]);
+    
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"userIdentifier"]);
+}
+
+- (void)testUserForIdentifier_whenClientIdNil_shouldFail
+{
+    NSError *error = nil;
+    
+    XCTAssertNil([_cache getUserForIdentifier:@"12345"
+                                     clientId:nil
+                                  environment:@"environment.com"
+                                        error:&error]);
+    
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"clientId"]);
+}
+
+- (void)testUserForIdentifier_whenEnvironmentNil_shouldFail
+{
+    NSError *error = nil;
+    
+    XCTAssertNil([_cache getUserForIdentifier:@"112334"
+                                     clientId:@"12345"
+                                  environment:nil
+                                        error:&error]);
+    
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"environment"]);
+}
+
+- (void)testUserForIdentifier_whenUserNotInCache_shouldFail
+{
+    NSError *error = nil;
+    
+    XCTAssertNil([_cache getUserForIdentifier:@"11234123+12314123"
+                                     clientId:@"12345"
+                                  environment:@"environment.com"
+                                        error:&error]);
+    
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorUserNotFound);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+}
+
+- (void)testUserForIdentifier_whenUserNotInCacheAndNoError_shouldFailAndStillLog
+{
+    XCTAssertNil([_cache getUserForIdentifier:@"11234123+12314123"
+                                     clientId:@"12345"
+                                  environment:@"environment.com"
+                                        error:nil]);
+    
+    XCTAssertTrue([[[MSALTestLogger sharedLogger] lastMessage] containsString:@"UserNotFound"]);
+}
+
+
+- (void)testUserForIdentifier_whenExists_shouldFind
+{
+    NSError *error = nil;
+    
+    NSString *uid = @"12345";
+    NSString *utid = @"678910";
+    NSDictionary *clientInfo = @{ @"uid" : uid, @"utid" : utid };
+    
+    MSALRefreshTokenCacheItem *rtItem =
+    [[MSALRefreshTokenCacheItem alloc] initWithJson:@{ @"refresh_token" : @"i am a refresh token!",
+                                                       @"environment" : _testEnvironment,
+                                                       @"displayable_id" : @"user@contoso.com",
+                                                       @"name" : @"User",
+                                                       @"identity_provider" : @"issuer",
+                                                       @"client_id" : _testClientId,
+                                                       @"client_info" : [clientInfo base64UrlJson]
+                                                       }
+                                               error:nil];
+    XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:nil]);
+    
+    NSString *userIdentifier = @"12345.678910";
+    
+    MSALUser * user = [_cache getUserForIdentifier:userIdentifier clientId:_testClientId environment:_testEnvironment error:&error];
+    XCTAssertNotNil(user);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(user.uid, uid);
+    XCTAssertEqualObjects(user.utid, utid);
 }
 
 @end

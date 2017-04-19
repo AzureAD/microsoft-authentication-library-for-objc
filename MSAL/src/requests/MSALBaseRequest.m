@@ -37,6 +37,7 @@
 #import "MSALTelemetryEventStrings.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
+#import "MSALClientInfo.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -216,6 +217,24 @@ static MSALScopes *s_reservedScopes = nil;
                  LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
                  LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
              }
+         }
+         
+         // Check user mismatch
+         MSALClientInfo *clientInfo = [[MSALClientInfo  alloc] initWithRawClientInfo:tokenResponse.clientInfo
+                                                                               error:&error];
+         if (!clientInfo)
+         {
+             LOG_ERROR(_parameters, @"Client info was not returned in the server response");
+             LOG_ERROR_PII(_parameters, @"Client info was not returned in the server response");
+             completionBlock(nil, error);
+             return;
+         }
+         if (_parameters.user != nil &&
+             ![_parameters.user.userIdentifier isEqualToString:clientInfo.uniqueUserIdentifier])
+         {
+             NSError *userMismatchError = CREATE_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+             completionBlock(nil, userMismatchError);
+             return;
          }
          
          NSError *cacheError = nil;

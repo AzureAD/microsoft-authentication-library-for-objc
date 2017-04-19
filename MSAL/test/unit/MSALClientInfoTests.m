@@ -27,6 +27,7 @@
 
 #import <XCTest/XCTest.h>
 #import "MSALClientInfo.h"
+#import "NSDictionary+MSALTestUtil.h"
 
 @interface MSALClientInfoTests : XCTestCase
 
@@ -45,15 +46,15 @@
 }
 
 - (void)testClientInfoParse {
-    NSString *base64String = @"eyJ1aWQiOiIyOWYzODA3YS00ZmIwLTQyZjItYTQ0YS0yMzZhYTBjYjNmOTciLCJ1dGlkIjoiMDI4N2Y5NjMtMmQ3Mi00MzYzLTllM2EtNTcwNWM1YjBmMDMxIn0";
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     
     NSError *error = nil;
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
     
     XCTAssertNil(error);
     XCTAssertNotNil(clientInfo);
-    XCTAssertEqualObjects(clientInfo.uniqueIdentifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(clientInfo.uniqueTenantIdentifier, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(clientInfo.uniqueIdentifier, @"1");
+    XCTAssertEqualObjects(clientInfo.uniqueTenantIdentifier, @"1234-5678-90abcdefg");
 }
 
 - (void)testBadClientInfo {
@@ -64,6 +65,18 @@
     
     XCTAssertNotNil(error);
     XCTAssertNil(clientInfo);
+}
+
+- (void)testUniqueUserIdentifier {
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    
+    NSError *error = nil;
+    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    
+    XCTAssertNil(error);
+    XCTAssertNotNil(clientInfo);
+    XCTAssertEqualObjects(clientInfo.uniqueUserIdentifier, @"1.1234-5678-90abcdefg");
+    
 }
 
 @end
