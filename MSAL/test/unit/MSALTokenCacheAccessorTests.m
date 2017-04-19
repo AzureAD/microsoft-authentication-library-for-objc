@@ -161,8 +161,8 @@
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, [atItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(atItem.clientId, atItemInCache.clientId);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueIdentifier, atItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueTenantIdentifier, atItemInCache.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(atItem.clientInfo.uid, atItemInCache.clientInfo.uid);
+    XCTAssertEqualObjects(atItem.clientInfo.utid, atItemInCache.clientInfo.utid);
     
     //save the same AT again
     [_cache saveAccessAndRefreshToken:requestParam response:_testTokenResponse context:nil error:nil];
@@ -212,8 +212,8 @@
     XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].service, [atItemInCache2 tokenCacheKey:nil].service);
     XCTAssertEqualObjects([atItem2 tokenCacheKey:nil].account, [atItemInCache2 tokenCacheKey:nil].account);
     XCTAssertEqualObjects(atItem2.clientId, atItemInCache2.clientId);
-    XCTAssertEqualObjects(atItem2.clientInfo.uniqueIdentifier, atItemInCache2.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(atItem2.clientInfo.uniqueTenantIdentifier, atItemInCache2.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(atItem2.clientInfo.uid, atItemInCache2.clientInfo.uid);
+    XCTAssertEqualObjects(atItem2.clientInfo.utid, atItemInCache2.clientInfo.utid);
 }
 
 - (void)testSaveAndRetrieveRefreshToken {
@@ -248,8 +248,8 @@
     XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, [rtItemInCache tokenCacheKey:nil].service);
     XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, [rtItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueIdentifier, rtItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueTenantIdentifier, rtItemInCache.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(rtItem.clientInfo.uid, rtItemInCache.clientInfo.uid);
+    XCTAssertEqualObjects(rtItem.clientInfo.utid, rtItemInCache.clientInfo.utid);
     XCTAssertEqualObjects(rtItem.displayableId, rtItemInCache.displayableId);
     XCTAssertEqualObjects(rtItem.name, rtItemInCache.name);
     XCTAssertEqualObjects(rtItem.identityProvider, rtItemInCache.identityProvider);
@@ -296,8 +296,8 @@
     XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].service, [rtItemInCache2 tokenCacheKey:nil].service);
     XCTAssertEqualObjects([rtItem2 tokenCacheKey:nil].account, [rtItemInCache2 tokenCacheKey:nil].account);
     XCTAssertEqualObjects(rtItem2.clientId, rtItemInCache2.clientId);
-    XCTAssertEqualObjects(rtItem2.clientInfo.uniqueIdentifier, rtItemInCache2.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(rtItem2.clientInfo.uniqueTenantIdentifier, rtItemInCache2.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(rtItem2.clientInfo.uid, rtItemInCache2.clientInfo.uid);
+    XCTAssertEqualObjects(rtItem2.clientInfo.utid, rtItemInCache2.clientInfo.utid);
     XCTAssertEqualObjects(rtItem2.displayableId, rtItemInCache2.displayableId);
     XCTAssertEqualObjects(rtItem2.name, rtItemInCache2.name);
     XCTAssertEqualObjects(rtItem2.identityProvider, rtItemInCache2.identityProvider);

@@ -29,10 +29,10 @@
 
 @interface MSALClientInfo : MSALJsonObject
 
-@property (readonly) NSString *uniqueIdentifier;
-@property (readonly) NSString *uniqueTenantIdentifier;
+@property (readonly) NSString *uid;
+@property (readonly) NSString *utid;
 
-@property (readonly) NSString *uniqueUserIdentifier;
+@property (readonly) NSString *userIdentifier;
 
 - (id)initWithRawClientInfo:(NSString *)rawClientInfo
                       error:(NSError *__autoreleasing *)error;

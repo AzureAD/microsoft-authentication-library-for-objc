@@ -53,8 +53,8 @@
     
     XCTAssertNil(error);
     XCTAssertNotNil(clientInfo);
-    XCTAssertEqualObjects(clientInfo.uniqueIdentifier, @"1");
-    XCTAssertEqualObjects(clientInfo.uniqueTenantIdentifier, @"1234-5678-90abcdefg");
+    XCTAssertEqualObjects(clientInfo.uid, @"1");
+    XCTAssertEqualObjects(clientInfo.utid, @"1234-5678-90abcdefg");
 }
 
 - (void)testBadClientInfo {
@@ -75,7 +75,7 @@
     
     XCTAssertNil(error);
     XCTAssertNotNil(clientInfo);
-    XCTAssertEqualObjects(clientInfo.uniqueUserIdentifier, @"1.1234-5678-90abcdefg");
+    XCTAssertEqualObjects(clientInfo.userIdentifier, @"1.1234-5678-90abcdefg");
     
 }
 

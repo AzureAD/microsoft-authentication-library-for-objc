@@ -176,8 +176,8 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
     XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, [atItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(atItem.clientId, atItemInCache.clientId);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueIdentifier, atItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueTenantIdentifier, atItemInCache.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(atItem.clientInfo.uid, atItemInCache.clientInfo.uid);
+    XCTAssertEqualObjects(atItem.clientInfo.utid, atItemInCache.clientInfo.utid);
 }
 
 - (void)testSaveIdenticalATMultipleTimes_shouldReturnOnlyOneAT
@@ -277,8 +277,8 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, [rtItemInCache tokenCacheKey:nil].service);
     XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, [rtItemInCache tokenCacheKey:nil].account);
     XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueIdentifier, rtItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueTenantIdentifier, rtItemInCache.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(rtItem.clientInfo.uid, rtItemInCache.clientInfo.uid);
+    XCTAssertEqualObjects(rtItem.clientInfo.utid, rtItemInCache.clientInfo.utid);
     XCTAssertEqualObjects(rtItem.displayableId, rtItemInCache.displayableId);
     XCTAssertEqualObjects(rtItem.name, rtItemInCache.name);
     XCTAssertEqualObjects(rtItem.identityProvider, rtItemInCache.identityProvider);
