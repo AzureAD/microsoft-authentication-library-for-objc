@@ -30,8 +30,8 @@
 
 @implementation MSALClientInfo
 
-MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uniqueIdentifier)
-MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uid)
+MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, utid)
 
 - (id)initWithRawClientInfo:(NSString *)rawClientInfo
                       error:(NSError *__autoreleasing *)error
@@ -45,9 +45,9 @@ MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, uniqueTenantIdentifier)
     return self;
 }
 
-- (NSString *)uniqueUserIdentifier
+- (NSString *)userIdentifier
 {
-    return [NSString stringWithFormat:@"%@.%@", self.uniqueIdentifier, self.uniqueTenantIdentifier];
+    return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
 }
 
 @end

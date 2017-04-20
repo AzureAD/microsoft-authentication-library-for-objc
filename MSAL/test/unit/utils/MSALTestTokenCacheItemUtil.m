@@ -77,8 +77,8 @@
     RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
     RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueIdentifier, item.clientInfo.uniqueIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueTenantIdentifier, item.clientInfo.uniqueTenantIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uid, item.clientInfo.uid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.utid, item.clientInfo.utid);
     
     return YES;
 }
@@ -119,8 +119,8 @@
     RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
     RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueIdentifier, item.clientInfo.uniqueIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueTenantIdentifier, item.clientInfo.uniqueTenantIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uid, item.clientInfo.uid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.utid, item.clientInfo.utid);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.displayableId, item.displayableId);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.name, item.name);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.identityProvider, item.identityProvider);

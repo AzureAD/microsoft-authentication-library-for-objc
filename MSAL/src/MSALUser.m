@@ -38,8 +38,8 @@
     return [self initWithDisplayableId:idToken.preferredUsername
                                   name:idToken.name
                       identityProvider:idToken.issuer
-                                   uid:clientInfo.uniqueIdentifier
-                                  utid:clientInfo.uniqueTenantIdentifier
+                                   uid:clientInfo.uid
+                                  utid:clientInfo.utid
                            environment:environment];
 }
 
