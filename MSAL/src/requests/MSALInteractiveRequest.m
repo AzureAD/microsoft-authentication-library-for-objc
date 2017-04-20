@@ -128,6 +128,18 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return [urlComponents URL];
 }
 
+- (void)run:(MSALCompletionBlock)completionBlock
+{
+    [super run:^(MSALResult *result, NSError *error)
+     {
+         // Make sure that any response to an interactive request is returned on
+         // the main thread.
+         dispatch_async(dispatch_get_main_queue(), ^{
+             completionBlock(result, error);
+         });
+     }];
+}
+
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
