@@ -98,7 +98,7 @@
     [super tearDown];
 }
 
-- (void)testDispatcherDefaultEvent
+- (void)testDispatcherEmpty
 {
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
@@ -111,26 +111,13 @@
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
-    // Verify results
-    XCTAssertEqual([receivedEvents count], 1);
+    NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     
-    NSDictionary *eventProperties = [receivedEvents objectAtIndex:0];
-    NSArray *eventPropertyNames = [eventProperties allKeys];
+    // Flush without adding any additional events
+    [[MSALTelemetry sharedInstance] flush:requestId];
     
-    XCTAssertEqual([eventPropertyNames count], 10);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.application_name"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.application_version"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.device_id"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.device_ip_address"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.event_name"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_cpu"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_dm"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_os"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_sku"]);
-    XCTAssertTrue([eventPropertyNames containsObject:@"msal.x_client_ver"]);
-    
-    XCTAssertTrue([[eventProperties objectForKey:@"msal.event_name"] compare:@"default_event"
-                                                                               options:NSCaseInsensitiveSearch] == NSOrderedSame);
+    // Verify that default event is not added in such case
+    XCTAssertEqual([receivedEvents count], 0);
 }
 
 - (void)testDispatcherAll
@@ -155,6 +142,8 @@
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
     MSALTelemetryAPIEvent *apiEvent = [[MSALTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:ctx];
     [apiEvent setProperty:@"api_property" value:@"api_value"];
+    [apiEvent setRequestId:requestId];
+    [apiEvent setCorrelationId:correlationId];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:apiEvent];
     
     // HTTP event
@@ -165,11 +154,29 @@
     
     [[MSALTelemetry sharedInstance] flush:requestId];
     
-    // Verify results
-    XCTAssertEqual([receivedEvents count], 2);
+    // Verify results: there should be 3 events (default, HTTP, API)
+    XCTAssertEqual([receivedEvents count], 3);
+    
+    // Default event
+    NSDictionary *defaultEventProperties = [receivedEvents objectAtIndex:0];
+    NSArray *defaultEventPropertyNames = [defaultEventProperties allKeys];
+    XCTAssertEqual([defaultEventPropertyNames count], 10);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_name"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_version"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_id"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_ip_address"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.event_name"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_cpu"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_dm"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_os"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_sku"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_ver"]);
+    
+    XCTAssertTrue([[defaultEventProperties objectForKey:@"msal.event_name"] compare:@"default_event"
+                                                                            options:NSCaseInsensitiveSearch] == NSOrderedSame);
     
     // API event
-    NSDictionary *apiEventProperties = [receivedEvents objectAtIndex:0];
+    NSDictionary *apiEventProperties = [receivedEvents objectAtIndex:1];
     NSArray *apiEventPropertyNames = [apiEventProperties allKeys];
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.stop_time"]);
@@ -183,13 +190,11 @@
                                                                      options:NSCaseInsensitiveSearch] == NSOrderedSame);
     
     // HTTP event
-    NSDictionary *httpEventProperties = [receivedEvents objectAtIndex:1];
+    NSDictionary *httpEventProperties = [receivedEvents objectAtIndex:2];
     NSArray *httpEventPropertyNames = [httpEventProperties allKeys];
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.stop_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.correlation_id"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.elapsed_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.request_id"]);
     
     XCTAssertTrue([[httpEventProperties objectForKey:@"msal.event_name"] compare:@"httpEvent"
                                                                                    options:NSCaseInsensitiveSearch] == NSOrderedSame);
@@ -222,9 +227,12 @@
     [[MSALTelemetry sharedInstance] flush:requestId];
     
     // Verify results
-    XCTAssertEqual([receivedEvents count], 1);
-    XCTAssertTrue([[[receivedEvents objectAtIndex:0] objectForKey:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE] compare:@"error_code_123"
-                                                                                                       options:NSCaseInsensitiveSearch] == NSOrderedSame);
+    XCTAssertEqual([receivedEvents count], 2);
+    
+    NSString *errorCode = [[receivedEvents objectAtIndex:1] objectForKey:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE];
+    
+    XCTAssertNotNil(errorCode);
+    XCTAssertTrue([errorCode compare:@"error_code_123" options:NSCaseInsensitiveSearch] == NSOrderedSame);
 }
 
 - (void)testDispatcherErrorOnlyWithoutError
