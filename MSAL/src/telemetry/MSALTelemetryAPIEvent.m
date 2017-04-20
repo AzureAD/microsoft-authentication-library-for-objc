@@ -130,10 +130,10 @@
 #pragma mark -
 #pragma mark log error
 
-- (void)setErrorCode:(NSInteger)errorCode
+- (void)setErrorCode:(MSALErrorCode)errorCode
 {
     self.errorInEvent = YES;
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:[NSString stringWithFormat:@"%ld", (long)errorCode]];
+    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:MSALStringForErrorCode(errorCode)];
 }
 
 - (void)setErrorDescription:(NSString *)errorDescription

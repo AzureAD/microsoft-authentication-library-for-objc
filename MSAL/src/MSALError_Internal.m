@@ -55,6 +55,9 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorNoViewController);
         STRING_CASE(MSALErrorInternal);
         STRING_CASE(MSALErrorUserNotFound);
+            
+        default:
+            return [NSString stringWithFormat:@"%ld", (long)code];
     }
 }
 

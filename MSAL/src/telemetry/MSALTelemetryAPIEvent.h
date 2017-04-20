@@ -35,7 +35,7 @@
 - (void)setUser:(MSALUser *)user;
 - (void)setClientId:(NSString *)clientId;
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
-- (void)setErrorCode:(NSInteger)errorCode;
+- (void)setErrorCode:(MSALErrorCode)errorCode;
 - (void)setProtocolCode:(NSString *)protocolCode;
 - (void)setErrorDescription:(NSString *)errorDescription;
 - (void)setErrorDomain:(NSString *)errorDomain;
