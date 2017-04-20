@@ -42,59 +42,95 @@
     } \
 }
 
-@implementation MSALTestTokenCacheItemUtil
+@implementation MSALAccessTokenCacheItem (TestExtensions)
 
-+ (BOOL)areAccessTokensEqual:(MSALAccessTokenCacheItem *)tokenA
-                      tokenB:(MSALAccessTokenCacheItem *)tokenB
+- (BOOL)isEqual:(id)object
 {
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.jsonDictionary, tokenB.jsonDictionary);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.authority, tokenB.authority);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.rawIdToken, tokenB.rawIdToken);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.tokenType, tokenB.tokenType);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.accessToken, tokenB.accessToken);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.expiresOn.description, tokenB.expiresOn.description);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.scope.msalToString, tokenB.scope.msalToString);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.displayableId, tokenB.user.displayableId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.name, tokenB.user.name);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.identityProvider, tokenB.user.identityProvider);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.uid, tokenB.user.uid);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.utid, tokenB.user.utid);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.environment, tokenB.user.environment);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.userIdentifier, tokenB.user.userIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.tenantId, tokenB.tenantId);
-    RETURN_NO_ON_OBJECT_UNEQUAL([NSNumber numberWithBool:tokenA.isExpired], [NSNumber numberWithBool:tokenB.isExpired]);
-    RETURN_NO_ON_OBJECT_UNEQUAL([tokenA tokenCacheKey:nil].service, [tokenB tokenCacheKey:nil].service);
-    RETURN_NO_ON_OBJECT_UNEQUAL([tokenA tokenCacheKey:nil].account, [tokenB tokenCacheKey:nil].account);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientId, tokenB.clientId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientInfo.uniqueIdentifier, tokenB.clientInfo.uniqueIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientInfo.uniqueTenantIdentifier, tokenB.clientInfo.uniqueTenantIdentifier);
+    if (!object)
+    {
+        return NO;
+    }
+    
+    if (![object isKindOfClass:[MSALAccessTokenCacheItem class]])
+    {
+        return NO;
+    }
+    
+    MSALAccessTokenCacheItem* item = (MSALAccessTokenCacheItem*)object;
+    
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.jsonDictionary, item.jsonDictionary);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.authority, item.authority);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.rawIdToken, item.rawIdToken);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.tokenType, item.tokenType);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.accessToken, item.accessToken);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.expiresOn.description, item.expiresOn.description);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.scope.msalToString, item.scope.msalToString);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.displayableId, item.user.displayableId);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.name, item.user.name);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.identityProvider, item.user.identityProvider);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.uid, item.user.uid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.utid, item.user.utid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.environment, item.user.environment);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.userIdentifier, item.user.userIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.tenantId, item.tenantId);
+    RETURN_NO_ON_OBJECT_UNEQUAL([NSNumber numberWithBool:self.isExpired], [NSNumber numberWithBool:item.isExpired]);
+    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
+    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueIdentifier, item.clientInfo.uniqueIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueTenantIdentifier, item.clientInfo.uniqueTenantIdentifier);
     
     return YES;
 }
 
-+ (BOOL)areRefreshTokensEqual:(MSALRefreshTokenCacheItem *)tokenA
-                       tokenB:(MSALRefreshTokenCacheItem *)tokenB
+- (NSUInteger)hash
 {
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.jsonDictionary, tokenB.jsonDictionary);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.environment, tokenB.environment);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.refreshToken, tokenB.refreshToken);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.displayableId, tokenB.user.displayableId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.name, tokenB.user.name);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.identityProvider, tokenB.user.identityProvider);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.uid, tokenB.user.uid);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.utid, tokenB.user.utid);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.environment, tokenB.user.environment);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.user.userIdentifier, tokenB.user.userIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL([tokenA tokenCacheKey:nil].service, [tokenB tokenCacheKey:nil].service);
-    RETURN_NO_ON_OBJECT_UNEQUAL([tokenA tokenCacheKey:nil].account, [tokenB tokenCacheKey:nil].account);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientId, tokenB.clientId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientInfo.uniqueIdentifier, tokenB.clientInfo.uniqueIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.clientInfo.uniqueTenantIdentifier, tokenB.clientInfo.uniqueTenantIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.displayableId, tokenB.displayableId);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.name, tokenB.name);
-    RETURN_NO_ON_OBJECT_UNEQUAL(tokenA.identityProvider, tokenB.identityProvider);
+    return [self.jsonDictionary hash];
+}
+
+@end
+
+@implementation MSALRefreshTokenCacheItem (TestExtensions)
+
+- (BOOL)isEqual:(id)object
+{
+    if (!object)
+    {
+        return NO;
+    }
+    
+    if (![object isKindOfClass:[MSALRefreshTokenCacheItem class]])
+    {
+        return NO;
+    }
+    
+    MSALRefreshTokenCacheItem* item = (MSALRefreshTokenCacheItem*)object;
+    
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.jsonDictionary, item.jsonDictionary);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.environment, item.environment);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.refreshToken, item.refreshToken);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.displayableId, item.user.displayableId);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.name, item.user.name);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.identityProvider, item.user.identityProvider);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.uid, item.user.uid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.utid, item.user.utid);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.environment, item.user.environment);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.user.userIdentifier, item.user.userIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
+    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueIdentifier, item.clientInfo.uniqueIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uniqueTenantIdentifier, item.clientInfo.uniqueTenantIdentifier);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.displayableId, item.displayableId);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.name, item.name);
+    RETURN_NO_ON_OBJECT_UNEQUAL(self.identityProvider, item.identityProvider);
     
     return YES;
+}
+
+- (NSUInteger)hash
+{
+    return [self.jsonDictionary hash];
 }
 
 @end

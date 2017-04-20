@@ -158,7 +158,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
     
     //compare AT with the AT retrieved from cache
-    XCTAssertTrue([MSALTestTokenCacheItemUtil areAccessTokensEqual:atItem tokenB:atItemInCache]);
+    XCTAssertEqualObjects(atItem, atItemInCache);
 }
 
 - (void)testSaveIdenticalATMultipleTimes_shouldReturnOnlyOneAT
@@ -245,7 +245,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNotNil(rtItemInCache);
     
     //compare RT with the RT retrieved from cache
-    XCTAssertTrue([MSALTestTokenCacheItemUtil areRefreshTokensEqual:rtItem tokenB:rtItemInCache]);
+    XCTAssertEqualObjects(rtItem, rtItemInCache);
 }
 
 - (void)testDeleteAccessToken

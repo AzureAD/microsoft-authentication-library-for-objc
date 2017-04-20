@@ -26,16 +26,3 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@class MSALAccessTokenCacheItem;
-@class MSALRefreshTokenCacheItem;
-
-@interface MSALTestTokenCacheItemUtil : NSObject
-
-+ (BOOL)areAccessTokensEqual:(MSALAccessTokenCacheItem *)tokenA
-                      tokenB:(MSALAccessTokenCacheItem *)tokenB;
-
-+ (BOOL)areRefreshTokensEqual:(MSALRefreshTokenCacheItem *)tokenA
-                       tokenB:(MSALRefreshTokenCacheItem *)tokenB;
-
-@end
