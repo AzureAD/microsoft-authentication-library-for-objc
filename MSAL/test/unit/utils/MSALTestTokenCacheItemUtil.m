@@ -74,8 +74,6 @@
     RETURN_NO_ON_OBJECT_UNEQUAL(self.user.userIdentifier, item.user.userIdentifier);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.tenantId, item.tenantId);
     RETURN_NO_ON_OBJECT_UNEQUAL([NSNumber numberWithBool:self.isExpired], [NSNumber numberWithBool:item.isExpired]);
-    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
-    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uid, item.clientInfo.uid);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.utid, item.clientInfo.utid);
@@ -116,8 +114,6 @@
     RETURN_NO_ON_OBJECT_UNEQUAL(self.user.utid, item.user.utid);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.user.environment, item.user.environment);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.user.userIdentifier, item.user.userIdentifier);
-    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].service, [item tokenCacheKey:nil].service);
-    RETURN_NO_ON_OBJECT_UNEQUAL([self tokenCacheKey:nil].account, [item tokenCacheKey:nil].account);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientId, item.clientId);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.uid, item.clientInfo.uid);
     RETURN_NO_ON_OBJECT_UNEQUAL(self.clientInfo.utid, item.clientInfo.utid);
