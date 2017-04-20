@@ -32,6 +32,5 @@
 - (void)showDialogForError:(NSError *)error;
 
 - (float)startY;
-- (float)endY;
 
 @end

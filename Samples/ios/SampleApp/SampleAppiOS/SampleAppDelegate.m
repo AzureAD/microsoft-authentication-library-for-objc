@@ -53,11 +53,6 @@
     
     _rootController = [UIViewController new];
     
-    //[_rootController addChildViewController:[SampleMainViewController sharedViewController]];
-    //[_rootController addChildViewController:[SampleLoginViewController sharedViewController]];
-    
-    
-    
     if ([SampleMSALUtil currentUser:nil])
     {
         [self setCurrentViewController:[SampleMainViewController sharedViewController]];
@@ -108,7 +103,6 @@
     {
         CGRect newInitialFrame = _rootController.view.frame;
         CGRect newEndFrame = _rootController.view.frame;
-
         
         float startYp = viewController.startY;
         float endY = startYp * newInitialFrame.size.height;

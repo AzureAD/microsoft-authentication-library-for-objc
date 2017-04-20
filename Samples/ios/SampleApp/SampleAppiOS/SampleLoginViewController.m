@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#import <MSAL/MSAL.h>
+
 #import "SampleLoginViewController.h"
 #import "SampleAppErrors.h"
 #import "SampleAppDelegate.h"
@@ -65,7 +67,12 @@
     {
         if (error)
         {
-            [self showDialogForError:error];
+            // Don't bother showing an error if the user cancels the sign in flow.
+            if (!([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorUserCanceled))
+            {
+                [self showDialogForError:error];
+            }
+            
             return;
         }
         

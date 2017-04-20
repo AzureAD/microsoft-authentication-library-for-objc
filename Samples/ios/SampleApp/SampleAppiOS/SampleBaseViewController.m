@@ -42,9 +42,7 @@
     
     [alert addAction:[UIAlertAction actionWithTitle:@"OK"
                                               style:UIAlertActionStyleDefault
-                                            handler:^(UIAlertAction * _Nonnull action)
-    {
-    }]];
+                                            handler:nil]];
     
     [self presentViewController:alert
                        animated:YES
