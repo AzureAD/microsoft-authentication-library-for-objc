@@ -169,9 +169,4 @@
     XCTAssertNil(keyA.account);
 }
 
-- (void)testAccessTokenCacheKeyAccount
-{
-    
-}
-
 @end
