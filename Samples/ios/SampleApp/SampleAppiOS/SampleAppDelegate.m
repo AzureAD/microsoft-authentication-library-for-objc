@@ -53,7 +53,7 @@
     
     _rootController = [UIViewController new];
     
-    if ([SampleMSALUtil currentUser:nil])
+    if ([[SampleMSALUtil sharedUtil] currentUser:nil])
     {
         [self setCurrentViewController:[SampleMainViewController sharedViewController]];
     }

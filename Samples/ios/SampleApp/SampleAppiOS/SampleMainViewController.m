@@ -75,7 +75,7 @@
     [self setUserPhoto:[UIImage imageNamed:@"no_photo"]];
     [self loadPhoto];
     
-    _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [SampleMSALUtil currentUser:nil].name];
+    _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [[SampleMSALUtil sharedUtil] currentUser:nil].name];
     _resultView.text = @"";
 }
 
@@ -119,7 +119,8 @@
 
 - (IBAction)acquireTokenSilent:(id)sender
 {
-    [SampleMSALUtil acquireTokenSilentForCurrentUser:^(NSString *token, NSError *error) {
+    [[SampleMSALUtil sharedUtil] acquireTokenSilentForCurrentUser:@[@"User.Read"]
+                                                  completionBlock:^(NSString *token, NSError *error) {
         [self setResultText:error token:token];
     }];
 }
@@ -127,14 +128,14 @@
 - (IBAction)acquireTokenInteractive:(id)sender
 
 {
-    [SampleMSALUtil acquireTokenInteractiveForCurrentUser:^(NSString *token, NSError *error) {
+    [[SampleMSALUtil sharedUtil] acquireTokenInteractiveForCurrentUser:^(NSString *token, NSError *error) {
         [self setResultText:error token:token];
     }];
 }
 
 - (IBAction)signOut:(id)sender
 {
-    [SampleMSALUtil signOut];
+    [[SampleMSALUtil sharedUtil] signOut];
     [SampleAppDelegate setCurrentViewController:[SampleLoginViewController sharedViewController]];
 }
 

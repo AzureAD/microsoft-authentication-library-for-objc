@@ -31,38 +31,43 @@
 
 @interface SampleMSALUtil : NSObject
 
++ (instancetype)sharedUtil;
+
 /*!
     Called during app intialization to set up app-wide MSAL properties.
  */
 + (void)setup;
 
-+ (NSString *)currentUserIdentifer;
+
+- (NSString *)currentUserIdentifer;
 
 /*!
     Returns the current user for the application
  */
-+ (MSALUser *)currentUser:(NSError * __autoreleasing *)error;
+- (MSALUser *)currentUser:(NSError * __autoreleasing *)error;
 
 /*!
     Signs in a user using MSAL.
  */
-+ (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock;
+- (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock;
 
 /*!
     Removes MSAL user state from the application.
  */
 
-+ (void)signOut;
+- (void)signOut;
 
 /*!
     Acquires a token to use against graph for the current user
  */
-+ (void)acquireTokenSilentForCurrentUser:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
+                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 /*!
     Acquires a token using an interactive flow for the current user. Used if
     the library returns MSALErrorInteractionRequired.
  */
-+ (void)acquireTokenInteractiveForCurrentUser:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
+                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 @end

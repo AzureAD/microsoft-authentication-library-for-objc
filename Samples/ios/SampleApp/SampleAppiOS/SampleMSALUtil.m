@@ -35,20 +35,32 @@
 
 @implementation SampleMSALUtil
 
++ (instancetype)sharedUtil
+{
+    static SampleMSALUtil *s_sharedUtil = nil;
+    static dispatch_once_t once;
+    
+    dispatch_once(&once, ^{
+        s_sharedUtil = [SampleMSALUtil new];
+    });
+    
+    return s_sharedUtil;
+}
+
 + (void)setup
 {
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
         // Log messages are played in both comtainsPII and not containsPII versions, so we only need
         // to capture one of them.
-        if (containsPII)
+        if (!containsPII)
         {
             NSLog(@"%@", message);
         }
     }];
 }
 
-+ (MSALPublicClientApplication *)clientApplication
+- (MSALPublicClientApplication *)createClientApplication
 {
     // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
     // go to the Microsoft App Portal (TODO: Name? Link?) to register your own applications with their own client
@@ -56,12 +68,12 @@
     return [[MSALPublicClientApplication alloc] initWithClientId:@"0615b6ca-88d4-4884-8729-b178178f7c27" error:nil];
 }
 
-+ (NSString *)currentUserIdentifer
+- (NSString *)currentUserIdentifer
 {
     return [[NSUserDefaults standardUserDefaults] stringForKey:CURRENT_USER_KEY];
 }
 
-+ (MSALUser *)currentUser:(NSError * __autoreleasing *)error
+- (MSALUser *)currentUser:(NSError * __autoreleasing *)error
 {
     // We retrieve our current user by checking for the userIdentifier that we stored in NSUserDefaults when
     // we first signed in the user.
@@ -84,7 +96,7 @@
     NSError *localError = nil;
     
     // Ask MSALPublicClientApplication object to retrieve the user from the cache.
-    MSALUser *user = [[self clientApplication] userForIdentifier:currentUserIdentifier error:&localError];
+    MSALUser *user = [[self createClientApplication] userForIdentifier:currentUserIdentifier error:&localError];
     
     // If we did not find a user because it wasn't found in the cache then that must mean someone else removed
     // the user underneath us, either due to multiple apps sharing a client ID, or due to the user restoring an
@@ -104,9 +116,9 @@
     return user;
 }
 
-+ (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock
+- (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock
 {
-    MSALPublicClientApplication *application = [self clientApplication];
+    MSALPublicClientApplication *application = [self createClientApplication];
     
     // When signing in a user for the first time we acquire a token without providing
     // a user object. If you've previously asked the user for an email address,
@@ -134,9 +146,10 @@
     }];
 }
 
-+ (void)acquireTokenSilentForCurrentUser:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
+                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
-    MSALPublicClientApplication *application = [self clientApplication];
+    MSALPublicClientApplication *application = [self createClientApplication];
     
     NSError *error = nil;
     MSALUser *currentUser = [self currentUser:&error];
@@ -153,7 +166,7 @@
     NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentUser.utid];
     
     
-    [application acquireTokenSilentForScopes:@[@"User.Read"]
+    [application acquireTokenSilentForScopes:scopes
                                         user:currentUser
                                    authority:homeAuthority
                                 forceRefresh:NO
@@ -164,9 +177,10 @@
     }];
 }
 
-+ (void)acquireTokenInteractiveForCurrentUser:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
+                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
-    MSALPublicClientApplication *application = [self clientApplication];
+    MSALPublicClientApplication *application = [self createClientApplication];
     
     NSError *error = nil;
     MSALUser *currentUser = [self currentUser:&error];
@@ -186,10 +200,10 @@
      }];
 }
 
-+ (void)signOut
+- (void)signOut
 
 {
-    MSALPublicClientApplication *application = [self clientApplication];
+    MSALPublicClientApplication *application = [self createClientApplication];
     MSALUser *currentUser = [self currentUser:nil];
     [self cleanupLocalState];
     
@@ -205,7 +219,7 @@
     
 }
 
-+ (void)cleanupLocalState
+- (void)cleanupLocalState
 {
     [SamplePhotoUtil clearPhotoCache];
     

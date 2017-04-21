@@ -102,7 +102,14 @@
 
 + (void)getUserPhotoImpl:(PhotoBlock)photoBlock
 {
-    [SampleMSALUtil acquireTokenSilentForCurrentUser:^(NSString *token, NSError *error)
+    // When acquiring a token silently for a specific purpose you should limit the scopes
+    // you ask for to just the ones needed for that operation. A user or admin might not
+    // consent to all of the scopes asked for, and core application functionality should
+    // not be blocked on not having consent for edge features.
+    __block NSArray *scopesRequired = @[@"User.Read"];
+    
+    [[SampleMSALUtil sharedUtil] acquireTokenSilentForCurrentUser:scopesRequired
+                                                  completionBlock:^(NSString *token, NSError *error)
      {
          if (error)
          {
@@ -112,7 +119,8 @@
              // acquireTokenInteractive flow.
              if ([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
              {
-                 [SampleMSALUtil acquireTokenInteractiveForCurrentUser:^(NSString *token, NSError *error)
+                 [[SampleMSALUtil sharedUtil] acquireTokenInteractiveForCurrentUser:scopesRequired
+                                                                    completionBlock:^(NSString *token, NSError *error)
                   {
                       if (error)
                       {
@@ -163,7 +171,7 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
 
 + (NSString *)cachedImagePath
 {
-    return [NSString stringWithFormat:@"%@/%@", [self cachedImageDirectory], [SampleMSALUtil currentUserIdentifer]];
+    return [NSString stringWithFormat:@"%@/%@", [self cachedImageDirectory], [[SampleMSALUtil sharedUtil] currentUserIdentifer]];
 }
 
 + (UIImage *)checkPhotoCache
