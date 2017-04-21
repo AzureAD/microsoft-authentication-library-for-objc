@@ -415,7 +415,7 @@
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
-    params.urlSession = [MSALURLSession createMSALSesssion:params];
+    params.urlSession = [MSALURLSession createMSALSession:params];
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
@@ -472,7 +472,7 @@
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
-    params.urlSession = [MSALURLSession createMSALSesssion:params];
+    params.urlSession = [MSALURLSession createMSALSession:params];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];

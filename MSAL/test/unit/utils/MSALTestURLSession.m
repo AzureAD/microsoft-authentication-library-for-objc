@@ -373,7 +373,10 @@ static NSMutableArray *s_responses = nil;
 #pragma mark - NSURLSession
 
 // Invalidate
-- (void)invalidateAndCancel{}
+- (void)invalidateAndCancel
+{
+    // No need to invalidate anything here.
+}
 
 
 // Runtime methods for NSURLSession, needs to declare since this is a NSObject, not :NSURLSession
