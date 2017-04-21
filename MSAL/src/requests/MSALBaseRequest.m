@@ -188,7 +188,7 @@ static MSALScopes *s_reservedScopes = nil;
          {
              MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
              
-             NSError *msalError = MSALCreateAndLogError(_parameters, code, oauthError, tokenResponse.subError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription);
+             NSError *msalError = CREATE_LOG_ERROR_WITH_SUBERRORS(_parameters, code, oauthError, tokenResponse.subError, @"%@", tokenResponse.errorDescription);
              
              [self stopTelemetryEvent:event error:msalError];
              
