@@ -371,6 +371,11 @@ static NSMutableArray *s_responses = nil;
 
 
 #pragma mark - NSURLSession
+
+// Invalidate
+- (void)invalidateAndCancel{}
+
+
 // Runtime methods for NSURLSession, needs to declare since this is a NSObject, not :NSURLSession
 // For now though, of no real usage
 - (void)set_isSharedSession:(BOOL)shared
