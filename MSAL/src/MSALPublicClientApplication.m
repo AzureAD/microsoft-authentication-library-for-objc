@@ -373,7 +373,6 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.component = _component;
     params.apiId = apiId;
@@ -416,6 +415,7 @@
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
+    params.urlSession = [MSALURLSession createMSALSession:params];
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
@@ -424,11 +424,15 @@
                                                  error:&error];
     if (!request)
     {
+        [params.urlSession invalidateAndCancel];
         completionBlock(nil, error);
         return;
     }
     
-    [request run:completionBlock];
+    [request run:^(MSALResult *result, NSError *error) {
+        [params.urlSession invalidateAndCancel];
+        completionBlock(result, error);
+    }];
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -440,7 +444,6 @@
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.urlSession = [MSALURLSession createMSALSesssion:params];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.user = user;
     params.apiId = apiId;
@@ -469,17 +472,22 @@
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.tokenCache = _tokenCache;
-    
+    params.urlSession = [MSALURLSession createMSALSession:params];
+
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
     
     if (!request)
     {
+        [params.urlSession invalidateAndCancel];
         completionBlock(nil, error);
         return;
     }
     
-    [request run:completionBlock];
+    [request run:^(MSALResult *result, NSError *error) {
+        [params.urlSession invalidateAndCancel];
+        completionBlock(result, error);
+    }];
 }
 
 #pragma mark -

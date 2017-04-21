@@ -29,6 +29,6 @@
 
 @interface MSALURLSession : NSObject
 
-+ (NSURLSession *)createMSALSesssion:(id<MSALRequestContext>)context;
++ (NSURLSession *)createMSALSession:(id<MSALRequestContext>)context;
 
 @end
