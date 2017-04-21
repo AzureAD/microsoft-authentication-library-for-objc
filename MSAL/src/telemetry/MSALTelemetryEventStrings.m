@@ -47,7 +47,7 @@ NSString *const MSAL_TELEMETRY_KEY_TENANT_ID                    = @"msal.tenant_
 NSString *const MSAL_TELEMETRY_KEY_USER_ID                      = @"msal.user_id";
 NSString *const MSAL_TELEMETRY_KEY_START_TIME                   = @"msal.start_time";
 NSString *const MSAL_TELEMETRY_KEY_END_TIME                     = @"msal.stop_time";
-NSString *const MSAL_TELEMETRY_KEY_ELAPSED_TIME                = @"msal.elapsed_time";
+NSString *const MSAL_TELEMETRY_KEY_ELAPSED_TIME                 = @"msal.elapsed_time";
 NSString *const MSAL_TELEMETRY_KEY_DEVICE_ID                    = @"msal.device_id";
 NSString *const MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS            = @"msal.device_ip_address";
 NSString *const MSAL_TELEMETRY_KEY_APPLICATION_NAME             = @"msal.application_name";
@@ -86,6 +86,7 @@ NSString *const MSAL_TELEMETRY_KEY_GRANT_TYPE                   = @"msal.grant_t
 NSString *const MSAL_TELEMETRY_KEY_API_STATUS                   = @"msal.api_status";
 NSString *const MSAL_TELEMETRY_KEY_REQUEST_ID                   = @"msal.request_id";
 NSString *const MSAL_TELEMETRY_KEY_USER_CANCEL                  = @"msal.user_cancel";
+NSString *const MSAL_TELEMETRY_KEY_TENANT_SCRUBBED_VALUE        = @"<tenant>";
 
 // Telemetry property value
 NSString *const MSAL_TELEMETRY_VALUE_YES                             = @"yes";

@@ -258,8 +258,14 @@ static MSALScopes *s_reservedScopes = nil;
     [event setCorrelationId:_parameters.correlationId];
     [event setRequestId:_parameters.telemetryRequestId];
     [event setAuthorityType:_authority.authorityType];
-    [event setAuthority:_parameters.unvalidatedAuthority.absoluteString];
+    [event setAuthority:_parameters.unvalidatedAuthority];
     [event setClientId:_parameters.clientId];
+    
+    // Login hint is an optional parameter and might not be present
+    if (_parameters.loginHint)
+    {
+        [event setLoginHint:_parameters.loginHint];
+    }
     
     return event;
 }

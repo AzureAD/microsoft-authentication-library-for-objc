@@ -28,4 +28,7 @@
 // Returns a string that contains host and the port, if specified
 - (NSString *)msalHostWithPort;
 
+// Returns a path with any tenant info removed from it
+- (NSString *)scrubbedHttpPath;
+
 @end

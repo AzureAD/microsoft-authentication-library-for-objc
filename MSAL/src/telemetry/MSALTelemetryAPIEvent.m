@@ -24,6 +24,7 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTelemetryAPIEvent
 
@@ -50,6 +51,11 @@
 - (void)setClientId:(NSString *)clientId
 {
     [self setProperty:MSAL_TELEMETRY_KEY_CLIENT_ID value:clientId];
+}
+
+- (void)setLoginHint:(NSString *)loginHint
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[loginHint msalComputeSHA256Hex]];
 }
 
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken
@@ -90,9 +96,9 @@
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityTypeString];
 }
 
-- (void)setAuthority:(NSString *)authority
+- (void)setAuthority:(NSURL *)authority
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authority];
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:[authority scrubbedHttpPath]];
 }
 
 - (void)setGrantType:(NSString *)grantType

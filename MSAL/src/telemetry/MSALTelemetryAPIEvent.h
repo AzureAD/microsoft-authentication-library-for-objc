@@ -34,6 +34,7 @@
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
 - (void)setUser:(MSALUser *)user;
 - (void)setClientId:(NSString *)clientId;
+- (void)setLoginHint:(NSString *)loginHint;
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
 - (void)setErrorCode:(MSALErrorCode)errorCode;
 - (void)setProtocolCode:(NSString *)protocolCode;
@@ -42,7 +43,7 @@
 
 - (void)setAuthorityValidationStatus:(NSString *)status;
 - (void)setAuthorityType:(MSALAuthorityType)authorityType;
-- (void)setAuthority:(NSString *)authority;
+- (void)setAuthority:(NSURL *)authority;
 
 - (void)setGrantType:(NSString *)grantType;
 - (void)setAPIStatus:(NSString *)status;
