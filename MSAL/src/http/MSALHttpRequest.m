@@ -49,7 +49,6 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
     NSMutableDictionary<NSString *, NSString *> *_headers;
     NSMutableDictionary *_queryParameters;
     
-    //TODO: move to seperate settings? - MSALAuthenticationSettings.h
     NSTimeInterval _timeOutInterval;
     NSURLRequestCachePolicy _cachePolicy;
 }
@@ -165,8 +164,6 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
         bodyData = [[_bodyParameters msalURLFormEncode] dataUsingEncoding:NSUTF8StringEncoding];
         [self setContentTypeFormURLEncoded];
     }
-    
-    // TODO: Add client version to URL
     
     newURL = newURL? newURL : _endpointURL;
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:newURL
