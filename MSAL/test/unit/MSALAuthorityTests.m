@@ -213,7 +213,7 @@
     XCTAssertNil([MSALAuthority authorityFromCache:[NSURL URLWithString:@"https://somehost.com/"] userPrincipalName:nil]);
 }
 
-- (void)testResolveEndpointsSuccess
+- (void)testResolveEndpointsForAuthority_whenNormalAad_shouldPass
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
@@ -283,7 +283,7 @@
      }];
 }
 
-- (void)testResolveEndpointsOpenIDConfigError
+- (void)testResolveEndpointsForAuthority_whenOpenIDConfigError_shouldFail
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -325,7 +325,7 @@
      }];
 }
 
-- (void)testResolveEndpointWithTenantEndpointError
+- (void)testResolveEndpointsForAuthority_whenTenantEndpointError_shouldFail
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -381,6 +381,32 @@
      {
          (void)error;
      }];
+}
+
+// For preview, AD FS as authority is not supported
+- (void)testResolveEndpointsForAuthority_whenAdfsAuthority_shouldFail
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    NSURL *adfsAuthority = [NSURL URLWithString:@"https://somehost.com/adfs/"];
+    
+    [MSALAuthority resolveEndpointsForAuthority:adfsAuthority
+                              userPrincipalName:nil
+                                       validate:YES
+                                        context:nil
+                                completionBlock:^(MSALAuthority *authority, NSError *error)
+     {
+         XCTAssertNil(authority);
+         XCTAssertNotNil(error);
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0
+                                 handler:^(NSError * _Nullable error)
+     {
+         (void)error;
+     }];
+
 }
 
 @end

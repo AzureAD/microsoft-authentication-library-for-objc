@@ -40,8 +40,9 @@
     (void)validate;
     (void)context;
     (void)completionBlock;
-    @throw @"TODO";
-
+    
+    NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"AD FS as authority is not supported for preview");
+    completionBlock(nil, error);
 }
 
 - (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority
