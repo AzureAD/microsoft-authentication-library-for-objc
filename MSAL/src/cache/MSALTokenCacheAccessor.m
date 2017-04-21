@@ -168,8 +168,6 @@
         }
     }
     
-    [event setIsRT:MSAL_TELEMETRY_VALUE_NO];
-    
     if (matchedTokens.count == 0)
     {
         LOG_WARN(ctx, @"No access token found.");
@@ -251,7 +249,6 @@
                                                                            userIdentifier:requestParam.user.userIdentifier];
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
     
-    [event setIsRT:MSAL_TELEMETRY_VALUE_YES];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
     
     return item;
