@@ -45,8 +45,6 @@
 - (void)setUser:(MSALUser *)user
 {
     [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256Hex]];
-    //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256Hex]];
-    [self setProperty:MSAL_TELEMETRY_KEY_IDP value:[user identityProvider]];
 }
 
 - (void)setClientId:(NSString *)clientId
@@ -69,7 +67,7 @@
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_VALIDATION_STATUS value:status];
 }
 
-- (void)setAuthority:(MSALAuthorityType)authorityType
+- (void)setAuthorityType:(MSALAuthorityType)authorityType
 {
     NSString *authorityTypeString;
     
@@ -90,6 +88,11 @@
     }
     
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityTypeString];
+}
+
+- (void)setAuthority:(NSString *)authority
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authority];
 }
 
 - (void)setGrantType:(NSString *)grantType

@@ -41,7 +41,8 @@
 - (void)setErrorDomain:(NSString *)errorDomain;
 
 - (void)setAuthorityValidationStatus:(NSString *)status;
-- (void)setAuthority:(MSALAuthorityType)authorityType;
+- (void)setAuthorityType:(MSALAuthorityType)authorityType;
+- (void)setAuthority:(NSString *)authority;
 
 - (void)setGrantType:(NSString *)grantType;
 - (void)setAPIStatus:(NSString *)status;
