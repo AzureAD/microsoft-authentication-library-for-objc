@@ -152,7 +152,7 @@ static NSDateFormatter *s_dateFormatter = nil;
         UIDevice* device = [UIDevice currentDevice];
         NSMutableDictionary* result = [NSMutableDictionary dictionaryWithDictionary:
                                        @{
-                                         MSAL_ID_PLATFORM:@"iOS",
+                                         MSAL_ID_PLATFORM:@"MSAL.iOS",
                                          MSAL_ID_VERSION:@MSAL_VERSION_STRING,
                                          MSAL_ID_OS_VER:device.systemVersion,
                                          MSAL_ID_DEVICE_MODEL:device.model,//Prints out only "iPhone" or "iPad".
@@ -161,7 +161,7 @@ static NSDateFormatter *s_dateFormatter = nil;
         NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
         NSMutableDictionary* result = [NSMutableDictionary dictionaryWithDictionary:
                                        @{
-                                         MSAL_ID_PLATFORM:@"OSX",
+                                         MSAL_ID_PLATFORM:@"MSAL.OSX",
                                          MSAL_ID_VERSION:@MSAL_VERSION_STRING,
                                          MSAL_ID_OS_VER:[NSString stringWithFormat:@"%ld.%ld.%ld", (long)osVersion.majorVersion, (long)osVersion.minorVersion, (long)osVersion.patchVersion],
                                          }];
