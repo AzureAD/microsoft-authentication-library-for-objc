@@ -33,6 +33,7 @@
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALUSer.h"
 #import "MSALClientInfo.h"
+#import "NSURL+MSALExtensions.h"
 
 @interface MSALTokenCacheItemTests : XCTestCase
 
@@ -79,8 +80,8 @@
     XCTAssertEqualObjects(atItem.user.uid, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
     XCTAssertEqualObjects(atItem.user.utid, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
     XCTAssertEqualObjects(atItem.user.environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueIdentifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueTenantIdentifier, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(atItem.clientInfo.uid, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(atItem.clientInfo.utid, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
 - (void)testBadAccessTokenInit {
@@ -107,8 +108,8 @@
     XCTAssertEqualObjects(rtItem.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(rtItem.clientId, @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc");
     XCTAssertEqualObjects(rtItem.identityProvider, @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/v2.0");
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueIdentifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueTenantIdentifier, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(rtItem.clientInfo.uid, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(rtItem.clientInfo.utid, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
     XCTAssertEqualObjects(rtItem.displayableId, @"user@msdevex.onmicrosoft.com");
     XCTAssertEqualObjects(rtItem.name, @"Simple User");
     XCTAssertEqualObjects(rtItem.user.displayableId, @"user@msdevex.onmicrosoft.com");
@@ -133,6 +134,39 @@
                                                                            response:nil];
     
     XCTAssertThrows([item user]);
+}
+
+- (void)testTokenCacheKeyBaseService
+{
+    MSALTokenCacheKeyBase *keyBase = [MSALTokenCacheKeyBase new];
+    XCTAssertThrows(keyBase.service);
+}
+
+- (void)testTokenCacheKeyBaseAccount
+{
+    MSALTokenCacheKeyBase *keyBase = [MSALTokenCacheKeyBase new];
+    XCTAssertThrows(keyBase.account);
+}
+
+- (void)testRefreshTokenCacheKeyMatch
+{
+    NSURL *testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
+    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+                                                                                  clientId:@"123-456"
+                                                                            userIdentifier:nil];
+    MSALRefreshTokenCacheKey *keyB = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+                                                                                  clientId:@"123-456"
+                                                                            userIdentifier:@"abcde"];
+    XCTAssertTrue([keyA matches:keyB]);
+}
+
+- (void)testRefreshTokenCacheKeyAccount
+{
+    NSURL *testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
+    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+                                                                                  clientId:@"123-456"
+                                                                            userIdentifier:nil];
+    XCTAssertNil(keyA.account);
 }
 
 @end

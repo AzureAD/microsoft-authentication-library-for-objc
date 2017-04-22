@@ -30,7 +30,7 @@
 
 @implementation MSALURLSession
 
-+ (NSURLSession *)createMSALSesssion:(id<MSALRequestContext>)context
++ (NSURLSession *)createMSALSession:(id<MSALRequestContext>)context
 {
     MSALURLSessionDelegate *delegate = [[MSALURLSessionDelegate alloc] initWithContext:context];
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];

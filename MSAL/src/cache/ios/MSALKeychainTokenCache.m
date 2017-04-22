@@ -222,7 +222,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         return nil;
     }
     
-    return [MSALKeychainTokenCache refreshTokenItemFromKeychainAttributes:(__bridge NSDictionary *)item context:ctx error:error];;
+    return [MSALKeychainTokenCache refreshTokenItemFromKeychainAttributes:CFBridgingRelease(item) context:ctx error:error];;
 }
 
 - (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId

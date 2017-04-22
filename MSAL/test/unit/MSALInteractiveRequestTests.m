@@ -385,7 +385,10 @@
          dispatch_semaphore_signal(dsem);
      }];
     
-    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
 }
 
 - (void)testInteractiveRequestFlowWithUser
@@ -544,7 +547,10 @@
          dispatch_semaphore_signal(dsem);
      }];
     
-    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
 }
 
 - (void)testInteractiveRequestFlowWithUserNotMatch
@@ -695,6 +701,9 @@
          dispatch_semaphore_signal(dsem);
      }];
     
-    dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
 }
 @end

@@ -32,6 +32,7 @@
 #import "MSALClientInfo.h"
 
 #import "MSALTestIdTokenUtil.h"
+#import "MSALTestTokenCacheItemUtil.h"
 
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSURL+MSALExtensions.h"
@@ -157,27 +158,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
     
     //compare AT with the AT retrieved from cache
-    XCTAssertEqualObjects(atItem.jsonDictionary, atItemInCache.jsonDictionary);
-    XCTAssertEqualObjects(atItem.authority, atItemInCache.authority);
-    XCTAssertEqualObjects(atItem.rawIdToken, atItemInCache.rawIdToken);
-    XCTAssertEqualObjects(atItem.tokenType, atItemInCache.tokenType);
-    XCTAssertEqualObjects(atItem.accessToken, atItemInCache.accessToken);
-    XCTAssertEqualObjects(atItem.expiresOn.description, atItemInCache.expiresOn.description);
-    XCTAssertEqualObjects(atItem.scope.msalToString, atItemInCache.scope.msalToString);
-    XCTAssertEqualObjects(atItem.user.displayableId, atItemInCache.user.displayableId);
-    XCTAssertEqualObjects(atItem.user.name, atItemInCache.user.name);
-    XCTAssertEqualObjects(atItem.user.identityProvider, atItemInCache.user.identityProvider);
-    XCTAssertEqualObjects(atItem.user.uid, atItemInCache.user.uid);
-    XCTAssertEqualObjects(atItem.user.utid, atItemInCache.user.utid);
-    XCTAssertEqualObjects(atItem.user.environment, atItemInCache.user.environment);
-    XCTAssertEqualObjects(atItem.user.userIdentifier, atItemInCache.user.userIdentifier);
-    XCTAssertEqualObjects(atItem.tenantId, atItemInCache.tenantId);
-    XCTAssertTrue(atItem.isExpired==atItemInCache.isExpired);
-    XCTAssertEqualObjects([atItem tokenCacheKey:nil].service, [atItemInCache tokenCacheKey:nil].service);
-    XCTAssertEqualObjects([atItem tokenCacheKey:nil].account, [atItemInCache tokenCacheKey:nil].account);
-    XCTAssertEqualObjects(atItem.clientId, atItemInCache.clientId);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueIdentifier, atItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(atItem.clientInfo.uniqueTenantIdentifier, atItemInCache.clientInfo.uniqueTenantIdentifier);
+    XCTAssertEqualObjects(atItem, atItemInCache);
 }
 
 - (void)testSaveIdenticalATMultipleTimes_shouldReturnOnlyOneAT
@@ -264,24 +245,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNotNil(rtItemInCache);
     
     //compare RT with the RT retrieved from cache
-    XCTAssertEqualObjects(rtItem.jsonDictionary, rtItemInCache.jsonDictionary);
-    XCTAssertEqualObjects(rtItem.environment, rtItemInCache.environment);
-    XCTAssertEqualObjects(rtItem.refreshToken, rtItemInCache.refreshToken);
-    XCTAssertEqualObjects(rtItem.user.displayableId, rtItemInCache.user.displayableId);
-    XCTAssertEqualObjects(rtItem.user.name, rtItemInCache.user.name);
-    XCTAssertEqualObjects(rtItem.user.identityProvider, rtItemInCache.user.identityProvider);
-    XCTAssertEqualObjects(rtItem.user.uid, rtItemInCache.user.uid);
-    XCTAssertEqualObjects(rtItem.user.utid, rtItemInCache.user.utid);
-    XCTAssertEqualObjects(rtItem.user.environment, rtItemInCache.user.environment);
-    XCTAssertEqualObjects(rtItem.user.userIdentifier, rtItemInCache.user.userIdentifier);
-    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].service, [rtItemInCache tokenCacheKey:nil].service);
-    XCTAssertEqualObjects([rtItem tokenCacheKey:nil].account, [rtItemInCache tokenCacheKey:nil].account);
-    XCTAssertEqualObjects(rtItem.clientId, rtItemInCache.clientId);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueIdentifier, rtItemInCache.clientInfo.uniqueIdentifier);
-    XCTAssertEqualObjects(rtItem.clientInfo.uniqueTenantIdentifier, rtItemInCache.clientInfo.uniqueTenantIdentifier);
-    XCTAssertEqualObjects(rtItem.displayableId, rtItemInCache.displayableId);
-    XCTAssertEqualObjects(rtItem.name, rtItemInCache.name);
-    XCTAssertEqualObjects(rtItem.identityProvider, rtItemInCache.identityProvider);
+    XCTAssertEqualObjects(rtItem, rtItemInCache);
 }
 
 - (void)testDeleteAccessToken
@@ -330,5 +294,45 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
 }
 
+- (void)testRemoveAllTokensForUserIdentifier
+{
+    //save AT/RT for user 1
+    NSError *error = nil;
+    MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
+                                                                                  clientId:_testClientId
+                                                                                  response:_testTokenResponse];
+    XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem context:nil error:&error]);
+    XCTAssertNil(error);
+    
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+                                                                                      clientId:_testClientId
+                                                                                      response:_testTokenResponse];
+    XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:&error]);
+    XCTAssertNil(error);
+    
+    //save AT/RT for user 2
+    MSALAccessTokenCacheItem *atItem2 = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
+                                                                                   clientId:_testClientId
+                                                                                   response:_testTokenResponse2];
+    XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:&error]);
+    XCTAssertNil(error);
+    
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+                                                                                       clientId:_testClientId
+                                                                                       response:_testTokenResponse2];
+    XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem2 context:nil error:&error]);
+    XCTAssertNil(error);
+    
+    //there should be 2 ATs and 2 RTs in cache
+    XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 2);
+    XCTAssertEqual([_dataSource allRefreshTokens:nil context:nil error:nil].count, 2);
+    
+    //delete tokens for user 1
+    XCTAssertTrue([_dataSource removeAllTokensForUserIdentifier:_userIdentifier1 environment:_testAuthority.msalHostWithPort clientId:_testClientId context:nil error:&error]);
+    
+    //there should be one AT and one RT left in cache
+    XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 1);
+    XCTAssertEqual([_dataSource allRefreshTokens:nil context:nil error:nil].count, 1);
+}
 
 @end

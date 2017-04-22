@@ -26,9 +26,3 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@interface MSALURLSession : NSObject
-
-+ (NSURLSession *)createMSALSession:(id<MSALRequestContext>)context;
-
-@end
