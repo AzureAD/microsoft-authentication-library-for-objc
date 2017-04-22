@@ -51,8 +51,10 @@
 {
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
-        // Log messages are played in both comtainsPII and not containsPII versions, so we only need
-        // to capture one of them.
+        // When capturing log messages from MSAL you only need to capture either messages where
+        // containsPII == YES or containsPII == NO, as log messages are duplicated between the
+        // two, however the containsPII version might contain Personally Identifiable Information (PII)
+        // about the user being logged in.
         if (!containsPII)
         {
             NSLog(@"%@", message);
@@ -90,7 +92,6 @@
         return nil;
     }
     
-    
     // Because error is an optional parameter we need to pass in our own error pointer to make sure we get
     // an error back so we can inspect it after.
     NSError *localError = nil;
@@ -123,6 +124,10 @@
     // When signing in a user for the first time we acquire a token without providing
     // a user object. If you've previously asked the user for an email address,
     // or phone number you can provide that as a "login hint."
+    
+    // Request as many scopes as possible up front that you know your application will
+    // want to use so the service can request consent for them up front and minimize
+    // how much users are interrupted for interactive auth.
     [application acquireTokenForScopes:@[@"User.Read"]
                        completionBlock:^(MSALResult *result, NSError *error)
     {
@@ -164,7 +169,6 @@
     // for graph in this sample it's best to specify the user's home authority to remove any possibility of there
     // being any ambiquity in the cache lookup.
     NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentUser.utid];
-    
     
     [application acquireTokenSilentForScopes:scopes
                                         user:currentUser
