@@ -128,7 +128,8 @@
 - (IBAction)acquireTokenInteractive:(id)sender
 
 {
-    [[SampleMSALUtil sharedUtil] acquireTokenInteractiveForCurrentUser:^(NSString *token, NSError *error) {
+    [[SampleMSALUtil sharedUtil] acquireTokenInteractiveForCurrentUser:@[@"User.Read"]
+                                                       completionBlock:^(NSString *token, NSError *error) {
         [self setResultText:error token:token];
     }];
 }
