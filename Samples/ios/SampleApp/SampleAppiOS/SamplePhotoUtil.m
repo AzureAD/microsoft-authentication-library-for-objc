@@ -44,9 +44,23 @@
 
 
 @implementation SamplePhotoUtil
+{
+    UIImage *_currentUserPhoto;
+}
 
++ (instancetype)sharedUtil
+{
+    static SamplePhotoUtil *s_sharedUtil = nil;
+    static dispatch_once_t once;
+    
+    dispatch_once(&once, ^{
+        s_sharedUtil = [SamplePhotoUtil new];
+    });
+    
+    return s_sharedUtil;
+}
 
-+ (void)getPhoto:(NSString *)token
+- (void)getPhoto:(NSString *)token
            block:(PhotoBlock)photoBlock
 {
     
@@ -58,9 +72,9 @@
             return;
         }
         
+        [self setLastChecked];
         if (!data)
         {
-            [self setLastChecked];
             NSLog(@"No data returned from graph for photo");
             photoBlock([UIImage imageNamed:@"no_photo"], nil);
             return;
@@ -76,19 +90,15 @@
         }
         
         [self cachePhoto:data];
-        
-        
-            photoBlock(image, nil);
+        _currentUserPhoto = image;
+        photoBlock(image, nil);
     }];
 }
 
-+ (void)getUserPhoto:(PhotoBlock)photoBlock
+- (void)checkUpdatePhoto:(PhotoBlock)photoBlock
 {
-    // Start by checking if we have a cached image available for this user
-    UIImage *cached = [self checkPhotoCache];
-    if (cached)
+    if (![self checkTimestamp])
     {
-        photoBlock(cached, nil);
         return;
     }
     
@@ -100,7 +110,7 @@
      }];
 }
 
-+ (void)getUserPhotoImpl:(PhotoBlock)photoBlock
+- (void)getUserPhotoImpl:(PhotoBlock)photoBlock
 {
     // When acquiring a token silently for a specific purpose you should limit the scopes
     // you ask for to just the ones needed for that operation. A user or admin might not
@@ -145,7 +155,7 @@
 
 static NSString * const kLastPhotoCheck = @"last_photo_check";
 
-+ (void)clearPhotoCache
+- (void)clearPhotoCache
 {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:kLastPhotoCheck];
     
@@ -154,54 +164,78 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
     {
         NSLog(@"Failed to remove cache file: %@", error);
     }
+    
+    _currentUserPhoto = nil;
 }
 
-+ (void)setLastChecked
+- (void)setLastChecked
 {
     [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kLastPhotoCheck];
 }
 
 #define SECONDS_PER_DAY 3600 * 24
 
-+ (NSString *)cachedImageDirectory
+- (NSString *)cachedImageDirectory
 {
     NSArray<NSString *> *directories = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     return [NSString stringWithFormat:@"%@/com.microsoft.MSALSampleApp/userphoto", directories[0]];
 }
 
-+ (NSString *)cachedImagePath
+- (NSString *)cachedImagePath
 {
     return [NSString stringWithFormat:@"%@/%@", [self cachedImageDirectory], [[SampleMSALUtil sharedUtil] currentUserIdentifer]];
 }
 
-+ (UIImage *)checkPhotoCache
+- (BOOL)checkTimestamp
 {
     NSString *cachedImagePath = [self cachedImagePath];
     if (!cachedImagePath)
     {
-        return nil;
+        return YES;
+    }
+    
+    NSDate *lastChecked = [[NSUserDefaults standardUserDefaults] objectForKey:kLastPhotoCheck];
+    if (!lastChecked)
+    {
+        return YES;
+    }
+    
+    BOOL cachedFileExists = [[NSFileManager defaultManager] fileExistsAtPath:cachedImagePath];
+    if (cachedFileExists)
+    {
+        return (-[lastChecked timeIntervalSinceNow] > SECONDS_PER_DAY * 7);
+    }
+    else
+    {
+        return (-[lastChecked timeIntervalSinceNow] > SECONDS_PER_DAY);
+    }
+}
+
+- (UIImage *)cachedPhoto
+{
+    if (_currentUserPhoto)
+    {
+        return _currentUserPhoto;
+    }
+    
+    NSString *cachedImagePath = [self cachedImagePath];
+    if (!cachedImagePath)
+    {
+        _currentUserPhoto = [UIImage imageNamed:@"no_photo"];
+        return _currentUserPhoto;
     }
     
     UIImage *cachedImage = [UIImage imageWithContentsOfFile:cachedImagePath];
-    NSDate *lastChecked = [[NSUserDefaults standardUserDefaults] objectForKey:kLastPhotoCheck];
     if (!cachedImage)
     {
-        // If we never had an image don't check more then once a day...?
-        if (lastChecked && [lastChecked timeIntervalSinceNow] < SECONDS_PER_DAY)
-        {
-            return [UIImage imageNamed:@"no_photo"];
-        }
-    }
-    else if ([lastChecked timeIntervalSinceNow] < SECONDS_PER_DAY * 7)
-    {
-        // If we've checked in less then 7 days just return the cached image
-        return cachedImage;
+        cachedImage = [UIImage imageNamed:@"no_photo"];
     }
     
+    _currentUserPhoto = cachedImage;
     return cachedImage;
 }
 
-+ (void)cachePhoto:(NSData *)data
+- (void)cachePhoto:(NSData *)data
 {
     NSString *cachedImageDirectory = [self cachedImageDirectory];
     if (![[NSFileManager defaultManager] fileExistsAtPath:cachedImageDirectory])

@@ -31,7 +31,15 @@ typedef void(^PhotoBlock)(UIImage *photo, NSError *error);
 
 @interface SamplePhotoUtil : NSObject
 
-+ (void)getUserPhoto:(PhotoBlock)photoBlock;
-+ (void)clearPhotoCache;
++ (instancetype)sharedUtil;
+
+// Returns the current photo in the cache for the user, or the placeholder image if none is in the cache
+- (UIImage *)cachedPhoto;
+
+// Checks with the graph for an updated photo, if enough time has passed since the last check
+- (void)checkUpdatePhoto:(PhotoBlock)photoBlock;
+
+// Clears out any cached data for the current user
+- (void)clearPhotoCache;
 
 @end

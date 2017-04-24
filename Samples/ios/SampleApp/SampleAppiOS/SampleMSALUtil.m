@@ -196,7 +196,7 @@
 
     [application acquireTokenForScopes:@[@"User.Read"]
                                   user:currentUser
-                            uiBehavior:MSALForceConsent
+                            uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:nil
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -225,7 +225,7 @@
 
 - (void)cleanupLocalState
 {
-    [SamplePhotoUtil clearPhotoCache];
+    [[SamplePhotoUtil sharedUtil] clearPhotoCache];
     
     // Leave around the user identifier as the last piece of state to clean up as you will probably need
     // it to clean up user-specific state

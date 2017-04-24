@@ -72,7 +72,6 @@
 {
     // Set the photo first to "no_photo" so we have something there if we have
     // to wait for network lag
-    [self setUserPhoto:[UIImage imageNamed:@"no_photo"]];
     [self loadPhoto];
     
     _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [[SampleMSALUtil sharedUtil] currentUser:nil].name];
@@ -81,7 +80,9 @@
 
 - (void)loadPhoto
 {
-    [SamplePhotoUtil getUserPhoto:^(UIImage *photo, NSError *error)
+    SamplePhotoUtil *util = [SamplePhotoUtil sharedUtil];
+    [self setUserPhoto:[util cachedPhoto]];
+    [util checkUpdatePhoto:^(UIImage *photo, NSError *error)
      {
          if (error)
          {
@@ -112,7 +113,7 @@
 
 - (IBAction)refreshPhoto:(id)sender
 {
-    [SamplePhotoUtil clearPhotoCache];
+    [[SamplePhotoUtil sharedUtil] clearPhotoCache];
     [self loadPhoto];
 }
 
