@@ -130,10 +130,10 @@
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
-      @"x-client-SKU" : @"iOS",
+      @"x-client-SKU" : @"MSAL.iOS",
       @"x-client-DM" : msalId[@"x-client-DM"],
 #else
-      @"x-client-SKU" : @"OSX",
+      @"x-client-SKU" : @"MSAL.OSX",
 #endif
       @"x-client-OS" : msalId[@"x-client-OS"],
       @"x-client-CPU" : msalId[@"x-client-CPU"],
@@ -208,10 +208,10 @@
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
-      @"x-client-SKU" : @"iOS",
+      @"x-client-SKU" : @"MSAL.iOS",
       @"x-client-DM" : msalId[@"x-client-DM"],
 #else
-      @"x-client-SKU" : @"OSX",
+      @"x-client-SKU" : @"MSAL.OSX",
 #endif
       @"x-client-OS" : msalId[@"x-client-OS"],
       @"x-client-CPU" : msalId[@"x-client-CPU"],
@@ -294,10 +294,10 @@
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
-           @"x-client-SKU" : @"iOS",
+           @"x-client-SKU" : @"MSAL.iOS",
            @"x-client-DM" : msalId[@"x-client-DM"],
 #else
-           @"x-client-SKU" : @"OSX",
+           @"x-client-SKU" : @"MSAL.OSX",
 #endif
            @"x-client-OS" : msalId[@"x-client-OS"],
            @"x-client-CPU" : msalId[@"x-client-CPU"],
@@ -454,10 +454,10 @@
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
-           @"x-client-SKU" : @"iOS",
+           @"x-client-SKU" : @"MSAL.iOS",
            @"x-client-DM" : msalId[@"x-client-DM"],
 #else
-           @"x-client-SKU" : @"OSX",
+           @"x-client-SKU" : @"MSAL.OSX",
 #endif
            @"x-client-OS" : msalId[@"x-client-OS"],
            @"x-client-CPU" : msalId[@"x-client-CPU"],
@@ -616,10 +616,10 @@
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
 #if TARGET_OS_IPHONE
-           @"x-client-SKU" : @"iOS",
+           @"x-client-SKU" : @"MSAL.iOS",
            @"x-client-DM" : msalId[@"x-client-DM"],
 #else
-           @"x-client-SKU" : @"OSX",
+           @"x-client-SKU" : @"MSAL.OSX",
 #endif
            @"x-client-OS" : msalId[@"x-client-OS"],
            @"x-client-CPU" : msalId[@"x-client-CPU"],

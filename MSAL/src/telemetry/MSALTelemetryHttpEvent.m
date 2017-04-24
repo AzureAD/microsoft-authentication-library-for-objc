@@ -25,6 +25,7 @@
 #import "MSALTelemetryEventStrings.h"
 #import "NSString+MSALHelperMethods.h"
 #import "NSDictionary+MSALExtensions.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTelemetryHttpEvent
 
@@ -33,9 +34,10 @@
     [self setProperty:MSAL_TELEMETRY_KEY_HTTP_METHOD value:method];
 }
 
-- (void)setHttpPath:(NSString *)path
+- (void)setHttpURL:(NSURL *)url
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_HTTP_PATH value:path];
+    NSURL *urlWithoutParameters = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, [url msalHostWithPort], url.path]];
+    [self setProperty:MSAL_TELEMETRY_KEY_HTTP_PATH value:[urlWithoutParameters scrubbedHttpPath]];
 }
 
 - (void)setHttpRequestIdHeader:(NSString *)requestIdHeader

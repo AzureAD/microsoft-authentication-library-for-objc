@@ -40,6 +40,8 @@
 - (id)initWithName:(NSString *)eventName
            context:(id<MSALRequestContext>)context
 {
+    (void)context;
+    
     if (!(self = [super init]))
     {
         return nil;
@@ -47,9 +49,6 @@
     
     _errorInEvent = NO;
     _propertyMap = [NSMutableDictionary dictionary];
-    
-    [_propertyMap msalSetObjectIfNotNil:[context telemetryRequestId] forKey:MSAL_TELEMETRY_KEY_REQUEST_ID];
-    [_propertyMap msalSetObjectIfNotNil:[[context correlationId] UUIDString] forKey:MSAL_TELEMETRY_KEY_CORRELATION_ID];
     
     [_propertyMap msalSetObjectIfNotNil:eventName forKey:MSAL_TELEMETRY_KEY_EVENT_NAME];
     
@@ -112,7 +111,7 @@
 - (void)setResponseTime:(NSTimeInterval)responseTime
 {
     //the property is set in milliseconds
-    [_propertyMap setValue:[NSString stringWithFormat:@"%f", responseTime * 1000] forKey:MSAL_TELEMETRY_KEY_RESPONSE_TIME];
+    [_propertyMap setValue:[NSString stringWithFormat:@"%f", responseTime * 1000] forKey:MSAL_TELEMETRY_KEY_ELAPSED_TIME];
 }
 
 @end

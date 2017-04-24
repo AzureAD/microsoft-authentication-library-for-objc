@@ -119,6 +119,8 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)run:(nonnull MSALCompletionBlock)completionBlock
 {
+    [[MSALTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_API_EVENT];
+    
     [self acquireToken:completionBlock];
 }
 
@@ -143,8 +145,6 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
-    [[MSALTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_API_EVENT];
-    
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
     // TODO: Remove once uid+utid work hits PROD
@@ -163,15 +163,11 @@ static MSALScopes *s_reservedScopes = nil;
     
     [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
      {
-         MSALTelemetryAPIEvent* event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
-                                                                          context:_parameters];
-         [event setApiId:_apiId];
-         [event setCorrelationId:_parameters.correlationId];
-         [event setAuthority:_authority.authorityType];
+         MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
          
          if (error)
          {
-             [self setEventError:event errorCode:error.code errorDomain:error.domain];
+             [self stopTelemetryEvent:event error:error];
              
              completionBlock(nil, error);
              return;
@@ -182,7 +178,7 @@ static MSALScopes *s_reservedScopes = nil;
                                            error:&error];
          if (!tokenResponse)
          {
-             [self setEventError:event errorCode:error.code errorDomain:error.domain];
+             [self stopTelemetryEvent:event error:error];
              
              completionBlock(nil, error);
              return;
@@ -193,9 +189,11 @@ static MSALScopes *s_reservedScopes = nil;
          {
              MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
              
-             [self setEventError:event errorCode:error.code errorDomain:nil];
+             NSError *msalError = CREATE_LOG_ERROR_WITH_SUBERRORS(_parameters, code, oauthError, tokenResponse.subError, @"%@", tokenResponse.errorDescription);
              
-             completionBlock(nil, MSALCreateAndLogError(_parameters, code, oauthError, tokenResponse.subError, nil, __FUNCTION__, __LINE__, @"%@", tokenResponse.errorDescription));
+             [self stopTelemetryEvent:event error:msalError];
+             
+             completionBlock(nil, msalError);
              
              return;
          }
@@ -258,10 +256,8 @@ static MSALScopes *s_reservedScopes = nil;
                                       user:atItem.user
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@","]];
 
-         [event setClientId:_parameters.clientId];
          [event setUser:result.user];
-
-         [self flushEvent:event];
+         [self stopTelemetryEvent:event error:nil];
          
          completionBlock(result, nil);
      }];
@@ -272,16 +268,35 @@ static MSALScopes *s_reservedScopes = nil;
     (void)parameters;
 }
 
-- (void)setEventError:(MSALTelemetryAPIEvent *)event errorCode:(NSInteger)errorCode errorDomain:(NSString *)errorDomain
+- (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
 {
-    [event setErrorCode:errorCode];
-    [event setErrorDomain:errorDomain];
+    MSALTelemetryAPIEvent *event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
+                                                                       context:_parameters];
     
-    [self flushEvent:event];
+    [event setApiId:_apiId];
+    [event setCorrelationId:_parameters.correlationId];
+    [event setRequestId:_parameters.telemetryRequestId];
+    [event setAuthorityType:_authority.authorityType];
+    [event setAuthority:_parameters.unvalidatedAuthority];
+    [event setClientId:_parameters.clientId];
+    
+    // Login hint is an optional parameter and might not be present
+    if (_parameters.loginHint)
+    {
+        [event setLoginHint:_parameters.loginHint];
+    }
+    
+    return event;
 }
 
-- (void)flushEvent:(MSALTelemetryAPIEvent *)event
+- (void)stopTelemetryEvent:(MSALTelemetryAPIEvent *)event error:(NSError *)error
 {
+    if (error)
+    {
+        [event setErrorCode:error.code];
+        [event setErrorDomain:error.domain];
+    }
+    
     [[MSALTelemetry sharedInstance] stopEvent:_parameters.telemetryRequestId event:event];
     [[MSALTelemetry sharedInstance] flush:_parameters.telemetryRequestId];
 }

@@ -32,6 +32,7 @@
 @class MSALTokenCache;
 @class MSALTokenResponse;
 @class MSALTokenCacheItem;
+@class MSALTelemetryAPIEvent;
 
 @interface MSALBaseRequest : NSObject
 {
@@ -60,5 +61,9 @@
 - (void)addAdditionalRequestParameters:(nonnull NSMutableDictionary<NSString *, NSString *> *)parameters;
 
 - (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
+
+- (nonnull MSALTelemetryAPIEvent *)getTelemetryAPIEvent;
+
+- (void)stopTelemetryEvent:(nonnull MSALTelemetryAPIEvent *)event error:(nullable NSError *)error;
 
 @end
