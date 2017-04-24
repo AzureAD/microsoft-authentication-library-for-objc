@@ -29,7 +29,7 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
 
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
@@ -64,7 +64,7 @@
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
 
-    MSALTokenCacheAccessor *cache = _parameters.tokenCache;
+    MSALTokenCache *cache = _parameters.tokenCache;
     
     if (!_forceRefresh)
     {

@@ -42,7 +42,7 @@
 
 @implementation MSALPublicClientApplication
 {
-    MSALTokenCacheAccessor *_tokenCache;
+    MSALTokenCache *_tokenCache;
 }
 
 - (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
@@ -98,13 +98,13 @@
     
     CHECK_RETURN_NIL([self generateRedirectUri:error]);
     
-    id<MSALTokenCacheDataSource> dataSource;
+    id<MSALTokenCacheAccessor> dataSource;
 #if TARGET_OS_IPHONE
     dataSource = [MSALKeychainTokenCache defaultKeychainCache];
 #else
     dataSource = [MSALWrapperTokenCache defaultCache];
 #endif
-    _tokenCache = [[MSALTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    _tokenCache = [[MSALTokenCache alloc] initWithDataSource:dataSource];
     
     return self;
 }
@@ -509,12 +509,12 @@
 
 @implementation MSALPublicClientApplication (Internal)
 
-- (MSALTokenCacheAccessor *)tokenCache
+- (MSALTokenCache *)tokenCache
 {
     return _tokenCache;
 }
 
-- (void)setTokenCache:(MSALTokenCacheAccessor *)tokenCache
+- (void)setTokenCache:(MSALTokenCache *)tokenCache
 {
     _tokenCache = tokenCache;
 }
