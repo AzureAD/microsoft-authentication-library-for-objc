@@ -24,8 +24,14 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
+#import "NSURL+MSALExtensions.h"
 
 @implementation MSALTelemetryAPIEvent
+
+- (void)setRequestId:(NSString *)requestId
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_ID value:requestId];
+}
 
 - (void)setCorrelationId:(NSUUID *)correlationId
 {
@@ -40,13 +46,16 @@
 - (void)setUser:(MSALUser *)user
 {
     [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256Hex]];
-    //[self setProperty:MSAL_TELEMETRY_KEY_TENANT_ID value:[[user tenantId] msalComputeSHA256Hex]];
-    [self setProperty:MSAL_TELEMETRY_KEY_IDP value:[user identityProvider]];
 }
 
 - (void)setClientId:(NSString *)clientId
 {
     [self setProperty:MSAL_TELEMETRY_KEY_CLIENT_ID value:clientId];
+}
+
+- (void)setLoginHint:(NSString *)loginHint
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[loginHint msalComputeSHA256Hex]];
 }
 
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken
@@ -64,7 +73,7 @@
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_VALIDATION_STATUS value:status];
 }
 
-- (void)setAuthority:(MSALAuthorityType)authorityType
+- (void)setAuthorityType:(MSALAuthorityType)authorityType
 {
     NSString *authorityTypeString;
     
@@ -85,6 +94,11 @@
     }
     
     [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityTypeString];
+}
+
+- (void)setAuthority:(NSURL *)authority
+{
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:[authority scrubbedHttpPath]];
 }
 
 - (void)setGrantType:(NSString *)grantType
@@ -108,15 +122,15 @@
     
     switch (uiBehavior) {
         case MSALForceLogin:
-            uiBehaviorString = @"MSAL_Force_Login";
+            uiBehaviorString = @"force_login";
             break;
             
         case MSALForceConsent:
-            uiBehaviorString = @"MSAL_Force_Consent";
+            uiBehaviorString = @"force_consent";
             break;
             
         case MSALSelectAccount:
-            uiBehaviorString = @"MSAL_Select_Account";
+            uiBehaviorString = @"select_account";
     }
     
     [self setProperty:MSAL_TELEMETRY_KEY_PROMPT_BEHAVIOR value:uiBehaviorString];
@@ -125,10 +139,10 @@
 #pragma mark -
 #pragma mark log error
 
-- (void)setErrorCode:(NSInteger)errorCode
+- (void)setErrorCode:(MSALErrorCode)errorCode
 {
     self.errorInEvent = YES;
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:[NSString stringWithFormat:@"%ld", (long)errorCode]];
+    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:MSALStringForErrorCode(errorCode)];
 }
 
 - (void)setErrorDescription:(NSString *)errorDescription

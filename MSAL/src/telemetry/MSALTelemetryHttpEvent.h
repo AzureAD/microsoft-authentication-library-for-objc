@@ -28,7 +28,7 @@
 @interface MSALTelemetryHttpEvent : MSALTelemtryBaseEvent
 
 - (void)setHttpMethod:(NSString *)method;
-- (void)setHttpPath:(NSString *)path;
+- (void)setHttpURL:(NSURL *)url;
 - (void)setHttpRequestIdHeader:(NSString *)requestIdHeader;
 - (void)setHttpResponseCode:(NSString *)code;
 - (void)setHttpResponseMethod:(NSString *)method;

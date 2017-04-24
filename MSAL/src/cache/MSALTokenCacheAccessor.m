@@ -106,7 +106,6 @@
 
     BOOL result = [_dataSource addOrUpdateRefreshTokenItem:rtItem context:ctx error:error];
 
-    [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
     [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
 
     return result;
@@ -123,7 +122,6 @@
     
     BOOL result = [_dataSource addOrUpdateAccessTokenItem:atItem context:ctx error:error];
     
-    [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
     [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
@@ -151,7 +149,6 @@
                                                                                   error:error];
     if (!allAccessTokens)
     {
-        [event setStatus:MSAL_TELEMETRY_VALUE_NOT_FOUND];
         [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
         
         return nil;
@@ -171,14 +168,11 @@
         }
     }
     
-    [event setIsRT:MSAL_TELEMETRY_VALUE_NO];
-    
     if (matchedTokens.count == 0)
     {
         LOG_WARN(ctx, @"No access token found.");
         LOG_WARN_PII(ctx, @"No access token found.");
         
-        [event setStatus:MSAL_TELEMETRY_VALUE_NOT_FOUND];
         [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
         
         if (!requestParam.unvalidatedAuthority && authorityFound)
@@ -193,7 +187,6 @@
     {
         MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
         
-        [event setStatus:MSAL_TELEMETRY_VALUE_MULTIPLE];
         [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
         
         return nil;
@@ -214,13 +207,11 @@
             *authorityFound = requestParam.unvalidatedAuthority ? requestParam.unvalidatedAuthority.absoluteString : matchedTokens[0].authority;
         }
         
-        [event setStatus:MSAL_TELEMETRY_VALUE_EXPIRED];
         [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
         
         return nil;
     }
     
-    [event setStatus:MSAL_TELEMETRY_VALUE_TRIED];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
     
     return matchedTokens[0];
@@ -258,8 +249,6 @@
                                                                            userIdentifier:requestParam.user.userIdentifier];
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
     
-    [event setIsRT:MSAL_TELEMETRY_VALUE_YES];
-    [event setRTStatus:item ? MSAL_TELEMETRY_VALUE_TRIED : MSAL_TELEMETRY_VALUE_NOT_FOUND];
     [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
     
     return item;
@@ -283,7 +272,6 @@
     
     BOOL result = [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
     
-    [event setStatus:result ? MSAL_TELEMETRY_VALUE_SUCCEEDED : MSAL_TELEMETRY_VALUE_FAILED];
     [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;

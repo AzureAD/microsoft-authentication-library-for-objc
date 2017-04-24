@@ -28,19 +28,22 @@
 
 @interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
 
+- (void)setRequestId:(NSString *)requestId;
 - (void)setCorrelationId:(NSUUID *)correlationId;
 - (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
 - (void)setUser:(MSALUser *)user;
 - (void)setClientId:(NSString *)clientId;
+- (void)setLoginHint:(NSString *)loginHint;
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
-- (void)setErrorCode:(NSInteger)errorCode;
+- (void)setErrorCode:(MSALErrorCode)errorCode;
 - (void)setProtocolCode:(NSString *)protocolCode;
 - (void)setErrorDescription:(NSString *)errorDescription;
 - (void)setErrorDomain:(NSString *)errorDomain;
 
 - (void)setAuthorityValidationStatus:(NSString *)status;
-- (void)setAuthority:(MSALAuthorityType)authorityType;
+- (void)setAuthorityType:(MSALAuthorityType)authorityType;
+- (void)setAuthority:(NSURL *)authority;
 
 - (void)setGrantType:(NSString *)grantType;
 - (void)setAPIStatus:(NSString *)status;

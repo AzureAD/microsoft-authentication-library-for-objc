@@ -31,39 +31,4 @@
     [self setProperty:MSAL_TELEMETRY_KEY_TOKEN_TYPE value:tokenType];
 }
 
-- (void)setStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_RESULT_STATUS value:status];
-}
-
-- (void)setIsRT:(NSString *)isRT
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_IS_RT value:isRT];
-}
-
-- (void)setIsMRRT:(NSString *)isMRRT
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_IS_MRRT value:isMRRT];
-}
-
-- (void)setIsFRT:(NSString *)isFRT
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_IS_FRT value:isFRT];
-}
-
-- (void)setRTStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_RT_STATUS value:status];
-}
-
-- (void)setMRRTStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_MRRT_STATUS value:status];
-}
-
-- (void)setFRTStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_FRT_STATUS value:status];
-}
-
 @end
