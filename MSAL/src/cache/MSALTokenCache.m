@@ -56,18 +56,25 @@
     return _dataSource;
 }
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
-                                               response:(MSALTokenResponse *)response
-                                                context:(nullable id<MSALRequestContext>)ctx
-                                                  error:(NSError * __autoreleasing *)error
+- (MSALAccessTokenCacheItem *)saveAccessTokenWithAuthority:(NSURL *)authority
+                                                  clientId:(NSString *)clientId
+                                                  response:(MSALTokenResponse *)response
+                                                   context:(id<MSALRequestContext>)context
+                                                     error:(NSError * __autoreleasing *)error
 {
-    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:requestParam.unvalidatedAuthority
-                                                                                       clientId:requestParam.clientId
+    MSALAccessTokenCacheItem *accessToken = [[MSALAccessTokenCacheItem alloc] initWithAuthority:authority
+                                                                                       clientId:clientId
                                                                                        response:response];
+    
     //delete all cache entries with intersecting scopes
     //this should not happen but we have this as a safe guard against multiple matches
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:accessToken.user clientId:accessToken.clientId context:ctx error:nil];
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:accessToken.user
+                                                                               clientId:accessToken.clientId
+                                                                                context:context
+                                                                                  error:nil];
+    
     NSMutableArray<MSALAccessTokenCacheItem *> *overlappingTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
+    
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
         if ([tokenItem.authority isEqualToString:accessToken.authority]
@@ -79,20 +86,30 @@
     }
     for (MSALAccessTokenCacheItem *itemToDelete in overlappingTokens)
     {
-        [self deleteAccessToken:itemToDelete context:ctx error:nil];
+        [self deleteAccessToken:itemToDelete context:context error:nil];
     }
     
-    [self saveAccessToken:accessToken context:ctx error:error];
-    
-    if (response.refreshToken)
-    {
-        MSALRefreshTokenCacheItem *refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:requestParam.unvalidatedAuthority.msalHostWithPort
-                                                                                                clientId:requestParam.clientId
-                                                                                                response:response];
-        [self saveRefreshToken:refreshToken context:ctx error:error];
-    }
+    [self saveAccessToken:accessToken context:context error:error];
     
     return accessToken;
+}
+
+- (MSALRefreshTokenCacheItem *)saveRefreshTokenWithEnvironment:(NSString *)environment
+                                                      clientId:(NSString *)clientId
+                                                      response:(MSALTokenResponse *)response
+                                                       context:(id<MSALRequestContext>)context
+                                                         error:(NSError * __autoreleasing *)error
+{
+    MSALRefreshTokenCacheItem *refreshToken = nil;
+    if (response.refreshToken)
+    {
+        refreshToken = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:environment
+                                                                     clientId:clientId
+                                                                     response:response];
+        [self saveRefreshToken:refreshToken context:context error:error];
+    }
+    
+    return refreshToken;
 }
 
 - (BOOL)saveRefreshToken:(MSALRefreshTokenCacheItem *)rtItem
@@ -127,29 +144,32 @@
     return result;
 }
 
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-                                      context:(nullable id<MSALRequestContext>)ctx
-                               authorityFound:(NSString * __autoreleasing *)authorityFound
-                                        error:(NSError * __autoreleasing *)error
+- (MSALAccessTokenCacheItem *)findAccessTokenWithAuthority:(NSURL *)authority
+                                                  clientId:(NSString *)clientId
+                                                    scopes:(MSALScopes *)scopes
+                                                      user:(MSALUser *)user
+                                                   context:(nullable id<MSALRequestContext>)ctx
+                                            authorityFound:(NSString * __autoreleasing *)authorityFound
+                                                     error:(NSError * __autoreleasing *)error
 {
     [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
-    MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:requestParam.unvalidatedAuthority.absoluteString
-                                                                             clientId:requestParam.clientId
-                                                                                scope:requestParam.scopes
-                                                                       userIdentifier:requestParam.user.userIdentifier
-                                                                          environment:requestParam.user.environment];
+    MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:authority.absoluteString
+                                                                             clientId:clientId
+                                                                                scope:scopes
+                                                                       userIdentifier:user.userIdentifier
+                                                                          environment:user.environment];
     
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:requestParam.user
-                                                                               clientId:requestParam.clientId
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:user
+                                                                               clientId:clientId
                                                                                 context:ctx
                                                                                   error:error];
     if (!allAccessTokens)
     {
-        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
         
         return nil;
     }
@@ -158,11 +178,11 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if (requestParam.unvalidatedAuthority && [key matches:[tokenItem tokenCacheKey:nil]])
+        if (authority && [key matches:[tokenItem tokenCacheKey:nil]])
         {
             [matchedTokens addObject:tokenItem];
         }
-        else if (!requestParam.unvalidatedAuthority && [requestParam.scopes isSubsetOfOrderedSet:tokenItem.scope])
+        else if (!authority && [scopes isSubsetOfOrderedSet:tokenItem.scope])
         {
             [matchedTokens addObject:tokenItem];
         }
@@ -173,9 +193,9 @@
         LOG_WARN(ctx, @"No access token found.");
         LOG_WARN_PII(ctx, @"No access token found.");
         
-        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
         
-        if (!requestParam.unvalidatedAuthority && authorityFound)
+        if (!authority && authorityFound)
         {
             *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
         }
@@ -187,7 +207,7 @@
     {
         MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
         
-        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
         
         return nil;
     }
@@ -197,22 +217,19 @@
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         
-        MSALAccessTokenCacheItem *token = matchedTokens[0];
-        NSLog(@"%@", token.authority);
-        
         if (authorityFound)
         {
             // if authority is not provided, set authorityFound with the token's authority
             // if not, set authorityFound with the passed in authority
-            *authorityFound = requestParam.unvalidatedAuthority ? requestParam.unvalidatedAuthority.absoluteString : matchedTokens[0].authority;
+            *authorityFound = authority ? authority.absoluteString : matchedTokens[0].authority;
         }
         
-        [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
         
         return nil;
     }
     
-    [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return matchedTokens[0];
 }
@@ -235,21 +252,23 @@
     return authorities.allObjects[0];
 }
 
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
-                                        context:(nullable id<MSALRequestContext>)ctx
-                                          error:(NSError * __autoreleasing *)error
+- (MSALRefreshTokenCacheItem *)findRefreshTokenWithEnvironment:(NSString *)environment
+                                                      clientId:(NSString *)clientId
+                                                userIdentifier:(NSString *)userIdentifier
+                                                       context:(nullable id<MSALRequestContext>)ctx
+                                                         error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[requestParam telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
+    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
     
-    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:requestParam.unvalidatedAuthority.msalHostWithPort
-                                                                                 clientId:requestParam.clientId
-                                                                           userIdentifier:requestParam.user.userIdentifier];
+    MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment
+                                                                                 clientId:clientId
+                                                                           userIdentifier:userIdentifier];
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
     
-    [[MSALTelemetry sharedInstance] stopEvent:[requestParam telemetryRequestId] event:event];
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return item;
 }
