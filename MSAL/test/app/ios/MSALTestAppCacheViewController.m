@@ -168,7 +168,8 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     [self loadCache];
 }
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
@@ -259,16 +260,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
         [_cacheMap setObject:userTokens forKey:userId];
     }
     
-    NSString *environment;
-    
-    if ([item isKindOfClass:[MSALAccessTokenCacheItem class]])
-    {
-        environment = [NSURL URLWithString:((MSALAccessTokenCacheItem *)item).authority].msalHostWithPort;
-    }
-    else if ([item isKindOfClass:[MSALRefreshTokenCacheItem class]])
-    {
-        environment = ((MSALRefreshTokenCacheItem *)item).environment;
-    }
+    NSString *environment = item.user.environment;
     
     NSMutableArray *environmentTokens = userTokens[environment];
     if (!environmentTokens)
