@@ -171,6 +171,8 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
         {
             [_errorEvents addObject:requestId];
         }
+        
+        [_eventTracking removeObjectForKey:key];
     }
 }
 
