@@ -1,5 +1,4 @@
 # Microsoft Authentication Library (MSAL) for iOS
-=====================================
 
 ## Our new SDK is under development!
 
@@ -15,7 +14,9 @@ Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MI
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## Adding MSAL to your project
+## Using MSAL
+
+### Adding MSAL to your project
 1. If you have not done so already, create an app listing at [apps.dev.microsoft.com](https://apps.dev.microsoft.com)
 2. Clone the repository
 ```
@@ -40,7 +41,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
     </array>
 ```
 
-## Creating an Application Object
+### Creating an Application Object
 Use the client ID from yout app listing when initializing your MSALPublicClientApplication object:
 ```objective-c
     NSError *error = nil;
@@ -49,7 +50,7 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
                                                     error:&error];
 ```
                                                     
-## Acquiring Your First Token
+### Acquiring Your First Token
 ```objective-c
     [application acquireTokenForScopes:@[@"scope1", @"scope2"]
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -69,7 +70,7 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
     }
 ```
 
-## Silently Acquiring an Updated Token
+### Silently Acquiring an Updated Token
 ```objective-c
     NSError *error = nil;
     MSALUser *user = [application userForIdentifier:userIdentifier error:&error];
@@ -100,7 +101,7 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
     }
 ```
 
-## Responding to an Interaction Required Error
+### Responding to an Interaction Required Error
 Occasionally user interaction will be required to get a new access token, when this occurs you will receive a `MSALErrorInteractionRequired` error when trying to silently acquire a new token. In those cases call `acquireToken:` with the same user and scopes as the failing `acquireTokenSilent:` call. It is recommending to display a status message to the user in an unobtrusive way first before using an interactive `acquireToken:` call.
 ```objective-c
     [application acquireTokenForScopes:@["scope1"]
