@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALRefreshTokenCacheKey.h"
@@ -34,12 +34,12 @@
 #import "NSURL+MSALExtensions.h"
 #import "NSURL+MSALExtensions.h"
 
-@implementation MSALTokenCacheAccessor
+@implementation MSALTokenCache
 {
-    id<MSALTokenCacheDataSource> _dataSource;
+    id<MSALTokenCacheAccessor> _dataSource;
 }
 
-- (id)initWithDataSource:(id<MSALTokenCacheDataSource>)dataSource
+- (id)initWithDataSource:(id<MSALTokenCacheAccessor>)dataSource
 {
     if (!(self = [super init]))
     {
@@ -51,7 +51,7 @@
     return self;
 }
 
-- (id<MSALTokenCacheDataSource>)dataSource
+- (id<MSALTokenCacheAccessor>)dataSource
 {
     return _dataSource;
 }

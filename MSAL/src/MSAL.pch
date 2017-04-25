@@ -51,12 +51,12 @@
 #import "NSOrderedSet+MSALExtensions.h"
 #import "MSALOAuth2Constants.h"
 
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheDataSource.h"
+#import "MSALTokenCacheAccessor.h"
 
 #if TARGET_OS_IPHONE
 #import "MSALKeychainTokenCache.h"

@@ -27,10 +27,10 @@
 
 #import "MSALPublicClientApplication.h"
 
-@class MSALTokenCacheAccessor;
+@class MSALTokenCache;
 
 @interface MSALPublicClientApplication (Internal)
 
-@property (nullable) MSALTokenCacheAccessor *tokenCache;
+@property (nullable) MSALTokenCache *tokenCache;
 
 @end

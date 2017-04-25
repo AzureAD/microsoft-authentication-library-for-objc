@@ -36,13 +36,13 @@
 #import "NSURL+MSALExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
-@interface MSALTokenCacheAccessorTests : XCTestCase
+@interface MSALTokenCacheTests : XCTestCase
 {
     NSURL *_testAuthority;
     NSString *_testEnvironment;
     NSString *_testClientId;
     
-    MSALTokenCacheAccessor *_cache;
+    MSALTokenCache *_cache;
     
     NSDictionary *_testResponse1Claims;
     MSALTokenResponse *_testTokenResponse;
@@ -59,7 +59,7 @@
 
 @end
 
-@implementation MSALTokenCacheAccessorTests
+@implementation MSALTokenCacheTests
 
 - (void)setUp {
     [super setUp];
