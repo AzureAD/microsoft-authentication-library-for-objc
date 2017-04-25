@@ -1,0 +1,540 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */; };
+		D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3301E95B22500BA782C /* SampleAppErrors.m */; };
+		D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3331E95CE4800BA782C /* SampleBaseViewController.m */; };
+		D621518B1E9EA65D00B96A7D /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D62CF4981E9595CE006C0217 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D62CF4821E9593ED006C0217 /* SampleMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D62CF4811E9593ED006C0217 /* SampleMainViewController.m */; };
+		D62CF4851E9593FB006C0217 /* SampleLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D62CF4841E9593FB006C0217 /* SampleLoginViewController.m */; };
+		D62CF4871E9594B2006C0217 /* SampleMainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D62CF4861E9594B2006C0217 /* SampleMainView.xib */; };
+		D62CF4891E9594C5006C0217 /* SampleLoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = D62CF4881E9594C5006C0217 /* SampleLoginView.xib */; };
+		D62CF4A71E9595EC006C0217 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D62CF4981E9595CE006C0217 /* MSAL.framework */; };
+		D6AEBD6D1E92DBB300C31082 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D6AEBD6C1E92DBB300C31082 /* main.m */; };
+		D6AEBD701E92DBB300C31082 /* SampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */; };
+		D6AEBD781E92DBB300C31082 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6AEBD771E92DBB300C31082 /* Assets.xcassets */; };
+		D6AEBD7B1E92DBB300C31082 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */; };
+		D6B88B0E1EA55B3E00A2374B /* SamplePhotoUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */; };
+		D6B88B171EA55F3C00A2374B /* no_photo.png in Resources */ = {isa = PBXBuildFile; fileRef = D6B88B161EA55F3C00A2374B /* no_photo.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D621518C1E9EA65D00B96A7D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		D62CF4951E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D6DFF3A21E2579360012891A;
+			remoteInfo = "MSAL (iOS Static Lib)";
+		};
+		D62CF4971E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F431E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+		D62CF4991E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FC11E3FF47D00C69FBA;
+			remoteInfo = "MSAL iOS Unit Tests";
+		};
+		D62CF49B1E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6F501E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
+		D62CF49D1E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D65A6FD01E3FF49C00C69FBA;
+			remoteInfo = "MSAL Mac Unit Tests";
+		};
+		D62CF49F1E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D61A64331E5A29580086D120;
+			remoteInfo = "MSAL Test App (iOS)";
+		};
+		D62CF4A11E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D61A646C1E5AA7120086D120;
+			remoteInfo = "MSAL Test App (Mac)";
+		};
+		D62CF4A31E9595CE006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 962E37BC1E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
+		};
+		D62CF4A51E9595E1006C0217 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D621518E1E9EA65D00B96A7D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D621518B1E9EA65D00B96A7D /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D611E3251E95A5CD00BA782C /* SampleMSALUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleMSALUtil.h; sourceTree = "<group>"; };
+		D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleMSALUtil.m; sourceTree = "<group>"; };
+		D611E32F1E95B22500BA782C /* SampleAppErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleAppErrors.h; sourceTree = "<group>"; };
+		D611E3301E95B22500BA782C /* SampleAppErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleAppErrors.m; sourceTree = "<group>"; };
+		D611E3321E95CE4800BA782C /* SampleBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBaseViewController.h; sourceTree = "<group>"; };
+		D611E3331E95CE4800BA782C /* SampleBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleBaseViewController.m; sourceTree = "<group>"; };
+		D62CF4801E9593ED006C0217 /* SampleMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleMainViewController.h; sourceTree = "<group>"; };
+		D62CF4811E9593ED006C0217 /* SampleMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleMainViewController.m; sourceTree = "<group>"; };
+		D62CF4831E9593FB006C0217 /* SampleLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleLoginViewController.h; sourceTree = "<group>"; };
+		D62CF4841E9593FB006C0217 /* SampleLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleLoginViewController.m; sourceTree = "<group>"; };
+		D62CF4861E9594B2006C0217 /* SampleMainView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SampleMainView.xib; sourceTree = "<group>"; };
+		D62CF4881E9594C5006C0217 /* SampleLoginView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SampleLoginView.xib; path = ../SampleLoginView.xib; sourceTree = "<group>"; };
+		D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
+		D6AEBD681E92DBB300C31082 /* SampleAppiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleAppiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6AEBD6C1E92DBB300C31082 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		D6AEBD6E1E92DBB300C31082 /* SampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleAppDelegate.h; sourceTree = "<group>"; };
+		D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SampleAppDelegate.m; sourceTree = "<group>"; };
+		D6AEBD771E92DBB300C31082 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D6AEBD7A1E92DBB300C31082 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D6AEBD7C1E92DBB300C31082 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D6B88B0C1EA55B3E00A2374B /* SamplePhotoUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SamplePhotoUtil.h; sourceTree = "<group>"; };
+		D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SamplePhotoUtil.m; sourceTree = "<group>"; };
+		D6B88B161EA55F3C00A2374B /* no_photo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_photo.png; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D6AEBD651E92DBB300C31082 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D62CF4A71E9595EC006C0217 /* MSAL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D62CF48B1E9595CE006C0217 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D62CF4961E9595CE006C0217 /* libMSAL.a */,
+				D62CF4981E9595CE006C0217 /* MSAL.framework */,
+				D62CF49A1E9595CE006C0217 /* "MSAL-iOS-Unit-Tests".xctest */,
+				D62CF49C1E9595CE006C0217 /* MSAL.framework */,
+				D62CF49E1E9595CE006C0217 /* "MSAL-Mac-Unit-Tests".xctest */,
+				D62CF4A01E9595CE006C0217 /* MSAL Test App.app */,
+				D62CF4A21E9595CE006C0217 /* MSAL Test App.app */,
+				D62CF4A41E9595CE006C0217 /* MSAL Test Automation (iOS).app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D6AEBD5F1E92DBB300C31082 = {
+			isa = PBXGroup;
+			children = (
+				D6AEBD6A1E92DBB300C31082 /* SampleAppiOS */,
+				D6AEBD691E92DBB300C31082 /* Products */,
+				D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		D6AEBD691E92DBB300C31082 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6AEBD681E92DBB300C31082 /* SampleAppiOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D6AEBD6A1E92DBB300C31082 /* SampleAppiOS */ = {
+			isa = PBXGroup;
+			children = (
+				D6AEBD6E1E92DBB300C31082 /* SampleAppDelegate.h */,
+				D6AEBD6F1E92DBB300C31082 /* SampleAppDelegate.m */,
+				D6AEBD771E92DBB300C31082 /* Assets.xcassets */,
+				D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */,
+				D6AEBD7C1E92DBB300C31082 /* Info.plist */,
+				D6AEBD6B1E92DBB300C31082 /* Supporting Files */,
+				D611E32F1E95B22500BA782C /* SampleAppErrors.h */,
+				D611E3301E95B22500BA782C /* SampleAppErrors.m */,
+				D611E3251E95A5CD00BA782C /* SampleMSALUtil.h */,
+				D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */,
+				D611E3321E95CE4800BA782C /* SampleBaseViewController.h */,
+				D611E3331E95CE4800BA782C /* SampleBaseViewController.m */,
+				D62CF4831E9593FB006C0217 /* SampleLoginViewController.h */,
+				D62CF4841E9593FB006C0217 /* SampleLoginViewController.m */,
+				D62CF4881E9594C5006C0217 /* SampleLoginView.xib */,
+				D62CF4801E9593ED006C0217 /* SampleMainViewController.h */,
+				D62CF4811E9593ED006C0217 /* SampleMainViewController.m */,
+				D62CF4861E9594B2006C0217 /* SampleMainView.xib */,
+				D6B88B0C1EA55B3E00A2374B /* SamplePhotoUtil.h */,
+				D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */,
+			);
+			path = SampleAppiOS;
+			sourceTree = "<group>";
+		};
+		D6AEBD6B1E92DBB300C31082 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D6B88B161EA55F3C00A2374B /* no_photo.png */,
+				D6AEBD6C1E92DBB300C31082 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D6AEBD671E92DBB300C31082 /* SampleAppiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D6AEBD7F1E92DBB300C31082 /* Build configuration list for PBXNativeTarget "SampleAppiOS" */;
+			buildPhases = (
+				D6AEBD641E92DBB300C31082 /* Sources */,
+				D6AEBD651E92DBB300C31082 /* Frameworks */,
+				D6AEBD661E92DBB300C31082 /* Resources */,
+				D621518E1E9EA65D00B96A7D /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D62CF4A61E9595E1006C0217 /* PBXTargetDependency */,
+				D621518D1E9EA65D00B96A7D /* PBXTargetDependency */,
+			);
+			name = SampleAppiOS;
+			productName = BasicApplicationiOS;
+			productReference = D6AEBD681E92DBB300C31082 /* SampleAppiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D6AEBD601E92DBB300C31082 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0830;
+				ORGANIZATIONNAME = Microsoft;
+				TargetAttributes = {
+					D6AEBD671E92DBB300C31082 = {
+						CreatedOnToolsVersion = 8.3;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D6AEBD631E92DBB300C31082 /* Build configuration list for PBXProject "SampleAppiOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D6AEBD5F1E92DBB300C31082;
+			productRefGroup = D6AEBD691E92DBB300C31082 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D62CF48B1E9595CE006C0217 /* Products */;
+					ProjectRef = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				D6AEBD671E92DBB300C31082 /* SampleAppiOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		D62CF4961E9595CE006C0217 /* libMSAL.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libMSAL.a;
+			remoteRef = D62CF4951E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF4981E9595CE006C0217 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = D62CF4971E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF49A1E9595CE006C0217 /* "MSAL-iOS-Unit-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-iOS-Unit-Tests\".xctest";
+			remoteRef = D62CF4991E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF49C1E9595CE006C0217 /* MSAL.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MSAL.framework;
+			remoteRef = D62CF49B1E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF49E1E9595CE006C0217 /* "MSAL-Mac-Unit-Tests".xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "\"MSAL-Mac-Unit-Tests\".xctest";
+			remoteRef = D62CF49D1E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF4A01E9595CE006C0217 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = D62CF49F1E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF4A21E9595CE006C0217 /* MSAL Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test App.app";
+			remoteRef = D62CF4A11E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D62CF4A41E9595CE006C0217 /* MSAL Test Automation (iOS).app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "MSAL Test Automation (iOS).app";
+			remoteRef = D62CF4A31E9595CE006C0217 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D6AEBD661E92DBB300C31082 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6AEBD7B1E92DBB300C31082 /* LaunchScreen.storyboard in Resources */,
+				D62CF4871E9594B2006C0217 /* SampleMainView.xib in Resources */,
+				D6AEBD781E92DBB300C31082 /* Assets.xcassets in Resources */,
+				D6B88B171EA55F3C00A2374B /* no_photo.png in Resources */,
+				D62CF4891E9594C5006C0217 /* SampleLoginView.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D6AEBD641E92DBB300C31082 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6AEBD701E92DBB300C31082 /* SampleAppDelegate.m in Sources */,
+				D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */,
+				D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */,
+				D6AEBD6D1E92DBB300C31082 /* main.m in Sources */,
+				D62CF4821E9593ED006C0217 /* SampleMainViewController.m in Sources */,
+				D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */,
+				D6B88B0E1EA55B3E00A2374B /* SamplePhotoUtil.m in Sources */,
+				D62CF4851E9593FB006C0217 /* SampleLoginViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D621518D1E9EA65D00B96A7D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = D621518C1E9EA65D00B96A7D /* PBXContainerItemProxy */;
+		};
+		D62CF4A61E9595E1006C0217 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = D62CF4A51E9595E1006C0217 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D6AEBD7A1E92DBB300C31082 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D6AEBD7D1E92DBB300C31082 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D6AEBD7E1E92DBB300C31082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D6AEBD801E92DBB300C31082 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SampleAppiOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALSampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D6AEBD811E92DBB300C31082 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				INFOPLIST_FILE = SampleAppiOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALSampleApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D6AEBD631E92DBB300C31082 /* Build configuration list for PBXProject "SampleAppiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6AEBD7D1E92DBB300C31082 /* Debug */,
+				D6AEBD7E1E92DBB300C31082 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D6AEBD7F1E92DBB300C31082 /* Build configuration list for PBXNativeTarget "SampleAppiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6AEBD801E92DBB300C31082 /* Debug */,
+				D6AEBD811E92DBB300C31082 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D6AEBD601E92DBB300C31082 /* Project object */;
+}
