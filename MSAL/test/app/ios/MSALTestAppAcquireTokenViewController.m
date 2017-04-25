@@ -32,6 +32,7 @@
 #import "MSALTestAppUserViewController.h"
 #import "MSALTestAppScopesViewController.h"
 #import "MSALTestAppTelemetryViewController.h"
+#import "MSALStressTestHelper.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -162,6 +163,12 @@
     [telemetryButton addTarget:self action:@selector(showTelemetry:) forControlEvents:UIControlEventTouchUpInside];
     
     [layout addCenteredView:telemetryButton key:@"telemetry"];
+    
+    UIButton *stressTestButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [stressTestButton setTitle:@"Stress test" forState:UIControlStateNormal];
+    [stressTestButton addTarget:self action:@selector(runStressTest:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [layout addCenteredView:stressTestButton key:@"stressTest"];
     
     _resultView = [[UITextView alloc] init];
     _resultView.layer.borderWidth = 1.0f;
@@ -550,6 +557,69 @@
 {
     (void)sender;
     [self.navigationController pushViewController:[MSALTestAppScopesViewController sharedController] animated:YES];
+}
+
+- (void)runStressTest:(id)sender
+{
+    (void)sender;
+    
+    void (^logHandler)(NSString *logLine) = ^(NSString *logLine) {
+        
+        // Execute after a little delay, so other callbacks do their logging first
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            _resultView.text = [_resultView.text stringByAppendingFormat:@"\n%@", logLine];
+        });
+    };
+    
+    UIAlertController *stressTestController = [UIAlertController alertControllerWithTitle:@"Select stress test type"
+                                                                                  message:nil
+                                                                           preferredStyle:UIAlertControllerStyleAlert];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (no expiring)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [MSALStressTestHelper testWithSameTokenAndLogHandler:logHandler];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (with expiring)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [MSALStressTestHelper testWithExpiredTokenAndLogHandler:logHandler];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (with multiple users)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [MSALStressTestHelper testWithMultipleUsersAndLogHandler:logHandler];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (until success)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [MSALStressTestHelper testPollingInBackgroundWithLogHandler:logHandler];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Stop stress test"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [MSALStressTestHelper stopStressTestWithLogHandler:logHandler];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                                             style:UIAlertActionStyleCancel
+                                                           handler:nil]];
+    
+    [self presentViewController:stressTestController animated:YES completion:nil];
 }
 
 @end
