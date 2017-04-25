@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheDataSource.h"
+#import "MSALTokenCacheAccessor.h"
 
 @interface MSALKeychainTokenCache : NSObject
 
@@ -33,7 +33,7 @@
 
 @end
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheDataSource>
+@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
 
 - (nonnull NSDictionary *)defaultKeychainQuery;
 

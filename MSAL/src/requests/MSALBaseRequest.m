@@ -236,7 +236,7 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          NSError *cacheError = nil;
-         MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
+         MSALTokenCache *cache = self.parameters.tokenCache;
          MSALAccessTokenCacheItem *atItem =
          [cache saveAccessAndRefreshToken:self.parameters
                                  response:tokenResponse
