@@ -73,7 +73,7 @@
                  error:(NSError * __autoreleasing *)error;
 
 /*!
-    Returna an array of users visible to this application
+    Returns an array of users visible to this application
  
     @param  error   The error that occured trying to retrieve users, if any, if you're
                     not interested in the specific error pass in nil.
@@ -105,7 +105,9 @@
 + (void)handleMSALResponse:(NSURL *)response;
 
 /*!
-    Cancel a currently running interactive web authentication session.
+    Cancels any currently running interactive web authentication session, resulting
+    in the SafariViewController being dismissed and the acquireToken request ending
+    in a cancelation error.
  */
 + (void)cancelCurrentWebAuthSession;
 
@@ -115,8 +117,9 @@
 /*!
     Acquire a token for a new user using interactive authentication
  
-    @param  scopes          Scopes to request from the server, the scopes that come back
-                            can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
@@ -130,8 +133,9 @@
 /*!
     Acquire a token for a new user using interactive authentication
  
-    @param  scopes          Scopes to request from the server, the scopes that come back
-                            can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
                             beginning of the interactive authentication flow. The user returned
                             in the completion block is not guaranteed to match the loginHint.
@@ -145,8 +149,9 @@
 /*!
     Acquire a token for a new user using interactive authentication
  
-    @param  scopes          Scopes to request from the server, the scopes that come back
-                            can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
                             beginning of the interactive authentication flow. The user returned
                             in the completion block is not guaranteed to match the loginHint.
@@ -165,13 +170,12 @@
 /*!
     Acquire a token for a new user using interactive authentication
  
-    @param  scopes                  Scopes to request from the server, the scopes that come back
-                                    can differ from the ones in the original call
-    @param  additionalScopes        Scopes for the service to ask the user to consent to, will
-                                    not be included in the token returned by the service, but
-                                    if the user consented to those scopes you will be able to
-                                    silently acquire tokens with those scopes later without requiring
-                                    further user interaction
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    gauranteed to be included in the access token returned.
+    @param  additionalScopes        Permissions you want the user to consent to in the same
+                                    authentication flow, but won't be included in the returned
+                                    access token
     @param  loginHint               A loginHint (usually an email) to pass to the service at the
                                     beginning of the interactive authentication flow. The user returned
                                     in the completion block is not guaranteed to match the loginHint.
@@ -197,10 +201,12 @@
 #pragma mark acquireToken using User
 
 /*!
-    Acquire a token requiring interaction for a previously used user
+    Acquire a token interactively for an existing user. This is typically used after receiving
+    a MSALErrorInteractionRequired error.
  
-    @param  scopes          Scopes to request from the server, the scopes that come back
-                            can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  user            A user object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -211,10 +217,12 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token requiring interaction for a previously used user
+    Acquire a token interactively for an existing user. This is typically used after receiving
+    a MSALErrorInteractionRequired error.
  
-    @param  scopes                  Scopes to request from the server, the scopes that come back
-                                    can differ from the ones in the original call
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    gauranteed to be included in the access token returned.
     @param  user                    A user object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
@@ -230,15 +238,15 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token requiring interaction for a previously used user
+    Acquire a token interactively for an existing user. This is typically used after receiving
+    a MSALErrorInteractionRequired error.
  
-    @param  scopes                  Scopes to request from the server, the scopes that come back
-                                    can differ from the ones in the original call
-    @param  additionalScopes        Scopes for the service to ask the user to consent to, will
-                                    not be included in the token returned by the service, but
-                                    if the user consented to those scopes you will be able to
-                                    silently acquire tokens with those scopes later without requiring
-                                    further user interaction
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    gauranteed to be included in the access token returned.
+    @param  additionalScopes        Permissions you want the user to consent to in the same
+                                    authentication flow, but won't be included in the returned
+                                    access token
     @param  user                    A user object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
@@ -263,10 +271,11 @@
 #pragma mark acquireTokenSilent
 
 /*!
-    Acquire a token silently without user interaction for a previously used user
+    Acquire a token silently for an existing user.
  
-    @param  scopes          Scopes to request from the server, the scopes that come back
-                            can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  user            A user object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -277,10 +286,11 @@
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token requiring interaction for a previously used user
+    Acquire a token silently for an existing user.
  
-    @param  scopes                  Scopes to request from the server, the scopes that come back
-                                    can differ from the ones in the original call
+    @param  scopes          Permissions you want included in the access token received
+                            in the result in the completionBlock. Not all scopes are
+                            gauranteed to be included in the access token returned.
     @param  user                    A user object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               An authority (must be a URL) for acquiring the token, overrides
@@ -294,7 +304,7 @@
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token requiring interaction for a previously used user
+    Acquire a token silently for an existing user.
  
     @param  scopes                  Scopes to request from the server, the scopes that come back
                                     can differ from the ones in the original call
