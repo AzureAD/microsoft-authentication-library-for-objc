@@ -34,7 +34,6 @@
 
 @implementation MSALStressTestHelper
 
-static dispatch_semaphore_t s_sem = nil;
 static BOOL s_stop = NO;
 static BOOL s_runningTest = NO;
 
@@ -63,13 +62,12 @@ static BOOL s_runningTest = NO;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        s_sem = dispatch_semaphore_create(10);
-        
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(10);
         __block NSUInteger userIndex = 0;
         
         while (!s_stop)
         {
-            dispatch_semaphore_wait(s_sem, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
@@ -92,7 +90,7 @@ static BOOL s_runningTest = NO;
                          [self expireAllTokens];
                      }
                      
-                     dispatch_semaphore_signal(s_sem);
+                     dispatch_semaphore_signal(sem);
                  }];
             });
         }});
@@ -104,11 +102,11 @@ static BOOL s_runningTest = NO;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        s_sem = dispatch_semaphore_create(10);
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(10);
         
         while (!s_stop)
         {
-            dispatch_semaphore_wait(s_sem, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
@@ -116,7 +114,7 @@ static BOOL s_runningTest = NO;
                 
                 if (![users count])
                 {
-                    dispatch_semaphore_signal(s_sem);
+                    dispatch_semaphore_signal(sem);
                 }
                 else
                 {
@@ -132,7 +130,7 @@ static BOOL s_runningTest = NO;
                              s_runningTest = NO;
                          }
                          
-                         dispatch_semaphore_signal(s_sem);
+                         dispatch_semaphore_signal(sem);
                      }];
                 }
             });
