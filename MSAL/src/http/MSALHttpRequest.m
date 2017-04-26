@@ -49,7 +49,6 @@ NSString *const MSALHttpHeaderFormURLEncoded = @"application/x-www-form-urlencod
     NSMutableDictionary<NSString *, NSString *> *_headers;
     NSMutableDictionary *_queryParameters;
     
-    //TODO: move to seperate settings? - MSALAuthenticationSettings.h
     NSTimeInterval _timeOutInterval;
     NSURLRequestCachePolicy _cachePolicy;
 }
@@ -166,8 +165,6 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
         [self setContentTypeFormURLEncoded];
     }
     
-    // TODO: Add client version to URL
-    
     newURL = newURL? newURL : _endpointURL;
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:newURL
                                                            cachePolicy:_cachePolicy
@@ -177,7 +174,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     request.HTTPBody = bodyData;
     
     [event setHttpMethod:request.HTTPMethod];
-    [event setHttpPath:[NSString stringWithFormat:@"%@://%@/%@", newURL.scheme, newURL.host, newURL.path]];
+    [event setHttpURL:newURL];
     
     LOG_INFO(_context, @"HTTP request %@", [MSALAuthority isKnownHost:request.URL] ? request.URL.absoluteString : [request.URL.absoluteString msalComputeSHA256Hex]);
     LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);

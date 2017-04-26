@@ -22,9 +22,9 @@
 // THE SOFTWARE.
 
 #import "MSALWrapperTokenCache.h"
-#import "MSALTokenCacheDataSource.h"
+#import "MSALTokenCacheAccessor.h"
 
-@interface MSALWrapperTokenCache (Internal) <MSALTokenCacheDataSource>
+@interface MSALWrapperTokenCache (Internal) <MSALTokenCacheAccessor>
 
 - (nullable id<MSALTokenCacheDelegate>)delegate;
 

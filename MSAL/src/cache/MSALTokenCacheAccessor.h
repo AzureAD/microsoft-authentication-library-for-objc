@@ -21,44 +21,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTokenCacheDataSource.h"
+@class MSALAccessTokenCacheKey;
+@class MSALRefreshTokenCacheKey;
+@class MSALAccessTokenCacheItem;
+@class MSALRefreshTokenCacheItem;
 
-@class MSALTokenResponse;
-@class MSALRequestParameters;
 @protocol MSALRequestContext;
 
-@interface MSALTokenCacheAccessor : NSObject
+@protocol MSALTokenCacheAccessor <NSObject>
 
-- (id)initWithDataSource:(id<MSALTokenCacheDataSource>)dataSource;
+- (nullable NSArray<MSALAccessTokenCacheItem *> *)getAccessTokenItemsWithKey:(nullable MSALAccessTokenCacheKey *)key
+                                                                     context:(nullable id<MSALRequestContext>)ctx
+                                                                       error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (id<MSALTokenCacheDataSource>)dataSource;
+- (nullable MSALRefreshTokenCacheItem *)getRefreshTokenItemForKey:(nonnull MSALRefreshTokenCacheKey *)key
+                                                          context:(nullable id<MSALRequestContext>)ctx
+                                                            error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
-                                               response:(MSALTokenResponse *)response
-                                                context:(id<MSALRequestContext>)ctx
-                                                  error:(NSError * __autoreleasing *)error;
+- (nullable NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens:(nullable NSString *)clientId
+                                                            context:(nullable id<MSALRequestContext>)ctx
+                                                              error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-                                      context:(id<MSALRequestContext>)ctx
-                               authorityFound:(NSString * __autoreleasing *)authorityFound
-                                        error:(NSError * __autoreleasing *)error;
+- (BOOL)addOrUpdateAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
+                           context:(nullable id<MSALRequestContext>)ctx
+                             error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
-                                        context:(id<MSALRequestContext>)ctx
-                                          error:(NSError * __autoreleasing *)error;
+- (BOOL)addOrUpdateRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
+                            context:(nullable id<MSALRequestContext>)ctx
+                              error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (BOOL)deleteAllTokensForUser:(MSALUser *)user
-                      clientId:(NSString *)clientId
-                       context:(id<MSALRequestContext>)ctx
-                         error:(NSError * __autoreleasing *)error;
+- (BOOL)removeAccessTokenItem:(nonnull MSALAccessTokenCacheItem *)item
+                      context:(nullable id<MSALRequestContext>)ctx
+                        error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (NSArray<MSALUser *> *)getUsers:(NSString *)clientId
-                          context:(id<MSALRequestContext>)ctx
-                            error:(NSError * __autoreleasing *)error;
+- (BOOL)removeRefreshTokenItem:(nonnull MSALRefreshTokenCacheItem *)item
+                       context:(nullable id<MSALRequestContext>)ctx
+                         error:(NSError * __nullable __autoreleasing * __nullable)error;
 
-- (MSALUser *)getUserForIdentifier:(NSString *)userIdentifier
-                          clientId:(NSString *)clientId
-                       environment:(NSString *)environment
-                             error:(NSError * __autoreleasing *)error;
+- (BOOL)removeAllTokensForUserIdentifier:(nullable NSString *)userIdentifier
+                             environment:(nonnull NSString *)environment
+                                clientId:(nonnull NSString *)clientId
+                                 context:(nullable id<MSALRequestContext>)ctx
+                                   error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 @end

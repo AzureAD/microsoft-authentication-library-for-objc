@@ -77,9 +77,6 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     {
         [_dispatchers addObject:[[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
                                                             setTelemetryOnFailure:setTelemetryOnFailure]];
-        
-        // Log default events
-        [dispatcher dispatchEvent: @[[s_defaultEvent getProperties]]];
     }
 }
 
@@ -174,6 +171,8 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
         {
             [_errorEvents addObject:requestId];
         }
+        
+        [_eventTracking removeObjectForKey:key];
     }
 }
 
@@ -208,6 +207,11 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     {
         NSArray *events = [_events objectForKey:requestId];
         BOOL errorInEvent = [_errorEvents containsObject:requestId];
+        
+        if ([events count])
+        {
+            events = [@[[s_defaultEvent getProperties]] arrayByAddingObjectsFromArray:events];
+        }
         
         for (MSALDefaultDispatcher *dispatcher in _dispatchers)
         {

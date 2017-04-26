@@ -129,11 +129,13 @@ static MSALWebUI *s_currentWebSession = nil;
         s_currentWebSession = self;
     }
     
-    _telemetryRequestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    _telemetryRequestId = [_context telemetryRequestId];
     
     [[MSALTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_UI_EVENT];
     _telemetryEvent = [[MSALTelemetryUIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_UI_EVENT
                                                        context:_context];
+    
+    [_telemetryEvent setIsCancelled:NO];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         _safariViewController = [[SFSafariViewController alloc] initWithURL:url

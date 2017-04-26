@@ -29,7 +29,11 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
-#import "MSALTokenCacheAccessor.h"
+#import "MSALTokenCache.h"
+
+#import "MSALTelemetryAPIEvent.h"
+#import "MSALTelemetry+Internal.h"
+#import "MSALTelemetryEventStrings.h"
 
 @interface MSALSilentRequest()
 {
@@ -60,7 +64,7 @@
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
 
-    MSALTokenCacheAccessor *cache = _parameters.tokenCache;
+    MSALTokenCache *cache = _parameters.tokenCache;
     
     if (!_forceRefresh)
     {
@@ -74,12 +78,20 @@
         if (accessToken)
         {
             MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
+            
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [event setUser:result.user];
+            [self stopTelemetryEvent:event error:nil];
+            
             completionBlock(result, nil);
             return;
         }
         
         if (!accessToken && !updatedAuthority)
         {
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [self stopTelemetryEvent:event error:error];
+            
             completionBlock(nil, error);
             return;
         }
@@ -93,6 +105,9 @@
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)
         {
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [self stopTelemetryEvent:event error:error];
+            
             completionBlock(nil, error);
             return;
         }

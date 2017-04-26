@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheDataSource.h"
+#import "MSALTokenCacheAccessor.h"
 
-@class MSALTokenCacheAccessor;
+@class MSALTokenCache;
 
-@interface MSALTestTokenCache : NSObject <MSALTokenCacheDataSource>
+@interface MSALTestTokenCache : NSObject <MSALTokenCacheAccessor>
 
-+ (MSALTokenCacheAccessor *)createTestAccessor;
++ (MSALTokenCache *)createTestAccessor;
 
 - (NSArray<MSALRefreshTokenCacheItem *> *)refreshTokens;
 - (NSArray<MSALAccessTokenCacheItem *> *)accessTokens;

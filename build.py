@@ -58,6 +58,13 @@ target_specifiers = [
 		"platform" : "iOS",
 	},
 	{
+		"name" : "Sample iOS App",
+		"scheme" : "SampleAppiOS",
+		"workspace" : "Samples/ios/SampleApp.xcworkspace",
+		"operations" : [ "build" ],
+		"platform" : "iOS",
+	},
+	{
 		"name" : "Mac Framework",
 		"scheme" : "MSAL (Mac Framework)",
 		"operations" : [ "build", "test", "codecov" ],

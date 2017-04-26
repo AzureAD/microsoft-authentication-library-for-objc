@@ -762,7 +762,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                     error:nil];
     application.tokenCache = [MSALTestTokenCache createTestAccessor];
-    id<MSALTokenCacheDataSource> dataSource = application.tokenCache.dataSource;
+    id<MSALTokenCacheAccessor> dataSource = application.tokenCache.dataSource;
     
     // Make sure no users are showing up in the cache
     XCTAssertEqual([application users:nil].count, 0);
@@ -839,7 +839,7 @@
     MSALUser *user = [MSALUser new];
     
     [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:context:error:)
-                              class:[MSALTokenCacheAccessor class]
+                              class:[MSALTokenCache class]
                               block:(id)^(id obj, MSALUser *user, NSString *clientId, id<MSALRequestContext> ctx, NSError **error)
      {
          (void)obj;

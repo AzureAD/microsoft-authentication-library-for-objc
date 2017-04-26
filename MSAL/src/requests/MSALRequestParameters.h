@@ -30,7 +30,7 @@
 #import "MSALTelemetryApiId.h"
 
 @class MSALAuthority;
-@class MSALTokenCacheAccessor;
+@class MSALTokenCache;
 @class MSALUser;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
@@ -38,7 +38,7 @@
 @property NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property MSALScopes *scopes;
-@property MSALTokenCacheAccessor *tokenCache;
+@property MSALTokenCache *tokenCache;
 @property NSURL *redirectUri;
 @property NSString *loginHint;
 @property NSString *clientId;
