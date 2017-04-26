@@ -37,8 +37,7 @@
 /*!
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
     templates representing well-formed authorities. It is useful when the authority is obtained at
-    run time as it ensures the authority complies, to prevent MSAL from displaying authentication
-    prompts from malicious pages.
+    run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
 @property BOOL validateAuthority;
 
@@ -68,7 +67,7 @@
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
-    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
+    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
