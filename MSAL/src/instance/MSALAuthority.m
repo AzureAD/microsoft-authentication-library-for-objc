@@ -157,7 +157,9 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         tenant = firstPathComponent;
     }
     
-    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority userPrincipalName:userPrincipalName];
+    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority
+                                                          authorityType:authorityType
+                                                      userPrincipalName:userPrincipalName];
     
     if (authorityInCache)
     {
@@ -235,7 +237,6 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
             s_validatedUsersForAuthority[authorityKey] = usersInDomain;
         }
         [usersInDomain addObject:userPrincipalName];
-        
     }
     s_validatedAuthorities[authorityKey] = authority;
 
@@ -243,6 +244,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
 }
 
 + (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                        authorityType:(MSALAuthorityType)authorityType
                     userPrincipalName:(NSString *)userPrincipalName
 {
     if (!authority)
@@ -251,16 +253,22 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     }
     
     NSString *authorityKey = authority.absoluteString;
-
-    if (userPrincipalName)
+    
+    if (authorityType == ADFSAuthority)
     {
+        if (!userPrincipalName)
+        {
+            return nil;
+        }
+        
         NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+
         if (![validatedUsers containsObject:userPrincipalName])
         {
             return nil;
         }
     }
-    
+
     return s_validatedAuthorities[authorityKey];
 }
 
