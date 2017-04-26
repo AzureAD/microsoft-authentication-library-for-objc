@@ -157,12 +157,6 @@
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
-    MSALAccessTokenCacheKey *key = [[MSALAccessTokenCacheKey alloc] initWithAuthority:authority.absoluteString
-                                                                             clientId:clientId
-                                                                                scope:scopes
-                                                                       userIdentifier:user.userIdentifier
-                                                                          environment:user.environment];
-    
     NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:user
                                                                                clientId:clientId
                                                                                 context:ctx
@@ -178,13 +172,14 @@
     
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if (authority && [key matches:[tokenItem tokenCacheKey:nil]])
+        if ([scopes isSubsetOfOrderedSet:tokenItem.scope])
         {
-            [matchedTokens addObject:tokenItem];
-        }
-        else if (!authority && [scopes isSubsetOfOrderedSet:tokenItem.scope])
-        {
-            [matchedTokens addObject:tokenItem];
+            if ((!authority) ||
+                (authority && [authority.absoluteString isEqual:tokenItem.authority]))
+                
+            {
+                [matchedTokens addObject:tokenItem];
+            }
         }
     }
     
