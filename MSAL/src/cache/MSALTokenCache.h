@@ -33,19 +33,31 @@
 
 - (id<MSALTokenCacheAccessor>)dataSource;
 
-- (MSALAccessTokenCacheItem *)saveAccessAndRefreshToken:(MSALRequestParameters *)requestParam
-                                               response:(MSALTokenResponse *)response
-                                                context:(id<MSALRequestContext>)ctx
-                                                  error:(NSError * __autoreleasing *)error;
+- (MSALAccessTokenCacheItem *)saveAccessTokenWithAuthority:(NSURL *)authority
+                                                  clientId:(NSString *)clientId
+                                                  response:(MSALTokenResponse *)response
+                                                   context:(id<MSALRequestContext>)context
+                                                     error:(NSError * __autoreleasing *)error;
 
-- (MSALAccessTokenCacheItem *)findAccessToken:(MSALRequestParameters *)requestParam
-                                      context:(id<MSALRequestContext>)ctx
-                               authorityFound:(NSString * __autoreleasing *)authorityFound
-                                        error:(NSError * __autoreleasing *)error;
+- (MSALRefreshTokenCacheItem *)saveRefreshTokenWithEnvironment:(NSString *)environment
+                                                      clientId:(NSString *)clientId
+                                                      response:(MSALTokenResponse *)response
+                                                       context:(id<MSALRequestContext>)context
+                                                         error:(NSError * __autoreleasing *)error;
 
-- (MSALRefreshTokenCacheItem *)findRefreshToken:(MSALRequestParameters *)requestParam
-                                        context:(id<MSALRequestContext>)ctx
-                                          error:(NSError * __autoreleasing *)error;
+- (MSALAccessTokenCacheItem *)findAccessTokenWithAuthority:(NSURL *)authority
+                                                  clientId:(NSString *)clientId
+                                                    scopes:(MSALScopes *)scopes
+                                                      user:(MSALUser *)user
+                                                   context:(id<MSALRequestContext>)ctx
+                                            authorityFound:(NSString * __autoreleasing *)authorityFound
+                                                     error:(NSError * __autoreleasing *)error;
+
+- (MSALRefreshTokenCacheItem *)findRefreshTokenWithEnvironment:(NSString *)environment
+                                                      clientId:(NSString *)clientId
+                                                userIdentifier:(NSString *)userIdentifier
+                                                       context:(id<MSALRequestContext>)ctx
+                                                         error:(NSError * __autoreleasing *)error;
 
 - (BOOL)deleteAllTokensForUser:(MSALUser *)user
                       clientId:(NSString *)clientId

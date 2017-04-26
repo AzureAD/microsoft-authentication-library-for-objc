@@ -403,8 +403,7 @@
     NSError *error = nil;
     if (!authority)
     {
-        // TODO: Rationalize default authority behavior (#93)
-        params.unvalidatedAuthority = [MSALAuthority defaultAuthority];
+        params.unvalidatedAuthority = _authority;
     }
     else if (![params setAuthorityFromString:authority error:&error])
     {
