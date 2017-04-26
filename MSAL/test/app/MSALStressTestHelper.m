@@ -34,50 +34,11 @@
 
 @implementation MSALStressTestHelper
 
-static dispatch_semaphore_t sem = nil;
-static BOOL stop = NO;
-static BOOL runningTest = NO;
+static dispatch_semaphore_t s_sem = nil;
+static BOOL s_stop = NO;
+static BOOL s_runningTest = NO;
 
 #pragma mark - Helpers
-
-+ (void)commonSetup
-{
-    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-    [MSALLogger sharedLogger].level = MSALLogLevelNothing;
-    
-    stop = NO;
-}
-
-+ (MSALPublicClientApplication *)createTestPublicApplicationWithLogHandler:(void (^)(NSString *testLogEntry))logHandler
-{
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    
-    if (![[settings.scopes allObjects] count])
-    {
-        logHandler(@"Please select the scope!");
-        return nil;
-    }
-    
-    if (runningTest)
-    {
-        logHandler(@"Running other test, please stop first!");
-        return nil;
-    }
-    
-    NSString *authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
-    
-    NSError *error = nil;
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
-    
-    if (!application)
-    {
-        logHandler([NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error]);
-    }
-
-    return application;
-}
 
 + (void)expireAllTokens
 {
@@ -95,39 +56,20 @@ static BOOL runningTest = NO;
 
 + (void)testAcquireTokenSilentWithExpiringToken:(BOOL)expireToken
                                useMultipleUsers:(BOOL)multipleUsers
-                                     logHandler:(void (^)(NSString *testLogEntry))logHandler
+                                    application:(MSALPublicClientApplication *)application
 {
-    [self commonSetup];
-    
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    MSALPublicClientApplication *application = [self createTestPublicApplicationWithLogHandler:logHandler];
-    
-    if (!application)
-    {
-        return;
-    }
-    
     NSArray<MSALUser *> *users = [application users:nil];
-    
-    if (![users count])
-    {
-        logHandler(@"Cannot proceed with a silent call without having any users");
-        return;
-    }
-    
-    logHandler([NSString stringWithFormat:@"Started stress test at %@", [NSDate date]]);
-    
-    runningTest = YES;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        sem = dispatch_semaphore_create(10);
+        s_sem = dispatch_semaphore_create(10);
         
         __block NSUInteger userIndex = 0;
         
-        while (!stop)
+        while (!s_stop)
         {
-            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(s_sem, DISPATCH_TIME_FOREVER);
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
@@ -150,35 +92,23 @@ static BOOL runningTest = NO;
                          [self expireAllTokens];
                      }
                      
-                     dispatch_semaphore_signal(sem);
+                     dispatch_semaphore_signal(s_sem);
                  }];
             });
         }});
 }
 
-+ (void)testPollingInBackgroundWithLogHandler:(void (^)(NSString *testLogEntry))logHandler
++ (void)testPollingUntilSuccessWithApplication:(MSALPublicClientApplication *)application
 {
-    [self commonSetup];
-    
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    MSALPublicClientApplication *application = [self createTestPublicApplicationWithLogHandler:logHandler];
-    
-    if (!application)
-    {
-        return;
-    }
-    
-    logHandler([NSString stringWithFormat:@"Started stress test at %@", [NSDate date]]);
-    
-    runningTest = YES;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        sem = dispatch_semaphore_create(10);
+        s_sem = dispatch_semaphore_create(10);
         
-        while (!stop)
+        while (!s_stop)
         {
-            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(s_sem, DISPATCH_TIME_FOREVER);
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
@@ -186,7 +116,7 @@ static BOOL runningTest = NO;
                 
                 if (![users count])
                 {
-                    dispatch_semaphore_signal(sem);
+                    dispatch_semaphore_signal(s_sem);
                 }
                 else
                 {
@@ -198,11 +128,11 @@ static BOOL runningTest = NO;
                          
                          if (result.accessToken)
                          {
-                             stop = YES;
-                             logHandler([NSString stringWithFormat:@"Stress test received access token at %@", [NSDate date]]);
+                             s_stop = YES;
+                             s_runningTest = NO;
                          }
                          
-                         dispatch_semaphore_signal(sem);
+                         dispatch_semaphore_signal(s_sem);
                      }];
                 }
             });
@@ -211,29 +141,60 @@ static BOOL runningTest = NO;
     });
 }
 
-#pragma mark - Convinience
+#pragma mark - Convenience
 
-+ (void)testWithSameTokenAndLogHandler:(void (^)(NSString *testLogEntry))logHandler
++ (BOOL)runStressTestWithType:(MSALStressTestType)type application:(MSALPublicClientApplication *)application
 {
-    [self testAcquireTokenSilentWithExpiringToken:NO useMultipleUsers:NO logHandler:logHandler];
-}
-
-+ (void)testWithExpiredTokenAndLogHandler:(void (^)(NSString *testLogEntry))logHandler
-{
-    [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:NO logHandler:logHandler];
-}
-
-+ (void)testWithMultipleUsersAndLogHandler:(void (^)(NSString *testLogEntry))logHandler
-{
-    [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:YES logHandler:logHandler];
-}
-
-+ (void)stopStressTestWithLogHandler:(void (^)(NSString *testLogEntry))logHandler
-{
-    stop = YES;
-    runningTest = NO;
+    if (s_runningTest)
+    {
+        return NO;
+    }
     
-    logHandler([NSString stringWithFormat:@"Stopped the currently running stress test at %@", [NSDate date]]);
+    s_stop = NO;
+    s_runningTest = YES;
+    
+    switch (type) {
+        case MSALStressTestWithSameToken:
+            [self testAcquireTokenSilentWithExpiringToken:NO useMultipleUsers:NO application:application];
+            break;
+            
+        case MSALStressTestWithExpiredToken:
+            [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:NO application:application];
+            break;
+        
+        case MSALStressTestWithMultipleUsers:
+            [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:YES application:application];
+            break;
+            
+        case MSALStressTestOnlyUntilSuccess:
+            [self testPollingUntilSuccessWithApplication:application];
+            break;
+            
+        default:
+            break;
+    }
+    
+    return YES;
+}
+
++ (NSUInteger)numberOfUsersNeededForTestType:(MSALStressTestType)type
+{
+    switch (type) {
+        case MSALStressTestOnlyUntilSuccess:
+            return 0;
+            
+        case MSALStressTestWithMultipleUsers:
+            return 2;
+            
+        default:
+            return 1;
+    }
+}
+
++ (void)stopStressTest
+{
+    s_stop = YES;
+    s_runningTest = NO;
 }
 
 @end

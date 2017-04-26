@@ -27,34 +27,46 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum {
+                /*
+                 With RT and AT in cache, 10 threads calling acquireTokenSilent at the same time.
+                 */
+                MSALStressTestWithSameToken,
+    
+                /*
+                 With RT and AT in cache, 10 threads calling acquireTokenSilent at the same time.
+                 Each acquireTokenSilent call will expire AT when the call is finished.
+                 */
+                MSALStressTestWithExpiredToken,
+    
+                /*
+                 With two different users in cache, 10 threads calling acquireTokenSilent at the same time once for one user, once for another.
+                 Each acquireTokenSilent call will expire AT when the call is finished.
+                 */
+                MSALStressTestWithMultipleUsers,
+    
+                /*
+                 10 threads trying to find token in cache in background while interactive acquireToken is in progress.
+                 Once interactive acquireToken is finished, they should find token and fo acquireTokenSilent.
+                 */
+                MSALStressTestOnlyUntilSuccess} MSALStressTestType;
+
 @interface MSALStressTestHelper : NSObject
 
 /*
- With RT and AT in cache, 10 threads calling acquireTokenSilent at the same time.
+ Runs a requested stress test type until stopped
+ Returns YES if test was started
  */
-+ (void)testWithSameTokenAndLogHandler:(void (^)(NSString *testLogEntry))logHandler;
++ (BOOL)runStressTestWithType:(MSALStressTestType)type application:(MSALPublicClientApplication *)application;
 
 /*
- With RT and AT in cache, 10 threads calling acquireTokenSilent at the same time.
- Each acquireTokenSilent call will expire AT when the call is finished.
+ Returns the required number of users in cache for the requested stress test type
  */
-+ (void)testWithExpiredTokenAndLogHandler:(void (^)(NSString *testLogEntry))logHandler;
-
-/*
- With two different users in cache, 10 threads calling acquireTokenSilent at the same time once for one user, once for another.
- Each acquireTokenSilent call will expire AT when the call is finished.
- */
-+ (void)testWithMultipleUsersAndLogHandler:(void (^)(NSString *testLogEntry))logHandler;
-
-/*
- 10 threads trying to find token in cache in background while interactive acquireToken is in progress.
- Once interactive acquireToken is finished, they should find token and fo acquireTokenSilent.
- */
-+ (void)testPollingInBackgroundWithLogHandler:(void (^)(NSString *testLogEntry))logHandler;
++ (NSUInteger)numberOfUsersNeededForTestType:(MSALStressTestType)type;
 
 /*
  Stops the currently running stress test
  */
-+ (void)stopStressTestWithLogHandler:(void (^)(NSString *testLogEntry))logHandler;
++ (void)stopStressTest;
 
 @end
