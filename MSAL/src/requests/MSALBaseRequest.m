@@ -38,6 +38,7 @@
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALClientInfo.h"
+#import "NSURL+MSALExtensions.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -236,12 +237,13 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          NSError *cacheError = nil;
-         MSALTokenCacheAccessor *cache = self.parameters.tokenCache;
-         MSALAccessTokenCacheItem *atItem =
-         [cache saveAccessAndRefreshToken:self.parameters
-                                 response:tokenResponse
-                                  context:_parameters
-                                    error:&cacheError];
+         MSALTokenCache *cache = self.parameters.tokenCache;
+         
+         MSALAccessTokenCacheItem *atItem = [cache saveAccessTokenWithAuthority:_parameters.unvalidatedAuthority
+                                                                       clientId:_parameters.clientId
+                                                                       response:tokenResponse
+                                                                        context:_parameters
+                                                                          error:&cacheError];
          
          if (!atItem)
          {
@@ -249,6 +251,17 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
 
+         MSALRefreshTokenCacheItem *rtItem =  [cache saveRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msalHostWithPort
+                                                                            clientId:_parameters.clientId
+                                                                            response:tokenResponse
+                                                                             context:_parameters
+                                                                               error:&cacheError];
+         if (!rtItem && cacheError)
+         {
+             completionBlock(nil, cacheError);
+             return;
+         }
+         
          MSALResult *result =
          [MSALResult resultWithAccessToken:atItem.accessToken
                                  expiresOn:atItem.expiresOn

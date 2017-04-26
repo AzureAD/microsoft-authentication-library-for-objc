@@ -34,9 +34,9 @@
 
 @interface MSALTestAppCacheRowItem : NSObject
 
-@property BOOL clientId;
-@property MSALBaseTokenCacheItem* item;
-@property NSString* title;
+@property BOOL environment;
+@property MSALBaseTokenCacheItem *item;
+@property NSString *title;
 
 @end
 
@@ -49,17 +49,22 @@
 @end
 
 @implementation MSALTestAppCacheViewController
+
+#define BAD_REFRESH_TOKEN @"bad-refresh-token"
+
 {
-    UITableView* _cacheTableView;
+    UITableView *_cacheTableView;
     
-    NSMutableDictionary* _cacheMap;
+    NSMutableDictionary *_cacheMap;
     
-    NSMutableArray* _users;
-    NSMutableArray* _userTokens;
+    NSMutableDictionary *_userMap;
     
-    NSArray* _tokenRowActions;
-    NSArray* _rtRowActions;
-    NSArray* _clientIdRowActions;
+    NSMutableArray *_userIdentifiers;
+    NSMutableArray *_userTokens;
+    
+    NSArray *_tokenRowActions;
+    NSArray *_rtRowActions;
+    NSArray *_environmentRowActions;
 }
 
 - (id)init
@@ -81,7 +86,7 @@
 
 - (void)deleteTokenAtPath:(NSIndexPath*)indexPath
 {
-    MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
     
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
     if ([rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
@@ -96,15 +101,9 @@
     [self loadCache];
 }
 
-- (void)tombstoneTokenAtPath:(NSIndexPath*)indexPath
-{
-    // current delete implementation will tombstone MRRTs.
-    [self deleteTokenAtPath:indexPath];
-}
-
 - (void)expireTokenAtPath:(NSIndexPath*)indexPath
 {
-    MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
     if (![rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
     {
         return;
@@ -119,33 +118,37 @@
     [self loadCache];
 }
 
-- (void)deleteAllAtPath:(NSIndexPath*)indexPath
+- (void)deleteAllAtPath:(NSIndexPath *)indexPath
 {
-    MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
-    if (!rowItem.clientId)
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
+    if (!rowItem.environment)
     {
         NSLog(@"Trying to delete all from a non-client-id item?");
         return;
     }
     
-    NSString* userId = [_users objectAtIndex:indexPath.section];
+    NSString *userId = [_userIdentifiers objectAtIndex:indexPath.section];
     
-    // TODO: Test App Token Cache
-    (void)userId;
+    // Delete all tokens
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    [cache removeAllTokensForUserIdentifier:userId environment:rowItem.title clientId:TEST_APP_CLIENT_ID context:nil error:nil];
+    
+    [_userMap removeObjectForKey:userId];
+    [_userTokens removeObjectAtIndex:indexPath.section];
     
     [self loadCache];
 }
 
 - (void)invalidateTokenAtPath:(NSIndexPath*)indexPath
 {
-    MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
-    if (![rowItem isKindOfClass:[MSALRefreshTokenCacheItem class]])
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
+    if (![rowItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]])
     {
         return;
     }
     
     MSALRefreshTokenCacheItem *item = (MSALRefreshTokenCacheItem *)rowItem.item;
-    item.refreshToken = @"bad-refresh-token";
+    item.refreshToken = BAD_REFRESH_TOKEN;
     
     MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
     [cache addOrUpdateRefreshTokenItem:item context:nil error:nil];
@@ -153,7 +156,8 @@
     [self loadCache];
 }
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
@@ -182,16 +186,6 @@
         [self deleteTokenAtPath:indexPath];
     }];
     
-    UITableViewRowAction* tombstoneTokenAction =
-    [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
-                                       title:@"Tombstone"
-                                     handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
-    {
-        (void)action;
-        [self tombstoneTokenAtPath:indexPath];
-    }];
-    [tombstoneTokenAction setBackgroundColor:[UIColor brownColor]];
-    
     UITableViewRowAction* invalidateAction =
     [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
                                        title:@"Invalidate"
@@ -200,7 +194,7 @@
          (void)action;
          [self invalidateTokenAtPath:indexPath];
      }];
-    [invalidateAction setBackgroundColor:[UIColor yellowColor]];
+    [invalidateAction setBackgroundColor:[UIColor orangeColor]];
     
     UITableViewRowAction* expireTokenAction =
     [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
@@ -223,8 +217,8 @@
     }];
     
     _tokenRowActions = @[ deleteTokenAction, expireTokenAction ];
-    _rtRowActions = @[ tombstoneTokenAction, invalidateAction ];
-    _clientIdRowActions = @[ deleteAllAction ];
+    _rtRowActions = @[ deleteTokenAction, invalidateAction ];
+    _environmentRowActions = @[ deleteAllAction ];
     
     [[NSNotificationCenter defaultCenter] addObserverForName:MSALTestAppCacheChangeNotification
                                                       object:nil
@@ -243,30 +237,27 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)addTokenToCacheMap:(MSALBaseTokenCacheItem*)item
+- (void)addTokenToCacheMap:(MSALBaseTokenCacheItem *)item
 {
-    NSString* userId = item.user.displayableId;
-    if (!userId)
-    {
-        userId = @"<unknown>";
-    }
+    NSString *userId = item.user.userIdentifier;
     
-    NSMutableDictionary* userTokens = [_cacheMap objectForKey:userId];
+    NSMutableDictionary *userTokens = _cacheMap[userId];
     if (!userTokens)
     {
         userTokens = [NSMutableDictionary new];
         [_cacheMap setObject:userTokens forKey:userId];
     }
     
-    NSString* clientId = item.clientId;
-    NSMutableArray* clientIdTokens = [userTokens objectForKey:clientId];
-    if (!clientIdTokens)
+    NSString *environment = item.user.environment;
+    
+    NSMutableArray *environmentTokens = userTokens[environment];
+    if (!environmentTokens)
     {
-        clientIdTokens = [NSMutableArray new];
-        [userTokens setObject:clientIdTokens forKey:clientId];
+        environmentTokens = [NSMutableArray new];
+        userTokens[environment] = environmentTokens;
     }
     
-    [clientIdTokens addObject:item];
+    [environmentTokens addObject:item];
 }
 
 - (void)loadCache
@@ -274,18 +265,19 @@
     [self.refreshControl beginRefreshing];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
         // First create a map heirarchy of userId -> clientId -> tokens to sort
         // through all the itmes we get back
         MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
         _cacheMap = [NSMutableDictionary new];
         
-        NSArray* allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
+        NSArray *allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
         for (MSALBaseTokenCacheItem* item in allAccessTokenItems)
         {
             [self addTokenToCacheMap:item];
         }
         
-        NSArray* allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
+        NSArray *allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
         for (MSALBaseTokenCacheItem* item in allRefreshTokenItems)
         {
             [self addTokenToCacheMap:item];
@@ -293,32 +285,36 @@
         
         // Now that we have all the items sorted out in the dictionaries flatten it
         // out to a single list.
-        _users = [[NSMutableArray alloc] initWithCapacity:_cacheMap.count];
+        _userIdentifiers = [[NSMutableArray alloc] initWithCapacity:_cacheMap.count];
         _userTokens = [[NSMutableArray alloc] initWithCapacity:_cacheMap.count];
-        for (NSString* userId in _cacheMap)
+        _userMap = [NSMutableDictionary new];
+        
+        for (NSString *userId in _cacheMap)
         {
             NSUInteger count = 0;
-            [_users addObject:userId];
+            [_userIdentifiers addObject:userId];
             
-            NSDictionary* userTokens = [_cacheMap objectForKey:userId];
+            NSDictionary *userTokens = _cacheMap[userId];
             for (NSString* key in userTokens)
             {
                 count += [[userTokens objectForKey:key] count]  + 1; // Add one for the "client ID" item
             }
             
             NSMutableArray* arrUserTokens = [[NSMutableArray alloc] initWithCapacity:count];
-            
-            for (NSString* clientId in userTokens)
+
+            for (NSString *environment in userTokens)
             {
-                MSALTestAppCacheRowItem* clientIdItem = [MSALTestAppCacheRowItem new];
-                clientIdItem.title = clientId;
-                clientIdItem.clientId = YES;
+                // Add environment row
+                MSALTestAppCacheRowItem *environmentItem = [MSALTestAppCacheRowItem new];
+                environmentItem.title = environment;
+                environmentItem.environment = YES;
                 
-                [arrUserTokens addObject:clientIdItem];
+                [arrUserTokens addObject:environmentItem];
                 
-                NSArray* clientIdTokens = [userTokens objectForKey:clientId];
-                for (MSALBaseTokenCacheItem* item in clientIdTokens)
+                NSArray *environmentTokens = userTokens[environment];
+                for (MSALBaseTokenCacheItem *item in environmentTokens)
                 {
+                    
                     MSALTestAppCacheRowItem* tokenItem = [MSALTestAppCacheRowItem new];
                     if ([item isKindOfClass:[MSALAccessTokenCacheItem class]])
                     {
@@ -329,24 +325,27 @@
                         tokenItem.title = @"RT";
                     }
                     tokenItem.item = item;
-                    
                     [arrUserTokens addObject:tokenItem];
+                    
+                    _userMap[userId] = item.user.displayableId;
                 }
             }
             
             [_userTokens addObject:arrUserTokens];
+            
         }
-        
         _cacheMap = nil;
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [_cacheTableView reloadData];
             [self.refreshControl endRefreshing];
+            
+            if (!_userMap[MSALTestAppSettings.settings.currentUser.userIdentifier])
+            {
+                MSALTestAppSettings.settings.currentUser = nil;
+            }
         });
     });
-    
-    
-    
 }
 
 - (MSALTestAppCacheRowItem*)cacheItemForPath:(NSIndexPath*)indexPath
@@ -354,21 +353,16 @@
     return [[_userTokens objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
 }
 
-- (BOOL)isPathClientId:(NSIndexPath*)indexPath
-{
-    return [self cacheItemForPath:indexPath].clientId;
-}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     (void)tableView;
-    return [_users count];
+    return [_userIdentifiers count];
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     (void)tableView;
-    return [_users objectAtIndex:section];
+    return _userMap[[_userIdentifiers objectAtIndex:section]];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -382,7 +376,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"cacheCell"];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cacheCell"];
     
     if (!cell)
     {
@@ -391,7 +385,7 @@
     
     MSALTestAppCacheRowItem* cacheItem = [self cacheItemForPath:indexPath];
     
-    if (cacheItem.clientId)
+    if (cacheItem.environment)
     {
         [cell setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:((CGFloat)0x80/(CGFloat)0xFF) alpha:1.0]];
         [[cell textLabel] setTextColor:[UIColor whiteColor]];
@@ -400,18 +394,11 @@
     else
     {
         [cell setBackgroundColor:[UIColor whiteColor]];
-            
-        // TODO: Test App Token Cache
-        /*
-        if (cacheItem.item.tombstone)
-        {
-            [[cell textLabel] setTextColor:[UIColor brownColor]];
-        }
-        else */
+
         if ([cacheItem.item isKindOfClass:[MSALRefreshTokenCacheItem class]] &&
-             [((MSALRefreshTokenCacheItem *)cacheItem.item).refreshToken isEqualToString:@"bad-refresh-token"])
+             [((MSALRefreshTokenCacheItem *)cacheItem.item).refreshToken isEqualToString:BAD_REFRESH_TOKEN])
         {
-            [[cell textLabel] setTextColor:[UIColor yellowColor]];
+            [[cell textLabel] setTextColor:[UIColor orangeColor]];
         }
         else if ([cacheItem.item isKindOfClass:[MSALAccessTokenCacheItem class]] &&
                  ((MSALAccessTokenCacheItem *)cacheItem.item).isExpired)
@@ -438,9 +425,9 @@
     MSALTestAppCacheRowItem* rowItem = [self cacheItemForPath:indexPath];
     (void)rowItem;
     
-    if (rowItem.clientId)
+    if (rowItem.environment)
     {
-        return _clientIdRowActions;
+        return _environmentRowActions;
     }
     else
     {

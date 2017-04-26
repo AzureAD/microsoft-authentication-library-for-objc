@@ -25,20 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import <UIKit/UIKit.h>
 
-@interface MSALKeychainTokenCache : NSObject
+@interface SampleAppDelegate : UIResponder <UIApplicationDelegate>
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+@property (strong, nonatomic) UIWindow *window;
 
-@end
-
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
-
-- (nonnull NSDictionary *)defaultKeychainQuery;
-
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
++ (void)setCurrentViewController:(UIViewController *)viewController;
 
 @end
+

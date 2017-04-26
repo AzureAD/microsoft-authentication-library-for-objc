@@ -25,20 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import <UIKit/UIKit.h>
 
-@interface MSALKeychainTokenCache : NSObject
+typedef void(^PhotoBlock)(UIImage *photo, NSError *error);
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+@interface SamplePhotoUtil : NSObject
 
-@end
++ (instancetype)sharedUtil;
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
+// Returns the current photo in the cache for the user, or the placeholder image if none is in the cache
+- (UIImage *)cachedPhoto;
 
-- (nonnull NSDictionary *)defaultKeychainQuery;
+// Checks with the graph for an updated photo, if enough time has passed since the last check
+- (void)checkUpdatePhoto:(PhotoBlock)photoBlock;
 
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
+// Clears out any cached data for the current user
+- (void)clearPhotoCache;
 
 @end

@@ -25,20 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALKeychainTokenCache : NSObject
+@class MSALUser;
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+@interface SampleMSALUtil : NSObject
 
-@end
++ (instancetype)sharedUtil;
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
+/*!
+    Called during app intialization to set up app-wide MSAL properties.
+ */
++ (void)setup;
 
-- (nonnull NSDictionary *)defaultKeychainQuery;
 
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
+- (NSString *)currentUserIdentifer;
+
+/*!
+    Returns the current user for the application
+ */
+- (MSALUser *)currentUser:(NSError * __autoreleasing *)error;
+
+/*!
+    Signs in a user using MSAL.
+ */
+- (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock;
+
+/*!
+    Removes MSAL user state from the application.
+ */
+
+- (void)signOut;
+
+/*!
+    Acquires a token to use against graph for the current user
+ */
+- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
+                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+
+/*!
+    Acquires a token using an interactive flow for the current user. Used if
+    the library returns MSALErrorInteractionRequired.
+ */
+- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
+                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 @end

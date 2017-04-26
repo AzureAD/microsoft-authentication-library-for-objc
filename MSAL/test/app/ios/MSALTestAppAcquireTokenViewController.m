@@ -322,7 +322,6 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    (void)animated;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *loginHint = settings.loginHint;
     if (![NSString msalIsStringNilOrBlank:loginHint])
@@ -528,6 +527,8 @@
         
         [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
                      forState:UIControlStateNormal];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
     }
     else
     {

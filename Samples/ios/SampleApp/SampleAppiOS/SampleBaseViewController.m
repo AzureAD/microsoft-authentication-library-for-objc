@@ -25,20 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import "SampleBaseViewController.h"
 
-@interface MSALKeychainTokenCache : NSObject
-
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+@interface SampleBaseViewController ()
 
 @end
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
+@implementation SampleBaseViewController
 
-- (nonnull NSDictionary *)defaultKeychainQuery;
+- (void)showDialogForError:(NSError *)error
+{
+    __block UIAlertController *alert =
+    [UIAlertController alertControllerWithTitle:error.localizedDescription
+                                        message:error.localizedFailureReason
+                                 preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                              style:UIAlertActionStyleDefault
+                                            handler:nil]];
+    
+    [self presentViewController:alert
+                       animated:YES
+                     completion:nil];
+    
+}
 
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
+- (float)startY
+{
+    return 1.0f;
+}
 
 @end

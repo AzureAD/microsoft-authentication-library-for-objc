@@ -25,20 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import "SampleBaseViewController.h"
 
-@interface MSALKeychainTokenCache : NSObject
+@interface SampleLoginViewController : SampleBaseViewController
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
-
-@end
-
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
-
-- (nonnull NSDictionary *)defaultKeychainQuery;
-
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
++ (instancetype)sharedViewController;
 
 @end

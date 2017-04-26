@@ -417,10 +417,10 @@
     [rts removeObjectForKey:key.account];
 }
 
-+ (MSALTokenCacheAccessor *)createTestAccessor
++ (MSALTokenCache *)createTestAccessor
 {
     MSALTestTokenCache *testCache = [MSALTestTokenCache new];
-    return [[MSALTokenCacheAccessor alloc] initWithDataSource:testCache];
+    return [[MSALTokenCache alloc] initWithDataSource:testCache];
 }
 
 - (NSArray<MSALRefreshTokenCacheItem *> *)refreshTokens

@@ -25,20 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALKeychainTokenCache : NSObject
+extern const NSErrorDomain SampleAppErrorDomain;
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
-
-@end
-
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
-
-- (nonnull NSDictionary *)defaultKeychainQuery;
-
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
-
-@end
+NS_ENUM(NSInteger)
+{
+    SampleAppNoUserSignedIn,
+    SampleAppServerError,
+    SampleAppNoImageDataError,
+    SampleAppFailedToMakeUIImageError,
+};
