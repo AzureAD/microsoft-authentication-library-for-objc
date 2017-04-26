@@ -47,7 +47,7 @@ typedef enum {
     
                 /*
                  10 threads trying to find token in cache in background while interactive acquireToken is in progress.
-                 Once interactive acquireToken is finished, they should find token and fo acquireTokenSilent.
+                 Once interactive acquireToken is finished, they should find token and finish acquireTokenSilent.
                  */
                 MSALStressTestOnlyUntilSuccess} MSALStressTestType;
 
