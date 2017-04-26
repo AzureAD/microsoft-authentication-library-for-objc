@@ -35,6 +35,8 @@
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
 
+#import "NSURL+MSALExtensions.h"
+
 @interface MSALSilentRequest()
 {
     MSALRefreshTokenCacheItem *_refreshToken;
@@ -70,10 +72,13 @@
     {
         NSString *updatedAuthority = nil;
         NSError *error = nil;
-        MSALAccessTokenCacheItem *accessToken = [cache findAccessToken:_parameters
-                                                               context:_parameters
-                                                        authorityFound:&updatedAuthority
-                                                                 error:&error];
+        MSALAccessTokenCacheItem *accessToken = [cache findAccessTokenWithAuthority:_parameters.unvalidatedAuthority
+                                                                           clientId:_parameters.clientId
+                                                                             scopes:_parameters.scopes
+                                                                               user:_parameters.user
+                                                                            context:_parameters
+                                                                     authorityFound:&updatedAuthority
+                                                                              error:&error];
         
         if (accessToken)
         {
@@ -99,7 +104,12 @@
         _parameters.unvalidatedAuthority = [NSURL URLWithString:updatedAuthority];
     }
     
-    _refreshToken = [cache findRefreshToken:_parameters context:_parameters error:nil];
+    _refreshToken = [cache findRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msalHostWithPort
+                                                  clientId:_parameters.clientId
+                                            userIdentifier:_parameters.user.userIdentifier
+                                                   context:_parameters
+                                                     error:nil];
+    
     CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
     
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
