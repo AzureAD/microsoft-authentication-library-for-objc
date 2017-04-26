@@ -34,13 +34,18 @@
 
 @interface MSALPublicClientApplication : NSObject
 
-/*! Whether or not to validate the authority used with the application, default YES */
+/*!
+    When set to YES (default), MSAL will compare the application's authority against well-known URLs
+    templates representing well-formed authorities. It is useful when the authority is obtained at
+    run time as it ensures the authority complies, to prevent MSAL from displaying authentication
+    prompts from malicious pages.
+ */
 @property BOOL validateAuthority;
 
-/*! The authority used with the application object */
+/*! The authority the application will use to obtain tokens */
 @property (readonly) NSURL *authority;
 
-/*! The client ID of the application */
+/*! The client ID of the application, this should come from the app developer portal. */
 @property (readonly) NSString *clientId;
 
 /*! The redirect URI of the application */
@@ -51,8 +56,7 @@
 @property NSString *component;
 
 /*!
-    Initialize a MSALPublicClientApplication with a given clientID for the default
-    authority
+    Initialize a MSALPublicClientApplication with a given clientID
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  error       The error that occurred creating the application object, if any (optional)
@@ -64,7 +68,12 @@
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
-    @param  authority   The authority to use for the application
+    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
     @param  error       The error that occurred creating the application object, if any, if you're
                         not interested in the specific error pass in nil.
  */
@@ -182,8 +191,12 @@
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
-    @param  authority               An authority (must be a URL) for acquiring the token, overrides
-                                    the authority in the application object.
+    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
+                                    it is of the form https://<instance/<tenant>, where <instance> is the
+                                    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated to the
+                                    tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                                    TenantID property of the directory)
     @param  correlationId           UUID to correlate this request with the server
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
@@ -252,8 +265,13 @@
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
-    @param  authority               An authority (must be a URL) for acquiring the token, overrides
-                                    the authority in the application object.
+    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
+                                    <instance> is the directory host
+                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated
+                                    to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                    representing the TenantID property of the directory)
     @param  correlationId           UUID to correlate this request with the server
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
@@ -288,13 +306,18 @@
 /*!
     Acquire a token silently for an existing user.
  
-    @param  scopes          Permissions you want included in the access token received
-                            in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    gauranteed to be included in the access token returned.
     @param  user                    A user object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               An authority (must be a URL) for acquiring the token, overrides
-                                    the authority in the application object.
+    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
+                                    <instance> is the directory host
+                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated
+                                    to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                    representing the TenantID property of the directory)
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
@@ -310,8 +333,13 @@
                                     can differ from the ones in the original call
     @param  user                    A user object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               An authority (must be a URL) for acquiring the token, overrides
-                                    the authority in the application object.
+    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
+                                    <instance> is the directory host
+                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated
+                                    to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                    representing the TenantID property of the directory)
     @param  forceRefresh            Ignore any existing access token in the cache and force MSAL to
                                     get a new access token from the service.
     @param  correlationId           UUID to correlate this request with the server
