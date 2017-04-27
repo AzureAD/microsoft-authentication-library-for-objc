@@ -204,6 +204,36 @@
      }];
 }
 
+- (void)acquireTokenForCurrentUser:(NSArray<NSString *> *)scopes
+                   completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+{
+    [self acquireTokenSilentForCurrentUser:scopes
+                           completionBlock:^(NSString *token, NSError *error)
+     {
+         if (!error)
+         {
+             acquireTokenBlock(token, nil);
+             return;
+         }
+         
+         // What an app does on an InteractionRequired error will vary from app to app. Most apps
+         // will want to present a notification to the user in an unobtrusive way (such as on a
+         // status bar in the application UI) before bringing up the modal interactive login dialog,
+         // otherwise it can appear to be out of context for the user, and confuse them as to why
+         // they are seeing an authentication prompt.
+         if ([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
+         {
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 [self acquireTokenInteractiveForCurrentUser:scopes
+                                             completionBlock:acquireTokenBlock];
+             });
+             return;
+         }
+         
+         acquireTokenBlock(nil, error);
+     }];
+}
+
 - (void)signOut
 
 {
