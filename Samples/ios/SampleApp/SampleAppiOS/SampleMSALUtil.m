@@ -32,6 +32,7 @@
 #import "SamplePhotoUtil.h"
 
 #define CURRENT_USER_KEY @"MSALCurrentUserIdentifier"
+#define CLIENT_ID @"0615b6ca-88d4-4884-8729-b178178f7c27"
 
 @implementation SampleMSALUtil
 
@@ -67,7 +68,7 @@
     // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
     // go to the Microsoft App Portal (TODO: Name? Link?) to register your own applications with their own client
     // IDs.
-    return [[MSALPublicClientApplication alloc] initWithClientId:@"0615b6ca-88d4-4884-8729-b178178f7c27" error:nil];
+    return [[MSALPublicClientApplication alloc] initWithClientId:CLIENT_ID error:nil];
 }
 
 - (NSString *)currentUserIdentifer
@@ -218,7 +219,7 @@
     // not sign the user completely out of the device or remove tokens for the user for other client IDs. If
     // you have multiple applications sharing a client ID this will make the user effectively "disappear" for
     // those applications as well if you are using Keychain Cache Sharing (not currently available in MSAL
-    // build preview). We do not recommend shating a ClientID among multiple apps.
+    // build preview). We do not recommend sharing a ClientID among multiple apps.
     [application removeUser:currentUser error:nil];
     
 }
