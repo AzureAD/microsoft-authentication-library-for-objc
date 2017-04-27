@@ -225,19 +225,23 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     }
     
     NSString *authorityKey = authority.canonicalAuthority.absoluteString;
-
-    if (authority.authorityType == ADFSAuthority)
+    
+    @synchronized ([MSALAuthority class])
     {
-        NSMutableSet<NSString *> *usersInDomain = s_validatedUsersForAuthority[authorityKey];
-        if (!usersInDomain)
+        if (authority.authorityType == ADFSAuthority)
         {
-            usersInDomain = [NSMutableSet new];
-            s_validatedUsersForAuthority[authorityKey] = usersInDomain;
+            NSMutableSet<NSString *> *usersInDomain = s_validatedUsersForAuthority[authorityKey];
+            if (!usersInDomain)
+            {
+                usersInDomain = [NSMutableSet new];
+                s_validatedUsersForAuthority[authorityKey] = usersInDomain;
+            }
+            [usersInDomain addObject:userPrincipalName];
+            
         }
-        [usersInDomain addObject:userPrincipalName];
         
+        s_validatedAuthorities[authorityKey] = authority;
     }
-    s_validatedAuthorities[authorityKey] = authority;
 
     return YES;
 }
@@ -251,17 +255,20 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     }
     
     NSString *authorityKey = authority.absoluteString;
-
-    if (userPrincipalName)
-    {
-        NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
-        if (![validatedUsers containsObject:userPrincipalName])
-        {
-            return nil;
-        }
-    }
     
-    return s_validatedAuthorities[authorityKey];
+    @synchronized ([MSALAuthority class])
+    {
+        if (userPrincipalName)
+        {
+            NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+            if (![validatedUsers containsObject:userPrincipalName])
+            {
+                return nil;
+            }
+        }
+        
+        return s_validatedAuthorities[authorityKey];
+    }
 }
 
 @end
