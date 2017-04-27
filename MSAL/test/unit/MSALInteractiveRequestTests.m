@@ -40,6 +40,7 @@
 #import "MSALUser.h"
 #import "MSALWebUI.h"
 #import "NSURL+MSALExtensions.h"
+#import "MSALTestConstants.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -66,8 +67,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -91,8 +92,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -140,12 +141,12 @@
       @"return-client-request-id" : correlationId.UUIDString,
       @"state" : request.state,
       @"login_hint" : @"fakeuser@contoso.com",
-      @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+      @"client_id" : UNIT_TEST_CLIENT_ID,
       @"prompt" : @"login",
       @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
       @"eqp1" : @"val1",
       @"eqp2" : @"val2",
-      @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+      @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
       @"response_type" : @"code",
       @"code_challenge": pkce.codeChallenge,
       @"code_challenge_method" : @"S256",
@@ -165,8 +166,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.user = [[MSALUser alloc] initWithDisplayableId:@"preferredUserName"
@@ -220,12 +221,12 @@
       @"login_hint" : @"preferredUserName",
       @"login_req" : @"1",
       @"domain_req" : @"1234-5678-90abcdefg",
-      @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+      @"client_id" : UNIT_TEST_CLIENT_ID,
       @"prompt" : @"login",
       @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
       @"eqp1" : @"val1",
       @"eqp2" : @"val2",
-      @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+      @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
       @"response_type" : @"code",
       @"code_challenge": pkce.codeChallenge,
       @"code_challenge_method" : @"S256",
@@ -246,8 +247,8 @@
     parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -305,11 +306,11 @@
            @"state" : request.state,
            @"prompt" : @"consent",
            @"login_hint" : @"fakeuser@contoso.com",
-           @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+           @"client_id" : UNIT_TEST_CLIENT_ID,
            @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
-           @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
@@ -319,7 +320,7 @@
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth?code=%@&state=%@", @"iamafakecode", request.state];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
@@ -346,9 +347,9 @@
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
-                                             @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                             @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+                                             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : pkce.codeVerifier,
                                              @"client_info" : @"1"}
@@ -401,8 +402,8 @@
     parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
@@ -467,11 +468,11 @@
            @"login_hint" : @"User",
            @"login_req" : @"1",
            @"domain_req" : @"1234-5678-90abcdefg",
-           @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+           @"client_id" : UNIT_TEST_CLIENT_ID,
            @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
-           @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
@@ -481,7 +482,7 @@
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth?code=%@&state=%@", @"iamafakecode", request.state];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
     
@@ -508,9 +509,9 @@
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
-                                             @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                             @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+                                             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : pkce.codeVerifier,
                                              @"client_info" : @"1"}
@@ -563,8 +564,8 @@
     parameters.urlSession = [MSALTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
@@ -629,11 +630,11 @@
            @"login_hint" : @"User",
            @"login_req" : @"2",
            @"domain_req" : @"1234-5678-90abcdefg",
-           @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+           @"client_id" : UNIT_TEST_CLIENT_ID,
            @"scope" : @"fakescope1 fakescope2 fakescope3 openid profile offline_access",
            @"eqp1" : @"val1",
            @"eqp2" : @"val2",
-           @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
@@ -643,7 +644,7 @@
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareDictionary:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:@"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth?code=%@&state=%@", @"iamafakecode", request.state];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
     
@@ -670,9 +671,9 @@
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
-                                             @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                             @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : @"msalb92e0ba5-f86e-4411-8e18-6b5f928d968a://auth",
+                                             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : pkce.codeVerifier,
                                              @"client_info" : @"1"}
