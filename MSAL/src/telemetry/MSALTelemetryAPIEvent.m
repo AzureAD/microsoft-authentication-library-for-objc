@@ -30,12 +30,12 @@
 
 - (void)setRequestId:(NSString *)requestId
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_ID value:requestId];
+    [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_ID value:[requestId lowercaseString]];
 }
 
 - (void)setCorrelationId:(NSUUID *)correlationId
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_CORRELATION_ID value:[correlationId UUIDString]];
+    [self setProperty:MSAL_TELEMETRY_KEY_CORRELATION_ID value:[[correlationId UUIDString] lowercaseString]];
 }
 
 - (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting
@@ -133,7 +133,7 @@
             uiBehaviorString = @"select_account";
     }
     
-    [self setProperty:MSAL_TELEMETRY_KEY_PROMPT_BEHAVIOR value:uiBehaviorString];
+    [self setProperty:MSAL_TELEMETRY_KEY_UI_BEHAVIOR value:uiBehaviorString];
 }
 
 #pragma mark -
