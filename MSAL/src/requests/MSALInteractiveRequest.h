@@ -30,7 +30,7 @@
 
 @interface MSALInteractiveRequest : MSALBaseRequest
 {
-    MSALScopes *_additionalScopes;
+    MSALScopes *_extraScopesToConsent;
     MSALUIBehavior _uiBehavior;
 }
 
@@ -39,7 +39,7 @@
 + (MSALInteractiveRequest *)currentActiveRequest;
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
-        additionalScopes:(NSArray<NSString *> *)additionalScopes
+    extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
                    error:(NSError * __autoreleasing *)error;
 
