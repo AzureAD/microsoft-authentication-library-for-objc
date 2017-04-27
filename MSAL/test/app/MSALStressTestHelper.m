@@ -1,0 +1,198 @@
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+#import "MSALStressTestHelper.h"
+#import "MSALTestAppTelemetryViewController.h"
+#import "MSALTestAppSettings.h"
+#import "NSURL+MSALExtensions.h"
+#import "MSALAuthority.h"
+#import "MSALAccessTokenCacheItem+TestAppUtil.h"
+
+@implementation MSALStressTestHelper
+
+static BOOL s_stop = NO;
+static BOOL s_runningTest = NO;
+
+#pragma mark - Helpers
+
++ (void)expireAllTokens
+{
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
+    
+    for (MSALAccessTokenCacheItem *item in tokenCacheItems)
+    {
+        item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
+        [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
+    }
+}
+
+#pragma mark - Stress tests
+
++ (void)testAcquireTokenSilentWithExpiringToken:(BOOL)expireToken
+                               useMultipleUsers:(BOOL)multipleUsers
+                                    application:(MSALPublicClientApplication *)application
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSArray<MSALUser *> *users = [application users:nil];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(10);
+        __block NSUInteger userIndex = 0;
+        
+        while (!s_stop)
+        {
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                
+                MSALUser *user = users[userIndex];
+                
+                if (multipleUsers)
+                {
+                    userIndex = ++userIndex >= [users count] ? 0 : userIndex;
+                }
+                
+                [application acquireTokenSilentForScopes:[settings.scopes allObjects]
+                                                    user:user
+                                         completionBlock:^(MSALResult *result, NSError *error)
+                 {
+                     (void)error;
+                     
+                     if (expireToken
+                         && result.user)
+                     {
+                         [self expireAllTokens];
+                     }
+                     
+                     dispatch_semaphore_signal(sem);
+                 }];
+            });
+        }});
+}
+
++ (void)testPollingUntilSuccessWithApplication:(MSALPublicClientApplication *)application
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(10);
+        
+        while (!s_stop)
+        {
+            dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                
+                NSArray *users = [application users:nil];
+                
+                if (![users count])
+                {
+                    dispatch_semaphore_signal(sem);
+                }
+                else
+                {
+                    [application acquireTokenSilentForScopes:[settings.scopes allObjects]
+                                                        user:users[0]
+                                             completionBlock:^(MSALResult *result, NSError *error)
+                     {
+                         (void)error;
+                         
+                         if (result.accessToken)
+                         {
+                             s_stop = YES;
+                             s_runningTest = NO;
+                         }
+                         
+                         dispatch_semaphore_signal(sem);
+                     }];
+                }
+            });
+        }
+        
+    });
+}
+
+#pragma mark - Convenience
+
++ (BOOL)runStressTestWithType:(MSALStressTestType)type application:(MSALPublicClientApplication *)application
+{
+    if (s_runningTest)
+    {
+        return NO;
+    }
+    
+    s_stop = NO;
+    s_runningTest = YES;
+    
+    switch (type) {
+        case MSALStressTestWithSameToken:
+            [self testAcquireTokenSilentWithExpiringToken:NO useMultipleUsers:NO application:application];
+            break;
+            
+        case MSALStressTestWithExpiredToken:
+            [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:NO application:application];
+            break;
+        
+        case MSALStressTestWithMultipleUsers:
+            [self testAcquireTokenSilentWithExpiringToken:YES useMultipleUsers:YES application:application];
+            break;
+            
+        case MSALStressTestOnlyUntilSuccess:
+            [self testPollingUntilSuccessWithApplication:application];
+            break;
+            
+        default:
+            break;
+    }
+    
+    return YES;
+}
+
++ (NSUInteger)numberOfUsersNeededForTestType:(MSALStressTestType)type
+{
+    switch (type) {
+        case MSALStressTestOnlyUntilSuccess:
+            return 0;
+            
+        case MSALStressTestWithMultipleUsers:
+            return 2;
+            
+        default:
+            return 1;
+    }
+}
+
++ (void)stopStressTest
+{
+    s_stop = YES;
+    s_runningTest = NO;
+}
+
+@end

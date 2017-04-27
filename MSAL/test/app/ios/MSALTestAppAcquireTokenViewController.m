@@ -32,6 +32,7 @@
 #import "MSALTestAppUserViewController.h"
 #import "MSALTestAppScopesViewController.h"
 #import "MSALTestAppTelemetryViewController.h"
+#import "MSALStressTestHelper.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -162,6 +163,12 @@
     [telemetryButton addTarget:self action:@selector(showTelemetry:) forControlEvents:UIControlEventTouchUpInside];
     
     [layout addCenteredView:telemetryButton key:@"telemetry"];
+    
+    UIButton *stressTestButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [stressTestButton setTitle:@"Stress test" forState:UIControlStateNormal];
+    [stressTestButton addTarget:self action:@selector(runStressTest:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [layout addCenteredView:stressTestButton key:@"stressTest"];
     
     _resultView = [[UITextView alloc] init];
     _resultView.layer.borderWidth = 1.0f;
@@ -551,6 +558,118 @@
 {
     (void)sender;
     [self.navigationController pushViewController:[MSALTestAppScopesViewController sharedController] animated:YES];
+}
+
+#pragma mark - Stress tests
+
+- (void)runStressTest:(id)sender
+{
+    (void)sender;
+    
+    UIAlertController *stressTestController = [UIAlertController alertControllerWithTitle:@"Select stress test type"
+                                                                                  message:nil
+                                                                           preferredStyle:UIAlertControllerStyleAlert];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (no expiring)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [self runStressTestWithType:MSALStressTestWithSameToken];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (with expiring)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [self runStressTestWithType:MSALStressTestWithExpiredToken];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (with multiple users)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [self runStressTestWithType:MSALStressTestWithMultipleUsers];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Acquire token silent (until success)"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [self runStressTestWithType:MSALStressTestOnlyUntilSuccess];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Stop stress test"
+                                                             style:UIAlertActionStyleDefault
+                                                           handler:^(UIAlertAction * _Nonnull action) {
+                                                               
+                                                               (void)action;
+                                                               [self stopStressTest];
+                                                           }]];
+    
+    [stressTestController addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                                             style:UIAlertActionStyleCancel
+                                                           handler:nil]];
+    
+    [self presentViewController:stressTestController animated:YES completion:nil];
+}
+
+- (void)runStressTestWithType:(MSALStressTestType)type
+{
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    
+    if (![[settings.scopes allObjects] count])
+    {
+        _resultView.text = @"Please select the scope!";
+        return;
+    }
+    
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
+    
+    NSError *error = nil;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    
+    if (!application)
+    {
+        _resultView.text = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        return;
+    }
+    
+    NSUInteger existingUserCount = [[application users:nil] count];
+    NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
+    
+    if (existingUserCount != requiredUserCount)
+    {
+        _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
+        return;
+    }
+    
+    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
+    
+    if ([MSALStressTestHelper runStressTestWithType:type application:application])
+    {
+        _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
+    }
+    else
+    {
+        _resultView.text = @"Cannot start test, because other test is currently running!";
+    }
+}
+
+- (void)stopStressTest
+{
+    [MSALStressTestHelper stopStressTest];
+    
+    _resultView.text = [NSString stringWithFormat:@"Stopped the currently running stress test at %@", [NSDate date]];
+    
+    [[MSALTestAppTelemetryViewController sharedController] startTracking];
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
 }
 
 @end

@@ -30,6 +30,7 @@
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALKeychainTokenCache.h"
+#import "MSALAccessTokenCacheItem+TestAppUtil.h"
 #import "NSURL+MSALExtensions.h"
 
 @interface MSALTestAppCacheRowItem : NSObject
@@ -41,18 +42,6 @@
 @end
 
 @implementation MSALTestAppCacheRowItem
-
-@end
-
-@interface MSALAccessTokenCacheItem (TestAppUtil)
-
-@property NSString *expiresOnString;
-
-@end
-
-@implementation MSALAccessTokenCacheItem (TestAppUtil)
-
-MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 
 @end
 
