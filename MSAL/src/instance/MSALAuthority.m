@@ -239,7 +239,6 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
                 s_validatedUsersForAuthority[authorityKey] = usersInDomain;
             }
             [usersInDomain addObject:userPrincipalName];
-            
         }
         
         s_validatedAuthorities[authorityKey] = authority;
@@ -261,9 +260,15 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     
     @synchronized ([MSALAuthority class])
     {
-        if (userPrincipalName)
+        if (authorityType == ADFSAuthority)
         {
+            if (!userPrincipalName)
+            {
+                return nil;
+            }
+            
             NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+            
             if (![validatedUsers containsObject:userPrincipalName])
             {
                 return nil;
