@@ -67,8 +67,8 @@
 
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
                                                             context:context];
-    [request addValue:API_VERSION_VALUE forHTTPHeaderField:API_VERSION];
-    [request addValue:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString forHTTPHeaderField:AUTHORIZATION_ENDPOINT];
+    [request setValue:API_VERSION_VALUE forQueryParameter:API_VERSION];
+    [request setValue:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString forQueryParameter:AUTHORIZATION_ENDPOINT];
     
     [request sendGet:^(MSALHttpResponse *response, NSError *error)
      {
