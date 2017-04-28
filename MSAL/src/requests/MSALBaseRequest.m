@@ -130,7 +130,7 @@ static MSALScopes *s_reservedScopes = nil;
     NSString *upn = nil;
     if (_parameters.user)
     {
-        upn = _parameters.user.displayableId;//rather than upn?
+        upn = _parameters.user.displayableId;
     }
     else if(_parameters.loginHint)
     {

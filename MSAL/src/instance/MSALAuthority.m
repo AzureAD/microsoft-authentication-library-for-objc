@@ -163,8 +163,12 @@ static NSMutableDictionary *s_reslovedUsersForAuthority;
     
     if (authorityInCache)
     {
-        completionBlock(authorityInCache, nil);
-        return;
+        if (!validate ||
+            (validate && authorityInCache.validatedAuthority))
+        {
+            completionBlock(authorityInCache, nil);
+            return;
+        }
     }
 
     TenantDiscoveryCallback tenantDiscoveryCallback = ^void
@@ -175,7 +179,7 @@ static NSMutableDictionary *s_reslovedUsersForAuthority;
         MSALAuthority *authority = [MSALAuthority new];
         authority.canonicalAuthority = updatedAuthority;
         authority.authorityType = authorityType;
-        authority.validateAuthority = validate;
+        authority.validatedAuthority = validate;
         authority.isTenantless = [self isTenantless:updatedAuthority];
         
         // Only happens for AAD authority

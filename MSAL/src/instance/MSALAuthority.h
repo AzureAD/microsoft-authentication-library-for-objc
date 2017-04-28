@@ -60,7 +60,7 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
-@property BOOL validateAuthority;
+@property BOOL validatedAuthority;
 @property BOOL isTenantless;
 @property NSURL *authorizationEndpoint;
 @property NSURL *tokenEndpoint;
