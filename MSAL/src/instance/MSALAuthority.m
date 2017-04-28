@@ -41,8 +41,8 @@
 #define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
 
 static NSSet<NSString *> *s_trustedHostList;
-static NSMutableDictionary *s_validatedAuthorities;
-static NSMutableDictionary *s_validatedUsersForAuthority;
+static NSMutableDictionary *s_resolvedAuthorities;
+static NSMutableDictionary *s_reslovedUsersForAuthority;
 
 #pragma mark - helper functions
 + (BOOL)isTenantless:(NSURL *)authority
@@ -80,8 +80,8 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
                          @"login.microsoftonline.com",
                          @"login.microsoftonline.de", nil];
     
-    s_validatedAuthorities = [NSMutableDictionary new];
-    s_validatedUsersForAuthority = [NSMutableDictionary new];
+    s_resolvedAuthorities = [NSMutableDictionary new];
+    s_reslovedUsersForAuthority = [NSMutableDictionary new];
 }
 
 + (NSSet<NSString *> *)trustedHosts
@@ -188,7 +188,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         authority.endSessionEndpoint = nil;
         authority.selfSignedJwtAudience = issuer;
      
-        [MSALAuthority addToValidatedAuthority:authority userPrincipalName:userPrincipalName];
+        [MSALAuthority addToResolvedAuthority:authority userPrincipalName:userPrincipalName];
         
         completionBlock(authority, nil);
     };
@@ -212,8 +212,8 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
     return [s_trustedHostList containsObject:url.host.lowercaseString];
 }
 
-+ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
-              userPrincipalName:(NSString *)userPrincipalName
++ (BOOL)addToResolvedAuthority:(MSALAuthority *)authority
+             userPrincipalName:(NSString *)userPrincipalName
 {
     if (!authority)
     {
@@ -230,15 +230,15 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
 
     if (authority.authorityType == ADFSAuthority)
     {
-        NSMutableSet<NSString *> *usersInDomain = s_validatedUsersForAuthority[authorityKey];
+        NSMutableSet<NSString *> *usersInDomain = s_reslovedUsersForAuthority[authorityKey];
         if (!usersInDomain)
         {
             usersInDomain = [NSMutableSet new];
-            s_validatedUsersForAuthority[authorityKey] = usersInDomain;
+            s_reslovedUsersForAuthority[authorityKey] = usersInDomain;
         }
         [usersInDomain addObject:userPrincipalName];
     }
-    s_validatedAuthorities[authorityKey] = authority;
+    s_resolvedAuthorities[authorityKey] = authority;
 
     return YES;
 }
@@ -261,7 +261,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
             return nil;
         }
         
-        NSSet *validatedUsers = s_validatedUsersForAuthority[authorityKey];
+        NSSet *validatedUsers = s_reslovedUsersForAuthority[authorityKey];
 
         if (![validatedUsers containsObject:userPrincipalName])
         {
@@ -269,7 +269,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         }
     }
 
-    return s_validatedAuthorities[authorityKey];
+    return s_resolvedAuthorities[authorityKey];
 }
 
 @end
