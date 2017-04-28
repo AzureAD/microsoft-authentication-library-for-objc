@@ -112,39 +112,18 @@
 
 - (void)getUserPhotoImpl:(PhotoBlock)photoBlock
 {
-    // When acquiring a token silently for a specific purpose you should limit the scopes
+    // When acquiring a token for a specific purpose you should limit the scopes
     // you ask for to just the ones needed for that operation. A user or admin might not
     // consent to all of the scopes asked for, and core application functionality should
     // not be blocked on not having consent for edge features.
     __block NSArray *scopesRequired = @[@"User.Read"];
     
-    [[SampleMSALUtil sharedUtil] acquireTokenSilentForCurrentUser:scopesRequired
-                                                  completionBlock:^(NSString *token, NSError *error)
+    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentUser:scopesRequired
+                                            completionBlock:^(NSString *token, NSError *error)
      {
          if (error)
          {
-             // What an app does on an InteractionRequired error will vary from app to app. More complex apps
-             // will usually want to present a notification to the user in an unobtrusive way (such as on a
-             // status bar in the application UI). Simpler apps, like this one, can jump straight into the
-             // acquireTokenInteractive flow.
-             if ([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
-             {
-                 [[SampleMSALUtil sharedUtil] acquireTokenInteractiveForCurrentUser:scopesRequired
-                                                                    completionBlock:^(NSString *token, NSError *error)
-                  {
-                      if (error)
-                      {
-                          photoBlock(nil, error);
-                          return;
-                      }
-                      
-                      [self getPhoto:token block:photoBlock];
-                  }];
-             }
-             else
-             {
-                 photoBlock(nil, error);
-             }
+             photoBlock(nil, error);
              return;
          }
          

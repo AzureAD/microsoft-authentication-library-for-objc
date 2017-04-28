@@ -157,7 +157,9 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
         tenant = firstPathComponent;
     }
     
-    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority userPrincipalName:userPrincipalName];
+    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority
+                                                          authorityType:authorityType
+                                                      userPrincipalName:userPrincipalName];
     
     if (authorityInCache)
     {
@@ -247,6 +249,7 @@ static NSMutableDictionary *s_validatedUsersForAuthority;
 }
 
 + (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                        authorityType:(MSALAuthorityType)authorityType
                     userPrincipalName:(NSString *)userPrincipalName
 {
     if (!authority)

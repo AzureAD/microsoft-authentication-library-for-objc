@@ -104,6 +104,7 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
               userPrincipalName:(NSString *)userPrincipalName;
 
 + (MSALAuthority *)authorityFromCache:(NSURL *)authority
+                        authorityType:(MSALAuthorityType)authorityType
                     userPrincipalName:(NSString *)userPrincipalName;
 
 @end
