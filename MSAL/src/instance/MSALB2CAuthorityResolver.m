@@ -39,7 +39,7 @@
 {
     (void)userPrincipalName;
     
-    if (validate) // And check for !IsInTrustedHostList(authority.Host)
+    if (validate && ![MSALAuthority isKnownHost:authority])
     {
         NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
         completionBlock(nil, error);
