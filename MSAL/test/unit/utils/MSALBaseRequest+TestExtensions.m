@@ -48,9 +48,9 @@
 
 @implementation MSALInteractiveRequest (TestExtensions)
 
-- (MSALScopes *)additionalScopes
+- (MSALScopes *)extraScopesToConsent
 {
-    return _additionalScopes;
+    return _extraScopesToConsent;
 }
 
 - (MSALUIBehavior)uiBehavior

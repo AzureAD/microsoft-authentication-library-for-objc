@@ -182,7 +182,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:nil
+           extraScopesToConsent:nil
                            user:nil
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
@@ -201,7 +201,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:nil
+           extraScopesToConsent:nil
                            user:nil
                       loginHint:loginHint
                      uiBehavior:MSALUIBehaviorDefault
@@ -219,7 +219,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:nil
+           extraScopesToConsent:nil
                            user:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
@@ -231,7 +231,7 @@
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             additionalScopes:(NSArray<NSString *> *)additionalScopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
@@ -240,7 +240,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:additionalScopes
+           extraScopesToConsent:extraScopesToConsent
                            user:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
@@ -260,7 +260,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:nil
+           extraScopesToConsent:nil
                            user:user
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
@@ -279,7 +279,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:nil
+           extraScopesToConsent:nil
                            user:user
                       loginHint:nil
                      uiBehavior:uiBehavior
@@ -291,7 +291,7 @@
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             additionalScopes:(NSArray<NSString *> *)additionalScopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
@@ -300,7 +300,7 @@
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
-               additionalScopes:additionalScopes
+           extraScopesToConsent:extraScopesToConsent
                            user:user
                       loginHint:nil
                      uiBehavior:uiBehavior
@@ -352,7 +352,7 @@
     [self acquireTokenSilentForScopes:scopes
                                  user:user
                             authority:authority
-                          forceRefresh:forceRefresh
+                         forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
                       completionBlock:completionBlock];
@@ -362,7 +362,7 @@
 #pragma mark - private methods
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             additionalScopes:(NSArray<NSString *> *)additionalScopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                          user:(MSALUser *)user
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
@@ -378,24 +378,26 @@
     params.apiId = apiId;
     params.user = user;
     
-    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
-             "                                   additionalScopes:%@\n"
-             "                                               user:%@\n"
-             "                                          loginHint:%@\n"
-             "                                         uiBehavior:%@\n"
-             "                               extraQueryParameters:%@\n"
-             "                                          authority:%@\n"
-             "                                      correlationId:%@]",
-             scopes, additionalScopes, _PII(user.userIdentifier), _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
-    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
-                 "                                   additionalScopes:%@\n"
-                 "                                               user:%@\n"
-                 "                                          loginHint:%@\n"
-                 "                                         uiBehavior:%@\n"
-                 "                               extraQueryParameters:%@\n"
-                 "                                          authority:%@\n"
-                 "                                      correlationId:%@]",
-                 scopes, additionalScopes, user.userIdentifier, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+    LOG_INFO(params,
+             @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+              "                               extraScopesToConsent:%@\n"
+              "                                               user:%@\n"
+              "                                          loginHint:%@\n"
+              "                                         uiBehavior:%@\n"
+              "                               extraQueryParameters:%@\n"
+              "                                          authority:%@\n"
+              "                                      correlationId:%@]",
+             scopes, extraScopesToConsent, _PII(user.userIdentifier), _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
+    LOG_INFO_PII(params,
+                 @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
+                  "                               extraScopesToConsent:%@\n"
+                  "                                               user:%@\n"
+                  "                                          loginHint:%@\n"
+                  "                                         uiBehavior:%@\n"
+                  "                               extraQueryParameters:%@\n"
+                  "                                          authority:%@\n"
+                  "                                      correlationId:%@]",
+                 scopes, extraScopesToConsent, user.userIdentifier, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
     
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
@@ -418,7 +420,7 @@
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
-                                      additionalScopes:additionalScopes
+                                      extraScopesToConsent:extraScopesToConsent
                                               behavior:uiBehavior
                                                  error:&error];
     if (!request)
@@ -449,17 +451,19 @@
     
     [params setScopesFromArray:scopes];
     
-    LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-             "                                                     user:%@\n"
-             "                                             forceRefresh:%@\n"
-             "                                            correlationId:%@\n]",
+    LOG_INFO(params,
+             @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
+              "                                                     user:%@\n"
+              "                                             forceRefresh:%@\n"
+              "                                            correlationId:%@\n]",
              scopes, _PII(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
-    LOG_INFO_PII(params, @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                 "                                                     user:%@\n"
-                 "                                             forceRefresh:%@\n"
-                 "                                            correlationId:%@\n]",
+    LOG_INFO_PII(params,
+                 @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
+                  "                                                     user:%@\n"
+                  "                                             forceRefresh:%@\n"
+                  "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
 
     NSError *error = nil;

@@ -48,7 +48,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
-        additionalScopes:(NSArray<NSString *> *)additionalScopes
+    extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
                    error:(NSError * __autoreleasing *)error
 {
@@ -58,10 +58,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         return nil;
     }
     
-    if (additionalScopes)
+    if (extraScopesToConsent)
     {
-        _additionalScopes = [[NSOrderedSet alloc] initWithArray:additionalScopes];
-        if (![self validateScopeInput:_additionalScopes error:error])
+        _extraScopesToConsent = [[NSOrderedSet alloc] initWithArray:extraScopesToConsent];
+        if (![self validateScopeInput:_extraScopesToConsent error:error])
         {
             return nil;
         }
@@ -85,7 +85,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     {
         [parameters addEntriesFromDictionary:_parameters.extraQueryParameters];
     }
-    MSALScopes *allScopes = [self requestScopes:_additionalScopes];
+    MSALScopes *allScopes = [self requestScopes:_extraScopesToConsent];
     parameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
     parameters[OAUTH2_SCOPE] = [allScopes msalToString];
     parameters[OAUTH2_RESPONSE_TYPE] = OAUTH2_CODE;
