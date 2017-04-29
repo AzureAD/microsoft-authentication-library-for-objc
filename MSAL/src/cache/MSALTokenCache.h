@@ -45,13 +45,18 @@
                                                        context:(id<MSALRequestContext>)context
                                                          error:(NSError * __autoreleasing *)error;
 
-- (MSALAccessTokenCacheItem *)findAccessTokenWithAuthority:(NSURL *)authority
-                                                  clientId:(NSString *)clientId
-                                                    scopes:(MSALScopes *)scopes
-                                                      user:(MSALUser *)user
-                                                   context:(id<MSALRequestContext>)ctx
-                                            authorityFound:(NSString * __autoreleasing *)authorityFound
-                                                     error:(NSError * __autoreleasing *)error;
+/*
+    Searches the cache for either a matching access token, or an authority to use, if it only found
+    one authority matching the client ID and user. Returns NO if it can't find either.
+ */
+- (BOOL)findAccessTokenWithAuthority:(NSURL *)authority
+                            clientId:(NSString *)clientId
+                              scopes:(MSALScopes *)scopes
+                                user:(MSALUser *)user
+                             context:(id<MSALRequestContext>)ctx
+                         accessToken:(MSALAccessTokenCacheItem **)outAccessToken
+                      authorityFound:(NSString **)outAuthorityFound
+                               error:(NSError * __autoreleasing *)error;
 
 - (MSALRefreshTokenCacheItem *)findRefreshTokenWithEnvironment:(NSString *)environment
                                                       clientId:(NSString *)clientId

@@ -70,15 +70,32 @@
     
     if (!_forceRefresh)
     {
-        NSString *updatedAuthority = nil;
+        NSString *foundAuthority = nil;
         NSError *error = nil;
-        MSALAccessTokenCacheItem *accessToken = [cache findAccessTokenWithAuthority:_parameters.unvalidatedAuthority
-                                                                           clientId:_parameters.clientId
-                                                                             scopes:_parameters.scopes
-                                                                               user:_parameters.user
-                                                                            context:_parameters
-                                                                     authorityFound:&updatedAuthority
-                                                                              error:&error];
+        MSALAccessTokenCacheItem *accessToken = nil;
+        if (![cache findAccessTokenWithAuthority:_parameters.unvalidatedAuthority
+                                        clientId:_parameters.clientId
+                                          scopes:_parameters.scopes
+                                            user:_parameters.user
+                                         context:_parameters
+                                     accessToken:&accessToken
+                                  authorityFound:&foundAuthority
+                                           error:&error])
+        {
+            if (error == nil && !_parameters.unvalidatedAuthority)
+            {
+                error = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound, @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
+            }
+            
+            if (error)
+            {
+                MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                [self stopTelemetryEvent:event error:error];
+
+                completionBlock(nil, error);
+                return;
+            }
+        }
         
         if (accessToken)
         {
@@ -92,19 +109,13 @@
             return;
         }
         
-        if (!accessToken && !updatedAuthority)
+        if (!_parameters.unvalidatedAuthority)
         {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-            
-            completionBlock(nil, error);
-            return;
+            _parameters.unvalidatedAuthority = [NSURL URLWithString:foundAuthority];
         }
-        
-        _parameters.unvalidatedAuthority = [NSURL URLWithString:updatedAuthority];
     }
     
-    _refreshToken = [cache findRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msalHostWithPort
+    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msalHostWithPort]
                                                   clientId:_parameters.clientId
                                             userIdentifier:_parameters.user.userIdentifier
                                                    context:_parameters

@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALUser;
+
 typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *response, NSError *error);
 
 @interface MSALTestURLResponse : NSObject
@@ -43,29 +45,35 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
     NSError *_error;
 }
 
-+ (MSALTestURLResponse*)requestURLString:(NSString *)requestUrlString
-                        requestHeaders:(NSDictionary *)requestHeaders
-                     requestParamsBody:(id)requestParams
-                     responseURLString:(NSString *)responseUrlString
-                          responseCode:(NSInteger)responseCode
-                      httpHeaderFields:(NSDictionary *)headerFields
-                      dictionaryAsJSON:(NSDictionary *)data;
++ (MSALTestURLResponse *)requestURLString:(NSString *)requestUrlString
+                           requestHeaders:(NSDictionary *)requestHeaders
+                        requestParamsBody:(id)requestParams
+                        responseURLString:(NSString *)responseUrlString
+                             responseCode:(NSInteger)responseCode
+                         httpHeaderFields:(NSDictionary *)headerFields
+                         dictionaryAsJSON:(NSDictionary *)data;
 
-+ (MSALTestURLResponse*)request:(NSURL *)request
-                 requestHeaders:(NSDictionary *)requestHeaders
-              requestParamsBody:(id)requestParams
-               respondWithError:(NSError *)error;
++ (MSALTestURLResponse *)request:(NSURL *)request
+                  requestHeaders:(NSDictionary *)requestHeaders
+               requestParamsBody:(id)requestParams
+                respondWithError:(NSError *)error;
 
-+ (MSALTestURLResponse*)request:(NSURL *)request
-                     response:(NSURLResponse *)response
-                  reponseData:(NSData *)data;
++ (MSALTestURLResponse *)request:(NSURL *)request
+                        response:(NSURLResponse *)response
+                     reponseData:(NSData *)data;
 
-+ (MSALTestURLResponse*)request:(NSURL *)request
-                      reponse:(NSURLResponse *)response;
++ (MSALTestURLResponse *)request:(NSURL *)request
+                         reponse:(NSURLResponse *)response;
 
-+ (MSALTestURLResponse*)serverNotFoundResponseForURLString:(NSString *)requestUrlString
-                                            requestHeaders:(NSDictionary *)requestHeaders
-                                         requestParamsBody:(id)requestParams;
++ (MSALTestURLResponse *)oidResponseForAuthority:(NSString *)authority;
++ (MSALTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
+                                   authority:(NSString *)authority
+                                    tenantId:(NSString *)tid
+                                        user:(MSALUser *)user;
+
++ (MSALTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
+                                             requestHeaders:(NSDictionary *)requestHeaders
+                                          requestParamsBody:(id)requestParams;
 
 
 @end
@@ -81,7 +89,7 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 
 // This adds an expected request, and response to it.
 + (void)addResponse:(MSALTestURLResponse *)response;
-
++ (void)addResponses:(NSArray *)responses;
 
 // Helper method to retrieve a response for a request
 + (MSALTestURLResponse *)removeResponseForRequest:(NSURLRequest *)request;

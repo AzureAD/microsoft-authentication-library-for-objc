@@ -37,7 +37,10 @@
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSURL+MSALExtensions.h"
 
-@interface MSALKeychainTokenCacheTests : XCTestCase
+// There are keychain entitlement bugs with the simulator in unit test runs where the simulator can
+// lose its entitlements between the first use of the keychain and when these get hit, so we added
+// a "1" to the name of these tests to make sure they're the first ones run. :)
+@interface MSAL1KeychainTokenCacheTests : XCTestCase
 {
     NSURL *_testAuthority;
     NSString *_testEnvironment;
@@ -62,7 +65,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     return [MSALTestIdTokenUtil idTokenWithName:name preferredUsername:preferredUsername];
 }
 
-@implementation MSALKeychainTokenCacheTests
+@implementation MSAL1KeychainTokenCacheTests
 
 - (void)setUp
 {

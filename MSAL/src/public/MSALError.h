@@ -108,6 +108,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorTokenCacheItemFailure = -42200,
     MSALErrorMultipleMatchesNoAuthoritySpecified = -42201,
     MSALErrorUserNotFound = -42202,
+    MSALErrorNoAccessTokensFound = -42203,
     MSALErrorKeychainFailure = -42240,
     MSALErrorWrapperCacheFailure = -42270,
     /*!

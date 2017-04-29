@@ -25,50 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-#import "NSDictionary+MSALTestUtil.h"
+#import <Foundation/Foundation.h>
 
-@implementation NSDictionary (MSALTestUtil)
+@class MSALTokenCache;
+@class MSALTestTokenCache;
 
-- (BOOL)compareDictionary:(NSDictionary *)dictionary
-{
-    BOOL fSame = YES;
-    
-    for (NSString *key in self)
-    {
-        id myVal = self[key];
-        id otherVal = dictionary[key];
-        if (!otherVal)
-        {
-            NSLog(@"\"%@\" missing from result dictionary.", key);
-            fSame = NO;
-        }
-        else if (![myVal isKindOfClass:[MSALTestSentinel class]] && ![myVal isEqual:otherVal])
-        {
-            NSLog(@"\"%@\" does not match. Expected: \"%@\" Actual: \"%@\"", key, self[key], otherVal);
-            fSame = NO;
-        }
-    }
-    
-    for (NSString *key in dictionary)
-    {
-        if (!self[key])
-        {
-            NSLog(@"Extra key \"%@\" in result dictionary: \"%@\"", key, dictionary[key]);
-            fSame = NO;
-        }
-    }
-    
-    return fSame;
-}
+@interface MSALTestCacheDataUtil : NSObject
 
-- (NSString *)base64UrlJson
-{
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:nil];
-    return [NSString msalBase64EncodeData:jsonData];
-}
+@property (readonly) MSALTokenCache *cache;
 
-@end
++ (instancetype)defaultUtil;
++ (NSString *)defaultClientId;
 
-@implementation MSALTestSentinel
+- (void)reset;
+
+- (MSALUser *)addUserWithDisplayId:(NSString *)displayId;
+- (MSALUser *)addUserWithDisplayId:(NSString *)displayId
+                               uid:(NSString *)uid
+                              utid:(NSString *)utid;
+
+- (MSALAccessTokenCacheItem *)addATforScopes:(NSArray *)scopes
+                                      tenant:(NSString *)tenant
+                                        user:(MSALUser *)user;
+
+- (MSALTestTokenCache *)dataSource;
+- (NSArray<MSALAccessTokenCacheItem *> *)allAccessTokens;
+- (NSArray<MSALRefreshTokenCacheItem *> *)allRefreshTokens;
 
 @end
