@@ -200,7 +200,7 @@
     
     if (matchedTokens.count > 1)
     {
-        MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
+        MSAL_ERROR_PARAM(ctx, MSALErrorAmbiguousAuthority, @"Found multiple access tokens. Please specify an authority.");
         
         [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
         

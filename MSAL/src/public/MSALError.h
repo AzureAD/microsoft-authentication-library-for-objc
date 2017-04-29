@@ -106,7 +106,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         documented in Apple's <Security/SecBase.h> header file
      */
     MSALErrorTokenCacheItemFailure = -42200,
-    MSALErrorMultipleMatchesNoAuthoritySpecified = -42201,
+    MSALErrorAmbiguousAuthority = -42201,
     MSALErrorUserNotFound = -42202,
     MSALErrorKeychainFailure = -42240,
     MSALErrorWrapperCacheFailure = -42270,
