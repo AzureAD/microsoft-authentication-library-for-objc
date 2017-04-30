@@ -361,7 +361,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [[result.accessToken msalComputeSHA256Hex] substringToIndex:8], result.expiresOn, result.tenantId, result.user, result.scopes];
+                            [result.accessToken msalShortSHA256Hex], result.expiresOn, result.tenantId, result.user, result.scopes];
     
     [_resultView setText:resultText];
     

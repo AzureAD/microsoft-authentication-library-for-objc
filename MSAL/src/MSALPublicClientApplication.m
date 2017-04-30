@@ -376,7 +376,7 @@
     
     if (result)
     {
-        NSString *hashedAT = [result.accessToken msalComputeSHA256Hex];
+        NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
         LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
         LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }

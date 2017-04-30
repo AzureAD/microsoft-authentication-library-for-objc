@@ -341,6 +341,21 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
     return toReturn;
 }
 
+- (NSString *)msalShortSHA256Hex
+{
+    NSData *hashData = [MSALCryptoHelper msalSHA256fromString:self];
+    NSUInteger length = 8;
+    NSMutableString *toReturn = [NSMutableString stringWithCapacity:length *2];
+    const unsigned char *buf = hashData.bytes;
+    NSInteger max = length < hashData.length * 2? length : hashData.length *2;
+    for (int i = 0; i < max; i++)
+    {
+        [toReturn appendFormat:@"%02x", buf[i]];
+    }
+    
+    return toReturn;
+}
+
 + (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size
 {
     if (size > RANDOM_STRING_MAX_SIZE)
