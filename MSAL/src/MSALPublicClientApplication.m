@@ -368,17 +368,17 @@
 {
     if (error)
     {
-        LOG_ERROR(ctx, @"%@ returning with error: %@, %ld", operation, error.domain, (long)error.code);
-        LOG_ERROR_PII(ctx, @"%@ returning with error: %@, %ld", operation, error.domain, (long)error.code);
+        NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
+        errorDescription = errorDescription ? errorDescription : @"";
+        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msalComputeSHA256Hex];
-        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@",
-                 operation, hashedAT, result.scopes, result.expiresOn);
-        LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@",
-                     operation, hashedAT, result.scopes, result.expiresOn);
+        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
