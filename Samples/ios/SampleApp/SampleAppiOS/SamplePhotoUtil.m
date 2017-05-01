@@ -27,16 +27,13 @@
 
 #import <MSAL/MSAL.h>
 
-#import "SampleAppErrors.h"
 #import "SamplePhotoUtil.h"
+
+#import "SampleAppErrors.h"
+#import "SampleGraphRequest.h"
 #import "SampleMSALUtil.h"
 
-@interface SamplePhotoRequest : NSObject
-{
-    NSString *_token;
-}
-
-+ (instancetype)requestWithToken:(NSString *)token;
+@interface SamplePhotoRequest : SampleGraphRequest
 
 - (void)getPhotoData:(void (^)(NSData *data, NSError *error))photoBlock;
 
@@ -229,57 +226,10 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
 
 @implementation SamplePhotoRequest
 
-+ (instancetype)requestWithToken:(NSString *)token
-{
-    SamplePhotoRequest *req = [SamplePhotoRequest new];
-    req->_token = token;
-    return req;
-}
-
 - (void)getMetadata:(void (^)(NSDictionary *json, NSError *error))metadataBlock
 {
-    NSMutableURLRequest *metadataRequest = [NSMutableURLRequest new];
-    metadataRequest.URL = [NSURL URLWithString:@"https://graph.microsoft.com/v1.0/me/photo"];
-    metadataRequest.HTTPMethod = @"GET";
-    metadataRequest.allHTTPHeaderFields = @{ @"Authorization" : [NSString stringWithFormat:@"Bearer %@", _token] };
-    
-    NSURLSession *session = [NSURLSession sharedSession];
-    
-    NSURLSessionDataTask *task =
-    [session dataTaskWithRequest:metadataRequest
-               completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error)
-     {
-         if (error)
-         {
-             metadataBlock(nil, error);
-             return;
-         }
-         
-         // If we get a 404 that means the user has no photo, just return all nils
-         if (((NSHTTPURLResponse *)response).statusCode == 404)
-         {
-             metadataBlock(nil, nil);
-             return;
-         }
-         
-         NSError *localError = nil;
-         NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&localError];
-         if (!json)
-         {
-             metadataBlock(nil, localError);
-             return;
-         }
-         
-         NSDictionary *serverError = json[@"error"];
-         if (serverError)
-         {
-             metadataBlock(nil, [NSError errorWithDomain:SampleAppErrorDomain code:SampleAppServerError userInfo:serverError]);
-             return;
-         }
-         
-         metadataBlock(json, nil);
-     }];
-    [task resume];
+    [self getJSON:@"me/photo"
+            block:metadataBlock];
 }
 
 - (void)getPhotoData:(void (^)(NSData *data, NSError *error))photoBlock
@@ -292,22 +242,8 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
             return;
         }
         
-        NSMutableURLRequest *photoRequest = [NSMutableURLRequest new];
-        photoRequest.URL = [NSURL URLWithString:@"https://graph.microsoft.com/beta/me/photo/$value"];
-        photoRequest.HTTPMethod = @"GET";
-        photoRequest.allHTTPHeaderFields = @{ @"Authorization" : _token };
-        
-        NSURLSession *session = [NSURLSession sharedSession];
-        
-        NSURLSessionDataTask *task =
-        [session dataTaskWithRequest:photoRequest
-                   completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error)
-         {
-             
-             photoBlock(data, error);
-         }];
-        
-        [task resume];
+        [self getData:@"me/photo/$value"
+                block:photoBlock];
     }];
 }
 
