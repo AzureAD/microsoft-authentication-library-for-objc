@@ -31,6 +31,7 @@
 #import "MSALClientInfo.h"
 #import "MSALTokenCache.h"
 
+#import "MSALTestConstants.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestTokenCache.h"
 
@@ -57,7 +58,7 @@
 
 + (NSString *)defaultClientId
 {
-    return @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+    return UNIT_TEST_CLIENT_ID;
 }
 
 - (void)reset

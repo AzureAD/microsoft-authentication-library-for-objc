@@ -25,7 +25,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>x-msauth-com-microsoft-MSALSampleApp</string>
+				<string>msal0615b6ca-88d4-4884-8729-b178178f7c27</string>
 			</array>
 		</dict>
 	</array>

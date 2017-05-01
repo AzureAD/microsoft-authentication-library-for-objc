@@ -42,6 +42,8 @@
 
 #import "NSURL+MSALExtensions.h"
 
+#import "MSALTestConstants.h"
+
 @interface MSALSilentRequestTests : MSALTestCase
 
 @end
@@ -81,8 +83,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     
@@ -102,8 +104,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     
@@ -139,8 +141,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
@@ -157,7 +159,7 @@
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                    @"authority" : @"https://login.microsoftonline.com/common",
                                                                                    @"scope": @"fakescope1 fakescope2",
-                                                                                   @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                   @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                    @"id_token": rawIdToken,
                                                                                    @"client_info": rawClientInfo,
                                                                                    @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:6000] timeIntervalSince1970]]
@@ -195,8 +197,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -215,7 +217,7 @@
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
-                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                    @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                     @"id_token": rawIdToken,
                                                                                     @"client_info": rawClientInfo,
                                                                                     @"expires_on" : @"0"
@@ -226,7 +228,7 @@
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
                                                                                       @"environment" : @"login.microsoftonline.com",
-                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
@@ -246,7 +248,7 @@
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
-                        requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
                                              @"refresh_token" : @"fakeRefreshToken",
@@ -291,8 +293,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -311,7 +313,7 @@
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
-                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                    @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                     @"id_token": rawIdToken,
                                                                                     @"client_info": rawClientInfo,
                                                                                     @"expires_on" : @"0"
@@ -322,7 +324,7 @@
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
                                                                                       @"environment" : @"login.microsoftonline.com",
-                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
@@ -342,7 +344,7 @@
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
-                        requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
                                              @"refresh_token" : @"fakeRefreshToken",
@@ -389,8 +391,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -409,7 +411,7 @@
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
-                                                                                    @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                    @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                     @"id_token": rawIdToken,
                                                                                     @"client_info": rawClientInfo,
                                                                                     @"expires_on" : @"0"
@@ -447,8 +449,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -467,7 +469,7 @@
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
                                                                                       @"environment" : @"login.microsoftonline.com",
-                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
@@ -487,7 +489,7 @@
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
-                        requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
                                              @"refresh_token" : @"fakeRefreshToken",
@@ -533,8 +535,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -576,8 +578,8 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:@"x-msauth-com-microsoft-unittests://com.microsoft.unittests/msal"];
-    parameters.clientId = @"b92e0ba5-f86e-4411-8e18-6b5f928d968a";
+    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
@@ -596,7 +598,7 @@
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
                                                                                       @"environment" : @"login.microsoftonline.com",
-                                                                                      @"client_id": @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                                                                                      @"client_id": UNIT_TEST_CLIENT_ID,
                                                                                       @"id_token": rawIdToken,
                                                                                       @"refresh_token": @"fakeRefreshToken",
                                                                                       @"client_info": rawClientInfo,
@@ -616,7 +618,7 @@
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
                            requestHeaders:reqHeaders
-                        requestParamsBody:@{ @"client_id" : @"b92e0ba5-f86e-4411-8e18-6b5f928d968a",
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
                                              @"grant_type" : @"refresh_token",
                                              @"refresh_token" : @"fakeRefreshToken",

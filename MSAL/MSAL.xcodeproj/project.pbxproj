@@ -368,6 +368,7 @@
 		94E876D91E493DC600FB96ED /* MSALInteractiveRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALInteractiveRequest.h; sourceTree = "<group>"; };
 		94E876DA1E493DC600FB96ED /* MSALInteractiveRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALInteractiveRequest.m; sourceTree = "<group>"; };
 		94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALUIBehavior.h; sourceTree = "<group>"; };
+		9612C6141EB28F9D00816915 /* MSALTestConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestConstants.h; sourceTree = "<group>"; };
 		962302581E7215170022A778 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9623025E1E7217740022A778 /* MSALAutomation.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MSALAutomation.entitlements; sourceTree = "<group>"; };
 		962859441E734ECA008F1AE1 /* OpenIdConfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OpenIdConfiguration.json; sourceTree = "<group>"; };
@@ -1239,6 +1240,7 @@
 				603D19A01EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m */,
 				D6B58A561EB2C743000B3A5F /* MSALTestCacheDataUtil.h */,
 				D6B58A571EB2C743000B3A5F /* MSALTestCacheDataUtil.m */,
+				9612C6141EB28F9D00816915 /* MSALTestConstants.h */,
 			);
 			path = utils;
 			sourceTree = "<group>";

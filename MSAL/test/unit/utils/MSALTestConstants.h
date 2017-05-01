@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,28 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALB2CAuthorityResolver.h"
+#pragma once
 
-#define UNSUPPORTED_AUTHORITY_VALIDATION @"Authority validation is not supported for this type of authority"
+// Unit test client ID
+#define UNIT_TEST_CLIENT_ID                 @"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
 
-@implementation MSALB2CAuthorityResolver
+// Unit test redirect scheme : msal<clientId>
+#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
 
-- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
-                              userPrincipalName:(NSString *)userPrincipalName
-                                       validate:(BOOL)validate
-                                        context:(id<MSALRequestContext>)context
-                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock
-{
-    (void)userPrincipalName;
-    
-    if (validate && ![MSALAuthority isKnownHost:authority])
-    {
-        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
-        completionBlock(nil, error);
-        return;
-    }
-    
-    completionBlock([self defaultOpenIdConfigurationEndpointForAuthority:authority], nil);
-}
+// Unit test redirect uri : msal<clientId>://auth
+#define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
 
-@end
+

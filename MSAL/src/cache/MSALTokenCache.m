@@ -219,7 +219,7 @@
         }
         else if (![foundAuthority isEqualToString:tokenItem.authority])
         {
-            MSAL_ERROR_PARAM(ctx, MSALErrorMultipleMatchesNoAuthoritySpecified, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
+            MSAL_ERROR_PARAM(ctx, MSALErrorAmbiguousAuthority, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
             return NO;
         }
         

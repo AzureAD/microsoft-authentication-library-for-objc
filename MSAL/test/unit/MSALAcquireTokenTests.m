@@ -29,6 +29,7 @@
 
 #import "MSALTestBundle.h"
 #import "MSALTestCacheDataUtil.h"
+#import "MSALTestConstants.h"
 #import "MSALTestURLSession.h"
 #import "NSDictionary+MSALTestUtil.h"
 
@@ -53,7 +54,7 @@
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[@"x-msauth-com-microsoft-unittests", @"adaliosxformsapp"] } ];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Seed a cache object with a user and existing AT that does not match the scope we will ask for

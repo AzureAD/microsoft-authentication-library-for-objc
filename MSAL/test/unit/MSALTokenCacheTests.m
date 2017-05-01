@@ -714,7 +714,7 @@
                                          authorityFound:&authorityFound
                                                   error:&error]);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorMultipleMatchesNoAuthoritySpecified);
+    XCTAssertEqual(error.code, MSALErrorAmbiguousAuthority);
 }
 
 - (void)testFindAccessToken_whenNoAuthoritySpecifiedAndOnlyOneAuthorityInCache_shouldReturnAuthority
@@ -808,7 +808,7 @@
                                         authorityFound:&authorityFound
                                                  error:&error]);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorMultipleMatchesNoAuthoritySpecified);
+    XCTAssertEqual(error.code, MSALErrorAmbiguousAuthority);
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
 }
