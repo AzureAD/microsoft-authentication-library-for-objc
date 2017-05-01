@@ -377,6 +377,7 @@
     params.component = _component;
     params.apiId = apiId;
     params.user = user;
+    params.validateAuthority = _validateAuthority;
     
     LOG_INFO(params, @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
              "                                   additionalScopes:%@\n"
@@ -446,6 +447,7 @@
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.user = user;
     params.apiId = apiId;
+    params.validateAuthority = _validateAuthority;
     
     [params setScopesFromArray:scopes];
     
