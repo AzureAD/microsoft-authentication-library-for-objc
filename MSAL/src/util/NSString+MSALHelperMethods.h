@@ -52,7 +52,10 @@
 - (NSString *)msalUrlFormEncode;
 
 /*! Computes a SHA256 hash of the string in hex string */
-- (NSString*)msalComputeSHA256Hex;
+- (NSString *)msalComputeSHA256Hex;
+
+/*! Shorter hex string for friendlier logs */
+- (NSString *)msalShortSHA256Hex;
 
 /*! Generate a URL-safe string of random data */
 + (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size;
