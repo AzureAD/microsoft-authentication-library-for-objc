@@ -181,7 +181,7 @@
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  additionalScopes        Permissions you want the user to consent to in the same
+    @param  extraScopesToConsent    Permissions you want the user to consent to in the same
                                     authentication flow, but won't be included in the returned
                                     access token
     @param  loginHint               A loginHint (usually an email) to pass to the service at the
@@ -201,7 +201,7 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             additionalScopes:(NSArray<NSString *> *)additionalScopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
@@ -256,7 +256,7 @@
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  additionalScopes        Permissions you want the user to consent to in the same
+    @param  extraScopesToConsent    Permissions you want the user to consent to in the same
                                     authentication flow, but won't be included in the returned
                                     access token
     @param  user                    A user object retrieved from the application object that the
@@ -276,7 +276,7 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             additionalScopes:(NSArray<NSString *> *)additionalScopes
+             extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                          user:(MSALUser *)user
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters

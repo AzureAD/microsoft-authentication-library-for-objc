@@ -39,7 +39,7 @@
 
 @interface MSALInteractiveRequest (TestExtensions)
 
-- (MSALScopes *)additionalScopes;
+- (MSALScopes *)extraScopesToConsent;
 - (MSALUIBehavior)uiBehavior;
 @end
 

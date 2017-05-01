@@ -217,7 +217,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
-         XCTAssertNil(obj.additionalScopes);
+         XCTAssertNil(obj.extraScopesToConsent);
          XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
          
          MSALRequestParameters *params = [obj parameters];
@@ -266,7 +266,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
-         XCTAssertNil(obj.additionalScopes);
+         XCTAssertNil(obj.extraScopesToConsent);
          XCTAssertEqual(obj.uiBehavior, MSALForceLogin);
          
          MSALRequestParameters *params = [obj parameters];
@@ -321,7 +321,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
-         XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
+         XCTAssertEqualObjects(obj.extraScopesToConsent, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
          XCTAssertEqual(obj.uiBehavior, MSALForceConsent);
          
          MSALRequestParameters *params = [obj parameters];
@@ -340,7 +340,7 @@
      }];
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                      additionalScopes:@[@"fakescope3"]
+                      extraScopesToConsent:@[@"fakescope3"]
                              loginHint:@"fakeuser@contoso.com"
                             uiBehavior:MSALForceConsent
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
@@ -384,7 +384,7 @@
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
-         XCTAssertNil(obj.additionalScopes);
+         XCTAssertNil(obj.extraScopesToConsent);
          XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
          
          MSALRequestParameters *params = [obj parameters];
@@ -441,7 +441,7 @@
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
-         XCTAssertNil(obj.additionalScopes);
+         XCTAssertNil(obj.extraScopesToConsent);
          XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
          
          MSALRequestParameters *params = [obj parameters];
@@ -502,7 +502,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSALInteractiveRequest class]]);
          
-         XCTAssertEqualObjects(obj.additionalScopes, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
+         XCTAssertEqualObjects(obj.extraScopesToConsent, [NSOrderedSet orderedSetWithArray:@[@"fakescope3"]]);
          XCTAssertEqual(obj.uiBehavior, MSALUIBehaviorDefault);
          
          MSALRequestParameters *params = [obj parameters];
@@ -522,7 +522,7 @@
      }];
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                      additionalScopes:@[@"fakescope3"]
+                      extraScopesToConsent:@[@"fakescope3"]
                                   user:user
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }

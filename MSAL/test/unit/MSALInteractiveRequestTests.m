@@ -75,7 +75,7 @@
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                      extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
                                                  error:&error];
     
@@ -111,7 +111,7 @@
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                      extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceLogin
                                                  error:&error];
     
@@ -189,7 +189,7 @@
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                      extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceLogin
                                                  error:&error];
     
@@ -267,7 +267,7 @@
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                  extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
                                                  error:&error];
     
@@ -427,7 +427,7 @@
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                      extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
                                                  error:&error];
     
@@ -589,7 +589,7 @@
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      additionalScopes:@[@"fakescope3"]
+                                      extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
                                                  error:&error];
     
