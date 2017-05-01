@@ -228,8 +228,7 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
 
 - (void)getMetadata:(void (^)(NSDictionary *json, NSError *error))metadataBlock
 {
-    [self getJSON:@"me/photo"
-            block:metadataBlock];
+    [self getJSON:@"me/photo" completionHandler:metadataBlock];
 }
 
 - (void)getPhotoData:(void (^)(NSData *data, NSError *error))photoBlock
@@ -242,8 +241,7 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
             return;
         }
         
-        [self getData:@"me/photo/$value"
-                block:photoBlock];
+        [self getData:@"me/photo/$value" completionHandler:photoBlock];
     }];
 }
 

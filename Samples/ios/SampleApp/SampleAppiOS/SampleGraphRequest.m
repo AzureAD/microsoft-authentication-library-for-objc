@@ -34,6 +34,12 @@ const NSErrorDomain SampleGraphErrorDomain = (NSErrorDomain)(@"SampleGraphErrorD
     NSString *_token;
 }
 
++ (NSURL *)graphURLWithPath:(NSString *)path
+{
+    NSString *urlString = [NSString stringWithFormat:@"https://graph.microsoft.com/beta/%@", path];
+    return [NSURL URLWithString:urlString];
+}
+
 + (instancetype)requestWithToken:(NSString *)token
 {
     SampleGraphRequest *req = [self new];
@@ -41,11 +47,10 @@ const NSErrorDomain SampleGraphErrorDomain = (NSErrorDomain)(@"SampleGraphErrorD
     return req;
 }
 
-- (void)getData:(NSString *)path
-          block:(void (^)(NSData *, NSError *))completionBlock
+- (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock
 {
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest new];
-    urlRequest.URL = [NSURL URLWithString:[NSString stringWithFormat:@"https://graph.microsoft.com/beta/%@", path]];
+    urlRequest.URL = [SampleGraphRequest graphURLWithPath:path];
     urlRequest.HTTPMethod = @"GET";
     urlRequest.allHTTPHeaderFields = @{ @"Authorization" : [NSString stringWithFormat:@"Bearer %@", _token] };
     
@@ -73,11 +78,9 @@ const NSErrorDomain SampleGraphErrorDomain = (NSErrorDomain)(@"SampleGraphErrorD
      }];
     [task resume];
 }
-- (void)getJSON:(NSString *)path
-          block:(void(^)(NSDictionary *json, NSError *error))completionBlock
+- (void)getJSON:(NSString *)path completionHandler:(void(^)(NSDictionary *json, NSError *error))completionBlock
 {
-    [self getData:path
-            block:^(NSData *data, NSError *error) {
+    [self getData:path completionHandler:^(NSData *data, NSError *error) {
         if (error)
         {
             completionBlock(nil, error);
