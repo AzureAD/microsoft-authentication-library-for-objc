@@ -51,7 +51,7 @@
     [super tearDown];
 }
 
-- (void)testDefaultOpenIdConfigurationEndpoint
+- (void)testDefaultOpenIdConfigurationEndpoint_whenAuthority_shouldReturnDefault
 {
     MSALB2CAuthorityResolver *b2cResolver = [MSALB2CAuthorityResolver new];
     NSURL *authority = [NSURL URLWithString:@"https://login.microsoftonline.in/tfp/tenant/policy"];
@@ -59,12 +59,17 @@
     // Test with authority
     NSString *endpoint = [b2cResolver defaultOpenIdConfigurationEndpointForAuthority:authority];
     XCTAssertEqualObjects(endpoint, @"https://login.microsoftonline.in/tfp/tenant/policy/v2.0/.well-known/openid-configuration");
+}
+
+- (void)testDefaultOpenIdConfigurationEndpoint_whenNoAuthority_shouldReturnNil
+{
+    MSALB2CAuthorityResolver *b2cResolver = [MSALB2CAuthorityResolver new];
     
     // Test with no authority
     XCTAssertNil([b2cResolver defaultOpenIdConfigurationEndpointForAuthority:nil]);
 }
 
-- (void)testValidateError
+- (void)testOpenIDConfigurationEndpointForAuthority_whenValidate_shouldReturnError
 {
     MSALB2CAuthorityResolver *b2cResolver = [MSALB2CAuthorityResolver new];
     NSURL *authority = [NSURL URLWithString:@"https://login.microsoftonline.in/tfp/tenant/policy"];
@@ -73,10 +78,51 @@
                                        userPrincipalName:nil
                                                 validate:YES
                                                  context:nil
-                                         completionBlock:^(NSString *endpoint, NSError *error) {
-    XCTAssertNotNil(error);
-    XCTAssertNil(endpoint);
-}];
+                                         completionBlock:^(NSString *endpoint, NSError *error)
+     {
+         XCTAssertNil(endpoint);
+         XCTAssertNotNil(error);
+         
+         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"not supported"]);
+         XCTAssertTrue(error.code == MSALErrorInvalidRequest);
+     }];
 }
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenKnownAuthorityAndValidate_shouldReturnDefaultAuthority
+{
+    MSALB2CAuthorityResolver *b2cResolver = [MSALB2CAuthorityResolver new];
+    NSURL *authority = [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/tenant/policy"];
+    
+    [b2cResolver openIDConfigurationEndpointForAuthority:authority
+                                       userPrincipalName:nil
+                                                validate:YES
+                                                 context:nil
+                                         completionBlock:^(NSString *endpoint, NSError *error)
+     {
+         XCTAssertNotNil(endpoint);
+         XCTAssertNil(error);
+         
+         XCTAssertEqualObjects(endpoint, [b2cResolver defaultOpenIdConfigurationEndpointForAuthority:authority]);
+     }];
+}
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenAuthorityAndNoValidate_shouldReturnDefaultAuthority
+{
+    MSALB2CAuthorityResolver *b2cResolver = [MSALB2CAuthorityResolver new];
+    NSURL *authority = [NSURL URLWithString:@"https://login.microsoftonline.in/tfp/tenant/policy"];
+    
+    [b2cResolver openIDConfigurationEndpointForAuthority:authority
+                                       userPrincipalName:nil
+                                                validate:NO
+                                                 context:nil
+                                         completionBlock:^(NSString *endpoint, NSError *error)
+     {
+         XCTAssertNotNil(endpoint);
+         XCTAssertNil(error);
+         
+         XCTAssertEqualObjects(endpoint, [b2cResolver defaultOpenIdConfigurationEndpointForAuthority:authority]);
+     }];
+}
+
 
 @end
