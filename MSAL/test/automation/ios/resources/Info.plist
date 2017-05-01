@@ -56,8 +56,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>x-msauth-com-microsoft-MSALAutomationApp</string>
-				<string>adaliosxformsapp</string>
+				<string>msal5a434691-ccb2-4fd1-b97b-b64bcfbc03fc</string>
 			</array>
 		</dict>
 	</array>

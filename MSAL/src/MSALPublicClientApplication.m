@@ -45,10 +45,10 @@
     MSALTokenCache *_tokenCache;
 }
 
-- (BOOL)generateRedirectUri:(NSError * __autoreleasing *)error
+- (BOOL)generateRedirectUriWithClientId:(NSString *)clientId
+                                  error:(NSError * __autoreleasing *)error
 {
-    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *scheme = [NSString stringWithFormat:@"x-msauth-%@", [bundleId stringByReplacingOccurrencesOfString:@"." withString:@"-"]];
+    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
     
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
     
@@ -57,7 +57,7 @@
         NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
         if ([urlSchemes containsObject:scheme])
         {
-            NSString *redirectUri = [NSString stringWithFormat:@"%@://%@", scheme, bundleId];
+            NSString *redirectUri = [NSString stringWithFormat:@"%@://auth", scheme];
             _redirectUri = [NSURL URLWithString:redirectUri];
             return YES;
         }
@@ -96,7 +96,8 @@
         _authority = [MSALAuthority defaultAuthority];
     }
     
-    CHECK_RETURN_NIL([self generateRedirectUri:error]);
+    CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
+                                                     error:error]);
     
     id<MSALTokenCacheAccessor> dataSource;
 #if TARGET_OS_IPHONE
