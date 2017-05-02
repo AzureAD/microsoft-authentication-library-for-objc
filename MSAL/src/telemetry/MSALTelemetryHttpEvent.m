@@ -54,7 +54,7 @@
 {
     self.errorInEvent = ![NSString msalIsStringNilOrBlank:code];
     
-    [self setProperty:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE value:code];
+    [self setProperty:MSAL_TELEMETRY_KEY_HTTP_RESPONSE_CODE value:code];
 }
 
 - (void)setOAuthErrorCode:(MSALHttpResponse *)response
