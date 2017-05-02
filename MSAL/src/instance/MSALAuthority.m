@@ -42,7 +42,7 @@
 
 static NSSet<NSString *> *s_trustedHostList;
 static NSMutableDictionary *s_resolvedAuthorities;
-static NSMutableDictionary *s_reslovedUsersForAuthority;
+static NSMutableDictionary *s_resolvedUsersForAuthority;
 
 #pragma mark - helper functions
 + (BOOL)isTenantless:(NSURL *)authority
@@ -81,7 +81,7 @@ static NSMutableDictionary *s_reslovedUsersForAuthority;
                          @"login.microsoftonline.de", nil];
     
     s_resolvedAuthorities = [NSMutableDictionary new];
-    s_reslovedUsersForAuthority = [NSMutableDictionary new];
+    s_resolvedUsersForAuthority = [NSMutableDictionary new];
 }
 
 + (NSSet<NSString *> *)trustedHosts
@@ -234,11 +234,11 @@ static NSMutableDictionary *s_reslovedUsersForAuthority;
 
     if (authority.authorityType == ADFSAuthority)
     {
-        NSMutableSet<NSString *> *usersInDomain = s_reslovedUsersForAuthority[authorityKey];
+        NSMutableSet<NSString *> *usersInDomain = s_resolvedUsersForAuthority[authorityKey];
         if (!usersInDomain)
         {
             usersInDomain = [NSMutableSet new];
-            s_reslovedUsersForAuthority[authorityKey] = usersInDomain;
+            s_resolvedUsersForAuthority[authorityKey] = usersInDomain;
         }
         [usersInDomain addObject:userPrincipalName];
     }
@@ -265,7 +265,7 @@ static NSMutableDictionary *s_reslovedUsersForAuthority;
             return nil;
         }
         
-        NSSet *validatedUsers = s_reslovedUsersForAuthority[authorityKey];
+        NSSet *validatedUsers = s_resolvedUsersForAuthority[authorityKey];
 
         if (![validatedUsers containsObject:userPrincipalName])
         {
