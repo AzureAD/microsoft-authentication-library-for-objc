@@ -231,18 +231,21 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     }
     
     NSString *authorityKey = authority.canonicalAuthority.absoluteString;
-
-    if (authority.authorityType == ADFSAuthority)
+    
+    @synchronized ([MSALAuthority class])
     {
-        NSMutableSet<NSString *> *usersInDomain = s_resolvedUsersForAuthority[authorityKey];
-        if (!usersInDomain)
+        if (authority.authorityType == ADFSAuthority)
         {
-            usersInDomain = [NSMutableSet new];
-            s_resolvedUsersForAuthority[authorityKey] = usersInDomain;
+            NSMutableSet<NSString *> *usersInDomain = s_resolvedUsersForAuthority[authorityKey];
+            if (!usersInDomain)
+            {
+                usersInDomain = [NSMutableSet new];
+                s_resolvedUsersForAuthority[authorityKey] = usersInDomain;
+            }
+            [usersInDomain addObject:userPrincipalName];
         }
-        [usersInDomain addObject:userPrincipalName];
+        s_resolvedAuthorities[authorityKey] = authority;
     }
-    s_resolvedAuthorities[authorityKey] = authority;
 
     return YES;
 }
@@ -258,22 +261,25 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     
     NSString *authorityKey = authority.absoluteString;
     
-    if (authorityType == ADFSAuthority)
+    @synchronized ([MSALAuthority class])
     {
-        if (!userPrincipalName)
+        if (authorityType == ADFSAuthority)
         {
-            return nil;
+            if (!userPrincipalName)
+            {
+                return nil;
+            }
+            
+            NSSet *validatedUsers = s_resolvedUsersForAuthority[authorityKey];
+            
+            if (![validatedUsers containsObject:userPrincipalName])
+            {
+                return nil;
+            }
         }
         
-        NSSet *validatedUsers = s_resolvedUsersForAuthority[authorityKey];
-
-        if (![validatedUsers containsObject:userPrincipalName])
-        {
-            return nil;
-        }
+        return s_resolvedAuthorities[authorityKey];
     }
-
-    return s_resolvedAuthorities[authorityKey];
 }
 
 @end

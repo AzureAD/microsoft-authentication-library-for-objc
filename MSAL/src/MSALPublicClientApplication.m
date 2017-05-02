@@ -362,6 +362,27 @@
 #pragma mark -
 #pragma mark - private methods
 
++ (void)logOperation:(NSString *)operation
+              result:(MSALResult *)result
+               error:(NSError *)error
+             context:(id<MSALRequestContext>)ctx
+{
+    if (error)
+    {
+        NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
+        errorDescription = errorDescription ? errorDescription : @"";
+        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+    }
+    
+    if (result)
+    {
+        NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
+        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+    }
+}
+
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                          user:(MSALUser *)user
@@ -400,6 +421,12 @@
                   "                                      correlationId:%@]",
                  scopes, extraScopesToConsent, user.userIdentifier, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
     
+    MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
+    {
+        [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:error context:params];
+        completionBlock(result, error);
+    };
+    
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
@@ -410,7 +437,7 @@
     }
     else if (![params setAuthorityFromString:authority error:&error])
     {
-        completionBlock(nil, error);
+        block(nil, error);
         return;
     }
     
@@ -427,13 +454,13 @@
     if (!request)
     {
         [params.urlSession invalidateAndCancel];
-        completionBlock(nil, error);
+        block(nil, error);
         return;
     }
     
     [request run:^(MSALResult *result, NSError *error) {
         [params.urlSession invalidateAndCancel];
-        completionBlock(result, error);
+        block(result, error);
     }];
 }
 
@@ -466,11 +493,17 @@
                   "                                             forceRefresh:%@\n"
                   "                                            correlationId:%@\n]",
                  scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
+    
+    MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
+    {
+        [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:error context:params];
+        completionBlock(result, error);
+    };
 
     NSError *error = nil;
     if (![params setAuthorityFromString:authority error:&error])
     {
-        completionBlock(nil, error);
+        block(nil, error);
         return;
     }
     params.redirectUri = _redirectUri;
@@ -484,13 +517,13 @@
     if (!request)
     {
         [params.urlSession invalidateAndCancel];
-        completionBlock(nil, error);
+        block(nil, error);
         return;
     }
     
     [request run:^(MSALResult *result, NSError *error) {
         [params.urlSession invalidateAndCancel];
-        completionBlock(result, error);
+        block(result, error);
     }];
 }
 
