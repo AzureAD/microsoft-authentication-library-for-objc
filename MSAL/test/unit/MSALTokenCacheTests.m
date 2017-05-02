@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
 #import "MSALTestTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALTokenResponse.h"
@@ -36,22 +36,27 @@
 #import "NSURL+MSALExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
-@interface MSALTokenCacheTests : XCTestCase
+@interface MSALTokenCacheTests : MSALTestCase
 {
     NSURL *_testAuthority;
     NSString *_testEnvironment;
     NSString *_testClientId;
+    MSALUser *_testUser;
     
     MSALTokenCache *_cache;
     
     NSDictionary *_testResponse1Claims;
     MSALTokenResponse *_testTokenResponse;
+    NSString *_idToken1;
+    NSString *_clientInfo1;
     NSString *_userIdentifier1;
     MSALUser *_user1;
     MSALRequestParameters *_requestParam1;
     
     NSDictionary *_testResponse2Claims;
     MSALTokenResponse *_testTokenResponse2;
+    NSString *_idToken2;
+    NSString *_clientInfo2;
     NSString *_userIdentifier2;
     MSALUser *_user2;
     MSALRequestParameters *_requestParam2;
@@ -70,12 +75,13 @@
     _testEnvironment = _testAuthority.msalHostWithPort;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
-    NSString *idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
-    NSString *clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    _idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
+     _clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
-    _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken1]
-                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:clientInfo1 error:nil]
+    _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken1]
+                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo1 error:nil]
                                    environment:_testAuthority.msalHostWithPort];
+    _testUser = _user1;
     
     _testResponse1Claims =
     @{ @"token_type" : @"Bearer",
@@ -85,8 +91,8 @@
        @"ext_expires_in" : @"10800",
        @"access_token" : @"fake-access-token",
        @"refresh_token" : @"fake-refresh-token",
-       @"id_token" : idToken1,
-       @"client_info" : clientInfo1
+       @"id_token" : _idToken1,
+       @"client_info" : _clientInfo1
        };
     
     NSError *error = nil;
@@ -100,11 +106,11 @@
     [_requestParam1 setScopesFromArray:@[@"mail.read", @"user.read"]];
     _requestParam1.user = _user1;
     
-    NSString *idToken2 = [MSALTestIdTokenUtil idTokenWithName:@"User 2" preferredUsername:@"user2@contoso.com"];
-    NSString *clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    _idToken2 = [MSALTestIdTokenUtil idTokenWithName:@"User 2" preferredUsername:@"user2@contoso.com"];
+    _clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
-    _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:idToken2]
-                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:clientInfo2 error:nil]
+    _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken2]
+                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo2 error:nil]
                                    environment:_testAuthority.msalHostWithPort];
     
     _testResponse2Claims =
@@ -115,8 +121,8 @@
        @"ext_expires_in" : @"10800",
        @"access_token" : @"fake-access-token",
        @"refresh_token" : @"fake-refresh-token",
-       @"id_token" : idToken2,
-       @"client_info" : clientInfo2
+       @"id_token" : _idToken2,
+       @"client_info" : _clientInfo2
        };
     
     _testTokenResponse2 = [[MSALTokenResponse alloc] initWithJson:_testResponse2Claims error:nil];
@@ -149,20 +155,18 @@
     
     
     //retrieve AT
-    NSString *authorityFound;
+    NSString *authorityFound = nil;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];
-                                               
+    MSALAccessTokenCacheItem *atItemInCache = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
+                                           clientId:_requestParam1.clientId
+                                             scopes:_requestParam1.scopes
+                                               user:_requestParam1.user
+                                            context:nil
+                                        accessToken:&atItemInCache
+                                     authorityFound:&authorityFound
+                                              error:&error]);
     XCTAssertNil(error);
-    
-    //compare AT with the AT retrieved from cache
-    XCTAssertNil(authorityFound);
     XCTAssertEqualObjects(atItem, atItemInCache);
 }
 
@@ -282,40 +286,6 @@
     XCTAssertEqualObjects(rtsInCacheSet, rtsSet);
 }
 
-- (void)testFindAccessToken_whenScopeMismatch_shouldNoTokenFound
-{
-    // store an access token
-    NSDictionary *clientInfo1 = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
-    MSALAccessTokenCacheItem *atItem =
-    [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
-                                                      @"authority" : _testAuthority.absoluteString,
-                                                      @"displayable_id" : _user1.displayableId,
-                                                      @"scope" : @"mail.read user.read",
-                                                      @"token_type" : @"Bearer",
-                                                      @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
-                                                      @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
-                                                      }
-                                              error:nil];
-    XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
-    
-    //prepare requestParameter
-    MSALRequestParameters *requestParam = [MSALRequestParameters new];
-    requestParam.unvalidatedAuthority = _testAuthority;
-    requestParam.clientId = _testClientId;
-    requestParam.user = _user1;
-    [requestParam setScopesFromArray:@[@"User.Read", @"scope.notexist"]];
-    NSError *error = nil;
-    XCTAssertNil([_cache findAccessTokenWithAuthority:requestParam.unvalidatedAuthority
-                                             clientId:requestParam.clientId
-                                               scopes:requestParam.scopes
-                                                 user:requestParam.user
-                                              context:nil
-                                       authorityFound:nil
-                                                error:&error]);
-    XCTAssertNil(error);
-}
-
 - (void)testFindRefreshTokenWithEnvironment_whenOneSaved_shouldFindRT
 {
     //prepare token response and save RT
@@ -403,13 +373,16 @@
     
     //Both RT and AT are deleted, both should return nil
     NSError *error = nil;
-    XCTAssertNil([_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                             clientId:_requestParam1.clientId
-                                               scopes:_requestParam1.scopes
-                                                 user:_requestParam1.user
-                                              context:nil
-                                       authorityFound:nil
-                                                error:&error]);
+    NSString *authorityFound = nil;
+    MSALAccessTokenCacheItem *atItem1 = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
+                                               clientId:_requestParam1.clientId
+                                                 scopes:_requestParam1.scopes
+                                                   user:_requestParam1.user
+                                                context:nil
+                                            accessToken:&atItem1
+                                         authorityFound:&authorityFound
+                                                  error:&error]);
     XCTAssertNil(error);
     
     error = nil;
@@ -424,13 +397,15 @@
     XCTAssertEqual([_cache.dataSource allRefreshTokens:nil context:nil error:nil].count, 1);
     
     error = nil;
-    MSALAccessTokenCacheItem *atItemInCache2 = [_cache findAccessTokenWithAuthority:_requestParam2.unvalidatedAuthority
-                                                                           clientId:_requestParam2.clientId
-                                                                             scopes:_requestParam2.scopes
-                                                                               user:_requestParam2.user
-                                                                            context:nil
-                                                                     authorityFound:nil
-                                                                              error:&error];;
+    MSALAccessTokenCacheItem *atItemInCache2 = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:_requestParam2.unvalidatedAuthority
+                                         clientId:_requestParam2.clientId
+                                           scopes:_requestParam2.scopes
+                                             user:_requestParam2.user
+                                          context:nil
+                                      accessToken:&atItemInCache2
+                                   authorityFound:&authorityFound
+                                            error:&error]);
     XCTAssertNil(error);
     error = nil;
     MSALRefreshTokenCacheItem *rtItemInCache2 = [_cache findRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msalHostWithPort
@@ -525,44 +500,92 @@
     XCTAssertTrue(users.count==0);
 }
 
-- (void)testFindAccessToken_whenMultipleMatches_shouldFail
+#pragma mark -
+#pragma mark findAccessToken
+
+- (void)testFindAccessToken_whenNilUser_shouldParameterError
 {
-    //store 2 tokens
     NSError *error = nil;
-    [_cache saveAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                clientId:_requestParam1.clientId
-                                response:_testTokenResponse
-                                 context:nil error:nil];
-    
-    XCTAssertNil(error);
-    
-    error = nil;
-    [_cache saveAccessTokenWithAuthority:_requestParam2.unvalidatedAuthority
-                                clientId:_requestParam2.clientId
-                                response:_testTokenResponse2
-                                 context:nil error:nil];
-    
-    XCTAssertNil(error);
-    
-    //remove user specifier to make an ambigious query
-    MSALRequestParameters *requestParam = [MSALRequestParameters new];
-    requestParam.unvalidatedAuthority = _testAuthority;
-    requestParam.clientId = _testClientId;
-    [requestParam setScopesFromArray:@[@"User.Read"]];
-    requestParam.user = nil;
-    
-    error = nil;
-    XCTAssertNil([_cache findAccessTokenWithAuthority:requestParam.unvalidatedAuthority
-                                             clientId:requestParam.clientId
-                                               scopes:requestParam.scopes
-                                                 user:requestParam.user
-                                              context:nil
-                                       authorityFound:nil
-                                                error:&error]);
-    XCTAssertEqual(error.code, MSALErrorAmbiguousAuthority);
+    NSString *authorityFound = nil;
+    MSALAccessTokenCacheItem *cachedAT = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:_testAuthority
+                                               clientId:_testClientId
+                                                 scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"mail.read"]])
+                                                   user:nil
+                                                context:nil
+                                            accessToken:&cachedAT
+                                         authorityFound:&authorityFound
+                                                  error:&error]);
+    XCTAssertNotNil(error);
+    XCTAssertTrue([[error userInfo][MSALErrorDescriptionKey] containsString:@"user"]);
 }
 
-- (void)testFindAccessToken_whenTokenExpired_shouldReturnNil
+- (void)testFindAccessToken_whenNilOutAuthority_shouldParameterError
+{
+    NSError *error = nil;
+    MSALAccessTokenCacheItem *cachedAT = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:_testAuthority
+                                               clientId:_testClientId
+                                                 scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"mail.read"]])
+                                                   user:_testUser
+                                                context:nil
+                                            accessToken:&cachedAT
+                                         authorityFound:nil
+                                                  error:&error]);
+    XCTAssertNotNil(error);
+    XCTAssertTrue([[error userInfo][MSALErrorDescriptionKey] containsString:@"outAuthority"]);
+}
+
+- (void)testFindAccessToken_whenNilOutAccessToken_shouldParameterError
+{
+    NSError *error = nil;
+    NSString *authorityFound = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:_testAuthority
+                                               clientId:_testClientId
+                                                 scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"mail.read"]])
+                                                   user:_testUser
+                                                context:nil
+                                            accessToken:nil
+                                         authorityFound:&authorityFound
+                                                  error:&error]);
+    XCTAssertNotNil(error);
+    XCTAssertTrue([[error userInfo][MSALErrorDescriptionKey] containsString:@"outAccessToken"]);
+}
+
+- (void)testFindAccessToken_whenScopeMismatch_shouldNoTokenFound
+{
+    // store an access token
+    NSDictionary *clientInfo1 = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
+    MSALAccessTokenCacheItem *atItem =
+    [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
+                                                      @"authority" : _testAuthority.absoluteString,
+                                                      @"displayable_id" : _user1.displayableId,
+                                                      @"scope" : @"mail.read user.read",
+                                                      @"token_type" : @"Bearer",
+                                                      @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
+                                                      @"client_id" : _testClientId,
+                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      }
+                                             error:nil];
+    XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
+    
+    NSError *error = nil;
+    NSString *authorityFound = nil;
+    MSALAccessTokenCacheItem *accessToken = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:_testAuthority
+                                              clientId:_testClientId
+                                                scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"scope.notexist"]])
+                                                  user:_testUser
+                                               context:nil
+                                           accessToken:&accessToken
+                                        authorityFound:&authorityFound
+                                                 error:&error]);
+    XCTAssertNil(error);
+    XCTAssertNil(accessToken);
+    XCTAssertNotNil(authorityFound);
+}
+
+- (void)testFindAccessToken_whenTokenExpired_shouldReturnFoundAuthority
 {
     //prepare and save expired token
     NSDictionary *clientInfo = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
@@ -581,17 +604,22 @@
     
     //token is expired so it is not returned
     NSError *error = nil;
-    XCTAssertNil([_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                     clientId:_requestParam1.clientId
-                                                       scopes:_requestParam1.scopes
-                                                         user:_requestParam1.user
-                                                      context:nil
-                                               authorityFound:nil
-                                                        error:&error]);
+    NSString *authorityFound = nil;
+    MSALAccessTokenCacheItem *cachedAT = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:_testAuthority
+                                              clientId:_testClientId
+                                                scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"mail.read"]])
+                                                  user:_requestParam1.user
+                                               context:nil
+                                           accessToken:&cachedAT
+                                        authorityFound:&authorityFound
+                                                 error:&error]);
     XCTAssertNil(error);
+    XCTAssertNil(cachedAT);
+    XCTAssertEqualObjects(authorityFound, _testAuthority.absoluteString);
 }
 
-- (void)testFindAccessTokenWithoutAuthority_whenExists_shouldFind
+- (void)testFindAccessToken_whenTokenExistsAndNoAuthoritySpecified_shouldReturnAccessToken
 {
     //store AT
     NSDictionary *clientInfo = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
@@ -612,44 +640,47 @@
     NSString *authorityFound = nil;
     _requestParam1.unvalidatedAuthority = nil;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];
+    MSALAccessTokenCacheItem *atItemInCache = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:nil
+                                              clientId:_testClientId
+                                                scopes:[NSOrderedSet orderedSetWithObject:@"mail.read"]
+                                                  user:_testUser
+                                               context:nil
+                                           accessToken:&atItemInCache
+                                        authorityFound:&authorityFound
+                                                 error:&error]);
     XCTAssertNil(error);
     XCTAssertNotNil(atItemInCache);
-    XCTAssertNil(authorityFound);
 }
-- (void)testFindAccessTokenWithoutAuthority_whenEmptyCache_shouldReturnNil
+- (void)testFindAccessToken_whenEmptyCache_shouldReturnNil
 {
     //retrieve without authority in empty cache
     _requestParam1.unvalidatedAuthority = nil;
     NSString *authorityFound;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];
+    MSALAccessTokenCacheItem *atItemInCache = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
+                                               clientId:_requestParam1.clientId
+                                                 scopes:_requestParam1.scopes
+                                                   user:_requestParam1.user
+                                                context:nil
+                                            accessToken:&atItemInCache
+                                         authorityFound:&authorityFound
+                                                  error:&error]);
     XCTAssertNil(error);
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
 }
 
-- (void)testFindAccessTokenWithoutAuthority_whenMultipleMatches_shouldFail
+- (void)testFindAccessToken_whenMultipleMatchesDueToNoAuthoritySpecified_shouldFailWithAmbiguousError
 {
     //store two ATs
     NSDictionary *clientInfo1 = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
     MSALAccessTokenCacheItem *atItem1 =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
-                                                      @"authority" : _testAuthority.absoluteString,
-                                                      @"displayable_id" : _user1.displayableId,
-                                                      @"scope" : @"mail.read user.read",
+                                                      @"authority" : @"https://login.microsoftonline.com/contoso.com",
+                                                      @"displayable_id" : _testUser.displayableId,
+                                                      @"scope" : @"mail.write useread",
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
@@ -658,64 +689,61 @@
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem1 context:nil error:nil]);
 
-    NSDictionary *clientInfo2 = @{ @"uid" : _user2.uid, @"utid" : _user2.utid };
     MSALAccessTokenCacheItem *atItem2 =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
-                                                      @"authority" : _testAuthority.absoluteString,
-                                                      @"displayable_id" : _user2.displayableId,
+                                                      @"authority" : @"https://login.microsoftonline.com/fabrikam.com",
+                                                      @"displayable_id" : _testUser.displayableId,
                                                       @"scope" : @"mail.read user.read",
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo2 base64UrlJson]
+                                                      @"client_info" : [clientInfo1 base64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
     
-    //remove user specifier such that multiple matched tokens could be found
-    _requestParam1.user = nil;
-    _requestParam1.unvalidatedAuthority = nil;
-    NSString *authorityFound = nil;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];
-    XCTAssertNil(atItemInCache);
-    XCTAssertNil(authorityFound);
+    MSALAccessTokenCacheItem *atItem = nil;
+    NSString *authorityFound = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:nil
+                                               clientId:_testClientId
+                                                 scopes:[NSOrderedSet orderedSetWithArray:@[@"User.Read"]]
+                                                   user:_testUser
+                                                context:nil
+                                            accessToken:&atItem
+                                         authorityFound:&authorityFound
+                                                  error:&error]);
+    XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorAmbiguousAuthority);
 }
 
-- (void)testFindAccessTokenWithoutAuthority_whenNoMatchButFoundUniqueAuthority_shouldReturnAuthority
+- (void)testFindAccessToken_whenNoAuthoritySpecifiedAndOnlyOneAuthorityInCache_shouldReturnAuthority
 {
     //store two ATs
-    NSDictionary *clientInfo1 = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
+    NSDictionary *clientInfo = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
+    NSString *expiresOn = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600];
     MSALAccessTokenCacheItem *atItem1 =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
                                                       @"authority" : _testAuthority.absoluteString,
                                                       @"displayable_id" : _user1.displayableId,
-                                                      @"scope" : @"mail.read user.read",
+                                                      @"scope" : @"mail.read mail.write",
                                                       @"token_type" : @"Bearer",
-                                                      @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
+                                                      @"expires_on" : expiresOn,
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      @"client_info" : [clientInfo base64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem1 context:nil error:nil]);
     
-    NSDictionary *clientInfo2 = @{ @"uid" : _user2.uid, @"utid" : _user2.utid };
     MSALAccessTokenCacheItem *atItem2 =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
                                                       @"authority" : _testAuthority.absoluteString,
-                                                      @"displayable_id" : _user2.displayableId,
-                                                      @"scope" : @"mail.read user.read",
+                                                      @"displayable_id" : _user1.displayableId,
+                                                      @"scope" : @"user.read user.write",
                                                       @"token_type" : @"Bearer",
-                                                      @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
+                                                      @"expires_on" : expiresOn,
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo2 base64UrlJson]
+                                                      @"client_info" : [clientInfo base64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
@@ -725,22 +753,23 @@
     [_requestParam1 setScopesFromArray:@[@"nonexist"]];
     NSString *authorityFound = nil;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];
+    MSALAccessTokenCacheItem *atItemInCache = nil;
+    XCTAssertTrue([_cache findAccessTokenWithAuthority:nil
+                                              clientId:_testClientId
+                                                scopes:([NSOrderedSet orderedSetWithArray:@[@"mail.read", @"user.read"]])
+                                                  user:_testUser
+                                               context:nil
+                                           accessToken:&atItemInCache
+                                        authorityFound:&authorityFound
+                                                 error:&error]);
     XCTAssertNil(error);
     XCTAssertNil(atItemInCache);
     XCTAssertEqualObjects(authorityFound, _testAuthority.absoluteString);
 }
 
-- (void)testFindAccessTokenWithoutAuthority_whenNoMatchNoUniqueAuthority_shouldReturnNothing
+- (void)testFindAccessToken_whenAuthorityNotSpecifiedAndMultiple_shouldReturnError
 {
     //store two ATs for the same user but with different authorities
-    NSDictionary *clientInfo = @{ @"uid" : _user1.uid, @"utid" : _user1.utid };
     MSALAccessTokenCacheItem *atItem1 =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{ @"access_token" : @"i am a access token!",
                                                       @"authority" : _testAuthority.absoluteString,
@@ -749,7 +778,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : _clientInfo1
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem1 context:nil error:nil]);
@@ -762,27 +791,30 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : _clientInfo1
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
-    
-    //no match but can find a unique authority in cache
-    _requestParam1.unvalidatedAuthority = nil;
-    [_requestParam1 setScopesFromArray:@[@"nonexist"]];
+
     NSString *authorityFound = nil;
     NSError *error = nil;
-    MSALAccessTokenCacheItem *atItemInCache = [_cache findAccessTokenWithAuthority:_requestParam1.unvalidatedAuthority
-                                                                          clientId:_requestParam1.clientId
-                                                                            scopes:_requestParam1.scopes
-                                                                              user:_requestParam1.user
-                                                                           context:nil
-                                                                    authorityFound:&authorityFound
-                                                                             error:&error];;
-    XCTAssertNil(error);
+    MSALAccessTokenCacheItem *atItemInCache = nil;
+    XCTAssertFalse([_cache findAccessTokenWithAuthority:nil
+                                              clientId:_testClientId
+                                                scopes:([NSOrderedSet orderedSetWithArray:@[@"user.read", @"mail.read"]])
+                                                  user:_user1
+                                               context:nil
+                                           accessToken:&atItemInCache
+                                        authorityFound:&authorityFound
+                                                 error:&error]);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorAmbiguousAuthority);
     XCTAssertNil(atItemInCache);
     XCTAssertNil(authorityFound);
 }
+
+#pragma mark -
+#pragma mark userForIdentifier
 
 - (void)testUserForIdentifier_whenIdentifierNil_shouldFail
 {

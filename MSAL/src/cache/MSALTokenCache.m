@@ -144,107 +144,111 @@
     return result;
 }
 
-- (MSALAccessTokenCacheItem *)findAccessTokenWithAuthority:(NSURL *)authority
-                                                  clientId:(NSString *)clientId
-                                                    scopes:(MSALScopes *)scopes
-                                                      user:(MSALUser *)user
-                                                   context:(nullable id<MSALRequestContext>)ctx
-                                            authorityFound:(NSString * __autoreleasing *)authorityFound
-                                                     error:(NSError * __autoreleasing *)error
+- (BOOL)findAccessTokenWithAuthority:(NSURL *)authority
+                            clientId:(NSString *)clientId
+                              scopes:(MSALScopes *)scopes
+                                user:(MSALUser *)user
+                             context:(nullable id<MSALRequestContext>)ctx
+                         accessToken:(MSALAccessTokenCacheItem **)outAccessToken
+                      authorityFound:(NSString * __autoreleasing *)outAuthorityFound
+                               error:(NSError * __autoreleasing *)error
 {
     [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
     [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
     
-    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens = [self allAccessTokensForUser:user
-                                                                               clientId:clientId
-                                                                                context:ctx
-                                                                                  error:error];
-    if (!allAccessTokens)
+    BOOL ret =  [self findAccessTokenImpl:authority
+                                 clientId:clientId
+                                   scopes:scopes
+                                     user:user
+                                  context:ctx
+                              accessToken:outAccessToken
+                           authorityFound:outAuthorityFound
+                                    error:error];
+    
+    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    
+    return ret;
+}
+
+- (BOOL)findAccessTokenImpl:(NSURL *)authority
+                   clientId:(NSString *)clientId
+                     scopes:(MSALScopes *)scopes
+                       user:(MSALUser *)user
+                    context:(nullable id<MSALRequestContext>)ctx
+                accessToken:(MSALAccessTokenCacheItem **)outAccessToken
+             authorityFound:(NSString **)outAuthorityFound
+                      error:(NSError * __autoreleasing *)error
+{
+    REQUIRED_PARAMETER_BOOL(user, ctx);
+    REQUIRED_PARAMETER_BOOL(outAccessToken, ctx);
+    REQUIRED_PARAMETER_BOOL(outAuthorityFound, ctx);
+    
+    *outAccessToken = nil;
+    *outAuthorityFound = nil;
+    
+    NSArray<MSALAccessTokenCacheItem *> *allAccessTokens =
+    [self allAccessTokensForUser:user
+                        clientId:clientId
+                         context:ctx
+                           error:error];
+    if (!allAccessTokens || allAccessTokens.count == 0)
     {
-        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+        // This should be rare-to-never as having a MSALUser object requires having a RT in cache,
+        // which should imply that at some point we got an AT for that user with this client ID
+        // as well. Unless users start working cross client id of course.
+        LOG_WARN(ctx, @"No access token found for user & client id.");
+        LOG_WARN_PII(ctx, @"No access token found for user & client id.");
         
-        return nil;
+        return NO;
     }
     
     NSMutableArray<MSALAccessTokenCacheItem *> *matchedTokens = [NSMutableArray<MSALAccessTokenCacheItem *> new];
     
+    NSString *absoluteAuthority = [authority absoluteString];
+    NSString *foundAuthority = allAccessTokens.count > 0 ? allAccessTokens[0].authority : nil;
     for (MSALAccessTokenCacheItem *tokenItem in allAccessTokens)
     {
-        if ([scopes isSubsetOfOrderedSet:tokenItem.scope])
+        if (absoluteAuthority)
         {
-            if ((!authority) ||
-                (authority && [authority.absoluteString isEqual:tokenItem.authority]))
-                
+            if (![absoluteAuthority isEqualToString:tokenItem.authority])
             {
-                [matchedTokens addObject:tokenItem];
+                continue;
             }
         }
+        else if (![foundAuthority isEqualToString:tokenItem.authority])
+        {
+            MSAL_ERROR_PARAM(ctx, MSALErrorAmbiguousAuthority, @"Found multiple access tokens, which token to return is ambiguous! Please pass in authority if not provided.");
+            return NO;
+        }
+        
+        if (![scopes isSubsetOfOrderedSet:tokenItem.scope])
+        {
+            continue;
+        }
+        
+        [matchedTokens addObject:tokenItem];
     }
+    
+    *outAuthorityFound = foundAuthority;
     
     if (matchedTokens.count == 0)
     {
-        LOG_WARN(ctx, @"No access token found.");
-        LOG_WARN_PII(ctx, @"No access token found.");
-        
-        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-        
-        if (!authority && authorityFound)
-        {
-            *authorityFound = [self findUniqueAuthorityInAccessTokens:allAccessTokens];
-        }
-        
-        return nil;
-    }
-    
-    if (matchedTokens.count > 1)
-    {
-        MSAL_ERROR_PARAM(ctx, MSALErrorAmbiguousAuthority, @"Found multiple access tokens. Please specify an authority.");
-        
-        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-        
-        return nil;
+        LOG_INFO(ctx, @"No matching access token found.");
+        LOG_INFO_PII(ctx, @"No matching access token found.");
+        return YES;
     }
     
     if (matchedTokens[0].isExpired)
     {
         LOG_INFO(ctx, @"Access token found in cache is already expired.");
         LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
-        
-        if (authorityFound)
-        {
-            // if authority is not provided, set authorityFound with the token's authority
-            // if not, set authorityFound with the passed in authority
-            *authorityFound = authority ? authority.absoluteString : matchedTokens[0].authority;
-        }
-        
-        [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-        
-        return nil;
+        return YES;
     }
     
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
-    
-    return matchedTokens[0];
-}
-
-- (NSString *)findUniqueAuthorityInAccessTokens:(NSArray<MSALAccessTokenCacheItem *> *)accessTokens
-{
-    NSMutableSet<NSString *> *authorities = [[NSMutableSet<NSString *> alloc] init];
-    for (MSALAccessTokenCacheItem *accessToken in accessTokens)
-    {
-        if (accessToken.authority)
-        {
-            [authorities addObject:accessToken.authority];
-        }
-    }
-    
-    if (authorities.count > 1 || authorities.count == 0)
-    {
-        return nil;
-    }
-    return authorities.allObjects[0];
+    *outAccessToken = matchedTokens[0];
+    return YES;
 }
 
 - (MSALRefreshTokenCacheItem *)findRefreshTokenWithEnvironment:(NSString *)environment

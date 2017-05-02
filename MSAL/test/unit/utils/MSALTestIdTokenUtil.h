@@ -37,4 +37,8 @@
 + (NSString *)idTokenWithName:(NSString *)name
             preferredUsername:(NSString *)preferredUsername;
 
++ (NSString *)idTokenWithName:(NSString *)name
+            preferredUsername:(NSString *)preferredUsername
+                     tenantId:(NSString *)tid;
+
 @end

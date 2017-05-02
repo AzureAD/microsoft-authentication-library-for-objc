@@ -53,11 +53,18 @@
 + (NSString *)idTokenWithName:(NSString *)name
             preferredUsername:(NSString *)preferredUsername
 {
+    return [self idTokenWithName:name preferredUsername:preferredUsername tenantId:nil];
+}
+
++ (NSString *)idTokenWithName:(NSString *)name
+            preferredUsername:(NSString *)preferredUsername
+                     tenantId:(NSString *)tid
+{
     NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} base64UrlJson];
     NSString *idTokenp2 = [@{ @"iss" : @"issuer",
                               @"name" : name,
                               @"preferred_username" : preferredUsername,
-                              @"tid" : [self defaultTenantId]} base64UrlJson];
+                              @"tid" : tid ? tid : [self defaultTenantId]} base64UrlJson];
     return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
 }
 

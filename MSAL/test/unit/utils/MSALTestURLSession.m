@@ -27,9 +27,15 @@
 
 #import "MSALTestURLSession.h"
 #import "MSALTestURLSessionDataTask.h"
-#import "NSString+MSALHelperMethods.h"
+#import "MSALTestIdTokenUtil.h"
+#import "MSALTestCacheDataUtil.h"
+
+#import "MSALUser.h"
+
 #import "NSDictionary+MSALExtensions.h"
 #import "NSDictionary+MSALTestUtil.h"
+#import "NSOrderedSet+MSALExtensions.h"
+#import "NSString+MSALHelperMethods.h"
 #import "NSURL+MSALExtensions.h"
 
 @implementation MSALTestURLResponse
@@ -89,6 +95,64 @@
     response->_response = urlResponse;
     
     return response;
+}
+
++ (MSALTestURLResponse *)oidResponseForAuthority:(NSString *)authority
+{
+    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    
+    NSDictionary *oidcJson =
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize", authority],
+       @"issuer" : @"issuer"
+       };
+    
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
+                           requestHeaders:oidcReqHeaders
+                        requestParamsBody:nil
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:oidcJson];
+    
+    return oidcResponse;
+}
+
++ (MSALTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
+                                   authority:(NSString *)authority
+                                    tenantId:(NSString *)tid
+                                        user:(MSALUser *)user
+{
+    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token?slice=testslice&uid=true", authority]
+                           requestHeaders:tokenReqHeaders
+                        requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                                             OAUTH2_SCOPE : [scopes msalToString],
+                                             OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                                             @"client_info" : @"1",
+                                             @"grant_type" : @"refresh_token" }
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
+                                             @"expires_in" : @"600",
+                                             @"refresh_token" : @"i am a refresh token",
+                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:user.name
+                                                                              preferredUsername:user.displayableId
+                                                                                       tenantId:tid ? tid : user.utid],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : user.uid, @"utid" : user.utid} base64UrlJson] } ];
+    
+    return tokenResponse;
 }
 
 + (MSALTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
@@ -276,6 +340,10 @@ static NSMutableArray *s_responses = nil;
     [s_responses addObject:response];
 }
 
++ (void)addResponses:(NSArray *)responses
+{
+    [s_responses addObject:[responses mutableCopy]];
+}
 
 + (MSALTestURLResponse *)removeResponseForRequest:(NSURLRequest *)request
 {

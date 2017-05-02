@@ -111,6 +111,8 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    
+    application = nil;
 }
 
 - (void)testIsMSALResponse
@@ -163,6 +165,8 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
@@ -189,7 +193,12 @@
      {
          XCTAssertNil(result);
          XCTAssertNil(error);
+         
+         dispatch_semaphore_signal(dsem);
      }];
+    
+    dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW);
+    application = nil;
 }
 
 #pragma

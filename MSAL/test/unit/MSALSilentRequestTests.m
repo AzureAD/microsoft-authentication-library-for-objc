@@ -256,7 +256,7 @@
                         responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                              responseCode:200
                          httpHeaderFields:nil
-                         dictionaryAsJSON:@{ @"access_token" : @"i am a acces token!",
+                         dictionaryAsJSON:@{ @"access_token" : @"i am a access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",

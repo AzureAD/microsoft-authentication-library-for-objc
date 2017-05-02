@@ -34,3 +34,11 @@
 - (NSString *)base64UrlJson;
 
 @end
+
+/*!
+    Sentinel class to use for values you want to make sure are present in a dictionary but don't
+    care about the actual value.
+ */
+@interface MSALTestSentinel : NSObject
+
+@end
