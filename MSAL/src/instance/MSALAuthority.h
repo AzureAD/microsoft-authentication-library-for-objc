@@ -60,7 +60,7 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 @property MSALAuthorityType authorityType;
 @property NSURL *canonicalAuthority;
-@property BOOL validateAuthority;
+@property BOOL validatedAuthority;
 @property BOOL isTenantless;
 @property NSURL *authorizationEndpoint;
 @property NSURL *tokenEndpoint;
@@ -100,8 +100,8 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 
 + (NSSet<NSString *> *)trustedHosts;
 
-+ (BOOL)addToValidatedAuthority:(MSALAuthority *)authority
-              userPrincipalName:(NSString *)userPrincipalName;
++ (BOOL)addToResolvedAuthority:(MSALAuthority *)authority
+             userPrincipalName:(NSString *)userPrincipalName;
 
 + (MSALAuthority *)authorityFromCache:(NSURL *)authority
                         authorityType:(MSALAuthorityType)authorityType

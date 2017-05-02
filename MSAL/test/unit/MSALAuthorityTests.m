@@ -183,15 +183,15 @@
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login-us.microsoftonline.com"]]);
 }
 
-- (void)testAuthorityAddToValidatedAuthority_whenNilAuthority_shouldFail
+- (void)testAuthorityAddToResolvedAuthority_whenNilAuthority_shouldFail
 {
-    XCTAssertFalse([MSALAuthority addToValidatedAuthority:nil userPrincipalName:nil]);
+    XCTAssertFalse([MSALAuthority addToResolvedAuthority:nil userPrincipalName:nil]);
 }
 
-- (void)testAuthorityAddToValidatedAuthority_whenAdfsAuthorityNilUpn_shouldFail
+- (void)testAuthorityAddToResolvedAuthority_whenAdfsAuthorityNilUpn_shouldFail
 {
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
-    XCTAssertFalse([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:nil]);
+    XCTAssertFalse([MSALAuthority addToResolvedAuthority:adfsAuthority userPrincipalName:nil]);
 }
 
 - (void)testAuthorityFromCache_whenAadAuthorityCachedNilUpn_shouldRetrieveAuthority
@@ -199,7 +199,7 @@
     MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/common"]];
    
     // Add valid authority
-    XCTAssertTrue([MSALAuthority addToValidatedAuthority:aadAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToResolvedAuthority:aadAuthority userPrincipalName:nil]);
    
     // Check if valid authority returned
     MSALAuthority *retrivedAuthority = [MSALAuthority authorityFromCache:aadAuthority.canonicalAuthority
@@ -214,7 +214,7 @@
     MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/common"]];
    
     // Add valid authority
-    XCTAssertTrue([MSALAuthority addToValidatedAuthority:aadAuthority userPrincipalName:nil]);
+    XCTAssertTrue([MSALAuthority addToResolvedAuthority:aadAuthority userPrincipalName:nil]);
    
     // Check if valid authority returned
     MSALAuthority *retrivedAuthority = [MSALAuthority authorityFromCache:aadAuthority.canonicalAuthority
@@ -229,7 +229,7 @@
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
 
     // Add valid authority
-    XCTAssertTrue([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
+    XCTAssertTrue([MSALAuthority addToResolvedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
 
     // Check if valid authority returned
     MSALAuthority *retrivedAdfsAuthority = [MSALAuthority authorityFromCache:adfsAuthority.canonicalAuthority
@@ -242,7 +242,7 @@
 - (void)testAuthorityFromCache_whenAdfsWithNilUpn_shouldFail
 {
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
-    XCTAssertTrue([MSALAuthority addToValidatedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
+    XCTAssertTrue([MSALAuthority addToResolvedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
     
     // Check if valid authority returned
     MSALAuthority *retrivedAdfsAuthority = [MSALAuthority authorityFromCache:adfsAuthority.canonicalAuthority

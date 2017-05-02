@@ -55,7 +55,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read"];
 
 }
 
