@@ -229,7 +229,7 @@
     // Verify results
     XCTAssertEqual([receivedEvents count], 2);
     
-    NSString *errorCode = [[receivedEvents objectAtIndex:1] objectForKey:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE];
+    NSString *errorCode = [[receivedEvents objectAtIndex:1] objectForKey:MSAL_TELEMETRY_KEY_HTTP_RESPONSE_CODE];
     
     XCTAssertNotNil(errorCode);
     XCTAssertTrue([errorCode compare:@"error_code_123" options:NSCaseInsensitiveSearch] == NSOrderedSame);
