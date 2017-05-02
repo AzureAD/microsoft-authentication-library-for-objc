@@ -22,6 +22,7 @@
 		D6AEBD7B1E92DBB300C31082 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6AEBD791E92DBB300C31082 /* LaunchScreen.storyboard */; };
 		D6B88B0E1EA55B3E00A2374B /* SamplePhotoUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */; };
 		D6B88B171EA55F3C00A2374B /* no_photo.png in Resources */ = {isa = PBXBuildFile; fileRef = D6B88B161EA55F3C00A2374B /* no_photo.png */; };
+		D6BFE3DF1EB6B0BE00F2B7E8 /* SampleGraphRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = D6BFE3DE1EB6B0BE00F2B7E8 /* SampleGraphRequest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +136,8 @@
 		D6B88B0C1EA55B3E00A2374B /* SamplePhotoUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SamplePhotoUtil.h; sourceTree = "<group>"; };
 		D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SamplePhotoUtil.m; sourceTree = "<group>"; };
 		D6B88B161EA55F3C00A2374B /* no_photo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = no_photo.png; sourceTree = "<group>"; };
+		D6BFE3DD1EB6B0BE00F2B7E8 /* SampleGraphRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleGraphRequest.h; sourceTree = "<group>"; };
+		D6BFE3DE1EB6B0BE00F2B7E8 /* SampleGraphRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleGraphRequest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +207,8 @@
 				D62CF4861E9594B2006C0217 /* SampleMainView.xib */,
 				D6B88B0C1EA55B3E00A2374B /* SamplePhotoUtil.h */,
 				D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */,
+				D6BFE3DD1EB6B0BE00F2B7E8 /* SampleGraphRequest.h */,
+				D6BFE3DE1EB6B0BE00F2B7E8 /* SampleGraphRequest.m */,
 			);
 			path = SampleAppiOS;
 			sourceTree = "<group>";
@@ -361,6 +366,7 @@
 			files = (
 				D6AEBD701E92DBB300C31082 /* SampleAppDelegate.m in Sources */,
 				D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */,
+				D6BFE3DF1EB6B0BE00F2B7E8 /* SampleGraphRequest.m in Sources */,
 				D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */,
 				D6AEBD6D1E92DBB300C31082 /* main.m in Sources */,
 				D62CF4821E9593ED006C0217 /* SampleMainViewController.m in Sources */,
