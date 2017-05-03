@@ -74,13 +74,14 @@
     
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
+    NSString *authorizationEndpoint = @"https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize";
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
-    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
-    [reqHeaders setObject:@"https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -149,13 +150,14 @@
     params.urlSession = [MSALTestURLSession createMockSession];
     
     NSString *authorityString = @"https://somehost.com/sometenant.com";
+    NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
-    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
-    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:AAD_INSTANCE_DISCOVERY_ENDPOINT
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -189,12 +191,14 @@
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [MSALTestURLSession createMockSession];
     
+    NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
+    
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
-    [reqHeaders setObject:@"1.0" forKey:@"api-version"];
-    [reqHeaders setObject:@"https://somehost.com/sometenant.com/oauth2/v2.0/authorize" forKey:@"authorization_endpoint"];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse request:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    
+    MSALTestURLResponse *response = [MSALTestURLResponse request:[NSURL URLWithString:requestURLString]
                                                   requestHeaders:reqHeaders
                                                requestParamsBody:nil
                                                 respondWithError:[NSError errorWithDomain:NSURLErrorDomain
