@@ -166,9 +166,14 @@
     return YES;
 }
 
-+ (void)handleMSALResponse:(NSURL *)response
++ (BOOL)handleMSALResponse:(NSURL *)response
 {
-    [MSALWebUI handleResponse:response];
+    if (![self.class isMSALResponse:response])
+    {
+        return NO;
+    }
+    
+    return [MSALWebUI handleResponse:response];
 }
 
 + (void)cancelCurrentWebAuthSession
