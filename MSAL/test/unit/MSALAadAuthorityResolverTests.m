@@ -52,7 +52,7 @@
     [super tearDown];
 }
 
-- (void)testDefaultOpenIdConfigurationEndpoint
+- (void)testDefaultOpenIdConfigurationEndpoint_whenGivenAuthority_shouldReturnEndpoint
 {
     MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];
     NSURL *authority = [NSURL URLWithString:@"https://www.somehost.com/sometenant.com"];
@@ -60,12 +60,16 @@
     // Test with authority
     NSString *endpoint = [aadResolver defaultOpenIdConfigurationEndpointForAuthority:authority];
     XCTAssertEqualObjects(endpoint, @"https://www.somehost.com/sometenant.com/v2.0/.well-known/openid-configuration");
-    
+}
+
+- (void)testDefaultOpenIdConfigurationEndpoint_whenMissingAuthority_shouldReturnNil
+{
+    MSALAadAuthorityResolver *aadResolver = [MSALAadAuthorityResolver new];
     // Test with no authority
     XCTAssertNil([aadResolver defaultOpenIdConfigurationEndpointForAuthority:nil]);
 }
 
-- (void)testOpenIdConfigEndpointSucess
+- (void)testOpenIDConfigurationEndpointForAuthority_whenNormal_shouldResolve
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -108,7 +112,7 @@
      }];
 }
 
-- (void)testOpenIdConfigEndpointNoValidationNeeded
+- (void)testOpenIDConfigurationEndpointForAuthority_whenNoValidation_shouldReturnDefaultOpenIdConfig
 {
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
@@ -142,7 +146,7 @@
      }];
 }
 
-- (void)testOpenIdConfigEndpointMissingFields
+- (void)testOpenIDConfigurationEndpointForAuthority_whenMissingFieldsInResponse_shouldReturnNilWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -184,7 +188,7 @@
      }];
 }
 
-- (void)testOpenIdConfigEndpointErrorResponse
+- (void)testopenIDConfigurationEndpointForAuthority_whenErrorResponse_shouldReturnNilWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -226,7 +230,5 @@
          XCTAssertNil(error);
      }];
 }
-
-
 
 @end

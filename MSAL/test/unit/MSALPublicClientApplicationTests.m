@@ -743,7 +743,7 @@
 #pragma
 #pragma mark - remove user
 
-- (void)testRemoveUser
+- (void)testRemoveUser_whenUserExists_shouldRemoveUser
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -802,7 +802,7 @@
     XCTAssertEqual([application users:nil].count, 0);
 }
 
-- (void)testRemoveNonExistingUser
+- (void)testRemove_whenUserDontExist_shouldReturnTrueWithNoError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -824,7 +824,7 @@
     XCTAssertNil(error);
 }
 
-- (void)testUserKeychainError
+- (void)testRemoveUser_whenKeychainError_shouldReturnNoWithError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
