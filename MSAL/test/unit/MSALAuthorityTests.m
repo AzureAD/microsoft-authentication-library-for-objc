@@ -59,6 +59,17 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
 }
 
+- (void)testCheckAuthorityString_whenB2C_shouldPass
+{
+    NSError *error = nil;
+    NSURL *url = nil;
+    
+    url = [MSALAuthority checkAuthorityString:@"https://login.microsoftonline.com/tfp/contoso.onmicrosoft.com/B2C_1_contosify" error:&error];
+    XCTAssertNotNil(url);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/contoso.onmicrosoft.com/B2C_1_contosify"]);
+}
+
 - (void)testCheckAuthorityString_whenNil_shouldFail
 {
     NSError *error = nil;

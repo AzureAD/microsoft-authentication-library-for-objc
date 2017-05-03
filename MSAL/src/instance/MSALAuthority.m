@@ -100,20 +100,21 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     REQUIRED_STRING_PARAMETER(authority, nil);
     
     NSURL *authorityUrl = [NSURL URLWithString:authority];
+    NSArray *pathComponents = [authorityUrl pathComponents];
     CHECK_ERROR_RETURN_NIL(authorityUrl, nil, MSALErrorInvalidParameter, @"\"authority\" must be a valid URI");
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
-    CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
+    CHECK_ERROR_RETURN_NIL((pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
     
     CHECK_ERROR_RETURN_NIL(![authorityUrl.host.lowercaseString isEqualToString:@"login.windows.net"], nil, MSALErrorInvalidParameter, @"login.windows.net has been deprecated. Use login.microsoftonline.com instead.");
     
     
     // B2C
-    if ([[authorityUrl.pathComponents[1] lowercaseString] isEqualToString:@"tfp"])
+    if ([pathComponents[1] caseInsensitiveCompare:@"tfp"] == NSOrderedSame)
     {
-        CHECK_ERROR_RETURN_NIL((authorityUrl.pathComponents.count > 3), nil, MSALErrorInvalidParameter,
+        CHECK_ERROR_RETURN_NIL((pathComponents.count > 3), nil, MSALErrorInvalidParameter,
                                @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
         
-        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[0], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2]];
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2], authorityUrl.pathComponents[3]];
         return [NSURL URLWithString:updatedAuthorityString];
     }
     
