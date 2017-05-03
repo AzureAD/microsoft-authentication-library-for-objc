@@ -107,6 +107,8 @@
 #endif
     _tokenCache = [[MSALTokenCache alloc] initWithDataSource:dataSource];
     
+    _validateAuthority = YES;
+    
     return self;
 }
 
