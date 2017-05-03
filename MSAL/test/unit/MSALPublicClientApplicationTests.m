@@ -824,7 +824,7 @@
     XCTAssertNil(error);
 }
 
-- (void)testUserKeychainError
+- (void)testRemoveUser_whenKeychainError_shouldReturnNoWithError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -844,12 +844,13 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR_PARAM(ctx, -34018, @"fetching team ID.");
+         MSAL_KEYCHAIN_ERROR(ctx, -34018);
          return NO;
      }];
     
     XCTAssertFalse([application removeUser:user error:&error]);
     XCTAssertNotNil(error);
+    XCTAssertTrue(error.domain == NSOSStatusErrorDomain);
 }
 
 

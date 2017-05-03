@@ -109,7 +109,6 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAmbiguousAuthority = -42201,
     MSALErrorUserNotFound = -42202,
     MSALErrorNoAccessTokensFound = -42203,
-    MSALErrorKeychainFailure = -42240,
     MSALErrorWrapperCacheFailure = -42270,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect
