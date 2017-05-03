@@ -198,6 +198,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                       
                                       [event setHttpResponseCode:[NSString stringWithFormat: @"%ld", (long)[msalResponse statusCode]]];
                                       [event setHttpRequestIdHeader:[msalResponse.headers objectForKey:OAUTH2_CORRELATION_ID_REQUEST_VALUE]];
+                                      [event setOAuthErrorCode:msalResponse];
                                       
                                       [[MSALTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
                                       
