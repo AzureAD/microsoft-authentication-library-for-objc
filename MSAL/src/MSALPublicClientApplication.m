@@ -126,7 +126,7 @@
 
 #pragma SafariViewController Support
 
-+ (BOOL)isMSALResponse:(NSURL *)response
++ (BOOL)handleMSALResponse:(NSURL *)response
 {
     if (!response)
     {
@@ -160,16 +160,6 @@
     {
         LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
         LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        return NO;
-    }
-    
-    return YES;
-}
-
-+ (BOOL)handleMSALResponse:(NSURL *)response
-{
-    if (![self.class isMSALResponse:response])
-    {
         return NO;
     }
     
