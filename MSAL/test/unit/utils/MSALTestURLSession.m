@@ -275,6 +275,11 @@
     return [_requestHeaders compareDictionary:headers];
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %@>", NSStringFromClass(self.class), _requestURL];
+}
+
 @end
 
 
