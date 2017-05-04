@@ -73,10 +73,12 @@
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-    if ([MSALPublicClientApplication handleMSALResponse:url])
+    if ([MSALPublicClientApplication isMSALResponse:url])
     {
-        NSLog(@"This URL is handled by MSAL");
+        [MSALPublicClientApplication handleMSALResponse:url];
+        return YES;
     }
+    
     return YES;
 }
 

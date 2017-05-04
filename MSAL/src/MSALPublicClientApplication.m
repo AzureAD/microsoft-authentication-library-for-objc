@@ -128,7 +128,7 @@
 
 #pragma SafariViewController Support
 
-+ (BOOL)handleMSALResponse:(NSURL *)response
++ (BOOL)isMSALResponse:(NSURL *)response
 {
     if (!response)
     {
@@ -165,7 +165,12 @@
         return NO;
     }
     
-    return [MSALWebUI handleResponse:response];
+    return YES;
+}
+
++ (void)handleMSALResponse:(NSURL *)response
+{
+    [MSALWebUI handleResponse:response];
 }
 
 + (void)cancelCurrentWebAuthSession
