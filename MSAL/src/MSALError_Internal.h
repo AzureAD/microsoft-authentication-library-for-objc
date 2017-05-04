@@ -31,21 +31,19 @@
 extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 extern MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode defaultCode);
 
-extern void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *errorDescription, NSString *subError, NSString *oauthError, const char *function, int line);
-extern NSError *MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError);
+extern void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *errorDescription, NSString *subError, NSString *oauthError, const char *function, int line);
+extern NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError);
 
-extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(8, 9);
-extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(9, 10);
-
-extern void MSALFillAndLogKeychainError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, OSStatus code, NSString *errorDescription, const char *function, int line);
+extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(9, 10);
+extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(10, 11);
 
 // Convenience macro for checking and filling an optional NSError** parameter
-#define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
-#define MSAL_OSERROR_PARAM(_CTX, _CODE, _OSERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSERROR userInfo:nil], __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define MSAL_OSERROR_PARAM(_CTX, _CODE, _OSERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, MSALErrorDomain, _CODE, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSERROR userInfo:nil], __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
-#define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
-#define CREATE_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
 // Convenience macros for checking a false/nil return result and passing along
 // an error to a completion block with quick return
@@ -59,7 +57,7 @@ extern void MSALFillAndLogKeychainError(NSError * __autoreleasing * error, id<MS
 
 // Convenience macro to create invalid response error
 #define CREATE_ERROR_INVALID_RESULT(_CTX, _PARAMETER, _ERROR) \
-    _ERROR = MSALCreateAndLogError(_CTX, MSALErrorInvalidResponse, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is not found in the response.")
+    _ERROR = MSALCreateAndLogError(_CTX, MSALErrorDomain, MSALErrorInvalidResponse, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is not found in the response.")
 
 // Check and pass an error back through the completion block
 #define CHECK_ERROR_COMPLETION(_CHECK, _CTX, _CODE, _DESC, ...) if (!_CHECK) { ERROR_COMPLETION(_CTX, _CODE, _DESC, ##__VA_ARGS__); }
@@ -79,8 +77,8 @@ extern void MSALFillAndLogKeychainError(NSError * __autoreleasing * error, id<MS
 
 #define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
-#define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
+#define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorDomain, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
 
 // Convenience macro for creating a keychain error
 #define MSAL_KEYCHAIN_ERROR(_CTX, _OSSTATUS, _OPERATION) \
-    MSALFillAndLogKeychainError(error, _CTX, _OSSTATUS, _OPERATION, __FUNCTION__, __LINE__);
+    MSALFillAndLogError(error, _CTX, NSOSStatusErrorDomain, _OSSTATUS, nil, nil, nil, __FUNCTION__, __LINE__, _OPERATION);

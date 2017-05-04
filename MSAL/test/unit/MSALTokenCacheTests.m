@@ -881,7 +881,7 @@
                                      clientId:@"12345"
                                   environment:@"environment.com"
                                         error:nil]);
-    
+    NSLog(@"%@", [[MSALTestLogger sharedLogger] lastMessage]);
     XCTAssertTrue([[[MSALTestLogger sharedLogger] lastMessage] containsString:@"UserNotFound"]);
 }
 

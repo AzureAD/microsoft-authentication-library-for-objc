@@ -61,8 +61,10 @@
             [NSString msalIsStringNilOrBlank:tokenEndpoint] ||
             [NSString msalIsStringNilOrBlank:issuer])
         {
-            MSALLogError(context, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil,  __FUNCTION__, __LINE__);
-            completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil));
+            MSALLogError(context, MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil,  __FUNCTION__, __LINE__);
+            
+            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil);
+            completionBlock(nil, discoveryError);
             return;
         }
         
