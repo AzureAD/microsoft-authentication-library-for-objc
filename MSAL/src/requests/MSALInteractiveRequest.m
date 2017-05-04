@@ -110,7 +110,17 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     [[NSURLComponents alloc] initWithURL:_authority.authorizationEndpoint
                  resolvingAgainstBaseURL:NO];
     
+    // Query parameters can come through from the OIDC discovery on the authorization endpoint as well
+    // and we need to retain them when constructing our authorization uri
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
+    if (urlComponents.percentEncodedQuery)
+    {
+        NSDictionary *authorizationQueryParams = [NSDictionary msalURLFormDecode:urlComponents.percentEncodedQuery];
+        if (authorizationQueryParams)
+        {
+            [parameters addEntriesFromDictionary:authorizationQueryParams];
+        }
+    }
     
     // TODO: Remove once uid+utid is in prod
     parameters[@"slice"] = @"testslice";

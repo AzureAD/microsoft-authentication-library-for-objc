@@ -65,7 +65,16 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 + (MSALTestURLResponse *)request:(NSURL *)request
                          reponse:(NSURLResponse *)response;
 
-+ (MSALTestURLResponse *)oidResponseForAuthority:(NSString *)authority;
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
+                                      responseUrl:(NSString *)responseAuthority
+                                            query:(NSString *)query;
+
++ (MSALTestURLResponse *)authCodeResponse:(NSString *)authcode
+                                authority:(NSString *)authority
+                                    query:(NSString *)query
+                                   scopes:(MSALScopes *)scopes;
+
 + (MSALTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
