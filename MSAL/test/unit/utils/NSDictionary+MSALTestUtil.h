@@ -29,7 +29,7 @@
 
 @interface NSDictionary (MSALTestUtil)
 
-- (BOOL)compareDictionary:(NSDictionary *)dictionary;
+- (BOOL)compareToActual:(NSDictionary *)dictionary;
 
 - (NSString *)base64UrlJson;
 
