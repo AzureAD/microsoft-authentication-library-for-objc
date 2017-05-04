@@ -32,6 +32,7 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestCacheDataUtil.h"
 
+#import "MSALPublicClientApplication+Internal.h"
 #import "MSALUser.h"
 
 #import "NSDictionary+MSALExtensions.h"
@@ -200,8 +201,23 @@ static bool AmIBeingDebugged(void)
     [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
-    NSString *requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?slice=testslice&uid=true%@%@",
-                               authority, query ? @"&" : @"", query ? query: @""];
+    NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
+    [tokenQPs addEntriesFromDictionary:@{UT_SLICE_PARAMS_DICT}];
+    if (query)
+    {
+        [tokenQPs addEntriesFromDictionary:[NSDictionary msalURLFormDecode:query]];
+    }
+    
+    NSString *requestUrlStr = nil;
+    if (tokenQPs.count > 0)
+    {
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msalURLFormEncode]];
+    }
+    else
+    {
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority];
+    }
+    
     MSALTestURLResponse *tokenResponse =
     [MSALTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
@@ -237,7 +253,7 @@ static bool AmIBeingDebugged(void)
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSALTestURLResponse *tokenResponse =
-    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token?slice=testslice&uid=true", authority]
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token" UT_SLICE_PARAMS_QUERY, authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
                                              OAUTH2_SCOPE : [scopes msalToString],
@@ -498,6 +514,7 @@ static NSMutableArray *s_responses = nil;
     
     if (AmIBeingDebugged())
     {
+        NSLog(@"Failed to find repsonse for %@\ncurrent responses: %@", requestURL, s_responses);
         // This will cause the tests to immediately stop execution right here if we're in the debugger,
         // hopefully making it a little easier to see why a test is failing. :)
         __builtin_trap();

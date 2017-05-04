@@ -50,6 +50,12 @@
 /*! The redirect URI of the application */
 @property (readonly) NSURL *redirectUri;
 
+/*!
+    Used to specify query parameters that must be passed to both the authorize and token endpoints
+    to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
+ */
+@property NSDictionary<NSString *, NSString *> *sliceParameters;
+
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
 @property NSString *component;

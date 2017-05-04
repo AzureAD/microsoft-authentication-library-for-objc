@@ -109,6 +109,8 @@
     
     _validateAuthority = YES;
     
+    _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
+    
     return self;
 }
 
@@ -397,6 +399,7 @@
     params.apiId = apiId;
     params.user = user;
     params.validateAuthority = _validateAuthority;
+    params.sliceParameters = _sliceParameters;
     
     LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
@@ -475,6 +478,7 @@
     params.user = user;
     params.apiId = apiId;
     params.validateAuthority = _validateAuthority;
+    params.sliceParameters = _sliceParameters;
     
     [params setScopesFromArray:scopes];
     
@@ -553,6 +557,11 @@
 - (void)setTokenCache:(MSALTokenCache *)tokenCache
 {
     _tokenCache = tokenCache;
+}
+
++ (NSDictionary *)defaultSliceParameters
+{
+    return @{ DEFAULT_SLICE_PARAMS };
 }
 
 @end
