@@ -122,9 +122,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         }
     }
     
-    // TODO: Remove once uid+utid is in prod
-    parameters[@"slice"] = @"testslice";
-    parameters[@"uid"] = @"true";
+    if (_parameters.sliceParameters)
+    {
+        [parameters addEntriesFromDictionary:_parameters.sliceParameters];
+    }
     
     MSALUser *user = _parameters.user;
     if (user)
