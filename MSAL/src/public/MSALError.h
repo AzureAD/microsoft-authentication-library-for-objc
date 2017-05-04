@@ -100,6 +100,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
+        MSAL received a valid token response, but it didn't contain an access token.
+        By Oauth 2.0 spec it should never happen, but it still occasionally happens.
+     */
+    MSALErrorNoAccessTokeInResponse = -42105,
+    
+    /*!
         MSAL encounted an error when trying to store or retrieve items from
         keychain. Inspect NSUnderlyingError from the userInfo dictionary for
         more information about the specific error. Keychain error codes are
