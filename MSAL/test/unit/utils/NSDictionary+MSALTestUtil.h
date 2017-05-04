@@ -41,4 +41,6 @@
  */
 @interface MSALTestSentinel : NSObject
 
++ (instancetype)sentinel;
+
 @end

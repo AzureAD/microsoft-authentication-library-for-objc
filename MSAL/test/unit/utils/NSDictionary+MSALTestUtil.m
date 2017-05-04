@@ -71,4 +71,16 @@
 
 @implementation MSALTestSentinel
 
+static MSALTestSentinel *s_sentinel = nil;
+
++ (void)initialize
+{
+    s_sentinel = [MSALTestSentinel new];
+}
+
++ (instancetype)sentinel
+{
+    return s_sentinel;
+}
+
 @end
