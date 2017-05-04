@@ -104,7 +104,7 @@
     Ask MSAL to handle a URL response.
     
     @param   response   URL response from your application delegate's openURL handler into
-                        MSAL for web authnetication sessions
+                        MSAL for web authentication sessions
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
