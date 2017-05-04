@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestURLSession.h"
+
+#import "MSALTestConstants.h"
 #import "MSALTestURLSessionDataTask.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestCacheDataUtil.h"
@@ -137,7 +139,7 @@ static bool AmIBeingDebugged(void)
     return response;
 }
 
-+ (MSALTestURLResponse *)oidResponseForAuthority:(NSString *)authority
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
 {
     NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -159,6 +161,68 @@ static bool AmIBeingDebugged(void)
                          dictionaryAsJSON:oidcJson];
     
     return oidcResponse;
+}
+
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
+                                      responseUrl:(NSString *)responseAuthority
+                                            query:(NSString *)query
+{
+    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    
+    NSDictionary *oidcJson =
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", responseAuthority, query],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize?%@", responseAuthority, query],
+       @"issuer" : @"issuer"
+       };
+    
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
+                           requestHeaders:oidcReqHeaders
+                        requestParamsBody:nil
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:oidcJson];
+    
+    return oidcResponse;
+}
+
++ (MSALTestURLResponse *)authCodeResponse:(NSString *)authcode
+                                authority:(NSString *)authority
+                                    query:(NSString *)query
+                                   scopes:(MSALScopes *)scopes
+{
+    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    
+    NSString *requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?slice=testslice&uid=true%@%@",
+                               authority, query ? @"&" : @"", query ? query: @""];
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse requestURLString:requestUrlStr
+                           requestHeaders:tokenReqHeaders
+                        requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                                             OAUTH2_SCOPE : [scopes msalToString],
+                                             @"client_info" : @"1",
+                                             @"grant_type" : @"authorization_code",
+                                             @"code_verifier" : [MSALTestSentinel sentinel],
+                                             OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
+                                             OAUTH2_CODE : authcode }
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
+                                             @"expires_in" : @"600",
+                                             @"refresh_token" : @"i am a refresh token",
+                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]} base64UrlJson] } ];
+    
+    return tokenResponse;
 }
 
 + (MSALTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
