@@ -28,11 +28,12 @@
 #import <Foundation/Foundation.h>
 
 extern const NSErrorDomain SampleAppErrorDomain;
-
 NS_ENUM(NSInteger)
 {
     SampleAppNoUserSignedIn,
-    SampleAppServerError,
+    SampleAppServerInvalidResponseError,
     SampleAppNoImageDataError,
     SampleAppFailedToMakeUIImageError,
 };
+
+#define SA_ERROR(_code, _userInfo) [NSError errorWithDomain:SampleAppErrorDomain code:_code userInfo:_userInfo]

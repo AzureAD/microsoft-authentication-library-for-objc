@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,7 +13,7 @@
             <connections>
                 <outlet property="_nameLabel" destination="HEj-3D-Ut6" id="5Ew-vB-FRs"/>
                 <outlet property="_profileImageView" destination="sD3-kT-6Ug" id="qOp-SH-NpH"/>
-                <outlet property="_resultView" destination="0JR-Do-qaz" id="byR-te-boX"/>
+                <outlet property="_tableView" destination="78H-hT-ck2" id="413-eh-F7V"/>
                 <outlet property="view" destination="xQl-Rl-JkZ" id="qdh-G5-XrB"/>
             </connections>
         </placeholder>
@@ -30,7 +30,7 @@
                     </constraints>
                 </view>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="x7J-TL-LJq">
-                    <rect key="frame" x="8" y="147" width="359" height="140.5"/>
+                    <rect key="frame" x="8" y="147" width="359" height="50.5"/>
                     <subviews>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Welcome, &lt;name&gt;" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HEj-3D-Ut6">
                             <rect key="frame" x="105" y="0.0" width="149.5" height="20.5"/>
@@ -38,29 +38,8 @@
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="obG-jA-1hV">
-                            <rect key="frame" x="130.5" y="20.5" width="98" height="30"/>
-                            <state key="normal" title="Refresh Photo"/>
-                            <connections>
-                                <action selector="refreshPhoto:" destination="-1" eventType="touchUpInside" id="vBG-wZ-4yP"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1DR-wN-nTc">
-                            <rect key="frame" x="109.5" y="50.5" width="140" height="30"/>
-                            <state key="normal" title="Acquire Token Silent"/>
-                            <connections>
-                                <action selector="acquireTokenSilent:" destination="-1" eventType="touchUpInside" id="4hZ-Go-Iip"/>
-                            </connections>
-                        </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eYF-eV-nHU">
-                            <rect key="frame" x="92.5" y="80.5" width="174" height="30"/>
-                            <state key="normal" title="Acquire Token Interactive"/>
-                            <connections>
-                                <action selector="acquireTokenInteractive:" destination="-1" eventType="touchUpInside" id="RLe-1P-ZEf"/>
-                            </connections>
-                        </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EUs-7T-RLN">
-                            <rect key="frame" x="149.5" y="110.5" width="60" height="30"/>
+                            <rect key="frame" x="149.5" y="20.5" width="60" height="30"/>
                             <state key="normal" title="Sign Out"/>
                             <connections>
                                 <action selector="signOut:" destination="-1" eventType="touchUpInside" id="Vsx-3V-V6H"/>
@@ -75,30 +54,25 @@
                         <constraint firstAttribute="width" constant="112" id="sHB-Eu-awA"/>
                     </constraints>
                 </imageView>
-                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="0JR-Do-qaz">
-                    <rect key="frame" x="8" y="296" width="359" height="363"/>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="78H-hT-ck2">
+                    <rect key="frame" x="0.0" y="206" width="375" height="461"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <accessibility key="accessibilityConfiguration">
-                        <accessibilityTraits key="traits" adjustable="YES"/>
-                    </accessibility>
-                    <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                </textView>
+                    <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
+                </tableView>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="sD3-kT-6Ug" firstAttribute="centerX" secondItem="xQl-Rl-JkZ" secondAttribute="centerX" id="10V-Go-L52"/>
                 <constraint firstItem="x7J-TL-LJq" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" constant="8" id="7Lb-fV-epe"/>
-                <constraint firstItem="0JR-Do-qaz" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" constant="8" id="9Im-2B-gor"/>
                 <constraint firstAttribute="trailing" secondItem="02G-N7-auS" secondAttribute="trailing" id="A9I-We-kZS"/>
-                <constraint firstAttribute="trailing" secondItem="0JR-Do-qaz" secondAttribute="trailing" constant="8" id="G9b-2z-bzI"/>
-                <constraint firstAttribute="bottom" secondItem="0JR-Do-qaz" secondAttribute="bottom" constant="8" id="N5U-WO-U9S"/>
+                <constraint firstAttribute="trailing" secondItem="78H-hT-ck2" secondAttribute="trailing" id="F1h-af-26A"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" id="NvN-DG-Cvm"/>
-                <constraint firstItem="0JR-Do-qaz" firstAttribute="top" secondItem="x7J-TL-LJq" secondAttribute="bottom" constant="8" id="OyJ-ju-lQb"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="top" secondItem="xQl-Rl-JkZ" secondAttribute="top" id="avk-C3-Ekm"/>
+                <constraint firstItem="78H-hT-ck2" firstAttribute="top" secondItem="x7J-TL-LJq" secondAttribute="bottom" constant="8" id="dUi-g6-Hvp"/>
                 <constraint firstAttribute="trailing" secondItem="x7J-TL-LJq" secondAttribute="trailing" constant="8" id="gaw-sa-nWT"/>
                 <constraint firstItem="sD3-kT-6Ug" firstAttribute="top" secondItem="xQl-Rl-JkZ" secondAttribute="top" constant="27" id="nYf-NG-PY5"/>
+                <constraint firstItem="78H-hT-ck2" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" id="uiX-BF-88n"/>
+                <constraint firstAttribute="bottom" secondItem="78H-hT-ck2" secondAttribute="bottom" id="wgi-SW-wT9"/>
                 <constraint firstItem="x7J-TL-LJq" firstAttribute="top" secondItem="sD3-kT-6Ug" secondAttribute="bottom" constant="8" id="yqt-c5-C60"/>
             </constraints>
             <point key="canvasLocation" x="25.5" y="51.5"/>

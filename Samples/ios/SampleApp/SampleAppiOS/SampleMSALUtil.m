@@ -29,10 +29,11 @@
 
 #import "SampleMSALUtil.h"
 #import "SampleAppErrors.h"
+#import "SampleCalendarUtil.h"
 #import "SamplePhotoUtil.h"
 
 #define CURRENT_USER_KEY @"MSALCurrentUserIdentifier"
-#define CLIENT_ID @"0615b6ca-88d4-4884-8729-b178178f7c27"
+#define CLIENT_ID @"11744750-bfe5-4818-a1c0-655455f68fa7"
 
 @implementation SampleMSALUtil
 
@@ -129,7 +130,7 @@
     // Request as many scopes as possible up front that you know your application will
     // want to use so the service can request consent for them up front and minimize
     // how much users are interrupted for interactive auth.
-    [application acquireTokenForScopes:@[@"User.Read"]
+    [application acquireTokenForScopes:@[@"User.Read", @"Calendars.Read"]
                        completionBlock:^(MSALResult *result, NSError *error)
     {
         if (error)
@@ -195,7 +196,7 @@
         return;
     }
 
-    [application acquireTokenForScopes:@[@"User.Read"]
+    [application acquireTokenForScopes:scopes
                                   user:currentUser
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:nil
@@ -257,6 +258,7 @@
 - (void)cleanupLocalState
 {
     [[SamplePhotoUtil sharedUtil] clearPhotoCache];
+    [[SampleCalendarUtil sharedUtil] clearCache];
     
     // Leave around the user identifier as the last piece of state to clean up as you will probably need
     // it to clean up user-specific state

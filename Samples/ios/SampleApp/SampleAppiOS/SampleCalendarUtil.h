@@ -25,39 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "SampleBaseViewController.h"
+#import <Foundation/Foundation.h>
 
-@interface SampleBaseViewController ()
+@interface SampleCalendarEvent : NSObject
+
+@property NSDate *startDate;
+@property NSString *subject;
 
 @end
 
-@implementation SampleBaseViewController
+@interface SampleCalendarUtil : NSObject
 
-- (void)showDialogForError:(NSError *)error
-{
-    (void)error;
-    // Launching this UIAlert can cause problems if it happens right around the same time some other
-    // UI is trying to launch, and for now is disabled.
-    /*__block UIAlertController *alert =
-    [UIAlertController alertControllerWithTitle:error.localizedDescription
-                                        message:error.localizedFailureReason
-                                 preferredStyle:UIAlertControllerStyleAlert];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"OK"
-                                              style:UIAlertActionStyleDefault
-                                            handler:nil]];
-    
-    [self presentViewController:alert
-                       animated:YES
-                     completion:nil];*/
-    
-    NSLog(@"App error: %@", error);
-    
-}
++ (instancetype)sharedUtil;
 
-- (float)startY
-{
-    return 1.0f;
-}
+/*
+    Retrieves updated calendar event information from Microsoft graph
+ */
+- (void)getEvents:(void (^)(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error))completionBlock;
+
+/*
+    Returns cached calendar events (if any) for the current user
+ */
+- (NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *)cachedEvents;
+
+/*
+    Clears any cached events for the current user
+ */
+- (void)clearCache;
 
 @end
