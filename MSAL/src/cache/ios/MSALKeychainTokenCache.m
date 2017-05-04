@@ -218,7 +218,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, status, @"retreieve refresh tokens");
+        MSAL_KEYCHAIN_ERROR(ctx, status, @"retreieve refresh token");
         return nil;
     }
     
@@ -443,7 +443,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess && deleteStatus != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus, @"deleting all user token");
+        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus, @"deleting all user tokens");
         return NO;
     }
     return YES;
