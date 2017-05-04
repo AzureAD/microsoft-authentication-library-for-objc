@@ -139,7 +139,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(nil, status);
+        MSAL_KEYCHAIN_ERROR(nil, status, @"fetching team ID");
         return nil;
     }
     
@@ -176,7 +176,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, &items);
     if (status != errSecSuccess && status != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, status);
+        MSAL_KEYCHAIN_ERROR(ctx, status, @"retreieve access tokens");
         return nil;
     }
     NSArray *accessTokenitems = CFBridgingRelease(items);
@@ -218,7 +218,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, status);
+        MSAL_KEYCHAIN_ERROR(ctx, status, @"retreieve refresh tokens");
         return nil;
     }
     
@@ -248,7 +248,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (status != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, status);
+        MSAL_KEYCHAIN_ERROR(ctx, status, @"retreieve refresh tokens");
         return nil;
     }
     
@@ -308,7 +308,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR(ctx, status);
+            MSAL_KEYCHAIN_ERROR(ctx, status, @"updating access token");
             return NO;
         }
         
@@ -318,7 +318,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR(ctx, status);
+            MSAL_KEYCHAIN_ERROR(ctx, status, @"adding access token");
             return NO;
         }
         return YES;
@@ -360,7 +360,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         }
         else if (status != errSecItemNotFound)
         {
-            MSAL_KEYCHAIN_ERROR(ctx,status);
+            MSAL_KEYCHAIN_ERROR(ctx,status, @"updating refresh token");
             return NO;
         }
         
@@ -370,7 +370,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         status = SecItemAdd((CFDictionaryRef)query, NULL);
         if (status != errSecSuccess)
         {
-            MSAL_KEYCHAIN_ERROR(ctx, status);
+            MSAL_KEYCHAIN_ERROR(ctx, status, @"adding refresh token");
             return NO;
         }
         return YES;
@@ -394,7 +394,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus);
+        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus, @"deleting access token");
         return NO;
     }
     return YES;
@@ -417,7 +417,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus);
+        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus, @"deleting refresh token");
         return NO;
     }
     return YES;
@@ -443,7 +443,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     if (deleteStatus != errSecSuccess && deleteStatus != errSecItemNotFound)
     {
-        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus);
+        MSAL_KEYCHAIN_ERROR(ctx, deleteStatus, @"deleting all user token");
         return NO;
     }
     return YES;

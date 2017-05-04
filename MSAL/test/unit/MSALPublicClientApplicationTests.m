@@ -844,7 +844,7 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR(ctx, -34018);
+         MSAL_KEYCHAIN_ERROR(ctx, -34018, @"fetching team ID.");
          return NO;
      }];
     

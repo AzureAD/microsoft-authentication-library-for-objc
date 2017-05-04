@@ -92,7 +92,7 @@ void MSALLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *erro
     LOG_ERROR_PII(ctx, @"%@", message);
 }
 
-NSError* MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)
+NSError *MSALCreateError(MSALErrorCode code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)
 {
     NSMutableDictionary* userInfo = [NSMutableDictionary new];
     userInfo[MSALErrorDescriptionKey] = errorDescription;
@@ -125,5 +125,20 @@ void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContex
     if (error)
     {
         *error = MSALCreateError(code, description, oauthError, subError, underlyingError);
+    }
+}
+
+void MSALFillAndLogKeychainError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, OSStatus code, NSString *errorDescription, const char *function, int line)
+{
+    NSMutableString *message = [NSMutableString stringWithFormat:@"Keychain failure: %@", errorDescription];
+    [message appendFormat:@" (%s:%d)", function, line];
+    LOG_ERROR(ctx, @"%@", message);
+    LOG_ERROR_PII(ctx, @"%@", message);
+    
+    if (error)
+    {
+        *error = [NSError errorWithDomain:NSOSStatusErrorDomain
+                                     code:code
+                                 userInfo:@{ MSALErrorDescriptionKey : message }];
     }
 }

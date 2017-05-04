@@ -37,6 +37,8 @@ extern NSError *MSALCreateError(MSALErrorCode code, NSString *errorDescription, 
 extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(8, 9);
 extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, MSALErrorCode code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(9, 10);
 
+extern void MSALFillAndLogKeychainError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, OSStatus code, NSString *errorDescription, const char *function, int line);
+
 // Convenience macro for checking and filling an optional NSError** parameter
 #define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
@@ -80,6 +82,5 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
 
 // Convenience macro for creating a keychain error
-#define MSAL_KEYCHAIN_ERROR(_CTX, _OSSTATUS) \
-    MSALLogError(_CTX, _OSSTATUS, @"Keychain failure", nil, nil, __FUNCTION__, __LINE__); \
-    if (error) { *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSSTATUS userInfo:nil]; }
+#define MSAL_KEYCHAIN_ERROR(_CTX, _OSSTATUS, _OPERATION) \
+    MSALFillAndLogKeychainError(error, _CTX, _OSSTATUS, _OPERATION, __FUNCTION__, __LINE__);
