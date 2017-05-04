@@ -150,7 +150,12 @@ static MSALScopes *s_reservedScopes = nil;
     
     // TODO: Remove once uid+utid work hits PROD
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
-    tokenEndpoint.query = @"slice=testslice&uid=true";
+    
+    NSMutableDictionary *endpointQPs = [[NSDictionary msalURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
+    endpointQPs[@"slice"] = @"testslice";
+    endpointQPs[@"uid"] = @"true";
+    
+    tokenEndpoint.query = [endpointQPs msalURLFormEncode];
     
     MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
                                                                       context:_parameters];
