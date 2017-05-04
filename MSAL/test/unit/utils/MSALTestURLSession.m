@@ -269,7 +269,7 @@ static bool AmIBeingDebugged(void)
     if (![NSString msalIsStringNilOrBlank:query])
     {
         NSDictionary *QPs = [NSDictionary msalURLFormDecode:query];
-        if (![QPs isEqualToDictionary:_QPs])
+        if (![_QPs compareToActual:QPs])
         {
             return NO;
         }
@@ -287,8 +287,8 @@ static bool AmIBeingDebugged(void)
     if (_requestParamsBody)
     {
         NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
-        id obj = [NSDictionary msalURLFormDecode:string];
-        return [obj isEqual:_requestParamsBody];
+        NSDictionary *obj = [NSDictionary msalURLFormDecode:string];
+        return [_requestParamsBody compareToActual:obj];
     }
     
     if (_requestBody)
@@ -308,11 +308,11 @@ static bool AmIBeingDebugged(void)
             return YES;
         }
         // This wiil spit out to console the extra stuff that we weren't expecting
-        [@{} compareDictionary:headers];
+        [@{} compareToActual:headers];
         return NO;
     }
     
-    return [_requestHeaders compareDictionary:headers];
+    return [_requestHeaders compareToActual:headers];
 }
 
 - (NSString *)description
