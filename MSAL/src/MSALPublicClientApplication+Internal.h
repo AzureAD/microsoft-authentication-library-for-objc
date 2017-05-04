@@ -27,10 +27,15 @@
 
 #import "MSALPublicClientApplication.h"
 
+// TODO: Remove these defaults once uid/client info is in prod
+#define DEFAULT_SLICE_PARAMS @"slice" : @"testslice", @"uid" : @"true"
+
 @class MSALTokenCache;
 
 @interface MSALPublicClientApplication (Internal)
 
 @property (nullable) MSALTokenCache *tokenCache;
+
++ (nullable NSDictionary<NSString *, NSString *> *)defaultSliceParameters;
 
 @end

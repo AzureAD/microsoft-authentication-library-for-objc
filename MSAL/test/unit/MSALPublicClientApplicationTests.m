@@ -183,6 +183,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -202,6 +203,7 @@
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI]);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.component);
@@ -238,6 +240,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -259,6 +262,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -287,6 +291,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -308,6 +313,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -340,6 +346,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -363,6 +370,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -399,6 +407,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -426,6 +435,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
@@ -456,6 +466,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -483,6 +494,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -514,6 +526,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -544,6 +557,7 @@
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -582,6 +596,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -602,6 +617,7 @@
          XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertNil(params.unvalidatedAuthority);
          
@@ -643,6 +659,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -663,6 +680,7 @@
          XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
          
@@ -706,6 +724,7 @@
                                                 authority:@"https://login.microsoftonline.com/common"
                                                     error:&error];
     application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -728,6 +747,7 @@
          XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
          

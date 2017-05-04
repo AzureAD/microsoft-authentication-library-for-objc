@@ -152,8 +152,11 @@ static MSALScopes *s_reservedScopes = nil;
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msalURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
-    endpointQPs[@"slice"] = @"testslice";
-    endpointQPs[@"uid"] = @"true";
+    
+    if (_parameters.sliceParameters)
+    {
+        [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
+    }
     
     tokenEndpoint.query = [endpointQPs msalURLFormEncode];
     
