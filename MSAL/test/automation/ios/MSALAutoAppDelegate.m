@@ -91,8 +91,11 @@
     (void)options;
     NSLog(@"iOS 9 OpenURL Method!");
     
-    [MSALPublicClientApplication handleMSALResponse:url];
-
+    if ([MSALPublicClientApplication isMSALResponse:url])
+    {
+        [MSALPublicClientApplication handleMSALResponse:url];
+    }
+    
     return YES;
 }
 
