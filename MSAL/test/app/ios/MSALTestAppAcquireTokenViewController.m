@@ -390,8 +390,6 @@
     NSString *clientId = TEST_APP_CLIENT_ID;
     //NSURL* redirectUri = [settings redirectUri];
     
-    //BOOL validateAuthority = _validateAuthority.selectedSegmentIndex == 0;
-    
     NSError *error = nil;
     MSALPublicClientApplication *application = 
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
@@ -401,6 +399,8 @@
         [_resultView setText:resultText];
         return;
     }
+    
+    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     
@@ -473,6 +473,8 @@
         [_resultView setText:resultText];
         return;
     }
+    
+    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     _acquireSilentButton.enabled = NO;

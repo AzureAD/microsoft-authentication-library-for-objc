@@ -154,7 +154,7 @@
       @"slice" : @"testslice"
       };
     NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
-    XCTAssertTrue([expectedQPs compareDictionary:QPs]);
+    XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
 - (void)testAuthorizationUriWithUser
@@ -234,7 +234,7 @@
       @"slice" : @"testslice"
       };
     NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
-    XCTAssertTrue([expectedQPs compareDictionary:QPs]);
+    XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
 - (void)testInteractiveRequestFlow
@@ -318,7 +318,7 @@
            @"slice" : @"testslice"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareDictionary:QPs]);
+         XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -480,7 +480,7 @@
            @"slice" : @"testslice"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareDictionary:QPs]);
+         XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -642,7 +642,7 @@
            @"slice" : @"testslice"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareDictionary:QPs]);
+         XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);

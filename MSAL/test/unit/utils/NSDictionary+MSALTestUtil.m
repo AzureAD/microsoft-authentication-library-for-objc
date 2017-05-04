@@ -29,7 +29,7 @@
 
 @implementation NSDictionary (MSALTestUtil)
 
-- (BOOL)compareDictionary:(NSDictionary *)dictionary
+- (BOOL)compareToActual:(NSDictionary *)dictionary
 {
     BOOL fSame = YES;
     
