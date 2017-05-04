@@ -243,7 +243,7 @@ static MSALScopes *s_reservedScopes = nil;
          
          if ([NSString msalIsStringNilOrBlank:tokenResponse.accessToken])
          {
-             NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokeInResponse, @"Token response is missing the access token");
+             NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
              completionBlock(nil, noAccessTokenError);
              return;
          }

@@ -101,9 +101,9 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     /*!
         MSAL received a valid token response, but it didn't contain an access token.
-        By Oauth 2.0 spec it should never happen, but it still occasionally happens.
+        Check to make sure your application is consented to get all of the scopes you are asking for.
      */
-    MSALErrorNoAccessTokeInResponse = -42105,
+    MSALErrorNoAccessTokenInResponse = -42105,
     
     /*!
         MSAL encounted an error when trying to store or retrieve items from
