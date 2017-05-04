@@ -101,11 +101,12 @@
 #pragma SafariViewController Support
 
 /*!
-    Pass a URL response from your application delegate's openURL handler into
-    MSAL for web authnetication sessions.
- 
-    Returns whether or not the URL is a response to a MSAL web authentication
-    session
+    Ask MSAL to handle a URL response.
+    
+    @param   response   URL response from your application delegate's openURL handler into
+                        MSAL for web authnetication sessions
+    @return  YES if URL is a response to a MSAL web authentication session and handled,
+             NO otherwise.
  */
 + (BOOL)handleMSALResponse:(NSURL *)response;
 

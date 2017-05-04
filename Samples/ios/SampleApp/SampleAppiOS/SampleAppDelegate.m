@@ -75,7 +75,7 @@
 {
     if ([MSALPublicClientApplication handleMSALResponse:url])
     {
-        NSLog(@"This URL is a response to a MSAL web authentication");
+        NSLog(@"This URL is handled by MSAL");
     }
     return YES;
 }
