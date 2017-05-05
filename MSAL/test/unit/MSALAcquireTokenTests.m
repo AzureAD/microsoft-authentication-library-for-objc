@@ -98,8 +98,7 @@
            @"code_challenge": [MSALTestSentinel sentinel],
            @"code_challenge_method" : @"S256",
            @"p" : @"b2c_1_policy",
-           @"uid" : @"true",
-           @"slice" : @"testslice"
+           UT_SLICE_PARAMS_DICT
            } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSALLogger msalId]];
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];

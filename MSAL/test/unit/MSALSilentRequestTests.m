@@ -202,6 +202,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.sliceParameters = @{ @"slice" : @"myslice" };
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -246,7 +247,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -298,6 +299,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -342,7 +344,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -487,7 +489,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -616,7 +618,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",

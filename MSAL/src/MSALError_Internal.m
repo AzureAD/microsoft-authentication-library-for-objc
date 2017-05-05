@@ -72,6 +72,10 @@ MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode def
     {
         return MSALErrorInvalidClient;
     }
+    if ([oauthError isEqualToString:@"invalid_scope"])
+    {
+        return MSALErrorInvalidParameter;
+    }
     
     return defaultCode;
 }
