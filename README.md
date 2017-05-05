@@ -1,7 +1,7 @@
 Microsoft Authentication Library for iOS
 =====================================
 
-| [Get Started](https://apps.dev.microsoft.com/portal/register-app)|  [Docs](http://cocoadocs.org/docsets/MSAL/) | [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support)
+| [Get Started](https://apps.dev.microsoft.com/portal/register-app)| [Docs](https://aka.ms/aaddev)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- | --- |
 
 
