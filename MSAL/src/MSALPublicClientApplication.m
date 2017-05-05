@@ -63,7 +63,7 @@
         }
     }
     
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"%@<clientID>\" format without any whitespaces.", scheme, scheme);
+    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"msal<clientID>\" format without any whitespaces.", scheme);
     
     return NO;
 }
