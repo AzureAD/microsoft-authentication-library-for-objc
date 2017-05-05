@@ -38,6 +38,8 @@
                             expiresOn:(NSDate *)expiresOn
                              tenantId:(NSString *)tenantId
                                  user:(MSALUser *)user
+                              idToken:(NSString *)idToken
+                             uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
 {
     MSALResult *result = [MSALResult new];
@@ -46,6 +48,8 @@
     result->_expiresOn = expiresOn;
     result->_tenantId = tenantId;
     result->_user = user;
+    result->_idToken = idToken;
+    result->_uniqueId = uniqueId;
     result->_scopes = scopes;
     
     return result;
@@ -57,6 +61,8 @@
                              expiresOn:cacheItem.expiresOn
                               tenantId:cacheItem.tenantId
                                   user:cacheItem.user
+                               idToken:cacheItem.rawIdToken
+                              uniqueId:cacheItem.uniqueId
                                 scopes:[cacheItem.scope array]];
 }
 

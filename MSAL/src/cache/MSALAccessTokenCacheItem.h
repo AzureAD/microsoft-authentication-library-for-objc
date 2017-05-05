@@ -35,6 +35,7 @@
 
 @property (readonly) NSString *authority;
 @property (readonly) NSString *rawIdToken;
+@property (readonly) NSString *uniqueId;
 @property (readonly) NSString *accessToken;
 @property (readonly) NSString *tokenType;
 @property (readonly) NSDate *expiresOn;

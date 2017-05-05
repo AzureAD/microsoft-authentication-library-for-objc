@@ -35,6 +35,8 @@
 @property (readonly) NSDate *expiresOn;
 @property (readonly) NSString *tenantId;
 @property (readonly) MSALUser *user;
+@property (readonly) NSString *idToken;
+@property (readonly) NSString *uniqueId;
 @property (readonly) NSArray<NSString *> *scopes;
 
 @end

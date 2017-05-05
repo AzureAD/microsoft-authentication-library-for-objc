@@ -275,6 +275,8 @@ static MSALScopes *s_reservedScopes = nil;
                                  expiresOn:atItem.expiresOn
                                   tenantId:atItem.tenantId
                                       user:atItem.user
+                                   idToken:atItem.rawIdToken
+                                  uniqueId:atItem.uniqueId
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@" "]];
 
          [event setUser:result.user];
