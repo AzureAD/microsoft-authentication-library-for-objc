@@ -15,7 +15,7 @@ These libraries are suitable to use in a production environment. We provide the 
 
 [![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
-## Example
+## Example in Swift
 
 ```swift
      if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority) {
@@ -30,6 +30,27 @@ These libraries are suitable to use in a production environment. We provide the 
     else {
             print("Unable to create application.")
         } 
+```
+
+## Example in Objective C
+
+```objective-c
+    [application acquireTokenForScopes:@[@"scope1", @"scope2"]
+                       completionBlock:^(MSALResult *result, NSError *error)
+    {
+        if (!error)
+        {
+            // You'll want to get the user identifier to retrieve and reuse the user
+            // for later acquireToken calls
+            NSString *userIdentifier = result.user.userIdentifier;
+            
+            NSString *accessToken = result.accessToken;
+        }
+        else
+        {
+            // Check the error
+        }
+    }
 ```
 
 ## Installation
@@ -124,7 +145,7 @@ If you find a security issue with our libraries or services please report it to 
     </array>
 ```
 
-### Creating an Application Object
+### Creating an Application Object (Objective-C)
 Use the client ID from yout app listing when initializing your MSALPublicClientApplication object:
 ```objective-c
     NSError *error = nil;
@@ -132,8 +153,15 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
     [[MSALPublicClientApplication alloc] initWithClientId:@"<your-client-id-here>"
                                                     error:&error];
 ```
+
+### Creating an Application Object (Swift)
+
+```swift
+let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+
+```
                                                     
-### Acquiring Your First Token
+### Acquiring Your First Token (Objective-C)
 ```objective-c
     [application acquireTokenForScopes:@[@"scope1", @"scope2"]
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -153,7 +181,26 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
     }
 ```
 
-### Silently Acquiring an Updated Token
+### Acquiring Your First Token (Swift)
+
+```swift
+    application.acquireToken(forScopes: kScopes) { (result, error) in
+                
+        if !(error != nil) {
+                        
+            // You'll want to get the user identifier to retrieve and reuse the user
+            // for later acquireToken calls
+
+            userIdentifier = result.user.userIdentifier
+            accessToken = result.accessToken
+            
+        } else {
+                // Check error
+        }
+    }
+```
+
+### Silently Acquiring an Updated Token (Objective C)
 ```objective-c
     NSError *error = nil;
     MSALUser *user = [application userForIdentifier:userIdentifier error:&error];
@@ -184,6 +231,24 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
     }
 ```
 
+### Silently Acquiring an Updated Token (Swift)
+```swift
+
+    application.acquireTokenSilent(forScopes: kScopes, user: user) { (result, error) in
+    
+        if !(error != nil)  {
+
+          accessToken = result.accessToken!
+                        
+                        
+         } else  {
+                        
+          // Interactive auth will be required
+                 }
+         }
+
+```
+
 ### Responding to an Interaction Required Error
 Occasionally user interaction will be required to get a new access token, when this occurs you will receive a `MSALErrorInteractionRequired` error when trying to silently acquire a new token. In those cases call `acquireToken:` with the same user and scopes as the failing `acquireTokenSilent:` call. It is recommending to display a status message to the user in an unobtrusive way first before using an interactive `acquireToken:` call.
 ```objective-c
@@ -191,5 +256,7 @@ Occasionally user interaction will be required to get a new access token, when t
                                   user:user
                              completionBlock:^(MSALResult *result, NSError *error) { }];
 ```
+
+
 
 Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
