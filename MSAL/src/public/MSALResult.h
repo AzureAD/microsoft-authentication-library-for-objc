@@ -31,10 +31,28 @@
 
 @interface MSALResult : NSObject
 
+/*! The Access Token requested. */
 @property (readonly) NSString *accessToken;
+
+/*!
+    The time that the access token returned in the Token property ceases to be valid.
+    This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
+ */
 @property (readonly) NSDate *expiresOn;
+
+/*!
+    An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
+ */
 @property (readonly) NSString *tenantId;
+
+/*!
+    The user object that holds user information.
+ */
 @property (readonly) MSALUser *user;
+
+/*!
+    The scope values returned from the service.
+ */
 @property (readonly) NSArray<NSString *> *scopes;
 
 @end
