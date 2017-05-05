@@ -850,7 +850,7 @@
     
     XCTAssertFalse([application removeUser:user error:&error]);
     XCTAssertNotNil(error);
-    XCTAssertTrue(error.domain == NSOSStatusErrorDomain);
+    XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
 }
 
 
