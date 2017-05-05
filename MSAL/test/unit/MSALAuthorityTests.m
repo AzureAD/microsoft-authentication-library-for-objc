@@ -354,7 +354,7 @@
          (void)context;
          (void)completionBlock;
          
-         completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+         completionBlock(nil, MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
@@ -412,7 +412,7 @@
          (void)context;
          (void)completionBlock;
          
-         completionBlock(nil, MSALCreateError(MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
+         completionBlock(nil, MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil));
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
