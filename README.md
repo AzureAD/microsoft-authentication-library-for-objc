@@ -1,13 +1,13 @@
 Microsoft Authentication Library for iOS
 =====================================
 
-| [Get Started](https://aka.ms/aaddev)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support) | [Releases](../../releases)
-| --- | --- | --- | --- | --- |
+| [Get Started](https://aka.ms/aaddev)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support)
+| --- | --- | --- | --- | 
 
 
 The MSAL library preview for iOS gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Microsoft Azure B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
-Note that for the preview, **only iOS is supported.**. macOS support will be provided later. 
+Note that for the preview, **only iOS is supported.** macOS support will be provided later. 
 
 [![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
