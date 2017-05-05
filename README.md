@@ -18,7 +18,7 @@ These libraries are suitable to use in a production environment. We provide the 
 ## Example in Swift
 
 ```swift
-     if let application = try? MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority) {
+     if let application = try? MSALPublicClientApplication.init(clientId: <your-client-id-here>) {
         application.acquireToken(forScopes: kScopes) { (result, error) in
             if result != nil {
                     // Set up your app for the user
@@ -35,6 +35,9 @@ These libraries are suitable to use in a production environment. We provide the 
 ## Example in Objective C
 
 ```objective-c
+ MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:@"<your-client-id-here>"
+                                                    error:&error];
     [application acquireTokenForScopes:@[@"scope1", @"scope2"]
                        completionBlock:^(MSALResult *result, NSError *error)
     {
