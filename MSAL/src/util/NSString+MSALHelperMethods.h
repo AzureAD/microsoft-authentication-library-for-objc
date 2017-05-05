@@ -35,9 +35,9 @@
 - (NSString *)msalBase64UrlDecode;
 
 /*! Converts NSData to base64 String */
-+ (NSString *)msalBase64EncodeData:(NSData *)data;
++ (NSString *)msalBase64UrlEncodeData:(NSData *)data;
 /*! Converts base64 String to NSData */
-+ (NSData *)msalBase64DecodeData:(NSString *)encodedString;
++ (NSData *)msalBase64UrlDecodeData:(NSString *)encodedString;
 
 /*! Returns YES if the string is nil, or contains only white space */
 + (BOOL)msalIsStringNilOrBlank:(NSString *)string;

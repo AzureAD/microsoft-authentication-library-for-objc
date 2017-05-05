@@ -154,8 +154,8 @@
 
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                    @"authority" : @"https://login.microsoftonline.com/common",
                                                                                    @"scope": @"fakescope1 fakescope2",
@@ -213,8 +213,8 @@
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
@@ -310,8 +310,8 @@
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
@@ -408,8 +408,8 @@
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     MSALAccessTokenCacheItem *at = [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                                                     @"authority" : @"https://login.microsoftonline.com/common",
                                                                                     @"scope": @"fakescope1 fakescope2",
@@ -465,8 +465,8 @@
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
@@ -594,8 +594,8 @@
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     
     //store a refresh token in cache
     MSALRefreshTokenCacheItem *rt = [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
