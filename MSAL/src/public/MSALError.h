@@ -55,10 +55,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     /*!
         The required MSAL URL scheme is not registered in the app's info.plist.
-        The scheme "x-msauth-<bundle-id-with-hyphens-instead-of-periods>"
+        The scheme should be "msal<clientid>"
      
-        e.g. an app with the bundle ID "com.microsoft.testapp" would need to
-        register the scheme "x-msauth-com-microsoft-testapp" and add the
+        e.g. an app with the client ID "abcde-12345-vwxyz-67890" would need to
+        register the scheme "msalabcde-12345-vwxyz-67890" and add the
         following to the info.plist file:
      
         <key>CFBundleURLTypes</key>
@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
                 <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
-                    <string>x-msauth-com-microsoft-testapp</string>
+                    <string>msalabcde-12345-vwxyz-67890</string>
                 </array>
             </dict>
 
