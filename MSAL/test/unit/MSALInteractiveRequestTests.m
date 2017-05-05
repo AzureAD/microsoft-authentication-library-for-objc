@@ -776,9 +776,7 @@
            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
            @"response_type" : @"code",
            @"code_challenge": pkce.codeChallenge,
-           @"code_challenge_method" : @"S256",
-           @"uid" : @"true",
-           @"slice" : @"testslice"
+           @"code_challenge_method" : @"S256"
            };
          NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
@@ -807,7 +805,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=testslice&uid=true"
+    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : UNIT_TEST_CLIENT_ID,
