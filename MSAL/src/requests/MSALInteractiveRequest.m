@@ -218,9 +218,9 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              NSString *errorDescription = params[OAUTH2_ERROR_DESCRIPTION];
              NSString *subError = params[OAUTH2_SUB_ERROR];
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
-             MSALLogError(_parameters, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
+             MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
              
-             NSError *msalError = MSALCreateError(code, errorDescription, authorizationError, subError, nil);
+             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil);
                           
              MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
              [self stopTelemetryEvent:event error:msalError];
