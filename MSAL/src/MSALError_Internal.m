@@ -47,6 +47,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInvalidResponse);
         STRING_CASE(MSALErrorBadAuthorizationResponse);
         STRING_CASE(MSALErrorAuthorizationFailed);
+        STRING_CASE(MSALErrorNoAccessTokenInResponse);
         STRING_CASE(MSALErrorNoAuthorizationResponse);
         STRING_CASE(MSALErrorUserCanceled);
         STRING_CASE(MSALErrorSessionCanceled);
@@ -70,6 +71,10 @@ MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode def
     if ([oauthError isEqualToString:@"invalid_client"])
     {
         return MSALErrorInvalidClient;
+    }
+    if ([oauthError isEqualToString:@"invalid_scope"])
+    {
+        return MSALErrorInvalidParameter;
     }
     
     return defaultCode;
