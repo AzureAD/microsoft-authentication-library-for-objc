@@ -63,7 +63,7 @@
 @property (readonly) NSString *environment;
 
 /*!
-    Initialize a MSALUser uby extracting information from id token and client info.
+    Initialize a MSALUser by extracting information from id token and client info.
  
     @param  idToken             A MSALIdToken object that holds information extracted from the raw id token
     @param  clientInfo          Client info returned by the service
