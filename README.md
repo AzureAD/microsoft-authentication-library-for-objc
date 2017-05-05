@@ -1,7 +1,7 @@
 Microsoft Authentication Library for iOS
 =====================================
 
-| [Get Started](https://aka.ms/aaddev)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support)
+| [Get Started](https://apps.dev.microsoft.com/portal/register-app)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL/) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- | 
 
 
@@ -11,7 +11,7 @@ Note that for the preview, **only iOS is supported.** macOS support will be prov
 
 ## Important Note about the MSAL Preview
 
-These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvments. This may impact your applicaiton. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support. 
+These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements  This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support.
 
 [![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
