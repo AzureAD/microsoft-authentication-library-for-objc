@@ -533,6 +533,8 @@
          XCTAssertEqualObjects(result.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(result.user.name, [MSALTestIdTokenUtil defaultName]);
          XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertEqualObjects(result.user.environment, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(result.user.identityProvider, @"issuer");
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
          XCTAssertNotNil(result.idToken);
@@ -542,6 +544,11 @@
          XCTAssertNotNil(result.accessToken);
          XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
          XCTAssertNil(error);
+         XCTAssertNotNil(result.scopes);
+         XCTAssertEqual([result.scopes count], 2);
+         XCTAssertEqualObjects(result.scopes, (@[@"fakescope1", @"fakescope2"]));
+         XCTAssertNotNil(result.expiresOn);
+         XCTAssertEqualWithAccuracy([result.expiresOn timeIntervalSinceDate:[NSDate date]], 600, 10);
          
          dispatch_semaphore_signal(dsem);
      }];
