@@ -881,7 +881,6 @@
                                      clientId:@"12345"
                                   environment:@"environment.com"
                                         error:nil]);
-    
     XCTAssertTrue([[[MSALTestLogger sharedLogger] lastMessage] containsString:@"UserNotFound"]);
 }
 

@@ -5,5 +5,5 @@ DEFINES_MODULE = YES;
 INFOPLIST_FILE = resources/ios/Info.plist;
 PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL;
 PRODUCT_NAME = MSAL;
-OTHER_LDFLAGS = "-ObjC";
+OTHER_LDFLAGS = $(inherited) -ObjC;
 

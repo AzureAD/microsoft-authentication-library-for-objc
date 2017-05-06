@@ -808,11 +808,11 @@
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
-    NSString *rawClientInfo = [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64EncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     MSALAccessTokenCacheItem *at =
     [[MSALAccessTokenCacheItem alloc] initWithJson:@{
                                                      @"authority" : @"https://login.microsoftonline.com/fake_tenant",
@@ -866,7 +866,7 @@
     XCTAssertNil(error);
 }
 
-- (void)testUserKeychainError
+- (void)testRemoveUser_whenKeychainError_shouldReturnNoWithError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -886,12 +886,13 @@
          (void)obj;
          (void)user;
          (void)clientId;
-         MSAL_KEYCHAIN_ERROR_PARAM(ctx, -34018, @"fetching team ID.");
+         MSAL_KEYCHAIN_ERROR(ctx, -34018, @"fetching team ID.");
          return NO;
      }];
     
     XCTAssertFalse([application removeUser:user error:&error]);
     XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
 }
 
 

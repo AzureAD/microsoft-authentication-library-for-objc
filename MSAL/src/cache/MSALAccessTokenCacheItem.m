@@ -48,6 +48,7 @@ MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
 MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
 MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
 MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
+MSAL_JSON_RW(@"unique_id", uniqueId, setUniqueId)
 
 - (id)initWithAuthority:(NSURL *)authority
                clientId:(NSString *)clientId
@@ -67,6 +68,7 @@ MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
     _idToken = [[MSALIdToken alloc] initWithRawIdToken:response.idToken];
     self.authority = [[MSALAuthority cacheUrlForAuthority:authority tenantId:_idToken.tenantId] absoluteString];
     self.rawIdToken = response.idToken;
+    self.uniqueId = [_idToken uniqueId];
     self.accessToken = response.accessToken;
     self.tokenType = response.tokenType;
     self.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[response.expiresOn timeIntervalSince1970]];

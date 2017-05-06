@@ -244,6 +244,13 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
+         if ([NSString msalIsStringNilOrBlank:tokenResponse.accessToken])
+         {
+             NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
+             completionBlock(nil, noAccessTokenError);
+             return;
+         }
+         
          NSError *cacheError = nil;
          MSALTokenCache *cache = self.parameters.tokenCache;
          
@@ -275,6 +282,8 @@ static MSALScopes *s_reservedScopes = nil;
                                  expiresOn:atItem.expiresOn
                                   tenantId:atItem.tenantId
                                       user:atItem.user
+                                   idToken:atItem.rawIdToken
+                                  uniqueId:atItem.uniqueId
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@" "]];
 
          [event setUser:result.user];

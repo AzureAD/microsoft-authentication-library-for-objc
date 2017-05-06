@@ -100,6 +100,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
+        MSAL received a valid token response, but it didn't contain an access token.
+        Check to make sure your application is consented to get all of the scopes you are asking for.
+     */
+    MSALErrorNoAccessTokenInResponse = -42105,
+    
+    /*!
         MSAL encounted an error when trying to store or retrieve items from
         keychain. Inspect NSUnderlyingError from the userInfo dictionary for
         more information about the specific error. Keychain error codes are
@@ -109,7 +115,6 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAmbiguousAuthority = -42201,
     MSALErrorUserNotFound = -42202,
     MSALErrorNoAccessTokensFound = -42203,
-    MSALErrorKeychainFailure = -42240,
     MSALErrorWrapperCacheFailure = -42270,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect

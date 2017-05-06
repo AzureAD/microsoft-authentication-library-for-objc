@@ -25,19 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
-@class MSALAccessTokenCacheItem;
+#import <UIKit/UIKit.h>
 
-@interface MSALResult (Internal)
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-                             tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
-                              idToken:(NSString *)idToken
-                             uniqueId:(NSString *)uniqueId
-                               scopes:(NSArray<NSString *> *)scopes;
+@property (strong, nonatomic) UIWindow *window;
 
-+ (MSALResult *)resultWithAccessTokenItem:(MSALAccessTokenCacheItem *)cacheItem;
 
 @end
+
