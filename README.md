@@ -189,7 +189,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 ```swift
     application.acquireToken(forScopes: kScopes) { (result, error) in
                 
-        if !(error != nil) {
+        if error == nil {
                         
             // You'll want to get the user identifier to retrieve and reuse the user
             // for later acquireToken calls
@@ -239,14 +239,17 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 
     application.acquireTokenSilent(forScopes: kScopes, user: user) { (result, error) in
     
-        if !(error != nil)  {
+        if error == nil  {
 
           accessToken = result.accessToken!
                         
                         
          } else  {
                         
-          // Interactive auth will be required
+           if error.code == MSALErrorInteractionRequired {
+
+               // Interactive auth will be required
+           }
                  }
          }
 
