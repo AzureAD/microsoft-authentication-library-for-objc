@@ -58,7 +58,7 @@
     // and we'll probably not have enough diagnostic information, however verbose
     // will most likely be too noisy for most usage.
     self.level = MSALLogLevelInfo;
-    self.consoleLogging = YES;
+    self.consoleLogging = NO;
     
     return self;
 }
