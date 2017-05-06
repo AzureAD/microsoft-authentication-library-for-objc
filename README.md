@@ -18,11 +18,11 @@ These libraries are suitable to use in a production environment. We provide the 
 ## Example in Swift
 
 ```swift
-     if let application = try? MSALPublicClientApplication.init(clientId: <your-client-id-here>) {
+    if let application = try? MSALPublicClientApplication.init(clientId: <your-client-id-here>) {
         application.acquireToken(forScopes: kScopes) { (result, error) in
             if result != nil {
                     // Set up your app for the user
-          } else {
+            } else {
                 print(error?.localizedDescription)
             }
         }
@@ -239,19 +239,18 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 
     application.acquireTokenSilent(forScopes: kScopes, user: user) { (result, error) in
     
-        if error == nil  {
+        if error == nil {
 
           accessToken = result.accessToken!
                         
+        } else {
                         
-         } else  {
-                        
-           if error.code == MSALErrorInteractionRequired {
+            if error.code == MSALErrorInteractionRequired {
 
                // Interactive auth will be required
-           }
-                 }
-         }
+            }
+        }
+    }
 
 ```
 
