@@ -51,6 +51,16 @@
 @property (readonly) MSALUser *user;
 
 /*!
+    The raw id token if it's returned by the service or nil if no id token is returned.
+*/
+@property (readonly) NSString *idToken;
+
+/*!
+    The unique id of the user.
+ */
+@property (readonly) NSString *uniqueId;
+
+/*!
     The scope values returned from the service.
  */
 @property (readonly) NSArray<NSString *> *scopes;
