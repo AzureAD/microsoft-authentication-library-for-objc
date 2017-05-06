@@ -535,6 +535,10 @@
          XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
+         XCTAssertNotNil(result.idToken);
+         XCTAssertEqualObjects(result.idToken, [MSALTestIdTokenUtil defaultIdToken]);
+         XCTAssertNotNil(result.uniqueId);
+         XCTAssertEqualObjects(result.uniqueId, [MSALTestIdTokenUtil defaultUniqueId]);
          XCTAssertNotNil(result.accessToken);
          XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
          XCTAssertNil(error);

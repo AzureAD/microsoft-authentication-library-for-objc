@@ -45,6 +45,11 @@
     return @"1234-5678-90abcdefg";
 }
 
++ (NSString *)defaultUniqueId
+{
+    return @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97";
+}
+
 + (NSString *)defaultIdToken
 {
     return [self idTokenWithName:[self defaultName] preferredUsername:[self defaultUsername]];
@@ -64,7 +69,8 @@
     NSString *idTokenp2 = [@{ @"iss" : @"issuer",
                               @"name" : name,
                               @"preferred_username" : preferredUsername,
-                              @"tid" : tid ? tid : [self defaultTenantId]} base64UrlJson];
+                              @"tid" : tid ? tid : [self defaultTenantId],
+                              @"oid" : [self defaultUniqueId]} base64UrlJson];
     return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
 }
 
