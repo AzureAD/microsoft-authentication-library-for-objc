@@ -59,8 +59,6 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
  */
 @property (readwrite) MSALLogLevel level;
 
-@property (readwrite) BOOL consoleLogging;
-
 /*!
     Sets the callback block to send MSAL log messages to.
  

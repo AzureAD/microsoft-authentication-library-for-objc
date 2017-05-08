@@ -58,7 +58,6 @@
     // and we'll probably not have enough diagnostic information, however verbose
     // will most likely be too noisy for most usage.
     self.level = MSALLogLevelInfo;
-    self.consoleLogging = YES;
     
     return self;
 }
@@ -221,12 +220,6 @@ static NSDateFormatter *s_dateFormatter = nil;
     
     
     NSString* log = [NSString stringWithFormat:@"MSAL " MSAL_VERSION_STRING " %@ [%@%@]%@ %@", s_OSString, dateString, correlationIdStr, component, message];
-    
-    // Don't log PII out to console.
-    if (_consoleLogging && !isPii)
-    {
-        NSLog(@"%@", log);
-    }
     
     if (_callback)
     {
