@@ -78,6 +78,7 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelVerbose);
     
     [logger reset];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     LOG_ERROR_PII(nil, @"userId: %@ failed to sign in", @"user@contoso.com");
     XCTAssertNotNil(logger.lastMessage);
     XCTAssertTrue(logger.containsPII);
@@ -85,6 +86,7 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
     
     [logger reset];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     LOG_WARN_PII(nil, @"%@ pressed the cancel button", @"user@contoso.com");
     XCTAssertNotNil(logger.lastMessage);
     XCTAssertTrue(logger.containsPII);
@@ -92,6 +94,7 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelWarning);
     
     [logger reset];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     LOG_INFO_PII(nil, @"%@ is trying to log in", @"user@contoso.com");
     XCTAssertNotNil(logger.lastMessage);
     XCTAssertTrue(logger.containsPII);
@@ -99,6 +102,23 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelInfo);
      
     [logger reset];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
+    LOG_VERBSOE_PII(nil, @"waiting on response from %@", @"contoso.com");
+    XCTAssertNotNil(logger.lastMessage);
+    XCTAssertTrue(logger.containsPII);
+    XCTAssertTrue([logger.lastMessage containsString:@"waiting on response from contoso.com"]);
+    XCTAssertEqual(logger.lastLevel, MSALLogLevelVerbose);
+}
+
+- (void)testIsPiiEnabled
+{
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelLast];
+    MSALTestLogger* logger = [MSALTestLogger sharedLogger];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:NO];
+    LOG_VERBSOE_PII(nil, @"waiting on response from %@", @"contoso.com");
+    XCTAssertNil(logger.lastMessage);
+    
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     LOG_VERBSOE_PII(nil, @"waiting on response from %@", @"contoso.com");
     XCTAssertNotNil(logger.lastMessage);
     XCTAssertTrue(logger.containsPII);

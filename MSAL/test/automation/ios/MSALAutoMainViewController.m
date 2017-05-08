@@ -47,6 +47,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    [MSALLogger sharedLogger].PiiLoggingEnabled = YES;
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
         (void)level;
         if (!containsPII)
