@@ -53,7 +53,7 @@ These libraries are suitable to use in a production environment. We provide the 
         {
             // Check the error
         }
-    }
+    }]
 ```
 
 ## Installation
@@ -65,7 +65,7 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 ##### If you're building for iOS, tvOS, or watchOS
 
 1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
-1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
+1. You must create a `Cartfile` that lists the MSAL library for this project on Github. Example: ` github "AzureAD/microsoft-authentication-library-for-objc" "master"`
 1. Run `carthage update`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
 1. On your application targets’ “General” settings tab, in the “Linked Frameworks and Libraries” section, drag and drop the `MSAL.framework` from the `Carthage/Build` folder on disk.
 1. On your application targets’ “Build Phases” settings tab, click the “+” icon and choose “New Run Script Phase”. Create a Run Script in which you specify your shell (ex: `/bin/sh`), add the following contents to the script area below the shell:
@@ -146,6 +146,35 @@ If you find a security issue with our libraries or services please report it to 
             </array>
         </dict>
     </array>
+```
+
+Our library uses the SFSafariViewController for authentication. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session.
+
+### Adding the redirect from the SFSafariViewController (Objective C)
+
+```objective-c
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options
+{
+    (void)app;
+    (void)url;
+    (void)options;
+    
+    [MSALPublicClientApplication handleMSALResponse:url];
+    
+    return YES;
+}
+```
+
+### Adding the redirect from the SFSafariViewController (Swift)
+
+```swift
+func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        
+        MSALPublicClientApplication.handleMSALResponse(url)
+        
+        
+        return true
+    }
 ```
 
 ### Creating an Application Object (Objective-C)
