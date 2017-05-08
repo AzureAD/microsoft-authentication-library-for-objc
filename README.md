@@ -148,9 +148,11 @@ If you find a security issue with our libraries or services please report it to 
     </array>
 ```
 
-Our library uses the SFSafariViewController for authentication. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session.
+Our library uses the SFSafariViewController for authentication. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session. 
 
-### Adding the redirect from the SFSafariViewController (Objective C)
+### Handling the redirect from the SFSafariViewController (Objective C)
+
+You will need to add the following to your `AppDelegate.m` file:
 
 ```objective-c
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options
@@ -165,7 +167,9 @@ Our library uses the SFSafariViewController for authentication. The authorizatio
 }
 ```
 
-### Adding the redirect from the SFSafariViewController (Swift)
+### Handling the redirect from the SFSafariViewController (Swift)
+
+You will need to add the following to your `AppDelegate.swift` file:
 
 ```swift
 func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
