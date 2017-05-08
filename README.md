@@ -214,7 +214,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
         {
             // Check the error
         }
-    }
+    }]
 ```
 
 ### Acquiring Your First Token (Swift)
@@ -246,7 +246,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
         return;
     }
     
-    [application acquireTokenSilentForScopes:@["scope1"]
+    [application acquireTokenSilentForScopes:@[@"scope1"]
                                         user:user
                              completionBlock:^(MSALResult *result, NSError *error)
     {
@@ -264,7 +264,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
             
             // Other errors may require trying again later, or reporting authentication problems to the user
         }
-    }
+    }]
 ```
 
 ### Silently Acquiring an Updated Token (Swift)
@@ -274,11 +274,11 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
     
         if error == nil {
 
-          accessToken = result.accessToken!
+          accessToken = result!.accessToken
                         
         } else {
                         
-            if error.code == MSALErrorInteractionRequired {
+            if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
 
                // Interactive auth will be required
             }
