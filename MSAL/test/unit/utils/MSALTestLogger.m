@@ -68,6 +68,7 @@
     _lastLevel = -1;
     _containsPII = NO;
     [[MSALLogger sharedLogger] setLevel:level];
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:NO];
 }
 
 @end

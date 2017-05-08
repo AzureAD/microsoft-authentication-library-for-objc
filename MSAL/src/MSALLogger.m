@@ -58,6 +58,7 @@
     // and we'll probably not have enough diagnostic information, however verbose
     // will most likely be too noisy for most usage.
     self.level = MSALLogLevelInfo;
+    self.PiiLoggingEnabled = NO;
     
     return self;
 }
@@ -190,6 +191,11 @@ static NSDateFormatter *s_dateFormatter = nil;
     }
     
     if (level > _level)
+    {
+        return;
+    }
+    
+    if (isPii && !_PiiLoggingEnabled)
     {
         return;
     }

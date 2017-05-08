@@ -44,8 +44,11 @@ typedef NS_ENUM(NSInteger, MSALLogLevel)
  
     @param  level           The level of the log message
     @param  message         The message being logged
-    @param  containsPII     Whether the message contains personally identifiable
-                            information (PII)
+    @param  containsPII     If the message might contain Personally Identifiable Information (PII)
+                            this will be true. Log messages possibly containing PII will not be
+                            sent to the callback unless PIllLoggingEnabled is set to YES on the
+                            logger.
+
  */
 typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
 
@@ -58,6 +61,12 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
     The minimum log level for messages to be passed onto the log callback.
  */
 @property (readwrite) MSALLogLevel level;
+
+/*!
+    Set to YES to allow messages possibly containing Personally Identifiable Information (PII) to be
+    sent to the logging callback.
+ */
+@property (readwrite) BOOL PiiLoggingEnabled;
 
 /*!
     Sets the callback block to send MSAL log messages to.
