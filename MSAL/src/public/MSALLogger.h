@@ -62,8 +62,6 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
  */
 @property (readwrite) MSALLogLevel level;
 
-@property (readwrite) BOOL consoleLogging;
-
 /*!
     Set to YES to allow messages possibly containing Personally Identifiable Information (PII) to be
     sent to the logging callback.
