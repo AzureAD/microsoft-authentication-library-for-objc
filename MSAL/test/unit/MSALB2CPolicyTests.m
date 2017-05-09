@@ -1,0 +1,148 @@
+//
+//  MSALB2CProfilesTests.m
+//  MSAL
+//
+//  Created by Olga Dalton on 5/9/17.
+//  Copyright © 2017 Microsoft. All rights reserved.
+//
+
+#import "MSALTestCase.h"
+
+#import "MSALTestBundle.h"
+#import "MSALTestConstants.h"
+#import "MSALTestSwizzle.h"
+#import "MSALBaseRequest+TestExtensions.h"
+#import "MSALTestURLSession.h"
+#import "MSALWebUI.h"
+#import "NSDictionary+MSALTestUtil.h"
+#import "NSURL+MSALExtensions.h"
+#import "MSALTestIdTokenUtil.h"
+#import "MSALTestCacheDataUtil.h"
+
+@interface MSALB2CPolicyTests : MSALTestCase
+
+@end
+
+@implementation MSALB2CPolicyTests
+
+/*
+    This is an integraton test to verify that two acquireToken calls with two different B2C policies
+    result in two fully functional users that can be retrieved and used.
+ */
+
+- (void)testAcquireToken_whenMultipleB2CPolicies_shouldHaveMultipleUsers
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSALTestCacheDataUtil *cacheUtil = [MSALTestCacheDataUtil defaultUtil];
+    
+    // Setup acquireToken with first policy (b2c_1_policy)
+    NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
+    
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse oidcResponseForAuthority:firstAuthority
+                                      responseUrl:@"https://login.microsoftonline.com/contosob2c"
+                                            query:@"p=b2c_1_policy"];
+    
+    // User identifier should be uid-policy
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:@"https://login.microsoftonline.com/contosob2c"
+                                    query:@"p=b2c_1_policy"
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
+                               clientInfo:@{ @"uid" : @"1-b2c_1_policy", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
+    
+    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
+                           class:[MSALWebUI class]
+                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+     {
+         (void)obj;
+         (void)context;
+         
+         XCTAssertNotNil(url);
+         
+         // State preserving and url are tested separately
+         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSString *state = QPs[@"state"];
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];
+         completionBlock([NSURL URLWithString:responseString], nil);
+     }];
+    
+    NSError *error = nil;
+    
+    // Create application object with the first policy as authority
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:firstAuthority
+                                                    error:&error];
+    
+    application.tokenCache = cacheUtil.cache;
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         
+         NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+         XCTAssertEqualObjects(result.user.userIdentifier, userIdentifier);
+         dispatch_semaphore_signal(dsem);
+     }];
+    
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
+    
+    // Now acquiretoken call with second policy (b2c_2_policy)
+    NSString *secondAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy";
+    
+    // Override oidc and token responses for the second policy
+    oidcResponse = [MSALTestURLResponse oidcResponseForAuthority:secondAuthority
+                                                     responseUrl:@"https://login.microsoftonline.com/contosob2c"
+                                                           query:@"p=b2c_2_policy"];
+    
+    tokenResponse = [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+                                                authority:@"https://login.microsoftonline.com/contosob2c"
+                                                    query:@"p=b2c_2_policy"
+                                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
+                                               clientInfo:@{ @"uid" : @"1-b2c_2_policy", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
+    
+    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    // Use an authority with a different policy in the second acquiretoken call
+    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+                  extraScopesToConsent:nil
+                             loginHint:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:nil
+                             authority:secondAuthority
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error) {
+                           
+                           XCTAssertNil(error);
+                           XCTAssertNotNil(result);
+                           
+                           NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+                           XCTAssertEqualObjects(result.user.userIdentifier, userIdentifier);
+        
+    }];
+    
+    // Ensure we have two different accesstokens in cache
+    // and that second call doesn't overwrite first one, since policies are different
+    XCTAssertEqual(cacheUtil.allAccessTokens.count, 2);
+    XCTAssertEqual(cacheUtil.allRefreshTokens.count, 2);
+    XCTAssertEqual([[application users:nil] count], 2);
+}
+
+@end
