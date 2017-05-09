@@ -26,10 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestURLSession.h"
+
+#import "MSALTestConstants.h"
 #import "MSALTestURLSessionDataTask.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestCacheDataUtil.h"
 
+#import "MSALPublicClientApplication+Internal.h"
 #import "MSALUser.h"
 
 #import "NSDictionary+MSALExtensions.h"
@@ -37,6 +40,46 @@
 #import "NSOrderedSet+MSALExtensions.h"
 #import "NSString+MSALHelperMethods.h"
 #import "NSURL+MSALExtensions.h"
+
+#include <assert.h>
+#include <stdbool.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/sysctl.h>
+
+// From https://developer.apple.com/library/content/qa/qa1361/_index.html
+static bool AmIBeingDebugged(void)
+// Returns true if the current process is being debugged (either
+// running under the debugger or has a debugger attached post facto).
+{
+    int                 junk;
+    int                 mib[4];
+    struct kinfo_proc   info;
+    size_t              size;
+    
+    // Initialize the flags so that, if sysctl fails for some bizarre
+    // reason, we get a predictable result.
+    
+    info.kp_proc.p_flag = 0;
+    
+    // Initialize mib, which tells sysctl the info we want, in this case
+    // we're looking for information about a specific process ID.
+    
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PID;
+    mib[3] = getpid();
+    
+    // Call sysctl.
+    
+    size = sizeof(info);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    assert(junk == 0);
+    
+    // We're being debugged if the P_TRACED flag is set.
+    
+    return ( (info.kp_proc.p_flag & P_TRACED) != 0 );
+}
 
 @implementation MSALTestURLResponse
 
@@ -97,7 +140,7 @@
     return response;
 }
 
-+ (MSALTestURLResponse *)oidResponseForAuthority:(NSString *)authority
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
 {
     NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -121,6 +164,83 @@
     return oidcResponse;
 }
 
++ (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
+                                      responseUrl:(NSString *)responseAuthority
+                                            query:(NSString *)query
+{
+    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    
+    NSDictionary *oidcJson =
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", responseAuthority, query],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize?%@", responseAuthority, query],
+       @"issuer" : @"issuer"
+       };
+    
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
+                           requestHeaders:oidcReqHeaders
+                        requestParamsBody:nil
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:oidcJson];
+    
+    return oidcResponse;
+}
+
++ (MSALTestURLResponse *)authCodeResponse:(NSString *)authcode
+                                authority:(NSString *)authority
+                                    query:(NSString *)query
+                                   scopes:(MSALScopes *)scopes
+{
+    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
+    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    
+    NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
+    [tokenQPs addEntriesFromDictionary:@{UT_SLICE_PARAMS_DICT}];
+    if (query)
+    {
+        [tokenQPs addEntriesFromDictionary:[NSDictionary msalURLFormDecode:query]];
+    }
+    
+    NSString *requestUrlStr = nil;
+    if (tokenQPs.count > 0)
+    {
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msalURLFormEncode]];
+    }
+    else
+    {
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority];
+    }
+    
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse requestURLString:requestUrlStr
+                           requestHeaders:tokenReqHeaders
+                        requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                                             OAUTH2_SCOPE : [scopes msalToString],
+                                             @"client_info" : @"1",
+                                             @"grant_type" : @"authorization_code",
+                                             @"code_verifier" : [MSALTestSentinel sentinel],
+                                             OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
+                                             OAUTH2_CODE : authcode }
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
+                                             @"expires_in" : @"600",
+                                             @"refresh_token" : @"i am a refresh token",
+                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]} base64UrlJson] } ];
+    
+    return tokenResponse;
+}
+
 + (MSALTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
@@ -133,7 +253,7 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSALTestURLResponse *tokenResponse =
-    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token?slice=testslice&uid=true", authority]
+    [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token" UT_SLICE_PARAMS_QUERY, authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
                                              OAUTH2_SCOPE : [scopes msalToString],
@@ -229,7 +349,7 @@
     if (![NSString msalIsStringNilOrBlank:query])
     {
         NSDictionary *QPs = [NSDictionary msalURLFormDecode:query];
-        if (![QPs isEqualToDictionary:_QPs])
+        if (![_QPs compareToActual:QPs])
         {
             return NO;
         }
@@ -247,8 +367,8 @@
     if (_requestParamsBody)
     {
         NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
-        id obj = [NSDictionary msalURLFormDecode:string];
-        return [obj isEqual:_requestParamsBody];
+        NSDictionary *obj = [NSDictionary msalURLFormDecode:string];
+        return [_requestParamsBody compareToActual:obj];
     }
     
     if (_requestBody)
@@ -268,11 +388,16 @@
             return YES;
         }
         // This wiil spit out to console the extra stuff that we weren't expecting
-        [@{} compareDictionary:headers];
+        [@{} compareToActual:headers];
         return NO;
     }
     
-    return [_requestHeaders compareDictionary:headers];
+    return [_requestHeaders compareToActual:headers];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %@>", NSStringFromClass(self.class), _requestURL];
 }
 
 @end
@@ -385,6 +510,14 @@ static NSMutableArray *s_responses = nil;
                 return response;
             }
         }
+    }
+    
+    if (AmIBeingDebugged())
+    {
+        NSLog(@"Failed to find repsonse for %@\ncurrent responses: %@", requestURL, s_responses);
+        // This will cause the tests to immediately stop execution right here if we're in the debugger,
+        // hopefully making it a little easier to see why a test is failing. :)
+        __builtin_trap();
     }
     
     // This class is used in the test target only. If you're seeing this outside the test target that means you linked in the file wrong

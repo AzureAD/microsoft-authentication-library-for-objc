@@ -46,6 +46,7 @@
 @property NSString *prompt;
 @property MSALUser *user;
 @property MSALTelemetryApiId apiId;
+@property NSDictionary<NSString *, NSString *> *sliceParameters;
 
 #pragma mark MSALRequestContext properties
 @property NSUUID *correlationId;

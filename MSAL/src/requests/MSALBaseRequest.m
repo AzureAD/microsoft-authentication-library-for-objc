@@ -150,7 +150,15 @@ static MSALScopes *s_reservedScopes = nil;
     
     // TODO: Remove once uid+utid work hits PROD
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
-    tokenEndpoint.query = @"slice=testslice&uid=true";
+    
+    NSMutableDictionary *endpointQPs = [[NSDictionary msalURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
+    
+    if (_parameters.sliceParameters)
+    {
+        [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
+    }
+    
+    tokenEndpoint.query = [endpointQPs msalURLFormEncode];
     
     MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
                                                                       context:_parameters];
@@ -236,6 +244,13 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
+         if ([NSString msalIsStringNilOrBlank:tokenResponse.accessToken])
+         {
+             NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
+             completionBlock(nil, noAccessTokenError);
+             return;
+         }
+         
          NSError *cacheError = nil;
          MSALTokenCache *cache = self.parameters.tokenCache;
          
@@ -267,6 +282,8 @@ static MSALScopes *s_reservedScopes = nil;
                                  expiresOn:atItem.expiresOn
                                   tenantId:atItem.tenantId
                                       user:atItem.user
+                                   idToken:atItem.rawIdToken
+                                  uniqueId:atItem.uniqueId
                                     scopes:[tokenResponse.scope componentsSeparatedByString:@" "]];
 
          [event setUser:result.user];

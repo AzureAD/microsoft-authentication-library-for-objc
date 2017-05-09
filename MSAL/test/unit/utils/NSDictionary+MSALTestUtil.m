@@ -29,7 +29,7 @@
 
 @implementation NSDictionary (MSALTestUtil)
 
-- (BOOL)compareDictionary:(NSDictionary *)dictionary
+- (BOOL)compareToActual:(NSDictionary *)dictionary
 {
     BOOL fSame = YES;
     
@@ -64,11 +64,23 @@
 - (NSString *)base64UrlJson
 {
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:nil];
-    return [NSString msalBase64EncodeData:jsonData];
+    return [NSString msalBase64UrlEncodeData:jsonData];
 }
 
 @end
 
 @implementation MSALTestSentinel
+
+static MSALTestSentinel *s_sentinel = nil;
+
++ (void)initialize
+{
+    s_sentinel = [MSALTestSentinel new];
+}
+
++ (instancetype)sentinel
+{
+    return s_sentinel;
+}
 
 @end

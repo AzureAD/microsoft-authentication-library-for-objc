@@ -33,6 +33,7 @@
 + (NSString *)defaultName;
 + (NSString *)defaultUsername;
 + (NSString *)defaultTenantId;
++ (NSString *)defaultUniqueId;
 
 + (NSString *)idTokenWithName:(NSString *)name
             preferredUsername:(NSString *)preferredUsername;

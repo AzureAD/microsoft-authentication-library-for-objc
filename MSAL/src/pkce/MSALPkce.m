@@ -55,7 +55,7 @@ static NSUInteger const s_kCodeVerifierByteSize = 32;
 
 + (NSString *)createChallangeFromCodeVerifier:(NSString *)codeVerifier
 {
-    return [NSString msalBase64EncodeData:[MSALCryptoHelper msalSHA256fromString:codeVerifier]];
+    return [NSString msalBase64UrlEncodeData:[MSALCryptoHelper msalSHA256fromString:codeVerifier]];
 }
 
 - (NSString *)codeChallengeMethod

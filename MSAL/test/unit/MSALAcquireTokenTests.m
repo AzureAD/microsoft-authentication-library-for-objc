@@ -30,8 +30,12 @@
 #import "MSALTestBundle.h"
 #import "MSALTestCacheDataUtil.h"
 #import "MSALTestConstants.h"
+#import "MSALTestSwizzle.h"
 #import "MSALTestURLSession.h"
+#import "MSALWebUI.h"
+
 #import "NSDictionary+MSALTestUtil.h"
+#import "NSURL+MSALExtensions.h"
 
 #import "MSALPublicClientApplication+Internal.h"
 
@@ -49,6 +53,84 @@
 - (void)tearDown
 {
     [super tearDown];
+}
+
+- (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSString *authority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse oidcResponseForAuthority:authority
+                                      responseUrl:@"https://login.microsoftonline.com/contosob2c"
+                                            query:@"p=b2c_1_policy"];
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:@"https://login.microsoftonline.com/contosob2c"
+                                    query:@"p=b2c_1_policy"
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]];
+    
+    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
+    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
+                           class:[MSALWebUI class]
+                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+     {
+         (void)obj;
+         (void)context;
+         
+         XCTAssertNotNil(url);
+         XCTAssertEqualObjects(url.scheme, @"https");
+         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.path, @"/contosob2c/v2.0/oauth/authorize");
+         NSMutableDictionary *expectedQPs =
+         [@{
+           @"return-client-request-id" : [MSALTestSentinel sentinel],
+           @"state" : [MSALTestSentinel sentinel],
+           @"prompt" : @"select_account",
+           @"client_id" : UNIT_TEST_CLIENT_ID,
+           @"scope" : @"fakeb2cscopes openid profile offline_access",
+           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+           @"response_type" : @"code",
+           @"code_challenge": [MSALTestSentinel sentinel],
+           @"code_challenge_method" : @"S256",
+           @"p" : @"b2c_1_policy",
+           UT_SLICE_PARAMS_DICT
+           } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSALLogger msalId]];
+         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         XCTAssertTrue([expectedQPs compareToActual:QPs]);
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         completionBlock([NSURL URLWithString:responseString], nil);
+     }];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:[MSALTestCacheDataUtil defaultClientId]
+                                                authority:authority
+                                                    error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         dispatch_semaphore_signal(dsem);
+     }];
+    
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
 }
 
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
@@ -71,12 +153,10 @@
     XCTAssertNotNil(application);
     application.tokenCache = cacheUtil.cache;
     
-    
-    
     // Set up the network responses for OIDC discovery and the RT response
     NSString *authority = @"https://login.microsoftonline.com/contoso";
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
-    MSALTestURLResponse *oidcResponse = [MSALTestURLResponse oidResponseForAuthority:authority];
+    MSALTestURLResponse *oidcResponse = [MSALTestURLResponse oidcResponseForAuthority:authority];
     MSALTestURLResponse *tokenResponse = [MSALTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:user];
     [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     

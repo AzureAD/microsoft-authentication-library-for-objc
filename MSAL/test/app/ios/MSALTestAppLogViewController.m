@@ -59,6 +59,7 @@ static NSAttributedString* s_attrNewLine = nil;
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     
+    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
         (void)level;

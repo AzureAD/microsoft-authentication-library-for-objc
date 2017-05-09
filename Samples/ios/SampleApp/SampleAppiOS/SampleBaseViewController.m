@@ -35,7 +35,10 @@
 
 - (void)showDialogForError:(NSError *)error
 {
-    __block UIAlertController *alert =
+    (void)error;
+    // Launching this UIAlert can cause problems if it happens right around the same time some other
+    // UI is trying to launch, and for now is disabled.
+    /*__block UIAlertController *alert =
     [UIAlertController alertControllerWithTitle:error.localizedDescription
                                         message:error.localizedFailureReason
                                  preferredStyle:UIAlertControllerStyleAlert];
@@ -46,7 +49,9 @@
     
     [self presentViewController:alert
                        animated:YES
-                     completion:nil];
+                     completion:nil];*/
+    
+    NSLog(@"App error: %@", error);
     
 }
 

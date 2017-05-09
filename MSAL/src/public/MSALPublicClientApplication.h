@@ -50,6 +50,12 @@
 /*! The redirect URI of the application */
 @property (readonly) NSURL *redirectUri;
 
+/*!
+    Used to specify query parameters that must be passed to both the authorize and token endpoints
+    to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
+ */
+@property NSDictionary<NSString *, NSString *> *sliceParameters;
+
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
 @property NSString *component;
@@ -101,16 +107,14 @@
 #pragma SafariViewController Support
 
 /*!
-    Returns whether or not the URL is a response to a MSAL web authentication
-    session. Call this before passing the URL into -handleMSALResponse:
+    Ask MSAL to handle a URL response.
+    
+    @param   response   URL response from your application delegate's openURL handler into
+                        MSAL for web authentication sessions
+    @return  YES if URL is a response to a MSAL web authentication session and handled,
+             NO otherwise.
  */
-+ (BOOL)isMSALResponse:(NSURL *)response;
-
-/*!
-    Pass a URL response from your application delegate's openURL handler into
-    MSAL for web authnetication sessions.
- */
-+ (void)handleMSALResponse:(NSURL *)response;
++ (BOOL)handleMSALResponse:(NSURL *)response;
 
 /*!
     Cancels any currently running interactive web authentication session, resulting

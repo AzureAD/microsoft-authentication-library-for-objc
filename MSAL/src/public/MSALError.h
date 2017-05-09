@@ -55,10 +55,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     /*!
         The required MSAL URL scheme is not registered in the app's info.plist.
-        The scheme "x-msauth-<bundle-id-with-hyphens-instead-of-periods>"
+        The scheme should be "msal<clientid>"
      
-        e.g. an app with the bundle ID "com.microsoft.testapp" would need to
-        register the scheme "x-msauth-com-microsoft-testapp" and add the
+        e.g. an app with the client ID "abcde-12345-vwxyz-67890" would need to
+        register the scheme "msalabcde-12345-vwxyz-67890" and add the
         following to the info.plist file:
      
         <key>CFBundleURLTypes</key>
@@ -70,7 +70,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
                 <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
                 <key>CFBundleURLSchemes</key>
                 <array>
-                    <string>x-msauth-com-microsoft-testapp</string>
+                    <string>msalabcde-12345-vwxyz-67890</string>
                 </array>
             </dict>
 
@@ -100,6 +100,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
+        MSAL received a valid token response, but it didn't contain an access token.
+        Check to make sure your application is consented to get all of the scopes you are asking for.
+     */
+    MSALErrorNoAccessTokenInResponse = -42105,
+    
+    /*!
         MSAL encounted an error when trying to store or retrieve items from
         keychain. Inspect NSUnderlyingError from the userInfo dictionary for
         more information about the specific error. Keychain error codes are
@@ -109,7 +115,6 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAmbiguousAuthority = -42201,
     MSALErrorUserNotFound = -42202,
     MSALErrorNoAccessTokensFound = -42203,
-    MSALErrorKeychainFailure = -42240,
     MSALErrorWrapperCacheFailure = -42270,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect

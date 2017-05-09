@@ -29,7 +29,7 @@
 
 @interface NSDictionary (MSALTestUtil)
 
-- (BOOL)compareDictionary:(NSDictionary *)dictionary;
+- (BOOL)compareToActual:(NSDictionary *)dictionary;
 
 - (NSString *)base64UrlJson;
 
@@ -40,5 +40,7 @@
     care about the actual value.
  */
 @interface MSALTestSentinel : NSObject
+
++ (instancetype)sentinel;
 
 @end

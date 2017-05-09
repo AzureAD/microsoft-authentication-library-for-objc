@@ -31,7 +31,7 @@
 {
     IBOutlet UIImageView *_profileImageView;
     IBOutlet UILabel *_nameLabel;
-    IBOutlet UITextView *_resultView;
+    IBOutlet UITableView *_tableView;
 }
 
 + (instancetype)sharedViewController;

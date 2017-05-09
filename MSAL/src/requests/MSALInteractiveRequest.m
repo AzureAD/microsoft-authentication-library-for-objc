@@ -110,11 +110,22 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     [[NSURLComponents alloc] initWithURL:_authority.authorizationEndpoint
                  resolvingAgainstBaseURL:NO];
     
+    // Query parameters can come through from the OIDC discovery on the authorization endpoint as well
+    // and we need to retain them when constructing our authorization uri
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
+    if (urlComponents.percentEncodedQuery)
+    {
+        NSDictionary *authorizationQueryParams = [NSDictionary msalURLFormDecode:urlComponents.percentEncodedQuery];
+        if (authorizationQueryParams)
+        {
+            [parameters addEntriesFromDictionary:authorizationQueryParams];
+        }
+    }
     
-    // TODO: Remove once uid+utid is in prod
-    parameters[@"slice"] = @"testslice";
-    parameters[@"uid"] = @"true";
+    if (_parameters.sliceParameters)
+    {
+        [parameters addEntriesFromDictionary:_parameters.sliceParameters];
+    }
     
     MSALUser *user = _parameters.user;
     if (user)
@@ -207,9 +218,9 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              NSString *errorDescription = params[OAUTH2_ERROR_DESCRIPTION];
              NSString *subError = params[OAUTH2_SUB_ERROR];
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
-             MSALLogError(_parameters, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
+             MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
              
-             NSError *msalError = MSALCreateError(code, errorDescription, authorizationError, subError, nil);
+             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil);
                           
              MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
              [self stopTelemetryEvent:event error:msalError];

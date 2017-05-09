@@ -77,7 +77,7 @@ static BOOL validBase64Characters(const byte* data, const int size)
 /// See RFC 4648, Section 5 plus switch characters 62 and 63 and no padding.
 /// For a good overview of Base64 encoding, see http://en.wikipedia.org/wiki/Base64
 /// </remarks>
-+ (NSData *)msalBase64DecodeData:(NSString *)encodedString
++ (NSData *)msalBase64UrlDecodeData:(NSString *)encodedString
 {
     if ( nil == encodedString )
     {
@@ -174,7 +174,7 @@ static BOOL validBase64Characters(const byte* data, const int size)
 
 - (NSString *)msalBase64UrlDecode
 {
-    NSData *decodedData = [self.class msalBase64DecodeData:self];
+    NSData *decodedData = [self.class msalBase64UrlDecodeData:self];
     
     return [[NSString alloc] initWithData:decodedData encoding:NSUTF8StringEncoding];
 }
@@ -196,7 +196,7 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
 /// See RFC 4648, Section 5 plus switch characters 62 and 63 and no padding.
 /// For a good overview of Base64 encoding, see http://en.wikipedia.org/wiki/Base64
 /// </remarks>
-+ (NSString *)msalBase64EncodeData:(NSData *)data
++ (NSString *)msalBase64UrlEncodeData:(NSData *)data
 {
     if ( nil == data )
         return nil;
@@ -276,7 +276,7 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
 {
     NSData *decodedData = [self dataUsingEncoding:NSUTF8StringEncoding];
     
-    return [NSString msalBase64EncodeData:decodedData];
+    return [NSString msalBase64UrlEncodeData:decodedData];
 }
 
 + (BOOL)msalIsStringNilOrBlank:(NSString *)string
@@ -371,7 +371,7 @@ static inline void Encode3bytesTo4bytes(char* output, int b0, int b1, int b2)
         return nil;
     }
     
-    return [NSString msalBase64EncodeData:data];
+    return [NSString msalBase64UrlEncodeData:data];
 }
 
 @end

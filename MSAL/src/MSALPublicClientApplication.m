@@ -63,7 +63,7 @@
         }
     }
     
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file.", scheme);
+    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"msal<clientID>\" format without any whitespaces.", scheme);
     
     return NO;
 }
@@ -107,6 +107,10 @@
 #endif
     _tokenCache = [[MSALTokenCache alloc] initWithDataSource:dataSource];
     
+    _validateAuthority = YES;
+    
+    _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
+    
     return self;
 }
 
@@ -126,7 +130,7 @@
 
 #pragma SafariViewController Support
 
-+ (BOOL)isMSALResponse:(NSURL *)response
++ (BOOL)handleMSALResponse:(NSURL *)response
 {
     if (!response)
     {
@@ -163,12 +167,7 @@
         return NO;
     }
     
-    return YES;
-}
-
-+ (void)handleMSALResponse:(NSURL *)response
-{
-    [MSALWebUI handleResponse:response];
+    return [MSALWebUI handleResponse:response];
 }
 
 + (void)cancelCurrentWebAuthSession
@@ -400,6 +399,7 @@
     params.apiId = apiId;
     params.user = user;
     params.validateAuthority = _validateAuthority;
+    params.sliceParameters = _sliceParameters;
     
     LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
@@ -478,6 +478,7 @@
     params.user = user;
     params.apiId = apiId;
     params.validateAuthority = _validateAuthority;
+    params.sliceParameters = _sliceParameters;
     
     [params setScopesFromArray:scopes];
     
@@ -556,6 +557,11 @@
 - (void)setTokenCache:(MSALTokenCache *)tokenCache
 {
     _tokenCache = tokenCache;
+}
+
++ (NSDictionary *)defaultSliceParameters
+{
+    return @{ DEFAULT_SLICE_PARAMS };
 }
 
 @end

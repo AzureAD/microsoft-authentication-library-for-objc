@@ -32,17 +32,57 @@
 
 @interface MSALUser : NSObject <NSCopying>
 
+/*!
+    The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ */
 @property (readonly) NSString *displayableId;
+
+/*!
+    The given name of the user. Can be nil if not returned by the service.
+ */
 @property (readonly) NSString *name;
+
+/*!
+    The identity provider of the user authenticated. Can be nil if not returned by the service.
+ */
 @property (readonly) NSString *identityProvider;
+
+/*!
+    Unique identifier of the user. Can be nil if not returned by the service.
+ */
 @property (readonly) NSString *uid;
+
+/*!
+    Unique tenant identifier of the user. Can be nil if not returned by the service.
+ */
 @property (readonly) NSString *utid;
+
+/*!
+    Host part of the authority string used for authentication.
+ */
 @property (readonly) NSString *environment;
 
+/*!
+    Initialize a MSALUser by extracting information from id token and client info.
+ 
+    @param  idToken             A MSALIdToken object that holds information extracted from the raw id token
+    @param  clientInfo          Client info returned by the service
+    @param  environment         Host part of the authority string
+ */
 - (id)initWithIdToken:(MSALIdToken *)idToken
            clientInfo:(MSALClientInfo *)clientInfo
           environment:(NSString *)environment;
 
+/*!
+    Initialize a MSALUser with given information
+ 
+    @param  displayableId       The displayable value in UserPrincipleName(UPN) format
+    @param  name                The given name of the user
+    @param  identityProvider    The identity provider of the user authenticated
+    @param  uid                 Unique identifier of the user
+    @param  utid                Unique tenant identifier of the user
+    @param  environment         Host part of the authority string
+ */
 - (id)initWithDisplayableId:(NSString *)displayableId
                        name:(NSString *)name
            identityProvider:(NSString *)identityProvider
@@ -50,6 +90,9 @@
                        utid:(NSString *)utid
                 environment:(NSString *)environment;
 
+/*!
+    Returns the unique identifier of the user, which is a combination of uid and utid properties
+ */
 - (NSString *)userIdentifier;
 
 @end
