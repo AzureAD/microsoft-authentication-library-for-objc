@@ -25,6 +25,29 @@
 
 @implementation MSALB2CPolicyTests
 
+- (void)setupURLSessionWithB2CAuthority:(NSString *)authority policy:(NSString *)policy
+{
+    NSString *query = [NSString stringWithFormat:@"p=%@", policy];
+    
+    MSALTestURLResponse *oidcResponse =
+    [MSALTestURLResponse oidcResponseForAuthority:authority
+                                      responseUrl:@"https://login.microsoftonline.com/contosob2c"
+                                            query:query];
+    
+    NSString *uid = [NSString stringWithFormat:@"1-%@", policy];
+    
+    // User identifier should be uid-policy
+    MSALTestURLResponse *tokenResponse =
+    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:@"https://login.microsoftonline.com/contosob2c"
+                                    query:query
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
+                               clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
+    
+    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+}
+
+
 /*
     This is an integraton test to verify that two acquireToken calls with two different B2C policies
     result in two fully functional users that can be retrieved and used.
@@ -40,21 +63,7 @@
     
     // Setup acquireToken with first policy (b2c_1_policy)
     NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
-    
-    MSALTestURLResponse *oidcResponse =
-    [MSALTestURLResponse oidcResponseForAuthority:firstAuthority
-                                      responseUrl:@"https://login.microsoftonline.com/contosob2c"
-                                            query:@"p=b2c_1_policy"];
-    
-    // User identifier should be uid-policy
-    MSALTestURLResponse *tokenResponse =
-    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
-                                authority:@"https://login.microsoftonline.com/contosob2c"
-                                    query:@"p=b2c_1_policy"
-                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
-                               clientInfo:@{ @"uid" : @"1-b2c_1_policy", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
-    
-    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
     
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
                            class:[MSALWebUI class]
@@ -108,17 +117,7 @@
     NSString *secondAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy";
     
     // Override oidc and token responses for the second policy
-    oidcResponse = [MSALTestURLResponse oidcResponseForAuthority:secondAuthority
-                                                     responseUrl:@"https://login.microsoftonline.com/contosob2c"
-                                                           query:@"p=b2c_2_policy"];
-    
-    tokenResponse = [MSALTestURLResponse authCodeResponse:@"i am an auth code"
-                                                authority:@"https://login.microsoftonline.com/contosob2c"
-                                                    query:@"p=b2c_2_policy"
-                                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
-                                               clientInfo:@{ @"uid" : @"1-b2c_2_policy", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
-    
-    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
     
     // Use an authority with a different policy in the second acquiretoken call
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
