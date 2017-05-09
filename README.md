@@ -53,7 +53,7 @@ These libraries are suitable to use in a production environment. We provide the 
         {
             // Check the error
         }
-    }
+    }]
 ```
 
 ## Installation
@@ -65,7 +65,12 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 ##### If you're building for iOS, tvOS, or watchOS
 
 1. Install Carthage on your Mac using a download from their website or if using Homebrew `brew install carthage`.
-1. We have already created a `Cartfile` that lists the MSAL library for this project on Github. We use the `/dev` branch.
+1. You must create a `Cartfile` that lists the MSAL library for this project on Github. 
+
+```
+github "AzureAD/microsoft-authentication-library-for-objc" "master"
+```
+
 1. Run `carthage update`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
 1. On your application targets’ “General” settings tab, in the “Linked Frameworks and Libraries” section, drag and drop the `MSAL.framework` from the `Carthage/Build` folder on disk.
 1. On your application targets’ “Build Phases” settings tab, click the “+” icon and choose “New Run Script Phase”. Create a Run Script in which you specify your shell (ex: `/bin/sh`), add the following contents to the script area below the shell:
@@ -148,6 +153,36 @@ If you find a security issue with our libraries or services please report it to 
     </array>
 ```
 
+Our library uses the SFSafariViewController for authentication. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session. 
+
+### Handling the redirect from the SFSafariViewController (Objective C)
+
+You will need to add the following to your `AppDelegate.m` file:
+
+```objective-c
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *,id> *)options
+{
+    
+    [MSALPublicClientApplication handleMSALResponse:url];
+    
+    return YES;
+}
+```
+
+### Handling the redirect from the SFSafariViewController (Swift)
+
+You will need to add the following to your `AppDelegate.swift` file:
+
+```swift
+func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        
+        MSALPublicClientApplication.handleMSALResponse(url)
+        
+        
+        return true
+    }
+```
+
 ### Creating an Application Object (Objective-C)
 Use the client ID from yout app listing when initializing your MSALPublicClientApplication object:
 ```objective-c
@@ -181,7 +216,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
         {
             // Check the error
         }
-    }
+    }]
 ```
 
 ### Acquiring Your First Token (Swift)
@@ -213,7 +248,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
         return;
     }
     
-    [application acquireTokenSilentForScopes:@["scope1"]
+    [application acquireTokenSilentForScopes:@[@"scope1"]
                                         user:user
                              completionBlock:^(MSALResult *result, NSError *error)
     {
@@ -231,7 +266,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
             
             // Other errors may require trying again later, or reporting authentication problems to the user
         }
-    }
+    }]
 ```
 
 ### Silently Acquiring an Updated Token (Swift)
@@ -241,11 +276,11 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
     
         if error == nil {
 
-          accessToken = result.accessToken!
+          accessToken = result!.accessToken
                         
         } else {
                         
-            if error.code == MSALErrorInteractionRequired {
+            if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
 
                // Interactive auth will be required
             }
