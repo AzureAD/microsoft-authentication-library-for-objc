@@ -184,14 +184,18 @@
 }
 
 
-- (void)testIsKnownHost
+- (void)testIsKnownHost_whenValid_shuldReturnTrue
 {
-    XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.windows.net"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.chinacloudapi.cn"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.com"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.de"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login-us.microsoftonline.com"]]);
+}
+
+- (void)testIsKnownHost_whenInvalid_shouldReturnFalse
+{
+    XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
 }
 
 - (void)testAuthorityAddToResolvedAuthority_whenNilAuthority_shouldReturnNo

@@ -45,7 +45,8 @@
     [super tearDown];
 }
 
-- (void)testClientInfoParse {
+- (void)testInitWithRawClientInfo_whenUidAndUtid_shouldParse
+{
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     
     NSError *error = nil;
@@ -57,7 +58,8 @@
     XCTAssertEqualObjects(clientInfo.utid, @"1234-5678-90abcdefg");
 }
 
-- (void)testBadClientInfo {
+- (void)testInitWithRawClientInfo_whenBadJson_shouldReturnNilWithError
+{
     NSString *base64String = @"badclientinfo";
     
     NSError *error = nil;
@@ -67,7 +69,8 @@
     XCTAssertNil(clientInfo);
 }
 
-- (void)testUniqueUserIdentifier {
+- (void)testUserIdentifier_whenUniqueUserIdentifier_shouldReturnUserIndentifier
+{
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
     
     NSError *error = nil;
