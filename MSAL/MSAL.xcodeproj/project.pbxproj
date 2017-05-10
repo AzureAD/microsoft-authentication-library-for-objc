@@ -94,6 +94,7 @@
 		96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96EA2EEE1E721A4D00EE2FC6 /* MSALAutoResultViewController.m */; };
 		96ED57F41E4D52180063B3EE /* MSALURLSessionDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 96ED57F21E4D52180063B3EE /* MSALURLSessionDelegate.h */; };
 		96ED57F61E4D52180063B3EE /* MSALURLSessionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 96ED57F31E4D52180063B3EE /* MSALURLSessionDelegate.m */; };
+		B25F1BB71EC3C46200474D1B /* MSALAccessTokenCacheItem+TestAppUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B27724251EAEC14000375C53 /* MSALAccessTokenCacheItem+TestAppUtil.m */; };
 		B277241E1EAE97D700375C53 /* MSALStressTestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = B277241D1EAE97D700375C53 /* MSALStressTestHelper.m */; };
 		B27724261EAEC14000375C53 /* MSALAccessTokenCacheItem+TestAppUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B27724251EAEC14000375C53 /* MSALAccessTokenCacheItem+TestAppUtil.m */; };
 		B27724271EAEC14000375C53 /* MSALAccessTokenCacheItem+TestAppUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B27724251EAEC14000375C53 /* MSALAccessTokenCacheItem+TestAppUtil.m */; };
@@ -1705,6 +1706,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B25F1BB71EC3C46200474D1B /* MSALAccessTokenCacheItem+TestAppUtil.m in Sources */,
 				96EA2EF11E721A5200EE2FC6 /* MSALAutoRequestViewController.m in Sources */,
 				962E37ED1E72139100DE71FE /* MSALAutoMainViewController.m in Sources */,
 				963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */,

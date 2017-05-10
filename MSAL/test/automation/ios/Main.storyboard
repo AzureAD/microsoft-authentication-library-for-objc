@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -42,6 +42,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="acquireTokenSilent"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="acquireTokenSilent:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="tkh-C2-RPH"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t0I-aR-BPj">
                                         <rect key="frame" x="0.0" y="80" width="375" height="30"/>
@@ -50,14 +53,20 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="expireAccessToken"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="expireAccessToken:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="pNW-Oa-jK0"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pf6-OO-qrL">
                                         <rect key="frame" x="0.0" y="120" width="375" height="30"/>
                                         <accessibility key="accessibilityConfiguration" identifier="clearCache"/>
-                                        <state key="normal" title="Expire AT and invalidate RT"/>
+                                        <state key="normal" title="Invalidate Refresh Token"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="invalidateRefreshToken"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="invalidateRefreshToken:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="ZEM-co-WLl"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C6A-Ww-dPQ">
                                         <rect key="frame" x="0.0" y="160" width="375" height="30"/>

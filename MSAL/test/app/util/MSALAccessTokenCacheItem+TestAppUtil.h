@@ -27,6 +27,8 @@
 
 #import "MSALAccessTokenCacheItem.h"
 
+#define BAD_REFRESH_TOKEN @"bad-refresh-token"
+
 @interface MSALAccessTokenCacheItem (TestAppUtil)
 
 @property NSString *expiresOnString;
