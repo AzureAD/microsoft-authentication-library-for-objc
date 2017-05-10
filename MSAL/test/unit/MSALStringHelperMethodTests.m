@@ -53,7 +53,7 @@
     XCTAssertTrue([NSString msalIsStringNilOrBlank:nil], "Should return true for nil.");
 }
 
-- (void)testMsalIsStringNilOrBlank__whenBlankSpaceOnly_shouldReturnTrue
+- (void)testMsalIsStringNilOrBlank_whenBlankSpaceOnly_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@" "], "Should return true for nil.");
 }
@@ -74,7 +74,7 @@
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@" \r\n\t  \t\r\n"], "Should return true for nil.");
 }
 
-- (void)testMsalIsStringNilOrBlank_whenNotEmpty_shouldReturnFalce
+- (void)testMsalIsStringNilOrBlank_whenNotEmpty_shouldReturnFalse
 {
     //Prefix by white space:
     NSString* str = @"  text";
