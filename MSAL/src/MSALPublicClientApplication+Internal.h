@@ -27,8 +27,8 @@
 
 #import "MSALPublicClientApplication.h"
 
-// TODO: Remove these defaults once uid/client info is in prod
-#define DEFAULT_SLICE_PARAMS @"slice" : @"testslice", @"uid" : @"true"
+// If modifying this make sure UT_SLICE_PARAMS_QUERY matches
+#define DEFAULT_SLICE_PARAMS
 
 @class MSALTokenCache;
 
