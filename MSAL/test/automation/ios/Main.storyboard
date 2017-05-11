@@ -75,6 +75,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="readCache"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="readCache:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="bJE-Iu-qzS"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wbg-Oq-UjV">
                                         <rect key="frame" x="0.0" y="200" width="375" height="30"/>
@@ -83,6 +86,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCache"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="clearCache:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="K5i-V5-FqF"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KCg-uq-e4H">
                                         <rect key="frame" x="0.0" y="240" width="375" height="30"/>
@@ -90,6 +96,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="getUsers"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="getUsers:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="wQJ-ID-nS6"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8EH-37-udP">
                                         <rect key="frame" x="0.0" y="280" width="375" height="30"/>
@@ -97,6 +106,9 @@
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="signOut"/>
                                         </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="signOut:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="pxP-hm-5ZN"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>

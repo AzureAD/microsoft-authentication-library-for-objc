@@ -33,6 +33,13 @@
 #import "MSALAutoRequestViewController.h"
 #import "MSALAccessTokenCacheItem+TestAppUtil.h"
 
+#import "MSALAccessTokenCacheItem+Automation.h"
+#import "MSALRefreshTokenCacheItem+Automation.h"
+#import "MSALUser+Automation.h"
+#import "MSALResult+Automation.h"
+
+#import "MSALAutomationConstants.h"
+
 #import "MSAL.h"
 
 @interface MSALAutoMainViewController ()
@@ -43,6 +50,13 @@
 @end
 
 @implementation MSALAutoMainViewController
+
+#define SHOW_REQUEST_SEGUE          @"showRequest"
+#define SHOW_RESULT_SEGUE           @"showResult"
+
+#define RESULT_INFO_PARAM           @"resultInfo"
+#define RESULT_LOGS_PARAM           @"resultLogs"
+#define COMPLETION_BLOCK_PARAM      @"completionBlock"
 
 #pragma mark - View Lifecycle
 
@@ -73,49 +87,45 @@
 {
     (void)sender;
     
-    if ([segue.identifier isEqualToString:@"showRequest"])
+    if ([segue.identifier isEqualToString:SHOW_REQUEST_SEGUE])
     {
         MSALAutoRequestViewController *requestVC = segue.destinationViewController;
-        requestVC.completionBlock = sender[@"completionBlock"];
+        requestVC.completionBlock = sender[COMPLETION_BLOCK_PARAM];
     }
     
-    
-    if ([segue.identifier isEqualToString:@"showResult"])
+    if ([segue.identifier isEqualToString:SHOW_RESULT_SEGUE])
     {
         MSALAutoResultViewController *resultVC = segue.destinationViewController;
-        resultVC.resultInfoString = sender[@"resultInfo"];
-        resultVC.resultLogsString = sender[@"resultLogs"];
+        resultVC.resultInfoString = sender[RESULT_INFO_PARAM];
+        resultVC.resultLogsString = sender[RESULT_LOGS_PARAM];
     }
 }
 
 #pragma mark - Utils
 
-- (BOOL)parametersHaveError:(NSDictionary<NSString *, NSString *> *)parameters
+- (BOOL)checkParametersError:(NSDictionary<NSString *, NSString *> *)parameters
 {
     _resultLogs = [NSMutableString new];
     
-    if (parameters[@"error"])
+    if (parameters[MSAL_AUTOMATION_ERROR_PARAM])
     {
-        [self dismissViewControllerAnimated:NO completion:^{
-            [self displayResultJson:parameters[@"error"]
-                               logs:_resultLogs];
-        }];
+        [self displayOperationResultString:parameters[MSAL_AUTOMATION_ERROR_PARAM]];
         
-        return YES;
+        return NO;
     }
     
-    return NO;
+    return YES;
 }
 
 - (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
 {
-    BOOL validateAuthority = parameters[@"validate_authority"] ? [parameters[@"validate_authority"] boolValue] : YES;
+    BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
     
     NSError *error = nil;
     
     MSALPublicClientApplication *clientApplication =
-    [[MSALPublicClientApplication alloc] initWithClientId:parameters[@"client_id"]
-                                                authority:parameters[@"authority"]
+    [[MSALPublicClientApplication alloc] initWithClientId:parameters[MSAL_CLIENT_ID_PARAM]
+                                                authority:parameters[MSAL_AUTHORITY_PARAM]
                                                     error:&error];
     
     clientApplication.validateAuthority = validateAuthority;
@@ -132,7 +142,7 @@
 - (MSALUser *)userWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
                      application:(MSALPublicClientApplication *)application
 {
-    NSString *userIdentifier = parameters[@"user_identifier"];
+    NSString *userIdentifier = parameters[MSAL_USER_IDENTIFIER_PARAM];
     MSALUser *user = nil;
     
     NSError *error = nil;
@@ -143,7 +153,8 @@
         
         if (error)
         {
-            [self displayError:error];
+            [self displayResultJson:[self createJsonStringFromError:error]
+                               logs:_resultLogs];
             return nil;
         }
     }
@@ -156,15 +167,10 @@
     [self dismissViewControllerAnimated:NO
                              completion:^{
                                  
-                                 if (error)
-                                 {
-                                     [self displayError:error];
-                                 }
-                                 else
-                                 {
-                                     [self displayResultJson:[self createJsonFromResult:result]
-                                                        logs:_resultLogs];
-                                 }
+                                 NSString *resultString = error ? [self createJsonStringFromError:error] : [self createJsonFromResult:result];
+                                 
+                                 [self displayResultJson:resultString
+                                                    logs:_resultLogs];
                              }];
 }
 
@@ -176,7 +182,7 @@
     
     MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
     {
-        if ([self parametersHaveError:parameters])
+        if (![self checkParametersError:parameters])
         {
             return;
         }
@@ -190,17 +196,17 @@
         
         MSALUser *user = [self userWithParameters:parameters application:application]; // User is not required for acquiretoken
         
-        NSArray *scopes = (NSArray *)parameters[@"scopes"];
-        NSArray *extraScopes = (NSArray *)parameters[@"extra_scopes"];
-        NSDictionary *extraQueryParameters = (NSDictionary *)parameters[@"extra_qp"];
-        NSUUID *correlationId = parameters[@"correlation_id"] ? [[NSUUID alloc] initWithUUIDString:parameters[@"correlation_id"]] : nil;
+        NSArray *scopes = (NSArray *)parameters[MSAL_SCOPES_PARAM];
+        NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
+        NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
+        NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         
         [application acquireTokenForScopes:scopes
                       extraScopesToConsent:extraScopes
                                       user:user
                                 uiBehavior:MSALUIBehaviorDefault
                       extraQueryParameters:extraQueryParameters
-                                 authority:nil // Will use the authority passed in the application object
+                                 authority:nil // Will use the authority passed in with the application object
                              correlationId:correlationId
                            completionBlock:^(MSALResult *result, NSError *error)
          {
@@ -208,7 +214,7 @@
          }];
     };
     
-    [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
     
 }
 
@@ -218,7 +224,7 @@
     
     MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
     {
-        if ([self parametersHaveError:parameters])
+        if (![self checkParametersError:parameters])
         {
             return;
         }
@@ -238,9 +244,9 @@
             return;
         }
         
-        NSArray *scopes = (NSArray *)parameters[@"scopes"];
-        BOOL forceRefresh = parameters[@"force_refresh"] ? [parameters[@"force_refresh"] boolValue] : NO;
-        NSUUID *correlationId = parameters[@"correlation_id"] ? [[NSUUID alloc] initWithUUIDString:parameters[@"correlation_id"]] : nil;
+        NSArray *scopes = (NSArray *)parameters[MSAL_SCOPES_PARAM];
+        BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
+        NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         
         [application acquireTokenSilentForScopes:scopes
                                             user:user
@@ -253,7 +259,7 @@
          }];
     };
     
-    [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
 #pragma mark - Cache
@@ -264,20 +270,20 @@
     
     MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
     {
-        if ([self parametersHaveError:parameters])
+        if (![self checkParametersError:parameters])
         {
             return;
         }
         
         MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
         
-        MSALScopes *scopes = [NSOrderedSet orderedSetWithArray:(NSArray *)parameters[@"scopes"]];
+        MSALScopes *scopes = [NSOrderedSet orderedSetWithArray:(NSArray *)parameters[MSAL_SCOPES_PARAM]];
         
-        MSALAccessTokenCacheKey *tokenCacheKey = [[MSALAccessTokenCacheKey alloc] initWithAuthority:parameters[@"authority"]
-                                                                                           clientId:parameters[@"client_id"]
+        MSALAccessTokenCacheKey *tokenCacheKey = [[MSALAccessTokenCacheKey alloc] initWithAuthority:parameters[MSAL_AUTHORITY_PARAM]
+                                                                                           clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                               scope:scopes
-                                                                                     userIdentifier:parameters[@"user_identifier"]
-                                                                                        environment:parameters[@"user_environment"]];
+                                                                                     userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
+                                                                                        environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]];
         
         NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:tokenCacheKey context:nil error:nil];
         
@@ -290,13 +296,11 @@
             accessTokenCount++;
         }
         
-        [self dismissViewControllerAnimated:NO completion:^{
-            [self displayResultJson:[NSString stringWithFormat:@"{\"expired_access_token_count\":\"%lu\"}", (unsigned long)accessTokenCount]
-                               logs:_resultLogs];
-        }];
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, (unsigned long)accessTokenCount];
+        [self displayOperationResultString:resultString];
     };
     
-    [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
 - (IBAction)invalidateRefreshToken:(id)sender
@@ -305,16 +309,16 @@
     
     MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
     {
-        if ([self parametersHaveError:parameters])
+        if (![self checkParametersError:parameters])
         {
             return;
         }
         
         MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
         
-        MSALRefreshTokenCacheKey *tokenCacheKey = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:parameters[@"user_environment"]
-                                                                                               clientId:parameters[@"client_id"]
-                                                                                         userIdentifier:parameters[@"user_identifier"]];
+        MSALRefreshTokenCacheKey *tokenCacheKey = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:parameters[MSAL_USER_ENVIRONMENT_PARAM]
+                                                                                               clientId:parameters[MSAL_CLIENT_ID_PARAM]
+                                                                                         userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]];
         
         MSALRefreshTokenCacheItem *tokenCacheItem = [cache getRefreshTokenItemForKey:tokenCacheKey context:nil error:nil];
         
@@ -324,29 +328,158 @@
             [cache addOrUpdateRefreshTokenItem:tokenCacheItem context:nil error:nil];
         }
         
-        [self dismissViewControllerAnimated:NO completion:^{
-            [self displayResultJson:[NSString stringWithFormat:@"{\"invalidated_refresh_token\":\"%@\"}", tokenCacheItem ? @"yes" : @"no"]
-                               logs:_resultLogs];
-        }];
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_INVALIDATED_REFRESH_TOKEN_PARAM, tokenCacheItem ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+        
+        [self displayOperationResultString:resultString];
     };
     
-    [self performSegueWithIdentifier:@"showRequest" sender:@{@"completionBlock" : completionBlock}];
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
+}
+
+- (IBAction)clearCache:(id)sender
+{
+    (void)sender;
+    
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    
+    NSArray *allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
+    NSArray *allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
+    
+    NSUInteger allCount = allAccessTokenItems.count + allRefreshTokenItems.count;
+    
+    [cache testRemoveAll];
+    
+    NSString *resultCountsString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_CLEARED_TOKENS_COUNT_PARAM, (unsigned long)allCount];
+    [self displayResultJson:resultCountsString logs:_resultLogs];
+}
+
+- (IBAction)readCache:(id)sender
+{
+    (void)sender;
+    
+    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+    
+    NSArray *allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
+    NSArray *allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
+    
+    NSMutableDictionary *cacheDictionary = [NSMutableDictionary dictionary];
+    NSUInteger allCount = allAccessTokenItems.count + allRefreshTokenItems.count;
+    
+    [cacheDictionary setObject:@(allCount) forKey:MSAL_ITEM_COUNT_PARAM];
+    
+    NSMutableArray *accessTokenItems = [NSMutableArray array];
+    
+    for (MSALAccessTokenCacheItem *accessToken in allAccessTokenItems)
+    {
+        [accessTokenItems addObject:[accessToken msalItemAsDictionary]];
+    }
+    
+    [cacheDictionary setObject:accessTokenItems forKey:MSAL_ACCESS_TOKENS_PARAM];
+    
+    NSMutableArray *refreshTokenItems = [NSMutableArray array];
+    
+    for (MSALRefreshTokenCacheItem *refreshToken in allRefreshTokenItems)
+    {
+        [refreshTokenItems addObject:[refreshToken msalItemAsDictionary]];
+    }
+    
+    [cacheDictionary setObject:refreshTokenItems forKey:MSAL_REFRESH_TOKENS_PARAM];
+    
+    [self displayResultJson:[self createJsonStringFromDictionary:cacheDictionary]
+                       logs:_resultLogs];
+}
+
+#pragma mark - Users
+
+- (IBAction)signOut:(id)sender
+{
+    (void)sender;
+    
+    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
+    {
+        if (![self checkParametersError:parameters])
+        {
+            return;
+        }
+        
+        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+        
+        BOOL result = [cache removeAllTokensForUserIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
+                                                  environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]
+                                                     clientId:parameters[MSAL_CLIENT_ID_PARAM]
+                                                      context:nil
+                                                        error:nil];
+        
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+        
+        [self displayOperationResultString:resultString];
+    };
+    
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
+}
+
+- (IBAction)getUsers:(id)sender
+{
+    (void)sender;
+    
+    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
+    {
+        if (![self checkParametersError:parameters])
+        {
+            return;
+        }
+        
+        MSALPublicClientApplication *application = [self applicationWithParameters:parameters];
+        
+        if (!application)
+        {
+            return;
+        }
+        
+        NSError *error = nil;
+        NSArray *users = [application users:nil];
+        
+        if (error)
+        {
+            [self displayError:error];
+            return;
+        }
+        
+        NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
+        [resultDictionary setObject:@([users count]) forKey:MSAL_USER_COUNT_PARAM];
+        
+        NSMutableArray *items = [NSMutableArray array];
+        
+        for (MSALUser *user in users)
+        {
+            [items addObject:[user msalItemAsDictionary]];
+        }
+        
+        [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
+        
+        [self displayOperationResultString:[self createJsonStringFromDictionary:resultDictionary]];
+    };
+    
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
 #pragma mark - Helpers
 
 - (void)displayError:(NSError *)error
 {
-    NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-    
-    [self displayResultJson:[NSString stringWithFormat:@"{\"error\" : \"%@\"}", errorString]
-                       logs:_resultLogs];
+    [self displayOperationResultString:[self createJsonStringFromError:error]];
 }
 
 - (void)displayResultJson:(NSString *)resultJson logs:(NSString *)resultLogs
 {
-    [self performSegueWithIdentifier:@"showResult" sender:@{@"resultInfo":resultJson,
-                                                            @"resultLogs":resultLogs}];
+    [self performSegueWithIdentifier:SHOW_RESULT_SEGUE sender:@{RESULT_INFO_PARAM : resultJson ? resultJson : @"",
+                                                                RESULT_LOGS_PARAM : resultLogs ? resultLogs : @""}];
+}
+
+- (NSString *)createJsonStringFromError:(NSError *)error
+{
+    NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+    return [NSString stringWithFormat:@"{\"error\" : \"%@\"}", errorString];
 }
 
 - (NSString *)createJsonStringFromDictionary:(NSDictionary *)dictionary
@@ -366,12 +499,15 @@
 
 - (NSString *)createJsonFromResult:(MSALResult *)result
 {
-    // TODO: settle on what to show for test to succeed
-    return [self createJsonStringFromDictionary:
-            @{@"access_token":result.accessToken,
-              @"scopes":result.scopes,
-              @"tenantId":(result.tenantId) ? result.tenantId : @"",
-              @"expires_on":[NSString stringWithFormat:@"%f", result.expiresOn.timeIntervalSince1970]}];
+    return [self createJsonStringFromDictionary:[result msalItemAsDictionary]];
+}
+
+- (void)displayOperationResultString:(NSString *)operationResult
+{
+    [self dismissViewControllerAnimated:NO completion:^{
+        [self displayResultJson:operationResult
+                           logs:_resultLogs];
+    }];
 }
 
 @end

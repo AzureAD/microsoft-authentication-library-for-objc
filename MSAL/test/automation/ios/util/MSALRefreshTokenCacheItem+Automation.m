@@ -25,48 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutoRequestViewController.h"
-#import "MSALAutoSettings.h"
-#import "MSALAutomationConstants.h"
+#import "MSALRefreshTokenCacheItem+Automation.h"
+#import "MSALUser+Automation.h"
 
-@interface MSALAutoRequestViewController ()
+@implementation MSALRefreshTokenCacheItem (Automation)
 
-@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
-@property (strong, nonatomic) IBOutlet UIButton *requestGo;
-
-@end
-
-@implementation MSALAutoRequestViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-- (IBAction)go:(id)sender {
+- (NSDictionary *)msalItemAsDictionary
+{
+    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
+    [resultDict setValue:self.refreshToken forKey:@"refresh_token"];
     
-    (void)sender;
-    
-    self.requestInfo.editable = NO;
-    self.requestGo.enabled = NO;
-    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
-    
-    NSError *error = nil;
-    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    if (!params)
+    if (self.user)
     {
-        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-        
-        params = @{ MSAL_AUTOMATION_ERROR_PARAM : errorString };
+        [resultDict addEntriesFromDictionary:[self.user msalItemAsDictionary]];
     }
     
-    self.completionBlock(params);
+    return resultDict;
 }
 
 @end

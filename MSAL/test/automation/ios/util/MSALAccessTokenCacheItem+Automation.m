@@ -25,48 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutoRequestViewController.h"
-#import "MSALAutoSettings.h"
-#import "MSALAutomationConstants.h"
+#import "MSALAccessTokenCacheItem+Automation.h"
+#import "MSALUser+Automation.h"
 
-@interface MSALAutoRequestViewController ()
+@implementation MSALAccessTokenCacheItem (Automation)
 
-@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
-@property (strong, nonatomic) IBOutlet UIButton *requestGo;
-
-@end
-
-@implementation MSALAutoRequestViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-- (IBAction)go:(id)sender {
+- (NSDictionary *)msalItemAsDictionary
+{
+    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
+    [resultDict setValue:self.authority forKey:@"authority"];
+    [resultDict setValue:self.rawIdToken forKey:@"id_token"];
+    [resultDict setValue:self.uniqueId forKey:@"unique_id"];
+    [resultDict setValue:self.accessToken forKey:@"access_token"];
+    [resultDict setValue:self.tokenType forKey:@"token_type"];
+    [resultDict setValue:[NSString stringWithFormat:@"%ld", (long)self.expiresOn.timeIntervalSince1970] forKey:@"expires_on"];
+    [resultDict setValue:self.scope.msalToString forKey:@"scope"];
+    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
+    [resultDict setValue:self.clientId forKey:@"client_id"];
     
-    (void)sender;
-    
-    self.requestInfo.editable = NO;
-    self.requestGo.enabled = NO;
-    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
-    
-    NSError *error = nil;
-    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    if (!params)
+    if (self.user)
     {
-        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-        
-        params = @{ MSAL_AUTOMATION_ERROR_PARAM : errorString };
+        [resultDict addEntriesFromDictionary:[self.user msalItemAsDictionary]];
     }
     
-    self.completionBlock(params);
+    return resultDict;
 }
 
 @end

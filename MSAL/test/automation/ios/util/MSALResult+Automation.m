@@ -25,48 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutoRequestViewController.h"
-#import "MSALAutoSettings.h"
-#import "MSALAutomationConstants.h"
+#import "MSALResult+Automation.h"
+#import "MSALUser+Automation.h"
 
-@interface MSALAutoRequestViewController ()
+@implementation MSALResult (Automation)
 
-@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
-@property (strong, nonatomic) IBOutlet UIButton *requestGo;
-
-@end
-
-@implementation MSALAutoRequestViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-- (IBAction)go:(id)sender {
-    
-    (void)sender;
-    
-    self.requestInfo.editable = NO;
-    self.requestGo.enabled = NO;
-    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
-    
-    NSError *error = nil;
-    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    if (!params)
-    {
-        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-        
-        params = @{ MSAL_AUTOMATION_ERROR_PARAM : errorString };
-    }
-    
-    self.completionBlock(params);
+- (NSDictionary *)msalItemAsDictionary
+{
+    return @{@"access_token" : self.accessToken,
+             @"scopes" : self.scopes,
+             @"tenantId" : (self.tenantId) ? self.tenantId : @"",
+             @"expires_on" : [NSString stringWithFormat:@"%f", self.expiresOn.timeIntervalSince1970],
+             @"id_token" : self.idToken ? self.idToken : @"",
+             @"user" : self.user ? [self.user msalItemAsDictionary] : @""};
 }
 
 @end
