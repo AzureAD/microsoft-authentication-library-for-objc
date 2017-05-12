@@ -30,14 +30,13 @@
 
 @implementation MSALRefreshTokenCacheItem (Automation)
 
-- (NSDictionary *)msalItemAsDictionary
+- (NSDictionary *)itemAsDictionary
 {
-    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [resultDict setValue:self.refreshToken forKey:@"refresh_token"];
+    NSMutableDictionary *resultDict = [self->_json mutableCopy];
     
     if (self.user)
     {
-        [resultDict addEntriesFromDictionary:[self.user msalItemAsDictionary]];
+        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
     }
     
     return resultDict;

@@ -371,7 +371,7 @@
     
     for (MSALAccessTokenCacheItem *accessToken in allAccessTokenItems)
     {
-        [accessTokenItems addObject:[accessToken msalItemAsDictionary]];
+        [accessTokenItems addObject:[accessToken itemAsDictionary]];
     }
     
     [cacheDictionary setObject:accessTokenItems forKey:MSAL_ACCESS_TOKENS_PARAM];
@@ -380,7 +380,7 @@
     
     for (MSALRefreshTokenCacheItem *refreshToken in allRefreshTokenItems)
     {
-        [refreshTokenItems addObject:[refreshToken msalItemAsDictionary]];
+        [refreshTokenItems addObject:[refreshToken itemAsDictionary]];
     }
     
     [cacheDictionary setObject:refreshTokenItems forKey:MSAL_REFRESH_TOKENS_PARAM];
@@ -452,7 +452,7 @@
         
         for (MSALUser *user in users)
         {
-            [items addObject:[user msalItemAsDictionary]];
+            [items addObject:[user itemAsDictionary]];
         }
         
         [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
@@ -499,7 +499,7 @@
 
 - (NSString *)createJsonFromResult:(MSALResult *)result
 {
-    return [self createJsonStringFromDictionary:[result msalItemAsDictionary]];
+    return [self createJsonStringFromDictionary:[result itemAsDictionary]];
 }
 
 - (void)displayOperationResultString:(NSString *)operationResult

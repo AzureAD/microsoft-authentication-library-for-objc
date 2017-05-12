@@ -29,6 +29,6 @@
 
 @interface MSALUser (Automation)
 
-- (NSDictionary *)msalItemAsDictionary;
+- (NSDictionary *)itemAsDictionary;
 
 @end

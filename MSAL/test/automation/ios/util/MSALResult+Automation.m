@@ -30,14 +30,14 @@
 
 @implementation MSALResult (Automation)
 
-- (NSDictionary *)msalItemAsDictionary
+- (NSDictionary *)itemAsDictionary
 {
     return @{@"access_token" : self.accessToken,
              @"scopes" : self.scopes,
              @"tenantId" : (self.tenantId) ? self.tenantId : @"",
              @"expires_on" : [NSString stringWithFormat:@"%f", self.expiresOn.timeIntervalSince1970],
              @"id_token" : self.idToken ? self.idToken : @"",
-             @"user" : self.user ? [self.user msalItemAsDictionary] : @""};
+             @"user" : self.user ? [self.user itemAsDictionary] : @""};
 }
 
 @end

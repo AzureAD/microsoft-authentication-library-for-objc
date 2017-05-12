@@ -29,7 +29,7 @@
 
 @implementation MSALUser (Automation)
 
-- (NSDictionary *)msalItemAsDictionary
+- (NSDictionary *)itemAsDictionary
 {
     NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
     [resultDict setValue:self.displayableId forKey:@"displayable_id"];

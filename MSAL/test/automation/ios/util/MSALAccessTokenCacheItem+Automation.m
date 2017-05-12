@@ -30,22 +30,14 @@
 
 @implementation MSALAccessTokenCacheItem (Automation)
 
-- (NSDictionary *)msalItemAsDictionary
+- (NSDictionary *)itemAsDictionary
 {
-    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [resultDict setValue:self.authority forKey:@"authority"];
-    [resultDict setValue:self.rawIdToken forKey:@"id_token"];
-    [resultDict setValue:self.uniqueId forKey:@"unique_id"];
-    [resultDict setValue:self.accessToken forKey:@"access_token"];
-    [resultDict setValue:self.tokenType forKey:@"token_type"];
-    [resultDict setValue:[NSString stringWithFormat:@"%ld", (long)self.expiresOn.timeIntervalSince1970] forKey:@"expires_on"];
-    [resultDict setValue:self.scope.msalToString forKey:@"scope"];
+    NSMutableDictionary *resultDict = [self->_json mutableCopy];
     [resultDict setValue:self.tenantId forKey:@"tenant_id"];
-    [resultDict setValue:self.clientId forKey:@"client_id"];
     
     if (self.user)
     {
-        [resultDict addEntriesFromDictionary:[self.user msalItemAsDictionary]];
+        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
     }
     
     return resultDict;

@@ -29,6 +29,6 @@
 
 @interface MSALResult (Automation)
 
-- (NSDictionary *)msalItemAsDictionary;
+- (NSDictionary *)itemAsDictionary;
 
 @end

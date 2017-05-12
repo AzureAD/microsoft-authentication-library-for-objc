@@ -29,6 +29,6 @@
 
 @interface MSALAccessTokenCacheItem (Automation)
 
-- (NSDictionary *)msalItemAsDictionary;
+- (NSDictionary *)itemAsDictionary;
 
 @end

@@ -29,6 +29,6 @@
 
 @interface MSALRefreshTokenCacheItem (Automation)
 
-- (NSDictionary *)msalItemAsDictionary;
+- (NSDictionary *)itemAsDictionary;
 
 @end
