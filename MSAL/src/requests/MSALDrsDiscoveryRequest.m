@@ -61,7 +61,7 @@
     CHECK_ERROR_COMPLETION(domain, context, MSALErrorInvalidParameter, @"Domain cannot be nil.");
     
     MSALWebAuthRequest *request =
-    [[MSALWebAuthRequest alloc] initWithURL:[self.class urlForDrsDiscoveryForDomain:domain adfsType:type]
+    [[MSALWebAuthRequest alloc] initWithURL:[self urlForDrsDiscoveryForDomain:domain adfsType:type]
                                     context:context];
     
     [request sendGet:^(MSALHttpResponse *response, NSError *error) {
@@ -72,7 +72,7 @@
                                                                                          error:&jsonError];
         if (jsonError)
         {
-            completionBlock(nil, error);
+            completionBlock(nil, jsonError);
             return;
         }
         

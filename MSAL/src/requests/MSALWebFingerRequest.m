@@ -56,7 +56,7 @@
     CHECK_ERROR_COMPLETION(authority, context, MSALErrorInvalidParameter, @"authority cannot be nil.");
     
     MSALWebAuthRequest *request =
-    [[MSALWebAuthRequest alloc] initWithURL:[self.class urlForWebFinger:authenticationEndpoint absoluteAuthority:authority.absoluteString]
+    [[MSALWebAuthRequest alloc] initWithURL:[self urlForWebFinger:authenticationEndpoint absoluteAuthority:authority.absoluteString]
                                     context:context];
     
     [request sendGet:^(MSALHttpResponse *response, NSError *error) {
@@ -67,7 +67,7 @@
         
         if (jsonError)
         {
-            completionBlock(nil, error);
+            completionBlock(nil, jsonError);
             return;
         }
         
