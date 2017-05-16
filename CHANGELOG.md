@@ -1,3 +1,7 @@
+## [0.1.1] - 2017-05-10
+### Changed
+- MSAL for ObjC no longer targets test slice by default (#195)
+
 ## [0.1.0] - 2017-05-08
 ### Added
 - Initial BUILD Preview Release of MSAL for ObjC!

@@ -1190,6 +1190,7 @@
 				D62746D81E9B5F1E00EFCE99 /* MSALUserTests.m */,
 				60A0E2911EA0330000A5684C /* MSALTokenCacheTests.m */,
 				D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */,
+				B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -1950,6 +1951,7 @@
 				D61F5B9B1E57959900912CB8 /* MSALWebUITestsiOS.m in Sources */,
 				D61F5BD71E59682200912CB8 /* MSALTestAuthority.m in Sources */,
 				60DEF1441E65455A00966664 /* MSALTokenCacheItemTests.m in Sources */,
+				B25F1BB31EC257F900474D1B /* MSALB2CPolicyTests.m in Sources */,
 				D61F5BDB1E59694300912CB8 /* NSDictionary+MSALTestUtil.m in Sources */,
 				D61F5BC31E59193500912CB8 /* MSALFakeViewController.m in Sources */,
 				D69ADB3B1E516F9B00952049 /* MSALTestSwizzle.m in Sources */,

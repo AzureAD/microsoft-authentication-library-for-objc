@@ -195,6 +195,19 @@ static bool AmIBeingDebugged(void)
                                     query:(NSString *)query
                                    scopes:(MSALScopes *)scopes
 {
+    return [self authCodeResponse:authcode
+                        authority:authority
+                            query:query
+                           scopes:scopes
+                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}]; // Use default client info here
+}
+
++ (MSALTestURLResponse *)authCodeResponse:(NSString *)authcode
+                                authority:(NSString *)authority
+                                    query:(NSString *)query
+                                   scopes:(MSALScopes *)scopes
+                               clientInfo:(NSDictionary *)clientInfo
+{
     NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
     [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
@@ -236,7 +249,7 @@ static bool AmIBeingDebugged(void)
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]} base64UrlJson] } ];
+                                             @"client_info" : [clientInfo base64UrlJson] } ];
     
     return tokenResponse;
 }
