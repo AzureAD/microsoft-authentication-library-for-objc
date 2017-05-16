@@ -47,8 +47,8 @@
  */
 @interface MSALTelemetry : NSObject
 
-+ (nullable instancetype)new __attribute__((unavailable("new is unavailable, use sharedInstance instead.")));
-- (nullable instancetype)init __attribute__((unavailable("init is unavailable, use sharedInstance instead.")));
++ (nonnull instancetype)new __attribute__((unavailable("new is unavailable, use sharedInstance instead.")));
+- (nonnull instancetype)init __attribute__((unavailable("init is unavailable, use sharedInstance instead.")));
 
 /*!
  Get a singleton instance of MSALTelemetry.

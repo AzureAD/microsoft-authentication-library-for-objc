@@ -7,8 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		961E5C2E1ECA7864001DBA9A /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96672DB71EC7913D00878AC5 /* MSAL.framework */; };
+		961E5C2F1ECA7864001DBA9A /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 96672DB71EC7913D00878AC5 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9622AAC31ECA30B50052B975 /* SampleCalendarEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9622AAC21ECA30B50052B975 /* SampleCalendarEvent.swift */; };
 		9622AAC51ECA3D900052B975 /* SampleAppErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9622AAC41ECA3D900052B975 /* SampleAppErrors.swift */; };
+		9622AAC71ECA75FC0052B975 /* SampleLoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9622AAC61ECA75FC0052B975 /* SampleLoginViewController.swift */; };
+		966165671ECA79ED00E3E365 /* SampleMainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966165661ECA79ED00E3E365 /* SampleMainViewController.swift */; };
 		96672D9A1EC7912C00878AC5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672D991EC7912C00878AC5 /* AppDelegate.swift */; };
 		96672D9F1EC7912C00878AC5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96672D9D1EC7912C00878AC5 /* Main.storyboard */; };
 		96672DA11EC7912C00878AC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96672DA01EC7912C00878AC5 /* Assets.xcassets */; };
@@ -20,6 +24,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		961E5C301ECA7864001DBA9A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
 		96672DB61EC7913D00878AC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
@@ -78,9 +89,25 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		961E5C321ECA7865001DBA9A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				961E5C2F1ECA7864001DBA9A /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		9622AAC21ECA30B50052B975 /* SampleCalendarEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleCalendarEvent.swift; sourceTree = "<group>"; };
 		9622AAC41ECA3D900052B975 /* SampleAppErrors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleAppErrors.swift; sourceTree = "<group>"; };
+		9622AAC61ECA75FC0052B975 /* SampleLoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleLoginViewController.swift; sourceTree = "<group>"; };
+		966165661ECA79ED00E3E365 /* SampleMainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleMainViewController.swift; sourceTree = "<group>"; };
 		96672D961EC7912C00878AC5 /* SampleAppiOS-Swift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "SampleAppiOS-Swift.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		96672D991EC7912C00878AC5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		96672D9E1EC7912C00878AC5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -99,6 +126,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				961E5C2E1ECA7864001DBA9A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,9 +136,9 @@
 		96672D8D1EC7912C00878AC5 = {
 			isa = PBXGroup;
 			children = (
-				96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */,
 				96672D981EC7912C00878AC5 /* SampleAppiOS-Swift */,
 				96672D971EC7912C00878AC5 /* Products */,
+				96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -171,6 +199,8 @@
 		96672DC81EC791AC00878AC5 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				9622AAC61ECA75FC0052B975 /* SampleLoginViewController.swift */,
+				966165661ECA79ED00E3E365 /* SampleMainViewController.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -205,10 +235,12 @@
 				96672D921EC7912C00878AC5 /* Sources */,
 				96672D931EC7912C00878AC5 /* Frameworks */,
 				96672D941EC7912C00878AC5 /* Resources */,
+				961E5C321ECA7865001DBA9A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				961E5C311ECA7864001DBA9A /* PBXTargetDependency */,
 			);
 			name = "SampleAppiOS-Swift";
 			productName = "SampleAppiOS-Swift";
@@ -333,10 +365,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				966165671ECA79ED00E3E365 /* SampleMainViewController.swift in Sources */,
 				96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */,
 				96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */,
 				96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */,
 				96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */,
+				9622AAC71ECA75FC0052B975 /* SampleLoginViewController.swift in Sources */,
 				9622AAC51ECA3D900052B975 /* SampleAppErrors.swift in Sources */,
 				9622AAC31ECA30B50052B975 /* SampleCalendarEvent.swift in Sources */,
 				96672D9A1EC7912C00878AC5 /* AppDelegate.swift in Sources */,
@@ -344,6 +378,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		961E5C311ECA7864001DBA9A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MSAL (iOS Framework)";
+			targetProxy = 961E5C301ECA7864001DBA9A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		96672D9D1EC7912C00878AC5 /* Main.storyboard */ = {

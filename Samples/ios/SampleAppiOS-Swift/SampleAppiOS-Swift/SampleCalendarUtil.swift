@@ -115,13 +115,11 @@ fileprivate extension SampleCalendarUtil {
                 
                 let day = calendar.startOfDay(for: event.startDate)
                 
-                var eventsForDay = eventDictionary[day]
-                if (eventsForDay == nil) {
-                    eventsForDay = [SampleCalendarEvent]()
-                    eventDictionary[day] = eventsForDay
+                if (eventDictionary[day] == nil) {
+                    eventDictionary[day] = [SampleCalendarEvent]()
                 }
                 
-                eventsForDay!.append(event)
+                eventDictionary[day]!.append(event)
             }
         }
         

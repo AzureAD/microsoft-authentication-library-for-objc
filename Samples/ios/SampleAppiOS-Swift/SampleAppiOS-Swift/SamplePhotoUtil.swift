@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 import UIKit
 
 typealias PhotoCompletion = (UIImage?, Error?) -> Void
@@ -126,7 +125,7 @@ fileprivate extension SamplePhotoUtil {
                 throw SampleAppError.NoUserSignedIn
             }
             
-            try data.write(to: URL(string: imagePath)!)
+            try data.write(to: URL(fileURLWithPath: imagePath))
         } catch let error {
             throw SampleAppError.ImageCacheError(error)
         }
@@ -219,7 +218,7 @@ fileprivate extension SamplePhotoUtil {
         getMetaData(withRequest: request) {
             (json: [String : Any]?, error: Error?) in
             
-            if json != nil || error != nil {
+            if json == nil || error != nil {
                 completion(nil, error)
                 return
             }

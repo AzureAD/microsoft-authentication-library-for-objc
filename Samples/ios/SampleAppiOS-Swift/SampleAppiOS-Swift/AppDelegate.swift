@@ -26,19 +26,44 @@
 //------------------------------------------------------------------------------
 
 import UIKit
+import MSAL
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // The MSAL Logger should be set as early as possible in the app launch sequence, before any MSAL
+        // requests are made.
+        SampleMSALUtil.shared.setup()
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        
+        let initialViewController: UIViewController
+        do {
+            try SampleMSALUtil.shared.currentUser()
+            initialViewController = mainVC()
+            
+        } catch {
+            initialViewController = loginVC()
+        }
+        
+        self.window?.rootViewController = initialViewController
+        self.window?.makeKeyAndVisible()
         
         return true
     }
 
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        if MSALPublicClientApplication.handleMSALResponse(url) == true {
+            print("This URL is handled by MSAL")
+        }
+        return true
+    }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
@@ -62,5 +87,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
+}
+
+extension AppDelegate {
+    func showMainVC() {
+        self.window?.rootViewController = mainVC()
+    }
+    
+    func showLoginVC() {
+        self.window?.rootViewController = loginVC()
+    }
+    
+    func mainVC() -> UIViewController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        return storyboard.instantiateViewController(withIdentifier: "MainVC")
+    }
+    
+    func loginVC() -> UIViewController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        return storyboard.instantiateViewController(withIdentifier: "LoginVC")
+    }
+    
+    
 }
 

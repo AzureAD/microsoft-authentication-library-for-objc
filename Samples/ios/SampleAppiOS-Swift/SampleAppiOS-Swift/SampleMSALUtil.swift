@@ -76,7 +76,7 @@ extension SampleMSALUtil {
         }
     }
     
-    func currentUser() throws -> MSALUser {
+    @discardableResult func currentUser() throws -> MSALUser {
         // We retrieve our current user by checking for the userIdentifier that we stored in NSUserDefaults when
         // we first signed in the user.
         if let _ = currentUserIdentifier {
@@ -134,7 +134,7 @@ extension SampleMSALUtil {
                 // the cache in the future. Save this piece of information in a place you can
                 // easily retrieve in your app. In this case we're going to store it in
                 // NSUserDefaults.
-                UserDefaults.standard.set(signedInUser, forKey: self.kCurrentUserIdentifier)
+                UserDefaults.standard.set(signedInUser.userIdentifier(), forKey: self.kCurrentUserIdentifier)
                 
                 completion(signedInUser, acquireTokenResult.accessToken, nil)
             })
@@ -248,6 +248,9 @@ extension SampleMSALUtil {
     }
     
     func cleanupLocalState() {
+        
+        SampleCalendarUtil.shared.clearCache()
+        SamplePhotoUtil.shared.clearPhotoCache()
         
         // Leave around the user identifier as the last piece of state to clean up as you will probably need
         // it to clean up user-specific state
