@@ -136,6 +136,10 @@
         }
         
         _events = events;
+        _keys = [[_events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+            return [obj1 compare:obj2];
+        }];
+        
         [_tableView reloadData];
     }];
 }
