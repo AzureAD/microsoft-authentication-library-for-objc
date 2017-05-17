@@ -49,7 +49,21 @@
     [super tearDown];
 }
 
-- (void)testHeaderManipulation
+- (void)testSetValue_whenUpdated_shouldHaveUpdatedValues
+{
+    NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
+    
+    [request setValue:@"value1" forHTTPHeaderField:@"header1"];
+    [request setValue:@"value2" forHTTPHeaderField:@"header2"];
+    
+    XCTAssertEqualObjects(@"value2", [[request headers] objectForKey:@"header2"]);
+    XCTAssertEqualObjects(@"value1", [[request headers] objectForKey:@"header1"]);
+    
+    XCTAssertNil([[request headers] objectForKey:@"nonExistingValue"]);
+}
+
+- (void)testAddValue_whenAdded_shouldHaveUpdatedValues
 {
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
@@ -63,10 +77,9 @@
     XCTAssertEqualObjects(@"value1,moreValue", [[request headers] objectForKey:@"header1"]);
     
     XCTAssertNil([[request headers] objectForKey:@"nonExistingValue"]);
-    
 }
 
-- (void)testBodyParameters
+- (void)testSetValueForBodyParameters_whenSet_shouldHaveValue
 {
     NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
@@ -76,13 +89,20 @@
     XCTAssertEqualObjects(@"value1", [[request bodyParameters] objectForKey:@"bodyParam1"]);
     
     [request removeBodyParameter:@"bodyParam1"];
-    
-    XCTAssertNil([[request bodyParameters] objectForKey:@"bodyParam1"]);
-    
-    
 }
 
-- (void)testHttpGetRequest
+- (void)testRemoveBodyParameters_whenRemoved_shhouldBeNil
+{
+    NSURL *testURL = [NSURL URLWithString:@"http://sometesturl"];
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:testURL context:nil];
+    
+    [request setValue:@"value1" forBodyParameter:@"bodyParam1"];
+    [request removeBodyParameter:@"bodyParam1"];
+    
+    XCTAssertNil([[request bodyParameters] objectForKey:@"bodyParam1"]);
+}
+
+- (void)testSendGet_whenResponse_shouldReturnResponseWithNoError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
@@ -128,7 +148,7 @@
     }];
 }
 
-- (void)testHttpResponseInit
+- (void)testMSALHttpResponse_InitWithResponse_whenResponse_shouldParse
 {
     NSDictionary *headers = @{ @"ImAHeader" : @"Yes you are"};
     NSHTTPURLResponse *urlResponse =
@@ -147,7 +167,7 @@
     XCTAssertEqualObjects(response.headers, headers);
 }
 
-- (void)testHttpNilResponseInit
+- (void)testMSALHttpResponse_InitWithResponse_whenInvalidResponse_shouldReturnError
 {
     NSError *error = nil;
     MSALHttpResponse *response = [[MSALHttpResponse alloc] initWithResponse:nil data:nil error:&error];

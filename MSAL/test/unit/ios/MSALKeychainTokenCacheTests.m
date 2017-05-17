@@ -126,12 +126,12 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     [super tearDown];
 }
 
-- (void)testBadInit
+- (void)testInitAlloc_whenNoArgument_shouldThrowAssert
 {
     XCTAssertThrows([MSALKeychainTokenCache new]);
 }
 
-- (void)testSaveAndRetrieveAccessToken
+- (void)testAddOrUpdateAccessTokenItem_getAccessTokenItemsWithKey_whenValidAT_shouldSaveAndRetrieve
 {
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                   clientId:_testClientId
@@ -139,7 +139,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     NSError *error = nil;
     XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem context:nil error:&error]);
     XCTAssertNil(error);
-    
+
     //retrieve AT
     MSALAccessTokenCacheKey *atKey =
     [[MSALAccessTokenCacheKey alloc] initWithAuthority:_testAuthority.absoluteString
@@ -164,7 +164,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqualObjects(atItem, atItemInCache);
 }
 
-- (void)testSaveIdenticalATMultipleTimes_shouldReturnOnlyOneAT
+- (void)testGetAccessTokenItemsWithKey_whenSameATSavedMultipleTimes_shouldReturnOnlyOneAT
 {
     XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 0);
     
@@ -184,7 +184,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 1);
 }
 
-- (void)testRetrieve_whenInsufficientScopes_shouldNotReturnItem
+- (void)testGetAccessTokenItemsWithKey_whenInsufficientScopes_shouldNotReturnItem
 {
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                   clientId:_testClientId
@@ -209,7 +209,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual(items.count, 0);
 }
 
-- (void)testSaveAT_whenMultipleUsers_shouldCoexist
+- (void)testAddOrUpdateAccessTokenItem_whenMultipleUsers_shouldHave2ATs
 {
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                   clientId:_testClientId
@@ -230,9 +230,9 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 2);
 }
 
-- (void)testSaveAndRetrieveRefreshToken
+- (void)testAddOrUpdateRefreshToken_getRefreshTokenItemForKey_whenValidRT_shouldSaveAndRetrieve
 {
-    //prepare token response and save AT/RT
+    //prepare token response and save RT
     MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
@@ -251,18 +251,14 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqualObjects(rtItem, rtItemInCache);
 }
 
-- (void)testDeleteAccessToken
+- (void)testRemoveAccessTokenItem_when2ATs_shouldResultIn1AT
 {
     NSError *error = nil;
-    
-    XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:&error].count, 0);
-    XCTAssertNil(error);
     
     MSALAccessTokenCacheItem *atItem = [[MSALAccessTokenCacheItem alloc] initWithAuthority:_testAuthority
                                                                                   clientId:_testClientId
                                                                                   response:_testTokenResponse];
     XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem context:nil error:&error]);
-    XCTAssertNil(error);
     
     XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:&error].count, 1);
     XCTAssertNil(error);
@@ -274,12 +270,9 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
 }
 
-- (void)testDeleteRefreshToken
+- (void)testRemoveRefreshTokenItem_when2RTs_shouldResultIn1RT
 {
     NSError *error = nil;
-    
-    XCTAssertEqual([_dataSource allRefreshTokens:_testClientId context:nil error:&error].count, 0);
-    XCTAssertNil(error);
     
     MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
                                                                                       clientId:_testClientId
@@ -297,7 +290,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
 }
 
-- (void)testRemoveAllTokensForUserIdentifier
+- (void)testRemoveAllTokensForUserIdentifier_whenATRTExist_shouldRemoveAll
 {
     //save AT/RT for user 1
     NSError *error = nil;
