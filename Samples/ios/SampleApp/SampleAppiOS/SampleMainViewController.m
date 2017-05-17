@@ -125,9 +125,8 @@
 {
     SampleCalendarUtil *util = [SampleCalendarUtil sharedUtil];
     _events = [util cachedEvents];
-    _keys = [[_events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
-        return [obj1 compare:obj2];
-    }];
+    _keys = [self loadKeysFromEvents:_events];
+    
     [_tableView reloadData];
     [util getEvents:^(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error) {
         if (error)
@@ -136,12 +135,18 @@
         }
         
         _events = events;
-        _keys = [[_events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
-            return [obj1 compare:obj2];
-        }];
+        _keys = [self loadKeysFromEvents:_events];
         
         [_tableView reloadData];
     }];
+}
+
+- (NSArray<NSDate *> *)loadKeysFromEvents:(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *)events
+{
+    return [[events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        return [obj1 compare:obj2];
+    }];
+
 }
 
 - (IBAction)signOut:(id)sender
