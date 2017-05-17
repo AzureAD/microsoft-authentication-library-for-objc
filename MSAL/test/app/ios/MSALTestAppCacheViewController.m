@@ -51,8 +51,6 @@
 
 @implementation MSALTestAppCacheViewController
 
-#define BAD_REFRESH_TOKEN @"bad-refresh-token"
-
 {
     UITableView *_cacheTableView;
     
