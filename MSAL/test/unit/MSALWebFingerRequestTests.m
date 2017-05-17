@@ -74,6 +74,8 @@
 
 - (void)testRequestForAuthenticationEndpoint_whenNoAuthenticationEndpoint_shouldReturnError
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
     [MSALWebFingerRequest requestForAuthenticationEndpoint:nil
                                                  authority:[NSURL URLWithString:@"https://someauthority.com"]
                                                    context:nil
@@ -84,12 +86,21 @@
         
         XCTAssertTrue(error.code == MSALErrorInvalidParameter);
         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"AuthenticationEndpoint"]);
+        
+        [expectation fulfill];
     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
 }
 
 
 - (void)testRequestForAuthenticationEndpoint_whenNoAuthority_shouldReturnError
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
     [MSALWebFingerRequest requestForAuthenticationEndpoint:@"https://someauthendpoint.com"
                                                  authority:nil
                                                    context:nil
@@ -100,21 +111,24 @@
          
          XCTAssertTrue(error.code == MSALErrorInvalidParameter);
          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"authority"]);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 
 - (void)testRequestForAuthenticationEndpoint_whenAllParamsEnteredAndValidResponse_shouldReturnResponse
 {
-    __block NSUUID *correlationId = [NSUUID new];
-    
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSALTestURLSession createMockSession];
-    parameters.correlationId = correlationId;
-    
+
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://someauthendpoint.com/.well-known/webfinger?resource=https://someauthority.com"
@@ -125,7 +139,9 @@
                          httpHeaderFields:nil
                          dictionaryAsJSON:@{ @"links" : @[@{ @"rel" : @"https://somerel.com", @"href" : @"https://somehref"}]}];
     [MSALTestURLSession addResponse:response];
-    
+   
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
     [MSALWebFingerRequest requestForAuthenticationEndpoint:@"https://someauthendpoint.com"
                                                  authority:[NSURL URLWithString:@"https://someauthority.com"]
                                                    context:parameters
@@ -135,28 +151,33 @@
          XCTAssertNotNil(response);
          
          XCTAssertTrue(response.links.count == 1);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 
 - (void)testRequestForAuthenticationEndpoint_whenAllParamsEnteredAndResponseError_shouldReturnError
 {
-    __block NSUUID *correlationId = [NSUUID new];
-    
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSALTestURLSession createMockSession];
-    parameters.correlationId = correlationId;
-    
+  
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
-    
+ 
     MSALTestURLResponse *response =
     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://someauthendpoint.com/.well-known/webfinger?resource=https://someauthority.com"
                                              requestHeaders:reqHeaders
                                           requestParamsBody:nil];
     [MSALTestURLSession addResponse:response];
-    
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
     [MSALWebFingerRequest requestForAuthenticationEndpoint:@"https://someauthendpoint.com"
                                                  authority:[NSURL URLWithString:@"https://someauthority.com"]
                                                    context:parameters
@@ -164,6 +185,13 @@
      {
          XCTAssertNotNil(error);
          XCTAssertNil(response);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 

@@ -73,6 +73,8 @@
 
 - (void)testQueryEnrollmentServerEndpointForDomain_whenDomainNil_shouldReturnError
 {
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
     [MSALDrsDiscoveryRequest queryEnrollmentServerEndpointForDomain:nil
                                                            adfsType:MSAL_ADFS_CLOUD
                                                             context:nil
@@ -83,22 +85,25 @@
          
          XCTAssertTrue(error.code == MSALErrorInvalidParameter);
          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"Domain"]);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 
 - (void)testQueryEnrollmentServerEndpointForDomain_whenValidResponse_shouldReturnResponse
 {
-    __block NSUUID *correlationId = [NSUUID new];
-    
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSALTestURLSession createMockSession];
-    parameters.correlationId = correlationId;
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
-    
+
     MSALTestURLResponse *response =
     [MSALTestURLResponse requestURLString:@"https://enterpriseregistration.windows.net/somedomain.com/enrollmentserver/contract?api-version=1.0"
                            requestHeaders:reqHeaders
@@ -110,32 +115,35 @@
                                                  @{ @"PassiveAuthEndpoint" : @"https://fs.fabrikam.com/adfs/ls" }}];
     [MSALTestURLSession addResponse:response];
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
     [MSALDrsDiscoveryRequest queryEnrollmentServerEndpointForDomain:@"somedomain.com"
                                                            adfsType:MSAL_ADFS_CLOUD
-                                                            context:nil
+                                                            context:parameters
                                                     completionBlock:^(MSALDrsDiscoveryResponse *response, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(response);
          
          XCTAssertEqualObjects(response.passiveAuthEndpoint, @"https://fs.fabrikam.com/adfs/ls");
+         
+         [expectation fulfill];
      }];
      
-
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
 }
 
 - (void)testQueryEnrollmentServerEndpointForDomain_whenResponseError_shouldReturnError
 {
-    __block NSUUID *correlationId = [NSUUID new];
-    
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSALTestURLSession createMockSession];
-    parameters.correlationId = correlationId;
     
     NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
     MSALTestURLResponse *response =
     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.windows.net/somedomain.com/enrollmentserver/contract?api-version=1.0"
@@ -143,13 +151,22 @@
                                           requestParamsBody:nil];
     [MSALTestURLSession addResponse:response];
 
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
     [MSALDrsDiscoveryRequest queryEnrollmentServerEndpointForDomain:@"somedomain.com"
                                                            adfsType:MSAL_ADFS_CLOUD
-                                                            context:nil
+                                                            context:parameters
                                                     completionBlock:^(MSALDrsDiscoveryResponse *response, NSError *error)
      {
          XCTAssertNotNil(error);
          XCTAssertNil(response);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 
