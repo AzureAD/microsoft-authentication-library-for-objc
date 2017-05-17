@@ -58,7 +58,7 @@
     [super tearDown];
 }
 
-- (void)testInit
+- (void)testInitWithParameters_whenValidParams_shouldInit
 {
     NSError *error = nil;
     
@@ -83,7 +83,7 @@
     XCTAssertNil(error);
 }
 
-- (void)testAuthorizationUri
+- (void)testAuthorizationUri_whenValidParams_shouldContainQPs
 {
     NSError *error = nil;
     
@@ -157,7 +157,7 @@
     XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
-- (void)testAuthorizationUriWithUser
+- (void)testAuthorizationUri_whenValidParamsWithUser_shouldContainDomainReqAndLoginReq
 {
     NSError *error = nil;
     
@@ -235,7 +235,7 @@
     XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
-- (void)testInteractiveRequestFlow
+- (void)testInteractiveRequestFlow_whenValid_shouldReturnResultWithNoError
 {
     NSError *error = nil;
     
@@ -388,7 +388,7 @@
     }
 }
 
-- (void)testInteractiveRequestFlowWithUser
+- (void)testInteractiveRequestFlow_whenValidWithUser_shouldReturnResultWithNoError
 {
     NSError *error = nil;
     
@@ -559,7 +559,7 @@
     }
 }
 
-- (void)testInteractiveRequestFlowWithUserNotMatch
+- (void)testInteractiveRequestFlow_whenUserMismatch_shouldReturnNilResultWithError
 {
     NSError *error = nil;
     

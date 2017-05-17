@@ -48,7 +48,7 @@
     [super tearDown];
 }
 
-- (void)testTenantDiscoverySuccess
+- (void)testTenantDiscoveryEndpoint_whenGoodResponse_shouldReturnGoodResponse
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -96,7 +96,7 @@
     }];
 }
 
-- (void)testTenantDiscoveryMissingEndpoint
+- (void)testTenantDiscoveryEndpoint_whenMissingFields_shouldReturnNilWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     

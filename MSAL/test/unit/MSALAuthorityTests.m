@@ -48,7 +48,7 @@
     [super tearDown];
 }
 
-- (void)testCheckAuthorityString_whenCommon_shouldPass
+- (void)testCheckAuthorityString_whenCommon_shouldReturnURL
 {
     NSError *error = nil;
     NSURL *url = nil;
@@ -59,7 +59,7 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
 }
 
-- (void)testCheckAuthorityString_whenB2C_shouldPass
+- (void)testCheckAuthorityString_whenB2C_shouldReturnURL
 {
     NSError *error = nil;
     NSURL *url = nil;
@@ -70,7 +70,7 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/contoso.onmicrosoft.com/B2C_1_contosify"]);
 }
 
-- (void)testCheckAuthorityString_whenNil_shouldFail
+- (void)testCheckAuthorityString_whenNil_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:nil error:&error];
@@ -82,7 +82,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"nil"]);
 }
 
-- (void)testCheckAuthorityString_whenHttp_shouldFail
+- (void)testCheckAuthorityString_whenHttp_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"http://login.microsoftonline.com/common" error:&error];
@@ -95,7 +95,7 @@
     error = nil;
 }
 
-- (void)testCheckAuthorityString_whenNoTenant_shouldFail
+- (void)testCheckAuthorityString_whenNoTenant_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"https://login.microsoftonline.com" error:&error];
@@ -107,7 +107,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant or common"]);
 }
 
-- (void)testCheckAuthorityString_whenB2CNoPolicy_shouldFail
+- (void)testCheckAuthorityString_whenB2CNoPolicy_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"https://somehost.com/tfp/" error:&error];
@@ -119,7 +119,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"tenant"]);
 }
 
-- (void)testCheckAuthorityString_whenNotValidUri_shouldFail
+- (void)testCheckAuthorityString_whenNotValidUri_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"https login.microsoftonline.com common" error:&error];
@@ -131,7 +131,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"must be a valid URI"]);
 }
 
-- (void)testCheckAuthorityString_whenLoginWindowsNet_shouldFail
+- (void)testCheckAuthorityString_whenLoginWindowsNet_shouldReturnNilWithError
 {
     NSError *error = nil;
     NSURL *url = [MSALAuthority checkAuthorityString:@"https://login.windows.net/common" error:&error];
@@ -151,7 +151,7 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"deprecated"]);
 }
 
-- (void)testCacheURLAuthority_whenCommon
+- (void)testCacheURLAuthority_whenCommon_shouldReturnURL
 {
     NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] tenantId:@"tenant"];
     
@@ -159,7 +159,7 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tenant"]);
 }
 
-- (void)testCacheURLAuthority_whenCommonWithPort
+- (void)testCacheURLAuthority_whenCommonWithPort_shouldReturnURLWithPort
 {
     NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com:8080/common"] tenantId:@"tenant"];
     
@@ -167,7 +167,7 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com:8080/tenant"]);
 }
 
-- (void)testCacheURLAuthority_whenTenantSpecified
+- (void)testCacheURLAuthority_whenTenantSpecified_shouldReturnURL
 {
     NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com/tenant2"] tenantId:@"tenant1"];
     
@@ -175,7 +175,7 @@
     XCTAssertEqualObjects(url, [NSURL URLWithString:@"https://login.microsoftonline.com/tenant2"]);
 }
 
-- (void)testCacheURLAuthority_whenTenantSpecifiedWithPort
+- (void)testCacheURLAuthority_whenTenantSpecifiedWithPort_shouldReturnURLWithPort
 {
     NSURL *url = [MSALAuthority cacheUrlForAuthority:[NSURL URLWithString:@"https://login.microsoftonline.com:8080/tenant2"] tenantId:@"tenant1"];
     
@@ -184,9 +184,8 @@
 }
 
 
-- (void)testIsKnownHost
+- (void)testIsKnownHost_whenValid_shuldReturnTrue
 {
-    XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.windows.net"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.chinacloudapi.cn"]]);
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login.microsoftonline.com"]]);
@@ -194,18 +193,23 @@
     XCTAssertTrue([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://login-us.microsoftonline.com"]]);
 }
 
-- (void)testAuthorityAddToResolvedAuthority_whenNilAuthority_shouldFail
+- (void)testIsKnownHost_whenInvalid_shouldReturnFalse
+{
+    XCTAssertFalse([MSALAuthority isKnownHost:[NSURL URLWithString:@"https://www.noknownhost.com"]]);
+}
+
+- (void)testAuthorityAddToResolvedAuthority_whenNilAuthority_shouldReturnNo
 {
     XCTAssertFalse([MSALAuthority addToResolvedAuthority:nil userPrincipalName:nil]);
 }
 
-- (void)testAuthorityAddToResolvedAuthority_whenAdfsAuthorityNilUpn_shouldFail
+- (void)testAuthorityAddToResolvedAuthority_whenAdfsAuthorityNilUpn_shouldReturnNo
 {
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
     XCTAssertFalse([MSALAuthority addToResolvedAuthority:adfsAuthority userPrincipalName:nil]);
 }
 
-- (void)testAuthorityFromCache_whenAadAuthorityCachedNilUpn_shouldRetrieveAuthority
+- (void)testAuthorityFromCache_whenAadAuthorityCachedNilUpn_shouldReturnAuthority
 {
     MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/common"]];
    
@@ -220,7 +224,7 @@
     XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:aadAuthority.canonicalAuthority]);
 }
 
-- (void)testAuthorityFromCache_whenAadAuthorityCachedNonNilUpn_shouldRetrieveAuthority
+- (void)testAuthorityFromCache_whenAadAuthorityCachedNonNilUpn_shouldReturnAuthority
 {
     MSALAuthority *aadAuthority = [MSALTestAuthority AADAuthority:[NSURL URLWithString:@"https://login.microsoftonline.in/common"]];
    
@@ -235,7 +239,7 @@
     XCTAssertTrue([retrivedAuthority.canonicalAuthority isEqual:aadAuthority.canonicalAuthority]);
 }
 
-- (void)testAuthorityFromCache_whenAdfsAuthorityCachedNonNilUpn_shouldRetrieveAuthority
+- (void)testAuthorityFromCache_whenAdfsAuthorityCachedNonNilUpn_shouldReturnAuthority
 {
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
 
@@ -250,7 +254,7 @@
     XCTAssertTrue([retrivedAdfsAuthority.canonicalAuthority isEqual:adfsAuthority.canonicalAuthority]);
 }
 
-- (void)testAuthorityFromCache_whenAdfsWithNilUpn_shouldFail
+- (void)testAuthorityFromCache_whenAdfsWithNilUpn_shouldReturnNil
 {
     MSALAuthority *adfsAuthority = [MSALTestAuthority ADFSAuthority:[NSURL URLWithString:@"https://fs.contoso.com/adfs/"]];
     XCTAssertTrue([MSALAuthority addToResolvedAuthority:adfsAuthority userPrincipalName:@"user@contoso.com"]);
@@ -263,7 +267,7 @@
     XCTAssertNil(retrivedAdfsAuthority);
 }
 
-- (void)testResolveEndpointsForAuthority_whenNormalAad_shouldPass
+- (void)testResolveEndpointsForAuthority_whenNormalAad_shouldResolve
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
@@ -333,7 +337,7 @@
      }];
 }
 
-- (void)testResolveEndpointsForAuthority_whenOpenIDConfigError_shouldFail
+- (void)testResolveEndpointsForAuthority_whenOpenIDConfigError_shouldNotResolveWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -375,7 +379,7 @@
      }];
 }
 
-- (void)testResolveEndpointsForAuthority_whenTenantEndpointError_shouldFail
+- (void)testResolveEndpointsForAuthority_whenTenantEndpointError_shouldNotResolveWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
@@ -434,7 +438,7 @@
 }
 
 // For preview, AD FS as authority is not supported
-- (void)testResolveEndpointsForAuthority_whenAdfsAuthority_shouldFail
+- (void)testResolveEndpointsForAuthority_whenAdfsAuthority_shouldNotResolveWithError
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     

@@ -48,7 +48,7 @@
     [super tearDown];
 }
 
-- (void)testStartNoViewController
+- (void)testStartWebUIWithURL_withStartNoViewController_shouldReturnNilResponseWithError
 {
     [MSALFakeViewController returnNilForCurrentController];
     NSURL *testURL = [NSURL URLWithString:@"https://iamafakeurl.contoso.com/do/authy/things"];
@@ -66,7 +66,7 @@
     wait_and_run_main_thread(dsem);
 }
 
-- (void)testAlreadyRunningSession
+- (void)testStartWebUIWithURL_whenAlreadyRunningSession_shouldReturnNilResponseWithError
 {
     __block MSALFakeViewController *fakeSvc = nil;
     [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
@@ -113,7 +113,7 @@
     XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
-- (void)testCancelSession
+- (void)testCancelSession_whenSessionStarted_shouldDismissSafariViewController
 {
     __block MSALFakeViewController *fakeSvc = nil;
     [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
@@ -147,7 +147,7 @@
     XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
-- (void)testUserCancelSession
+- (void)testUserCancelSession_shouldDismissSafariViewController
 {
     __block MSALFakeViewController *fakeSvc = nil;
     [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)
@@ -183,7 +183,7 @@
     XCTAssertTrue(fakeSvc.wasDismissed);
 }
 
-- (void)testNilResponse
+- (void)testHandleResponse_whenNilResponse_shouldLogContainNil
 {
     XCTAssertFalse([MSALWebUI handleResponse:nil]);
     MSALTestLogger *logger = [MSALTestLogger sharedLogger];
@@ -191,7 +191,7 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
 }
 
-- (void)testNoCurrentSession
+- (void)testHandleResponse_whenNoCurrentSession_shouldLogContainSession
 {
     XCTAssertFalse([MSALWebUI handleResponse:[NSURL URLWithString:@"https://iamafakeresponse.com"]]);
     MSALTestLogger *logger = [MSALTestLogger sharedLogger];
@@ -199,7 +199,7 @@
     XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
 }
 
-- (void)testStartAndHandleCodeResponse
+- (void)testStartWebUIWithURL_HandleCodeResponse_whenValid_shouldStartWebUIAndHandleResponse
 {
     __block MSALFakeViewController *fakeSvc = nil;
     [SFSafariViewController setValidationBlock:^(MSALFakeViewController *controller, NSURL *url, BOOL entersReaderIfAvailable)

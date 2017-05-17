@@ -45,7 +45,7 @@
     [super tearDown];
 }
 
-- (void)testInitWithJSON
+- (void)testInitWithIdToken_whenValidJson_shouldInit
 {
     NSDictionary *idTokenClaims = @{ @"name" : @"User",
                                      @"preferred_username" : @"user@contoso.com",
@@ -71,7 +71,7 @@
     XCTAssertEqualObjects(user.displayableId, @"user@contoso.com");
 }
 
-- (void)testCopy
+- (void)testCopy_whenValidUser_shouldCopy
 {
     NSDictionary *idTokenClaims = @{ @"name" : @"User",
                                      @"preferred_username" : @"user@contoso.com",
@@ -101,7 +101,7 @@
     XCTAssertEqualObjects(user.name, user2.name);
 }
 
-- (void)testEquals
+- (void)testEquals_whenEqual_shouldReturnTrue
 {
     NSDictionary *idTokenClaims = @{ @"preferred_username" : @"User",
                                      @"iss" : @"issuer",
