@@ -88,6 +88,11 @@ class SampleMainViewController: UIViewController {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.showLoginVC()
     }
+
+}
+
+// MARK: Loading/setting photo and events
+fileprivate extension SampleMainViewController {
     
     func loadPhoto() {
         let photoUtil = SamplePhotoUtil.shared
@@ -138,7 +143,7 @@ class SampleMainViewController: UIViewController {
     }
 }
 
-
+// MARK: UITableViewDataSource
 extension SampleMainViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return keys.count
