@@ -27,8 +27,6 @@
 
 import Foundation
 
-//SampleAppServerInvalidResponseError
-
 enum SampleAppError: Error {
     case PublicClientApplicationCreation(NSError)
     case UserNotFound(NSError)

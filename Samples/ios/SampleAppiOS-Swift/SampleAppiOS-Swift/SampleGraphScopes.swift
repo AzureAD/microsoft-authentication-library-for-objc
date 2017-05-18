@@ -25,39 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-import Foundation
-
-class SampleCalendarEvent {
-    
-    let startDate: Date
-    let subject: String
-    
-    private static let s_dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS"
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
-        return formatter
-    }()
-    
-    private init(startDate date: Date, subject: String) {
-        self.startDate = date
-        self.subject = subject
-    }
-    
-    class func event(withJson json: [String: Any]) -> SampleCalendarEvent? {
-        guard let subject = json["subject"] as? String, let startDict = json["start"] as? [String: Any] else {
-            return nil
-        }
-        
-        guard let startTimeString = startDict["dateTime"] as? String else {
-            return nil
-        }
-        
-        guard let start = s_dateFormatter.date(from: startTimeString) else {
-            return nil
-        }
-        
-        return SampleCalendarEvent(startDate: start, subject: subject)
-    }
+enum GraphScopes: String {
+    case UserRead = "User.Read"
+    case CalendarsRead = "Calendars.Read"
 }
-

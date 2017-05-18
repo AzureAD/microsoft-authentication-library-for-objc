@@ -21,6 +21,7 @@
 		96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */; };
 		96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */; };
 		96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */; };
+		96DFD2B21ECD25A6007ED2A1 /* SampleGraphScopes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DFD2B11ECD25A6007ED2A1 /* SampleGraphScopes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,6 +120,7 @@
 		96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleCalendarUtil.swift; sourceTree = "<group>"; };
 		96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SamplePhotoUtil.swift; sourceTree = "<group>"; };
 		96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphRequest.swift; sourceTree = "<group>"; };
+		96DFD2B11ECD25A6007ED2A1 /* SampleGraphScopes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphScopes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +223,7 @@
 				96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */,
 				96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */,
 				96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */,
+				96DFD2B11ECD25A6007ED2A1 /* SampleGraphScopes.swift */,
 			);
 			name = Graph;
 			sourceTree = "<group>";
@@ -368,6 +371,7 @@
 				966165671ECA79ED00E3E365 /* SampleMainViewController.swift in Sources */,
 				96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */,
 				96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */,
+				96DFD2B21ECD25A6007ED2A1 /* SampleGraphScopes.swift in Sources */,
 				96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */,
 				96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */,
 				9622AAC71ECA75FC0052B975 /* SampleLoginViewController.swift in Sources */,

@@ -107,7 +107,5 @@ extension AppDelegate {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         return storyboard.instantiateViewController(withIdentifier: "LoginVC")
     }
-    
-    
 }
 

@@ -156,7 +156,7 @@ fileprivate extension SamplePhotoUtil {
         // you ask for to just the ones needed for that operation. A user or admin might not
         // consent to all of the scopes asked for, and core application functionality should
         // not be blocked on not having consent for edge features.
-        let scopesRequired = ["User.Read"]
+        let scopesRequired = [GraphScopes.UserRead.rawValue];
         
         SampleMSALUtil.shared.acquireTokenForCurrentUser(forScopes: scopesRequired) {
             (token, error) in

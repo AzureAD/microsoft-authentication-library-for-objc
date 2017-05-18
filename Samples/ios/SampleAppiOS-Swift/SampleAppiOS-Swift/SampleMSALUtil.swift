@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-import UIKit
 import MSAL
 
 // MARK: Setup and initialization
@@ -33,6 +32,8 @@ class SampleMSALUtil {
     
     let kClientId = "11744750-bfe5-4818-a1c0-655455f68fa7"
     let kCurrentUserIdentifier = "MSALCurrentUserIdentifier"
+    
+    let kAuthority = "https://login.microsoftonline.com/"
     
     // Singleton instance
     static let shared = SampleMSALUtil()
@@ -116,7 +117,7 @@ extension SampleMSALUtil {
             // Request as many scopes as possible up front that you know your application will
             // want to use so the service can request consent for them up front and minimize
             // how much users are interrupted for interactive auth.
-            application.acquireToken(forScopes: ["User.Read", "Calendars.Read"], completionBlock: {
+            application.acquireToken(forScopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue], completionBlock: {
                 (result: MSALResult?, error: Error?) in
                 
                 if let error = error {
@@ -156,7 +157,7 @@ extension SampleMSALUtil {
             // tokens of varying authorities for this user in the cache. Because we are trying to get a token specifically
             // for graph in this sample it's best to specify the user's home authority to remove any possibility of there
             // being any ambiquity in the cache lookup.
-            let homeAuthority = "https://login.microsoftonline.com/" + user.utid
+            let homeAuthority = kAuthority + user.utid
             
             application.acquireTokenSilent(forScopes: scopes, user: user, authority: homeAuthority, completionBlock: {
                 (result: MSALResult?, error: Error?) in

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-import UIKit
+import Foundation
 
 typealias CalendarCompletion = ([Date: [SampleCalendarEvent]]?, Error?) -> Void
 
@@ -68,7 +68,7 @@ class SampleCalendarUtil  {
             return
         }
         
-        SampleMSALUtil.shared.acquireTokenForCurrentUser(forScopes: ["Calendars.Read"]) {
+        SampleMSALUtil.shared.acquireTokenForCurrentUser(forScopes: [GraphScopes.CalendarsRead.rawValue]) {
             (token: String?, error: Error?) in
             
             guard let accessToken = token else {
