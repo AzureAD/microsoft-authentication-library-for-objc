@@ -48,33 +48,33 @@
     [super tearDown];
 }
 
-- (void)testIsStringNilOrBlankNil
+- (void)testMsalIsStringNilOrBlank_whenNil_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:nil], "Should return true for nil.");
 }
 
-- (void)testIsStringNilOrBlankSpace
+- (void)testMsalIsStringNilOrBlank_whenBlankSpaceOnly_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@" "], "Should return true for nil.");
 }
 
-- (void)testIsStringNilOrBlankTab
+- (void)testMsalIsStringNilOrBlank_whenTabOnly_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\t"], "Should return true for nil.");
 }
 
-- (void)testIsStringNilOrBlankEnter
+- (void)testMsalIsStringNilOrBlank_whenLineBreakOnly_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\r"], "Should return true for nil.");
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\n"], "Should return true for nil.");
 }
 
-- (void)testIsStringNilOrBlankMixed
+- (void)testMsalIsStringNilOrBlank_whenMixedWhiteSpaceOnly_shouldReturnTrue
 {
     XCTAssertTrue([NSString msalIsStringNilOrBlank:@" \r\n\t  \t\r\n"], "Should return true for nil.");
 }
 
-- (void)testIsStringNilOrBlankNonEmpty
+- (void)testMsalIsStringNilOrBlank_whenNotEmpty_shouldReturnFalse
 {
     //Prefix by white space:
     NSString* str = @"  text";
@@ -99,7 +99,7 @@
     XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
 }
 
-- (void)testTrimmedString
+- (void)testMsalTrimmedString_whenWhiteSpaceAtEnd_shouldReturnTrimmedString
 {
     XCTAssertEqualObjects([@" \t\r\n  test" msalTrimmedString], @"test");
     XCTAssertEqualObjects([@"test  \t\r\n  " msalTrimmedString], @"test");
@@ -114,14 +114,17 @@
     XCTAssertEqualObjects(decoded, _ORIGINAL); \
 }
 
-- (void)testBase64
+- (void)testMsalBase64UrlEncodeDecode_whenEmpty_shouldReturnEmpty
 {
     NSString* encodeEmpty = [@"" msalBase64UrlEncode];
     XCTAssertEqualObjects(encodeEmpty, @"");
     
     NSString* decodeEmpty = [@"" msalBase64UrlDecode];
     XCTAssertEqualObjects(decodeEmpty, @"");
-    
+}
+
+- (void)testMsalBase64UrlEncodeDecode_whenDifferentCharacters_shouldParseAccordingly
+{
     //15 characters, aka 3k:
     NSString* test1 = @"1$)=- \t\r\nfoo%^!";
     VERIFY_BASE64(test1, @"MSQpPS0gCQ0KZm9vJV4h");
@@ -133,17 +136,24 @@
     //17 characters, aka 3k + 2:
     NSString* test3 = [test2 stringByAppendingString:@"<"];
     VERIFY_BASE64(test3, @"MSQpPS0gCQ0KZm9vJV4hQDw");
-    
+}
+
+- (void)testMsalBase64UrlEncodeDecode_whenPlusMinusSigns_shouldParse
+{
     //Ensure that URL encoded is in place through encoding correctly the '+' and '/' signs (just in case)
     VERIFY_BASE64(@"++++/////", @"KysrKy8vLy8v");
-    
+}
+
+- (void)testMsalBase64UrlEncodeDecode_whenInvalid_shouldBeInvalid
+{
     //Decode invalid:
     XCTAssertFalse([@" " msalBase64UrlDecode].length, "Contains non-suppurted character < 128");
     XCTAssertFalse([@"™" msalBase64UrlDecode].length, "Contains characters beyond 128");
     XCTAssertFalse([@"денят" msalBase64UrlDecode].length, "Contains unicode characters.");
 }
 
-- (void)testUrlFormEncodeDecode
+
+- (void)testMsalUrlFormEncodeDecode_whenValidString_shouldParse
 {
     NSString* testString = @"Some interesting test/+-)(*&^%$#@!~|";
     NSString* encoded = [testString msalUrlFormEncode];
@@ -152,20 +162,28 @@
     XCTAssertEqualObjects([encoded msalUrlFormDecode], testString);
 }
 
-- (void)testRandomUrlSafeStringOfSize
+- (void)testRandomUrlSafeStringOfSize_whenZeroSize_shouldReturnNilOrBlank
 {
     // test with zero size
     NSString *stringZero = [NSString randomUrlSafeStringOfSize:0];
     XCTAssertTrue([NSString msalIsStringNilOrBlank:stringZero]);
-    
+}
+
+- (void)testRandomUrlSafeStringOfSize_whenNormalSize_shouldReturnRandomString
+{
     // test with normal size
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10]);
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:100]);
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:1000]);
     XCTAssertNotNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE]);
+}
+
+- (void)testRandomUrlSafeStringOfSize_whenTooBigSize_shouldReturnNilOrBlank
+{
     
     // test with bigger then max
     XCTAssertNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE + 1]);
-    
 }
+
+
 @end
