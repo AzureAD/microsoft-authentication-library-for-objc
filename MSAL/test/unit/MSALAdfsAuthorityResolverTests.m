@@ -27,12 +27,11 @@
 
 #import "MSALTestCase.h"
 #import "MSALAdfsAuthorityResolver.h"
-#import "MSALTestSwizzle.h"
 
-#import "MSALDrsDiscoveryRequest.h"
 #import "MSALDrsDiscoveryResponse.h"
-#import "MSALWebFingerRequest.h"
 #import "MSALWebFingerResponse.h"
+
+#import "MSALTestURLSession.h"
 
 #define TRUSTED_REALM @"http://schemas.microsoft.com/rel/trusted-realm"
 
@@ -44,10 +43,118 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 @end
 
 @implementation MSALAdfsAuthorityResolverTests
+{
+    NSURL *authority;
+    NSString *upn;
+    NSString *domain;
+    
+    NSString *expectedEndpoint;
+}
 
 - (void)setUp {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
+    upn = @"user@contoso.com";
+    domain = @"contoso.com";
+    
+    expectedEndpoint = @"https://fs.fabrikam.com/adfs/.well-known/openid-configuration";
+}
+
+- (void)addDrsDiscoverySuccessResponseForCloud:(NSDictionary *)customResponse
+{
+    [self addDrsDiscoverySuccessResponse:customResponse onPrems:NO];
+    
+}
+
+- (void)addDrsDiscoverySuccessResponseForOnPrems:(NSDictionary *)customResponse
+{
+    [self addDrsDiscoverySuccessResponse:customResponse onPrems:YES];
+}
+
+- (void)addDrsDiscoverySuccessResponse:(NSDictionary *)customResponse onPrems:(BOOL)onPrems
+{
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    
+    NSDictionary *resultJson = customResponse? customResponse :
+    @{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://fs.fabrikam.com/adfs/ls" }};
+    
+    NSString *url = onPrems?
+    @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0" :
+    @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0";
+    
+    MSALTestURLResponse *response =
+    [MSALTestURLResponse requestURLString:url
+                           requestHeaders:reqHeaders
+                        requestParamsBody:nil
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:resultJson];
+     [MSALTestURLSession addResponse:response];
+}
+
+- (void)addDrsDiscoveryForOnPremsFailureResponse
+{
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    
+    [MSALTestURLSession addResponse:
+     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0"
+                                              requestHeaders:reqHeaders
+                                           requestParamsBody:nil]];
+    
+}
+
+- (void)addDrsDiscoveryForCloudFailureResponse
+{
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    
+    [MSALTestURLSession addResponse:
+     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0"
+                                              requestHeaders:reqHeaders
+                                           requestParamsBody:nil]];
+}
+
+- (void)addWebFingerSuccessResponse:(NSDictionary *)customResponse
+{
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    
+    NSDictionary *resultJson = customResponse? customResponse :
+    @{ @"links" : @[@{ @"rel" : TRUSTED_REALM, @"href" : @"https://fs.fabrikam.com/adfs/"}]};
+    
+    MSALTestURLResponse *response =
+    [MSALTestURLResponse requestURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+                           requestHeaders:reqHeaders
+                        requestParamsBody:nil
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:resultJson];
+    [MSALTestURLSession addResponse:response];
+
+}
+
+
+- (void)addWebFingerFailureResponse
+{
+    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    
+    MSALTestURLResponse *response =
+    [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+                                             requestHeaders:reqHeaders
+                                          requestParamsBody:nil];
+    [MSALTestURLSession addResponse:response];
 }
 
 - (void)tearDown {
@@ -58,9 +165,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 - (void)testDefaultOpenIdConfigurationEndpointForAuthority_whenAuthority_shouldReturnURLString
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSString *expectedEndpoint = @"https://fs.fabrikam.com/adfs/.well-known/openid-configuration";
-    
-    NSString *endpoint = [resolver defaultOpenIdConfigurationEndpointForAuthority:[NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"]];
+    NSString *endpoint = [resolver defaultOpenIdConfigurationEndpointForAuthority:authority];
     
     XCTAssertEqualObjects(endpoint, expectedEndpoint);
 }
@@ -74,10 +179,6 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 - (void)testOpenIDConfigurationEndpointForAuthority_whenNoValidate_shouldReturnEndpoint
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
-    
-    NSString *expectedEndpoint = @"https://fs.fabrikam.com/adfs/.well-known/openid-configuration";
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
@@ -93,14 +194,60 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     }];
 }
 
+- (void)testUrlForDrsDiscoveryForDomain_whenNoDomain_shouldReturnNil
+{
+    XCTAssertNil([MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:nil adfsType:MSAL_ADFS_CLOUD]);
+    XCTAssertNil([MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:nil adfsType:MSAL_ADFS_ON_PREMS]);
+}
+
+- (void)testUrlForDrsDiscoveryForDomain_whenDomainAndOnPrems_shouldReturnUrl
+{
+    NSString *expectedUrlString = @"https://enterpriseregistration.somedomain.com/enrollmentserver/contract?api-version=1.0";
+    NSURL *resultUrl = [MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:@"somedomain.com" adfsType:MSAL_ADFS_ON_PREMS];
+    XCTAssertNotNil(resultUrl);
+    XCTAssertEqualObjects(resultUrl.absoluteString, expectedUrlString);
+}
+
+- (void)testUrlForDrsDiscoveryForDomain_whenDomainAndOnCloud_shouldReturnUrl
+{
+    NSString *expectedUrlString = @"https://enterpriseregistration.windows.net/somedomain.com/enrollmentserver/contract?api-version=1.0";
+    NSURL *resultUrl = [MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:@"somedomain.com" adfsType:MSAL_ADFS_CLOUD];
+    XCTAssertNotNil(resultUrl);
+    XCTAssertEqualObjects(resultUrl.absoluteString, expectedUrlString);
+}
+
+- (void)testUrlForWebFinger_whenNoAuthenticationEndpoint_shouldReturnNil
+{
+    XCTAssertNil([MSALAdfsAuthorityResolver urlForWebFinger:nil absoluteAuthority:@"https://login.microsoftonline.com/common"]);
+}
+
+- (void)testUrlForWebFinger_whenNoAuthority_shouldReturnNil
+{
+    XCTAssertNil([MSALAdfsAuthorityResolver urlForWebFinger:@"https://someUrl.com" absoluteAuthority:nil]);
+}
+
+- (void)testUrlForWebFinger_whenAuthenticationEndpointAndAuthority_shouldReturnUrl
+{
+    NSString *authenticationEndpoint = @"https://someauthendpoint.com";
+    NSString *someAuthority = @"https://someauthority.com";
+    
+    NSString *expectedUrlString = @"https://someauthendpoint.com/.well-known/webfinger?resource=https://someauthority.com";
+    
+    NSURL *url = [MSALAdfsAuthorityResolver urlForWebFinger:authenticationEndpoint absoluteAuthority:someAuthority];
+    
+    XCTAssertNotNil(url);
+    XCTAssertEqualObjects(url.absoluteString, expectedUrlString);
+}
+
 - (void)testOpenIDConfigurationEndpointForAuthority_whenBadUpn_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable";
+    NSString *badUpn = @"displayable";
 
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
     [resolver openIDConfigurationEndpointForAuthority:authority
-                                    userPrincipalName:upn
+                                    userPrincipalName:badUpn
                                              validate:YES
                                               context:nil
                                       completionBlock:^(NSString *endpoint, NSError *error)
@@ -111,383 +258,327 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
          
          XCTAssertTrue(error.code == MSALErrorInvalidParameter);
          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"UPN"]);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 
-
-- (void)testOpenIDConfigurationEndpointForAuthority_whenNilDrsResponse_shouldReturnError
+- (void)testOpenIDConfigurationEndpointForAuthority_whenNilUpn_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
     
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                              class:[MSALDrsDiscoveryRequest class]
-                              block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         completionBlock(nil, nil);
-     }];
-    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
-                                    userPrincipalName:upn
+                                    userPrincipalName:nil
                                              validate:YES
                                               context:nil
                                       completionBlock:^(NSString *endpoint, NSError *error)
      {
+         
          XCTAssertNotNil(error);
          XCTAssertNil(endpoint);
          
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"DRS discovery"]);
+         XCTAssertTrue(error.code == MSALErrorInvalidParameter);
+         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"UPN"]);
+         
+         [expectation fulfill];
      }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenDrsDiscoveryValidFromOnPremsAndWebFingerValid_shouldReturnEndpoint
+{
+    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    [self addDrsDiscoverySuccessResponseForOnPrems:nil];
+    [self addWebFingerSuccessResponse:nil];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [resolver openIDConfigurationEndpointForAuthority:authority
+                                    userPrincipalName:upn
+                                             validate:YES
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(endpoint);
+                                          XCTAssertNil(error);
+                                          
+                                          XCTAssertEqualObjects(endpoint, expectedEndpoint);
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenDrsDiscoveryValidFromCloudAndWebFingerValid_shouldReturnEndpoint
+{
+    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoverySuccessResponseForCloud:nil];
+    [self addWebFingerSuccessResponse:nil];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [resolver openIDConfigurationEndpointForAuthority:authority
+                                    userPrincipalName:upn
+                                             validate:YES
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(endpoint);
+                                          XCTAssertNil(error);
+                                          
+                                          XCTAssertEqualObjects(endpoint, expectedEndpoint);
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenDrsDiscoveryServerError_shouldReturnError
+{
+    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoveryForCloudFailureResponse];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [resolver openIDConfigurationEndpointForAuthority:authority
+                                    userPrincipalName:upn
+                                             validate:YES
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNil(endpoint);
+                                          XCTAssertNotNil(error);
+                                         
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];    
 }
 
 - (void)testOpenIDConfigurationEndpointForAuthority_whenDrsResponseMissingPassiveAuthEndpoint_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ } } error:nil];
-         
-         completionBlock(response, nil);
-     }];
+    [self addDrsDiscoverySuccessResponseForOnPrems:@{ @"IdentityProviderService" : @{ } }];
+    [self addWebFingerSuccessResponse:nil];
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
                                              validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"DRS discovery"]);
+                                          
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
      {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"DRS discovery"]);
+         XCTAssertNil(error);
      }];
-
 }
-
 
 - (void)testOpenIDConfigurationEndpointForAuthority_whenDrsResponseMissingIdentityProviderService_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{} error:nil];
-         
-         completionBlock(response, nil);
-     }];
+    [self addDrsDiscoverySuccessResponseForOnPrems:@{ }];
+    [self addWebFingerSuccessResponse:nil];
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
                                              validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"DRS discovery"]);
-     }];
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"DRS discovery"]);
+                                          
+                                          [expectation fulfill];
+                                      }];
     
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
 }
 
 - (void)testOpenIDConfigurationEndpointForAuthority_whenWebFingerResponseMissing_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://someendpoint.com"} } error:nil];
-         
-         completionBlock(response, nil);
-     }];
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoverySuccessResponseForCloud:nil];
+    [self addWebFingerSuccessResponse:@{}];
     
-    
-    [MSALTestSwizzle classMethod:@selector(requestForAuthenticationEndpoint:authority:context:completionBlock:)
-                           class:[MSALWebFingerRequest class]
-                           block:(id)^(id obj, NSString *authenticationEndpoint, NSURL *authority, id<MSALRequestContext>context, MSALWebFingerCompletionBlock completionBlock)
-     {
-         (void)obj;
-         (void)authenticationEndpoint;
-         (void)authority;
-         (void)context;
-         
-         completionBlock(nil, nil);
-     }];
-    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
                                              validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
      {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
-     }];
-}
-
-- (void)testOpenIDConfigurationEndpointForAuthority_whenWebFingerResponseEmptyLinks_shouldReturnError
-{
-    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
-    
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://someendpoint.com"} } error:nil];
-         
-         completionBlock(response, nil);
-     }];
-    
-    
-    [MSALTestSwizzle classMethod:@selector(requestForAuthenticationEndpoint:authority:context:completionBlock:)
-                           class:[MSALWebFingerRequest class]
-                           block:(id)^(id obj, NSString *authenticationEndpoint, NSURL *authority, id<MSALRequestContext>context, MSALWebFingerCompletionBlock completionBlock)
-     {
-         (void)obj;
-         (void)authenticationEndpoint;
-         (void)authority;
-         (void)context;
-         
-         MSALWebFingerResponse *response =
-         [[MSALWebFingerResponse alloc] initWithJson:@{ @"links" : @[] }
-                                               error:nil];
-         completionBlock(response, nil);
-     }];
-    
-    
-    [resolver openIDConfigurationEndpointForAuthority:authority
-                                    userPrincipalName:upn
-                                             validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+         XCTAssertNil(error);
      }];
 }
 
 - (void)testOpenIDConfigurationEndpointForAuthority_whenWebFingerResponseRealmNotTrusted_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     
-    NSString *rel = @"https://schemas.somehost.com/rel/not-trusted";
-    NSString *href = @"https://someref.com";
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://someendpoint.com"} } error:nil];
-         
-         completionBlock(response, nil);
-     }];
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoverySuccessResponseForCloud:nil];
+    [self addWebFingerSuccessResponse:@{ @"links" : @[ @{@"href" : @"https://fs.fabrikam.com/adfs/",
+                                                         @"rel" : @"https://schemas.somehost.com/rel/not-trusted"}] }];
     
-    
-    [MSALTestSwizzle classMethod:@selector(requestForAuthenticationEndpoint:authority:context:completionBlock:)
-                           class:[MSALWebFingerRequest class]
-                           block:(id)^(id obj, NSString *authenticationEndpoint, NSURL *authority, id<MSALRequestContext>context, MSALWebFingerCompletionBlock completionBlock)
-     {
-         (void)obj;
-         (void)authenticationEndpoint;
-         (void)authority;
-         (void)context;
-         
-         MSALWebFingerResponse *response =
-         [[MSALWebFingerResponse alloc] initWithJson:@{ @"links" : @[ @{@"href" : href, @"rel" : rel} ]}
-                                               error:nil];
-         
-         
-         completionBlock(response, nil);
-     }];
-    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
                                              validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
      {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+         XCTAssertNil(error);
      }];
 }
-
 
 - (void)testOpenIDConfigurationEndpointForAuthority_whenWebFingerLinkHrefNotMatchAuthority_shouldReturnError
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
     
-    NSString *rel = TRUSTED_REALM;
-    NSString *href = @"https://someref_not_match_authority.com";
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoverySuccessResponseForCloud:nil];
+    [self addWebFingerSuccessResponse:@{ @"links" : @[ @{@"href" : @"https://someref_not_match_authority.com",
+                                                         @"rel" : TRUSTED_REALM}] }];
     
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://someendpoint.com"} } error:nil];
-         
-         completionBlock(response, nil);
-     }];
-    
-    
-    [MSALTestSwizzle classMethod:@selector(requestForAuthenticationEndpoint:authority:context:completionBlock:)
-                           class:[MSALWebFingerRequest class]
-                           block:(id)^(id obj, NSString *authenticationEndpoint, NSURL *authority, id<MSALRequestContext>context, MSALWebFingerCompletionBlock completionBlock)
-     {
-         (void)obj;
-         (void)authenticationEndpoint;
-         (void)authority;
-         (void)context;
-         
-         MSALWebFingerResponse *response =
-         [[MSALWebFingerResponse alloc] initWithJson:@{ @"links" : @[ @{@"href" : href, @"rel" : rel} ]}
-                                               error:nil];
-         completionBlock(response, nil);
-     }];
-    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     [resolver openIDConfigurationEndpointForAuthority:authority
                                     userPrincipalName:upn
                                              validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertNil(endpoint);
-         
-         XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
-         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
-     }];
-}
-
-- (void)testOpenIDConfigurationEndpointForAuthority_whenNormalFlow_shouldReturnEndpointWithNoError
-{
-    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
-    NSURL *authority = [NSURL URLWithString:@"https://fs.fabrikam.com/adfs/"];
-    NSString *upn = @"displayable@contoso.com";
-    
-    NSString *rel = TRUSTED_REALM;
-    NSString *href = authority.absoluteString;
-    
-    NSString *expectedEndpoint = @"https://fs.fabrikam.com/adfs/.well-known/openid-configuration";
-    
-    [MSALTestSwizzle classMethod:@selector(queryEnrollmentServerEndpointForDomain:adfsType:context:completionBlock:)
-                           class:[MSALDrsDiscoveryRequest class]
-                           block:(id)^(id obj, NSString *domain, AdfsType type, id<MSALRequestContext> context, MSALDrsCompletionBlock completionBlock)
-     {
-         (void)domain;
-         (void)obj;
-         (void)type;
-         (void)context;
-         
-         MSALDrsDiscoveryResponse *response =
-         [[MSALDrsDiscoveryResponse alloc] initWithJson:@{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://someendpoint.com"} } error:nil];
-         
-         completionBlock(response, nil);
-     }];
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+                                          [expectation fulfill];
+                                      }];
     
     
-    [MSALTestSwizzle classMethod:@selector(requestForAuthenticationEndpoint:authority:context:completionBlock:)
-                           class:[MSALWebFingerRequest class]
-                           block:(id)^(id obj, NSString *authenticationEndpoint, NSURL *authority, id<MSALRequestContext>context, MSALWebFingerCompletionBlock completionBlock)
-     {
-         (void)obj;
-         (void)authenticationEndpoint;
-         (void)authority;
-         (void)context;
-         
-         MSALWebFingerResponse *response =
-         [[MSALWebFingerResponse alloc] initWithJson:@{ @"links" : @[ @{@"href" : href, @"rel" : rel} ]}
-                                               error:nil];
-         completionBlock(response, nil);
-     }];
-    
-    
-    [resolver openIDConfigurationEndpointForAuthority:authority
-                                    userPrincipalName:upn
-                                             validate:YES
-                                              context:nil
-                                      completionBlock:^(NSString *endpoint, NSError *error)
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
      {
          XCTAssertNil(error);
-         XCTAssertNotNil(endpoint);
-         
-         XCTAssertEqualObjects(endpoint, expectedEndpoint);
+     }];
+    
+    [parameters.urlSession invalidateAndCancel];
+}
+
+- (void)testOpenIDConfigurationEndpointForAuthority_whenWebFingerResponseEmptyLinks_shouldReturnError
+{
+    MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.urlSession = [MSALTestURLSession createMockSession];
+    
+    [self addDrsDiscoveryForOnPremsFailureResponse];
+    [self addDrsDiscoverySuccessResponseForCloud:nil];
+    [self addWebFingerSuccessResponse:@{ @"links" : @[] }];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    [resolver openIDConfigurationEndpointForAuthority:authority
+                                    userPrincipalName:upn
+                                             validate:YES
+                                              context:parameters
+                                      completionBlock:^(NSString *endpoint, NSError *error) {
+                                          XCTAssertNotNil(error);
+                                          XCTAssertNil(endpoint);
+                                          
+                                          XCTAssertTrue(error.code == MSALErrorFailedAuthorityValidation);
+                                          XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"WebFinger"]);
+                                          [expectation fulfill];
+                                      }];
+    
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
      }];
 }
 

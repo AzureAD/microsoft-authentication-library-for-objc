@@ -112,4 +112,7 @@ typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *respons
 // Helper dispatch method that URLSessionTask can utilize
 - (void)dispatchIfNeed:(void (^)(void))block;
 
+// Helper method to clear out response
++ (void)reset;
+
 @end
