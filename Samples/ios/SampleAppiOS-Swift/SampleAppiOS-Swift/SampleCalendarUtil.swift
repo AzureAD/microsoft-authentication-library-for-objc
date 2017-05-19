@@ -82,6 +82,7 @@ class SampleCalendarUtil  {
             self.getJsonEvents(withToken: accessToken, completion: {
                 (jsonEvents: [[String : Any]]?, error: Error?) in
                 
+                self.setLastChecked()
                 let processedEvents = self.processEvents(withEvents: jsonEvents)
                 
                 DispatchQueue.main.async {
@@ -160,8 +161,7 @@ fileprivate extension SampleCalendarUtil {
                 completion(nil, SampleAppError.ServerInvalidResponse)
                 return
             }
-            
-            self.setLastChecked()
+
             completion(verifiedJsonEvents, nil)
         }
     }
