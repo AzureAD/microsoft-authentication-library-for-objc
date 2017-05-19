@@ -56,6 +56,7 @@ class SampleCalendarUtil  {
      Clears any cached events for the current user
      */
     func clearCache() {
+        UserDefaults.standard.removeObject(forKey: kLastEventsCheckKey)
         cachedEvents.removeAll()
     }
     
