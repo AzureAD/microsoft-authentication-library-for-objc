@@ -103,6 +103,7 @@ fileprivate extension SampleMainViewController {
             
             if let error = error {
                 print("checkUpdatePhoto error: \(error)")
+                return
             }
             
             if let image = image {
