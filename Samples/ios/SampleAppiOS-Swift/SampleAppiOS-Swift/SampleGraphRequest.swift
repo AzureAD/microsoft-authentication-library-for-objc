@@ -85,7 +85,7 @@ class SampleGraphRequest: GraphRequesting {
                 return
             }
 
-            if let response = response as? HTTPURLResponse, 200 ~= response.statusCode {
+            if let response = response as? HTTPURLResponse, 200 == response.statusCode {
                 completion(data, nil)
                 return
             }

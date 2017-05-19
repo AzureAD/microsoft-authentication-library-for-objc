@@ -42,9 +42,9 @@ class SampleMSALUtil {
     func setup() {
         MSALLogger.shared().setCallback {
             (level: MSALLogLevel, message: String?, containsPII: Bool) in
-            // When capturing log messages from MSAL you only need to capture either messages where
-            // containsPII == YES or containsPII == NO, as log messages are duplicated between the
-            // two, however the containsPII version might contain Personally Identifiable Information (PII)
+            // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
+            // containsPII == NO. In this case, you only need to capture either one set of messages.
+            // however the containsPII version might contain Personally Identifiable Information (PII)
             // about the user being logged in.
             if let displayableMessage = message {
                 if (!containsPII) {

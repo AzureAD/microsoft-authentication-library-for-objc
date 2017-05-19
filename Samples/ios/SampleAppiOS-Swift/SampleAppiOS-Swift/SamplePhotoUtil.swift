@@ -110,7 +110,7 @@ fileprivate extension SamplePhotoUtil {
     }
     
     func setLastChecked() {
-        UserDefaults.standard.set(Data(), forKey: kLastPhotoCheckKey)
+        UserDefaults.standard.set(Date(), forKey: kLastPhotoCheckKey)
     }
     
     func cache(photo data: Data) throws {
@@ -132,8 +132,11 @@ fileprivate extension SamplePhotoUtil {
     }
     
     func checkTimestamp() -> Bool {
-        guard let cachedImagePath = cachedImagePath(),
-            let lastChecked = UserDefaults.standard.object(forKey: kLastPhotoCheckKey) as? Date else {
+        guard let cachedImagePath = cachedImagePath() else {
+            return true
+        }
+        
+        guard let lastChecked = UserDefaults.standard.object(forKey: kLastPhotoCheckKey) as? Date else {
             return true
         }
         
@@ -145,7 +148,6 @@ fileprivate extension SamplePhotoUtil {
             return (-lastChecked.timeIntervalSinceNow > kSecondsPerDay)
         }
     }
-    
 }
 
 // MARK: Request

@@ -127,11 +127,15 @@ fileprivate extension SampleCalendarUtil {
     }
     
     func checkTimestamp() -> Bool {
-        if let lastChecked = UserDefaults.standard.object(forKey: kEventsKey) as? Date {
+        if let lastChecked = UserDefaults.standard.object(forKey: kLastEventsCheckKey) as? Date {
             // Only check for updated events every 30 minutes
             return (-lastChecked.timeIntervalSinceNow > 30 * 60)
         }
         return true
+    }
+    
+    func setLastChecked() {
+        UserDefaults.standard.set(Date(), forKey: kLastEventsCheckKey)
     }
     
     func storeEvents(withJsonArray json: [[String: Any]]) {
@@ -156,6 +160,7 @@ fileprivate extension SampleCalendarUtil {
                 return
             }
             
+            self.setLastChecked()
             completion(verifiedJsonEvents, nil)
         }
     }
