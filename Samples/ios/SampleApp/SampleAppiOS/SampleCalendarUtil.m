@@ -31,9 +31,8 @@
 #import "SampleGraphRequest.h"
 #import "SampleMSALUtil.h"
 
-
-
 static NSString * const kLastEventsCheck = @"last_events_check";
+static NSString * const kEvents = @"events";
 
 @interface SampleEventRequest : SampleGraphRequest
 
@@ -104,7 +103,7 @@ static NSDateFormatter *s_df = nil;
         return nil;
     }
     
-    _cachedEvents = [self processEvents:[[NSUserDefaults standardUserDefaults] objectForKey:@"events"]];
+    _cachedEvents = [self processEvents:[[NSUserDefaults standardUserDefaults] objectForKey:kEvents]];
     
     return self;
 }
@@ -141,7 +140,10 @@ static NSDateFormatter *s_df = nil;
          
          [[SampleEventRequest requestWithToken:token] getEvents:^(NSArray *events, NSError *error)
           {
+              [self setLastChecked];
+              
               NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *processedEvents = [self processEvents:events];
+              
               dispatch_async(dispatch_get_main_queue(), ^{
                   if (!error)
                   {
@@ -210,12 +212,18 @@ static NSDateFormatter *s_df = nil;
  */
 - (void)clearCache
 {
-   _cachedEvents = nil;
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:kLastEventsCheck];
+    _cachedEvents = nil;
+}
+
+- (void)setLastChecked
+{
+    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:kLastEventsCheck];
 }
 
 - (void)storeEvents:(NSArray *)cachedEvents
 {
-    [[NSUserDefaults standardUserDefaults] setObject:cachedEvents forKey:@"events"];
+    [[NSUserDefaults standardUserDefaults] setObject:cachedEvents forKey:kEvents];
 }
 
 @end
