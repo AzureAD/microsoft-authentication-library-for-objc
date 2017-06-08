@@ -75,4 +75,11 @@
     return [[self absoluteString] stringByReplacingOccurrencesOfString:tenant withString:MSAL_TELEMETRY_KEY_TENANT_SCRUBBED_VALUE];
 }
 
+
+- (BOOL)isEquivalentAuthority:(NSURL *)aURL
+{
+    return ([self.scheme caseInsensitiveCompare:aURL.scheme] == NSOrderedSame &&
+            [self.msalHostWithPort caseInsensitiveCompare:aURL.msalHostWithPort] == NSOrderedSame);
+}
+
 @end

@@ -452,6 +452,10 @@
      {
          XCTAssertNil(authority);
          XCTAssertNotNil(error);
+         
+         XCTAssertEqual(error.code, MSALErrorInvalidRequest);
+         XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"supported authority"]);
+         
          [expectation fulfill];
      }];
     

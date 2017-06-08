@@ -117,4 +117,117 @@
     XCTAssertEqualObjects(@"https://login.microsoftonline.com/tfp/<tenant>/b2c_1_siup/v2.0/", scrubbedPath);
 }
 
+- (void)testIsEquivalentAuthority_whenMatch_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
+    NSURL *url2 = [url1 copy];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenOneSchemeIsNil_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
+    NSURL *url2 = [NSURL URLWithString:@"host.com/"];
+
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenBothSchemesAreNil_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"host.com/path1"];
+    NSURL *url2 = [NSURL URLWithString:@"host.com/path2"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenSchemesDontMatch_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
+    NSURL *url2 = [NSURL URLWithString:@"http://host.com/"];
+    
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenOneHostIsNil_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
+    NSURL *url2 = [NSURL URLWithString:@"https://"];
+    
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenBothHostsAreNil_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://"];
+    NSURL *url2 = [NSURL URLWithString:@"https://"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenHostsDontMatch_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host1.com/"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host2.com/"];
+    
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenPortsDontMatch_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com:123/"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com:456/"];
+    
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenPortsNilAndCustom_shouldReturnFalse
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com:123/"];
+    
+    XCTAssertFalse([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenPortsNilAnd443_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com:443/"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com/"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenPortsBothNil_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/path1"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com/path2"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenTrailingPathsExistOthersMatch_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com/path1"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com/path2"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+- (void)testIsEquivalentAuthority_whenTrailingPathsExistOthersMatchCustomPorts_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com:123/path1"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com:123/path2"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
+
+- (void)testIsEquivalentAuthority_whenTrailingPathsExistOthersMatchWithOne443Port_shouldReturnTrue
+{
+    NSURL *url1 = [NSURL URLWithString:@"https://host.com:443/path1"];
+    NSURL *url2 = [NSURL URLWithString:@"https://host.com/path2"];
+    
+    XCTAssertTrue([url1 isEquivalentAuthority:url2]);
+}
+
 @end

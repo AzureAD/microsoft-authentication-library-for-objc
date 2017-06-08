@@ -80,6 +80,13 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorInvalidRequest = -42002,
     MSALErrorInvalidClient = -42003,
     
+    /*! 
+        The passed in authority URL does not pass validation.
+        If you're trying to use B2C, you must disable authority validation by
+        setting validateAuthority of MSALPublicClientApplication to NO.
+     */
+    MSALErrorFailedAuthorityValidation = -42004,
+    
     /*!
         Interaction required errors occur because of a wide variety of errors
         returned by the authentication service. In all cases the proper response

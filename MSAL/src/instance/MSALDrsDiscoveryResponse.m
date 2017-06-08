@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,23 +17,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#pragma once
+#import "MSALDrsDiscoveryResponse.h"
 
-@interface NSURL (MSAL)
+@interface MSALDrsDiscoveryResponse()
 
-// Returns a string that contains host and the port, if specified
-- (NSString *)msalHostWithPort;
+@property (readonly) NSDictionary *identityProviderService;
 
-// Returns a path with any tenant info removed from it
-- (NSString *)scrubbedHttpPath;
+@end
 
-// Returns YES for equivalent authority
-- (BOOL)isEquivalentAuthority:(NSURL *)aURL;
+
+@implementation MSALDrsDiscoveryResponse
+
+#define IdentityProviderServiceKey  @"IdentityProviderService"
+#define PassiveAuthEndpointKey      @"PassiveAuthEndpoint"
+
+DICTIONARY_READ_PROPERTY_IMPL(_json[@"IdentityProviderService"], PassiveAuthEndpointKey, passiveAuthEndpoint)
 
 @end

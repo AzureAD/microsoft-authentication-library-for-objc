@@ -559,8 +559,10 @@ static NSMutableArray *s_responses = nil;
     return nil;
 }
 
-
-
++ (void)reset
+{
+    [s_responses removeAllObjects];
+}
 
 - (void)dispatchIfNeed:(void (^)(void))block
 {

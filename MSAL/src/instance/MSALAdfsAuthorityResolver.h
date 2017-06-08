@@ -28,6 +28,18 @@
 #import "MSALAuthority.h"
 #import "MSALAuthorityBaseResolver.h"
 
+/*!
+ For AD FS authority, type can be specified to be on-prems, or cloud.
+ */
+typedef enum
+{
+    MSAL_ADFS_ON_PREMS,
+    MSAL_ADFS_CLOUD
+} AdfsType;
+
 @interface MSALAdfsAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+
++ (NSURL *)urlForDrsDiscoveryForDomain:(NSString *)domain adfsType:(AdfsType)type;
++ (NSURL *)urlForWebFinger:(NSString *)authenticationEndpoint absoluteAuthority:(NSString *)authority;
 
 @end
