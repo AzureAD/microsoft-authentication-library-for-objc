@@ -64,7 +64,7 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorInvalidParameter, @"user parameter cannot be nil");
+    CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorNullUser, @"user parameter cannot be nil");
 
     MSALTokenCache *cache = _parameters.tokenCache;
     
