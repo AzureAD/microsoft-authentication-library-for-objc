@@ -29,8 +29,19 @@
 #define MSALUIBEHAVIOR_H
 
 typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+    /*!
+        If no user is specified the authentication webview will present a list of users currently
+        signed in for the user to select among.
+     */
     MSALSelectAccount,
+    
+    /*!
+        Require the user to authenticate in the webview
+     */
     MSALForceLogin,
+    /*!
+        Require the user to consent to the current set of scopes for the request.
+     */
     MSALForceConsent,
     MSALUIBehaviorDefault = MSALSelectAccount,
 };
