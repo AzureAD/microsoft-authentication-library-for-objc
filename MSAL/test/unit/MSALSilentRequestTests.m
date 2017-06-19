@@ -122,7 +122,7 @@
         XCTAssertNil(result);
         XCTAssertNotNil(error);
         
-        XCTAssertTrue(error.code == MSALErrorNullUser);
+        XCTAssertTrue(error.code == MSALErrorUserRequired);
         
         [expectation fulfill];
     }];

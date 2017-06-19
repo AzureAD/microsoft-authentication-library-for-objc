@@ -98,7 +98,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorMismatchedUser             = -42101,
     MSALErrorNoAuthorizationResponse    = -42102,
     MSALErrorBadAuthorizationResponse   = -42103,
-    MSALErrorNullUser                   = -42104,
+    MSALErrorUserRequired               = -42104,
     
     /*!
         The user or application failed to authenticate in the interactive flow.
