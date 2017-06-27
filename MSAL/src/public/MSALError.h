@@ -77,8 +77,8 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorRedirectSchemeNotRegistered = -42001,
     
-    MSALErrorInvalidRequest = -42002,
-    MSALErrorInvalidClient = -42003,
+    MSALErrorInvalidRequest              = -42002,
+    MSALErrorInvalidClient               = -42003,
     
     /*! 
         The passed in authority URL does not pass validation.
@@ -94,10 +94,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
         in the userInfo dictionary.
      */
-    MSALErrorInteractionRequired    = -42100,
-    MSALErrorMismatchedUser = -42101,
-    MSALErrorNoAuthorizationResponse = -42102,
-    MSALErrorBadAuthorizationResponse = -42103,
+    MSALErrorInteractionRequired        = -42100,
+    MSALErrorMismatchedUser             = -42101,
+    MSALErrorNoAuthorizationResponse    = -42102,
+    MSALErrorBadAuthorizationResponse   = -42103,
+    MSALErrorUserRequired               = -42104,
     
     /*!
         The user or application failed to authenticate in the interactive flow.
@@ -118,11 +119,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         more information about the specific error. Keychain error codes are
         documented in Apple's <Security/SecBase.h> header file
      */
-    MSALErrorTokenCacheItemFailure = -42200,
-    MSALErrorAmbiguousAuthority = -42201,
-    MSALErrorUserNotFound = -42202,
-    MSALErrorNoAccessTokensFound = -42203,
-    MSALErrorWrapperCacheFailure = -42270,
+    MSALErrorTokenCacheItemFailure  = -42200,
+    MSALErrorAmbiguousAuthority     = -42201,
+    MSALErrorUserNotFound           = -42202,
+    MSALErrorNoAccessTokensFound    = -42203,
+    MSALErrorWrapperCacheFailure    = -42270,
     /*!
         MSAL encounted a network error while trying to authenticate. Inspect
         NSUnderlyingError from the userInfo dictionary for more information
