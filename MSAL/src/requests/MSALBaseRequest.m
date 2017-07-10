@@ -114,7 +114,6 @@ static MSALScopes *s_reservedScopes = nil;
         [requestScopes unionOrderedSet:extraScopes];
     }
     [requestScopes unionOrderedSet:s_reservedScopes];
-    [requestScopes removeObject:_parameters.clientId];
     return requestScopes;
 }
 
