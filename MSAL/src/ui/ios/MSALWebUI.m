@@ -211,17 +211,32 @@ static MSALWebUI *s_currentWebSession = nil;
     return [webSession completeSessionWithResponse:url orError:nil];
 }
 
+- (void)cancelUI
+{
+#ifdef __IPHONE_11_0
+    if (_authSession)
+    {
+        [_authSession cancel];
+        
+        _authSession = nil;
+        return;
+    }
+#endif
+    
+    [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (BOOL)completeSessionWithResponse:(NSURL *)response
                             orError:(NSError *)error
 {
     if ([NSThread isMainThread])
     {
-        [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+        [self cancelUI];
     }
     else
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+            [self cancelUI];
         });
     }
     
