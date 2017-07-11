@@ -33,6 +33,7 @@ typedef void (^MSALWebUICompletionBlock)(NSURL *response, NSError *error);
 
 + (void)startWebUIWithURL:(NSURL *)url
                   context:(id<MSALRequestContext>)context
+           callbackScheme:(NSString *)callbackScheme
           completionBlock:(MSALWebUICompletionBlock)completionBlock;
 
 + (BOOL)handleResponse:(NSURL *)url;

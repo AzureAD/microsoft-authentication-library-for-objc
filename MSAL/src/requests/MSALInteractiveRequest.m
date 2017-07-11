@@ -182,6 +182,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     
     [MSALWebUI startWebUIWithURL:authorizationUrl
                          context:_parameters
+                  callbackScheme:_parameters.redirectUri.scheme
                  completionBlock:^(NSURL *response, NSError *error)
      {
          s_currentRequest = nil;
