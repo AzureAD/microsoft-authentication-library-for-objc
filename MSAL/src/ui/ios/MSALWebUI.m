@@ -166,7 +166,7 @@ static MSALWebUI *s_currentWebSession = nil;
             if (![_authSession start])
             {
                 [self clearCurrentWebSession];
-                ERROR_COMPLETION(_context, MSALErrorUserCanceled, @"Unable to start SFAuthenticationSession");
+                ERROR_COMPLETION(_context, MSALErrorInternal, @"Unable to start SFAuthenticationSession");
             }
             
             return;
