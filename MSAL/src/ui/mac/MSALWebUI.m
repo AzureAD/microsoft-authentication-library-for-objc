@@ -31,10 +31,12 @@
 
 + (void)startWebUIWithURL:(NSURL *)url
                   context:(id<MSALRequestContext>)context
+           callbackScheme:(NSString *)callbackScheme
           completionBlock:(MSALWebUICompletionBlock)completionBlock
 {
     (void)url;
     (void)context;
+    (void)callbackScheme;
     (void)completionBlock;
     
     @throw @"MSAL is not supported on macOS at this time.";
