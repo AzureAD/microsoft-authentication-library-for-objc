@@ -28,6 +28,7 @@
 #import "MSALDefaultDispatcher.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryDefaultEvent.h"
+#import "MSALTelemetryPiiRules.h"
 
 static NSString* const s_delimiter = @"|";
 static MSALTelemetryDefaultEvent *s_defaultEvent;
@@ -183,6 +184,13 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     {
         for (MSALDefaultDispatcher *dispatcher in _dispatchers)
         {
+            for (NSString *propertyName in [event.propertyMap allKeys]) {
+                BOOL isPii = [MSALTelemetryPiiRules isPii:propertyName];
+                if (isPii && !self.piiEnabled) {
+                    [event deleteProperty:propertyName];
+                }
+            }
+            
             [dispatcher receive:requestId event:event];
         }
     }
@@ -210,7 +218,17 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
         
         if ([events count])
         {
-            events = [@[[s_defaultEvent getProperties]] arrayByAddingObjectsFromArray:events];
+            events = [@[[[s_defaultEvent getProperties] mutableCopy]] arrayByAddingObjectsFromArray:events];
+        }
+        
+        // Clear PII fields.
+        for (NSMutableDictionary *eventProperties in events) {
+            for (NSString *propertyName in [eventProperties allKeys]) {
+                BOOL isPii = [MSALTelemetryPiiRules isPii:propertyName];
+                if (isPii && !self.piiEnabled) {
+                    [eventProperties removeObjectForKey:propertyName];
+                }
+            }
         }
         
         for (MSALDefaultDispatcher *dispatcher in _dispatchers)

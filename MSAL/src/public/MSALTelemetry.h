@@ -56,6 +56,12 @@
 + (nonnull MSALTelemetry *)sharedInstance;
 
 /*!
+ Set to YES to allow events possibly containing Personally Identifiable Information (PII) to be
+ sent to dispatcher.
+ */
+@property (nonatomic) BOOL piiEnabled;
+
+/*!
  Register a telemetry dispatcher for receiving telemetry events.
  @param dispatcher              An instance of MSALDispatcher implementation.
  @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
