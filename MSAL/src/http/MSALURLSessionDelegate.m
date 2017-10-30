@@ -57,7 +57,9 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     
     NSString *requestHost = [request.URL msalHostWithPort];
     
-    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ? requestHost : [requestHost msalShortSHA256Hex] );
+    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
+             [NSString stringWithFormat:@"%@://%@", request.URL.scheme, request.URL.host]
+             : @"unknown host");
     LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
     
     completionHandler(request);

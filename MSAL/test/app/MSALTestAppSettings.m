@@ -111,7 +111,9 @@ static NSArray<NSString *> *s_scopes_available = nil;
         }
     }
     
-    LOG_WARN(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
+    LOG_WARN(nil, @"failed to find user identifier among users.");
+    LOG_WARN_PII(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
+    
     return nil;
 }
 
