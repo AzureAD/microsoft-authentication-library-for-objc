@@ -377,7 +377,7 @@
     if (result)
     {
         NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
-        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII(hashedAT), result.scopes, result.expiresOn);
+        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), result.scopes, result.expiresOn);
         LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
@@ -410,7 +410,7 @@
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
-             scopes, extraScopesToConsent, _PII(user.userIdentifier), _PII(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII(authority), correlationId);
+             scopes, extraScopesToConsent, _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
     LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -487,7 +487,7 @@
               "                                                     user:%@\n"
               "                                             forceRefresh:%@\n"
               "                                            correlationId:%@\n]",
-             scopes, _PII(user), forceRefresh ? @"Yes" : @"No", correlationId);
+             scopes, _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
     LOG_INFO_PII(params,

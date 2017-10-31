@@ -177,7 +177,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     [event setHttpMethod:request.HTTPMethod];
     [event setHttpURL:newURL];
     
-    LOG_INFO(_context, @"HTTP request %@ - additional parameters are hidden to protect any personal identifiable information",
+    LOG_INFO(_context, @"HTTP request %@",
              [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msalHostWithPort], request.URL.host]
              : @"unknown host");
     LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
