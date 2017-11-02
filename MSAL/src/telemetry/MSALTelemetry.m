@@ -177,25 +177,6 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     }
 }
 
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event
-{
-    @synchronized(self)
-    {
-        for (MSALDefaultDispatcher *dispatcher in _dispatchers)
-        {
-            for (NSString *propertyName in [event.propertyMap allKeys]) {
-                BOOL isPii = [MSALTelemetryPiiRules isPii:propertyName];
-                if (isPii && !self.piiEnabled) {
-                    [event deleteProperty:propertyName];
-                }
-            }
-            
-            [dispatcher receive:requestId event:event];
-        }
-    }
-}
-
 - (NSString *)getEventTrackingKey:(NSString *)requestId
                        eventName:(NSString *)eventName
 {
