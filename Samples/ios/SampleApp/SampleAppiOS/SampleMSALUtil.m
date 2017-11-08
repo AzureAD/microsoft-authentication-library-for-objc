@@ -53,14 +53,38 @@
 {
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
+        
+        // LOG WITH PII : "authority hello"
+        
+        
+        
+        // LOG WITHOUT PII : "hello"
+        
+        
+        
+        
+        
+        // LOG("AAA");
+        // LOG_PII("AAA");
+        
         // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
         // containsPII == NO. In this case, you only need to capture either one set of messages.
         // however the containsPII version might contain Personally Identifiable Information (PII)
         // about the user being logged in.
         if (!containsPII)
         {
+            // WILL CONTAIN EVERYTHING
             NSLog(@"%@", message);
+                // >> "AAA"
         }
+        
+        else
+        {
+            /// "AAA"
+        }
+        
+        
+        
     }];
 }
 

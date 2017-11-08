@@ -55,12 +55,10 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     (void)response;
     (void)task;
     
-    NSString *requestHost = [request.URL msalHostWithPort];
-    
     LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
              [NSString stringWithFormat:@"%@://%@", request.URL.scheme, request.URL.host]
              : @"unknown host");
-    LOG_INFO_PII(self.context, @"Redirecting to %@", requestHost);
+    LOG_INFO_PII(self.context, @"Redirecting to %@", request.URL.absoluteString);
     
     completionHandler(request);
 }

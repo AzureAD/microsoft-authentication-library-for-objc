@@ -410,7 +410,7 @@
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
-             scopes, extraScopesToConsent, _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
+             _PII_NULLIFY(scopes), extraScopesToConsent, _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
     LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -487,7 +487,7 @@
               "                                                     user:%@\n"
               "                                             forceRefresh:%@\n"
               "                                            correlationId:%@\n]",
-             scopes, _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
     LOG_INFO_PII(params,
