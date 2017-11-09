@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
+		2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
 		23CDA9AD1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.h in Headers */ = {isa = PBXBuildFile; fileRef = 23CDA9AB1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.h */; };
 		23CDA9AE1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9AC1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.m */; };
 		23CDA9AF1FA3F45000FDD5C0 /* MSALTelemetryPiiRules.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9AC1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.m */; };
@@ -352,6 +354,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+HelperMethods.h"; sourceTree = "<group>"; };
+		2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+HelperMethods.m"; sourceTree = "<group>"; };
 		23CDA9AB1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryPiiRules.h; sourceTree = "<group>"; };
 		23CDA9AC1FA3F44500FDD5C0 /* MSALTelemetryPiiRules.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryPiiRules.m; sourceTree = "<group>"; };
 		23CDA9B01FA4443800FDD5C0 /* MSALTelemetryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryTests.m; sourceTree = "<group>"; };
@@ -961,6 +965,8 @@
 				962E37BE1E720E1700DE71FE /* automation */,
 				D61A647D1E5AA7C60086D120 /* app */,
 				D65A6FDB1E3FF71000C69FBA /* unit */,
+				2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */,
+				2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -1973,6 +1979,7 @@
 				9628594F1E735346008F1AE1 /* MSALB2CAuthorityResolverTests.m in Sources */,
 				6030A24A1E930C06008B838D /* MSALClientInfoTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSALTestURLSession.m in Sources */,
+				2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				D6B58A581EB2C743000B3A5F /* MSALTestCacheDataUtil.m in Sources */,
 				60DEF1411E6501F800966664 /* MSALIdTokenTests.m in Sources */,
 				964F65241EC508670017D685 /* MSALWebFingerResponseTests.m in Sources */,
@@ -2034,6 +2041,7 @@
 				D61F5BDC1E59694300912CB8 /* NSDictionary+MSALTestUtil.m in Sources */,
 				603D19A21EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m in Sources */,
 				964F64F01EC4E7B30017D685 /* MSALAdfsAuthorityResolverTests.m in Sources */,
+				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				D69ADB201E5151E000952049 /* MSALJsonObjectTests.m in Sources */,
 				964F65251EC508670017D685 /* MSALWebFingerResponseTests.m in Sources */,
 			);

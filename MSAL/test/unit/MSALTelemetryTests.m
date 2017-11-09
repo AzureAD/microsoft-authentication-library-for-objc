@@ -33,6 +33,7 @@
 #import "MSALTelemetryEventStrings.h"
 #import "MSALTelemetryTestDispatcher.h"
 #import "MSALTelemetryDefaultEvent.h"
+#import "XCTestCase+HelperMethods.h"
 
 @interface MSALTelemetryTests : MSALTestCase
 
@@ -69,7 +70,7 @@
     [MSALTelemetry sharedInstance].piiEnabled = NO;
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldSetPiiFieldsToEmpty
+- (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = NO;
     NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
@@ -86,7 +87,7 @@
     XCTAssertNil([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID]);
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldNotChangePiiFields
+- (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
     NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
@@ -100,7 +101,7 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    XCTAssertEqual([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], @"id1234");
+    MSALAssertStringEquals([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], [@"id1234" msalComputeSHA256Hex]);
 }
 
 #pragma mark - Private

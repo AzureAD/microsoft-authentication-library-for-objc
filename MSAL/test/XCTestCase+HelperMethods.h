@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,31 +17,32 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSALTelemetryUIEvent.h"
-#import "MSALTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
+#import <XCTest/XCTest.h>
 
-@implementation MSALTelemetryUIEvent
-
-- (void)setLoginHint:(NSString *)hint
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:hint];
+//Usage: MSALAssertStringEquals(resultString, "Blah");
+#define MSALAssertStringEquals(actualParam, expectedParam) \
+{ \
+    [self msalAssertStringEquals:actualParam \
+                stringExpression:@"" #actualParam \
+                        expected:expectedParam \
+                            file:__FILE__ \
+                            line:__LINE__]; \
 }
 
-- (void)setNtlm:(NSString *)ntlmHandled
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_NTLM_HANDLED value:ntlmHandled];
-}
+@interface XCTestCase (HelperMethods)
 
-- (void)setIsCancelled:(BOOL)cancelled
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_UI_CANCELLED value:cancelled ? MSAL_TELEMETRY_VALUE_YES : MSAL_TELEMETRY_VALUE_NO];
-}
+- (void)msalAssertStringEquals:(NSString *)actual
+              stringExpression:(NSString *)expression
+                      expected:(NSString *)expected
+                          file:(const char *)file
+                          line:(int)line;
 
 @end

@@ -45,7 +45,7 @@
 
 - (void)setUser:(MSALUser *)user
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256Hex]];
+    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[user displayableId]];
 }
 
 - (void)setClientId:(NSString *)clientId
@@ -55,7 +55,7 @@
 
 - (void)setLoginHint:(NSString *)loginHint
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[loginHint msalComputeSHA256Hex]];
+    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:loginHint];
 }
 
 - (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken
