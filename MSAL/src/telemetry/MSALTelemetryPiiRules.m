@@ -30,8 +30,7 @@ static NSSet *_piiFields;
 
 + (void)initialize
 {
-    _piiFields = [[NSSet alloc] initWithArray:@[MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS,
-                                                MSAL_TELEMETRY_KEY_TENANT_ID,
+    _piiFields = [[NSSet alloc] initWithArray:@[MSAL_TELEMETRY_KEY_TENANT_ID,
                                                 MSAL_TELEMETRY_KEY_USER_ID,
                                                 MSAL_TELEMETRY_KEY_DEVICE_ID,
                                                 MSAL_TELEMETRY_KEY_LOGIN_HINT,

@@ -135,7 +135,6 @@
 		D61BD2A51EBD09F90007E484 /* NSDictionary+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 96C9D93B1E49279D00047B93 /* NSDictionary+MSALExtensions.m */; };
 		D61BD2A61EBD09F90007E484 /* NSOrderedSet+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB151E50486400952049 /* NSOrderedSet+MSALExtensions.m */; };
 		D61BD2A71EBD09F90007E484 /* NSMutableDictionary+MSALExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */; };
-		D61BD2A81EBD09F90007E484 /* MSALIpAddressHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */; };
 		D61BD2A91EBD09F90007E484 /* MSALCryptoHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D62F7B1E8DCC3200941DEA /* MSALCryptoHelper.m */; };
 		D61BD2AA1EBD09F90007E484 /* NSURL+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 968674F21E985AC3009F2BF4 /* NSURL+MSALExtensions.m */; };
 		D61BD2AB1EBD09F90007E484 /* MSALOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5371E4AA56800674A85 /* MSALOAuth2Constants.m */; };
@@ -290,7 +289,6 @@
 		E02397091E7B1C34004D6278 /* MSALTelemetryCacheEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396E21E78806A004D6278 /* MSALTelemetryCacheEvent.m */; };
 		E023970A1E7B1C3B004D6278 /* MSALTelemetryDefaultEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396E81E788398004D6278 /* MSALTelemetryDefaultEvent.m */; };
 		E023970B1E7B1C4B004D6278 /* MSALDefaultDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396D21E776F10004D6278 /* MSALDefaultDispatcher.m */; };
-		E023970D1E7C9F31004D6278 /* MSALIpAddressHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */; };
 		E023970E1E7CA4D1004D6278 /* NSMutableDictionary+MSALExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */; };
 /* End PBXBuildFile section */
 
@@ -656,8 +654,6 @@
 		E02396E81E788398004D6278 /* MSALTelemetryDefaultEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryDefaultEvent.m; sourceTree = "<group>"; };
 		E02396EA1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+MSALExtension.h"; sourceTree = "<group>"; };
 		E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+MSALExtension.m"; sourceTree = "<group>"; };
-		E02396ED1E78CC26004D6278 /* MSALIpAddressHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALIpAddressHelper.h; sourceTree = "<group>"; };
-		E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALIpAddressHelper.m; sourceTree = "<group>"; };
 		E02396F31E79E2F4004D6278 /* MSALTelemetryApiId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryApiId.h; sourceTree = "<group>"; };
 		E02396F81E7B005C004D6278 /* MSALTelemetryTestDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetryTestDispatcher.h; sourceTree = "<group>"; };
 		E02396F91E7B005C004D6278 /* MSALTelemetryTestDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryTestDispatcher.m; sourceTree = "<group>"; };
@@ -1310,8 +1306,6 @@
 				D69ADB151E50486400952049 /* NSOrderedSet+MSALExtensions.m */,
 				E02396EA1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.h */,
 				E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */,
-				E02396ED1E78CC26004D6278 /* MSALIpAddressHelper.h */,
-				E02396EE1E78CC26004D6278 /* MSALIpAddressHelper.m */,
 				96D62F7A1E8DCC3200941DEA /* MSALCryptoHelper.h */,
 				96D62F7B1E8DCC3200941DEA /* MSALCryptoHelper.m */,
 				968674F11E985AC3009F2BF4 /* NSURL+MSALExtensions.h */,
@@ -1840,7 +1834,6 @@
 				D61BD2D71EBD0A1B0007E484 /* MSALTokenCacheKeyBase.m in Sources */,
 				D61BD2D61EBD0A1B0007E484 /* MSALAccessTokenCacheItem.m in Sources */,
 				D61BD2C31EBD0A080007E484 /* MSALOAuth2Response.m in Sources */,
-				D61BD2A81EBD09F90007E484 /* MSALIpAddressHelper.m in Sources */,
 				96F7FB0F1ECCDC2A00A7A0C1 /* MSALWebFingerResponse.m in Sources */,
 				96F7FB0B1ECCDC2A00A7A0C1 /* MSALDrsDiscoveryResponse.m in Sources */,
 				D61BD2CD1EBD0A0F0007E484 /* MSALB2CAuthorityResolver.m in Sources */,
@@ -1893,7 +1886,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E023970D1E7C9F31004D6278 /* MSALIpAddressHelper.m in Sources */,
 				96C9D93E1E49279D00047B93 /* NSDictionary+MSALExtensions.m in Sources */,
 				E023970E1E7CA4D1004D6278 /* NSMutableDictionary+MSALExtension.m in Sources */,
 				D61F5BD01E5935B900912CB8 /* MSALOAuth2Constants.m in Sources */,

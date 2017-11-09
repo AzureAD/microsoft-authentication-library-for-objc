@@ -23,7 +23,6 @@
 
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSALTelemetryEventStrings.h"
-#import "MSALIpAddressHelper.h"
 #import "MSALLogger+Internal.h"
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -76,8 +75,6 @@
             [self setProperty:propertyName value:[msalIds objectForKey:key]];
         }
     });
-    
-    [self setProperty:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS value:[MSALIpAddressHelper msalDeviceIpAddress]];
 }
 
 #if !TARGET_OS_IPHONE
