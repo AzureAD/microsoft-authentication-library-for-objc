@@ -53,38 +53,23 @@
 {
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
-        
-        // LOG WITH PII : "authority hello"
-        
-        
-        
-        // LOG WITHOUT PII : "hello"
-        
-        
-        
-        
-        
-        // LOG("AAA");
-        // LOG_PII("AAA");
-        
         // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
         // containsPII == NO. In this case, you only need to capture either one set of messages.
         // however the containsPII version might contain Personally Identifiable Information (PII)
         // about the user being logged in.
+        
+        // if message is "redirect to https://somehost.com",
         if (!containsPII)
         {
             // WILL CONTAIN EVERYTHING
+            // so message contains "redirect to https://somehost.com"
             NSLog(@"%@", message);
-                // >> "AAA"
         }
         
         else
         {
-            /// "AAA"
+            // message contains "redirect to unknown host" or "redirect to (non-nil)"
         }
-        
-        
-        
     }];
 }
 
