@@ -21,17 +21,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-@protocol MSALTelemetryEventInterface <NSObject>
+#import "MSALTelemetryPiiRules.h"
+#import "MSALTelemetryEventStrings.h"
 
-@property (readonly) NSDictionary *propertyMap;
-@property (assign) BOOL errorInEvent;
+static NSDictionary *_piiRules;
 
-- (void)setProperty:(NSString *)name value:(NSString *)value;
-- (NSDictionary *)getProperties;
+@implementation MSALTelemetryPiiRules
 
-- (void)setStartTime:(NSDate *)time;
-- (void)setStopTime:(NSDate *)time;
-- (void)setResponseTime:(NSTimeInterval)responseTime;
-- (void)deleteProperty:(NSString *)name;
++ (void)initialize
+{
+    _piiRules = @{MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS: @YES};
+}
+
+#pragma mark - Public
+
++ (BOOL)isPii:(NSString *)propertyName
+{
+    NSNumber *value = _piiRules[propertyName];
+    if (value)
+    {
+        return [value boolValue];
+    }
+    
+    return NO;
+}
 
 @end
