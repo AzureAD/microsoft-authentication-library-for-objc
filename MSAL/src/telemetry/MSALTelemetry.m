@@ -202,12 +202,16 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
             events = [@[[[s_defaultEvent getProperties] mutableCopy]] arrayByAddingObjectsFromArray:events];
         }
         
-        // Clear PII fields.
-        for (NSMutableDictionary *eventProperties in events) {
-            for (NSString *propertyName in [eventProperties allKeys]) {
-                BOOL isPii = [MSALTelemetryPiiRules isPii:propertyName];
-                if (isPii && !self.piiEnabled) {
-                    [eventProperties removeObjectForKey:propertyName];
+        if (!self.piiEnabled)
+        {
+            // Clear PII fields.
+            for (NSMutableDictionary *eventProperties in events)
+            {
+                for (NSString *propertyName in [eventProperties allKeys])
+                {
+                    if ([MSALTelemetryPiiRules isPii:propertyName]) {
+                        [eventProperties removeObjectForKey:propertyName];
+                    }
                 }
             }
         }
