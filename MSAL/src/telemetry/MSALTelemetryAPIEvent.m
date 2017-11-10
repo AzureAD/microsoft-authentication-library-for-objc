@@ -98,7 +98,7 @@
 
 - (void)setAuthority:(NSURL *)authority
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:[authority scrubbedHttpPath]];
+    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:authority.absoluteString];
 }
 
 - (void)setGrantType:(NSString *)grantType
