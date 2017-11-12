@@ -370,14 +370,14 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
         LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
-        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), result.scopes, result.expiresOn);
+        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
         LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
@@ -410,7 +410,7 @@
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
-             _PII_NULLIFY(scopes), extraScopesToConsent, _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
     LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
