@@ -122,6 +122,7 @@
 
 - (void)testDispatcherAll
 {
+    [MSALTelemetry sharedInstance].piiEnabled = YES;
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;

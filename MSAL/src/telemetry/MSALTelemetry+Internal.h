@@ -33,9 +33,6 @@
 - (void)stopEvent:(NSString *)requestId
             event:(id<MSALTelemetryEventInterface>)event;
 
-- (void)dispatchEventNow:(NSString *)requestId
-                   event:(id<MSALTelemetryEventInterface>)event;
-
 - (void)flush:(NSString *)requestId;
 
 @end
