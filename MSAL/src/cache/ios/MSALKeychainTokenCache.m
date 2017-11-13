@@ -113,7 +113,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     dispatch_once(&s_once, ^{
         s_keychainTeamId = [self retrieveTeamIDFromKeychain:error];
-        LOG_INFO(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
+        LOG_INFO(nil, @"Using \"%@\" Team ID for Keychain.", _PII_NULLIFY(s_keychainTeamId));
         LOG_INFO_PII(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
     });
     
