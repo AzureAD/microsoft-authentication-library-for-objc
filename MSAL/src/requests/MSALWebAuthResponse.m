@@ -115,15 +115,18 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             NSString *body = [[NSString alloc] initWithData:response.body encoding:NSUTF8StringEncoding];
             NSString *errorData = [NSString stringWithFormat:@"Full response: %@", body];
             
-            NSString* message = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
+            NSString* message = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n", @"Domain", (long)response.statusCode];
             
-            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: message};
+            NSString* messagePII = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
+            
+            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: messagePII};
             
             NSError *error = [NSError errorWithDomain:@"Domain"
                                                  code:MSALErrorNetworkFailure
                                              userInfo:userInfo];
             
             LOG_WARN(_context, @"%@", message);
+            LOG_WARN_PII(_context, @"%@", messagePII);
             
             completionHandler(response, error);
             

@@ -92,18 +92,21 @@ void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, 
     }
     
     NSMutableString *message = [codeString mutableCopy];
+    NSMutableString *messagePII = [codeString mutableCopy];
     if (oauthError)
     {
-        [message appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\" Description:\"%@\"}", oauthError, subError, errorDescription];
+        [message appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\"}", oauthError, subError];
+        [messagePII appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\" Description:\"%@\"}", oauthError, subError, errorDescription];
     }
     else
     {
-        [message appendFormat:@": %@", errorDescription];
+        [messagePII appendFormat:@": %@", errorDescription];
     }
     
     [message appendFormat:@" (%s:%d)", function, line];
+    [messagePII appendFormat:@" (%s:%d)", function, line];
     LOG_ERROR(ctx, @"%@", message);
-    LOG_ERROR_PII(ctx, @"%@", message);
+    LOG_ERROR_PII(ctx, @"%@", messagePII);
 }
 
 NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)
