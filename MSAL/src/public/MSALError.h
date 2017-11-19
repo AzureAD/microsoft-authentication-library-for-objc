@@ -50,6 +50,11 @@ extern NSString *MSALErrorDescriptionKey;
  */
 extern NSString *MSALHTTPHeadersKey;
 
+/*!
+ Specifies http response code for error cases
+ */
+extern NSString *MSALHTTPResponseCodeKey;
+
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
     /*!

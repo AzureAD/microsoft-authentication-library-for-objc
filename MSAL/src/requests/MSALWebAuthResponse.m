@@ -117,7 +117,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             
             NSString* messagePII = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
             
-            NSMutableDictionary *userInfo = [@{NSLocalizedDescriptionKey: messagePII} mutableCopy];
+            NSMutableDictionary *userInfo = [@{MSALHTTPResponseCodeKey : [NSString stringWithFormat: @"%ld", (long)response.statusCode]} mutableCopy];
             
             if (response.headers)
             {
