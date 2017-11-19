@@ -45,6 +45,11 @@ extern NSString *MSALOAuthSubErrorKey;
  */
 extern NSString *MSALErrorDescriptionKey;
 
+/*!
+ Contains all http headers returned from the http error response
+ */
+extern NSString *MSALHTTPHeadersKey;
+
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
     /*!

@@ -120,6 +120,19 @@ NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescri
     return [NSError errorWithDomain:domain code:code userInfo:[NSDictionary dictionaryWithDictionary:userInfo]];
 }
 
+NSError *MSALCreateErrorWithUserInfo(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError, NSDictionary* additionalUserInfo)
+{
+    NSMutableDictionary* userInfo = [NSMutableDictionary new];
+    userInfo[MSALErrorDescriptionKey] = errorDescription;
+    userInfo[MSALOAuthErrorKey] = oauthError;
+    userInfo[MSALOAuthSubErrorKey] = subError;
+    userInfo[NSUnderlyingErrorKey]  = underlyingError;
+    
+    [userInfo addEntriesFromDictionary:additionalUserInfo];
+    
+    return [NSError errorWithDomain:domain code:code userInfo:[NSDictionary dictionaryWithDictionary:userInfo]];
+}
+
 NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
 {
     va_list args;
