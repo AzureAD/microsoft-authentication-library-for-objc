@@ -32,8 +32,7 @@ extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 extern MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode defaultCode);
 
 extern void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *errorDescription, NSString *subError, NSString *oauthError, const char *function, int line);
-extern NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError);
-extern NSError *MSALCreateErrorWithUserInfo(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError, NSDictionary* additionalUserInfo);
+extern NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError, NSDictionary* additionalUserInfo);
 
 extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(9, 10);
 extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(10, 11);

@@ -63,7 +63,7 @@
         {
             MSALLogError(context, MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil,  __FUNCTION__, __LINE__);
             
-            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil);
+            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil, nil);
             completionBlock(nil, discoveryError);
             return;
         }

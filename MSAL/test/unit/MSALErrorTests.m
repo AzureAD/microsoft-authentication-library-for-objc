@@ -35,9 +35,9 @@
 
 @implementation MSALErrorTests
 
-- (void)testCreateError_withDomainCodeDescription_shouldReturnErrorWithCodeDomainUserInfo
+- (void)testCreateError_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil);
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
     
     XCTAssertEqualObjects(error.domain, @"TestDomain");
     XCTAssertEqual(error.code, -1000);
@@ -45,21 +45,11 @@
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
 }
 
-- (void)testCreateErrorWithUserInfo_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
-{
-    NSError *error = MSALCreateErrorWithUserInfo(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
-    
-    XCTAssertEqualObjects(error.domain, @"TestDomain");
-    XCTAssertEqual(error.code, -1000);
-    XCTAssertNotNil(error.userInfo);
-    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
-}
-
-- (void)testCreateErrorWithUserInfo_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
+- (void)testCreateError_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
     NSDictionary *userInfo = @{MSALHTTPHeadersKey : @{@"Retry-After": @"120"}};
     
-    NSError *error = MSALCreateErrorWithUserInfo(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
     
     XCTAssertEqualObjects(error.domain, @"TestDomain");
     XCTAssertEqual(error.code, -1000);

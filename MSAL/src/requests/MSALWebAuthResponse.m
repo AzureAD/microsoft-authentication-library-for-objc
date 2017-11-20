@@ -124,7 +124,7 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
                 userInfo[MSALHTTPHeadersKey] = response.headers;
             }
             
-            NSError *httpError = MSALCreateErrorWithUserInfo(MSALErrorDomain, MSALErrorNetworkFailure, messagePII, nil, nil, nil, userInfo);
+            NSError *httpError = MSALCreateError(MSALErrorDomain, MSALErrorNetworkFailure, messagePII, nil, nil, nil, userInfo);
             
             LOG_WARN(_context, @"%@", message);
             LOG_WARN_PII(_context, @"%@", messagePII);
