@@ -63,8 +63,7 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
 @property (readwrite) MSALLogLevel level;
 
 /*!
-    Set to YES to allow messages possibly containing Personally Identifiable Information (PII) to be
-    sent to the logging callback.
+    MSAL provides logging callbacks that assist in diagnostics. There are 2 API callbacks, one for generic messages and the other for messages containing user information. If PiiLoggingEnabled is not set to YES, the returned data for logging will not contain any user information. By default the library will not return any messages with user information in them.
  */
 @property (readwrite) BOOL PiiLoggingEnabled;
 
