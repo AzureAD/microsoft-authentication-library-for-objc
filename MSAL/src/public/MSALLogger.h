@@ -63,7 +63,7 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
 @property (readwrite) MSALLogLevel level;
 
 /*!
-    MSAL provides logging callbacks that assist in diagnostics. There are 2 API callbacks, one for generic messages and the other for messages containing user information. If PiiLoggingEnabled is not set to YES, the returned data for logging will not contain any user information. By default the library will not return any messages with user information in them.
+    MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
 @property (readwrite) BOOL PiiLoggingEnabled;
 
