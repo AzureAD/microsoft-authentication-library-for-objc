@@ -37,7 +37,7 @@
 - (void)setHttpURL:(NSURL *)url
 {
     NSURL *urlWithoutParameters = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, [url msalHostWithPort], url.path]];
-    [self setProperty:MSAL_TELEMETRY_KEY_HTTP_PATH value:[urlWithoutParameters scrubbedHttpPath]];
+    [self setProperty:MSAL_TELEMETRY_KEY_HTTP_PATH value:urlWithoutParameters.absoluteString];
 }
 
 - (void)setHttpRequestIdHeader:(NSString *)requestIdHeader

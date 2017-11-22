@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,18 +17,32 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#pragma once
+#import <XCTest/XCTest.h>
 
-#import <Foundation/Foundation.h>
+//Usage: MSALAssertStringEquals(resultString, "Blah");
+#define MSALAssertStringEquals(actualParam, expectedParam) \
+{ \
+    [self msalAssertStringEquals:actualParam \
+                stringExpression:@"" #actualParam \
+                        expected:expectedParam \
+                            file:__FILE__ \
+                            line:__LINE__]; \
+}
 
-@interface MSALIpAddressHelper : NSObject
+@interface XCTestCase (HelperMethods)
 
-+ (NSString *)msalDeviceIpAddress;
+- (void)msalAssertStringEquals:(NSString *)actual
+              stringExpression:(NSString *)expression
+                      expected:(NSString *)expected
+                          file:(const char *)file
+                          line:(int)line;
 
 @end

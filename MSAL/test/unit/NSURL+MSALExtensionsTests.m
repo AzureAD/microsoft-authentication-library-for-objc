@@ -68,55 +68,6 @@
     XCTAssertEqualObjects([urlWithNoHost msalHostWithPort], @"");
 }
 
-- (void)testScrubbedHttpPath_whenTenantlessAuthorityPath_shouldReturnSame
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects([testUrl absoluteString], scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenTenantlessTokenPath_shouldReturnSame
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects([testUrl absoluteString], scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenWithTenantAuthorityPath_shouldScrub
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects(@"https://login.microsoftonline.com/<tenant>", scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenWithTenantTokenPath_shouldScrub
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031/oauth2/v2.0/token"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects(@"https://login.microsoftonline.com/<tenant>/oauth2/v2.0/token", scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenWithoutTenantPath_shouldReturnSame
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects([testUrl absoluteString], scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenMalformedB2CPath_shouldReturnSame
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tfp"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects([testUrl absoluteString], scrubbedPath);
-}
-
-- (void)testScrubbedHttpPath_whenCorrectB2CPath_shouldScrub
-{
-    NSURL *testUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/0287f963-2d72-4363-9e3a-5705c5b0f031/b2c_1_siup/v2.0/"];
-    NSString *scrubbedPath = [testUrl scrubbedHttpPath];
-    XCTAssertEqualObjects(@"https://login.microsoftonline.com/tfp/<tenant>/b2c_1_siup/v2.0/", scrubbedPath);
-}
-
 - (void)testIsEquivalentAuthority_whenMatch_shouldReturnTrue
 {
     NSURL *url1 = [NSURL URLWithString:@"https://host.com/"];
