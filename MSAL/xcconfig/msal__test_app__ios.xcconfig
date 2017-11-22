@@ -1,4 +1,4 @@
-#include "msal__ios__common.xcconfig"
+#include "msal__common__ios.xcconfig"
 
 INFOPLIST_FILE = test/app/ios/resources/Info.plist;
 PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;

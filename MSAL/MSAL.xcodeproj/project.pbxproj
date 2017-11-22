@@ -275,6 +275,19 @@
 		D69ADB3E1E516F9B00952049 /* MSALTestURLSession.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB321E516F9B00952049 /* MSALTestURLSession.m */; };
 		D69ADB3F1E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */; };
 		D69ADB401E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */; };
+		D6A206301FC5107800755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
+		D6A206321FC5108900755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A206341FC5109B00755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
+		D6A206361FC510AF00755A51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
+		D6A206381FC510B500755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
+		D6A206391FC510C700755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063A1FC510D200755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
+		D6A2063C1FC510FB00755A51 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2063B1FC510FB00755A51 /* IOKit.framework */; };
+		D6A2063D1FC511CE00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063F1FC512EF00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
+		D6A206411FC514CE00755A51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
 		D6B58A541EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */; };
 		D6B58A551EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */; };
 		D6B58A581EB2C743000B3A5F /* MSALTestCacheDataUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A571EB2C743000B3A5F /* MSALTestCacheDataUtil.m */; };
@@ -677,6 +690,12 @@
 		D69ADB331E516F9B00952049 /* MSALTestURLSessionDataTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestURLSessionDataTask.h; sourceTree = "<group>"; };
 		D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestURLSessionDataTask.m; sourceTree = "<group>"; };
 		D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = IdentityCore.xcodeproj; path = IdentityCore/IdentityCore/IdentityCore.xcodeproj; sourceTree = "<group>"; };
+		D6A2062F1FC5106F00755A51 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206311FC5108000755A51 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206331FC5109400755A51 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206351FC510A400755A51 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D6A206371FC510B500755A51 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		D6A2063B1FC510FB00755A51 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenTests.m; sourceTree = "<group>"; };
 		D6B58A561EB2C743000B3A5F /* MSALTestCacheDataUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestCacheDataUtil.h; sourceTree = "<group>"; };
 		D6B58A571EB2C743000B3A5F /* MSALTestCacheDataUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestCacheDataUtil.m; sourceTree = "<group>"; };
@@ -712,6 +731,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */,
 				D67227931EBD100D00F3422A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -720,6 +740,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063A1FC510D200755A51 /* Security.framework in Frameworks */,
+				D6A206391FC510C700755A51 /* UIKit.framework in Frameworks */,
 				D67227961EBD10B500F3422A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -728,6 +750,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206411FC514CE00755A51 /* Cocoa.framework in Frameworks */,
 				D62B8FD41E6789DD009D6E7E /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -736,6 +759,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206341FC5109B00755A51 /* SafariServices.framework in Frameworks */,
+				D6A206321FC5108900755A51 /* UIKit.framework in Frameworks */,
+				D6A206301FC5107800755A51 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -743,6 +769,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063C1FC510FB00755A51 /* IOKit.framework in Frameworks */,
+				D6A206381FC510B500755A51 /* Security.framework in Frameworks */,
+				D6A206361FC510AF00755A51 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -750,6 +779,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */,
+				D6A2063F1FC512EF00755A51 /* UIKit.framework in Frameworks */,
 				D61F5BC81E59334D00912CB8 /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -766,6 +797,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063D1FC511CE00755A51 /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1411,6 +1443,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		D6A2062E1FC5106F00755A51 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D6A2063B1FC510FB00755A51 /* IOKit.framework */,
+				D6A206371FC510B500755A51 /* Security.framework */,
+				D6A206351FC510A400755A51 /* Cocoa.framework */,
+				D6A206331FC5109400755A51 /* SafariServices.framework */,
+				D6A206311FC5108000755A51 /* UIKit.framework */,
+				D6A2062F1FC5106F00755A51 /* Security.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
@@ -1420,6 +1465,7 @@
 				D65A6FB71E3FF44A00C69FBA /* resources */,
 				D65A6FBC1E3FF46100C69FBA /* xcconfig */,
 				D6DFF3A31E2579360012891A /* Products */,
+				D6A2062E1FC5106F00755A51 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
