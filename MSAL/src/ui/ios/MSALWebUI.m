@@ -45,7 +45,7 @@ static MSALWebUI *s_currentWebSession = nil;
     NSURL *_url;
     SFSafariViewController *_safariViewController;
 #ifdef __IPHONE_11_0
-    SFAuthenticationSession *_authSession;
+    id _authSession;
 #endif
     MSALWebUICompletionBlock _completionBlock;
     id<MSALRequestContext> _context;
@@ -163,7 +163,7 @@ static MSALWebUI *s_currentWebSession = nil;
                  completionBlock(callbackURL, nil);
              }];
             
-            if (![_authSession start])
+            if (![(SFAuthenticationSession *)_authSession start])
             {
                 [self clearCurrentWebSession];
                 ERROR_COMPLETION(_context, MSALErrorInternal, @"Unable to start SFAuthenticationSession");
