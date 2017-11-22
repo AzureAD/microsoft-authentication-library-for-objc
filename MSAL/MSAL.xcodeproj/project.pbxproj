@@ -275,6 +275,19 @@
 		D69ADB3E1E516F9B00952049 /* MSALTestURLSession.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB321E516F9B00952049 /* MSALTestURLSession.m */; };
 		D69ADB3F1E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */; };
 		D69ADB401E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */; };
+		D6A206301FC5107800755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
+		D6A206321FC5108900755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A206341FC5109B00755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
+		D6A206361FC510AF00755A51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
+		D6A206381FC510B500755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
+		D6A206391FC510C700755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063A1FC510D200755A51 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
+		D6A2063C1FC510FB00755A51 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2063B1FC510FB00755A51 /* IOKit.framework */; };
+		D6A2063D1FC511CE00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A2063F1FC512EF00755A51 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
+		D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
+		D6A206411FC514CE00755A51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
 		D6B58A541EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */; };
 		D6B58A551EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */; };
 		D6B58A581EB2C743000B3A5F /* MSALTestCacheDataUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A571EB2C743000B3A5F /* MSALTestCacheDataUtil.m */; };
@@ -329,6 +342,48 @@
 			proxyType = 1;
 			remoteGlobalIDString = D672279E1EBD111900F3422A;
 			remoteInfo = "unit-test-host";
+		};
+		D6A206221FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D68FB4871FBA698A005308BB;
+			remoteInfo = "IdentityCore iOS";
+		};
+		D6A206241FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D626FF5B1FBA6E9500EE4487;
+			remoteInfo = "IdentityCore Mac";
+		};
+		D6A206261FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D626FFD31FBD1F2B00EE4487;
+			remoteInfo = "IdentityTest iOS";
+		};
+		D6A206281FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D626FFE01FBD1F5700EE4487;
+			remoteInfo = "IdentityTest Mac";
+		};
+		D6A2062A1FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D626FF4A1FBA6DFC00EE4487;
+			remoteInfo = "IdentityCoreTests iOS";
+		};
+		D6A2062C1FC50A4D00755A51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D626FF681FBA6EDF00EE4487;
+			remoteInfo = "IdentityCoreTests Mac";
 		};
 		D6BFE3DA1EB42D3200F2B7E8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -401,7 +456,7 @@
 		962859441E734ECA008F1AE1 /* OpenIdConfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OpenIdConfiguration.json; sourceTree = "<group>"; };
 		962859471E734EF5008F1AE1 /* OpenIdConfigurationMissingFields.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OpenIdConfigurationMissingFields.json; sourceTree = "<group>"; };
 		9628594E1E735346008F1AE1 /* MSALB2CAuthorityResolverTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALB2CAuthorityResolverTests.m; sourceTree = "<group>"; };
-		962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__automation_app.xcconfig; sourceTree = "<group>"; };
+		962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__automation_app__ios.xcconfig; sourceTree = "<group>"; };
 		962E37BC1E720C5D00DE71FE /* MSAL Test Automation (iOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test Automation (iOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		962E37C01E720E4F00DE71FE /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		962E37C91E720E4F00DE71FE /* MSALAutoAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutoAppDelegate.h; sourceTree = "<group>"; };
@@ -497,8 +552,8 @@
 		B2AD634C1EA5665F00EFEEF1 /* MSALTestAppTelemetryDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppTelemetryDispatcher.m; sourceTree = "<group>"; };
 		D61A63F11E5979200086D120 /* MSALResult+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALResult+Internal.h"; sourceTree = "<group>"; };
 		D61A64331E5A29580086D120 /* MSAL Test App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__test_app.xcconfig; sourceTree = "<group>"; };
-		D61A64671E5AA6BE0086D120 /* msal__mac__test_app.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__test_app.xcconfig; sourceTree = "<group>"; };
+		D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__test_app__ios.xcconfig; sourceTree = "<group>"; };
+		D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__test_app__mac.xcconfig; sourceTree = "<group>"; };
 		D61A646C1E5AA7120086D120 /* MSAL Test App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D61A647F1E5AA7C60086D120 /* MSALTestAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppDelegate.h; sourceTree = "<group>"; };
 		D61A64801E5AA7C60086D120 /* MSALTestAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppDelegate.m; sourceTree = "<group>"; };
@@ -586,17 +641,17 @@
 		D65A6FE01E3FF71000C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D65A6FE21E3FF71000C69FBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D65A6FE31E3FF73600C69FBA /* MSALJsonObjectTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALJsonObjectTests.m; sourceTree = "<group>"; };
-		D65A6FE61E3FFFD300C69FBA /* msal__ios__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__common.xcconfig; sourceTree = "<group>"; };
-		D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__framework.xcconfig; sourceTree = "<group>"; };
-		D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__unit_test.xcconfig; sourceTree = "<group>"; };
-		D65A6FEA1E40002800C69FBA /* msal__mac__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__common.xcconfig; sourceTree = "<group>"; };
-		D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__framework.xcconfig; sourceTree = "<group>"; };
-		D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__unit_test.xcconfig; sourceTree = "<group>"; };
+		D65A6FE61E3FFFD300C69FBA /* msal__common__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common__ios.xcconfig; sourceTree = "<group>"; };
+		D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__framework__ios.xcconfig; sourceTree = "<group>"; };
+		D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__unit_test__ios.xcconfig; sourceTree = "<group>"; };
+		D65A6FEA1E40002800C69FBA /* msal__common__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common__mac.xcconfig; sourceTree = "<group>"; };
+		D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__framework__mac.xcconfig; sourceTree = "<group>"; };
+		D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__unit_test__mac.xcconfig; sourceTree = "<group>"; };
 		D65A6FEE1E400B1100C69FBA /* msal__common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common.xcconfig; sourceTree = "<group>"; };
-		D65A6FEF1E4024C800C69FBA /* msal__mac__common__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__mac__common__framework.xcconfig; sourceTree = "<group>"; };
+		D65A6FEF1E4024C800C69FBA /* msal__common__framework__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common__framework__mac.xcconfig; sourceTree = "<group>"; };
 		D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__debug.xcconfig; sourceTree = "<group>"; };
 		D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__release.xcconfig; sourceTree = "<group>"; };
-		D65A6FF21E40270600C69FBA /* msal__ios__common__framework.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__common__framework.xcconfig; sourceTree = "<group>"; };
+		D65A6FF21E40270600C69FBA /* msal__common__framework__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__common__framework__ios.xcconfig; sourceTree = "<group>"; };
 		D672279F1EBD111900F3422A /* unit-test-host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "unit-test-host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D67227A21EBD111900F3422A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		D67227A41EBD111900F3422A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -607,7 +662,7 @@
 		D67227AD1EBD111900F3422A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D67227B01EBD111900F3422A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D67227B21EBD111900F3422A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D67227BC1EBD302800F3422A /* msal__ios__unit_test_host.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__ios__unit_test_host.xcconfig; sourceTree = "<group>"; };
+		D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__unit_test_host__ios.xcconfig; sourceTree = "<group>"; };
 		D673F0691E42E4A20018BA91 /* MSALLogger+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALLogger+Internal.h"; sourceTree = "<group>"; };
 		D673F06F1E4411960018BA91 /* NSString+MSALHelperMethods.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+MSALHelperMethods.h"; sourceTree = "<group>"; };
 		D673F0701E4411960018BA91 /* NSString+MSALHelperMethods.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+MSALHelperMethods.m"; sourceTree = "<group>"; };
@@ -634,6 +689,13 @@
 		D69ADB321E516F9B00952049 /* MSALTestURLSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestURLSession.m; sourceTree = "<group>"; };
 		D69ADB331E516F9B00952049 /* MSALTestURLSessionDataTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestURLSessionDataTask.h; sourceTree = "<group>"; };
 		D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestURLSessionDataTask.m; sourceTree = "<group>"; };
+		D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = IdentityCore.xcodeproj; path = IdentityCore/IdentityCore/IdentityCore.xcodeproj; sourceTree = "<group>"; };
+		D6A2062F1FC5106F00755A51 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206311FC5108000755A51 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206331FC5109400755A51 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.1.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
+		D6A206351FC510A400755A51 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D6A206371FC510B500755A51 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		D6A2063B1FC510FB00755A51 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenTests.m; sourceTree = "<group>"; };
 		D6B58A561EB2C743000B3A5F /* MSALTestCacheDataUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestCacheDataUtil.h; sourceTree = "<group>"; };
 		D6B58A571EB2C743000B3A5F /* MSALTestCacheDataUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestCacheDataUtil.m; sourceTree = "<group>"; };
@@ -669,6 +731,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */,
 				D67227931EBD100D00F3422A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -677,6 +740,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063A1FC510D200755A51 /* Security.framework in Frameworks */,
+				D6A206391FC510C700755A51 /* UIKit.framework in Frameworks */,
 				D67227961EBD10B500F3422A /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -685,6 +750,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206411FC514CE00755A51 /* Cocoa.framework in Frameworks */,
 				D62B8FD41E6789DD009D6E7E /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -693,6 +759,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206341FC5109B00755A51 /* SafariServices.framework in Frameworks */,
+				D6A206321FC5108900755A51 /* UIKit.framework in Frameworks */,
+				D6A206301FC5107800755A51 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -700,6 +769,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063C1FC510FB00755A51 /* IOKit.framework in Frameworks */,
+				D6A206381FC510B500755A51 /* Security.framework in Frameworks */,
+				D6A206361FC510AF00755A51 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -707,6 +779,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206401FC512F400755A51 /* SafariServices.framework in Frameworks */,
+				D6A2063F1FC512EF00755A51 /* UIKit.framework in Frameworks */,
 				D61F5BC81E59334D00912CB8 /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -723,6 +797,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A2063D1FC511CE00755A51 /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1175,20 +1250,20 @@
 		D65A6FBC1E3FF46100C69FBA /* xcconfig */ = {
 			isa = PBXGroup;
 			children = (
+				962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */,
 				D65A6FEE1E400B1100C69FBA /* msal__common.xcconfig */,
+				D65A6FE61E3FFFD300C69FBA /* msal__common__ios.xcconfig */,
+				D65A6FF21E40270600C69FBA /* msal__common__framework__ios.xcconfig */,
+				D65A6FEF1E4024C800C69FBA /* msal__common__framework__mac.xcconfig */,
+				D65A6FEA1E40002800C69FBA /* msal__common__mac.xcconfig */,
 				D65A6FF01E4026B900C69FBA /* msal__debug.xcconfig */,
-				D65A6FE61E3FFFD300C69FBA /* msal__ios__common.xcconfig */,
-				D65A6FF21E40270600C69FBA /* msal__ios__common__framework.xcconfig */,
-				D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */,
-				D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */,
-				962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */,
-				D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */,
-				D67227BC1EBD302800F3422A /* msal__ios__unit_test_host.xcconfig */,
-				D65A6FEA1E40002800C69FBA /* msal__mac__common.xcconfig */,
-				D65A6FEF1E4024C800C69FBA /* msal__mac__common__framework.xcconfig */,
-				D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */,
-				D61A64671E5AA6BE0086D120 /* msal__mac__test_app.xcconfig */,
-				D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */,
+				D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */,
+				D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */,
+				D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */,
+				D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */,
+				D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */,
+				D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */,
+				D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */,
 				D65A6FF11E4026C000C69FBA /* msal__release.xcconfig */,
 			);
 			path = xcconfig;
@@ -1355,14 +1430,42 @@
 			path = utils;
 			sourceTree = "<group>";
 		};
+		D6A2061A1FC50A4D00755A51 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D6A206231FC50A4D00755A51 /* libIdentityCore.a */,
+				D6A206251FC50A4D00755A51 /* libIdentityCore.a */,
+				D6A206271FC50A4D00755A51 /* libIdentityTest.a */,
+				D6A206291FC50A4D00755A51 /* libIdentityTest.a */,
+				D6A2062B1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
+				D6A2062D1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D6A2062E1FC5106F00755A51 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D6A2063B1FC510FB00755A51 /* IOKit.framework */,
+				D6A206371FC510B500755A51 /* Security.framework */,
+				D6A206351FC510A400755A51 /* Cocoa.framework */,
+				D6A206331FC5109400755A51 /* SafariServices.framework */,
+				D6A206311FC5108000755A51 /* UIKit.framework */,
+				D6A2062F1FC5106F00755A51 /* Security.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
+				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
 				D65A6F671E3FF3D900C69FBA /* src */,
 				D61F5B691E53FCA100912CB8 /* test */,
 				D65A6FB71E3FF44A00C69FBA /* resources */,
 				D65A6FBC1E3FF46100C69FBA /* xcconfig */,
 				D6DFF3A31E2579360012891A /* Products */,
+				D6A2062E1FC5106F00755A51 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1680,6 +1783,12 @@
 			mainGroup = D6DFF3991E2579360012891A;
 			productRefGroup = D6DFF3A31E2579360012891A /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = D6A2061A1FC50A4D00755A51 /* Products */;
+					ProjectRef = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */,
@@ -1693,6 +1802,51 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		D6A206231FC50A4D00755A51 /* libIdentityCore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityCore.a;
+			remoteRef = D6A206221FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D6A206251FC50A4D00755A51 /* libIdentityCore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityCore.a;
+			remoteRef = D6A206241FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D6A206271FC50A4D00755A51 /* libIdentityTest.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityTest.a;
+			remoteRef = D6A206261FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D6A206291FC50A4D00755A51 /* libIdentityTest.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libIdentityTest.a;
+			remoteRef = D6A206281FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D6A2062B1FC50A4D00755A51 /* IdentityCoreTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = IdentityCoreTests.xctest;
+			remoteRef = D6A2062A1FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		D6A2062D1FC50A4D00755A51 /* IdentityCoreTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = IdentityCoreTests.xctest;
+			remoteRef = D6A2062C1FC50A4D00755A51 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		962E37B71E720C5D00DE71FE /* Resources */ = {
@@ -2122,7 +2276,7 @@
 /* Begin XCBuildConfiguration section */
 		962E37BA1E720C5D00DE71FE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */;
+			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2134,7 +2288,7 @@
 		};
 		962E37BB1E720C5D00DE71FE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__ios__automation_app.xcconfig */;
+			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2146,7 +2300,7 @@
 		};
 		D61A645E1E5A29590086D120 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */;
+			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -2158,7 +2312,7 @@
 		};
 		D61A645F1E5A29590086D120 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__ios__test_app.xcconfig */;
+			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -2170,21 +2324,21 @@
 		};
 		D61A647B1E5AA7120086D120 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__mac__test_app.xcconfig */;
+			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		D61A647C1E5AA7120086D120 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__mac__test_app.xcconfig */;
+			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Release;
 		};
 		D65A6F491E3FD30A00C69FBA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */;
+			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2193,7 +2347,7 @@
 		};
 		D65A6F4A1E3FD30A00C69FBA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__ios__framework.xcconfig */;
+			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2202,21 +2356,21 @@
 		};
 		D65A6F561E3FD32D00C69FBA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */;
+			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		D65A6F571E3FD32D00C69FBA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__mac__framework.xcconfig */;
+			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Release;
 		};
 		D65A6FCA1E3FF47E00C69FBA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
+			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 			};
@@ -2224,7 +2378,7 @@
 		};
 		D65A6FCB1E3FF47E00C69FBA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__ios__unit_test.xcconfig */;
+			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 			};
@@ -2232,28 +2386,28 @@
 		};
 		D65A6FD91E3FF49C00C69FBA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */;
+			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		D65A6FDA1E3FF49C00C69FBA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__mac__unit_test.xcconfig */;
+			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
 			};
 			name = Release;
 		};
 		D67227B41EBD111900F3422A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__ios__unit_test_host.xcconfig */;
+			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 			};
 			name = Debug;
 		};
 		D67227B51EBD111900F3422A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__ios__unit_test_host.xcconfig */;
+			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 			};
 			name = Release;
