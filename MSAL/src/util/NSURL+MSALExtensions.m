@@ -44,38 +44,6 @@
     }
 }
 
-- (NSString *)scrubbedHttpPath
-{
-    if ([self.pathComponents count] < 2 || // Full URL wasn't provided
-        [MSALAuthority isTenantless:self]) // We don't scrub the default tenant
-    {
-        return [self absoluteString];
-    }
-    
-    NSString *firstPathComponent = self.pathComponents[1].lowercaseString;
-    NSString *tenant = nil;
-    
-    if ([firstPathComponent isEqualToString:@"tfp"])
-    {
-        if ([self.pathComponents count] > 2)
-        {
-            tenant = self.pathComponents[2].lowercaseString;
-        }
-        else
-        {
-            // It's a malformed URL, log minimum information to not reveal PII accidentally
-            return [NSString stringWithFormat:@"%@://%@/%@", self.scheme, [self msalHostWithPort], firstPathComponent];
-        }
-    }
-    else
-    {
-        tenant = firstPathComponent;
-    }
-    
-    return [[self absoluteString] stringByReplacingOccurrencesOfString:tenant withString:MSAL_TELEMETRY_KEY_TENANT_SCRUBBED_VALUE];
-}
-
-
 - (BOOL)isEquivalentAuthority:(NSURL *)aURL
 {
     return ([self.scheme caseInsensitiveCompare:aURL.scheme] == NSOrderedSame &&

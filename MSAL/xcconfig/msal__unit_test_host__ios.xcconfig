@@ -1,4 +1,4 @@
-#include "msal__ios__common.xcconfig"
+#include "msal__common__ios.xcconfig"
 
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 INFOPLIST_FILE = test/unit/ios/unit-test-host/Info.plist;
