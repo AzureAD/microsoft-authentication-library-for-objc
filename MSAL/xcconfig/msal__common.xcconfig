@@ -1,3 +1,4 @@
 #include "../IdentityCore/IdentityCore/xcconfig/identitycore__common.xcconfig"
 
 GCC_PREFIX_HEADER = src/MSAL.pch
+IDCORE_PATH = IdentityCore/IdentityCore
