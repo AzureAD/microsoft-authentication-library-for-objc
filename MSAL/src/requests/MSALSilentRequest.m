@@ -35,7 +35,7 @@
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
 
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALSilentRequest()
 {
@@ -116,7 +116,7 @@
         }
     }
     
-    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msalHostWithPort]
+    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msidHostWithPortIfNecessary]
                                                   clientId:_parameters.clientId
                                             userIdentifier:_parameters.user.userIdentifier
                                                    context:_parameters

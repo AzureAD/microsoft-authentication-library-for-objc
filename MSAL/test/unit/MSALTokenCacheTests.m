@@ -33,7 +33,7 @@
 #import "NSDictionary+MSALTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestLogger.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
 @interface MSALTokenCacheTests : MSALTestCase
@@ -72,7 +72,7 @@
     _cache = [MSALTestTokenCache createTestAccessor];
     
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    _testEnvironment = _testAuthority.msalHostWithPort;
+    _testEnvironment = _testAuthority.msidHostWithPortIfNecessary;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
     _idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
@@ -80,7 +80,7 @@
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken1]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo1 error:nil]
-                                   environment:_testAuthority.msalHostWithPort];
+                                   environment:_testAuthority.msidHostWithPortIfNecessary];
     _testUser = _user1;
     
     _testResponse1Claims =
@@ -111,7 +111,7 @@
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken2]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo2 error:nil]
-                                   environment:_testAuthority.msalHostWithPort];
+                                   environment:_testAuthority.msidHostWithPortIfNecessary];
     
     _testResponse2Claims =
     @{ @"token_type" : @"Bearer",
@@ -197,14 +197,14 @@
 {
     //save RT twice
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
     XCTAssertNil(error);
     
     error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -255,7 +255,7 @@
 {
     //save first and second RT
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -263,7 +263,7 @@
     XCTAssertNil(error);
     
     error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam2.clientId
                                    response:_testTokenResponse2
                                     context:nil error:nil];
@@ -275,10 +275,10 @@
     XCTAssertEqual(rtsInCache.count, 2);
     
     //compare RTs with the RTs retrieved from cache
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                        clientId:_testClientId
                                                                                        response:_testTokenResponse2];
     NSSet *rtsSet = [[NSSet alloc] initWithObjects:rtItem, rtItem2, nil];
@@ -289,11 +289,11 @@
 - (void)testFindRefreshTokenWithEnvironment_whenOneSaved_shouldFindRT
 {
     //prepare token response and save RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -302,7 +302,7 @@
     
     //retrieve RT
     error = nil;
-    MSALRefreshTokenCacheItem *rtItemInCache = [_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItemInCache = [_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                                               clientId:_requestParam1.clientId
                                                                         userIdentifier:_requestParam1.user.userIdentifier
                                                                                context:nil error:&error];
@@ -386,7 +386,7 @@
     XCTAssertNil(error);
     
     error = nil;
-    XCTAssertNil([_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    XCTAssertNil([_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                 clientId:_requestParam1.clientId
                                           userIdentifier:_requestParam1.user.userIdentifier
                                                  context:nil error:&error]);
@@ -408,7 +408,7 @@
                                             error:&error]);
     XCTAssertNil(error);
     error = nil;
-    MSALRefreshTokenCacheItem *rtItemInCache2 = [_cache findRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItemInCache2 = [_cache findRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                                                clientId:_requestParam2.clientId
                                                                          userIdentifier:_requestParam2.user.userIdentifier
                                                                                 context:nil error:&error];

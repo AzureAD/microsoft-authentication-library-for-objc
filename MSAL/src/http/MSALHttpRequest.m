@@ -27,16 +27,16 @@
 
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
-#import "NSDictionary+MSALExtensions.h"
+#import "NSDictionary+MSIDExtensions.h"
 #import "MSALLogger+Internal.h"
 #import "MSALOAuth2Constants.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
+#import "NSString+MSIDExtensions.h"
 #import "MSALAuthority.h"
 #import "MSALTelemetryHttpEvent.h"
 #import "MSALTelemetry+Internal.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -155,14 +155,14 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     NSURL *newURL = nil;
     if (_isGetRequest && [_queryParameters allKeys].count > 0)
     {
-        NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters msalURLFormEncode]];
+        NSString *newURLString = [NSString stringWithFormat:@"%@?%@", _endpointURL.absoluteString, [_queryParameters msidURLFormEncode]];
         newURL = [NSURL URLWithString:newURLString];
     }
     
     NSData *bodyData = nil;
     if (!_isGetRequest && _bodyParameters)
     {
-        bodyData = [[_bodyParameters msalURLFormEncode] dataUsingEncoding:NSUTF8StringEncoding];
+        bodyData = [[_bodyParameters msidURLFormEncode] dataUsingEncoding:NSUTF8StringEncoding];
         [self setContentTypeFormURLEncoded];
     }
     
@@ -178,7 +178,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     [event setHttpURL:newURL];
     
     LOG_INFO(_context, @"HTTP request %@",
-             [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msalHostWithPort], request.URL.host]
+             [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msidHostWithPortIfNecessary], request.URL.host]
              : @"unknown host");
     LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
     

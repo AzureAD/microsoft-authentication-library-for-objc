@@ -1,1 +1,3 @@
 #include "../IdentityCore/IdentityCore/xcconfig/identitycore__common__ios.xcconfig"
+
+USER_HEADER_SEARCH_PATHS = $(inherited) $IDCORE_PATH/src/**

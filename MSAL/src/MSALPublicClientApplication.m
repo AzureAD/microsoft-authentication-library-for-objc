@@ -143,12 +143,12 @@
         return NO;
     }
     
-    if ([NSString msalIsStringNilOrBlank:response.query])
+    if ([NSString msidIsStringNilOrBlank:response.query])
     {
         return NO;
     }
     
-    NSDictionary *qps = [NSDictionary msalURLFormDecode:response.query];
+    NSDictionary *qps = [NSDictionary msidURLFormDecode:response.query];
     if (!qps)
     {
         return NO;
@@ -376,7 +376,7 @@
     
     if (result)
     {
-        NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
+        NSString *hashedAT = [result.accessToken msidTokenHash];
         LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
         LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }

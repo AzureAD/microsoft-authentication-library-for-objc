@@ -167,7 +167,7 @@ static NSDateFormatter *s_dateFormatter = nil;
                                          }];
 #endif
         NSString* CPUVer = [self getCPUInfo];
-        if (![NSString msalIsStringNilOrBlank:CPUVer])
+        if (![NSString msidIsStringNilOrBlank:CPUVer])
         {
             [result setObject:CPUVer forKey:MSAL_ID_CPU];
         }

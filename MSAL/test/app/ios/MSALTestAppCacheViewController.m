@@ -31,7 +31,7 @@
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALKeychainTokenCache.h"
 #import "MSALAccessTokenCacheItem+TestAppUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALTestAppCacheRowItem : NSObject
 

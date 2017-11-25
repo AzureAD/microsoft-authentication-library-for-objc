@@ -26,7 +26,7 @@
 #import "MSALTelemetryEventInterface.h"
 #import "MSALTelemetryEventStrings.h"
 #import "MSALDefaultDispatcher.h"
-#import "NSString+MSALHelperMethods.h"
+#import "NSString+MSIDExtensions.h"
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSALTelemetryPiiRules.h"
 
@@ -115,7 +115,7 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 - (void)startEvent:(NSString *)requestId
          eventName:(NSString *)eventName
 {
-    if ([NSString msalIsStringNilOrBlank:requestId] || [NSString msalIsStringNilOrBlank:eventName])
+    if ([NSString msidIsStringNilOrBlank:requestId] || [NSString msidIsStringNilOrBlank:eventName])
     {
         return;
     }
@@ -134,7 +134,7 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     NSDate *stopTime = [NSDate date];
     NSString *eventName = [self getPropertyFromEvent:event propertyName:MSAL_TELEMETRY_KEY_EVENT_NAME];
     
-    if ([NSString msalIsStringNilOrBlank:requestId] || [NSString msalIsStringNilOrBlank:eventName] || !event)
+    if ([NSString msidIsStringNilOrBlank:requestId] || [NSString msidIsStringNilOrBlank:eventName] || !event)
     {
         return;
     }
