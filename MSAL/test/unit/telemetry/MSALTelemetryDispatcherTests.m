@@ -68,7 +68,7 @@
     return _requestId;
 }
 
-- (NSString *)component
+- (NSString *)logComponent
 {
     return nil;
 }

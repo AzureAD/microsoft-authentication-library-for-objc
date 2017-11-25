@@ -84,7 +84,7 @@
         {
             if (error == nil && !_parameters.unvalidatedAuthority)
             {
-                error = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
+                error = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
                                          @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
             }
             
@@ -134,8 +134,8 @@
             return;
         }
         
-        LOG_INFO(_parameters, @"Refreshing access token");
-        LOG_INFO_PII(_parameters, @"Refreshing access token");
+        MSID_LOG_INFO(_parameters, @"Refreshing access token");
+        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
         
         _authority = authority;
         

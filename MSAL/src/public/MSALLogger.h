@@ -55,6 +55,8 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
 
 @interface MSALLogger : NSObject
 
+- (instancetype)init NS_UNAVAILABLE;
+
 + (MSALLogger *)sharedLogger;
 
 /*!

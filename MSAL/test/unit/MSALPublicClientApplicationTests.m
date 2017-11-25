@@ -206,7 +206,7 @@
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
-         XCTAssertNil(params.component);
+         XCTAssertNil(params.logComponent);
          XCTAssertNotNil(params.correlationId);
          
          completionBlock(nil, nil);

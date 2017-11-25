@@ -28,6 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
+#include "MSALRequestContext.h"
 
 @class MSALAuthority;
 @class MSALTokenCache;
@@ -50,7 +51,7 @@
 
 #pragma mark MSALRequestContext properties
 @property NSUUID *correlationId;
-@property NSString *component;
+@property NSString *logComponent;
 @property NSString *telemetryRequestId;
 @property NSURLSession *urlSession;
 

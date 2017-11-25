@@ -32,7 +32,6 @@
 #import "MSALClientInfo.h"
 #import "NSDictionary+MSALTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestLogger.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
@@ -875,13 +874,12 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
-- (void)testUserForIdentifier_whenUserNotInCacheAndNoError_shouldFailAndStillLog
+- (void)testUserForIdentifier_whenUserNotInCacheAndNoError_shouldReturnNilUser
 {
     XCTAssertNil([_cache getUserForIdentifier:@"11234123+12314123"
                                      clientId:@"12345"
                                   environment:@"environment.com"
                                         error:nil]);
-    XCTAssertTrue([[[MSALTestLogger sharedLogger] lastMessage] containsString:@"UserNotFound"]);
 }
 
 

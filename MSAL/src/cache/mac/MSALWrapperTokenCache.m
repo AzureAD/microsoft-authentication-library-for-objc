@@ -79,8 +79,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in setDelegate");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in setDelegate");
+        MSID_LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in setDelegate");
+        MSID_LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in setDelegate");
         return;
     }
     
@@ -109,8 +109,8 @@
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in serialize");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in serialize");
+        MSID_LOG_ERROR(nil, @"pthread_rwlock_rdlock failed in serialize");
+        MSID_LOG_ERROR_PII(nil, @"pthread_rwlock_rdlock failed in serialize");
         return nil;
     }
     NSData *data = [self serializeImpl];
@@ -147,8 +147,8 @@
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getAccessTokenItemsWithKey");
         
         // TODO pass through error object
         return nil;
@@ -237,8 +237,8 @@
     int err = pthread_rwlock_rdlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_rdlock failed in getRefreshTokenItemsWithKey");
         // TODO pass through error object
         return nil;
     }
@@ -333,8 +333,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateAccessTokenItem");
         return NO;
     }
     BOOL result = [self addOrUpdateAccessTokenImpl:item context:ctx error:error];
@@ -406,8 +406,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in addOrUpdateRefreshTokenItem");
         return NO;
     }
     BOOL result = [self addOrUpdateRefreshTokenImpl:item context:ctx error:error];
@@ -478,8 +478,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeAccessTokenItem");
         return NO;
     }
     BOOL result = [self removeAccessTokenImpl:item error:error];
@@ -541,8 +541,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
     BOOL result = [self removeRefreshTokenImpl:item error:error];
@@ -606,8 +606,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
-        LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        MSID_LOG_ERROR(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
+        MSID_LOG_ERROR_PII(ctx, @"pthread_rwlock_wrlock failed in removeRefreshTokenItem");
         return NO;
     }
     BOOL result = [self removeAllTokensForUserIdentifierImp:userIdentifier
@@ -651,8 +651,8 @@
     @catch (id exception)
     {
         // This should be exceedingly rare as all of the objects in the cache we placed there.
-        LOG_ERROR(nil, @"Failed to serialize the cache!");
-        LOG_ERROR_PII(nil, @"Failed to serialize the cache!");
+        MSID_LOG_ERROR(nil, @"Failed to serialize the cache!");
+        MSID_LOG_ERROR_PII(nil, @"Failed to serialize the cache!");
         return nil;
     }
 }
@@ -736,8 +736,8 @@
     int err = pthread_rwlock_wrlock(&_lock);
     if (err != 0)
     {
-        LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in testRemoveAll");
-        LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in testRemoveAll");
+        MSID_LOG_ERROR(nil, @"pthread_rwlock_wrlock failed in testRemoveAll");
+        MSID_LOG_ERROR_PII(nil, @"pthread_rwlock_wrlock failed in testRemoveAll");
     }
     
     _cache = [NSMutableDictionary new];

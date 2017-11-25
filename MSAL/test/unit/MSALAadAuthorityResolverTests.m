@@ -30,6 +30,7 @@
 #import "MSALAadAuthorityResolver.h"
 #import "MSALTestURLSession.h"
 #import "MSALTestSwizzle.h"
+#import "MSIDDeviceId.h"
 
 @interface MSALAadAuthorityResolverTests : MSALTestCase
 
@@ -80,7 +81,7 @@
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
     NSString *authorizationEndpoint = @"https://login.microsoftonline.in/mytenant.com/oauth2/v2.0/authorize";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
@@ -156,7 +157,7 @@
     NSString *authorityString = @"https://somehost.com/sometenant.com";
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
@@ -197,7 +198,7 @@
     
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];

@@ -113,8 +113,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     
     dispatch_once(&s_once, ^{
         s_keychainTeamId = [self retrieveTeamIDFromKeychain:error];
-        LOG_INFO(nil, @"Using \"%@\" Team ID for Keychain.", _PII_NULLIFY(s_keychainTeamId));
-        LOG_INFO_PII(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
+        MSID_LOG_INFO(nil, @"Using \"%@\" Team ID for Keychain.", _PII_NULLIFY(s_keychainTeamId));
+        MSID_LOG_INFO_PII(nil, @"Using \"%@\" Team ID for Keychain.", s_keychainTeamId);
     });
     
     return s_keychainTeamId;
@@ -295,8 +295,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         NSData* itemData = [atItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(ctx, @"Failed to archive keychain item.");
-            LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
+            MSID_LOG_ERROR(ctx, @"Failed to archive keychain item.");
+            MSID_LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -347,8 +347,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         NSData* itemData = [rtItem serialize:error];
         if (!itemData)
         {
-            LOG_ERROR(ctx, @"Failed to archive keychain item.");
-            LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
+            MSID_LOG_ERROR(ctx, @"Failed to archive keychain item.");
+            MSID_LOG_ERROR_PII(ctx, @"Failed to archive keychain item.");
             return NO;
         }
         
@@ -478,8 +478,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
     {
-        LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
-        LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
+        MSID_LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
+        MSID_LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -487,8 +487,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         MSALAccessTokenCacheItem *item = [[MSALAccessTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
-            LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
+            MSID_LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
+            MSID_LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         
@@ -496,8 +496,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     }
     @catch (NSException *exception)
     {
-        LOG_WARN(ctx, @"Failed to deserialize data from keychain");
-        LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
+        MSID_LOG_WARN(ctx, @"Failed to deserialize data from keychain");
+        MSID_LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
         return nil;
     }
 }
@@ -509,8 +509,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     NSData* data = [attrs objectForKey:(id)kSecValueData];
     if (!data)
     {
-        LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
-        LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
+        MSID_LOG_WARN(ctx, @"Retrieved item with key that did not have generic item data!");
+        MSID_LOG_WARN_PII(ctx, @"Retrieved item with key that did not have generic item data!");
         return nil;
     }
     @try
@@ -518,8 +518,8 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         MSALRefreshTokenCacheItem *item = [[MSALRefreshTokenCacheItem alloc] initWithData:data error:error];
         if (!item)
         {
-            LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
-            LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
+            MSID_LOG_ERROR(ctx, @"Unable to decode item from data stored in keychain.");
+            MSID_LOG_ERROR_PII(ctx, @"Unable to decode item from data stored in keychain.");
             return nil;
         }
         
@@ -527,15 +527,15 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
     }
     @catch (NSException *exception)
     {
-        LOG_WARN(ctx, @"Failed to deserialize data from keychain");
-        LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
+        MSID_LOG_WARN(ctx, @"Failed to deserialize data from keychain");
+        MSID_LOG_WARN_PII(ctx, @"Failed to deserialize data from keychain");
         return nil;
     }
 }
 
 - (void)testRemoveAll
 {
-    LOG_ERROR(nil, @"******** -testRemoveAll: being called in ADKeychainTokenCache. This method should NEVER be called in production code. ********");
+    MSID_LOG_ERROR(nil, @"******** -testRemoveAll: being called in ADKeychainTokenCache. This method should NEVER be called in production code. ********");
     @synchronized(self)
     {
         NSMutableDictionary* query = [self queryDictionaryForKey:nil additional:nil];
