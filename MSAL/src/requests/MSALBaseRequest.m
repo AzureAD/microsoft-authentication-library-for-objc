@@ -33,8 +33,8 @@
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALClientInfo.h"
@@ -64,7 +64,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     if ([NSString msidIsStringNilOrBlank:_parameters.telemetryRequestId])
     {
-        _parameters.telemetryRequestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+        _parameters.telemetryRequestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
     }
     
     if (!parameters.scopes || parameters.scopes.count == 0)
@@ -120,7 +120,7 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)run:(nonnull MSALCompletionBlock)completionBlock
 {
-    [[MSALTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_API_EVENT];
+    [[MSIDTelemetry sharedInstance] startEvent:_parameters.telemetryRequestId eventName:MSID_TELEMETRY_EVENT_API_EVENT];
     
     [self acquireToken:completionBlock];
 }
@@ -305,14 +305,13 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
 {
-    MSALTelemetryAPIEvent *event = [[MSALTelemetryAPIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_API_EVENT
+    MSALTelemetryAPIEvent *event = [[MSALTelemetryAPIEvent alloc] initWithName:MSID_TELEMETRY_EVENT_API_EVENT
                                                                        context:_parameters];
     
-    [event setApiId:_apiId];
+    [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
-    [event setRequestId:_parameters.telemetryRequestId];
     [event setAuthorityType:_authority.authorityType];
-    [event setAuthority:_parameters.unvalidatedAuthority];
+    [event setAuthority:_parameters.unvalidatedAuthority.absoluteString];
     [event setClientId:_parameters.clientId];
     
     // Login hint is an optional parameter and might not be present
@@ -332,8 +331,8 @@ static MSALScopes *s_reservedScopes = nil;
         [event setErrorDomain:error.domain];
     }
     
-    [[MSALTelemetry sharedInstance] stopEvent:_parameters.telemetryRequestId event:event];
-    [[MSALTelemetry sharedInstance] flush:_parameters.telemetryRequestId];
+    [[MSIDTelemetry sharedInstance] stopEvent:_parameters.telemetryRequestId event:event];
+    [[MSIDTelemetry sharedInstance] flush:_parameters.telemetryRequestId];
 }
 
 @end

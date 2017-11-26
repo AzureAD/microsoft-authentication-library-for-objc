@@ -28,11 +28,10 @@
 #import "MSALTestCase.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryHttpEvent.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryHttpEvent.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "MSALTelemetryTestDispatcher.h"
-#import "MSALTelemetryDefaultEvent.h"
 #import "XCTestCase+HelperMethods.h"
 
 @interface MSALTelemetryTests : MSALTestCase
@@ -73,35 +72,35 @@
 - (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = NO;
-    NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
     NSString *eventName = @"test event";
-    MSALTelemetryDefaultEvent *event = [[MSALTelemetryDefaultEvent alloc] initWithName:eventName context:nil];
-    [event setProperty:MSAL_TELEMETRY_KEY_USER_ID value:@"id1234"];
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:eventName];
-    [[MSALTelemetry sharedInstance] stopEvent:requestId event:event];
+    MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
+    [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
     
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    XCTAssertNil([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID]);
+    XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
 }
 
 - (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
-    NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
     NSString *eventName = @"test event";
-    MSALTelemetryDefaultEvent *event = [[MSALTelemetryDefaultEvent alloc] initWithName:eventName context:nil];
-    [event setProperty:MSAL_TELEMETRY_KEY_USER_ID value:@"id1234"];
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:eventName];
-    [[MSALTelemetry sharedInstance] stopEvent:requestId event:event];
+    MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
+    [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
     
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    MSALAssertStringEquals([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], [@"id1234" msidComputeSHA256]);
+    MSALAssertStringEquals([dictionary objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)], [@"id1234" msidComputeSHA256]);
 }
 
 #pragma mark - Private
@@ -109,7 +108,7 @@
 - (NSDictionary *)getEventPropertiesByEventName:(NSString *)eventName
 {
     for (NSDictionary *eventInfo in self.receivedEvents) {
-        if ([[eventInfo objectForKey:MSAL_TELEMETRY_KEY_EVENT_NAME] isEqualToString:eventName]) {
+        if ([[eventInfo objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_EVENT_NAME)] isEqualToString:eventName]) {
             return eventInfo;
         }
     }

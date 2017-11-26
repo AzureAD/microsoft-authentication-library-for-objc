@@ -44,5 +44,10 @@
     return @MSAL_VERSION_STRING;
 }
 
++ (NSString *)telemetryEventPrefix
+{
+    return @"msal.";
+}
+
 @end
 
