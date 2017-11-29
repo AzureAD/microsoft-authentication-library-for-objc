@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALAccessTokenCacheKey.h"
 
 @implementation MSALAccessTokenCacheKey
@@ -47,7 +47,7 @@
     NSMutableOrderedSet<NSString *> *scopeCopy = [NSMutableOrderedSet<NSString *> new];
     for (NSString *item in scope)
     {
-        [scopeCopy addObject:item.msalTrimmedString.lowercaseString];
+        [scopeCopy addObject:item.msidTrimmedString.lowercaseString];
     }
     self.scope = scopeCopy;
     
@@ -70,9 +70,9 @@
     }
     
     return [NSString stringWithFormat:@"%@$%@$%@",
-            self.authority ? self.authority.msalBase64UrlEncode : @"",
-            self.clientId ? self.clientId.msalBase64UrlEncode : @"",
-            self.scope ? self.scope.msalToString.msalBase64UrlEncode : @""];
+            self.authority ? self.authority.msidBase64UrlEncode : @"",
+            self.clientId ? self.clientId.msidBase64UrlEncode : @"",
+            self.scope ? self.scope.msalToString.msidBase64UrlEncode : @""];
 }
 
 - (NSString *)account

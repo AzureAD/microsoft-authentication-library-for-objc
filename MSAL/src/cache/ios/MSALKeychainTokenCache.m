@@ -288,7 +288,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                       additional:@{
                                                                    (id)kSecAttrType : [NSNumber numberWithUnsignedInt:ACCESS_TOKEN],
-                                                                   (id)kSecAttrGeneric : key.clientId.msalBase64UrlEncode,
+                                                                   (id)kSecAttrGeneric : key.clientId.msidBase64UrlEncode,
                                                                    (id)kSecAttrCreator : [NSNumber numberWithUnsignedInt:MSAL_V1]
                                                                    }];
         
@@ -340,7 +340,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
         NSMutableDictionary* query = [self queryDictionaryForKey:key
                                                       additional:@{
                                                                    (id)kSecAttrType : [NSNumber numberWithUnsignedInt:REFRESH_TOKEN],
-                                                                   (id)kSecAttrGeneric : key.clientId.msalBase64UrlEncode,
+                                                                   (id)kSecAttrGeneric : key.clientId.msidBase64UrlEncode,
                                                                    (id)kSecAttrCreator : [NSNumber numberWithUnsignedInt:MSAL_V1]
                                                                    }];
         
@@ -435,7 +435,7 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
                          
     NSMutableDictionary *query = [self queryDictionaryForKey:nil
                                                   additional:@{
-                                                               (id)kSecAttrGeneric : clientId.msalBase64UrlEncode,
+                                                               (id)kSecAttrGeneric : clientId.msidBase64UrlEncode,
                                                                (id)kSecAttrAccount : account
                                                                }];
 

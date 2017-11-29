@@ -27,9 +27,9 @@
 
 #import "MSALURLSessionDelegate.h"
 #import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
+#import "NSString+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALURLSessionDelegate
 

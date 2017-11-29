@@ -35,7 +35,7 @@
 #import "MSALWebUI.h"
 
 #import "NSDictionary+MSALTestUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 #import "MSALPublicClientApplication+Internal.h"
 
@@ -84,7 +84,7 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/contosob2c/v2.0/oauth/authorize");
          NSMutableDictionary *expectedQPs =
          [@{
@@ -101,7 +101,7 @@
            UT_SLICE_PARAMS_DICT
            } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSALLogger msalId]];
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];

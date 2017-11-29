@@ -101,7 +101,7 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    MSALAssertStringEquals([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], [@"id1234" msalComputeSHA256Hex]);
+    MSALAssertStringEquals([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], [@"id1234" msidComputeSHA256]);
 }
 
 #pragma mark - Private

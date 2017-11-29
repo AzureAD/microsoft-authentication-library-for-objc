@@ -1,3 +1,6 @@
 #include "../IdentityCore/IdentityCore/xcconfig/identitycore__common.xcconfig"
 
 GCC_PREFIX_HEADER = src/MSAL.pch
+IDCORE_PATH = IdentityCore/IdentityCore
+USER_HEADER_SEARCH_PATHS = $(inherited) $IDCORE_PATH/src/**
+

@@ -35,11 +35,11 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALUser.h"
 
-#import "NSDictionary+MSALExtensions.h"
+#import "NSDictionary+MSIDExtensions.h"
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSOrderedSet+MSALExtensions.h"
 #import "NSString+MSALHelperMethods.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -218,13 +218,13 @@ static bool AmIBeingDebugged(void)
     [tokenQPs addEntriesFromDictionary:@{UT_SLICE_PARAMS_DICT}];
     if (query)
     {
-        [tokenQPs addEntriesFromDictionary:[NSDictionary msalURLFormDecode:query]];
+        [tokenQPs addEntriesFromDictionary:[NSDictionary msidURLFormDecode:query]];
     }
     
     NSString *requestUrlStr = nil;
     if (tokenQPs.count > 0)
     {
-        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msalURLFormEncode]];
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msidURLFormEncode]];
     }
     else
     {
@@ -334,7 +334,7 @@ static bool AmIBeingDebugged(void)
     
     _requestURL = requestURL;
     NSString *query = [requestURL query];
-    _QPs = [NSString msalIsStringNilOrBlank:query] ? nil : [NSDictionary msalURLFormDecode:query];
+    _QPs = [NSString msidIsStringNilOrBlank:query] ? nil : [NSDictionary msidURLFormDecode:query];
 }
 
 - (BOOL)matchesURL:(NSURL *)url
@@ -345,7 +345,7 @@ static bool AmIBeingDebugged(void)
         return NO;
     }
     
-    if ([[url msalHostWithPort] caseInsensitiveCompare:[_requestURL msalHostWithPort]] != NSOrderedSame)
+    if ([[url msidHostWithPortIfNecessary] caseInsensitiveCompare:[_requestURL msidHostWithPortIfNecessary]] != NSOrderedSame)
     {
         return NO;
     }
@@ -359,9 +359,9 @@ static bool AmIBeingDebugged(void)
     // And lastly, the tricky part. Query Params can come in any order so we need to process them
     // a bit instead of just a string compare
     NSString *query = [url query];
-    if (![NSString msalIsStringNilOrBlank:query])
+    if (![NSString msidIsStringNilOrBlank:query])
     {
-        NSDictionary *QPs = [NSDictionary msalURLFormDecode:query];
+        NSDictionary *QPs = [NSDictionary msidURLFormDecode:query];
         if (![_QPs compareToActual:QPs])
         {
             return NO;
@@ -380,7 +380,7 @@ static bool AmIBeingDebugged(void)
     if (_requestParamsBody)
     {
         NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
-        NSDictionary *obj = [NSDictionary msalURLFormDecode:string];
+        NSDictionary *obj = [NSDictionary msidURLFormDecode:string];
         return [_requestParamsBody compareToActual:obj];
     }
     
@@ -500,7 +500,7 @@ static NSMutableArray *s_responses = nil;
         if ([obj isKindOfClass:[MSALTestURLResponse class]])
         {
             response = (MSALTestURLResponse *)obj;
-            
+                        
             if ([response matchesURL:requestURL] && [response matchesHeaders:headers] && [response matchesBody:body])
             {
                 [s_responses removeObjectAtIndex:i];

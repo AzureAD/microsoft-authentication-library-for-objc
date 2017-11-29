@@ -34,7 +34,7 @@
 #import "MSALTestURLSession.h"
 #import "MSALWebUI.h"
 #import "NSDictionary+MSALTestUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestCacheDataUtil.h"
 
@@ -94,7 +94,7 @@
          XCTAssertNotNil(url);
          
          // State preserving and url are tested separately
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          NSString *state = QPs[@"state"];
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];

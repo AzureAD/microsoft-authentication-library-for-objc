@@ -23,9 +23,9 @@
 
 #import "MSALTelemetryHttpEvent.h"
 #import "MSALTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSString+MSIDExtensions.h"
+#import "NSDictionary+MSIDExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALTelemetryHttpEvent
 
@@ -36,7 +36,7 @@
 
 - (void)setHttpURL:(NSURL *)url
 {
-    NSURL *urlWithoutParameters = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, [url msalHostWithPort], url.path]];
+    NSURL *urlWithoutParameters = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, [url msidHostWithPortIfNecessary], url.path]];
     [self setProperty:MSAL_TELEMETRY_KEY_HTTP_PATH value:urlWithoutParameters.absoluteString];
 }
 
@@ -52,7 +52,7 @@
 
 - (void)setHttpErrorCode:(NSString *)code
 {
-    self.errorInEvent = ![NSString msalIsStringNilOrBlank:code];
+    self.errorInEvent = ![NSString msidIsStringNilOrBlank:code];
     
     [self setProperty:MSAL_TELEMETRY_KEY_HTTP_RESPONSE_CODE value:code];
 }
@@ -75,7 +75,7 @@
     NSString *oauthError = [(NSDictionary *)jsonObject objectForKey:OAUTH2_ERROR];
     [self setProperty:MSAL_TELEMETRY_KEY_OAUTH_ERROR_CODE value:oauthError];
     
-    self.errorInEvent = ![NSString msalIsStringNilOrBlank:oauthError];
+    self.errorInEvent = ![NSString msidIsStringNilOrBlank:oauthError];
 }
 
 - (void)setHttpResponseMethod:(NSString *)method
@@ -85,12 +85,12 @@
 
 - (void)setHttpRequestQueryParams:(NSString *)params
 {
-    if ([NSString msalIsStringNilOrBlank:params])
+    if ([NSString msidIsStringNilOrBlank:params])
     {
         return;
     }
     
-    NSArray *parameterKeys = [[NSDictionary msalURLFormDecode:params] allKeys];
+    NSArray *parameterKeys = [[NSDictionary msidURLFormDecode:params] allKeys];
     
     [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_QUERY_PARAMS value:[parameterKeys componentsJoinedByString:@";"]];
 }
