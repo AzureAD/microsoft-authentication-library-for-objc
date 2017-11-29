@@ -89,7 +89,7 @@
          
          NSString *tenantDiscoverEndpoint = json.tenant_discovery_endpoint;
          
-         if ([NSString msalIsStringNilOrBlank:tenantDiscoverEndpoint])
+         if ([NSString msidIsStringNilOrBlank:tenantDiscoverEndpoint])
          {
              NSError *tenantDiscoveryError;
              CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);

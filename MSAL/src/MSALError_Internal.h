@@ -75,7 +75,7 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 
 #define REQUIRED_PARAMETER_BOOL(_PARAMETER, _CTX) if (!_PARAMETER) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return NO; }
 
-#define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
+#define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msidIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorDomain, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
 

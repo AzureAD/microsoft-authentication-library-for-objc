@@ -62,14 +62,14 @@
 - (void)setProperty:(NSString *)name value:(NSString *)value
 {
     // value can be empty but not nil
-    if ([NSString msalIsStringNilOrBlank:name] || !value)
+    if ([NSString msidIsStringNilOrBlank:name] || !value)
     {
         return;
     }
     
     if ([MSALTelemetryPiiRules isPii:name])
     {
-        value = [value msalComputeSHA256Hex];
+        value = [value msidComputeSHA256];
     }
     
     [_propertyMap setValue:value forKey:name];
@@ -77,7 +77,7 @@
 
 - (void)deleteProperty:(NSString *)name
 {
-    if ([NSString msalIsStringNilOrBlank:name])
+    if ([NSString msidIsStringNilOrBlank:name])
     {
         return;
     }

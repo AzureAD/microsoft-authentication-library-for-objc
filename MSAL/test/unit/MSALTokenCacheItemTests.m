@@ -33,7 +33,7 @@
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALUSer.h"
 #import "MSALClientInfo.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALTokenCacheItemTests : XCTestCase
 
@@ -151,10 +151,10 @@
 - (void)testRefreshTokenCacheKeyMatch
 {
     NSURL *testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msidHostWithPortIfNecessary
                                                                                   clientId:@"123-456"
                                                                             userIdentifier:nil];
-    MSALRefreshTokenCacheKey *keyB = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheKey *keyB = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msidHostWithPortIfNecessary
                                                                                   clientId:@"123-456"
                                                                             userIdentifier:@"abcde"];
     XCTAssertTrue([keyA matches:keyB]);
@@ -163,7 +163,7 @@
 - (void)testRefreshTokenCacheKeyAccount
 {
     NSURL *testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheKey *keyA = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:testAuthority.msidHostWithPortIfNecessary
                                                                                   clientId:@"123-456"
                                                                             userIdentifier:nil];
     XCTAssertNil(keyA.account);

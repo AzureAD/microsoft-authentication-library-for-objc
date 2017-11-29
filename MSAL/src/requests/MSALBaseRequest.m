@@ -38,7 +38,7 @@
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALClientInfo.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -62,7 +62,7 @@ static MSALScopes *s_reservedScopes = nil;
     _parameters = parameters;
     _apiId = parameters.apiId;
     
-    if ([NSString msalIsStringNilOrBlank:_parameters.telemetryRequestId])
+    if ([NSString msidIsStringNilOrBlank:_parameters.telemetryRequestId])
     {
         _parameters.telemetryRequestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     }
@@ -151,14 +151,19 @@ static MSALScopes *s_reservedScopes = nil;
     // TODO: Remove once uid+utid work hits PROD
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     
-    NSMutableDictionary *endpointQPs = [[NSDictionary msalURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
+    NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
+    
+    if (!endpointQPs)
+    {
+        endpointQPs = [NSMutableDictionary dictionary];
+    }
     
     if (_parameters.sliceParameters)
     {
         [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
     }
     
-    tokenEndpoint.query = [endpointQPs msalURLFormEncode];
+    tokenEndpoint.query = [endpointQPs msidURLFormEncode];
     
     MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
                                                                       context:_parameters];
@@ -207,7 +212,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         if ([NSString msalIsStringNilOrBlank:tokenResponse.scope])
+         if ([NSString msidIsStringNilOrBlank:tokenResponse.scope])
          {
              LOG_INFO(_parameters, @"No scope in server response, using passed in scope instead.");
              LOG_INFO_PII(_parameters, @"No scope in server response, using passed in scope instead.");
@@ -244,7 +249,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         if ([NSString msalIsStringNilOrBlank:tokenResponse.accessToken])
+         if ([NSString msidIsStringNilOrBlank:tokenResponse.accessToken])
          {
              NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
              completionBlock(nil, noAccessTokenError);
@@ -266,7 +271,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
 
-         MSALRefreshTokenCacheItem *rtItem =  [cache saveRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msalHostWithPort
+         MSALRefreshTokenCacheItem *rtItem =  [cache saveRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                                             clientId:_parameters.clientId
                                                                             response:tokenResponse
                                                                              context:_parameters

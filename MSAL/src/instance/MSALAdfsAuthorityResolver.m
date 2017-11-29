@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAdfsAuthorityResolver.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 #import "MSALDrsDiscoveryResponse.h"
 #import "MSALWebFingerResponse.h"
@@ -252,7 +252,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     for (MSALWebFingerLink *link in links)
     {
         if ([link.rel caseInsensitiveCompare:TRUSTED_REALM] == NSOrderedSame &&
-            [[NSURL URLWithString:link.href] isEquivalentAuthority:authority])
+            [[NSURL URLWithString:link.href] msidIsEquivalentAuthority:authority])
         {
             return YES;
         }
