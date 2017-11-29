@@ -105,8 +105,8 @@ void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, 
     
     [message appendFormat:@" (%s:%d)", function, line];
     [messagePII appendFormat:@" (%s:%d)", function, line];
-    LOG_ERROR(ctx, @"%@", message);
-    LOG_ERROR_PII(ctx, @"%@", messagePII);
+    MSID_LOG_ERROR(ctx, @"%@", message);
+    MSID_LOG_ERROR_PII(ctx, @"%@", messagePII);
 }
 
 NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)

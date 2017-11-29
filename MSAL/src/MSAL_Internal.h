@@ -63,7 +63,7 @@
 { \
     if (CONDITION) \
     { \
-        LOG_ERROR(nil, @"InvalidArgumentException: " #ARG); \
+        MSID_LOG_ERROR(nil, @"InvalidArgumentException: " #ARG); \
         @throw [NSException exceptionWithName: NSInvalidArgumentException \
                                        reason:@"Please provide a valid '" #ARG "' parameter." \
                                      userInfo:nil];  \
@@ -85,6 +85,7 @@
 typedef NSOrderedSet<NSString *> MSALScopes;
 
 #include "MSAL.h"
-#include "MSALLogger+Internal.h"
+#include "MSIDLogger+Internal.h"
 #include "MSALRequestParameters.h"
 #include "MSALError_Internal.h"
+#import  "MSALRequestContext.h"

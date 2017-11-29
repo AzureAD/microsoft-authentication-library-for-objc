@@ -25,50 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSIDRequestContext.h"
 
-#import "MSALTestLogger.h"
+@protocol MSALRequestContext <MSIDRequestContext>
 
-@implementation MSALTestLogger
-
-+ (void)load
-{
-    // We want the shared test logger to get created early so it grabs the log callback
-    [MSALTestLogger sharedLogger];
-}
-
-+ (MSALTestLogger *)sharedLogger
-{
-    static dispatch_once_t onceToken;
-    static MSALTestLogger *logger;
-    dispatch_once(&onceToken, ^{
-        logger = [MSALTestLogger new];
-        [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII) {
-            [logger logLevel:level isPii:containsPII message:message];
-        }];
-    });
-    
-    return logger;
-}
-
-- (void)logLevel:(MSALLogLevel)level isPii:(BOOL)isPii message:(NSString *)message
-{
-    _lastLevel = level;
-    _containsPII = isPii;
-    _lastMessage = message;
-}
-
-- (void)reset
-{
-    [self reset:MSALLogLevelLast];
-}
-
-- (void)reset:(MSALLogLevel)level
-{
-    _lastMessage = nil;
-    _lastLevel = -1;
-    _containsPII = NO;
-    [[MSALLogger sharedLogger] setLevel:level];
-    [[MSALLogger sharedLogger] setPiiLoggingEnabled:NO];
-}
+- (NSURLSession *)urlSession;
 
 @end

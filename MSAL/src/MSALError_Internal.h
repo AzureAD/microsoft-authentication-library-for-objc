@@ -42,8 +42,8 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 
 #define MSAL_OSERROR_PARAM(_CTX, _CODE, _OSERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, MSALErrorDomain, _CODE, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSERROR userInfo:nil], __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
-#define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
-#define CREATE_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_MSID_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_MSID_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
 // Convenience macros for checking a false/nil return result and passing along
 // an error to a completion block with quick return
@@ -52,7 +52,7 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
     return; \
 }
 #define ERROR_COMPLETION(_CTX, _CODE, _DESC, ...) \
-    completionBlock(nil, CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
+    completionBlock(nil, CREATE_MSID_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
     return; \
 
 // Convenience macro to create invalid response error

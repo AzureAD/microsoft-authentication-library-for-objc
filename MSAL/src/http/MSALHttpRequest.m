@@ -28,7 +28,7 @@
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "NSDictionary+MSIDExtensions.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 #import "MSALOAuth2Constants.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
@@ -37,6 +37,7 @@
 #import "MSALTelemetryHttpEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDDeviceId.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -144,7 +145,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     MSALTelemetryHttpEvent *event = [[MSALTelemetryHttpEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST
                                                                        context:_context];
     
-    [_headers addEntriesFromDictionary:[MSALLogger msalId]];
+    [_headers addEntriesFromDictionary:[MSIDDeviceId deviceId]];
     
     if (_context)
     {
@@ -177,10 +178,10 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     [event setHttpMethod:request.HTTPMethod];
     [event setHttpURL:newURL];
     
-    LOG_INFO(_context, @"HTTP request %@",
+    MSID_LOG_INFO(_context, @"HTTP request %@",
              [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msidHostWithPortIfNecessary], request.URL.host]
              : @"unknown host");
-    LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
+    MSID_LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
     
     NSURLSessionDataTask *task = [_session dataTaskWithRequest:request
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)

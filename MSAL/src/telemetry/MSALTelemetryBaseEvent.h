@@ -23,7 +23,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryEventInterface.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 
 @interface MSALTelemtryBaseEvent : NSObject<MSALTelemetryEventInterface>
 

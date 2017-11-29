@@ -203,7 +203,7 @@ static MSALScopes *s_reservedScopes = nil;
          {
              MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
              
-             NSError *msalError = CREATE_LOG_ERROR_WITH_SUBERRORS(_parameters, code, oauthError, tokenResponse.subError, @"%@", tokenResponse.errorDescription);
+             NSError *msalError = CREATE_MSID_LOG_ERROR_WITH_SUBERRORS(_parameters, code, oauthError, tokenResponse.subError, @"%@", tokenResponse.errorDescription);
              
              [self stopTelemetryEvent:event error:msalError];
              
@@ -214,8 +214,8 @@ static MSALScopes *s_reservedScopes = nil;
          
          if ([NSString msidIsStringNilOrBlank:tokenResponse.scope])
          {
-             LOG_INFO(_parameters, @"No scope in server response, using passed in scope instead.");
-             LOG_INFO_PII(_parameters, @"No scope in server response, using passed in scope instead.");
+             MSID_LOG_INFO(_parameters, @"No scope in server response, using passed in scope instead.");
+             MSID_LOG_INFO_PII(_parameters, @"No scope in server response, using passed in scope instead.");
              tokenResponse.scope = _parameters.scopes.msalToString;
          }
          
@@ -226,8 +226,8 @@ static MSALScopes *s_reservedScopes = nil;
              if (!tokenResponse.refreshToken)
              {
                  tokenResponse.refreshToken = reqParameters[OAUTH2_REFRESH_TOKEN];
-                 LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-                 LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                 MSID_LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                 MSID_LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
              }
          }
          
@@ -236,22 +236,22 @@ static MSALScopes *s_reservedScopes = nil;
                                                                                error:&error];
          if (!clientInfo)
          {
-             LOG_ERROR(_parameters, @"Client info was not returned in the server response");
-             LOG_ERROR_PII(_parameters, @"Client info was not returned in the server response");
+             MSID_LOG_ERROR(_parameters, @"Client info was not returned in the server response");
+             MSID_LOG_ERROR_PII(_parameters, @"Client info was not returned in the server response");
              completionBlock(nil, error);
              return;
          }
          if (_parameters.user != nil &&
              ![_parameters.user.userIdentifier isEqualToString:clientInfo.userIdentifier])
          {
-             NSError *userMismatchError = CREATE_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+             NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);
              return;
          }
          
          if ([NSString msidIsStringNilOrBlank:tokenResponse.accessToken])
          {
-             NSError *noAccessTokenError = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
+             NSError *noAccessTokenError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
              completionBlock(nil, noAccessTokenError);
              return;
          }
