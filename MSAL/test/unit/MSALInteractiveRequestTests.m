@@ -39,8 +39,9 @@
 #import "MSALTestURLSession.h"
 #import "MSALUser.h"
 #import "MSALWebUI.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestConstants.h"
+#import "MSIDDeviceId.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -124,10 +125,10 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     NSDictionary *expectedQPs =
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -153,7 +154,7 @@
       @"code_challenge_method" : @"S256",
       UT_SLICE_PARAMS_DICT
       };
-    NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
+    NSDictionary *QPs = [NSDictionary msidURLFormDecode:authorizationUrl.query];
     XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
@@ -201,10 +202,10 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     NSDictionary *expectedQPs =
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -231,7 +232,7 @@
       @"code_challenge": pkce.codeChallenge,
       @"code_challenge_method" : @"S256",
       };
-    NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
+    NSDictionary *QPs = [NSDictionary msidURLFormDecode:authorizationUrl.query];
     XCTAssertTrue([expectedQPs compareToActual:QPs]);
 }
 
@@ -285,10 +286,10 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -313,7 +314,7 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
@@ -333,7 +334,7 @@
         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
     }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -443,10 +444,10 @@
          XCTAssertNotNil(url);
          
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -473,7 +474,7 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
@@ -493,7 +494,7 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -614,10 +615,10 @@
          XCTAssertNotNil(url);
          
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -644,7 +645,7 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
@@ -664,7 +665,7 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -761,10 +762,10 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -789,7 +790,7 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256"
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
@@ -809,7 +810,7 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];

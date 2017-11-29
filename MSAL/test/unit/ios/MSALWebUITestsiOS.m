@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
-#import "MSALTestLogger.h"
 #import "MSALWebUI.h"
 #import "UIApplication+MSALExtensions.h"
 #import "MSALFakeViewController.h"
@@ -181,22 +180,6 @@
     MSALFakeViewController *fakeController = [MSALFakeViewController currentController];
     XCTAssertTrue(fakeController.wasPresented);
     XCTAssertTrue(fakeSvc.wasDismissed);
-}
-
-- (void)testHandleResponse_whenNilResponse_shouldLogContainNil
-{
-    XCTAssertFalse([MSALWebUI handleResponse:nil]);
-    MSALTestLogger *logger = [MSALTestLogger sharedLogger];
-    XCTAssertTrue([logger.lastMessage containsString:@"nil"]);
-    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
-}
-
-- (void)testHandleResponse_whenNoCurrentSession_shouldLogContainSession
-{
-    XCTAssertFalse([MSALWebUI handleResponse:[NSURL URLWithString:@"https://iamafakeresponse.com"]]);
-    MSALTestLogger *logger = [MSALTestLogger sharedLogger];
-    XCTAssertTrue([logger.lastMessage containsString:@"session"]);
-    XCTAssertEqual(logger.lastLevel, MSALLogLevelError);
 }
 
 - (void)testStartWebUIWithURL_HandleCodeResponse_whenValid_shouldStartWebUIAndHandleResponse

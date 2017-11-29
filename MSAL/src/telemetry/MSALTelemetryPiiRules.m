@@ -24,26 +24,29 @@
 #import "MSALTelemetryPiiRules.h"
 #import "MSALTelemetryEventStrings.h"
 
-static NSDictionary *_piiRules;
+static NSSet *_piiFields;
 
 @implementation MSALTelemetryPiiRules
 
 + (void)initialize
 {
-    _piiRules = @{MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS: @YES};
+    _piiFields = [[NSSet alloc] initWithArray:@[MSAL_TELEMETRY_KEY_TENANT_ID,
+                                                MSAL_TELEMETRY_KEY_USER_ID,
+                                                MSAL_TELEMETRY_KEY_DEVICE_ID,
+                                                MSAL_TELEMETRY_KEY_LOGIN_HINT,
+                                                MSAL_TELEMETRY_KEY_CLIENT_ID,
+                                                MSAL_TELEMETRY_KEY_ERROR_DESCRIPTION,
+                                                MSAL_TELEMETRY_KEY_HTTP_PATH,
+                                                MSAL_TELEMETRY_KEY_REQUEST_QUERY_PARAMS,
+                                                MSAL_TELEMETRY_KEY_AUTHORITY]];
 }
+
 
 #pragma mark - Public
 
 + (BOOL)isPii:(NSString *)propertyName
 {
-    NSNumber *value = _piiRules[propertyName];
-    if (value)
-    {
-        return [value boolValue];
-    }
-    
-    return NO;
+    return [_piiFields containsObject:propertyName];
 }
 
 @end

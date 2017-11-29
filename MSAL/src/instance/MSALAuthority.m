@@ -34,7 +34,7 @@
 #import "MSALHttpResponse.h"
 #import "MSALURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALAuthority
 
@@ -66,7 +66,7 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
         return authority;
     }
     
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authority msalHostWithPort], tenantId]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authority msidHostWithPortIfNecessary], tenantId]];
 }
 
 
@@ -114,12 +114,12 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
         CHECK_ERROR_RETURN_NIL((pathComponents.count > 3), nil, MSALErrorInvalidParameter,
                                @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
         
-        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2], authorityUrl.pathComponents[3]];
+        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msidHostWithPortIfNecessary], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2], authorityUrl.pathComponents[3]];
         return [NSURL URLWithString:updatedAuthorityString];
     }
     
     // ADFS and AAD
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authorityUrl msalHostWithPort], authorityUrl.pathComponents[1]]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authorityUrl msidHostWithPortIfNecessary], authorityUrl.pathComponents[1]]];
 }
 
 
@@ -141,7 +141,7 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     
     if ([firstPathComponent isEqualToString:@"adfs"])
     {
-        NSError *error = CREATE_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
+        NSError *error = CREATE_MSID_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
         completionBlock(nil, error);
         return;
     }
@@ -226,7 +226,7 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     }
     
     if (!authority.canonicalAuthority ||
-        (authority.authorityType == ADFSAuthority &&  [NSString msalIsStringNilOrBlank:userPrincipalName]))
+        (authority.authorityType == ADFSAuthority &&  [NSString msidIsStringNilOrBlank:userPrincipalName]))
     {
         return NO;
     }

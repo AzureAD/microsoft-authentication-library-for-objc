@@ -49,7 +49,6 @@ NSString *const MSAL_TELEMETRY_KEY_START_TIME                   = @"msal.start_t
 NSString *const MSAL_TELEMETRY_KEY_END_TIME                     = @"msal.stop_time";
 NSString *const MSAL_TELEMETRY_KEY_ELAPSED_TIME                 = @"msal.elapsed_time";
 NSString *const MSAL_TELEMETRY_KEY_DEVICE_ID                    = @"msal.device_id";
-NSString *const MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS            = @"msal.device_ip_address";
 NSString *const MSAL_TELEMETRY_KEY_APPLICATION_NAME             = @"msal.application_name";
 NSString *const MSAL_TELEMETRY_KEY_APPLICATION_VERSION          = @"msal.application_version";
 NSString *const MSAL_TELEMETRY_KEY_LOGIN_HINT                   = @"msal.login_hint";

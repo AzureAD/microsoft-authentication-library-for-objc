@@ -29,6 +29,7 @@
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALTestURLSession.h"
+#import "MSIDDeviceId.h"
 
 @interface MSALHttpRequestTests : MSALTestCase
 
@@ -111,7 +112,7 @@
     
     NSString *testURLString = @"https://somehttprequest.com";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:testURLString

@@ -42,8 +42,8 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 
 #define MSAL_OSERROR_PARAM(_CTX, _CODE, _OSERROR, _DESC, ...) MSALFillAndLogError(error, _CTX, MSALErrorDomain, _CODE, nil, nil, [NSError errorWithDomain:NSOSStatusErrorDomain code:_OSERROR userInfo:nil], __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
-#define CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
-#define CREATE_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_MSID_LOG_ERROR(_CTX, _CODE, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
+#define CREATE_MSID_LOG_ERROR_WITH_SUBERRORS(_CTX, _CODE, _OAUTH_ERROR, _SUB_ERROR, _DESC, ...) MSALCreateAndLogError(_CTX, MSALErrorDomain, _CODE, _OAUTH_ERROR, _SUB_ERROR, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)
 
 // Convenience macros for checking a false/nil return result and passing along
 // an error to a completion block with quick return
@@ -52,7 +52,7 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
     return; \
 }
 #define ERROR_COMPLETION(_CTX, _CODE, _DESC, ...) \
-    completionBlock(nil, CREATE_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
+    completionBlock(nil, CREATE_MSID_LOG_ERROR(_CTX, _CODE, _DESC, ##__VA_ARGS__)); \
     return; \
 
 // Convenience macro to create invalid response error
@@ -75,7 +75,7 @@ extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestConte
 
 #define REQUIRED_PARAMETER_BOOL(_PARAMETER, _CTX) if (!_PARAMETER) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return NO; }
 
-#define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msalIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
+#define REQUIRED_STRING_PARAMETER(_PARAMETER, _CTX) if ([NSString msidIsStringNilOrBlank:_PARAMETER]) { REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX); return nil; }
 
 #define REQUIRED_PARAMETER_ERROR(_PARAMETER, _CTX) MSALFillAndLogError(error, _CTX, MSALErrorDomain, MSALErrorInvalidParameter, nil, nil, nil, __FUNCTION__, __LINE__, @#_PARAMETER " is a required parameter and must not be nil or empty.")
 

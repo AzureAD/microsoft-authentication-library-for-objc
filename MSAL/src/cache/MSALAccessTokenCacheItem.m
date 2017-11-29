@@ -32,7 +32,7 @@
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
 
 static uint64_t s_expirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
@@ -114,7 +114,7 @@ MSAL_JSON_RW(@"unique_id", uniqueId, setUniqueId)
     _idToken = [[MSALIdToken alloc] initWithRawIdToken:self.rawIdToken];
     _user = [[MSALUser alloc] initWithIdToken:_idToken
                                    clientInfo:self.clientInfo
-                                  environment:self.authority ? [NSURL URLWithString:self.authority].msalHostWithPort : nil];
+                                  environment:self.authority ? [NSURL URLWithString:self.authority].msidHostWithPortIfNecessary : nil];
     _tenantId = _idToken.tenantId;
 }
 
@@ -143,9 +143,9 @@ MSAL_JSON_RW(@"unique_id", uniqueId, setUniqueId)
     NSArray* parts = [scopeString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@" "]];
     for (NSString *part in parts)
     {
-        if (![NSString msalIsStringNilOrBlank:part])
+        if (![NSString msidIsStringNilOrBlank:part])
         {
-            [scope addObject:part.msalTrimmedString.lowercaseString];
+            [scope addObject:part.msidTrimmedString.lowercaseString];
         }
     }
     return scope;
@@ -157,7 +157,7 @@ MSAL_JSON_RW(@"unique_id", uniqueId, setUniqueId)
     {
         return nil;
     }
-    return [NSURL URLWithString:self.authority].msalHostWithPort;
+    return [NSURL URLWithString:self.authority].msidHostWithPortIfNecessary;
 }
 
 - (id)copyWithZone:(NSZone*) zone

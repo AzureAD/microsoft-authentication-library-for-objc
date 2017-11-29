@@ -38,6 +38,7 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
+#import "MSIDDeviceId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
@@ -97,7 +98,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
     parameters[OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     [parameters addEntriesFromDictionary:msalId];
     [parameters addEntriesFromDictionary:MSALParametersForBehavior(_uiBehavior)];
     
@@ -115,7 +116,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
     if (urlComponents.percentEncodedQuery)
     {
-        NSDictionary *authorizationQueryParams = [NSDictionary msalURLFormDecode:urlComponents.percentEncodedQuery];
+        NSDictionary *authorizationQueryParams = [NSDictionary msidURLFormDecode:urlComponents.percentEncodedQuery];
         if (authorizationQueryParams)
         {
             [parameters addEntriesFromDictionary:authorizationQueryParams];
@@ -138,7 +139,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     _state = [[NSUUID UUID] UUIDString];
     parameters[OAUTH2_STATE] = _state;
     
-    urlComponents.percentEncodedQuery = [parameters msalURLFormEncode];
+    urlComponents.percentEncodedQuery = [parameters msidURLFormEncode];
     
     return [urlComponents URL];
 }
@@ -176,8 +177,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 {
     NSURL *authorizationUrl = [self authorizationUrl];
     
-    LOG_INFO(_parameters, @"Launching Web UI");
-    LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
+    MSID_LOG_INFO(_parameters, @"Launching Web UI");
+    MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
     s_currentRequest = self;
     
     [MSALWebUI startWebUIWithURL:authorizationUrl
@@ -194,13 +195,13 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              return;
          }
          
-         if ([NSString msalIsStringNilOrBlank:response.absoluteString])
+         if ([NSString msidIsStringNilOrBlank:response.absoluteString])
          {
              // This error case *really* shouldn't occur. If we're seeing it it's almost certainly a developer bug
              ERROR_COMPLETION(_parameters, MSALErrorNoAuthorizationResponse, @"No authorization response received from server.");
          }
          
-         NSDictionary *params = [NSDictionary msalURLFormDecode:response.query];
+         NSDictionary *params = [NSDictionary msidURLFormDecode:response.query];
          CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
          
          CHECK_ERROR_COMPLETION([_state isEqualToString:params[OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");

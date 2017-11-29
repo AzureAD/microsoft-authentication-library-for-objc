@@ -35,11 +35,12 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALUser.h"
 
-#import "NSDictionary+MSALExtensions.h"
+#import "NSDictionary+MSIDExtensions.h"
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSOrderedSet+MSALExtensions.h"
 #import "NSString+MSALHelperMethods.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSIDDeviceId.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -142,7 +143,7 @@ static bool AmIBeingDebugged(void)
 
 + (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     
@@ -168,7 +169,7 @@ static bool AmIBeingDebugged(void)
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     
@@ -208,7 +209,7 @@ static bool AmIBeingDebugged(void)
                                    scopes:(MSALScopes *)scopes
                                clientInfo:(NSDictionary *)clientInfo
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
     [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -218,13 +219,13 @@ static bool AmIBeingDebugged(void)
     [tokenQPs addEntriesFromDictionary:@{UT_SLICE_PARAMS_DICT}];
     if (query)
     {
-        [tokenQPs addEntriesFromDictionary:[NSDictionary msalURLFormDecode:query]];
+        [tokenQPs addEntriesFromDictionary:[NSDictionary msidURLFormDecode:query]];
     }
     
     NSString *requestUrlStr = nil;
     if (tokenQPs.count > 0)
     {
-        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msalURLFormEncode]];
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msidURLFormEncode]];
     }
     else
     {
@@ -259,7 +260,7 @@ static bool AmIBeingDebugged(void)
                                     tenantId:(NSString *)tid
                                         user:(MSALUser *)user
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
     [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -334,7 +335,7 @@ static bool AmIBeingDebugged(void)
     
     _requestURL = requestURL;
     NSString *query = [requestURL query];
-    _QPs = [NSString msalIsStringNilOrBlank:query] ? nil : [NSDictionary msalURLFormDecode:query];
+    _QPs = [NSString msidIsStringNilOrBlank:query] ? nil : [NSDictionary msidURLFormDecode:query];
 }
 
 - (BOOL)matchesURL:(NSURL *)url
@@ -345,7 +346,7 @@ static bool AmIBeingDebugged(void)
         return NO;
     }
     
-    if ([[url msalHostWithPort] caseInsensitiveCompare:[_requestURL msalHostWithPort]] != NSOrderedSame)
+    if ([[url msidHostWithPortIfNecessary] caseInsensitiveCompare:[_requestURL msidHostWithPortIfNecessary]] != NSOrderedSame)
     {
         return NO;
     }
@@ -359,9 +360,9 @@ static bool AmIBeingDebugged(void)
     // And lastly, the tricky part. Query Params can come in any order so we need to process them
     // a bit instead of just a string compare
     NSString *query = [url query];
-    if (![NSString msalIsStringNilOrBlank:query])
+    if (![NSString msidIsStringNilOrBlank:query])
     {
-        NSDictionary *QPs = [NSDictionary msalURLFormDecode:query];
+        NSDictionary *QPs = [NSDictionary msidURLFormDecode:query];
         if (![_QPs compareToActual:QPs])
         {
             return NO;
@@ -380,7 +381,7 @@ static bool AmIBeingDebugged(void)
     if (_requestParamsBody)
     {
         NSString * string = [[NSString alloc] initWithData:body encoding:NSUTF8StringEncoding];
-        NSDictionary *obj = [NSDictionary msalURLFormDecode:string];
+        NSDictionary *obj = [NSDictionary msidURLFormDecode:string];
         return [_requestParamsBody compareToActual:obj];
     }
     
@@ -500,7 +501,7 @@ static NSMutableArray *s_responses = nil;
         if ([obj isKindOfClass:[MSALTestURLResponse class]])
         {
             response = (MSALTestURLResponse *)obj;
-            
+                        
             if ([response matchesURL:requestURL] && [response matchesHeaders:headers] && [response matchesBody:body])
             {
                 [s_responses removeObjectAtIndex:i];
@@ -554,7 +555,7 @@ static NSMutableArray *s_responses = nil;
     
     NSAssert(nil, @"did not find a matching response for %@", requestURL.absoluteString);
     
-    LOG_ERROR(nil, @"No matching response found, request url = %@", request.URL);
+    MSID_LOG_ERROR(nil, @"No matching response found, request url = %@", request.URL);
     
     return nil;
 }

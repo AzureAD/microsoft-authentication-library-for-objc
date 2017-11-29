@@ -21,17 +21,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#pragma once
+#import "MSIDVersion.h"
 
-@interface NSURL (MSAL)
+@implementation MSIDVersion
 
-// Returns a string that contains host and the port, if specified
-- (NSString *)msalHostWithPort;
++ (NSString *)platformName
+{
+#if TARGET_OS_IPHONE
+    return @"MSAL.iOS";
+#else
+    return @"MSAL.OSX";
+#endif
+}
 
-// Returns a path with any tenant info removed from it
-- (NSString *)scrubbedHttpPath;
++ (NSString *)sdkName
+{
+    return @"MSAL";
+}
 
-// Returns YES for equivalent authority
-- (BOOL)isEquivalentAuthority:(NSURL *)aURL;
++ (NSString *)sdkVersion
+{
+    return @MSAL_VERSION_STRING;
+}
 
 @end
+

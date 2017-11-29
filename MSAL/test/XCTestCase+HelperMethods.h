@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,22 +17,32 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#pragma once
+#import <XCTest/XCTest.h>
 
-@interface NSDictionary (MSAL)
+//Usage: MSALAssertStringEquals(resultString, "Blah");
+#define MSALAssertStringEquals(actualParam, expectedParam) \
+{ \
+    [self msalAssertStringEquals:actualParam \
+                stringExpression:@"" #actualParam \
+                        expected:expectedParam \
+                            file:__FILE__ \
+                            line:__LINE__]; \
+}
 
-// Decodes a www-form-urlencoded string into a dictionary of key/value pairs.
-// Always returns a dictionary, even if the string is nil, empty or contains no pairs
-+ (NSDictionary *)msalURLFormDecode:(NSString *)string;
+@interface XCTestCase (HelperMethods)
 
-// Encodes a dictionary consisting of a set of name/values pairs that are strings to www-form-urlencoded
-// Returns nil if the dictionary is empty, otherwise the encoded value
-- (NSString *)msalURLFormEncode;
+- (void)msalAssertStringEquals:(NSString *)actual
+              stringExpression:(NSString *)expression
+                      expected:(NSString *)expected
+                          file:(const char *)file
+                          line:(int)line;
 
 @end

@@ -64,7 +64,7 @@
 - (NSString *)base64UrlJson
 {
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:nil];
-    return [NSString msalBase64UrlEncodeData:jsonData];
+    return [NSString msidBase64UrlEncodeData:jsonData];
 }
 
 @end

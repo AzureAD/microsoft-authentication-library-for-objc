@@ -33,6 +33,7 @@
 #import "MSALTelemetryEventStrings.h"
 #import "MSALTelemetryTestDispatcher.h"
 #import "MSALTelemetryDefaultEvent.h"
+#import "XCTestCase+HelperMethods.h"
 
 @interface MSALTelemetryTests : MSALTestCase
 
@@ -69,13 +70,13 @@
     [MSALTelemetry sharedInstance].piiEnabled = NO;
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldSetPiiFieldsToEmpty
+- (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = NO;
     NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     NSString *eventName = @"test event";
     MSALTelemetryDefaultEvent *event = [[MSALTelemetryDefaultEvent alloc] initWithName:eventName context:nil];
-    [event setProperty:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS value:@"192.168.0.1"];
+    [event setProperty:MSAL_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:event];
     
@@ -83,16 +84,16 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    XCTAssertNil([dictionary objectForKey:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS]);
+    XCTAssertNil([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID]);
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldNotChangePiiFields
+- (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
     NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
     NSString *eventName = @"test event";
     MSALTelemetryDefaultEvent *event = [[MSALTelemetryDefaultEvent alloc] initWithName:eventName context:nil];
-    [event setProperty:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS value:@"192.168.0.1"];
+    [event setProperty:MSAL_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSALTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSALTelemetry sharedInstance] stopEvent:requestId event:event];
     
@@ -100,7 +101,7 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    XCTAssertEqual([dictionary objectForKey:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS], @"192.168.0.1");
+    MSALAssertStringEquals([dictionary objectForKey:MSAL_TELEMETRY_KEY_USER_ID], [@"id1234" msidComputeSHA256]);
 }
 
 #pragma mark - Private

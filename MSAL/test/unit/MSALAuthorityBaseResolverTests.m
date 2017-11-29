@@ -29,6 +29,7 @@
 #import "MSALAuthorityBaseResolver.h"
 #import "MSALTestURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
+#import "MSIDDeviceId.h"
 
 @interface MSALAuthorityBaseResolverTests : MSALTestCase
 
@@ -63,7 +64,7 @@
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
@@ -111,7 +112,7 @@
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
     MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint

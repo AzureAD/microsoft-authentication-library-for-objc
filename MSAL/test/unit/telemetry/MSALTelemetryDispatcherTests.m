@@ -68,7 +68,7 @@
     return _requestId;
 }
 
-- (NSString *)component
+- (NSString *)logComponent
 {
     return nil;
 }
@@ -161,11 +161,10 @@
     // Default event
     NSDictionary *defaultEventProperties = [receivedEvents objectAtIndex:0];
     NSArray *defaultEventPropertyNames = [defaultEventProperties allKeys];
-    XCTAssertEqual([defaultEventPropertyNames count], 10);
+    XCTAssertEqual([defaultEventPropertyNames count], 9);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_name"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_version"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_id"]);
-    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_ip_address"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.event_name"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_cpu"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_dm"]);

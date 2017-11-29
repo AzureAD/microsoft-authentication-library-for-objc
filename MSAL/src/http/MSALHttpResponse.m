@@ -27,7 +27,7 @@
 
 
 #import "MSALHttpResponse.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 
 @implementation MSALHttpResponse
 
