@@ -72,7 +72,7 @@
 - (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = NO;
-    NSString *requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
@@ -89,7 +89,7 @@
 - (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
-    NSString *requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];

@@ -64,7 +64,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     if ([NSString msidIsStringNilOrBlank:_parameters.telemetryRequestId])
     {
-        _parameters.telemetryRequestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+        _parameters.telemetryRequestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     }
     
     if (!parameters.scopes || parameters.scopes.count == 0)

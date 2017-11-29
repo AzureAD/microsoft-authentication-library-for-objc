@@ -111,7 +111,7 @@
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
-    NSString *requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
     // Flush without adding any additional events
     [[MSIDTelemetry sharedInstance] flush:requestId];
@@ -134,7 +134,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
@@ -212,7 +212,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
@@ -247,7 +247,7 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSIDTelemetry sharedInstance] registerNewRequest];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
