@@ -197,8 +197,8 @@
         // This should be rare-to-never as having a MSALUser object requires having a RT in cache,
         // which should imply that at some point we got an AT for that user with this client ID
         // as well. Unless users start working cross client id of course.
-        LOG_WARN(ctx, @"No access token found for user & client id.");
-        LOG_WARN_PII(ctx, @"No access token found for user & client id.");
+        MSID_LOG_WARN(ctx, @"No access token found for user & client id.");
+        MSID_LOG_WARN_PII(ctx, @"No access token found for user & client id.");
         
         return NO;
     }
@@ -234,15 +234,15 @@
     
     if (matchedTokens.count == 0)
     {
-        LOG_INFO(ctx, @"No matching access token found.");
-        LOG_INFO_PII(ctx, @"No matching access token found.");
+        MSID_LOG_INFO(ctx, @"No matching access token found.");
+        MSID_LOG_INFO_PII(ctx, @"No matching access token found.");
         return YES;
     }
     
     if (matchedTokens[0].isExpired)
     {
-        LOG_INFO(ctx, @"Access token found in cache is already expired.");
-        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
+        MSID_LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        MSID_LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         return YES;
     }
     

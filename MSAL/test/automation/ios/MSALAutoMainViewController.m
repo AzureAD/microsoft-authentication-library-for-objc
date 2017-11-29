@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSAL.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 
 #import "MSALAutoMainViewController.h"
 #import "MSALAutoResultViewController.h"

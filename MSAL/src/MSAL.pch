@@ -45,7 +45,7 @@
 // Internal MSAL Files
 
 #import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 #import "NSString+MSIDExtensions.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "NSOrderedSet+MSALExtensions.h"

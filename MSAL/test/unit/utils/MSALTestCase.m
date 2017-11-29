@@ -32,7 +32,6 @@
 
 #import "MSALTestBundle.h"
 #import "MSALTestCacheDataUtil.h"
-#import "MSALTestLogger.h"
 #import "MSALTestSwizzle.h"
 
 #import "MSALTestURLSession.h"
@@ -47,7 +46,6 @@
 - (void)setUp
 {
     [super setUp];
-    [[MSALTestLogger sharedLogger] reset];
     [MSALTestBundle reset];
     [MSALTestSwizzle reset];
     [MSALAuthority initialize];

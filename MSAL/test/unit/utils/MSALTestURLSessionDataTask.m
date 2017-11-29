@@ -91,14 +91,14 @@
             if (!requestValue)
             {
                 // TODO: Add logging
-                // AD_LOG_ERROR_F(@"Missing request header", AD_FAILED, nil, @"expected \"%@\" header", key);
+                // MSID_AD_LOG_ERROR_F(@"Missing request header", AD_FAILED, nil, @"expected \"%@\" header", key);
                 failed = YES;
             }
             
             if (![requestValue isEqualToString:value])
             {
                 // TODO: Add logging
-                // AD_LOG_ERROR_F(@"Mismatched request header", AD_FAILED, nil, @"On \"%@\" header, expected:\"%@\" actual:\"%@\"", key, value, requestValue);
+                // MSID_AD_LOG_ERROR_F(@"Mismatched request header", AD_FAILED, nil, @"On \"%@\" header, expected:\"%@\" actual:\"%@\"", key, value, requestValue);
                 failed = YES;
             }
         }

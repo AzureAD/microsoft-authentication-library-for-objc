@@ -23,8 +23,9 @@
 
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSALTelemetryEventStrings.h"
-#import "MSALLogger+Internal.h"
+#import "MSIDLogger+Internal.h"
 #include <CoreFoundation/CoreFoundation.h>
+#import "MSIDDeviceId.h"
 
 #if !TARGET_OS_IPHONE
 #include <IOKit/IOKitLib.h>
@@ -66,7 +67,7 @@
         [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_NAME value:applicationName];
         [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_VERSION value:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
         
-        NSDictionary *msalIds = [MSALLogger msalId];
+        NSDictionary *msalIds = [MSIDDeviceId deviceId];
         for (NSString *key in msalIds)
         {
             NSString *propertyName = [NSString stringWithFormat:@"msal.%@",

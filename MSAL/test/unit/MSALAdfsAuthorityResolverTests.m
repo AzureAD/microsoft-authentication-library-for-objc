@@ -32,6 +32,7 @@
 #import "MSALWebFingerResponse.h"
 
 #import "MSALTestURLSession.h"
+#import "MSIDDeviceId.h"
 
 #define TRUSTED_REALM @"http://schemas.microsoft.com/rel/trusted-realm"
 
@@ -75,7 +76,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 
 - (void)addDrsDiscoverySuccessResponse:(NSDictionary *)customResponse onPrems:(BOOL)onPrems
 {
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
@@ -99,7 +100,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 
 - (void)addDrsDiscoveryForOnPremsFailureResponse
 {
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
@@ -112,7 +113,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 
 - (void)addDrsDiscoveryForCloudFailureResponse
 {
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
@@ -124,7 +125,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 
 - (void)addWebFingerSuccessResponse:(NSDictionary *)customResponse
 {
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
@@ -146,7 +147,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 
 - (void)addWebFingerFailureResponse
 {
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     

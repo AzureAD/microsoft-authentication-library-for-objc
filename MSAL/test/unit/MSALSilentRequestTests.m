@@ -43,6 +43,7 @@
 #import "NSURL+MSIDExtensions.h"
 
 #import "MSALTestConstants.h"
+#import "MSIDDeviceId.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -240,7 +241,7 @@
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
 
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -337,7 +338,7 @@
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -482,7 +483,7 @@
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -611,7 +612,7 @@
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
@@ -699,7 +700,7 @@
     [parameters.tokenCache.dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
     
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];

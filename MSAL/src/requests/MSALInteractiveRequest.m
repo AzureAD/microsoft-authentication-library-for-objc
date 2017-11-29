@@ -38,6 +38,7 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry+Internal.h"
 #import "MSALTelemetryEventStrings.h"
+#import "MSIDDeviceId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
@@ -97,7 +98,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
     parameters[OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     [parameters addEntriesFromDictionary:msalId];
     [parameters addEntriesFromDictionary:MSALParametersForBehavior(_uiBehavior)];
     
@@ -176,8 +177,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 {
     NSURL *authorizationUrl = [self authorizationUrl];
     
-    LOG_INFO(_parameters, @"Launching Web UI");
-    LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
+    MSID_LOG_INFO(_parameters, @"Launching Web UI");
+    MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
     s_currentRequest = self;
     
     [MSALWebUI startWebUIWithURL:authorizationUrl

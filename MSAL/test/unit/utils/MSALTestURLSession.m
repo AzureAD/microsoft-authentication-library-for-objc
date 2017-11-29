@@ -40,6 +40,7 @@
 #import "NSOrderedSet+MSALExtensions.h"
 #import "NSString+MSALHelperMethods.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDDeviceId.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -142,7 +143,7 @@ static bool AmIBeingDebugged(void)
 
 + (MSALTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     
@@ -168,7 +169,7 @@ static bool AmIBeingDebugged(void)
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     
@@ -208,7 +209,7 @@ static bool AmIBeingDebugged(void)
                                    scopes:(MSALScopes *)scopes
                                clientInfo:(NSDictionary *)clientInfo
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
     [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -259,7 +260,7 @@ static bool AmIBeingDebugged(void)
                                     tenantId:(NSString *)tid
                                         user:(MSALUser *)user
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
     [tokenReqHeaders setObject:[MSALTestSentinel new] forKey:@"client-request-id"];
     [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -554,7 +555,7 @@ static NSMutableArray *s_responses = nil;
     
     NSAssert(nil, @"did not find a matching response for %@", requestURL.absoluteString);
     
-    LOG_ERROR(nil, @"No matching response found, request url = %@", request.URL);
+    MSID_LOG_ERROR(nil, @"No matching response found, request url = %@", request.URL);
     
     return nil;
 }

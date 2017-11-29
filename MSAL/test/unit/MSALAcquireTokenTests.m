@@ -36,6 +36,7 @@
 
 #import "NSDictionary+MSALTestUtil.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDDeviceId.h"
 
 #import "MSALPublicClientApplication+Internal.h"
 
@@ -100,7 +101,7 @@
            @"p" : @"b2c_1_policy",
            UT_SLICE_PARAMS_DICT
            } mutableCopy];
-         [expectedQPs addEntriesFromDictionary:[MSALLogger msalId]];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          XCTAssertTrue([expectedQPs compareToActual:QPs]);
          
