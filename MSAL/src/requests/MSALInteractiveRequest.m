@@ -36,8 +36,8 @@
 #import "MSALPkce.h"
 
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "MSIDDeviceId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;

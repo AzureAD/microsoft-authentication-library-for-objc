@@ -22,40 +22,16 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventInterface.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetryEventInterface.h"
 #import "MSALDefaultDispatcher.h"
-#import "NSString+MSIDExtensions.h"
-#import "MSALTelemetryDefaultEvent.h"
-#import "MSALTelemetryPiiRules.h"
-
-static NSString* const s_delimiter = @"|";
-static MSALTelemetryDefaultEvent *s_defaultEvent;
-
-@interface MSALTelemetry()
-{
-    NSMutableArray<MSALDefaultDispatcher *> *_dispatchers;
-    NSMutableDictionary *_eventTracking;
-    NSMutableDictionary *_events;
-    NSMutableArray *_errorEvents;
-}
-
-@end
+#import "MSIDTelemetry.h"
+#import "MSIDTelemetry+Internal.h"
 
 @implementation MSALTelemetry
 
 - (id)initInternal
 {
-    self = [super init];
-    if (self)
-    {
-        _eventTracking = [NSMutableDictionary new];
-        _dispatchers = [NSMutableArray new];
-        _events = [NSMutableDictionary new];
-        _errorEvents = [NSMutableArray new];
-    }
-    return self;
+    return [super init];
 }
 
 + (MSALTelemetry *)sharedInstance
@@ -65,7 +41,6 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
     
     dispatch_once(&once, ^{
         singleton = [[MSALTelemetry alloc] initInternal];
-        s_defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
     });
     
     return singleton;
@@ -74,156 +49,20 @@ static MSALTelemetryDefaultEvent *s_defaultEvent;
 - (void)addDispatcher:(nonnull id<MSALDispatcher>)dispatcher
 setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
-    @synchronized(self)
-    {
-        [_dispatchers addObject:[[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
-                                                            setTelemetryOnFailure:setTelemetryOnFailure]];
-    }
+    MSALDefaultDispatcher *telemetryDispatcher = [[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
+                                                                             setTelemetryOnFailure:setTelemetryOnFailure];
+    
+    [[MSIDTelemetry sharedInstance] addDispatcher:telemetryDispatcher];
 }
 
 - (void)removeDispatcher:(nonnull id<MSALDispatcher>)dispatcher
 {
-    @synchronized(self)
-    {
-        for(MSALDefaultDispatcher *msalDispatcher in _dispatchers)
-        {
-            if ([msalDispatcher containsDispatcher:dispatcher])
-            {
-                [_dispatchers removeObject:msalDispatcher];
-            }
-        }
-    }
+    [[MSIDTelemetry sharedInstance] findAndRemoveDispatcher:dispatcher];
 }
 
 - (void)removeAllDispatchers
 {
-    @synchronized(self)
-    {
-        [_dispatchers removeAllObjects];
-    }
-}
-
-@end
-
-@implementation MSALTelemetry (Internal)
-
-- (NSString *)telemetryRequestId
-{
-    return [[NSUUID UUID] UUIDString];
-}
-
-- (void)startEvent:(NSString *)requestId
-         eventName:(NSString *)eventName
-{
-    if ([NSString msidIsStringNilOrBlank:requestId] || [NSString msidIsStringNilOrBlank:eventName])
-    {
-        return;
-    }
-    
-    NSDate *currentTime = [NSDate date];
-    @synchronized(self)
-    {
-        [_eventTracking setObject:currentTime
-                           forKey:[self getEventTrackingKey:requestId eventName:eventName]];
-    }
-}
-
-- (void)stopEvent:(NSString *)requestId
-            event:(id<MSALTelemetryEventInterface>)event
-{
-    NSDate *stopTime = [NSDate date];
-    NSString *eventName = [self getPropertyFromEvent:event propertyName:MSAL_TELEMETRY_KEY_EVENT_NAME];
-    
-    if ([NSString msidIsStringNilOrBlank:requestId] || [NSString msidIsStringNilOrBlank:eventName] || !event)
-    {
-        return;
-    }
-    
-    NSString *key = [self getEventTrackingKey:requestId eventName:eventName];
-    
-    NSDate *startTime = nil;
-    
-    @synchronized(self)
-    {
-        startTime = [_eventTracking objectForKey:key];
-        if (!startTime)
-        {
-            return;
-        }
-    }
-    
-    [event setStartTime:startTime];
-    [event setStopTime:stopTime];
-    [event setResponseTime:[stopTime timeIntervalSinceDate:startTime]];
-    
-    @synchronized(self)
-    {
-        NSMutableArray *eventCollection = [_events objectForKey:requestId];
-        
-        if (!eventCollection)
-        {
-            eventCollection = [NSMutableArray array];
-        }
-        
-        [eventCollection addObject:[event getProperties]];
-        [_events setObject:eventCollection forKey:requestId];
-        
-        if ([event errorInEvent] && ![_errorEvents containsObject:requestId])
-        {
-            [_errorEvents addObject:requestId];
-        }
-        
-        [_eventTracking removeObjectForKey:key];
-    }
-}
-
-- (NSString *)getEventTrackingKey:(NSString *)requestId
-                       eventName:(NSString *)eventName
-{
-    return [NSString stringWithFormat:@"%@%@%@", requestId, s_delimiter, eventName];
-}
-
-- (NSString *)getPropertyFromEvent:(id<MSALTelemetryEventInterface>)event
-                     propertyName:(NSString *)propertyName
-{
-    NSDictionary *properties = [event getProperties];
-    return [properties objectForKey:propertyName];
-}
-
-- (void)flush:(NSString *)requestId
-{
-    @synchronized(self)
-    {
-        NSArray *events = [_events objectForKey:requestId];
-        BOOL errorInEvent = [_errorEvents containsObject:requestId];
-        
-        if ([events count])
-        {
-            events = [@[[[s_defaultEvent getProperties] mutableCopy]] arrayByAddingObjectsFromArray:events];
-        }
-        
-        if (!self.piiEnabled)
-        {
-            // Clear PII fields.
-            for (NSMutableDictionary *eventProperties in events)
-            {
-                for (NSString *propertyName in [eventProperties allKeys])
-                {
-                    if ([MSALTelemetryPiiRules isPii:propertyName]) {
-                        [eventProperties removeObjectForKey:propertyName];
-                    }
-                }
-            }
-        }
-        
-        for (MSALDefaultDispatcher *dispatcher in _dispatchers)
-        {
-            [dispatcher flush:events errorInEvent:errorInEvent];
-        }
-        
-        [_events removeObjectForKey:requestId];
-        [_errorEvents removeObject:requestId];
-    }
+    [[MSIDTelemetry sharedInstance] removeAllDispatchers];
 }
 
 @end
