@@ -30,12 +30,12 @@
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSIDLogger+Internal.h"
 #import "MSALOAuth2Constants.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "NSString+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "MSALTelemetryHttpEvent.h"
-#import "MSALTelemetry+Internal.h"
+#import "MSIDTelemetryHttpEvent.h"
+#import "MSIDTelemetry+Internal.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDeviceId.h"
 
@@ -140,9 +140,9 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
 - (void)send:(MSALHttpRequestCallback)completionHandler
 {
     // Telemetry
-    [[MSALTelemetry sharedInstance] startEvent:[_context telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST];
+    [[MSIDTelemetry sharedInstance] startEvent:[_context telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_HTTP_REQUEST];
     
-    MSALTelemetryHttpEvent *event = [[MSALTelemetryHttpEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_HTTP_REQUEST
+    MSIDTelemetryHttpEvent *event = [[MSIDTelemetryHttpEvent alloc] initWithName:MSID_TELEMETRY_EVENT_HTTP_REQUEST
                                                                        context:_context];
     
     [_headers addEntriesFromDictionary:[MSIDDeviceId deviceId]];
@@ -176,7 +176,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     request.HTTPBody = bodyData;
     
     [event setHttpMethod:request.HTTPMethod];
-    [event setHttpURL:newURL];
+    [event setHttpPath:newURL.absoluteString];
     
     MSID_LOG_INFO(_context, @"HTTP request %@",
              [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msidHostWithPortIfNecessary], request.URL.host]
@@ -190,7 +190,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                       {
                                           [event setHttpErrorCode:[NSString stringWithFormat: @"%ld", (long)[error code]]];
                                           [event setHttpErrorDomain:[error domain]];
-                                          [[MSALTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
+                                          [[MSIDTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
                                           
                                           completionHandler(nil, error);
                                           return;
@@ -202,9 +202,9 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                       
                                       [event setHttpResponseCode:[NSString stringWithFormat: @"%ld", (long)[msalResponse statusCode]]];
                                       [event setHttpRequestIdHeader:[msalResponse.headers objectForKey:OAUTH2_CORRELATION_ID_REQUEST_VALUE]];
-                                      [event setOAuthErrorCode:msalResponse];
+                                      [event setOAuthErrorCodeFromResponseData:msalResponse.body];
                                       
-                                      [[MSALTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
+                                      [[MSIDTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
                                       
                                       completionHandler(msalResponse, error);
                                   }];
