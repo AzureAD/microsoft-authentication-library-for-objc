@@ -36,8 +36,8 @@
 #import "MSALPkce.h"
 
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "MSIDDeviceId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
@@ -221,7 +221,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
              MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
              
-             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil);
+             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil, nil);
                           
              MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
              [self stopTelemetryEvent:event error:msalError];

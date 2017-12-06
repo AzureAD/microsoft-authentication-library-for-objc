@@ -25,11 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALError.h"
+#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
+#import "MSALError_Internal.h"
 
-NSString *MSALErrorDomain = @"MSALErrorDomain";
-NSString *MSALOAuthErrorKey = @"MSALOAuthErrorKey";
-NSString *MSALOAuthSubErrorKey = @"MSALOAuthSubErrorKey";
-NSString *MSALErrorDescriptionKey = @"MSALErrorDescriptionKey";
-NSString *MSALHTTPHeadersKey = @"MSALHTTPHeadersKey";
-NSString *MSALHTTPResponseCodeKey = @"MSALHTTPResponseCodeKey";
+@interface MSALErrorTests : MSALTestCase
+
+@end
+
+@implementation MSALErrorTests
+
+- (void)testCreateError_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
+{
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
+    
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
+}
+
+- (void)testCreateError_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
+{
+    NSDictionary *userInfo = @{MSALHTTPHeadersKey : @{@"Retry-After": @"120"}};
+    
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
+    
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
+    XCTAssertNotNil(error.userInfo[MSALHTTPHeadersKey]);
+    XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"120");
+}
+
+@end

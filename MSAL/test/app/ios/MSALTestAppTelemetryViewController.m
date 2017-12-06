@@ -27,7 +27,7 @@
 
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppTelemetryDispatcher.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetryEventStrings.h"
 
 @interface MSALTestAppTelemetryViewController ()
 {
@@ -172,8 +172,8 @@
 
 - (NSString *)eventAsShortString:(NSDictionary *)telemetryEvent
 {
-    NSString *eventName = telemetryEvent[MSAL_TELEMETRY_KEY_EVENT_NAME];
-    NSString *startTime = telemetryEvent[MSAL_TELEMETRY_KEY_START_TIME];
+    NSString *eventName = telemetryEvent[MSID_TELEMETRY_KEY_EVENT_NAME];
+    NSString *startTime = telemetryEvent[MSID_TELEMETRY_KEY_START_TIME];
     
     return [NSString stringWithFormat:@"[%@]\n%@", startTime ? startTime : @"N/A", eventName];
 }

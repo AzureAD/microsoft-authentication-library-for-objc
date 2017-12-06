@@ -30,9 +30,9 @@
 #import "MSALWebUI.h"
 #import "UIApplication+MSALExtensions.h"
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryUIEvent.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryUIEvent.h"
+#import "MSIDTelemetryEventStrings.h"
 
 static MSALWebUI *s_currentWebSession = nil;
 
@@ -47,7 +47,7 @@ static MSALWebUI *s_currentWebSession = nil;
     MSALWebUICompletionBlock _completionBlock;
     id<MSALRequestContext> _context;
     NSString *_telemetryRequestId;
-    MSALTelemetryUIEvent *_telemetryEvent;
+    MSIDTelemetryUIEvent *_telemetryEvent;
 }
 
 + (void)startWebUIWithURL:(NSURL *)url
@@ -131,8 +131,8 @@ static MSALWebUI *s_currentWebSession = nil;
     
     _telemetryRequestId = [_context telemetryRequestId];
     
-    [[MSALTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_UI_EVENT];
-    _telemetryEvent = [[MSALTelemetryUIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_UI_EVENT
+    [[MSIDTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSID_TELEMETRY_EVENT_UI_EVENT];
+    _telemetryEvent = [[MSIDTelemetryUIEvent alloc] initWithName:MSID_TELEMETRY_EVENT_UI_EVENT
                                                        context:_context];
     
     [_telemetryEvent setIsCancelled:NO];
@@ -204,7 +204,7 @@ static MSALWebUI *s_currentWebSession = nil;
         return NO;
     }
     
-    [[MSALTelemetry sharedInstance] stopEvent:_telemetryRequestId event:_telemetryEvent];
+    [[MSIDTelemetry sharedInstance] stopEvent:_telemetryRequestId event:_telemetryEvent];
     
     completionBlock(response, error);
     return YES;

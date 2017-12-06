@@ -32,8 +32,8 @@
 #import "MSALTokenCache.h"
 
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 
 #import "NSURL+MSIDExtensions.h"
 
