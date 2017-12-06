@@ -31,7 +31,7 @@
 
 + (NSString *)keyForClientId:(NSString *)clientId
 {
-    return [clientId msalBase64UrlEncode];
+    return [clientId msidBase64UrlEncode];
 }
 
 - (id)initWithEnvironment:(NSString *)environment

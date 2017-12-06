@@ -22,32 +22,17 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MSALTelemetryBaseEvent.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALAuthority.h"
+#import "MSIDTelemetryAPIEvent.h"
 
-@interface MSALTelemetryAPIEvent : MSALTelemtryBaseEvent
+@interface MSALTelemetryAPIEvent : MSIDTelemetryAPIEvent
 
-- (void)setRequestId:(NSString *)requestId;
-- (void)setCorrelationId:(NSUUID *)correlationId;
-- (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting;
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
 - (void)setUser:(MSALUser *)user;
-- (void)setClientId:(NSString *)clientId;
-- (void)setLoginHint:(NSString *)loginHint;
-- (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken;
-- (void)setErrorCode:(MSALErrorCode)errorCode;
-- (void)setProtocolCode:(NSString *)protocolCode;
-- (void)setErrorDescription:(NSString *)errorDescription;
-- (void)setErrorDomain:(NSString *)errorDomain;
-
-- (void)setAuthorityValidationStatus:(NSString *)status;
 - (void)setAuthorityType:(MSALAuthorityType)authorityType;
-- (void)setAuthority:(NSURL *)authority;
-
-- (void)setGrantType:(NSString *)grantType;
-- (void)setAPIStatus:(NSString *)status;
-
-- (void)setApiId:(MSALTelemetryApiId)apiId;
+- (void)setMSALApiId:(MSALTelemetryApiId)apiId;
+- (void)setErrorCode:(MSALErrorCode)errorCode;
+- (void)setLoginHint:(NSString *)loginHint;
 
 @end

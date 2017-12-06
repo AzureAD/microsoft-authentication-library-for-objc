@@ -30,9 +30,9 @@
 #import "MSALWebUI.h"
 #import "UIApplication+MSALExtensions.h"
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryUIEvent.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryUIEvent.h"
+#import "MSIDTelemetryEventStrings.h"
 
 static MSALWebUI *s_currentWebSession = nil;
 
@@ -47,7 +47,7 @@ static MSALWebUI *s_currentWebSession = nil;
     MSALWebUICompletionBlock _completionBlock;
     id<MSALRequestContext> _context;
     NSString *_telemetryRequestId;
-    MSALTelemetryUIEvent *_telemetryEvent;
+    MSIDTelemetryUIEvent *_telemetryEvent;
 }
 
 + (void)startWebUIWithURL:(NSURL *)url
@@ -93,7 +93,7 @@ static MSALWebUI *s_currentWebSession = nil;
             // There's no error param because this isn't on a critical path. If we're seeing this error there is
             // a developer error somewhere in the code, but that won't necessarily prevent MSAL from otherwise
             // working.
-            LOG_ERROR(_context, @"Trying to clear out someone else's session");
+            MSID_LOG_ERROR(_context, @"Trying to clear out someone else's session");
             return NO;
         }
         
@@ -105,7 +105,7 @@ static MSALWebUI *s_currentWebSession = nil;
 - (void)cancel
 {
     [_telemetryEvent setIsCancelled:YES];
-    [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically")];
+    [self completeSessionWithResponse:nil orError:CREATE_MSID_LOG_ERROR(_context, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically")];
 }
 
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller
@@ -117,7 +117,7 @@ static MSALWebUI *s_currentWebSession = nil;
     }
     
     [_telemetryEvent setIsCancelled:YES];
-    [self completeSessionWithResponse:nil orError:CREATE_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
+    [self completeSessionWithResponse:nil orError:CREATE_MSID_LOG_ERROR(_context, MSALErrorUserCanceled, @"User cancelled the authorization session.")];
 }
 
 - (void)startWithURL:(NSURL *)url
@@ -131,8 +131,8 @@ static MSALWebUI *s_currentWebSession = nil;
     
     _telemetryRequestId = [_context telemetryRequestId];
     
-    [[MSALTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSAL_TELEMETRY_EVENT_UI_EVENT];
-    _telemetryEvent = [[MSALTelemetryUIEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_UI_EVENT
+    [[MSIDTelemetry sharedInstance] startEvent:_telemetryRequestId eventName:MSID_TELEMETRY_EVENT_UI_EVENT];
+    _telemetryEvent = [[MSIDTelemetryUIEvent alloc] initWithName:MSID_TELEMETRY_EVENT_UI_EVENT
                                                        context:_context];
     
     [_telemetryEvent setIsCancelled:NO];
@@ -161,14 +161,14 @@ static MSALWebUI *s_currentWebSession = nil;
 {
     if (!url)
     {
-        LOG_ERROR(nil, @"nil passed into MSAL Web handle response");
+        MSID_LOG_ERROR(nil, @"nil passed into MSAL Web handle response");
         return NO;
     }
     
     MSALWebUI *webSession = [MSALWebUI getAndClearCurrentWebSession];
     if (!webSession)
     {
-        LOG_ERROR(nil, @"Received MSAL web response without a current session running.");
+        MSID_LOG_ERROR(nil, @"Received MSAL web response without a current session running.");
         return NO;
     }
     
@@ -200,11 +200,11 @@ static MSALWebUI *s_currentWebSession = nil;
     
     if (!completionBlock)
     {
-        LOG_ERROR(_context, @"MSAL response received but no completion block saved");
+        MSID_LOG_ERROR(_context, @"MSAL response received but no completion block saved");
         return NO;
     }
     
-    [[MSALTelemetry sharedInstance] stopEvent:_telemetryRequestId event:_telemetryEvent];
+    [[MSIDTelemetry sharedInstance] stopEvent:_telemetryRequestId event:_telemetryEvent];
     
     completionBlock(response, error);
     return YES;

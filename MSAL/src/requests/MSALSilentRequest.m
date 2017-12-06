@@ -32,10 +32,10 @@
 #import "MSALTokenCache.h"
 
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryEventStrings.h"
 
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALSilentRequest()
 {
@@ -84,7 +84,7 @@
         {
             if (error == nil && !_parameters.unvalidatedAuthority)
             {
-                error = CREATE_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
+                error = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
                                          @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
             }
             
@@ -116,7 +116,7 @@
         }
     }
     
-    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msalHostWithPort]
+    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msidHostWithPortIfNecessary]
                                                   clientId:_parameters.clientId
                                             userIdentifier:_parameters.user.userIdentifier
                                                    context:_parameters
@@ -134,8 +134,8 @@
             return;
         }
         
-        LOG_INFO(_parameters, @"Refreshing access token");
-        LOG_INFO_PII(_parameters, @"Refreshing access token");
+        MSID_LOG_INFO(_parameters, @"Refreshing access token");
+        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
         
         _authority = authority;
         

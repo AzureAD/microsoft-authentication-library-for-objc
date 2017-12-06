@@ -28,11 +28,10 @@
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryCacheEvent.h"
-#import "MSALTelemetryEventStrings.h"
-#import "NSURL+MSALExtensions.h"
-#import "NSURL+MSALExtensions.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryCacheEvent.h"
+#import "MSIDTelemetryEventStrings.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALTokenCache
 {
@@ -116,14 +115,14 @@
                  context:(nullable id<MSALRequestContext>)ctx
                    error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
+    [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
+    MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
                                                                            context:ctx];
-    [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
+    [event setTokenType:MSID_TELEMETRY_VALUE_REFRESH_TOKEN];
 
     BOOL result = [_dataSource addOrUpdateRefreshTokenItem:rtItem context:ctx error:error];
 
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    [[MSIDTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
 
     return result;
 }
@@ -132,14 +131,14 @@
                 context:(nullable id<MSALRequestContext>)ctx
                   error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
+    [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
+    MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
                                                                            context:ctx];
-    [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
     
     BOOL result = [_dataSource addOrUpdateAccessTokenItem:atItem context:ctx error:error];
     
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    [[MSIDTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }
@@ -153,10 +152,10 @@
                       authorityFound:(NSString * __autoreleasing *)outAuthorityFound
                                error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
+    [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
+    MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
-    [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
     
     BOOL ret =  [self findAccessTokenImpl:authority
                                  clientId:clientId
@@ -167,7 +166,7 @@
                            authorityFound:outAuthorityFound
                                     error:error];
     
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    [[MSIDTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return ret;
 }
@@ -198,8 +197,8 @@
         // This should be rare-to-never as having a MSALUser object requires having a RT in cache,
         // which should imply that at some point we got an AT for that user with this client ID
         // as well. Unless users start working cross client id of course.
-        LOG_WARN(ctx, @"No access token found for user & client id.");
-        LOG_WARN_PII(ctx, @"No access token found for user & client id.");
+        MSID_LOG_WARN(ctx, @"No access token found for user & client id.");
+        MSID_LOG_WARN_PII(ctx, @"No access token found for user & client id.");
         
         return NO;
     }
@@ -235,15 +234,15 @@
     
     if (matchedTokens.count == 0)
     {
-        LOG_INFO(ctx, @"No matching access token found.");
-        LOG_INFO_PII(ctx, @"No matching access token found.");
+        MSID_LOG_INFO(ctx, @"No matching access token found.");
+        MSID_LOG_INFO_PII(ctx, @"No matching access token found.");
         return YES;
     }
     
     if (matchedTokens[0].isExpired)
     {
-        LOG_INFO(ctx, @"Access token found in cache is already expired.");
-        LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
+        MSID_LOG_INFO(ctx, @"Access token found in cache is already expired.");
+        MSID_LOG_INFO_PII(ctx, @"Access token found in cache is already expired.");
         return YES;
     }
     
@@ -257,17 +256,17 @@
                                                        context:(nullable id<MSALRequestContext>)ctx
                                                          error:(NSError * __autoreleasing *)error
 {
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
+    [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
+    MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
-    [event setTokenType:MSAL_TELEMETRY_VALUE_REFRESH_TOKEN];
+    [event setTokenType:MSID_TELEMETRY_VALUE_REFRESH_TOKEN];
     
     MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment
                                                                                  clientId:clientId
                                                                            userIdentifier:userIdentifier];
     MSALRefreshTokenCacheItem *item = [_dataSource getRefreshTokenItemForKey:key context:ctx error:error];
     
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    [[MSIDTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return item;
 }
@@ -282,15 +281,15 @@
         return NO;
     }
     
-    [[MSALTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
-    MSALTelemetryCacheEvent *event = [[MSALTelemetryCacheEvent alloc] initWithName:MSAL_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
+    [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_DELETE];
+    MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
                                                                            context:ctx];
     
-    [event setTokenType:MSAL_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
     
     BOOL result = [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
     
-    [[MSALTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
+    [[MSIDTelemetry sharedInstance] stopEvent:[ctx telemetryRequestId] event:event];
     
     return result;
 }

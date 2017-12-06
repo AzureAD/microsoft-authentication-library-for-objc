@@ -126,8 +126,8 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             
             NSError *httpError = MSALCreateError(MSALErrorDomain, MSALErrorNetworkFailure, messagePII, nil, nil, nil, userInfo);
             
-            LOG_WARN(_context, @"%@", message);
-            LOG_WARN_PII(_context, @"%@", messagePII);
+            MSID_LOG_WARN(_context, @"%@", message);
+            MSID_LOG_WARN_PII(_context, @"%@", messagePII);
             
             completionHandler(response, httpError);
             

@@ -143,12 +143,12 @@
         return NO;
     }
     
-    if ([NSString msalIsStringNilOrBlank:response.query])
+    if ([NSString msidIsStringNilOrBlank:response.query])
     {
         return NO;
     }
     
-    NSDictionary *qps = [NSDictionary msalURLFormDecode:response.query];
+    NSDictionary *qps = [NSDictionary msidURLFormDecode:response.query];
     if (!qps)
     {
         return NO;
@@ -162,8 +162,8 @@
     
     if (![request.state isEqualToString:state])
     {
-        LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        MSID_LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        MSID_LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
         return NO;
     }
     
@@ -370,15 +370,15 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
-        LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        MSID_LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
+        MSID_LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
     }
     
     if (result)
     {
-        NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
-        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
-        LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        NSString *hashedAT = [result.accessToken msidTokenHash];
+        MSID_LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
+        MSID_LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
@@ -395,13 +395,13 @@
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.component = _component;
+    params.logComponent = _component;
     params.apiId = apiId;
     params.user = user;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
     
-    LOG_INFO(params,
+    MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
               "                                               user:%@\n"
@@ -411,7 +411,7 @@
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
              _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
-    LOG_INFO_PII(params,
+    MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
                   "                                               user:%@\n"
@@ -482,7 +482,7 @@
     
     [params setScopesFromArray:scopes];
     
-    LOG_INFO(params,
+    MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                     user:%@\n"
               "                                             forceRefresh:%@\n"
@@ -490,7 +490,7 @@
              _PII_NULLIFY(scopes), _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
-    LOG_INFO_PII(params,
+    MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                     user:%@\n"
                   "                                             forceRefresh:%@\n"

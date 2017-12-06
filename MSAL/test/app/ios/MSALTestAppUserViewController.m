@@ -72,7 +72,7 @@
     
     if (!application)
     {
-        LOG_ERROR(nil, @"Failed to create public client application: %@", error);
+        MSID_LOG_ERROR(nil, @"Failed to create public client application: %@", error);
         return;
     }
     

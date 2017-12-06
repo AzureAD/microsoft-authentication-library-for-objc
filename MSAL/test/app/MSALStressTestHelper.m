@@ -28,7 +28,7 @@
 #import "MSALStressTestHelper.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppSettings.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
 #import "MSALAccessTokenCacheItem+TestAppUtil.h"
 

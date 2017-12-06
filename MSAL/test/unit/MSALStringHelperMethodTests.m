@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "NSString+MSALHelperMethods.h"
 
 // From NSString+MSALHelperMethods.m
 #define RANDOM_STRING_MAX_SIZE 1024
@@ -36,137 +37,11 @@
 
 @implementation MSALStringHelperMethodTests
 
-- (void)setUp
-{
-    [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-}
-
-- (void)tearDown
-{
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
-
-- (void)testMsalIsStringNilOrBlank_whenNil_shouldReturnTrue
-{
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:nil], "Should return true for nil.");
-}
-
-- (void)testMsalIsStringNilOrBlank_whenBlankSpaceOnly_shouldReturnTrue
-{
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:@" "], "Should return true for nil.");
-}
-
-- (void)testMsalIsStringNilOrBlank_whenTabOnly_shouldReturnTrue
-{
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\t"], "Should return true for nil.");
-}
-
-- (void)testMsalIsStringNilOrBlank_whenLineBreakOnly_shouldReturnTrue
-{
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\r"], "Should return true for nil.");
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:@"\n"], "Should return true for nil.");
-}
-
-- (void)testMsalIsStringNilOrBlank_whenMixedWhiteSpaceOnly_shouldReturnTrue
-{
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:@" \r\n\t  \t\r\n"], "Should return true for nil.");
-}
-
-- (void)testMsalIsStringNilOrBlank_whenNotEmpty_shouldReturnFalse
-{
-    //Prefix by white space:
-    NSString* str = @"  text";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    str = @" \r\n\t  \t\r\n text";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    
-    //Suffix with white space:
-    str = @"text  ";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    str = @"text \r\n\t  \t\r\n";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    
-    //Surrounded by white space:
-    str = @"text  ";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    str = @" \r\n\t text  \t\r\n";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-    
-    //No white space:
-    str = @"t";
-    XCTAssertFalse([NSString msalIsStringNilOrBlank:str], "Not an empty string %@", str);
-}
-
-- (void)testMsalTrimmedString_whenWhiteSpaceAtEnd_shouldReturnTrimmedString
-{
-    XCTAssertEqualObjects([@" \t\r\n  test" msalTrimmedString], @"test");
-    XCTAssertEqualObjects([@"test  \t\r\n  " msalTrimmedString], @"test");
-    XCTAssertEqualObjects([@"test  \t\r\n  test" msalTrimmedString], @"test  \t\r\n  test");
-    XCTAssertEqualObjects([@"  \t\r\n  test  \t\r\n  test  \t\r\n  " msalTrimmedString], @"test  \t\r\n  test");
-}
-
-#define VERIFY_BASE64(_ORIGINAL, _EXPECTED) { \
-    NSString* encoded = [_ORIGINAL msalBase64UrlEncode]; \
-    NSString* decoded = [_EXPECTED msalBase64UrlDecode]; \
-    XCTAssertEqualObjects(encoded, _EXPECTED); \
-    XCTAssertEqualObjects(decoded, _ORIGINAL); \
-}
-
-- (void)testMsalBase64UrlEncodeDecode_whenEmpty_shouldReturnEmpty
-{
-    NSString* encodeEmpty = [@"" msalBase64UrlEncode];
-    XCTAssertEqualObjects(encodeEmpty, @"");
-    
-    NSString* decodeEmpty = [@"" msalBase64UrlDecode];
-    XCTAssertEqualObjects(decodeEmpty, @"");
-}
-
-- (void)testMsalBase64UrlEncodeDecode_whenDifferentCharacters_shouldParseAccordingly
-{
-    //15 characters, aka 3k:
-    NSString* test1 = @"1$)=- \t\r\nfoo%^!";
-    VERIFY_BASE64(test1, @"MSQpPS0gCQ0KZm9vJV4h");
-    
-    //16 characters, aka 3k + 1:
-    NSString* test2 = [test1 stringByAppendingString:@"@"];
-    VERIFY_BASE64(test2, @"MSQpPS0gCQ0KZm9vJV4hQA");
-    
-    //17 characters, aka 3k + 2:
-    NSString* test3 = [test2 stringByAppendingString:@"<"];
-    VERIFY_BASE64(test3, @"MSQpPS0gCQ0KZm9vJV4hQDw");
-}
-
-- (void)testMsalBase64UrlEncodeDecode_whenPlusMinusSigns_shouldParse
-{
-    //Ensure that URL encoded is in place through encoding correctly the '+' and '/' signs (just in case)
-    VERIFY_BASE64(@"++++/////", @"KysrKy8vLy8v");
-}
-
-- (void)testMsalBase64UrlEncodeDecode_whenInvalid_shouldBeInvalid
-{
-    //Decode invalid:
-    XCTAssertFalse([@" " msalBase64UrlDecode].length, "Contains non-suppurted character < 128");
-    XCTAssertFalse([@"™" msalBase64UrlDecode].length, "Contains characters beyond 128");
-    XCTAssertFalse([@"денят" msalBase64UrlDecode].length, "Contains unicode characters.");
-}
-
-
-- (void)testMsalUrlFormEncodeDecode_whenValidString_shouldParse
-{
-    NSString* testString = @"Some interesting test/+-)(*&^%$#@!~|";
-    NSString* encoded = [testString msalUrlFormEncode];
-    
-    XCTAssertEqualObjects(encoded, @"Some+interesting+test%2F%2B-%29%28%2A%26%5E%25%24%23%40%21~%7C");
-    XCTAssertEqualObjects([encoded msalUrlFormDecode], testString);
-}
-
 - (void)testRandomUrlSafeStringOfSize_whenZeroSize_shouldReturnNilOrBlank
 {
     // test with zero size
     NSString *stringZero = [NSString randomUrlSafeStringOfSize:0];
-    XCTAssertTrue([NSString msalIsStringNilOrBlank:stringZero]);
+    XCTAssertTrue([NSString msidIsStringNilOrBlank:stringZero]);
 }
 
 - (void)testRandomUrlSafeStringOfSize_whenNormalSize_shouldReturnRandomString
@@ -180,7 +55,6 @@
 
 - (void)testRandomUrlSafeStringOfSize_whenTooBigSize_shouldReturnNilOrBlank
 {
-    
     // test with bigger then max
     XCTAssertNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE + 1]);
 }
