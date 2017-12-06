@@ -221,7 +221,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
              MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
              
-             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil);
+             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil, nil);
                           
              MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
              [self stopTelemetryEvent:event error:msalError];
