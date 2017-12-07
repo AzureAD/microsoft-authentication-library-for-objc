@@ -28,8 +28,8 @@
 #import "MSALErrorConverter.h"
 #import "MSALError_Internal.h"
 
-static NSDictionary* s_errorDomainMapping;
-static NSDictionary* s_errorCodeMapping;
+static NSDictionary *s_errorDomainMapping;
+static NSDictionary *s_errorCodeMapping;
 
 @implementation MSALErrorConverter
 
@@ -40,12 +40,17 @@ static NSDictionary* s_errorCodeMapping;
                              };
     
     s_errorCodeMapping = @{
-                           //sample format is like @"MSIDErrorDomain|-10000":@"MSALErrorDomain:-20000"
+                           //sample format is like @"MSIDErrorDomain|-10000":@"-20000"
                            };
 }
 
 + (NSError *)MSALErrorFromMSIDError:(NSError *)msidError
 {
+    if (!msidError)
+    {
+        return nil;
+    }
+    
     //Map domain
     NSString *domain = msidError.domain;
     if (domain && s_errorDomainMapping[domain])
@@ -59,13 +64,7 @@ static NSDictionary* s_errorCodeMapping;
     NSString *mapValue = s_errorCodeMapping[mapKey];
     if (![NSString msidIsStringNilOrBlank:mapValue])
     {
-        NSArray *domainAndCode = [mapValue componentsSeparatedByString:@"|"];
-        if (domainAndCode.count != 2)
-        {
-            return MSALCreateError(MSALErrorDomain, MSALErrorInternal, @"Invalid mapping format in MSALErrorConverter.", nil, nil, msidError);
-            
-        }
-        errorCode = [domainAndCode[1] integerValue];
+        errorCode = [mapValue integerValue];
     }
     
     return MSALCreateError(domain,
