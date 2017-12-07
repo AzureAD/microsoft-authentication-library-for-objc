@@ -154,7 +154,7 @@
         return NO;
     }
     
-    NSString *state = qps[OAUTH2_STATE];
+    NSString *state = qps[MSID_OAUTH2_STATE];
     if (!state)
     {
         return NO;

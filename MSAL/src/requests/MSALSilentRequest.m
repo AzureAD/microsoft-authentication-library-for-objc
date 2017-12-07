@@ -145,8 +145,8 @@
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
 {
-    parameters[OAUTH2_GRANT_TYPE] = OAUTH2_REFRESH_TOKEN;
-    parameters[OAUTH2_REFRESH_TOKEN] = [_refreshToken refreshToken];
+    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
+    parameters[MSID_OAUTH2_REFRESH_TOKEN] = [_refreshToken refreshToken];
 }
 
 

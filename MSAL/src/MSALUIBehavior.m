@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALOAuth2Constants.h"
 
 #define STRING_CASE(_CASE) case _CASE: return @#_CASE
 

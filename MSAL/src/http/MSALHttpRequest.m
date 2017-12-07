@@ -29,7 +29,6 @@
 #import "MSALHttpResponse.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSIDLogger+Internal.h"
-#import "MSALOAuth2Constants.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "NSString+MSIDExtensions.h"
@@ -149,8 +148,8 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     
     if (_context)
     {
-        _headers[OAUTH2_CORRELATION_ID_REQUEST] = @"true";
-        _headers[OAUTH2_CORRELATION_ID_REQUEST_VALUE] = [_context.correlationId UUIDString];
+        _headers[MSID_OAUTH2_CORRELATION_ID_REQUEST] = @"true";
+        _headers[MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE] = [_context.correlationId UUIDString];
     }
     
     NSURL *newURL = nil;
@@ -201,7 +200,7 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                                                                                             error:&error];
                                       
                                       [event setHttpResponseCode:[NSString stringWithFormat: @"%ld", (long)[msalResponse statusCode]]];
-                                      [event setHttpRequestIdHeader:[msalResponse.headers objectForKey:OAUTH2_CORRELATION_ID_REQUEST_VALUE]];
+                                      [event setHttpRequestIdHeader:[msalResponse.headers objectForKey:MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE]];
                                       [event setOAuthErrorCodeFromResponseData:msalResponse.body];
                                       
                                       [[MSIDTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
