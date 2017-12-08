@@ -53,14 +53,15 @@
     NSString *errorDescription = @"a fake error description.";
     NSString *oauthError = @"a fake oauth error message.";
     NSString *subError = @"a fake suberror";
-    NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain     code:errSecItemNotFound userInfo:nil];
+    NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
     
     NSError *msidError = MSIDCreateError(MSIDErrorDomain,
                                          errorCode,
                                          errorDescription,
                                          oauthError,
                                          subError,
-                                         underlyingError);
+                                         underlyingError,
+                                         nil);
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
     XCTAssertNotNil(msalError);
