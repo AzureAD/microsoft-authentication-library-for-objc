@@ -61,6 +61,7 @@
                                          oauthError,
                                          subError,
                                          underlyingError,
+                                         nil,
                                          nil);
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
