@@ -110,8 +110,6 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
         }
         default:
         {
-            // TODO: Check for right error code and details.
-            //   Perhaps a utility class to generate NSError would be nice
             NSString *body = [[NSString alloc] initWithData:response.body encoding:NSUTF8StringEncoding];
             NSString *errorData = [NSString stringWithFormat:@"Full response: %@", body];
             
@@ -119,16 +117,19 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
             
             NSString* messagePII = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
             
-            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: messagePII};
+            NSMutableDictionary *userInfo = [@{MSALHTTPResponseCodeKey : [NSString stringWithFormat: @"%ld", (long)response.statusCode]} mutableCopy];
             
-            NSError *error = [NSError errorWithDomain:@"Domain"
-                                                 code:MSALErrorNetworkFailure
-                                             userInfo:userInfo];
+            if (response.headers)
+            {
+                userInfo[MSALHTTPHeadersKey] = response.headers;
+            }
+            
+            NSError *httpError = MSALCreateError(MSALErrorDomain, MSALErrorNetworkFailure, messagePII, nil, nil, nil, userInfo);
             
             MSID_LOG_WARN(_context, @"%@", message);
-            MSID_LOG_WARN_PII(_context, @"%@", messagePII);
+            MSID_LOG_WARN(_context, @"%@", messagePII);
             
-            completionHandler(response, error);
+            completionHandler(response, httpError);
             
             break;
         }

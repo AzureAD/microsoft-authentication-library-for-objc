@@ -72,7 +72,8 @@ static NSDictionary *s_errorCodeMapping;
                            msidError.userInfo[MSIDErrorDescriptionKey],
                            msidError.userInfo[MSIDOAuthErrorKey],
                            msidError.userInfo[MSIDOAuthSubErrorKey],
-                           msidError.userInfo[NSUnderlyingErrorKey]);
+                           msidError.userInfo[NSUnderlyingErrorKey],
+                           msidError.userInfo);
     
 }
 

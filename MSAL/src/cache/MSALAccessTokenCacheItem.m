@@ -42,11 +42,11 @@ static uint64_t s_expirationBuffer = 300; //in seconds, ensures catching of cloc
     MSALIdToken *_idToken;
 }
 
-MSAL_JSON_RW(OAUTH2_AUTHORITY, authority, setAuthority)
-MSAL_JSON_RW(OAUTH2_ID_TOKEN, rawIdToken, setRawIdToken)
-MSAL_JSON_RW(OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
-MSAL_JSON_RW(OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
-MSAL_JSON_RW(OAUTH2_SCOPE, scopeString, setScopeString)
+MSAL_JSON_RW(MSID_OAUTH2_AUTHORITY, authority, setAuthority)
+MSAL_JSON_RW(MSID_OAUTH2_ID_TOKEN, rawIdToken, setRawIdToken)
+MSAL_JSON_RW(MSID_OAUTH2_TOKEN_TYPE, tokenType, setTokenType)
+MSAL_JSON_RW(MSID_OAUTH2_ACCESS_TOKEN, accessToken, setAccessToken)
+MSAL_JSON_RW(MSID_OAUTH2_SCOPE, scopeString, setScopeString)
 MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
 MSAL_JSON_RW(@"unique_id", uniqueId, setUniqueId)
 

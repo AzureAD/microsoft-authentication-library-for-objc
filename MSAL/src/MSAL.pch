@@ -49,7 +49,7 @@
 #import "NSString+MSIDExtensions.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
+#import "MSIDOAuth2Constants.h"
 
 #import "MSALTokenCache.h"
 #import "MSALAccessTokenCacheKey.h"

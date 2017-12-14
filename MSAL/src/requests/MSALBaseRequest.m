@@ -168,9 +168,9 @@ static MSALScopes *s_reservedScopes = nil;
     MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
                                                                       context:_parameters];
     
-    reqParameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
-    reqParameters[OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
-    reqParameters[OAUTH2_CLIENT_INFO] = @"1";
+    reqParameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
+    reqParameters[MSID_OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
+    reqParameters[MSID_OAUTH2_CLIENT_INFO] = @"1";
 
     [self addAdditionalRequestParameters:reqParameters];
     authRequest.bodyParameters = reqParameters;
@@ -219,13 +219,13 @@ static MSALScopes *s_reservedScopes = nil;
              tokenResponse.scope = _parameters.scopes.msalToString;
          }
          
-         // For silent flow, with grant type being OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
+         // For silent flow, with grant type being MSID_OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
          // In this case, we simply return the refresh token in the request.
-         if ([reqParameters[OAUTH2_GRANT_TYPE] isEqualToString:OAUTH2_REFRESH_TOKEN])
+         if ([reqParameters[MSID_OAUTH2_GRANT_TYPE] isEqualToString:MSID_OAUTH2_REFRESH_TOKEN])
          {
              if (!tokenResponse.refreshToken)
              {
-                 tokenResponse.refreshToken = reqParameters[OAUTH2_REFRESH_TOKEN];
+                 tokenResponse.refreshToken = reqParameters[MSID_OAUTH2_REFRESH_TOKEN];
                  MSID_LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
                  MSID_LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
              }

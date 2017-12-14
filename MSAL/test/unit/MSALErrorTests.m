@@ -25,50 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenResponse.h"
-#import "MSALClientInfo.h"
+#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
+#import "MSALError_Internal.h"
 
-@implementation MSALTokenResponse
+@interface MSALErrorTests : MSALTestCase
 
-- (void)initalize
+@end
+
+@implementation MSALErrorTests
+
+- (void)testCreateError_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    NSString *expiresIn =  self.expiresIn;
-    if (expiresIn)
-    {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
-    }
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
+    
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
 }
 
-- (id)initWithJson:(NSDictionary *)json error:(NSError *__autoreleasing *)error
+- (void)testCreateError_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    if (!(self = [super initWithJson:json error:error]))
-    {
-        return nil;
-    }
+    NSDictionary *userInfo = @{MSALHTTPHeadersKey : @{@"Retry-After": @"120"}};
     
-    [self initalize];
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
     
-    return self;
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
+    XCTAssertNotNil(error.userInfo[MSALHTTPHeadersKey]);
+    XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"120");
 }
-
-- (id)initWithData:(NSData *)data error:(NSError *__autoreleasing *)error
-{
-    if (!(self = [super initWithData:data error:error]))
-    {
-        return nil;
-    }
-
-    [self initalize];
-    
-    return self;
-}
-
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_TOKEN_TYPE, tokenType)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ACCESS_TOKEN, accessToken)
-MSAL_JSON_RW(MSID_OAUTH2_REFRESH_TOKEN, refreshToken, setRefreshToken)
-MSAL_JSON_RW(MSID_OAUTH2_SCOPE, scope, setScope)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_EXPIRES_IN, expiresIn)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ID_TOKEN, idToken)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_CLIENT_INFO, clientInfo)
 
 @end
