@@ -67,13 +67,21 @@ static NSDictionary *s_errorCodeMapping;
         errorCode = [mapValue integerValue];
     }
     
+    NSMutableDictionary *userInfo = nil;
+    if (msidError.userInfo[MSIDHTTPHeadersKey] || msidError.userInfo[MSIDHTTPResponseCodeKey])
+    {
+        userInfo = [NSMutableDictionary new];
+        [userInfo setValue:msidError.userInfo[MSIDHTTPHeadersKey] forKey:MSALHTTPHeadersKey];
+        [userInfo setValue:msidError.userInfo[MSIDHTTPResponseCodeKey] forKey:MSALHTTPResponseCodeKey];
+    }
+    
     return MSALCreateError(domain,
                            errorCode,
                            msidError.userInfo[MSIDErrorDescriptionKey],
                            msidError.userInfo[MSIDOAuthErrorKey],
                            msidError.userInfo[MSIDOAuthSubErrorKey],
                            msidError.userInfo[NSUnderlyingErrorKey],
-                           msidError.userInfo);
+                           userInfo);
     
 }
 

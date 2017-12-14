@@ -54,6 +54,9 @@
     NSString *oauthError = @"a fake oauth error message.";
     NSString *subError = @"a fake suberror";
     NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
+    NSUUID *correlationId = [NSUUID UUID];
+    NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
+    NSString *httpResponseCode = @"-99999";
     
     NSError *msidError = MSIDCreateError(MSIDErrorDomain,
                                          errorCode,
@@ -61,8 +64,10 @@
                                          oauthError,
                                          subError,
                                          underlyingError,
-                                         nil,
-                                         nil);
+                                         correlationId,
+                                         @{MSIDHTTPHeadersKey : httpHeaders,
+                                           MSIDHTTPResponseCodeKey : httpResponseCode
+                                           });
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
     XCTAssertNotNil(msalError);
@@ -72,6 +77,8 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
     XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
 }
 
 @end
