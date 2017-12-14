@@ -235,13 +235,13 @@ static bool AmIBeingDebugged(void)
     MSALTestURLResponse *tokenResponse =
     [MSALTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
-                                             OAUTH2_SCOPE : [scopes msalToString],
+                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
                                              @"client_info" : @"1",
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : [MSALTestSentinel sentinel],
-                                             OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
-                                             OAUTH2_CODE : authcode }
+                                             MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
+                                             MSID_OAUTH2_CODE : authcode }
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
@@ -269,9 +269,9 @@ static bool AmIBeingDebugged(void)
     MSALTestURLResponse *tokenResponse =
     [MSALTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token" UT_SLICE_PARAMS_QUERY, authority]
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
-                                             OAUTH2_SCOPE : [scopes msalToString],
-                                             OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
                                              @"client_info" : @"1",
                                              @"grant_type" : @"refresh_token" }
                         responseURLString:@"https://someresponseurl.com"

@@ -28,7 +28,6 @@
 #import "MSALInteractiveRequest.h"
 
 #import "MSALAuthority.h"
-#import "MSALOAuth2Constants.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
@@ -87,16 +86,16 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         [parameters addEntriesFromDictionary:_parameters.extraQueryParameters];
     }
     MSALScopes *allScopes = [self requestScopes:_extraScopesToConsent];
-    parameters[OAUTH2_CLIENT_ID] = _parameters.clientId;
-    parameters[OAUTH2_SCOPE] = [allScopes msalToString];
-    parameters[OAUTH2_RESPONSE_TYPE] = OAUTH2_CODE;
-    parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
-    parameters[OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
-    parameters[OAUTH2_LOGIN_HINT] = _parameters.loginHint;
+    parameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
+    parameters[MSID_OAUTH2_SCOPE] = [allScopes msalToString];
+    parameters[MSID_OAUTH2_RESPONSE_TYPE] = MSID_OAUTH2_CODE;
+    parameters[MSID_OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    parameters[MSID_OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
+    parameters[MSID_OAUTH2_LOGIN_HINT] = _parameters.loginHint;
 
     // PKCE:
-    parameters[OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
-    parameters[OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
+    parameters[MSID_OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
+    parameters[MSID_OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
     
     NSDictionary *msalId = [MSIDDeviceId deviceId];
     [parameters addEntriesFromDictionary:msalId];
@@ -131,13 +130,13 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     MSALUser *user = _parameters.user;
     if (user)
     {
-        parameters[OAUTH2_LOGIN_HINT] = user.displayableId;
-        parameters[OAUTH2_LOGIN_REQ] = user.uid;
-        parameters[OAUTH2_DOMAIN_REQ] = user.utid;
+        parameters[MSID_OAUTH2_LOGIN_HINT] = user.displayableId;
+        parameters[MSID_OAUTH2_LOGIN_REQ] = user.uid;
+        parameters[MSID_OAUTH2_DOMAIN_REQ] = user.utid;
     }
     
     _state = [[NSUUID UUID] UUIDString];
-    parameters[OAUTH2_STATE] = _state;
+    parameters[MSID_OAUTH2_STATE] = _state;
     
     urlComponents.percentEncodedQuery = [parameters msidURLFormEncode];
     
@@ -204,20 +203,20 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          NSDictionary *params = [NSDictionary msidURLFormDecode:response.query];
          CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
          
-         CHECK_ERROR_COMPLETION([_state isEqualToString:params[OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");
+         CHECK_ERROR_COMPLETION([_state isEqualToString:params[MSID_OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");
          
-         _code = params[OAUTH2_CODE];
+         _code = params[MSID_OAUTH2_CODE];
          if (_code)
          {
              [super acquireToken:completionBlock];
              return;
          }
          
-         NSString *authorizationError = params[OAUTH2_ERROR];
+         NSString *authorizationError = params[MSID_OAUTH2_ERROR];
          if (authorizationError)
          {
-             NSString *errorDescription = params[OAUTH2_ERROR_DESCRIPTION];
-             NSString *subError = params[OAUTH2_SUB_ERROR];
+             NSString *errorDescription = params[MSID_OAUTH2_ERROR_DESCRIPTION];
+             NSString *subError = params[MSID_OAUTH2_SUB_ERROR];
              MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
              MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
              
@@ -238,12 +237,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
 {
-    parameters[OAUTH2_GRANT_TYPE] = OAUTH2_AUTHORIZATION_CODE;
-    parameters[OAUTH2_CODE] = _code;
-    parameters[OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_AUTHORIZATION_CODE;
+    parameters[MSID_OAUTH2_CODE] = _code;
+    parameters[MSID_OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
     
     // PKCE
-    parameters[OAUTH2_CODE_VERIFIER] = _pkce.codeVerifier;
+    parameters[MSID_OAUTH2_CODE_VERIFIER] = _pkce.codeVerifier;
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
