@@ -1,1 +1,2 @@
+#include "msal__common.xcconfig"
 #include "../IdentityCore/IdentityCore/xcconfig/identitycore__release.xcconfig"

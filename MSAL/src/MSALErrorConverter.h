@@ -25,50 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenResponse.h"
-#import "MSALClientInfo.h"
+#import "MSIDError.h"
 
-@implementation MSALTokenResponse
+@interface MSALErrorConverter : NSObject
 
-- (void)initalize
-{
-    NSString *expiresIn =  self.expiresIn;
-    if (expiresIn)
-    {
-        _expiresOn = [NSDate dateWithTimeIntervalSinceNow:[expiresIn doubleValue]];
-    }
-}
-
-- (id)initWithJson:(NSDictionary *)json error:(NSError *__autoreleasing *)error
-{
-    if (!(self = [super initWithJson:json error:error]))
-    {
-        return nil;
-    }
-    
-    [self initalize];
-    
-    return self;
-}
-
-- (id)initWithData:(NSData *)data error:(NSError *__autoreleasing *)error
-{
-    if (!(self = [super initWithData:data error:error]))
-    {
-        return nil;
-    }
-
-    [self initalize];
-    
-    return self;
-}
-
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_TOKEN_TYPE, tokenType)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ACCESS_TOKEN, accessToken)
-MSAL_JSON_RW(MSID_OAUTH2_REFRESH_TOKEN, refreshToken, setRefreshToken)
-MSAL_JSON_RW(MSID_OAUTH2_SCOPE, scope, setScope)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_EXPIRES_IN, expiresIn)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ID_TOKEN, idToken)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_CLIENT_INFO, clientInfo)
++ (NSError *)MSALErrorFromMSIDError:(NSError *)msidError;
 
 @end
