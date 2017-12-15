@@ -11,6 +11,8 @@
 		04D32CAF1FD615B3000B123E /* MSALErrorConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */; };
 		04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
 		04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
+		231CE9931FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */; };
+		231CE9981FE45DDE00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */; };
 		2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
 		2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
 		23CDA9B31FA45A9E00FDD5C0 /* MSALTelemetryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9B01FA4443800FDD5C0 /* MSALTelemetryTests.m */; };
@@ -296,6 +298,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 231CE99D1FE86EA300E95D3E;
+			remoteInfo = MSIDTestsHostApp;
+		};
 		B2C17AFD1FC8D95A0070A514 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -414,6 +423,7 @@
 		04D32CAC1FD61585000B123E /* MSALErrorConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALErrorConverter.h; sourceTree = "<group>"; };
 		04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverter.m; sourceTree = "<group>"; };
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
+		231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m; sourceTree = "<group>"; };
 		2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+HelperMethods.h"; sourceTree = "<group>"; };
 		2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+HelperMethods.m"; sourceTree = "<group>"; };
 		23CDA9B01FA4443800FDD5C0 /* MSALTelemetryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryTests.m; sourceTree = "<group>"; };
@@ -1021,6 +1031,7 @@
 				D65A6FDB1E3FF71000C69FBA /* unit */,
 				2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */,
 				2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */,
+				231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -1413,6 +1424,7 @@
 				D6A206291FC50A4D00755A51 /* libIdentityTest.a */,
 				D6A2062B1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
 				D6A2062D1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
+				231CE9D31FEC641D00E95D3E /* MSIDTestsHostApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1775,6 +1787,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		231CE9D31FEC641D00E95D3E /* MSIDTestsHostApp.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = MSIDTestsHostApp.app;
+			remoteRef = 231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		D6A206231FC50A4D00755A51 /* libIdentityCore.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -2109,6 +2128,7 @@
 				D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */,
 				D65A6FE41E3FF73600C69FBA /* MSALJsonObjectTests.m in Sources */,
 				23CDA9B31FA45A9E00FDD5C0 /* MSALTelemetryTests.m in Sources */,
+				231CE9931FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */,
 				60A0E2921EA0330000A5684C /* MSALTokenCacheTests.m in Sources */,
 				E02396FB1E7B005C004D6278 /* MSALTelemetryTestDispatcher.m in Sources */,
 				603D19A11EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m in Sources */,
@@ -2137,6 +2157,7 @@
 				D68A15851E51A82100D923AD /* MSALInteractiveRequestTests.m in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				D69ADB3E1E516F9B00952049 /* MSALTestURLSession.m in Sources */,
+				231CE9981FE45DDE00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */,
 				96875DF21E59A3B000D7847F /* MSALAadAuthorityResolverTests.m in Sources */,
 				D6B88AE91E9EC5F200A2374B /* MSALTestIdTokenUtil.m in Sources */,
 				D61F5BD81E59682200912CB8 /* MSALTestAuthority.m in Sources */,
@@ -2323,6 +2344,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Debug;
 		};
@@ -2354,6 +2376,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Debug;
 		};
