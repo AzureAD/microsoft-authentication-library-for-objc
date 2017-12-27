@@ -34,7 +34,7 @@
 #import "MSALTestCacheDataUtil.h"
 #import "MSALTestSwizzle.h"
 
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession.h"
 
 #if TARGET_OS_IPHONE
 #import "SFSafariViewController+TestOverrides.h"
@@ -51,7 +51,7 @@
     [MSALAuthority initialize];
     [[MSALTestCacheDataUtil defaultUtil] reset];
     
-    [MSALTestURLSession reset];
+    [MSIDTestURLSession clearResponses];
     
 #if TARGET_OS_IPHONE
     [SFSafariViewController reset];

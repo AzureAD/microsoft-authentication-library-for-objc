@@ -25,62 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "NSDictionary+MSALTestUtil.h"
+#import <Foundation/Foundation.h>
+#import "MSIDTestURLSession.h"
 
-@implementation NSDictionary (MSALTestUtil)
+typedef void (^MSALTestHttpCompletionBlock)(NSData *data, NSURLResponse *response, NSError *error);
 
-- (BOOL)compareToActual:(NSDictionary *)dictionary
-{
-    BOOL fSame = YES;
-    
-    for (NSString *key in self)
-    {
-        id myVal = self[key];
-        id otherVal = dictionary[key];
-        if (!otherVal)
-        {
-            NSLog(@"\"%@\" missing from result dictionary.", key);
-            fSame = NO;
-        }
-        else if (![myVal isKindOfClass:[MSALTestSentinel class]] && ![myVal isEqual:otherVal])
-        {
-            NSLog(@"\"%@\" does not match. Expected: \"%@\" Actual: \"%@\"", key, self[key], otherVal);
-            fSame = NO;
-        }
-    }
-    
-    for (NSString *key in dictionary)
-    {
-        if (!self[key])
-        {
-            NSLog(@"Extra key \"%@\" in result dictionary: \"%@\"", key, dictionary[key]);
-            fSame = NO;
-        }
-    }
-    
-    return fSame;
-}
-
-- (NSString *)base64UrlJson
-{
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:nil];
-    return [NSString msidBase64UrlEncodeData:jsonData];
-}
-
-@end
-
-@implementation MSALTestSentinel
-
-static MSALTestSentinel *s_sentinel = nil;
-
-+ (void)initialize
-{
-    s_sentinel = [MSALTestSentinel new];
-}
-
-+ (instancetype)sentinel
-{
-    return s_sentinel;
-}
+@interface MSIDTestURLSession (MSAL)
 
 @end

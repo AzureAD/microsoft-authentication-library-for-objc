@@ -28,9 +28,11 @@
 #import "MSALTestCase.h"
 #import "MSALAuthority.h"
 #import "MSALAadAuthorityResolver.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
 
 @interface MSALAadAuthorityResolverTests : MSALTestCase
 
@@ -75,7 +77,8 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
@@ -86,14 +89,14 @@
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:requestURLString
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
                                                              responseCode:200
                                                          httpHeaderFields:nil
                                                          dictionaryAsJSON:@{@"tenant_discovery_endpoint":responseEndpoint}];
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
                                                           userPrincipalName:nil
@@ -152,7 +155,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *authorityString = @"https://somehost.com/sometenant.com";
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
@@ -162,7 +165,7 @@
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:requestURLString
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -170,7 +173,7 @@
                                                          httpHeaderFields:nil
                                                          dictionaryAsJSON:@{}];
     
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:authorityString]
                                                           userPrincipalName:nil
@@ -194,7 +197,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
@@ -203,14 +206,13 @@
     
     NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse request:[NSURL URLWithString:requestURLString]
-                                                  requestHeaders:reqHeaders
-                                               requestParamsBody:nil
-                                                respondWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                                     code:NSURLErrorCannotFindHost
-                                                                                 userInfo:nil]];
+    MSIDTestURLResponse *response = [MSIDTestURLResponse request:[NSURL URLWithString:requestURLString]
+                                               respondWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                    code:NSURLErrorCannotFindHost
+                                                                                userInfo:nil]];
+    response->_requestHeaders = reqHeaders;
     
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     [[MSALAadAuthorityResolver new] openIDConfigurationEndpointForAuthority:[NSURL URLWithString:@"https://somehost.com/sometenant.com"]
                                                           userPrincipalName:nil
