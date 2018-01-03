@@ -48,6 +48,28 @@
 #include <unistd.h>
 #include <sys/sysctl.h>
 
+#import "MSIDTestURLSession.h"
+
+@interface MSIDTestURLSession (MSAL)
+
+@end
+
+
+@implementation MSIDTestURLSession (MSAL)
+
+#pragma mark - DataTask creation
+
+- (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request
+                            completionHandler:(MSALTestHttpCompletionBlock)completionHandler
+{
+    MSALTestURLSessionDataTask *task = [[MSALTestURLSessionDataTask alloc] initWithRequest:request
+                                                                                   session:self completionHandler:completionHandler];
+    
+    return (NSURLSessionDataTask *)task;
+}
+
+@end
+
 // From https://developer.apple.com/library/content/qa/qa1361/_index.html
 static bool AmIBeingDebugged(void)
 // Returns true if the current process is being debugged (either
