@@ -27,8 +27,6 @@
 
 #import "MSALTestCase.h"
 
-#import "NSDictionary+MSALTestUtil.h"
-
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestAuthority.h"
 #import "MSALTestSwizzle.h"
@@ -38,12 +36,15 @@
 #import "MSALIdToken.h"
 #import "MSALClientInfo.h"
 
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 
 #import "NSURL+MSIDExtensions.h"
 
 #import "MSALTestConstants.h"
 #import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -202,7 +203,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
@@ -247,8 +248,8 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -262,8 +263,11 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
@@ -299,7 +303,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
@@ -344,8 +348,8 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -359,8 +363,11 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     parameters.unvalidatedAuthority = nil;
     
@@ -398,7 +405,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -456,7 +463,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -489,8 +496,8 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -504,9 +511,12 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
                                              }];
-    [MSALTestURLSession addResponse:response];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];
@@ -542,7 +552,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -585,7 +595,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -618,8 +628,8 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -633,9 +643,12 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
                                              }];
-    [MSALTestURLSession addResponse:response];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];
@@ -673,7 +686,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
@@ -706,8 +719,8 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -719,9 +732,12 @@
                          httpHeaderFields:nil
                          dictionaryAsJSON:@{ @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
                                              }];
-    [MSALTestURLSession addResponse:response];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES error:&error];

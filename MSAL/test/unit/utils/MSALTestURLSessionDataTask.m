@@ -27,11 +27,13 @@
 
 
 #import "MSALTestURLSessionDataTask.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
 
 @interface MSALTestURLSessionDataTask()
 
 @property MSALTestHttpCompletionBlock completionHandler;
-@property MSALTestURLSession *session;
+@property MSIDTestURLSession *session;
 @property NSURLRequest *request;
 
 @end
@@ -39,7 +41,7 @@
 @implementation MSALTestURLSessionDataTask
 
 - (id)initWithRequest:(NSURLRequest *)request
-              session:(MSALTestURLSession *)session
+              session:(MSIDTestURLSession *)session
     completionHandler:(MSALTestHttpCompletionBlock)completionHandler;
 {
     (void)completionHandler;
@@ -57,7 +59,7 @@
 
 - (void)resume
 {
-    MSALTestURLResponse *response = [MSALTestURLSession removeResponseForRequest:self.request];
+    MSIDTestURLResponse *response = [MSIDTestURLSession removeResponseForRequest:self.request];
     
     if (!response)
     {
