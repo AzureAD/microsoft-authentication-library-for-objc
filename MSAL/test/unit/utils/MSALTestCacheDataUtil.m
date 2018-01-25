@@ -35,8 +35,8 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestTokenCache.h"
 
-#import "NSDictionary+MSALTestUtil.h"
 #import "NSOrderedSet+MSALExtensions.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @implementation MSALTestCacheDataUtil
 {
@@ -80,7 +80,7 @@
     
     NSString *idTokenString = [MSALTestIdTokenUtil idTokenWithName:@"User" preferredUsername:displayId];
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:idTokenString];
-    NSString *clientInfo = [@{ @"uid" : uid, @"utid" : utid } base64UrlJson];
+    NSString *clientInfo = [@{ @"uid" : uid, @"utid" : utid } msidBase64UrlJson];
     NSString *environment = @"login.microsoftonline.com";
     
     
@@ -111,7 +111,7 @@
                                       tenant:(NSString *)tenant
                                         user:(MSALUser *)user
 {
-    NSString *clientInfo = [@{ @"uid" : user.uid, @"utid" : user.utid } base64UrlJson];
+    NSString *clientInfo = [@{ @"uid" : user.uid, @"utid" : user.utid } msidBase64UrlJson];
     
     NSOrderedSet *scopesSet = [NSOrderedSet orderedSetWithArray:scopes];
     NSString *authority = [NSString stringWithFormat:@"https://%@/%@", user.environment, tenant];

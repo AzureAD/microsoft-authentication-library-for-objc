@@ -30,10 +30,10 @@
 #import "MSIDToken.h"
 #import "MSALTokenResponse.h"
 #import "MSALTestIdTokenUtil.h"
-#import "NSDictionary+MSALTestUtil.h"
 #import "MSIDJsonSerializer.h"
 #import "MSALClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @interface MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests : XCTestCase
 
@@ -54,7 +54,7 @@
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     _testIdToken = [MSALTestIdTokenUtil idTokenWithName:@"User 2" preferredUsername:@"user2@contoso.com"];
-    _testClientInfo = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    _testClientInfo = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     
     NSDictionary *testResponse2Claims =
     @{ @"token_type" : @"Bearer",

@@ -31,8 +31,9 @@
 #import "MSALDrsDiscoveryResponse.h"
 #import "MSALWebFingerResponse.h"
 
-#import "MSALTestURLSession.h"
 #import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse+MSAL.h"
 
 #define TRUSTED_REALM @"http://schemas.microsoft.com/rel/trusted-realm"
 
@@ -87,15 +88,15 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0" :
     @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0";
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:url
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
                          dictionaryAsJSON:resultJson];
-     [MSALTestURLSession addResponse:response];
+     [MSIDTestURLSession addResponse:response];
 }
 
 - (void)addDrsDiscoveryForOnPremsFailureResponse
@@ -104,8 +105,8 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    [MSALTestURLSession addResponse:
-     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0"
+    [MSIDTestURLSession addResponse:
+     [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0"
                                               requestHeaders:reqHeaders
                                            requestParamsBody:nil]];
     
@@ -117,8 +118,8 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    [MSALTestURLSession addResponse:
-     [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0"
+    [MSIDTestURLSession addResponse:
+     [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0"
                                               requestHeaders:reqHeaders
                                            requestParamsBody:nil]];
 }
@@ -132,15 +133,15 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     NSDictionary *resultJson = customResponse? customResponse :
     @{ @"links" : @[@{ @"rel" : TRUSTED_REALM, @"href" : @"https://fs.fabrikam.com/adfs/"}]};
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
                            requestHeaders:reqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
                          dictionaryAsJSON:resultJson];
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
 
 }
 
@@ -151,11 +152,11 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse serverNotFoundResponseForURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
                                              requestHeaders:reqHeaders
                                           requestParamsBody:nil];
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
 }
 
 - (void)tearDown {
@@ -301,7 +302,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:nil];
     [self addWebFingerSuccessResponse:nil];
@@ -331,7 +332,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -362,7 +363,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoveryForCloudFailureResponse];
@@ -391,7 +392,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:@{ @"IdentityProviderService" : @{ } }];
     [self addWebFingerSuccessResponse:nil];
@@ -423,7 +424,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:@{ }];
     [self addWebFingerSuccessResponse:nil];
@@ -455,7 +456,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -487,7 +488,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -520,7 +521,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -555,7 +556,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
