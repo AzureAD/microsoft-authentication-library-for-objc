@@ -404,38 +404,53 @@
     
     __block BOOL fBlockHit = NO;
     
-    [application acquireTokenForScopes:[settings.scopes allObjects]
-                                  user:settings.currentUser
-                            uiBehavior:MSALUIBehaviorDefault
-                  extraQueryParameters:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         if (fBlockHit)
-         {
-             dispatch_async(dispatch_get_main_queue(), ^{
-                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                                message:@"Completion block was hit multiple times!"
-                                                                         preferredStyle:UIAlertControllerStyleAlert];
-                 [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                 [self presentViewController:alert animated:YES completion:nil];
-             });
-             
-             return;
-         }
-         fBlockHit = YES;
-         
-         dispatch_async(dispatch_get_main_queue(), ^{
-             if (result)
-             {
-                 [self updateResultView:result];
-             }
-             else
-             {
-                 [self updateResultViewError:error];
-             }
-             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-         });
-     }];
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        
+        if (fBlockHit)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                               message:@"Completion block was hit multiple times!"
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:YES completion:nil];
+            });
+            
+            return;
+        }
+        fBlockHit = YES;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (result)
+            {
+                [self updateResultView:result];
+            }
+            else
+            {
+                [self updateResultViewError:error];
+            }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    };
+    
+    if ([_loginHintField.text length])
+    {
+        [application acquireTokenForScopes:[settings.scopes allObjects]
+                                 loginHint:_loginHintField.text
+                                uiBehavior:[self uiBehavior]
+                      extraQueryParameters:nil
+                           completionBlock:completionBlock];
+    }
+    else
+    {
+        [application acquireTokenForScopes:[settings.scopes allObjects]
+                                      user:settings.currentUser
+                                uiBehavior:[self uiBehavior]
+                      extraQueryParameters:nil
+                           completionBlock:completionBlock];
+    }
 }
 
 - (IBAction)cancelAuth:(id)sender
