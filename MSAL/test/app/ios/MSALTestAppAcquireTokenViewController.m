@@ -324,7 +324,7 @@
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *loginHint = settings.loginHint;
-    if (![NSString msalIsStringNilOrBlank:loginHint])
+    if (![NSString msidIsStringNilOrBlank:loginHint])
     {
         _loginHintField.text = loginHint;
     }
@@ -361,7 +361,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msalShortSHA256Hex], result.expiresOn, result.tenantId, result.user, result.scopes];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.user, result.scopes];
     
     [_resultView setText:resultText];
     

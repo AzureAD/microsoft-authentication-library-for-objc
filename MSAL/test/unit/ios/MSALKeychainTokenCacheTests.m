@@ -34,8 +34,8 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestTokenCacheItemUtil.h"
 
-#import "NSDictionary+MSALTestUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 // There are keychain entitlement bugs with the simulator in unit test runs where the simulator can
 // lose its entitlements between the first use of the keychain and when these get hit, so we added
@@ -75,11 +75,11 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     [_dataSource testRemoveAll];
     
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    _testEnvironment = _testAuthority.msalHostWithPort;
+    _testEnvironment = _testAuthority.msidHostWithPortIfNecessary;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
     NSString *idToken1 = MakeIdToken(@"User 1", @"user1@contoso.com");
-    NSString *clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    NSString *clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     
     _testResponse1Claims =
@@ -100,7 +100,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertNil(error);
     
     NSString *idToken2 = MakeIdToken(@"User 2", @"user2@contoso.com");
-    NSString *clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    NSString *clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     
     _testResponse2Claims =
@@ -233,7 +233,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
 - (void)testAddOrUpdateRefreshToken_getRefreshTokenItemForKey_whenValidRT_shouldSaveAndRetrieve
 {
     //prepare token response and save RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     NSError *error = nil;
@@ -274,7 +274,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
 {
     NSError *error = nil;
     
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:&error]);
@@ -300,7 +300,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem context:nil error:&error]);
     XCTAssertNil(error);
     
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:&error]);
@@ -313,7 +313,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertTrue([_dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:&error]);
     XCTAssertNil(error);
     
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                        clientId:_testClientId
                                                                                        response:_testTokenResponse2];
     XCTAssertTrue([_dataSource addOrUpdateRefreshTokenItem:rtItem2 context:nil error:&error]);
@@ -324,7 +324,7 @@ static NSString *MakeIdToken(NSString *name, NSString *preferredUsername)
     XCTAssertEqual([_dataSource allRefreshTokens:nil context:nil error:nil].count, 2);
     
     //delete tokens for user 1
-    XCTAssertTrue([_dataSource removeAllTokensForUserIdentifier:_userIdentifier1 environment:_testAuthority.msalHostWithPort clientId:_testClientId context:nil error:&error]);
+    XCTAssertTrue([_dataSource removeAllTokensForUserIdentifier:_userIdentifier1 environment:_testAuthority.msidHostWithPortIfNecessary clientId:_testClientId context:nil error:&error]);
     
     //there should be one AT and one RT left in cache
     XCTAssertEqual([_dataSource getAccessTokenItemsWithKey:nil context:nil error:nil].count, 1);

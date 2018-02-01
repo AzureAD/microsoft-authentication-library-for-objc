@@ -92,14 +92,14 @@ static NSArray<NSString *> *s_scopes_available = nil;
                                                     error:&error];
     if (application == nil)
     {
-        LOG_ERROR(nil, @"failed to create application to get user: %@", error);
+        MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
         return nil;
     }
     
     NSArray<MSALUser *> *users = [application users:nil];
     if (!users)
     {
-        LOG_ERROR(nil, @"no users came back from the application");
+        MSID_LOG_ERROR(nil, @"no users came back from the application");
         return nil;
     }
     
@@ -111,8 +111,8 @@ static NSArray<NSString *> *s_scopes_available = nil;
         }
     }
     
-    LOG_WARN(nil, @"failed to find user identifier among users.");
-    LOG_WARN_PII(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
+    MSID_LOG_WARN(nil, @"failed to find user identifier among users.");
+    MSID_LOG_WARN_PII(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
     
     return nil;
 }

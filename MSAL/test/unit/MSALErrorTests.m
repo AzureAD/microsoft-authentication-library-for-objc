@@ -25,62 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#import "NSDictionary+MSALTestUtil.h"
+#import <XCTest/XCTest.h>
+#import "MSALTestCase.h"
+#import "MSALError_Internal.h"
 
-@implementation NSDictionary (MSALTestUtil)
-
-- (BOOL)compareToActual:(NSDictionary *)dictionary
-{
-    BOOL fSame = YES;
-    
-    for (NSString *key in self)
-    {
-        id myVal = self[key];
-        id otherVal = dictionary[key];
-        if (!otherVal)
-        {
-            NSLog(@"\"%@\" missing from result dictionary.", key);
-            fSame = NO;
-        }
-        else if (![myVal isKindOfClass:[MSALTestSentinel class]] && ![myVal isEqual:otherVal])
-        {
-            NSLog(@"\"%@\" does not match. Expected: \"%@\" Actual: \"%@\"", key, self[key], otherVal);
-            fSame = NO;
-        }
-    }
-    
-    for (NSString *key in dictionary)
-    {
-        if (!self[key])
-        {
-            NSLog(@"Extra key \"%@\" in result dictionary: \"%@\"", key, dictionary[key]);
-            fSame = NO;
-        }
-    }
-    
-    return fSame;
-}
-
-- (NSString *)base64UrlJson
-{
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:0 error:nil];
-    return [NSString msalBase64UrlEncodeData:jsonData];
-}
+@interface MSALErrorTests : MSALTestCase
 
 @end
 
-@implementation MSALTestSentinel
+@implementation MSALErrorTests
 
-static MSALTestSentinel *s_sentinel = nil;
-
-+ (void)initialize
+- (void)testCreateError_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    s_sentinel = [MSALTestSentinel new];
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
+    
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
 }
 
-+ (instancetype)sentinel
+- (void)testCreateError_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    return s_sentinel;
+    NSDictionary *userInfo = @{MSALHTTPHeadersKey : @{@"Retry-After": @"120"}};
+    
+    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
+    
+    XCTAssertEqualObjects(error.domain, @"TestDomain");
+    XCTAssertEqual(error.code, -1000);
+    XCTAssertNotNil(error.userInfo);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
+    XCTAssertNotNil(error.userInfo[MSALHTTPHeadersKey]);
+    XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"120");
 }
 
 @end

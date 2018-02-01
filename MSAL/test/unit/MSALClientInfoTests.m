@@ -27,7 +27,7 @@
 
 #import <XCTest/XCTest.h>
 #import "MSALClientInfo.h"
-#import "NSDictionary+MSALTestUtil.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @interface MSALClientInfoTests : XCTestCase
 
@@ -47,7 +47,7 @@
 
 - (void)testInitWithRawClientInfo_whenUidAndUtid_shouldParse
 {
-    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     
     NSError *error = nil;
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
@@ -71,7 +71,7 @@
 
 - (void)testUserIdentifier_whenUniqueUserIdentifier_shouldReturnUserIndentifier
 {
-    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     
     NSError *error = nil;
     MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];

@@ -26,17 +26,16 @@
 //------------------------------------------------------------------------------
 
 #import "MSALClientInfo.h"
-#import "MSALOAuth2Constants.h"
 
 @implementation MSALClientInfo
 
-MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_IDENTIFIER, uid)
-MSAL_JSON_ACCESSOR(OAUTH2_UNIQUE_TENANT_IDENTIFIER, utid)
+MSAL_JSON_ACCESSOR(MSID_OAUTH2_UNIQUE_IDENTIFIER, uid)
+MSAL_JSON_ACCESSOR(MSID_OAUTH2_UNIQUE_TENANT_IDENTIFIER, utid)
 
 - (id)initWithRawClientInfo:(NSString *)rawClientInfo
                       error:(NSError *__autoreleasing *)error
 {
-    NSData *decoded =  [[rawClientInfo msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *decoded =  [[rawClientInfo msidBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
     if (!(self = [super initWithData:decoded error:error]))
     {
         return nil;

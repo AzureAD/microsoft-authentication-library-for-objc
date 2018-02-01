@@ -31,12 +31,13 @@
 #import "MSALTestConstants.h"
 #import "MSALTestSwizzle.h"
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALWebUI.h"
-#import "NSDictionary+MSALTestUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestCacheDataUtil.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse+MSAL.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -48,22 +49,22 @@
 {
     NSString *query = [NSString stringWithFormat:@"p=%@", policy];
     
-    MSALTestURLResponse *oidcResponse =
-    [MSALTestURLResponse oidcResponseForAuthority:authority
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:authority
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:query];
     
     NSString *uid = [NSString stringWithFormat:@"1-%@", policy];
     
     // User identifier should be uid-policy
-    MSALTestURLResponse *tokenResponse =
-    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
                                clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
     
-    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 }
 
 
@@ -94,7 +95,7 @@
          XCTAssertNotNil(url);
          
          // State preserving and url are tested separately
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          NSString *state = QPs[@"state"];
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];

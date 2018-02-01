@@ -27,7 +27,6 @@
 
 #import "MSALTestCase.h"
 
-#import "NSDictionary+MSALTestUtil.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALPkce.h"
@@ -36,11 +35,15 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestTokenCache.h"
 #import "MSALTestSwizzle.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALUser.h"
 #import "MSALWebUI.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestConstants.h"
+#import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -124,10 +127,10 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     NSDictionary *expectedQPs =
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -153,8 +156,8 @@
       @"code_challenge_method" : @"S256",
       UT_SLICE_PARAMS_DICT
       };
-    NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
-    XCTAssertTrue([expectedQPs compareToActual:QPs]);
+    NSDictionary *QPs = [NSDictionary msidURLFormDecode:authorizationUrl.query];
+    XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
 }
 
 - (void)testAuthorizationUri_whenValidParamsWithUser_shouldContainDomainReqAndLoginReq
@@ -201,10 +204,10 @@
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
     XCTAssertEqualObjects(authorizationUrl.scheme, @"https");
-    XCTAssertEqualObjects(authorizationUrl.msalHostWithPort, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(authorizationUrl.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
     XCTAssertEqualObjects(authorizationUrl.path, @"/common/oauth2/v2.0/authorize");
     
-    NSDictionary *msalId = [MSALLogger msalId];
+    NSDictionary *msalId = [MSIDDeviceId deviceId];
     NSDictionary *expectedQPs =
     @{
       @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -231,8 +234,8 @@
       @"code_challenge": pkce.codeChallenge,
       @"code_challenge_method" : @"S256",
       };
-    NSDictionary *QPs = [NSDictionary msalURLFormDecode:authorizationUrl.query];
-    XCTAssertTrue([expectedQPs compareToActual:QPs]);
+    NSDictionary *QPs = [NSDictionary msidURLFormDecode:authorizationUrl.query];
+    XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
 }
 
 - (void)testInteractiveRequestFlow_whenValid_shouldReturnResultWithNoError
@@ -242,7 +245,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
@@ -285,10 +288,10 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -313,8 +316,8 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareToActual:QPs]);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -333,14 +336,14 @@
         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
     }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -357,8 +360,11 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     __block BOOL fAlreadyHit = NO;
@@ -395,7 +401,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
@@ -443,10 +449,10 @@
          XCTAssertNotNil(url);
          
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -473,8 +479,8 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareToActual:QPs]);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -493,14 +499,14 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -517,8 +523,11 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     __block BOOL fAlreadyHit = NO;
@@ -566,7 +575,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
@@ -614,10 +623,10 @@
          XCTAssertNotNil(url);
          
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -644,8 +653,8 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256",
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareToActual:QPs]);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -664,14 +673,14 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -688,8 +697,11 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     __block BOOL fAlreadyHit = NO;
@@ -718,7 +730,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSALTestURLSession createMockSession];
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
@@ -761,10 +773,10 @@
          
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msalHostWithPort, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
          XCTAssertEqualObjects(url.path, @"/common/oauth2/v2.0/authorize");
          
-         NSDictionary *msalId = [MSALLogger msalId];
+         NSDictionary *msalId = [MSIDDeviceId deviceId];
          NSDictionary *expectedQPs =
          @{
            @"x-client-Ver" : MSAL_VERSION_NSSTRING,
@@ -789,8 +801,8 @@
            @"code_challenge": pkce.codeChallenge,
            @"code_challenge_method" : @"S256"
            };
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareToActual:QPs]);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"iamafakecode", request.state];
          completionBlock([NSURL URLWithString:responseString], nil);
@@ -809,14 +821,14 @@
          completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
      }];
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    MSALTestURLResponse *response =
-    [MSALTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"code" : @"iamafakecode",
                                              @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -831,8 +843,11 @@
                          dictionaryAsJSON:@{ @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson]}];
-    [MSALTestURLSession addResponse:response];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+    
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+    
+    [MSIDTestURLSession addResponse:response];
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     __block BOOL fAlreadyHit = NO;

@@ -105,17 +105,19 @@ void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, 
     
     [message appendFormat:@" (%s:%d)", function, line];
     [messagePII appendFormat:@" (%s:%d)", function, line];
-    LOG_ERROR(ctx, @"%@", message);
-    LOG_ERROR_PII(ctx, @"%@", messagePII);
+    MSID_LOG_ERROR(ctx, @"%@", message);
+    MSID_LOG_ERROR_PII(ctx, @"%@", messagePII);
 }
 
-NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError)
+NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError, NSDictionary* additionalUserInfo)
 {
     NSMutableDictionary* userInfo = [NSMutableDictionary new];
     userInfo[MSALErrorDescriptionKey] = errorDescription;
     userInfo[MSALOAuthErrorKey] = oauthError;
     userInfo[MSALOAuthSubErrorKey] = subError;
     userInfo[NSUnderlyingErrorKey]  = underlyingError;
+    
+    [userInfo addEntriesFromDictionary:additionalUserInfo];
     
     return [NSError errorWithDomain:domain code:code userInfo:[NSDictionary dictionaryWithDictionary:userInfo]];
 }
@@ -128,7 +130,7 @@ NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSI
     va_end(args);
     
     MSALLogError(ctx, domain, code, description, oauthError, subError, function, line);
-    return MSALCreateError(domain, code, description, oauthError, subError, underlyingError);
+    return MSALCreateError(domain, code, description, oauthError, subError, underlyingError, nil);
 }
 
 void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
@@ -141,6 +143,6 @@ void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContex
     MSALLogError(ctx, domain, code, description, oauthError, subError, function, line);
     if (error)
     {
-        *error = MSALCreateError(domain, code, description, oauthError, subError, underlyingError);
+        *error = MSALCreateError(domain, code, description, oauthError, subError, underlyingError, nil);
     }
 }

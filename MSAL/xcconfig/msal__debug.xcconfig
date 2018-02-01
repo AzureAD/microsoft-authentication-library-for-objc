@@ -1,8 +1,2 @@
-
-COPY_PHASE_STRIP = NO;
-DEBUG_INFORMATION_FORMAT = dwarf;
-ENABLE_TESTABILITY = YES;
-GCC_DYNAMIC_NO_PIC = NO;
-GCC_OPTIMIZATION_LEVEL = 0;
-MTL_ENABLE_DEBUG_INFO = YES;
-CLANG_ENABLE_CODE_COVERAGE = YES;
+#include "msal__common.xcconfig"
+#include "../IdentityCore/IdentityCore/xcconfig/identitycore__debug.xcconfig"

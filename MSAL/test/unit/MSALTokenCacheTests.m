@@ -30,11 +30,10 @@
 #import "MSALIdToken.h"
 #import "MSALTokenResponse.h"
 #import "MSALClientInfo.h"
-#import "NSDictionary+MSALTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestLogger.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @interface MSALTokenCacheTests : MSALTestCase
 {
@@ -72,15 +71,15 @@
     _cache = [MSALTestTokenCache createTestAccessor];
     
     _testAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
-    _testEnvironment = _testAuthority.msalHostWithPort;
+    _testEnvironment = _testAuthority.msidHostWithPortIfNecessary;
     _testClientId = @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
     
     _idToken1 = [MSALTestIdTokenUtil idTokenWithName:@"User 1" preferredUsername:@"user1@contoso.com"];
-     _clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+     _clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken1]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo1 error:nil]
-                                   environment:_testAuthority.msalHostWithPort];
+                                   environment:_testAuthority.msidHostWithPortIfNecessary];
     _testUser = _user1;
     
     _testResponse1Claims =
@@ -107,11 +106,11 @@
     _requestParam1.user = _user1;
     
     _idToken2 = [MSALTestIdTokenUtil idTokenWithName:@"User 2" preferredUsername:@"user2@contoso.com"];
-    _clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} base64UrlJson];
+    _clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken2]
                                     clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo2 error:nil]
-                                   environment:_testAuthority.msalHostWithPort];
+                                   environment:_testAuthority.msidHostWithPortIfNecessary];
     
     _testResponse2Claims =
     @{ @"token_type" : @"Bearer",
@@ -197,14 +196,14 @@
 {
     //save RT twice
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
     XCTAssertNil(error);
     
     error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -255,7 +254,7 @@
 {
     //save first and second RT
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -263,7 +262,7 @@
     XCTAssertNil(error);
     
     error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam2.clientId
                                    response:_testTokenResponse2
                                     context:nil error:nil];
@@ -275,10 +274,10 @@
     XCTAssertEqual(rtsInCache.count, 2);
     
     //compare RTs with the RTs retrieved from cache
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
-    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem2 = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                        clientId:_testClientId
                                                                                        response:_testTokenResponse2];
     NSSet *rtsSet = [[NSSet alloc] initWithObjects:rtItem, rtItem2, nil];
@@ -289,11 +288,11 @@
 - (void)testFindRefreshTokenWithEnvironment_whenOneSaved_shouldFindRT
 {
     //prepare token response and save RT
-    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItem = [[MSALRefreshTokenCacheItem alloc] initWithEnvironment:_testAuthority.msidHostWithPortIfNecessary
                                                                                       clientId:_testClientId
                                                                                       response:_testTokenResponse];
     NSError *error = nil;
-    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    [_cache saveRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                    clientId:_requestParam1.clientId
                                    response:_testTokenResponse
                                     context:nil error:nil];
@@ -302,7 +301,7 @@
     
     //retrieve RT
     error = nil;
-    MSALRefreshTokenCacheItem *rtItemInCache = [_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItemInCache = [_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                                               clientId:_requestParam1.clientId
                                                                         userIdentifier:_requestParam1.user.userIdentifier
                                                                                context:nil error:&error];
@@ -324,7 +323,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
@@ -336,7 +335,7 @@
                                                        @"name" : _user1.name,
                                                        @"identity_provider" : _user1.identityProvider,
                                                        @"client_id" : _testClientId,
-                                                       @"client_info" : [clientInfo1 base64UrlJson]
+                                                       @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                        }
                                               error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:nil]);
@@ -351,7 +350,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo2 base64UrlJson]
+                                                      @"client_info" : [clientInfo2 msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
@@ -363,7 +362,7 @@
                                                        @"name" : _user2.name,
                                                        @"identity_provider" : _user2.identityProvider,
                                                        @"client_id" : _testClientId,
-                                                       @"client_info" : [clientInfo2 base64UrlJson]
+                                                       @"client_info" : [clientInfo2 msidBase64UrlJson]
                                                        }
                                               error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem2 context:nil error:nil]);
@@ -386,7 +385,7 @@
     XCTAssertNil(error);
     
     error = nil;
-    XCTAssertNil([_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msalHostWithPort
+    XCTAssertNil([_cache findRefreshTokenWithEnvironment:_requestParam1.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                 clientId:_requestParam1.clientId
                                           userIdentifier:_requestParam1.user.userIdentifier
                                                  context:nil error:&error]);
@@ -408,7 +407,7 @@
                                             error:&error]);
     XCTAssertNil(error);
     error = nil;
-    MSALRefreshTokenCacheItem *rtItemInCache2 = [_cache findRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msalHostWithPort
+    MSALRefreshTokenCacheItem *rtItemInCache2 = [_cache findRefreshTokenWithEnvironment:_requestParam2.unvalidatedAuthority.msidHostWithPortIfNecessary
                                                                                clientId:_requestParam2.clientId
                                                                          userIdentifier:_requestParam2.user.userIdentifier
                                                                                 context:nil error:&error];
@@ -433,7 +432,7 @@
                                                        @"name" : _user1.name,
                                                        @"identity_provider" : _user1.identityProvider,
                                                        @"client_id" : _testClientId,
-                                                       @"client_info" : [clientInfo1 base64UrlJson]
+                                                       @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                        }
                                               error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem1 context:nil error:nil]);
@@ -446,7 +445,7 @@
                                                        @"name" : _user2.name,
                                                        @"identity_provider" : _user2.identityProvider,
                                                        @"client_id" : _testClientId,
-                                                       @"client_info" : [clientInfo2 base64UrlJson]
+                                                       @"client_info" : [clientInfo2 msidBase64UrlJson]
                                                        }
                                               error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem2 context:nil error:nil]);
@@ -564,7 +563,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
@@ -597,7 +596,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : [clientInfo msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
@@ -631,7 +630,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : [clientInfo msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem context:nil error:nil]);
@@ -684,7 +683,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem1 context:nil error:nil]);
@@ -697,7 +696,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate date] timeIntervalSince1970]+600],
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo1 base64UrlJson]
+                                                      @"client_info" : [clientInfo1 msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
@@ -730,7 +729,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : expiresOn,
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : [clientInfo msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem1 context:nil error:nil]);
@@ -743,7 +742,7 @@
                                                       @"token_type" : @"Bearer",
                                                       @"expires_on" : expiresOn,
                                                       @"client_id" : _testClientId,
-                                                      @"client_info" : [clientInfo base64UrlJson]
+                                                      @"client_info" : [clientInfo msidBase64UrlJson]
                                                       }
                                              error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateAccessTokenItem:atItem2 context:nil error:nil]);
@@ -875,13 +874,12 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
-- (void)testUserForIdentifier_whenUserNotInCacheAndNoError_shouldFailAndStillLog
+- (void)testUserForIdentifier_whenUserNotInCacheAndNoError_shouldReturnNilUser
 {
     XCTAssertNil([_cache getUserForIdentifier:@"11234123+12314123"
                                      clientId:@"12345"
                                   environment:@"environment.com"
                                         error:nil]);
-    XCTAssertTrue([[[MSALTestLogger sharedLogger] lastMessage] containsString:@"UserNotFound"]);
 }
 
 
@@ -900,7 +898,7 @@
                                                        @"name" : @"User",
                                                        @"identity_provider" : @"issuer",
                                                        @"client_id" : _testClientId,
-                                                       @"client_info" : [clientInfo base64UrlJson]
+                                                       @"client_info" : [clientInfo msidBase64UrlJson]
                                                        }
                                                error:nil];
     XCTAssertTrue([_cache.dataSource addOrUpdateRefreshTokenItem:rtItem context:nil error:nil]);
