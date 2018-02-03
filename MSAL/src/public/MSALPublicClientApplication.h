@@ -87,6 +87,25 @@
                  error:(NSError * __autoreleasing *)error;
 
 /*!
+    Initialize a MSALPublicClientApplication with a given clientID and authority
+
+    @param  clientId    The clientID of your application, you should get this from the app portal.
+    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
+    @param  sharedGroup The keychain to use to store the token cache. Pass in nil to use the default group.
+    @param  error       The error that occurred creating the application object, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+                 group:(NSString *)sharedGroup
+                 error:(NSError * __autoreleasing *)error;
+
+/*!
     Returns an array of users visible to this application
  
     @param  error   The error that occured trying to retrieve users, if any, if you're

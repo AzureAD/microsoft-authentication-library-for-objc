@@ -31,6 +31,8 @@
 
 + (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
 
++ (nonnull MSALKeychainTokenCache *)sharedKeychainCacheWithGroup:(NSString *)group;
+
 @end
 
 @interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>

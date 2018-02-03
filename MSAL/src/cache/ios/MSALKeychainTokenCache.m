@@ -49,12 +49,17 @@ typedef NS_ENUM(uint32_t, MSALTokenType)
 
 + (MSALKeychainTokenCache *)defaultKeychainCache
 {
+    return [self.class sharedKeychainCacheWithGroup:nil];
+}
+
++ (MSALKeychainTokenCache *)sharedKeychainCacheWithGroup:(NSString *)group
+{
     static dispatch_once_t s_once;
-    
+
     dispatch_once(&s_once, ^{
-        s_defaultCache = [[MSALKeychainTokenCache alloc] initWithGroup:nil];
+        s_defaultCache = [[MSALKeychainTokenCache alloc] initWithGroup:group];
     });
-    
+
     return s_defaultCache;
 }
 
