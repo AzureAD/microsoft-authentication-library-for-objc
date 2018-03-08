@@ -15,10 +15,10 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
   s.ios.deployment_target = '10.0'
 
   #s.source_files = 'MSAL/src/**/*.{h,m}'
-  s.source_files = '**/*.{h,m}'
+  s.source_files = 'MSAL/**/*.{h,m}'
   s.exclude_files = 'MSAL/src/cache/mac/**/*',
-		  			'MSAL/src/ui/mac/**/*',
-		  			'MSAL/src/public/mac/**/*'
+		    'MSAL/src/ui/mac/**/*',
+		    'MSAL/src/public/mac/**/*'
   s.public_header_files = 'MSAL/src/public/*.h'
   s.prefix_header_file = 'MSAL/src/MSAL.pch'
   pch_MSAL = <<-EOS
