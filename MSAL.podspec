@@ -25,7 +25,6 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
 	#import "NSString+MSIDExtensions.h"
 	#import "MSAL_Internal.h"
 	#import "NSOrderedSet+MSALExtensions.h"
-	@import IdentityCore;
 	#import "MSALTokenCache.h"
 	#import "MSALAccessTokenCacheItem.h"
 	#import "MSALKeychainTokenCache.h"
