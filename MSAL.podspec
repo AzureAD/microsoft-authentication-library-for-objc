@@ -15,8 +15,7 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
 			}
   s.ios.deployment_target = '10.0'
 
-  #s.source_files = 'MSAL/src/**/*.{h,m}'
-  s.source_files = '**/*.{h,m}'
+  s.source_files = 'MSAL/src/**/*.{h,m}'
   s.exclude_files = 'MSAL/src/cache/mac/**/*',
 		  			'MSAL/src/ui/mac/**/*',
 		  			'MSAL/src/public/mac/**/*'
