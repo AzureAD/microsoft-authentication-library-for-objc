@@ -9,10 +9,10 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
   s.homepage         = 'https://github.com/AzureAD/microsoft-authentication-library-for-objc'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Zayin Krige' => 'zkrige@gmail.com' }
-  s.source           = { 
-  							:git => 'https://github.com/AzureAD/microsoft-authentication-library-for-objc.git', 
-  							:commit => 'b3a28be'
-  						}
+  s.source           = { :git => 'https://github.com/AzureAD/microsoft-authentication-library-for-objc.git', 
+  			 :commit => 'b3a28be',
+                         :submodules => true
+			}
   s.ios.deployment_target = '10.0'
 
   s.source_files = 'MSAL/src/**/*.{h,m}'
@@ -32,5 +32,5 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
 	#import "MSALClientInfo.h"
   EOS
   s.prefix_header_contents = pch_MSAL
-  s.dependency 'IdentityCore'
+  #s.dependency 'IdentityCore'
 end
