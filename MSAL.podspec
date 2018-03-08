@@ -20,6 +20,7 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
   s.exclude_files = 'MSAL/src/cache/mac/**/*',
 		    'MSAL/src/ui/mac/**/*',
 		    'MSAL/src/public/mac/**/*',
+		    'MSAL/src/MSIDVersion.m',
 		    'MSAL/IdentityCore/IdentityCore/src/**/MSIDTestIdTokenUtil.{h,m}' 
   s.public_header_files = 'MSAL/src/public/*.h'
   s.prefix_header_file = 'MSAL/src/MSAL.pch'
