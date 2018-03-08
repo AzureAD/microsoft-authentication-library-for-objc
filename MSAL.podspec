@@ -24,7 +24,14 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
   s.public_header_files = 'MSAL/src/public/*.h'
   s.prefix_header_file = 'MSAL/src/MSAL.pch'
   pch_MSAL = <<-EOS
+	#import "NSDictionary+MSIDExtensions.h"
 	#import "NSString+MSIDExtensions.h"
+	#import "NSURL+MSIDExtensions.h"
+	#import "MSIDLogger+Internal.h"
+	#import "MSIDError.h"
+	#import "MSIDOAuth2Constants.h"
+	#import "IdentityCore_Internal.h"
+
 	#import "MSAL_Internal.h"
 	#import "NSOrderedSet+MSALExtensions.h"
 	#import "MSALTokenCache.h"
@@ -33,5 +40,4 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
 	#import "MSALClientInfo.h"
   EOS
   s.prefix_header_contents = pch_MSAL
-  #s.dependency 'IdentityCore'
 end
