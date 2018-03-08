@@ -15,12 +15,12 @@ The MSAL library preview for iOS gives your app the ability to begin using the M
   s.ios.deployment_target = '10.0'
 
   s.source_files = 'MSAL/src/**/*.{h,m}', 
-                   'IdentityCore/src/**/*.{h,m}', 
-                   'IdentityCore/tests/**/MSIDVersion.{h,m,c}' 
+                   'MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}', 
+                   'MSAL/IdentityCore/IdentityCore/tests/**/MSIDVersion.{h,m,c}' 
   s.exclude_files = 'MSAL/src/cache/mac/**/*',
 		    'MSAL/src/ui/mac/**/*',
 		    'MSAL/src/public/mac/**/*',
-		    'IdentityCore/src/**/MSIDTestIdTokenUtil.{h,m}' 
+		    'MSAL/IdentityCore/IdentityCore/src/**/MSIDTestIdTokenUtil.{h,m}' 
   s.public_header_files = 'MSAL/src/public/*.h'
   s.prefix_header_file = 'MSAL/src/MSAL.pch'
   pch_MSAL = <<-EOS
