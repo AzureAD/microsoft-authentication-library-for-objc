@@ -25,22 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSIDTestURLSession+MSAL.h"
+#import "MSALTestURLSessionDataTask.h"
 
-@interface NSDictionary (MSALTestUtil)
+@implementation MSIDTestURLSession (MSAL)
 
-- (BOOL)compareToActual:(NSDictionary *)dictionary;
+#pragma mark - DataTask creation
 
-- (NSString *)base64UrlJson;
-
-@end
-
-/*!
-    Sentinel class to use for values you want to make sure are present in a dictionary but don't
-    care about the actual value.
- */
-@interface MSALTestSentinel : NSObject
-
-+ (instancetype)sentinel;
+- (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request
+                            completionHandler:(MSALTestHttpCompletionBlock)completionHandler
+{
+    MSALTestURLSessionDataTask *task = [[MSALTestURLSessionDataTask alloc] initWithRequest:request
+                                                                                   session:self
+                                                                         completionHandler:completionHandler];
+    
+    return (NSURLSessionDataTask *)task;
+}
 
 @end

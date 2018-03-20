@@ -39,6 +39,16 @@
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D626FF491FBA6DFC00EE4487"
+               BuildableName = "IdentityCoreTests.xctest"
+               BlueprintName = "IdentityCoreTests iOS"
+               ReferencedContainer = "container:IdentityCore/IdentityCore/IdentityCore.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
