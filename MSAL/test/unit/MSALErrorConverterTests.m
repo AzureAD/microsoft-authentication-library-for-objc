@@ -58,6 +58,40 @@
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
     
+    NSError *msidError = MSIDCreateError(MSIDKeychainErrorDomain,
+                                         errorCode,
+                                         errorDescription,
+                                         oauthError,
+                                         subError,
+                                         underlyingError,
+                                         correlationId,
+                                         @{MSIDHTTPHeadersKey : httpHeaders,
+                                           MSIDHTTPResponseCodeKey : httpResponseCode
+                                           });
+    NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+    
+    NSString *expectedErrorDomain = NSOSStatusErrorDomain;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, errorCode);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
+    XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
+}
+
+- (void)testErrorConversion_whenBothErrorDomainAndCodeAreMapped_shouldMapBoth {
+    NSInteger errorCode = MSIDErrorInteractionRequired;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
+    NSUUID *correlationId = [NSUUID UUID];
+    NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
+    NSString *httpResponseCode = @"-99999";
+    
     NSError *msidError = MSIDCreateError(MSIDErrorDomain,
                                          errorCode,
                                          errorDescription,
@@ -70,15 +104,52 @@
                                            });
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    NSInteger expectedErrorCode = MSALErrorInteractionRequired;
     XCTAssertNotNil(msalError);
-    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
-    XCTAssertEqual(msalError.code, errorCode);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, expectedErrorCode);
     XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
     XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
+}
+
+/*!
+ It's very easy to add an additional error in MSID space, but forget to map it to appropriate AD error.
+ This test is just making sure that each error under MSIDErrorDomain is mapped to a different AD error
+ and will fail if new error is added and left unmapped.
+ 
+ This test doesn't test that the error has been mapped correctly.
+ */
+- (void)testErrorConversion_whenErrorConverterInitialized_shouldMapAllMSIDErrors
+{
+    NSInteger errorCode = MSIDErrorCodeFirst;
+    
+    while (errorCode >= MSIDErrorCodeLast)
+    {
+        // All error codes in MSIDError.h are of MSIDErrorDomain except that,
+        // the following six are of MSIDOAuthErrorDomain
+        NSString *domain = MSIDErrorDomain;
+        if (errorCode == MSIDErrorServerRefreshTokenRejected ||
+            errorCode == MSIDErrorServerOauth ||
+            errorCode == MSIDErrorInvalidRequest ||
+            errorCode == MSIDErrorInvalidClient ||
+            errorCode == MSIDErrorInvalidGrant ||
+            errorCode == MSIDErrorInvalidParameter)
+        {
+            domain = MSIDOAuthErrorDomain;
+        }
+        
+        NSError *msidError = MSIDCreateError(domain, errorCode, @"test", nil, nil, nil, nil, nil);
+        NSError *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        
+        XCTAssertNotEqual(error.code, errorCode);
+        
+        errorCode--;
+    }
 }
 
 @end
