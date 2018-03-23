@@ -118,7 +118,7 @@
     [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
     MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
                                                                            context:ctx];
-    [event setTokenType:MSID_TELEMETRY_VALUE_REFRESH_TOKEN];
+    [event setTokenType:MSIDTokenTypeRefreshToken];
 
     BOOL result = [_dataSource addOrUpdateRefreshTokenItem:rtItem context:ctx error:error];
 
@@ -134,7 +134,7 @@
     [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE];
     MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_WRITE
                                                                            context:ctx];
-    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSIDTokenTypeAccessToken];
     
     BOOL result = [_dataSource addOrUpdateAccessTokenItem:atItem context:ctx error:error];
     
@@ -155,7 +155,7 @@
     [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
-    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSIDTokenTypeAccessToken];
     
     BOOL ret =  [self findAccessTokenImpl:authority
                                  clientId:clientId
@@ -259,7 +259,7 @@
     [[MSIDTelemetry sharedInstance] startEvent:[ctx telemetryRequestId] eventName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP];
     MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_LOOKUP
                                                                            context:ctx];
-    [event setTokenType:MSID_TELEMETRY_VALUE_REFRESH_TOKEN];
+    [event setTokenType:MSIDTokenTypeRefreshToken];
     
     MSALRefreshTokenCacheKey *key = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:environment
                                                                                  clientId:clientId
@@ -285,7 +285,7 @@
     MSIDTelemetryCacheEvent *event = [[MSIDTelemetryCacheEvent alloc] initWithName:MSID_TELEMETRY_EVENT_TOKEN_CACHE_DELETE
                                                                            context:ctx];
     
-    [event setTokenType:MSID_TELEMETRY_VALUE_ACCESS_TOKEN];
+    [event setTokenType:MSIDTokenTypeAccessToken];
     
     BOOL result = [_dataSource removeAccessTokenItem:atItem context:ctx error:error];
     
