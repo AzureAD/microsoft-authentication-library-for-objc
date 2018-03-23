@@ -48,9 +48,11 @@
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
+              tokenCache:(MSIDSharedTokenCache *)tokenCache
                    error:(NSError *__autoreleasing  _Nullable *)error;
 {
     if (!(self = [super initWithParameters:parameters
+                                tokenCache:tokenCache
                                      error:error]))
     {
         return nil;

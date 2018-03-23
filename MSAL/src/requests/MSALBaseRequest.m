@@ -39,8 +39,15 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDSharedTokenCache.h"
 
 static MSALScopes *s_reservedScopes = nil;
+
+@interface MSALBaseRequest()
+
+@property (nullable, nonatomic) MSIDSharedTokenCache *tokenCache;
+
+@end
 
 @implementation MSALBaseRequest
 
@@ -50,6 +57,7 @@ static MSALScopes *s_reservedScopes = nil;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
+              tokenCache:(MSIDSharedTokenCache *)tokenCache
                    error:(NSError * __nullable __autoreleasing * __nullable)error
 {
     if (!(self = [super init]))

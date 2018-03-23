@@ -92,7 +92,8 @@
     @param  error   The error that occured trying to retrieve users, if any, if you're
                     not interested in the specific error pass in nil.
  */
-- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error;
+// TODO: A
+//- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error;
 
 /*!
     Returns a specific user for the identifier given (received from a user object returned
@@ -101,8 +102,9 @@
     @param  error   The error that occured trying to the user, if any, if you're
                     not interested in the specific error pass in nil.
  */
-- (MSALUser *)userForIdentifier:(NSString *)identifier
-                          error:(NSError * __autoreleasing *)error;
+// TODO: A
+//- (MSALUser *)userForIdentifier:(NSString *)identifier
+//                          error:(NSError * __autoreleasing *)error;
 
 #pragma SafariViewController Support
 
@@ -364,8 +366,9 @@
  
     @param  user    The user to remove from the cache
  */
-- (BOOL)removeUser:(MSALUser *)user
-             error:(NSError * __autoreleasing *)error;
+// TODO: A
+//- (BOOL)removeUser:(MSALUser *)user
+//             error:(NSError * __autoreleasing *)error;
 
 
 @end
