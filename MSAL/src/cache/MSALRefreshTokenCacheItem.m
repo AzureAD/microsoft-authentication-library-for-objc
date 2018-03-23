@@ -29,7 +29,7 @@
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALTokenResponse.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 @implementation MSALRefreshTokenCacheItem
 
@@ -100,8 +100,7 @@ MSAL_JSON_RW(@"identity_provider", identityProvider, setIdentityProvider)
     _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
                                                name:self.name
                                    identityProvider:self.identityProvider
-                                                uid:self.clientInfo.uid
-                                               utid:self.clientInfo.utid
+                                     userIdentifier:self.clientInfo.userIdentifier
                                         environment:self.environment];
 }
 

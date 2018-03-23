@@ -44,6 +44,9 @@
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAccount.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSALUser+Internal.h"
 
 @interface MSALPublicClientApplication()
 
@@ -117,7 +120,7 @@
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:legacyAccessor otherCacheAccessors:@[defaultAccessor]];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
     
     _validateAuthority = YES;
     
@@ -126,20 +129,39 @@
     return self;
 }
 
-// TODO: A
-//- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
-//{
-//    return [_tokenCache getUsers:self.clientId context:nil error:error];
-//}
-//
-//- (MSALUser *)userForIdentifier:(NSString *)identifier
-//                          error:(NSError * __autoreleasing *)error
-//{
-//    return [_tokenCache getUserForIdentifier:identifier
-//                                    clientId:self.clientId
-//                                 environment:[self.authority host]
-//                                       error:error];
-//}
+- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
+{
+    NSMutableArray<MSALUser *> *users = [NSMutableArray new];
+    NSArray<MSIDAccount *> *accounts = [self.tokenCache getAllAccountsWithContext:nil error:error];
+    
+    for (MSIDAccount *account in accounts)
+    {
+        MSALUser *user = [[MSALUser alloc] initWithAccount:account];
+        
+        // TODO: A HACK (account should be created in constructor). The problem is in authority vs environment.
+        user.account = account;
+        
+        [users addObject:user];
+    }
+    
+    return users;
+}
+
+- (MSALUser *)userForIdentifier:(NSString *)identifier
+                          error:(NSError * __autoreleasing *)error
+{
+    __auto_type accounts = [self.tokenCache getAllAccountsWithContext:nil error:error];
+    
+    for (MSIDAccount *account in accounts)
+    {
+        if ([account.uniqueUserId isEqualToString:identifier])
+        {
+            return [[MSALUser alloc] initWithAccount:account];
+        }
+    }
+    
+    return nil;
+}
 
 #pragma SafariViewController Support
 
@@ -547,17 +569,27 @@
 #pragma mark -
 #pragma mark remove user from cache
 
-// TODO: A
-//- (BOOL)removeUser:(MSALUser *)user
-//             error:(NSError * __autoreleasing *)error
-//{
-//    if (!user)
-//    {
-//        return YES;
-//    }
-//
-//    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId context:nil error:error];
-//}
+- (BOOL)removeUser:(MSALUser *)user
+             error:(NSError * __autoreleasing *)error
+{
+    if (!user)
+    {
+        return YES;
+    }
+    
+    __auto_type tokens = [self.tokenCache allTokensForAccount:user.account context:nil error:error];
+    
+    if (*error) return NO;
+    
+    for (MSIDBaseToken *token in tokens)
+    {
+        BOOL result = [self.tokenCache removeTokenForAccount:user.account token:token context:nil error:error];
+        
+        if (!result) return NO;
+    }
+    
+    return [self.tokenCache removeAccount:user.account context:nil error:error];
+}
 
 @end
 

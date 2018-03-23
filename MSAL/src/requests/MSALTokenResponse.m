@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTokenResponse.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 @implementation MSALTokenResponse
 

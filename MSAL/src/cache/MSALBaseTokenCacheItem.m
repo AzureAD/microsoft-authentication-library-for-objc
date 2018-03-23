@@ -30,7 +30,7 @@
 #import "MSAL_Internal.h"
 #import "MSALTokenResponse.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 @implementation MSALBaseTokenCacheItem
 
@@ -84,7 +84,7 @@ MSAL_JSON_RW(@"client_info", rawClientInfo, setRawClientInfo)
 
 - (void)initDerivedBasePropertiesFromJson
 {
-    _clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
+    _clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:self.rawClientInfo error:nil];
 }
 
 - (MSALUser *)user

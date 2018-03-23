@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -58,7 +58,7 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
                                                                 error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
@@ -84,7 +84,7 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
                                                                 error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
@@ -113,7 +113,7 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
                                                                 error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];

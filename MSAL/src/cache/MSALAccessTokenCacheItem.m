@@ -31,7 +31,7 @@
 #import "MSALTokenResponse.h"
 #import "MSALJsonObject.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
 

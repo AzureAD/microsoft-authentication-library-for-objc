@@ -26,14 +26,14 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "NSDictionary+MSIDTestUtil.h"
 
-@interface MSALClientInfoTests : XCTestCase
+@interface MSIDClientInfoTests : XCTestCase
 
 @end
 
-@implementation MSALClientInfoTests
+@implementation MSIDClientInfoTests
 
 - (void)setUp {
     [super setUp];
@@ -50,7 +50,7 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     
     NSError *error = nil;
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:&error];
     
     XCTAssertNil(error);
     XCTAssertNotNil(clientInfo);
@@ -63,7 +63,7 @@
     NSString *base64String = @"badclientinfo";
     
     NSError *error = nil;
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:&error];
     
     XCTAssertNotNil(error);
     XCTAssertNil(clientInfo);
@@ -74,7 +74,7 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     
     NSError *error = nil;
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithRawClientInfo:base64String error:&error];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:&error];
     
     XCTAssertNil(error);
     XCTAssertNotNil(clientInfo);

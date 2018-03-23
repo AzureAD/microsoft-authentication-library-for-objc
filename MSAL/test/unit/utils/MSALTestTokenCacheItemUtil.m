@@ -28,7 +28,7 @@
 #import "MSALTestTokenCacheItemUtil.h"
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 #define RETURN_NO_ON_OBJECT_UNEQUAL(OBJ1, OBJ2) \
 { \

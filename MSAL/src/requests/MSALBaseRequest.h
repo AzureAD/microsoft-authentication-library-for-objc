@@ -41,6 +41,7 @@
     MSALRequestParameters *_parameters;
     MSALAuthority *_authority;
     MSALTelemetryApiId _apiId;
+    MSIDSharedTokenCache *_tokenCache;
 }
 
 @property (nullable) MSALTokenResponse *response;

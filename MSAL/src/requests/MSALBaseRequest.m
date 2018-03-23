@@ -37,9 +37,11 @@
 #import "MSIDTelemetryEventStrings.h"
 #import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDSharedTokenCache.h"
+#import "MSIDAccessToken.h"
+#import "MSALResult+Internal.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -86,6 +88,8 @@ static MSALScopes *s_reservedScopes = nil;
     {
         return nil;
     }
+    
+    _tokenCache = tokenCache;
     
     return self;
 }
@@ -240,7 +244,7 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          // Check user mismatch
-         MSALClientInfo *clientInfo = [[MSALClientInfo  alloc] initWithRawClientInfo:tokenResponse.clientInfo
+         MSIDClientInfo *clientInfo = [[MSIDClientInfo  alloc] initWithRawClientInfo:tokenResponse.clientInfo
                                                                                error:&error];
          if (!clientInfo)
          {
@@ -265,43 +269,28 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          NSError *cacheError = nil;
-         MSALTokenCache *cache = self.parameters.tokenCache;
          
-         MSALAccessTokenCacheItem *atItem = [cache saveAccessTokenWithAuthority:_parameters.unvalidatedAuthority
-                                                                       clientId:_parameters.clientId
-                                                                       response:tokenResponse
-                                                                        context:_parameters
-                                                                          error:&cacheError];
+         MSIDTokenResponse *msidTokenResponse = [[MSIDTokenResponse alloc] initWithJSONDictionary:tokenResponse.jsonDictionary error:nil];
          
-         if (!atItem)
-         {
-             completionBlock(nil, cacheError);
-             return;
-         }
-
-         MSALRefreshTokenCacheItem *rtItem =  [cache saveRefreshTokenWithEnvironment:_parameters.unvalidatedAuthority.msidHostWithPortIfNecessary
-                                                                            clientId:_parameters.clientId
-                                                                            response:tokenResponse
-                                                                             context:_parameters
-                                                                               error:&cacheError];
-         if (!rtItem && cacheError)
+         BOOL isSaved = [self.tokenCache saveTokensWithRequestParams:_parameters.msidParameters
+                                                            response:msidTokenResponse
+                                                             context:_parameters
+                                                               error:&cacheError];
+         
+         if (!isSaved)
          {
              completionBlock(nil, cacheError);
              return;
          }
          
-         MSALResult *result =
-         [MSALResult resultWithAccessToken:atItem.accessToken
-                                 expiresOn:atItem.expiresOn
-                                  tenantId:atItem.tenantId
-                                      user:atItem.user
-                                   idToken:atItem.rawIdToken
-                                  uniqueId:atItem.uniqueId
-                                    scopes:[tokenResponse.scope componentsSeparatedByString:@" "]];
-
+         MSIDAccessToken *accessToken = [[MSIDAccessToken alloc] initWithTokenResponse:msidTokenResponse
+                                                                               request:_parameters.msidParameters];
+         
+         MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
+         
          [event setUser:result.user];
          [self stopTelemetryEvent:event error:nil];
-         
+
          completionBlock(result, nil);
      }];
 }

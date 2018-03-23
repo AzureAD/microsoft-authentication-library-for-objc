@@ -30,12 +30,13 @@
 #import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
 #import "MSALTokenCache.h"
-
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
-
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSALUser+Internal.h"
+#import "MSIDAccessToken.h"
 
 @interface MSALSilentRequest()
 {
@@ -67,22 +68,16 @@
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
-
-    MSALTokenCache *cache = _parameters.tokenCache;
     
     if (!_forceRefresh)
     {
-        NSString *foundAuthority = nil;
         NSError *error = nil;
-        MSALAccessTokenCacheItem *accessToken = nil;
-        if (![cache findAccessTokenWithAuthority:_parameters.unvalidatedAuthority
-                                        clientId:_parameters.clientId
-                                          scopes:_parameters.scopes
-                                            user:_parameters.user
-                                         context:_parameters
-                                     accessToken:&accessToken
-                                  authorityFound:&foundAuthority
-                                           error:&error])
+        MSIDAccessToken *accessToken = [self.tokenCache getATForAccount:_parameters.user.account
+                                                          requestParams:_parameters.msidParameters
+                                                                context:_parameters
+                                                                  error:&error];
+        
+        if (!accessToken)
         {
             if (error == nil && !_parameters.unvalidatedAuthority)
             {
@@ -102,7 +97,7 @@
         
         if (accessToken)
         {
-            MSALResult *result = [MSALResult resultWithAccessTokenItem:accessToken];
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
             
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.user];
@@ -114,35 +109,35 @@
         
         if (!_parameters.unvalidatedAuthority)
         {
-            _parameters.unvalidatedAuthority = [NSURL URLWithString:foundAuthority];
+            _parameters.unvalidatedAuthority = accessToken.authority;
         }
     }
     
-    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msidHostWithPortIfNecessary]
-                                                  clientId:_parameters.clientId
-                                            userIdentifier:_parameters.user.userIdentifier
-                                                   context:_parameters
-                                                     error:nil];
-    
-    CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
-    
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
-        {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-            
-            completionBlock(nil, error);
-            return;
-        }
-        
-        MSID_LOG_INFO(_parameters, @"Refreshing access token");
-        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
-        
-        _authority = authority;
-        
-        [super acquireToken:completionBlock];
-    }];
+//    _refreshToken = [cache findRefreshTokenWithEnvironment:[_parameters.unvalidatedAuthority msidHostWithPortIfNecessary]
+//                                                  clientId:_parameters.clientId
+//                                            userIdentifier:_parameters.user.userIdentifier
+//                                                   context:_parameters
+//                                                     error:nil];
+//
+//    CHECK_ERROR_COMPLETION(_refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
+//
+//    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
+//        if (error)
+//        {
+//            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+//            [self stopTelemetryEvent:event error:error];
+//
+//            completionBlock(nil, error);
+//            return;
+//        }
+//
+//        MSID_LOG_INFO(_parameters, @"Refreshing access token");
+//        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
+//
+//        _authority = authority;
+//
+//        [super acquireToken:completionBlock];
+//    }];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters

@@ -32,7 +32,7 @@
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
 #import "MSALUSer.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
 
 @interface MSALTokenCacheItemTests : XCTestCase

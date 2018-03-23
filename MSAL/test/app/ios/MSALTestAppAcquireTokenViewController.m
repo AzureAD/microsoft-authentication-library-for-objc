@@ -528,29 +528,36 @@
     }];
 }
 
-- (IBAction)clearCache:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
-    (void)sender;
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
-    NSDictionary *query = [[MSALKeychainTokenCache defaultKeychainCache] defaultKeychainQuery];
-    OSStatus status = SecItemDelete((CFDictionaryRef)query);
+    // Delete accounts.
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
     
-    if (status == errSecSuccess || status == errSecItemNotFound)
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    
+    __auto_type users = [application users:&error];
+    
+    int deletedUsers = 0;
+    int notDeletedUsers = 0;
+    for (MSALUser *user in users)
     {
-        _resultView.text = @"Successfully cleared cache.";
-        
-        MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-        settings.currentUser = nil;
-        
-        [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
-                     forState:UIControlStateNormal];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        BOOL result = [application removeUser:user error:&error];
+        result ? deletedUsers ++ : notDeletedUsers++;
     }
-    else
-    {
-        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %d", (int)status];
-    }
+    
+    _resultView.text = [NSString stringWithFormat:@"Deleted users: %d, not deleted: %d", deletedUsers, notDeletedUsers];
+    
+    settings.currentUser = nil;
+    
+    [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
+                 forState:UIControlStateNormal];
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
 }
 
 - (IBAction)showTelemetry:(id)sender

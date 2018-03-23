@@ -25,28 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALClientInfo.h"
+#import "MSALUser.h"
 
-@implementation MSALClientInfo
+@class MSIDAccount;
 
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_UNIQUE_IDENTIFIER, uid)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_UNIQUE_TENANT_IDENTIFIER, utid)
+@interface MSALUser ()
 
-- (id)initWithRawClientInfo:(NSString *)rawClientInfo
-                      error:(NSError *__autoreleasing *)error
-{
-    NSData *decoded =  [[rawClientInfo msidBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
-    if (!(self = [super initWithData:decoded error:error]))
-    {
-        return nil;
-    }
-    
-    return self;
-}
+@property (nonatomic) MSIDAccount *account;
 
-- (NSString *)userIdentifier
-{
-    return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
-}
+- (instancetype)initWithAccount:(MSIDAccount *)account;
 
 @end

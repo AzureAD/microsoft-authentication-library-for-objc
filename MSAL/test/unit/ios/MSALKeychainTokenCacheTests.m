@@ -29,7 +29,7 @@
 #import "MSALTestTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALTokenResponse.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestTokenCacheItemUtil.h"

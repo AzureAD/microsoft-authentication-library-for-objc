@@ -28,7 +28,7 @@
 #import "MSALTestCacheDataUtil.h"
 
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "MSALTokenCache.h"
 
 #import "MSALTestConstants.h"

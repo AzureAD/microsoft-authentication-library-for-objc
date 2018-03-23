@@ -29,7 +29,7 @@
 #import "MSALTestTokenCache.h"
 #import "MSALIdToken.h"
 #import "MSALTokenResponse.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "MSALTestIdTokenUtil.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestTokenCacheItemUtil.h"
@@ -78,7 +78,7 @@
      _clientInfo1 = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier1 = @"1.1234-5678-90abcdefg";
     _user1 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken1]
-                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo1 error:nil]
+                                    clientInfo:[[MSIDClientInfo alloc] initWithRawClientInfo:_clientInfo1 error:nil]
                                    environment:_testAuthority.msidHostWithPortIfNecessary];
     _testUser = _user1;
     
@@ -109,7 +109,7 @@
     _clientInfo2 = [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     _userIdentifier2 = @"2.1234-5678-90abcdefg";
     _user2 = [[MSALUser alloc] initWithIdToken:[[MSALIdToken alloc] initWithRawIdToken:_idToken2]
-                                    clientInfo:[[MSALClientInfo alloc] initWithRawClientInfo:_clientInfo2 error:nil]
+                                    clientInfo:[[MSIDClientInfo alloc] initWithRawClientInfo:_clientInfo2 error:nil]
                                    environment:_testAuthority.msidHostWithPortIfNecessary];
     
     _testResponse2Claims =

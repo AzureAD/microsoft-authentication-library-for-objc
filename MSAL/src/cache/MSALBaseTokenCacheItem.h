@@ -36,7 +36,7 @@
 @interface MSALBaseTokenCacheItem : MSALJsonObject
 
 @property NSString *clientId;
-@property (readonly) MSALClientInfo *clientInfo;
+@property (readonly) MSIDClientInfo *clientInfo;
 
 - (id)initWithClientId:(NSString *)clientId
               response:(MSALTokenResponse *)response;

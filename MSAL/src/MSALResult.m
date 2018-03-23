@@ -27,6 +27,11 @@
 
 #import "MSALResult.h"
 #import "MSALAccessTokenCacheItem.h"
+#import "MSIDAccessToken.h"
+#import "NSString+MSIDExtensions.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSIDClientInfo.h"
+#import "MSALIdToken.h"
 
 @implementation MSALResult
 
@@ -55,15 +60,20 @@
     return result;
 }
 
-+ (MSALResult *)resultWithAccessTokenItem:(MSALAccessTokenCacheItem *)cacheItem
++ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
 {
-    return [self resultWithAccessToken:cacheItem.accessToken
-                             expiresOn:cacheItem.expiresOn
-                              tenantId:cacheItem.tenantId
-                                  user:cacheItem.user
-                               idToken:cacheItem.rawIdToken
-                              uniqueId:cacheItem.uniqueId
-                                scopes:[cacheItem.scope array]];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:accessToken.clientInfo.rawClientInfo error:nil];
+    MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:accessToken.idToken];
+    
+    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
+                                            clientInfo:clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
+    return [self resultWithAccessToken:accessToken.accessToken
+                             expiresOn:accessToken.expiresOn
+                              tenantId:accessToken.authority.msidTenant
+                                  user:user
+                               idToken:accessToken.idToken
+                              uniqueId:accessToken.uniqueUserId
+                                scopes:[accessToken.scopes array]];
 }
 
 @end

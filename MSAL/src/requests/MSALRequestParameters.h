@@ -28,18 +28,19 @@
 #import <Foundation/Foundation.h>
 #import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
-#include "MSALRequestContext.h"
+#import "MSALRequestContext.h"
+#import "MSIDRequestContext.h"
 
 @class MSALAuthority;
 @class MSALTokenCache;
 @class MSALUser;
+@class MSIDRequestParameters;
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+@interface MSALRequestParameters : NSObject <MSALRequestContext, MSIDRequestContext>
 
 @property NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property MSALScopes *scopes;
-@property MSALTokenCache *tokenCache;
 @property NSURL *redirectUri;
 @property NSString *loginHint;
 @property NSString *clientId;
@@ -54,6 +55,8 @@
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
 @property NSURLSession *urlSession;
+
+@property (retain, nonatomic, readonly) MSIDRequestParameters *msidParameters;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
