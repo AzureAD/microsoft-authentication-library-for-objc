@@ -48,6 +48,8 @@
 
 @interface MSALSilentRequestTests : MSALTestCase
 
+@property (nonatomic) MSIDClientInfo *clientInfo;
+
 @end
 
 @implementation MSALSilentRequestTests
@@ -55,7 +57,9 @@
 - (void)setUp
 {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
+    self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
     [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
                            class:[MSALAuthority class]
@@ -91,12 +95,11 @@
     parameters.correlationId = correlationId;
     
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:nil error:&error];
     
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 }
-
 
 - (void)testAtsNoUser
 {
@@ -112,7 +115,7 @@
     parameters.correlationId = correlationId;
     
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:nil error:&error];
     
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -150,7 +153,8 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
 
@@ -209,7 +213,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -309,7 +313,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -410,7 +414,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -468,7 +472,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -557,7 +561,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -600,7 +604,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
@@ -691,7 +695,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
     parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     

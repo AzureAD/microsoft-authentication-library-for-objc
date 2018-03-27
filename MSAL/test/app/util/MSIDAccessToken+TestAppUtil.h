@@ -25,10 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccessTokenCacheItem+TestAppUtil.h"
+#import "MSIDAccessToken.h"
 
-@implementation MSALAccessTokenCacheItem (TestAppUtil)
+#define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
-MSAL_JSON_RW(@"expires_on", expiresOnString, setExpiresOnString)
+@interface MSIDAccessToken (TestAppUtil)
+
+@property NSString *expiresOn;
 
 @end

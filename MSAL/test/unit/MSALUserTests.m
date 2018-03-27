@@ -58,8 +58,9 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
@@ -84,8 +85,7 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);
@@ -95,8 +95,8 @@
     // The two objects should have different pointers
     XCTAssertNotEqual(user2, user);
     
-    XCTAssertEqualObjects(user.uid, user2.uid);
-    XCTAssertEqualObjects(user.utid, user2.utid);
+    XCTAssertEqualObjects(user.clientInfo.uid, user2.clientInfo.uid);
+    XCTAssertEqualObjects(user.clientInfo.utid, user2.clientInfo.utid);
     XCTAssertEqualObjects(user.identityProvider, user2.identityProvider);
     XCTAssertEqualObjects(user.name, user2.name);
 }
@@ -113,8 +113,7 @@
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);

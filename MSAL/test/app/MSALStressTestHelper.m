@@ -30,7 +30,7 @@
 #import "MSALTestAppSettings.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "MSALAccessTokenCacheItem+TestAppUtil.h"
+#import "MSIDAccessToken+TestAppUtil.h"
 
 @implementation MSALStressTestHelper
 
@@ -41,14 +41,15 @@ static BOOL s_runningTest = NO;
 
 + (void)expireAllTokens
 {
-    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
-    
-    for (MSALAccessTokenCacheItem *item in tokenCacheItems)
-    {
-        item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-        [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
-    }
+    // TODO: A
+//    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+//    NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
+//
+//    for (MSIDAccessToken *item in tokenCacheItems)
+//    {
+//        item.expiresOn = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
+//        [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
+//    }
 }
 
 #pragma mark - Stress tests

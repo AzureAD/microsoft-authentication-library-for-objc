@@ -42,6 +42,7 @@
 #import "MSIDSharedTokenCache.h"
 #import "MSIDAccessToken.h"
 #import "MSALResult+Internal.h"
+#import "MSIDAADV2TokenResponse.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -268,18 +269,22 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         NSError *cacheError = nil;
-         
-         MSIDTokenResponse *msidTokenResponse = [[MSIDTokenResponse alloc] initWithJSONDictionary:tokenResponse.jsonDictionary error:nil];
+         NSError *msidError = nil;
+         MSIDAADV2TokenResponse *msidTokenResponse = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:tokenResponse.jsonDictionary error:nil];
+         if (!msidTokenResponse)
+         {
+             completionBlock(nil, msidError);
+             return;
+         }
          
          BOOL isSaved = [self.tokenCache saveTokensWithRequestParams:_parameters.msidParameters
                                                             response:msidTokenResponse
                                                              context:_parameters
-                                                               error:&cacheError];
+                                                               error:&msidError];
          
          if (!isSaved)
          {
-             completionBlock(nil, cacheError);
+             completionBlock(nil, msidError);
              return;
          }
          

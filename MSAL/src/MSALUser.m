@@ -39,6 +39,9 @@
 @property (nonatomic) NSString *name;
 @property (nonatomic) NSString *identityProvider;
 @property (nonatomic) NSString *environment;
+@property (nonatomic) MSIDClientInfo *clientInfo;
+@property (nonatomic) NSString *uid;
+@property (nonatomic) NSString *utid;
 
 @end
 
@@ -48,11 +51,20 @@
                      clientInfo:(MSIDClientInfo *)clientInfo
                     environment:(NSString *)environment
 {
-    return [self initWithDisplayableId:idToken.preferredUsername
+    self = [self initWithDisplayableId:idToken.preferredUsername
                                   name:idToken.name
                       identityProvider:idToken.issuer
                         userIdentifier:clientInfo.userIdentifier
                            environment:environment];
+    
+    if (self)
+    {
+        _clientInfo = clientInfo;
+        _uid = clientInfo.utid;
+        _utid = clientInfo.utid;
+    }
+    
+    return self;
 }
 
 - (instancetype)initWithDisplayableId:(NSString *)displayableId

@@ -31,7 +31,7 @@
 #import "MSALAutoMainViewController.h"
 #import "MSALAutoResultViewController.h"
 #import "MSALAutoRequestViewController.h"
-#import "MSALAccessTokenCacheItem+TestAppUtil.h"
+#import "MSIDAccessToken+TestAppUtil.h"
 
 #import "MSALAccessTokenCacheItem+Automation.h"
 #import "MSALRefreshTokenCacheItem+Automation.h"
@@ -267,40 +267,40 @@
 - (IBAction)expireAccessToken:(id)sender
 {
     (void)sender;
-    
-    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
-    {
-        if (![self checkParametersError:parameters])
-        {
-            return;
-        }
-        
-        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-        
-        MSALScopes *scopes = [NSOrderedSet orderedSetWithArray:(NSArray *)parameters[MSAL_SCOPES_PARAM]];
-        
-        MSALAccessTokenCacheKey *tokenCacheKey = [[MSALAccessTokenCacheKey alloc] initWithAuthority:parameters[MSAL_AUTHORITY_PARAM]
-                                                                                           clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                                                              scope:scopes
-                                                                                     userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
-                                                                                        environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]];
-        
-        NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:tokenCacheKey context:nil error:nil];
-        
-        NSUInteger accessTokenCount = 0;
-        
-        for (MSALAccessTokenCacheItem *item in tokenCacheItems)
-        {
-            item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-            [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
-            accessTokenCount++;
-        }
-        
-        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, (unsigned long)accessTokenCount];
-        [self displayOperationResultString:resultString];
-    };
-    
-    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
+    // TODO: A Fix
+//    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
+//    {
+//        if (![self checkParametersError:parameters])
+//        {
+//            return;
+//        }
+//
+//        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+//
+//        MSALScopes *scopes = [NSOrderedSet orderedSetWithArray:(NSArray *)parameters[MSAL_SCOPES_PARAM]];
+//
+//        MSALAccessTokenCacheKey *tokenCacheKey = [[MSALAccessTokenCacheKey alloc] initWithAuthority:parameters[MSAL_AUTHORITY_PARAM]
+//                                                                                           clientId:parameters[MSAL_CLIENT_ID_PARAM]
+//                                                                                              scope:scopes
+//                                                                                     userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
+//                                                                                        environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]];
+//
+//        NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:tokenCacheKey context:nil error:nil];
+//
+//        NSUInteger accessTokenCount = 0;
+//
+//        for (MSALAccessTokenCacheItem *item in tokenCacheItems)
+//        {
+//            item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
+//            [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
+//            accessTokenCount++;
+//        }
+//
+//        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, (unsigned long)accessTokenCount];
+//        [self displayOperationResultString:resultString];
+//    };
+//
+//    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
 - (IBAction)invalidateRefreshToken:(id)sender

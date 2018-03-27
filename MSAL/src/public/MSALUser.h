@@ -48,6 +48,16 @@
 @property (nonatomic, readonly) NSString *identityProvider;
 
 /*!
+ Unique identifier of the user. Can be nil if not returned by the service.
+ */
+@property (nonatomic, readonly) NSString *uid;
+
+/*!
+ Unique tenant identifier of the user. Can be nil if not returned by the service.
+ */
+@property (nonatomic, readonly) NSString *utid;
+
+/*!
     Host part of the authority string used for authentication.
  */
 @property (nonatomic, readonly) NSString *environment;
@@ -56,6 +66,8 @@
  The unique identifier of the user.
  */
 @property (nonatomic, readonly) NSString *userIdentifier;
+
+@property (nonatomic, readonly) MSIDClientInfo *clientInfo;
 
 /*!
     Initialize a MSALUser by extracting information from id token and client info.
