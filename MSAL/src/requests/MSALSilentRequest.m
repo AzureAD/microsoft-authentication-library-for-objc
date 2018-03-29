@@ -69,17 +69,19 @@
 {
     CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
     
+    MSIDRequestParameters *msidParameters = _parameters.msidParameters;
+    
     if (!_forceRefresh)
     {
         NSError *error = nil;
         MSIDAccessToken *accessToken = [self.tokenCache getATForAccount:_parameters.user.account
-                                                          requestParams:_parameters.msidParameters
+                                                          requestParams:msidParameters
                                                                 context:_parameters
                                                                   error:&error];
         
         if (!accessToken)
         {
-            if (error == nil && !_parameters.unvalidatedAuthority)
+            if (error == nil && !msidParameters.authority)
             {
                 error = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
                                          @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
@@ -107,14 +109,16 @@
             return;
         }
         
-        if (!_parameters.unvalidatedAuthority)
+        if (!msidParameters.authority)
         {
-            _parameters.unvalidatedAuthority = accessToken.authority;
+            msidParameters.authority = accessToken.authority;
         }
+        
+        _parameters.unvalidatedAuthority = msidParameters.authority;
     }
     
     self.refreshToken = [self.tokenCache getRTForAccount:_parameters.user.account
-                                           requestParams:_parameters.msidParameters
+                                           requestParams:msidParameters
                                                  context:_parameters
                                                    error:nil];
     
