@@ -583,7 +583,7 @@
     
     for (MSIDBaseToken *token in tokens)
     {
-        BOOL result = [self.tokenCache removeTokenForAccount:user.account token:token context:nil error:error];
+        BOOL result = [self.tokenCache removeToken:token forAccount:user.account context:nil error:error];
         
         if (!result) return NO;
     }
