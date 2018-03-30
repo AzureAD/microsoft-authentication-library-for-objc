@@ -618,8 +618,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
+         XCTAssertNil(params.user.utid);
+         XCTAssertNil(params.user.uid);
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -680,8 +681,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
+         XCTAssertNil(params.user.utid);
+         XCTAssertNil(params.user.uid);
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -746,8 +748,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
+         XCTAssertNil(params.user.utid);
+         XCTAssertNil(params.user.uid);
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
