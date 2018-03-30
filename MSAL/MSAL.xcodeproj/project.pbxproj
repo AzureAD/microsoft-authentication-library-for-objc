@@ -237,7 +237,6 @@
 		D67227AE1EBD111900F3422A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D67227AD1EBD111900F3422A /* Assets.xcassets */; };
 		D67227B11EBD111900F3422A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D67227AF1EBD111900F3422A /* LaunchScreen.storyboard */; };
 		D673F0791E4A633B0018BA91 /* MSALError_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = D673F0771E4A633B0018BA91 /* MSALError_Internal.h */; };
-		D673F07D1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F07C1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m */; };
 		D673F08E1E4CE6D70018BA91 /* MSALError_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F0781E4A633B0018BA91 /* MSALError_Internal.m */; };
 		D673F08F1E4CE6D70018BA91 /* MSALError.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F741E3FF3D900C69FBA /* MSALError.m */; };
 		D673F0901E4CE6D70018BA91 /* MSALJsonObject.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A6F761E3FF3D900C69FBA /* MSALJsonObject.m */; };
@@ -2131,7 +2130,6 @@
 				D62746D91E9B5F1E00EFCE99 /* MSALUserTests.m in Sources */,
 				D69ADB1E1E5144EB00952049 /* MSALAuthorityTests.m in Sources */,
 				969B868B1E7778FF000AF437 /* MSALPkceTests.m in Sources */,
-				D673F07D1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m in Sources */,
 				9628594F1E735346008F1AE1 /* MSALB2CAuthorityResolverTests.m in Sources */,
 				6030A24A1E930C06008B838D /* MSALClientInfoTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,
