@@ -44,22 +44,31 @@
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse.h"
 #import "NSDictionary+MSIDTestUtil.h"
+#import "MSIDSharedTokenCache.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
+
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
 
 @end
 
 @implementation MSALInteractiveRequestTests
 
-- (void)setUp {
+- (void)setUp
+{
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    
+    // TODO: A
+//    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:nil otherCacheAccessors:nil];
+    self.tokenCache = nil;
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+- (void)tearDown
+{
     [super tearDown];
 }
+
+#pragma mark - Tests
 
 - (void)testInitWithParameters_whenValidParams_shouldInit
 {
@@ -80,6 +89,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
+                                            tokenCache:nil
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -117,6 +127,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceLogin
+                                            tokenCache:nil
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -194,6 +205,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceLogin
+                                            tokenCache:nil
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -253,7 +265,6 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -270,6 +281,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                   extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -408,7 +420,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
                                                          name:@"user@contoso.com"
                                              identityProvider:@"identifyProvider"
@@ -431,6 +442,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -582,7 +594,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
                                                          name:@"user@contoso.com"
                                              identityProvider:@"identifyProvider"
@@ -605,6 +616,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -738,7 +750,6 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.tokenCache = [MSALTestTokenCache createTestAccessor];
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -755,6 +766,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                   extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     
     XCTAssertNotNil(request);

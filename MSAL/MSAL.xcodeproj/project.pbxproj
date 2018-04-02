@@ -20,6 +20,8 @@
 		2342584C20649A9800621AFE /* MSALUser+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2342584A20649A9800621AFE /* MSALUser+Internal.h */; };
 		2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
 		2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
+		23A169B12072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */; };
+		23A169B22072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */; };
 		23CDA9B31FA45A9E00FDD5C0 /* MSALTelemetryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9B01FA4443800FDD5C0 /* MSALTelemetryTests.m */; };
 		23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = 23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */; };
 		23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
@@ -2134,6 +2136,7 @@
 				6030A24A1E930C06008B838D /* MSALClientInfoTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,
 				2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */,
+				23A169B22072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */,
 				D6B58A581EB2C743000B3A5F /* MSALTestCacheDataUtil.m in Sources */,
 				60DEF1411E6501F800966664 /* MSALIdTokenTests.m in Sources */,
 				23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */,
@@ -2194,6 +2197,7 @@
 				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				D69ADB201E5151E000952049 /* MSALJsonObjectTests.m in Sources */,
 				964F65251EC508670017D685 /* MSALWebFingerResponseTests.m in Sources */,
+				23A169B12072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
