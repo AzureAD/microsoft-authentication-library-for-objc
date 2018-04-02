@@ -95,8 +95,8 @@
     // The two objects should have different pointers
     XCTAssertNotEqual(user2, user);
     
-    XCTAssertEqualObjects(user.clientInfo.uid, user2.clientInfo.uid);
-    XCTAssertEqualObjects(user.clientInfo.utid, user2.clientInfo.utid);
+    XCTAssertEqualObjects(user.uid, user2.uid);
+    XCTAssertEqualObjects(user.utid, user2.utid);
     XCTAssertEqualObjects(user.identityProvider, user2.identityProvider);
     XCTAssertEqualObjects(user.name, user2.name);
 }

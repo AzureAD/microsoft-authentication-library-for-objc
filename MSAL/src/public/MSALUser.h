@@ -33,66 +33,67 @@
 @interface MSALUser : NSObject <NSCopying>
 
 /*!
-    The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
  */
-@property (nonatomic, readonly) NSString *displayableId;
+@property (readonly) NSString *displayableId;
 
 /*!
-    The given name of the user. Can be nil if not returned by the service.
+ The given name of the user. Can be nil if not returned by the service.
  */
-@property (nonatomic, readonly) NSString *name;
+@property (readonly) NSString *name;
 
 /*!
-    The identity provider of the user authenticated. Can be nil if not returned by the service.
+ The identity provider of the user authenticated. Can be nil if not returned by the service.
  */
-@property (nonatomic, readonly) NSString *identityProvider;
+@property (readonly) NSString *identityProvider;
 
 /*!
  Unique identifier of the user. Can be nil if not returned by the service.
  */
-@property (nonatomic, readonly) NSString *uid;
+@property (readonly) NSString *uid;
 
 /*!
  Unique tenant identifier of the user. Can be nil if not returned by the service.
  */
-@property (nonatomic, readonly) NSString *utid;
+@property (readonly) NSString *utid;
 
 /*!
-    Host part of the authority string used for authentication.
+ Host part of the authority string used for authentication.
  */
-@property (nonatomic, readonly) NSString *environment;
+@property (readonly) NSString *environment;
 
 /*!
- The unique identifier of the user.
- */
-@property (nonatomic, readonly) NSString *userIdentifier;
-
-@property (nonatomic, readonly) MSIDClientInfo *clientInfo;
-
-/*!
-    Initialize a MSALUser by extracting information from id token and client info.
+ Initialize a MSALUser by extracting information from id token and client info.
  
-    @param  idToken             A MSALIdToken object that holds information extracted from the raw id token
-    @param  clientInfo          Client info returned by the service
-    @param  environment         Host part of the authority string
+ @param  idToken             A MSALIdToken object that holds information extracted from the raw id token
+ @param  clientInfo          Client info returned by the service
+ @param  environment         Host part of the authority string
  */
-- (instancetype)initWithIdToken:(MSALIdToken *)idToken
-                     clientInfo:(MSIDClientInfo *)clientInfo
-                    environment:(NSString *)environment;
+- (id)initWithIdToken:(MSALIdToken *)idToken
+           clientInfo:(MSIDClientInfo *)clientInfo
+          environment:(NSString *)environment;
 
 /*!
-    Initialize a MSALUser with given information
+ Initialize a MSALUser with given information
  
-    @param  displayableId       The displayable value in UserPrincipleName(UPN) format
-    @param  name                The given name of the user
-    @param  identityProvider    The identity provider of the user authenticated
-    @param  userIdentifier      Unique identifier of the user
-    @param  environment         Host part of the authority string
+ @param  displayableId       The displayable value in UserPrincipleName(UPN) format
+ @param  name                The given name of the user
+ @param  identityProvider    The identity provider of the user authenticated
+ @param  uid                 Unique identifier of the user
+ @param  utid                Unique tenant identifier of the user
+ @param  environment         Host part of the authority string
  */
-- (instancetype)initWithDisplayableId:(NSString *)displayableId
-                                 name:(NSString *)name
-                     identityProvider:(NSString *)identityProvider
-                       userIdentifier:(NSString *)userIdentifier
-                          environment:(NSString *)environment;
+- (id)initWithDisplayableId:(NSString *)displayableId
+                       name:(NSString *)name
+           identityProvider:(NSString *)identityProvider
+                        uid:(NSString *)uid
+                       utid:(NSString *)utid
+                environment:(NSString *)environment;
+
+/*!
+ Returns the unique identifier of the user, which is a combination of uid and utid properties
+ */
+- (NSString *)userIdentifier;
 
 @end
+

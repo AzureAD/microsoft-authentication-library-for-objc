@@ -51,27 +51,22 @@
                      clientInfo:(MSIDClientInfo *)clientInfo
                     environment:(NSString *)environment
 {
-    self = [self initWithDisplayableId:idToken.preferredUsername
-                                  name:idToken.name
-                      identityProvider:idToken.issuer
-                        userIdentifier:clientInfo.userIdentifier
-                           environment:environment];
+    self = [self initWithDisplayableId:idToken.preferredUsername name:idToken.name identityProvider:idToken.issuer uid:clientInfo.uid utid:clientInfo.utid environment:environment];
     
     if (self)
     {
         _clientInfo = clientInfo;
-        _uid = clientInfo.utid;
-        _utid = clientInfo.utid;
     }
     
     return self;
 }
 
-- (instancetype)initWithDisplayableId:(NSString *)displayableId
-                                 name:(NSString *)name
-                     identityProvider:(NSString *)identityProvider
-                       userIdentifier:(NSString *)userIdentifier
-                          environment:(NSString *)environment
+- (id)initWithDisplayableId:(NSString *)displayableId
+                       name:(NSString *)name
+           identityProvider:(NSString *)identityProvider
+                        uid:(NSString *)uid
+                       utid:(NSString *)utid
+                environment:(NSString *)environment
 {
     if (!(self = [super init]))
     {
@@ -81,9 +76,10 @@
     _displayableId = [displayableId copy];
     _name = [name copy];
     _identityProvider = [identityProvider copy];
+    _uid = [uid copy];
+    _utid = [utid copy];
     _environment = [environment copy];
-    _userIdentifier = [userIdentifier copy];
-    _account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:_userIdentifier];
+    _account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:self.userIdentifier];
     
     return self;
 }
@@ -91,11 +87,17 @@
 - (instancetype)initWithAccount:(MSIDAccount *)account
 {
     NSString *name = [NSString stringWithFormat:@"%@ %@", account.firstName, account.lastName];
-    return [self initWithDisplayableId:account.username
-                                  name:name
-                      identityProvider:nil
-                        userIdentifier:account.uniqueUserId
-                           environment:account.authority.msidHostWithPortIfNecessary];
+    
+    return[self initWithDisplayableId:account.username
+                                 name:name identityProvider:nil
+                                  uid:account.clientInfo.uid
+                                 utid:account.clientInfo.utid
+                          environment:account.authority.msidHostWithPortIfNecessary];
+}
+
+- (NSString *)userIdentifier
+{
+    return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
 }
 
 #pragma mark - NSCopying
@@ -108,6 +110,8 @@
     user.name = [self.name copyWithZone:zone];
     user.identityProvider = [self.identityProvider copyWithZone:zone];
     user.environment = [self.environment copyWithZone:zone];
+    user.uid = [user.uid copyWithZone:zone];
+    user.utid = [user.utid copyWithZone:zone];
     
     return user;
 }
@@ -137,6 +141,8 @@
     hash = hash * 31 + self.name.hash;
     hash = hash * 31 + self.identityProvider.hash;
     hash = hash * 31 + self.environment.hash;
+    hash = hash * 31 + self.uid.hash;
+    hash = hash * 31 + self.utid.hash;
     return hash;
 }
 
@@ -150,6 +156,8 @@
     result &= (!self.name && !user.name) || [self.name isEqualToString:user.name];
     result &= (!self.identityProvider && !user.identityProvider) || [self.identityProvider isEqualToString:user.identityProvider];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
+    result &= (!self.uid && !user.uid) || [self.uid isEqualToString:user.uid];
+    result &= (!self.utid && !user.utid) || [self.utid isEqualToString:user.utid];
     
     return result;
 }

@@ -36,14 +36,8 @@
     [resultDict setValue:self.displayableId forKey:@"displayable_id"];
     [resultDict setValue:self.name forKey:@"name"];
     [resultDict setValue:self.identityProvider forKey:@"identity_provider"];
-    if (self.clientInfo.uid)
-    {
-        [resultDict setValue:self.clientInfo.uid forKey:@"uid"];
-    }
-    if (self.clientInfo.utid)
-    {
-        [resultDict setValue:self.clientInfo.utid forKey:@"utid"];
-    }
+    [resultDict setValue:self.uid forKey:@"uid"];
+    [resultDict setValue:self.utid forKey:@"utid"];
     [resultDict setValue:self.environment forKey:@"environment"];
     [resultDict setValue:self.userIdentifier forKey:@"user_identifier"];
     
