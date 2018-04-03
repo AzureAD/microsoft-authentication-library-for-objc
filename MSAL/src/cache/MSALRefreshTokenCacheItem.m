@@ -97,12 +97,12 @@ MSAL_JSON_RW(@"identity_provider", identityProvider, setIdentityProvider)
 
 - (void)initDerivedPropertiesFromJson
 {
-    // TODO: A
-//    _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
-//                                               name:self.name
-//                                   identityProvider:self.identityProvider
-//                                     userIdentifier:self.clientInfo.userIdentifier
-//                                        environment:self.environment];
+    _user = [[MSALUser alloc] initWithDisplayableId:self.displayableId
+                                               name:self.name
+                                   identityProvider:self.identityProvider
+                                                uid:self.clientInfo.uid
+                                               utid:self.clientInfo.utid
+                                        environment:self.environment];
 }
 
 - (MSALRefreshTokenCacheKey *)tokenCacheKey:(NSError * __autoreleasing *)error

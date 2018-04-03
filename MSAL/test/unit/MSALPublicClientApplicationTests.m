@@ -41,6 +41,8 @@
 #import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAADV2TokenResponse.h"
+#import "MSIDAccount.h"
+#import "MSALUser+Internal.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -823,10 +825,9 @@
     XCTAssertEqual([application users:nil].count, 0);
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+//    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+//    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -853,6 +854,10 @@
     
     BOOL result = [self.tokenCache saveTokensWithRequestParams:requestParameters response:msidResponse context:nil error:nil];
     XCTAssertTrue(result);
+    
+    MSIDAccount *account = [[MSIDAccount alloc] initWithTokenResponse:msidResponse
+                                                              request:requestParameters];
+    MSALUser *user = [[MSALUser alloc] initWithAccount:account];
 
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application users:nil].count, 1);
@@ -860,7 +865,7 @@
 
     XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
-
+    
     // Make sure the user is now gone
     XCTAssertEqual([application users:nil].count, 0);
 }
@@ -900,14 +905,15 @@
 
     MSALUser *user = [MSALUser new];
 
-    [MSALTestSwizzle instanceMethod:@selector(removeToken:forAccount:context:error:)
+    [MSALTestSwizzle instanceMethod:@selector(removeAccount:context:error:)
                               class:[MSIDSharedTokenCache class]
-                              block:(id)^(id obj, MSIDBaseToken *token, MSIDAccount *account, id<MSALRequestContext> ctx, NSError **error)
+                              block:(id)^(id obj, MSIDAccount *account, id<MSIDRequestContext> ctx, NSError **error)
      {
          (void)obj;
-         (void)token;
          (void)account;
-         MSAL_KEYCHAIN_ERROR(ctx, -34018, @"fetching team ID.");
+         
+         *error = MSALCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil);
+         
          return NO;
      }];
     

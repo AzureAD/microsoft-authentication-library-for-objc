@@ -86,13 +86,19 @@
 
 - (instancetype)initWithAccount:(MSIDAccount *)account
 {
-    NSString *name = [NSString stringWithFormat:@"%@ %@", account.firstName, account.lastName];
+    self = [self initWithDisplayableId:account.username
+                                  name:account.firstName
+                      identityProvider:nil
+                                   uid:account.clientInfo.uid
+                                  utid:account.clientInfo.utid
+                           environment:account.authority.msidHostWithPortIfNecessary];
     
-    return[self initWithDisplayableId:account.username
-                                 name:name identityProvider:nil
-                                  uid:account.clientInfo.uid
-                                 utid:account.clientInfo.utid
-                          environment:account.authority.msidHostWithPortIfNecessary];
+    if (self)
+    {
+        _account = account;
+    }
+    
+    return self;
 }
 
 - (NSString *)userIdentifier
@@ -110,8 +116,8 @@
     user.name = [self.name copyWithZone:zone];
     user.identityProvider = [self.identityProvider copyWithZone:zone];
     user.environment = [self.environment copyWithZone:zone];
-    user.uid = [user.uid copyWithZone:zone];
-    user.utid = [user.utid copyWithZone:zone];
+    user.uid = [self.uid copyWithZone:zone];
+    user.utid = [self.utid copyWithZone:zone];
     
     return user;
 }
