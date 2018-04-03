@@ -37,6 +37,10 @@
 #import "MSALWebUI.h"
 #import "MSIDClientInfo.h"
 #import "NSDictionary+MSIDTestUtil.h"
+#import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAADV2TokenResponse.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -52,6 +56,8 @@
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
 @property (nonatomic) MSIDClientInfo *clientInfo;
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 
 @end
 
@@ -63,6 +69,11 @@
  
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
+    
+    [MSIDKeychainTokenCache reset];
+    
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
 }
 
 - (void)tearDown
@@ -422,7 +433,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                              userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
@@ -480,7 +492,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                                         userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
@@ -541,7 +554,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                                         userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
@@ -619,8 +633,8 @@
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
-         XCTAssertNil(params.user.utid);
-         XCTAssertNil(params.user.uid);
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -639,7 +653,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                                         userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
@@ -682,8 +697,8 @@
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
-         XCTAssertNil(params.user.utid);
-         XCTAssertNil(params.user.uid);
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -702,7 +717,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                                         userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
@@ -749,8 +765,8 @@
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
-         XCTAssertNil(params.user.utid);
-         XCTAssertNil(params.user.uid);
+         XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -770,7 +786,8 @@
     MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
-                                                         userIdentifier:self.clientInfo.userIdentifier
+                                                         uid:@"1"
+                                                        utid:@"1234-5678-90abcdefg"
                                                  environment:@"https://login.microsoftonline.com"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
@@ -800,42 +817,42 @@
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                     error:nil];
-    application.tokenCache = [MSALTestTokenCache createTestAccessor];
-    id<MSALTokenCacheAccessor> dataSource = application.tokenCache.dataSource;
+    application.tokenCache = self.tokenCache;
 
     // Make sure no users are showing up in the cache
     XCTAssertEqual([application users:nil].count, 0);
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
-
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-
-    //store an access token in cache
+    
+    //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    MSALAccessTokenCacheItem *at =
-    [[MSALAccessTokenCacheItem alloc] initWithJson:@{
-                                                     @"authority" : @"https://login.microsoftonline.com/fake_tenant",
-                                                     @"scope": @"fakescope1 fakescope2",
-                                                     @"client_id": clientId,
-                                                     @"id_token": rawIdToken,
-                                                     @"client_info": rawClientInfo,
-                                                     }
-                                             error:nil];
-    [dataSource addOrUpdateAccessTokenItem:at context:nil error:nil];
-    MSALRefreshTokenCacheItem *rt =
-    [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
-                                                      @"environment" : @"login.microsoftonline.com",
-                                                      @"client_id": clientId,
-                                                      @"client_info": rawClientInfo,
-                                                      @"refresh_token": @"fakeRefreshToken"
-                                                      }
-                                              error:nil];
-    [dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+    
+    MSIDAADV2TokenResponse *msidResponse =
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
+                                                             @"access_token": @"access_token",
+                                                             @"refresh_token": @"fakeRefreshToken",
+                                                             @"authority" : @"https://login.microsoftonline.com/common",
+                                                             @"scope": @"fakescope1 fakescope2",
+                                                             @"client_id": UNIT_TEST_CLIENT_ID,
+                                                             @"id_token": rawIdToken,
+                                                             @"client_info": rawClientInfo,
+                                                             @"expires_on" : @"1"
+                                                             }
+                                                     error:nil];
+
+    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:[[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"]
+                                                                                    redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                                                                       clientId:UNIT_TEST_CLIENT_ID
+                                                                                         target:@"fakescope1 fakescope2"];
+    
+    BOOL result = [self.tokenCache saveTokensWithRequestParams:requestParameters response:msidResponse context:nil error:nil];
+    XCTAssertTrue(result);
 
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application users:nil].count, 1);
@@ -858,12 +875,12 @@
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:nil];
-    application.tokenCache = [MSALTestTokenCache createTestAccessor];
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJson:clientInfoClaims error:nil];
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
 
     XCTAssertTrue([application removeUser:user error:&error]);
@@ -882,14 +899,14 @@
                                                     error:nil];
 
     MSALUser *user = [MSALUser new];
-    
-    [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:context:error:)
-                              class:[MSALTokenCache class]
-                              block:(id)^(id obj, MSALUser *user, NSString *clientId, id<MSALRequestContext> ctx, NSError **error)
+
+    [MSALTestSwizzle instanceMethod:@selector(removeToken:forAccount:context:error:)
+                              class:[MSIDSharedTokenCache class]
+                              block:(id)^(id obj, MSIDBaseToken *token, MSIDAccount *account, id<MSALRequestContext> ctx, NSError **error)
      {
          (void)obj;
-         (void)user;
-         (void)clientId;
+         (void)token;
+         (void)account;
          MSAL_KEYCHAIN_ERROR(ctx, -34018, @"fetching team ID.");
          return NO;
      }];
