@@ -72,7 +72,7 @@
                               tenantId:accessToken.authority.msidTenant
                                   user:user
                                idToken:accessToken.idToken
-                              uniqueId:accessToken.uniqueUserId
+                              uniqueId:idToken.objectId
                                 scopes:[accessToken.scopes array]];
 }
 
