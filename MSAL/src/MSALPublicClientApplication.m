@@ -47,6 +47,8 @@
 #import "MSIDAccount.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALUser+Internal.h"
+#import "MSIDRefreshToken.h"
+#import "MSALIdToken.h"
 
 @interface MSALPublicClientApplication()
 
@@ -131,20 +133,19 @@
 
 - (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
 {
-    NSMutableArray<MSALUser *> *users = [NSMutableArray new];
-    NSArray<MSIDAccount *> *accounts = [self.tokenCache getAllAccountsWithContext:nil error:error];
+    NSMutableSet *users = [NSMutableSet new];
     
-    for (MSIDAccount *account in accounts)
+    __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
+    for (MSIDRefreshToken *token in tokens)
     {
-        MSALUser *user = [[MSALUser alloc] initWithAccount:account];
+        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:token.idToken];
+        MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
+                                                clientInfo:token.clientInfo environment:token.authority.msidHostWithPortIfNecessary];
         
-        // TODO: A HACK (account should be created in constructor). The problem is in authority vs environment.
-        user.account = account;
-        
-        [users addObject:user];
+         [users addObject:user];
     }
-    
-    return users;
+
+    return [users allObjects];
 }
 
 - (MSALUser *)userForIdentifier:(NSString *)identifier
