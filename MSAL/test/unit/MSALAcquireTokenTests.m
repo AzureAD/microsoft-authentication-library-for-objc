@@ -57,6 +57,7 @@
 #import "MSIDTestIdTokenUtil.h"
 #import "MSALIdToken.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
+#import "MSIDMacTokenCache.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -68,7 +69,9 @@
 {
     [super setUp];
     
+#if TARGET_OS_IPHONE
     [MSIDKeychainTokenCache reset];
+#endif
 }
 
 - (void)tearDown

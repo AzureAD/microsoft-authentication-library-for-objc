@@ -48,6 +48,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
+#import "MSIDMacTokenCache.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -64,9 +65,11 @@
     
 #if TARGET_OS_IPHONE
     [MSIDKeychainTokenCache reset];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+#else
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDMacTokenCache new]];
 #endif
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
 }
 
