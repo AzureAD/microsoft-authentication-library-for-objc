@@ -904,8 +904,8 @@
                                                     error:nil];
 
     MSALUser *user = [MSALUser new];
-
-    [MSALTestSwizzle instanceMethod:@selector(removeAccount:context:error:)
+    
+    [MSALTestSwizzle instanceMethod:@selector(removeAllTokensForAccount:context:error:)
                               class:[MSIDSharedTokenCache class]
                               block:(id)^(id obj, MSIDAccount *account, id<MSIDRequestContext> ctx, NSError **error)
      {

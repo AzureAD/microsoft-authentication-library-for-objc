@@ -578,18 +578,7 @@
         return YES;
     }
     
-    __auto_type tokens = [self.tokenCache allTokensForAccount:user.account context:nil error:error];
-    
-    if (*error) return NO;
-    
-    for (MSIDBaseToken *token in tokens)
-    {
-        BOOL result = [self.tokenCache removeToken:token forAccount:user.account context:nil error:error];
-        
-        if (!result) return NO;
-    }
-    
-    return [self.tokenCache removeAccount:user.account context:nil error:error];
+    return [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
 }
 
 @end
