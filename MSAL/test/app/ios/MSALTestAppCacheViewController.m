@@ -28,7 +28,6 @@
 #import "MSALTestAppCacheViewController.h"
 #import "MSALTestAppSettings.h"
 #import "MSALKeychainTokenCache.h"
-#import "MSIDAccessToken+TestAppUtil.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -38,6 +37,10 @@
 #import "MSIDRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
+#import "MSIDDefaultTokenCacheKey.h"
+#import "MSIDJsonSerializer.h"
+
+#define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
 @interface MSALTestAppCacheRowItem : NSObject
 
@@ -71,6 +74,7 @@
     
     NSArray *_tokenRowActions;
     NSArray *_rtRowActions;
+    NSArray *_idTokenRowActions;
     NSArray *_environmentRowActions;
 }
 
@@ -97,36 +101,40 @@
 
 - (void)deleteTokenAtPath:(NSIndexPath*)indexPath
 {
-    // TODO: A
-//    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
-//
-//    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-//    if ([rowItem.item isKindOfClass:[MSALAccessTokenCacheItem class]])
-//    {
-//        [cache removeAccessTokenItem:(MSALAccessTokenCacheItem *)rowItem.item context:nil error:nil];
-//    }
-//    else if ([rowItem.item isKindOfClass:[MSIDRefreshToken class]])
-//    {
-//        [cache removeRefreshTokenItem:(MSIDRefreshToken *)rowItem.item context:nil error:nil];
-//    }
-//
-//    [self loadCache];
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
+
+    MSIDBaseToken *token = (MSIDBaseToken *)rowItem.item;
+    MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
+    [self.tokenCache removeToken:token forAccount:account context:nil error:nil];
+
+    [self loadCache];
 }
 
 - (void)expireTokenAtPath:(NSIndexPath*)indexPath
 {
-    // TODO: A
-//    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
-//
-//    if (![rowItem.item isKindOfClass:[MSIDAccessToken class]]) return;
-//
-//    MSIDAccessToken *item = (MSIDAccessToken *)rowItem.item;
-//    item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-//
-////    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-//    [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
-//
-//    [self loadCache];
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
+
+    if (![rowItem.item isKindOfClass:[MSIDAccessToken class]]) return;
+
+    MSIDAccessToken *token = (MSIDAccessToken *)rowItem.item;
+    token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
+
+    MSIDTokenCacheItem *cacheItem = token.tokenCacheItem;
+    
+    MSIDTokenCacheKey *key = [MSIDDefaultTokenCacheKey keyForAccessTokenWithUniqueUserId:token.uniqueUserId
+                                                             authority:token.authority
+                                                              clientId:token.clientId
+                                                                scopes:[cacheItem.target scopeSet]];
+    
+    [MSIDKeychainTokenCache.defaultKeychainCache saveToken:cacheItem
+                                                       key:key
+                                                serializer:[MSIDJsonSerializer new]
+                                                   context:nil
+                                                     error:nil];
+    
+    
+
+    [self loadCache];
 }
 
 - (void)deleteAllAtPath:(NSIndexPath *)indexPath
@@ -137,35 +145,51 @@
         NSLog(@"Trying to delete all from a non-client-id item?");
         return;
     }
-    
+
     NSString *userId = [_userIdentifiers objectAtIndex:indexPath.section];
+    NSMutableArray *tokens = _userTokens[indexPath.section];
     
-    // Delete all tokens
-    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    [cache removeAllTokensForUserIdentifier:userId environment:rowItem.title clientId:TEST_APP_CLIENT_ID context:nil error:nil];
-    
-    [_userMap removeObjectForKey:userId];
-    [_userTokens removeObjectAtIndex:indexPath.section];
-    
-    [self loadCache];
+    if (tokens.count > 1)
+    {
+        // Get 2nd cache item, 1st is envirment title.
+        MSALTestAppCacheRowItem *cacheItem = tokens[1];
+        
+        MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:userId];
+        account.authority = cacheItem.item.authority;
+        [self.tokenCache removeAllTokensForAccount:account context:nil error:nil];
+        [self.tokenCache removeAccount:account context:nil error:nil];
+        
+        [_userMap removeObjectForKey:userId];
+        [_userTokens removeObjectAtIndex:indexPath.section];
+        
+        [self loadCache];
+    }
 }
 
 - (void)invalidateTokenAtPath:(NSIndexPath*)indexPath
 {
-    // TODO: A
-//    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
-//    if (![rowItem.item isKindOfClass:[MSIDRefreshToken class]])
-//    {
-//        return;
-//    }
-//
-//    MSIDRefreshToken *item = (MSIDRefreshToken *)rowItem.item;
-//    item.refreshToken = BAD_REFRESH_TOKEN;
-//
-//    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-//    [cache addOrUpdateRefreshTokenItem:item context:nil error:nil];
-//
-//    [self loadCache];
+    MSALTestAppCacheRowItem *rowItem = [self cacheItemForPath:indexPath];
+    if (![rowItem.item isKindOfClass:[MSIDRefreshToken class]])
+    {
+        return;
+    }
+
+    MSIDRefreshToken *token = (MSIDRefreshToken *)rowItem.item;
+    token.refreshToken = BAD_REFRESH_TOKEN;
+
+    MSIDTokenCacheItem *cacheItem = token.tokenCacheItem;
+    
+    MSIDTokenCacheKey *key = [MSIDDefaultTokenCacheKey keyForRefreshTokenWithUniqueUserId:token.uniqueUserId
+                                                                              environment:token.authority.msidHostWithPortIfNecessary
+                                                                                 clientId:token.clientId];
+    
+    [MSIDKeychainTokenCache.defaultKeychainCache saveToken:cacheItem
+                                                       key:key
+                                                serializer:[MSIDJsonSerializer new]
+                                                   context:nil
+                                                     error:nil];
+
+    [self loadCache];
 }
 
 - (void)viewDidLoad
@@ -229,6 +253,7 @@
     }];
     
     _tokenRowActions = @[ deleteTokenAction, expireTokenAction ];
+    _idTokenRowActions = @[deleteTokenAction];
     _rtRowActions = @[ deleteTokenAction, invalidateAction ];
     _environmentRowActions = @[ deleteAllAction ];
     
@@ -282,10 +307,7 @@
         // through all the itmes we get back
         _cacheMap = [NSMutableDictionary new];
         
-        // TODO: A -- verify nil account
-        MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-        
-        NSArray *allItems = [self.tokenCache allTokensForAccount:settings.currentUser.account context:nil error:nil];
+        NSArray *allItems = [self.tokenCache allTokensWithContext:nil error:nil];
         for (MSIDBaseToken *item in allItems)
         {
             [self addTokenToCacheMap:item];
@@ -454,6 +476,10 @@
         else if ([rowItem.item isKindOfClass:[MSIDRefreshToken class]])
         {
             return _rtRowActions;
+        }
+        else if ([rowItem.item isKindOfClass:[MSIDIdToken class]])
+        {
+            return _idTokenRowActions;
         }
     }
     

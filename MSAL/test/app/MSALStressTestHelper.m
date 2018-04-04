@@ -30,7 +30,6 @@
 #import "MSALTestAppSettings.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "MSIDAccessToken+TestAppUtil.h"
 
 @implementation MSALStressTestHelper
 

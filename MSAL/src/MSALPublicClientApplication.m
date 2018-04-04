@@ -578,7 +578,10 @@
         return YES;
     }
     
-    return [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
+    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
+    if (!result) return NO;
+    
+    return [self.tokenCache removeAccount:user.account context:nil error:error];
 }
 
 @end

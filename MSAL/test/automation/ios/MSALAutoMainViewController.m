@@ -31,7 +31,6 @@
 #import "MSALAutoMainViewController.h"
 #import "MSALAutoResultViewController.h"
 #import "MSALAutoRequestViewController.h"
-#import "MSIDAccessToken+TestAppUtil.h"
 
 #import "MSALAccessTokenCacheItem+Automation.h"
 #import "MSALRefreshTokenCacheItem+Automation.h"
@@ -324,7 +323,7 @@
         
         if (tokenCacheItem)
         {
-            tokenCacheItem.refreshToken = BAD_REFRESH_TOKEN;
+            tokenCacheItem.refreshToken = @"bad-refresh-token";
             [cache addOrUpdateRefreshTokenItem:tokenCacheItem context:nil error:nil];
         }
         
