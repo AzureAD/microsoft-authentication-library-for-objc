@@ -43,6 +43,7 @@
 #import "MSIDAccessToken.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAADV2TokenResponse.h"
+#import "MSIDAADV2Oauth2Strategy.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -277,10 +278,11 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         BOOL isSaved = [self.tokenCache saveTokensWithRequestParams:_parameters.msidParameters
-                                                            response:msidTokenResponse
-                                                             context:_parameters
-                                                               error:&msidError];
+         MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
+         BOOL isSaved = [self.tokenCache saveTokensWithStrategy:strategy
+                                                  requestParams:_parameters.msidParameters
+                                                       response:msidTokenResponse
+                                                        context:_parameters error:&msidError];
          
          if (!isSaved)
          {
@@ -288,8 +290,8 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         MSIDAccessToken *accessToken = [[MSIDAccessToken alloc] initWithTokenResponse:msidTokenResponse
-                                                                               request:_parameters.msidParameters];
+         MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidTokenResponse
+                                                                  request:_parameters.msidParameters];
          
          MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
          

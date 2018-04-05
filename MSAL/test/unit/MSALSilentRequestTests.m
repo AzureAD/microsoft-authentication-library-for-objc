@@ -54,6 +54,7 @@
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAccount.h"
 #import "MSIDAccessToken.h"
+#import "MSIDAADOauth2Strategy.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -190,7 +191,12 @@
                                                                                                 }
                                                                                         error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:response context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:response
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
@@ -254,7 +260,12 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -345,7 +356,12 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -437,7 +453,12 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
@@ -500,12 +521,17 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [[MSIDAccount alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [[MSIDAccessToken alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);
 
@@ -639,12 +665,17 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [[MSIDAccount alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [[MSIDAccessToken alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);
 
@@ -724,7 +755,6 @@
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
-    ///
     //store at & rt.
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
@@ -738,15 +768,20 @@
                                                              }
                                                      error:nil];
     
-    BOOL result = [self.tokenCache saveTokensWithRequestParams:parameters.msidParameters response:msidResponse context:nil error:nil];
+    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
+    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+                                            requestParams:parameters.msidParameters
+                                                 response:msidResponse
+                                                  context:nil
+                                                    error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [[MSIDAccount alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [[MSIDAccessToken alloc] initWithTokenResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
+    
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);
-    ///
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];

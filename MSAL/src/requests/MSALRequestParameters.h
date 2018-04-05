@@ -38,7 +38,7 @@
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext, MSIDRequestContext>
 
-@property NSURL *unvalidatedAuthority;
+@property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property MSALScopes *scopes;
 @property NSURL *redirectUri;
