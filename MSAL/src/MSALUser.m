@@ -31,6 +31,7 @@
 #import "MSIDAccount.h"
 #import "MSALUser+Internal.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDAuthority.h"
 
 @interface MSALUser ()
 
@@ -80,6 +81,7 @@
     _utid = [utid copy];
     _environment = [environment copy];
     _account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:self.userIdentifier];
+    _account.authority = [NSURL msidURLWithEnvironment:_environment];
     
     return self;
 }

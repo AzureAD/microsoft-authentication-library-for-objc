@@ -53,6 +53,7 @@
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
 
 @end
 
@@ -120,9 +121,9 @@
 #endif
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.defaultAccessor otherCacheAccessors:@[legacyAccessor]];
     
     _validateAuthority = YES;
     
@@ -135,7 +136,10 @@
 {
     NSMutableSet *users = [NSMutableSet new];
     
-    __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
+    __auto_type tokens = [self.defaultAccessor getAllTokensOfType:MSIDTokenTypeRefreshToken
+                                                     withClientId:self.clientId
+                                                          context:nil
+                                                            error:error];
     for (MSIDRefreshToken *token in tokens)
     {
         MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:token.idToken];

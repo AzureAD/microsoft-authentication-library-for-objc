@@ -39,6 +39,7 @@
 #import "MSIDIdToken.h"
 #import "MSIDDefaultTokenCacheKey.h"
 #import "MSIDJsonSerializer.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -92,9 +93,9 @@
     [self setExtendedLayoutIncludesOpaqueBars:NO];
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
     
-    
-    __auto_type accessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    _tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:accessor otherCacheAccessors:nil];
+    __auto_type defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    __auto_type legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    _tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
     
     return self;
 }

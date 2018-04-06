@@ -951,19 +951,11 @@
 			path = util;
 			sourceTree = "<group>";
 		};
-		B27724231EAEC12700375C53 /* util */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = util;
-			sourceTree = "<group>";
-		};
 		D61A647D1E5AA7C60086D120 /* app */ = {
 			isa = PBXGroup;
 			children = (
 				D61A647E1E5AA7C60086D120 /* ios */,
 				D61A648B1E5AA7C60086D120 /* mac */,
-				B27724231EAEC12700375C53 /* util */,
 				D61A64AF1E5AAC5C0086D120 /* MSALTestAppSettings.h */,
 				D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */,
 				B277241C1EAE97D700375C53 /* MSALStressTestHelper.h */,
