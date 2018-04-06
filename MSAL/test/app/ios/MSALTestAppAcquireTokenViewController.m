@@ -33,6 +33,8 @@
 #import "MSALTestAppScopesViewController.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALStressTestHelper.h"
+#import "MSALPublicClientApplication+Internal.h"
+#import "MSIDSharedTokenCache.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -540,24 +542,23 @@
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     
-    __auto_type users = [application users:&error];
+    BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
-    int deletedUsers = 0;
-    int notDeletedUsers = 0;
-    for (MSALUser *user in users)
+    if (result)
     {
-        BOOL result = [application removeUser:user error:&error];
-        result ? deletedUsers ++ : notDeletedUsers++;
+        _resultView.text = @"Successfully cleared cache.";
+        
+        settings.currentUser = nil;
+        
+        [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
+                     forState:UIControlStateNormal];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
     }
-    
-    _resultView.text = [NSString stringWithFormat:@"Deleted users: %d, not deleted: %d", deletedUsers, notDeletedUsers];
-    
-    settings.currentUser = nil;
-    
-    [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
-                 forState:UIControlStateNormal];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+    else
+    {
+        _resultView.text = @"Failed to clear the cache.";
+    }
 }
 
 - (IBAction)showTelemetry:(id)sender
