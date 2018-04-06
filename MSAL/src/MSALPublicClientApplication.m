@@ -155,13 +155,13 @@
 - (MSALUser *)userForIdentifier:(NSString *)identifier
                           error:(NSError * __autoreleasing *)error
 {
-    __auto_type accounts = [self.tokenCache getAllAccountsWithContext:nil error:error];
+    __auto_type users = [self users:error];
     
-    for (MSIDAccount *account in accounts)
+    for (MSALUser *user in users)
     {
-        if ([account.uniqueUserId isEqualToString:identifier])
+        if ([user.userIdentifier isEqualToString:identifier])
         {
-            return [[MSALUser alloc] initWithAccount:account];
+            return user;
         }
     }
     
