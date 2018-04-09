@@ -62,11 +62,10 @@
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
 {
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:accessToken.clientInfo.rawClientInfo error:nil];
     MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:accessToken.idToken];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
-                                            clientInfo:clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
+                                            clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                               tenantId:accessToken.authority.msidTenant

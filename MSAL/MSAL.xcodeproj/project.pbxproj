@@ -30,8 +30,6 @@
 		23F32F0D1FF4789200B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
 		6030A2471E92114D008B838D /* MSALTestTokenCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A2461E92114D008B838D /* MSALTestTokenCache.m */; };
 		6030A2481E92114D008B838D /* MSALTestTokenCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A2461E92114D008B838D /* MSALTestTokenCache.m */; };
-		6030A24A1E930C06008B838D /* MSALClientInfoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A2491E930C06008B838D /* MSALClientInfoTests.m */; };
-		6030A24B1E930C06008B838D /* MSALClientInfoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A2491E930C06008B838D /* MSALClientInfoTests.m */; };
 		6030A24F1E944751008B838D /* MSALAccessTokenCacheKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A24D1E944751008B838D /* MSALAccessTokenCacheKey.m */; };
 		6030A2531E94478E008B838D /* MSALRefreshTokenCacheKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 6030A2511E94478E008B838D /* MSALRefreshTokenCacheKey.m */; };
 		603D19A11EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 603D19A01EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m */; };
@@ -447,7 +445,6 @@
 		23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTestURLResponse+MSAL.m"; sourceTree = "<group>"; };
 		6030A2451E9210CC008B838D /* MSALTestTokenCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestTokenCache.h; sourceTree = "<group>"; };
 		6030A2461E92114D008B838D /* MSALTestTokenCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestTokenCache.m; sourceTree = "<group>"; };
-		6030A2491E930C06008B838D /* MSALClientInfoTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALClientInfoTests.m; sourceTree = "<group>"; };
 		6030A24C1E94472E008B838D /* MSALAccessTokenCacheKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAccessTokenCacheKey.h; sourceTree = "<group>"; };
 		6030A24D1E944751008B838D /* MSALAccessTokenCacheKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAccessTokenCacheKey.m; sourceTree = "<group>"; };
 		6030A2501E944775008B838D /* MSALRefreshTokenCacheKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALRefreshTokenCacheKey.h; sourceTree = "<group>"; };
@@ -1288,7 +1285,6 @@
 				60DEF1401E6501F800966664 /* MSALIdTokenTests.m */,
 				60DEF1431E65455A00966664 /* MSALTokenCacheItemTests.m */,
 				9628594E1E735346008F1AE1 /* MSALB2CAuthorityResolverTests.m */,
-				6030A2491E930C06008B838D /* MSALClientInfoTests.m */,
 				D62746D81E9B5F1E00EFCE99 /* MSALUserTests.m */,
 				60A0E2911EA0330000A5684C /* MSALTokenCacheTests.m */,
 				D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */,
@@ -2117,7 +2113,6 @@
 				D69ADB1E1E5144EB00952049 /* MSALAuthorityTests.m in Sources */,
 				969B868B1E7778FF000AF437 /* MSALPkceTests.m in Sources */,
 				9628594F1E735346008F1AE1 /* MSALB2CAuthorityResolverTests.m in Sources */,
-				6030A24A1E930C06008B838D /* MSALClientInfoTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,
 				2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				23A169B22072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */,
@@ -2176,7 +2171,6 @@
 				D61F5BD41E59629200912CB8 /* MSALBaseRequest+TestExtensions.m in Sources */,
 				60DEF1421E6501F800966664 /* MSALIdTokenTests.m in Sources */,
 				D69ADB361E516F9B00952049 /* MSALTestBundle.m in Sources */,
-				6030A24B1E930C06008B838D /* MSALClientInfoTests.m in Sources */,
 				603D19A21EA6BD1800462A58 /* MSALTestTokenCacheItemUtil.m in Sources */,
 				964F64F01EC4E7B30017D685 /* MSALAdfsAuthorityResolverTests.m in Sources */,
 				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
