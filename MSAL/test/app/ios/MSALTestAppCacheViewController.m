@@ -190,23 +190,14 @@
     MSIDRefreshToken *token = (MSIDRefreshToken *)rowItem.item;
     token.refreshToken = BAD_REFRESH_TOKEN;
 
-    MSIDTokenCacheItem *cacheItem = token.tokenCacheItem;
-    
+    MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:token.username uniqueUserId:token.uniqueUserId];
     if (isLegacy)
     {
-        // not implemented.
+        [self.legacyAccessor saveToken:token account:account context:nil error:nil];
     }
     else
     {
-        MSIDTokenCacheKey *key = [MSIDDefaultTokenCacheKey keyForRefreshTokenWithUniqueUserId:token.uniqueUserId
-                                                                                  environment:token.authority.msidHostWithPortIfNecessary
-                                                                                     clientId:token.clientId];
-        
-        [MSIDKeychainTokenCache.defaultKeychainCache saveToken:cacheItem
-                                                           key:key
-                                                    serializer:[MSIDJsonSerializer new]
-                                                       context:nil
-                                                         error:nil];
+        [self.defaultAccessor saveToken:token account:account context:nil error:nil];
     }
 
     [self loadCache];
