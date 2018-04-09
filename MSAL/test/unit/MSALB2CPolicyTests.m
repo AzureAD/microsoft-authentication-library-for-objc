@@ -35,7 +35,6 @@
 #import "MSALWebUI.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestCacheDataUtil.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"

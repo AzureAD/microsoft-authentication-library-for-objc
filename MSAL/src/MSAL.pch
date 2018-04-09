@@ -54,7 +54,6 @@
 #import "MSALTokenCache.h"
 #import "MSALAccessTokenCacheKey.h"
 #import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
 #import "MSALRefreshTokenCacheItem.h"
 #import "MSALTokenCacheAccessor.h"
 

@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALResult.h"
-#import "MSALAccessTokenCacheItem.h"
 #import "MSIDAccessToken.h"
 #import "NSString+MSIDExtensions.h"
 #import "NSURL+MSIDExtensions.h"

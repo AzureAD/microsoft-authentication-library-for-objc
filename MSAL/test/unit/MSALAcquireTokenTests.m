@@ -28,7 +28,6 @@
 #import "MSALTestCase.h"
 
 #import "MSALTestBundle.h"
-#import "MSALTestCacheDataUtil.h"
 #import "MSALTestConstants.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
@@ -135,7 +134,7 @@
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:[MSALTestCacheDataUtil defaultClientId]
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                 authority:authority
                                                     error:&error];
     XCTAssertNotNil(application);
@@ -189,7 +188,7 @@
     
     // Add AT & RT.
     MSIDRequestParameters *requestParams = [MSIDTestRequestParams v2DefaultParams];
-    requestParams.clientId = [MSALTestCacheDataUtil defaultClientId];
+    requestParams.clientId = UNIT_TEST_CLIENT_ID;
     MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
     BOOL result = [tokenCache saveTokensWithStrategy:strategy
                                        requestParams:requestParams
@@ -200,7 +199,7 @@
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:[MSALTestCacheDataUtil defaultClientId]
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = tokenCache;

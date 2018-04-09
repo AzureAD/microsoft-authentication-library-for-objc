@@ -29,7 +29,6 @@
 #import "MSIDDeviceId.h"
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestCacheDataUtil.h"
 #import "MSALTestConstants.h"
 
 @implementation MSIDTestURLResponse (MSAL)
@@ -98,7 +97,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token" UT_SLICE_PARAMS_QUERY, authority]
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],
                                              MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
                                              @"client_info" : @"1",
@@ -164,7 +163,7 @@
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : [MSALTestCacheDataUtil defaultClientId],
+                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],
                                              @"client_info" : @"1",
                                              @"grant_type" : @"authorization_code",

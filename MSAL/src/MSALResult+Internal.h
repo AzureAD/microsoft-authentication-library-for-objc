@@ -27,7 +27,6 @@
 
 #import "MSALResult.h"
 
-@class MSALAccessTokenCacheItem;
 @class MSIDAccessToken;
 
 @interface MSALResult (Internal)

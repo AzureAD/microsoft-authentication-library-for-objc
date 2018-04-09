@@ -27,7 +27,6 @@
 
 #import "MSALSilentRequest.h"
 #import "MSALRefreshTokenCacheItem.h"
-#import "MSALAccessTokenCacheItem.h"
 #import "MSALResult+Internal.h"
 #import "MSALTokenCache.h"
 #import "MSALTelemetryAPIEvent.h"
