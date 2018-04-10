@@ -58,6 +58,7 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Strategy.h"
+#import "MSIDAADV2IdTokenWrapper.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -180,7 +181,7 @@
     
     NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    __auto_type idToken = [[MSALIdToken alloc] initWithRawIdToken:[MSIDTestIdTokenUtil defaultV2IdToken]];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:[MSIDTestIdTokenUtil defaultV2IdToken]];
     
     MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil
                                                         uniqueUserId:clientInfo.userIdentifier];

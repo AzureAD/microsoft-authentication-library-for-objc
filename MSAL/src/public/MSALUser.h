@@ -27,9 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALIdToken;
-@class MSIDClientInfo;
-
 @interface MSALUser : NSObject <NSCopying>
 
 /*!
@@ -61,17 +58,6 @@
  Host part of the authority string used for authentication.
  */
 @property (readonly) NSString *environment;
-
-/*!
- Initialize a MSALUser by extracting information from id token and client info.
- 
- @param  idToken             A MSALIdToken object that holds information extracted from the raw id token
- @param  clientInfo          Client info returned by the service
- @param  environment         Host part of the authority string
- */
-- (id)initWithIdToken:(MSALIdToken *)idToken
-           clientInfo:(MSIDClientInfo *)clientInfo
-          environment:(NSString *)environment;
 
 /*!
  Initialize a MSALUser with given information

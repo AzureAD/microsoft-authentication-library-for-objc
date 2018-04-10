@@ -25,22 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccessTokenCacheItem+Automation.h"
-#import "MSALUser+Automation.h"
+//#import "MSALAccessTokenCacheItem+Automation.h"
+//#import "MSALUser+Automation.h"
+//
+//@implementation MSALAccessTokenCacheItem (Automation)
+//
+//- (NSDictionary *)itemAsDictionary
+//{
+//    NSMutableDictionary *resultDict = [self->_json mutableCopy];
+//    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
+//    
+//    if (self.user)
+//    {
+//        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
+//    }
+//    
+//    return resultDict;
+//}
+//
+//@end
 
-@implementation MSALAccessTokenCacheItem (Automation)
-
-- (NSDictionary *)itemAsDictionary
-{
-    NSMutableDictionary *resultDict = [self->_json mutableCopy];
-    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
-    
-    if (self.user)
-    {
-        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
-    }
-    
-    return resultDict;
-}
-
-@end

@@ -31,6 +31,8 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDClientInfo.h"
 #import "MSALIdToken.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSALUser+Internal.h"
 
 @implementation MSALResult
 
@@ -61,8 +63,7 @@
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
 {
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:accessToken.idToken];
-    
+    __auto_type idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:accessToken.idToken];
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
                                             clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
     return [self resultWithAccessToken:accessToken.accessToken

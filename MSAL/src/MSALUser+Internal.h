@@ -28,11 +28,17 @@
 #import "MSALUser.h"
 
 @class MSIDAccount;
+@class MSIDAADV2IdTokenWrapper;
+@class MSIDClientInfo;
 
 @interface MSALUser ()
 
 @property (nonatomic) MSIDAccount *account;
 
 - (instancetype)initWithAccount:(MSIDAccount *)account;
+
+- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
+           clientInfo:(MSIDClientInfo *)clientInfo
+          environment:(NSString *)environment;
 
 @end

@@ -28,6 +28,8 @@
 #import "MSALTestCase.h"
 #import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSALUser+Internal.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -53,8 +55,7 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
@@ -80,8 +81,7 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
@@ -108,8 +108,7 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };

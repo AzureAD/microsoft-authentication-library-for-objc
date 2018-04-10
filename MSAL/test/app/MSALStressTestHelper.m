@@ -30,6 +30,10 @@
 #import "MSALTestAppSettings.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDAccessToken.h"
+#import "MSIDAccount.h"
 
 @implementation MSALStressTestHelper
 
@@ -40,15 +44,16 @@ static BOOL s_runningTest = NO;
 
 + (void)expireAllTokens
 {
-    // TODO: A
-//    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-//    NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
-//
-//    for (MSIDAccessToken *item in tokenCacheItems)
-//    {
-//        item.expiresOn = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-//        [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
-//    }
+    // TODO: A fix logic
+    __auto_type cache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:nil context:nil error:nil];
+
+    for (MSIDAccessToken *token in tokens)
+    {
+        __auto_type account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
+        token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
+        [cache saveToken:token account:account context:nil error:nil];
+    }
 }
 
 #pragma mark - Stress tests

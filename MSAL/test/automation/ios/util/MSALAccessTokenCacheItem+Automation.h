@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccessTokenCacheItem.h"
+//#import "MSALAccessTokenCacheItem.h"
+//
+//@interface MSALAccessTokenCacheItem (Automation)
+//
+//- (NSDictionary *)itemAsDictionary;
+//
+//@end
 
-@interface MSALAccessTokenCacheItem (Automation)
-
-- (NSDictionary *)itemAsDictionary;
-
-@end

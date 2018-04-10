@@ -33,7 +33,6 @@
 #import "MSALTestAuthority.h"
 #import "MSALTestBundle.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestTokenCache.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
 #import "MSALUser.h"

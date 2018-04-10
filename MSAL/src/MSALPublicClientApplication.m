@@ -49,6 +49,7 @@
 #import "MSALUser+Internal.h"
 #import "MSIDRefreshToken.h"
 #import "MSALIdToken.h"
+#import "MSIDAADV2IdTokenWrapper.h"
 
 @interface MSALPublicClientApplication()
 
@@ -138,8 +139,7 @@
     __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
     for (MSIDRefreshToken *token in tokens)
     {
-        MSALIdToken *idToken = [[MSALIdToken alloc] initWithRawIdToken:token.idToken];
-        MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
+        MSALUser *user = [[MSALUser alloc] initWithIdToken:[[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:token.idToken]
                                                 clientInfo:token.clientInfo environment:token.authority.msidHostWithPortIfNecessary];
         
          [users addObject:user];

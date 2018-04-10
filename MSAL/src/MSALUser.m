@@ -26,12 +26,12 @@
 //------------------------------------------------------------------------------
 
 #import "MSALUser.h"
-#import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 #import "MSIDAccount.h"
 #import "MSALUser+Internal.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDAuthority.h"
+#import "MSIDAADV2IdTokenWrapper.h"
 
 @interface MSALUser ()
 
@@ -48,9 +48,9 @@
 
 @implementation MSALUser
 
-- (instancetype)initWithIdToken:(MSALIdToken *)idToken
-                     clientInfo:(MSIDClientInfo *)clientInfo
-                    environment:(NSString *)environment
+- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
+           clientInfo:(MSIDClientInfo *)clientInfo
+          environment:(NSString *)environment
 {
     self = [self initWithDisplayableId:idToken.preferredUsername name:idToken.name identityProvider:idToken.issuer uid:clientInfo.uid utid:clientInfo.utid environment:environment];
     

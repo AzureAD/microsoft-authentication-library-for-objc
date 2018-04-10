@@ -25,21 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRefreshTokenCacheItem+Automation.h"
-#import "MSALUser+Automation.h"
+//#import "MSALRefreshTokenCacheItem+Automation.h"
+//#import "MSALUser+Automation.h"
+//
+//@implementation MSALRefreshTokenCacheItem (Automation)
+//
+//- (NSDictionary *)itemAsDictionary
+//{
+//    NSMutableDictionary *resultDict = [self->_json mutableCopy];
+//    
+//    if (self.user)
+//    {
+//        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
+//    }
+//    
+//    return resultDict;
+//}
+//
+//@end
 
-@implementation MSALRefreshTokenCacheItem (Automation)
-
-- (NSDictionary *)itemAsDictionary
-{
-    NSMutableDictionary *resultDict = [self->_json mutableCopy];
-    
-    if (self.user)
-    {
-        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
-    }
-    
-    return resultDict;
-}
-
-@end

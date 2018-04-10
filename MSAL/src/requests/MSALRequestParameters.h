@@ -32,7 +32,6 @@
 #import "MSIDRequestContext.h"
 
 @class MSALAuthority;
-@class MSALTokenCache;
 @class MSALUser;
 @class MSIDRequestParameters;
 

@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRefreshTokenCacheItem.h"
+//#import "MSALRefreshTokenCacheItem.h"
+//
+//@interface MSALRefreshTokenCacheItem (Automation)
+//
+//- (NSDictionary *)itemAsDictionary;
+//
+//@end
 
-@interface MSALRefreshTokenCacheItem (Automation)
-
-- (NSDictionary *)itemAsDictionary;
-
-@end

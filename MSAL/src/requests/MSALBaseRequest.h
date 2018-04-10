@@ -29,7 +29,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALAuthority.h"
 
-@class MSALTokenCache;
 @class MSALTokenResponse;
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;

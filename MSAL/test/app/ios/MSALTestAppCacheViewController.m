@@ -27,7 +27,6 @@
 
 #import "MSALTestAppCacheViewController.h"
 #import "MSALTestAppSettings.h"
-#import "MSALKeychainTokenCache.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
