@@ -113,17 +113,18 @@
     CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
                                                      error:error]);
     
-    id<MSIDTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
-    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
-#else
-    dataSource = MSIDMacTokenCache.defaultCache;
-#endif
-    
+    __auto_type dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
     
     self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
+#else
+    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:nil];
+#endif
     
     _validateAuthority = YES;
     
