@@ -271,14 +271,14 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          NSError *msidError = nil;
-         MSIDAADV2TokenResponse *msidTokenResponse = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:tokenResponse.jsonDictionary error:nil];
+         MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
+         __auto_type msidTokenResponse = [strategy tokenResponseFromJSON:tokenResponse.jsonDictionary context:nil error:&msidError];
          if (!msidTokenResponse)
          {
              completionBlock(nil, msidError);
              return;
          }
          
-         MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
          BOOL isSaved = [self.tokenCache saveTokensWithStrategy:strategy
                                                   requestParams:_parameters.msidParameters
                                                        response:msidTokenResponse
