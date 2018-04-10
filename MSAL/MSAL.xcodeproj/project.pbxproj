@@ -13,7 +13,6 @@
 		04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
 		231CE9931FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */; };
 		231CE9981FE45DDE00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */; };
-		231CE9D51FEC64FC00E95D3E /* MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 231CE9D41FEC64FC00E95D3E /* MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -443,7 +442,6 @@
 		04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverter.m; sourceTree = "<group>"; };
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
 		231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m; sourceTree = "<group>"; };
-		231CE9D41FEC64FC00E95D3E /* MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m; sourceTree = "<group>"; };
 		231CE9DD1FEC684C00E95D3E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "unit-test-host.entitlements"; sourceTree = "<group>"; };
 		2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+HelperMethods.h"; sourceTree = "<group>"; };
@@ -1057,7 +1055,6 @@
 				2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */,
 				2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */,
 				231CE9921FE45C0A00E95D3E /* MSALAccessTokenCacheItemAndMSIDTokenIntegrationTests.m */,
-				231CE9D41FEC64FC00E95D3E /* MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -2126,7 +2123,6 @@
 				B210E3E31FC23D4700E7A325 /* MSALErrorTests.m in Sources */,
 				96875DEE1E59A39C00D7847F /* MSALAuthorityBaseResolverTests.m in Sources */,
 				D61F5BC01E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m in Sources */,
-				231CE9D51FEC64FC00E95D3E /* MSALKeychainTokenCacheAndMSIDKeychainTokenCacheIntegrationTests.m in Sources */,
 				D69ADB351E516F9B00952049 /* MSALTestBundle.m in Sources */,
 				94E876BB1E46452A00FB96ED /* MSALStringHelperMethodTests.m in Sources */,
 				D69ADB3F1E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */,
