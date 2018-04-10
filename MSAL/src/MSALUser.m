@@ -80,7 +80,7 @@
     _uid = [uid copy];
     _utid = [utid copy];
     _environment = [environment copy];
-    _account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:self.userIdentifier];
+    _account = [[MSIDAccount alloc] initWithLegacyUserId:_displayableId uniqueUserId:self.userIdentifier];
     _account.authority = [NSURL msidURLWithEnvironment:_environment];
     
     return self;
