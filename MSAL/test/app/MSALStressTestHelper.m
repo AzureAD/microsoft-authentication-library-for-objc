@@ -42,11 +42,10 @@ static BOOL s_runningTest = NO;
 
 #pragma mark - Helpers
 
-+ (void)expireAllTokens
++ (void)expireAllTokensWithClientId:(NSString *)clientId
 {
-    // TODO: A fix logic
     __auto_type cache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:nil context:nil error:nil];
+    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:clientId context:nil error:nil];
 
     for (MSIDAccessToken *token in tokens)
     {
@@ -89,10 +88,9 @@ static BOOL s_runningTest = NO;
                  {
                      (void)error;
                      
-                     if (expireToken
-                         && result.user)
+                     if (expireToken && result.user)
                      {
-                         [self expireAllTokens];
+                         [self expireAllTokensWithClientId:application.clientId];
                      }
                      
                      dispatch_semaphore_signal(sem);
