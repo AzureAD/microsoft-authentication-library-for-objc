@@ -57,7 +57,7 @@
 #import "MSALIdToken.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
-#import "MSIDAADV2Oauth2Strategy.h"
+#import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDAADV2IdTokenWrapper.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
@@ -190,8 +190,8 @@
     // Add AT & RT.
     MSIDRequestParameters *requestParams = [MSIDTestRequestParams v2DefaultParams];
     requestParams.clientId = UNIT_TEST_CLIENT_ID;
-    MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
-    BOOL result = [tokenCache saveTokensWithStrategy:strategy
+    MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    BOOL result = [tokenCache saveTokensWithFactory:factory
                                        requestParams:requestParams
                                             response:response
                                              context:nil

@@ -42,7 +42,7 @@
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAccount.h"
 #import "MSALUser+Internal.h"
-#import "MSIDAADOauth2Strategy.h"
+#import "MSIDAADOauth2Factory.h"
 #import "MSIDAADV2IdTokenWrapper.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
@@ -851,15 +851,15 @@
                                                                                        clientId:UNIT_TEST_CLIENT_ID
                                                                                          target:@"fakescope1 fakescope2"];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                              requestParams:requestParameters
                                                   response:msidResponse
                                                    context:nil
                                                     error:nil];
     XCTAssertTrue(result);
     
-    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:requestParameters];
+    MSIDAccount *account = [factory accountFromResponse:msidResponse request:requestParameters];
     MSALUser *user = [[MSALUser alloc] initWithAccount:account];
 
     // Make sure that the user is properly showing up in the cache

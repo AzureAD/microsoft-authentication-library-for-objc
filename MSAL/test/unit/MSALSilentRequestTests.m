@@ -53,7 +53,7 @@
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAccount.h"
 #import "MSIDAccessToken.h"
-#import "MSIDAADOauth2Strategy.h"
+#import "MSIDAADOauth2Factory.h"
 #import "MSIDAADV2IdTokenWrapper.h"
 #import "MSALUser+Internal.h"
 
@@ -192,8 +192,8 @@
                                                                                                 }
                                                                                         error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:response
                                                   context:nil
@@ -261,8 +261,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -357,8 +357,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -454,8 +454,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -522,8 +522,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -531,8 +531,8 @@
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);
 
@@ -666,8 +666,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -675,8 +675,8 @@
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);
 
@@ -769,8 +769,8 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Strategy *strategy = [MSIDAADOauth2Strategy new];
-    BOOL result = [self.tokenCache saveTokensWithStrategy:strategy
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
                                             requestParams:parameters.msidParameters
                                                  response:msidResponse
                                                   context:nil
@@ -778,8 +778,8 @@
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [strategy accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
     
     result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
     XCTAssertTrue(result);

@@ -43,7 +43,7 @@
 #import "MSIDAccessToken.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAADV2TokenResponse.h"
-#import "MSIDAADV2Oauth2Strategy.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -271,15 +271,15 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          NSError *msidError = nil;
-         MSIDAADV2Oauth2Strategy *strategy = [MSIDAADV2Oauth2Strategy new];
-         __auto_type msidTokenResponse = [strategy tokenResponseFromJSON:tokenResponse.jsonDictionary context:nil error:&msidError];
+         MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+         __auto_type msidTokenResponse = [factory tokenResponseFromJSON:tokenResponse.jsonDictionary context:nil error:&msidError];
          if (!msidTokenResponse)
          {
              completionBlock(nil, msidError);
              return;
          }
          
-         BOOL isSaved = [self.tokenCache saveTokensWithStrategy:strategy
+         BOOL isSaved = [self.tokenCache saveTokensWithFactory:factory
                                                   requestParams:_parameters.msidParameters
                                                        response:msidTokenResponse
                                                         context:_parameters error:&msidError];
@@ -290,7 +290,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         MSIDAccessToken *accessToken = [strategy accessTokenFromResponse:msidTokenResponse
+         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidTokenResponse
                                                                   request:_parameters.msidParameters];
          
          MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
