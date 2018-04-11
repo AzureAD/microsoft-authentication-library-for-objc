@@ -1571,7 +1571,6 @@
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					962E37A61E720C5D00DE71FE = {
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -1581,7 +1580,6 @@
 					};
 					D61A64321E5A29580086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -1591,34 +1589,28 @@
 					};
 					D61A646B1E5AA7120086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 					};
 					D65A6F421E3FD30A00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 					};
 					D65A6F4F1E3FD32D00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 					};
 					D65A6FC01E3FF47D00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						TestTargetID = D672279E1EBD111900F3422A;
 					};
 					D65A6FCF1E3FF49C00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					D672279E1EBD111900F3422A = {
 						CreatedOnToolsVersion = 8.3.2;
-						DevelopmentTeam = UBF8T346G9;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -2108,7 +2100,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2120,7 +2112,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2134,6 +2126,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_OPTIMIZATION_LEVEL = 0;
+				DEVELOPMENT_TEAM = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PROVISIONING_PROFILE = "";
 			};
@@ -2146,6 +2139,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PROVISIONING_PROFILE = "";
 			};
@@ -2155,6 +2149,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = "";
 			};
 			name = Debug;
 		};
@@ -2162,6 +2157,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = "";
 			};
 			name = Release;
 		};
@@ -2171,6 +2167,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Debug;
@@ -2181,6 +2178,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 			};
 			name = Release;
 		};
@@ -2188,6 +2186,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Debug;
@@ -2196,6 +2195,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = "";
 			};
 			name = Release;
 		};
@@ -2203,7 +2203,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/**";
 			};
@@ -2213,6 +2217,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/unit-test-host.app/unit-test-host";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/**";
 			};
@@ -2222,7 +2230,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/**";
 			};
 			name = Debug;
@@ -2231,6 +2242,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEC1E40002800C69FBA /* msal__unit_test__mac.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $IDCORE_PATH/tests/util/**";
 			};
 			name = Release;
@@ -2240,6 +2254,9 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -2248,6 +2265,9 @@
 			baseConfigurationReference = D67227BC1EBD302800F3422A /* msal__unit_test_host__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = "unit-test-host.entitlements";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
