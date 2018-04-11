@@ -229,20 +229,6 @@ static MSALScopes *s_reservedScopes = nil;
              completionBlock(nil, error);
          }
 
-         // TODO: seems we don't need this code because we always send 'offline_access' scope,
-         // see here: https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols-oauth-code
-//         // For silent flow, with grant type being MSID_OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
-//         // In this case, we simply return the refresh token in the request.
-//         if ([reqParameters[MSID_OAUTH2_GRANT_TYPE] isEqualToString:MSID_OAUTH2_REFRESH_TOKEN])
-//         {
-//             if (!tokenResponse.refreshToken)
-//             {
-//                 tokenResponse.refreshToken = reqParameters[MSID_OAUTH2_REFRESH_TOKEN];
-//                 MSID_LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-//                 MSID_LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-//             }
-//         }
-
          if (_parameters.user != nil &&
              ![_parameters.user.userIdentifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
          {
