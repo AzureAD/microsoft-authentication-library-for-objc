@@ -29,7 +29,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALAuthority.h"
 
-@class MSALTokenResponse;
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;
 @class MSIDSharedTokenCache;
@@ -43,7 +42,6 @@
     MSIDSharedTokenCache *_tokenCache;
 }
 
-@property (nullable) MSALTokenResponse *response;
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
 @property (nonnull, readonly) MSALRequestParameters *parameters;
 @property (nullable, nonatomic, readonly) MSIDSharedTokenCache *tokenCache;

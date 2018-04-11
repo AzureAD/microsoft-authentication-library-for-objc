@@ -29,7 +29,6 @@
 #import "MSALAuthority.h"
 #import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
-#import "MSALTokenResponse.h"
 #import "MSALUser.h"
 #import "MSALWebAuthRequest.h"
 #import "MSALTelemetryAPIEvent.h"
@@ -44,6 +43,7 @@
 #import "MSALResult+Internal.h"
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSData+MSIDExtensions.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -192,6 +192,14 @@ static MSALScopes *s_reservedScopes = nil;
     [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
      {
          MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+         NSDictionary *jsonDictionary;
+         
+         // TODO: Map msid errors to msal errors.
+         
+         if (!error)
+         {
+             jsonDictionary = [response.body msidToJson:&error];
+         }
          
          if (error)
          {
@@ -201,9 +209,11 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         MSALTokenResponse *tokenResponse =
-         [[MSALTokenResponse alloc] initWithData:response.body
-                                           error:&error];
+         // TODO: can we use factory here?
+         MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+         MSIDAADV2TokenResponse *tokenResponse = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:jsonDictionary error:&error];
+//         [factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
+
          if (!tokenResponse)
          {
              [self stopTelemetryEvent:event error:error];
@@ -212,85 +222,47 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         NSString *oauthError = tokenResponse.error;
-         if (oauthError)
+         if (![factory verifyResponse:tokenResponse context:nil error:&error])
          {
-             MSALErrorCode code = MSALErrorCodeForOAuthError(oauthError, MSALErrorInteractionRequired);
+             [self stopTelemetryEvent:event error:error];
              
-             NSError *msalError = CREATE_MSID_LOG_ERROR_WITH_SUBERRORS(_parameters, code, oauthError, tokenResponse.subError, @"%@", tokenResponse.errorDescription);
-             
-             [self stopTelemetryEvent:event error:msalError];
-             
-             completionBlock(nil, msalError);
-             
-             return;
-         }
-         
-         if ([NSString msidIsStringNilOrBlank:tokenResponse.scope])
-         {
-             MSID_LOG_INFO(_parameters, @"No scope in server response, using passed in scope instead.");
-             MSID_LOG_INFO_PII(_parameters, @"No scope in server response, using passed in scope instead.");
-             tokenResponse.scope = _parameters.scopes.msalToString;
-         }
-         
-         // For silent flow, with grant type being MSID_OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
-         // In this case, we simply return the refresh token in the request.
-         if ([reqParameters[MSID_OAUTH2_GRANT_TYPE] isEqualToString:MSID_OAUTH2_REFRESH_TOKEN])
-         {
-             if (!tokenResponse.refreshToken)
-             {
-                 tokenResponse.refreshToken = reqParameters[MSID_OAUTH2_REFRESH_TOKEN];
-                 MSID_LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-                 MSID_LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-             }
-         }
-         
-         // Check user mismatch
-         MSIDClientInfo *clientInfo = [[MSIDClientInfo  alloc] initWithRawClientInfo:tokenResponse.clientInfo
-                                                                               error:&error];
-         if (!clientInfo)
-         {
-             MSID_LOG_ERROR(_parameters, @"Client info was not returned in the server response");
-             MSID_LOG_ERROR_PII(_parameters, @"Client info was not returned in the server response");
              completionBlock(nil, error);
-             return;
          }
+
+         // TODO: seems we don't need this code because we always send 'offline_access' scope,
+         // see here: https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols-oauth-code
+//         // For silent flow, with grant type being MSID_OAUTH2_REFRESH_TOKEN, this value may be missing from the response.
+//         // In this case, we simply return the refresh token in the request.
+//         if ([reqParameters[MSID_OAUTH2_GRANT_TYPE] isEqualToString:MSID_OAUTH2_REFRESH_TOKEN])
+//         {
+//             if (!tokenResponse.refreshToken)
+//             {
+//                 tokenResponse.refreshToken = reqParameters[MSID_OAUTH2_REFRESH_TOKEN];
+//                 MSID_LOG_WARN(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+//                 MSID_LOG_WARN_PII(_parameters, @"Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+//             }
+//         }
+
          if (_parameters.user != nil &&
-             ![_parameters.user.userIdentifier isEqualToString:clientInfo.userIdentifier])
+             ![_parameters.user.userIdentifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
          {
              NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);
              return;
          }
          
-         if ([NSString msidIsStringNilOrBlank:tokenResponse.accessToken])
-         {
-             NSError *noAccessTokenError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokenInResponse, @"Token response is missing the access token");
-             completionBlock(nil, noAccessTokenError);
-             return;
-         }
-         
-         NSError *msidError = nil;
-         MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-         __auto_type msidTokenResponse = [factory tokenResponseFromJSON:tokenResponse.jsonDictionary context:nil error:&msidError];
-         if (!msidTokenResponse)
-         {
-             completionBlock(nil, msidError);
-             return;
-         }
-         
          BOOL isSaved = [self.tokenCache saveTokensWithFactory:factory
                                                   requestParams:_parameters.msidParameters
-                                                       response:msidTokenResponse
-                                                        context:_parameters error:&msidError];
+                                                       response:tokenResponse
+                                                        context:_parameters error:&error];
          
          if (!isSaved)
          {
-             completionBlock(nil, msidError);
+             completionBlock(nil, error);
              return;
          }
          
-         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidTokenResponse
+         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse
                                                                   request:_parameters.msidParameters];
          
          MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
