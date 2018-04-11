@@ -880,7 +880,7 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          
-         XCTAssertEqual(error.code, MSALErrorNoAccessTokenInResponse);
+         XCTAssertEqual(error.code, MSALErrorInternal);
          dispatch_semaphore_signal(dsem);
      }];
     

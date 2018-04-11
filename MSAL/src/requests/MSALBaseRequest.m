@@ -44,6 +44,7 @@
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "NSData+MSIDExtensions.h"
+#import "MSALErrorConverter.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -194,8 +195,6 @@ static MSALScopes *s_reservedScopes = nil;
          MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
          NSDictionary *jsonDictionary;
          
-         // TODO: Map msid errors to msal errors.
-         
          if (!error)
          {
              jsonDictionary = [response.body msidToJson:&error];
@@ -209,16 +208,14 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         // TODO: can we use factory here?
          MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-         MSIDAADV2TokenResponse *tokenResponse = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:jsonDictionary error:&error];
-//         [factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
+         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
 
          if (!tokenResponse)
          {
              [self stopTelemetryEvent:event error:error];
              
-             completionBlock(nil, error);
+             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
          
@@ -226,7 +223,8 @@ static MSALScopes *s_reservedScopes = nil;
          {
              [self stopTelemetryEvent:event error:error];
              
-             completionBlock(nil, error);
+             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+             return;
          }
 
          if (_parameters.user != nil &&
@@ -244,7 +242,7 @@ static MSALScopes *s_reservedScopes = nil;
          
          if (!isSaved)
          {
-             completionBlock(nil, error);
+             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
          
