@@ -133,16 +133,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     if (user)
     {
         parameters[MSID_OAUTH2_LOGIN_HINT] = user.displayableId;
-        
-        if (user.uid)
-        {
-            parameters[MSID_OAUTH2_LOGIN_REQ] = user.uid;
-        }
-        
-        if (user.utid)
-        {
-            parameters[MSID_OAUTH2_DOMAIN_REQ] = user.utid;
-        }
+        parameters[MSID_OAUTH2_LOGIN_REQ] = user.uid;
+        parameters[MSID_OAUTH2_DOMAIN_REQ] = user.utid;
     }
     
     _state = [[NSUUID UUID] UUIDString];
