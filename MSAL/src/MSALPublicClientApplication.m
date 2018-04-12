@@ -114,7 +114,16 @@
                                                      error:error]);
     
 #if TARGET_OS_IPHONE
-    __auto_type dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    MSIDKeychainTokenCache *dataSource;
+    if (self.keychainGroup)
+    {
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:self.keychainGroup];
+    }
+    else
+    {
+        dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    }
+    
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
     

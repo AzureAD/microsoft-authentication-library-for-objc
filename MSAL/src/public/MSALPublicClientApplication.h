@@ -60,6 +60,14 @@
     called MSAL. */
 @property NSString *component;
 
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
+ */
+@property (nonatomic) NSString *keychainGroup;
+#endif
+
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
  
