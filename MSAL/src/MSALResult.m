@@ -66,12 +66,14 @@
     __auto_type idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:accessToken.idToken];
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
                                             clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
+    NSString *uniqueId = idToken.objectId != nil ? idToken.objectId : idToken.subject;
+    
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                               tenantId:accessToken.authority.msidTenant
                                   user:user
                                idToken:accessToken.idToken
-                              uniqueId:idToken.objectId
+                              uniqueId:uniqueId
                                 scopes:[accessToken.scopes array]];
 }
 
