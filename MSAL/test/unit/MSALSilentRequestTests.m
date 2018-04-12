@@ -71,13 +71,13 @@
 {
     [super setUp];
     
-    [MSIDKeychainTokenCache reset];
-    
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
+    
+    [self.tokenCache clearWithContext:nil error:nil];
     
     [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
                            class:[MSALAuthority class]

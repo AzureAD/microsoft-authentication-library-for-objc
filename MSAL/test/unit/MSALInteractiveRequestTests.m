@@ -63,13 +63,14 @@
     [super setUp];
     
 #if TARGET_OS_IPHONE
-    [MSIDKeychainTokenCache reset];
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
 #else
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDMacTokenCache new]];
 #endif
     
     self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
+    
+    [self.tokenCache clearWithContext:nil error:nil];
 }
 
 - (void)tearDown

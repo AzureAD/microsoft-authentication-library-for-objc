@@ -62,6 +62,8 @@
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+
 @end
 
 @implementation MSALAcquireTokenTests
@@ -70,9 +72,16 @@
 {
     [super setUp];
     
+    id<MSIDTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
-    [MSIDKeychainTokenCache reset];
+    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+#else
+    dataSource = MSIDMacTokenCache.defaultCache;
 #endif
+    MSIDDefaultTokenCacheAccessor *cacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:cacheAccessor otherCacheAccessors:nil];
+    
+    [self.tokenCache clearWithContext:nil error:nil];
 }
 
 - (void)tearDown
@@ -161,15 +170,6 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    id<MSIDTokenCacheDataSource> dataSource;
-#if TARGET_OS_IPHONE
-    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
-#else
-    dataSource = MSIDMacTokenCache.defaultCache;
-#endif
-    MSIDDefaultTokenCacheAccessor *cacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
-    MSIDSharedTokenCache *tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:cacheAccessor otherCacheAccessors:nil];
-    
     // Seed a cache object with a user and existing AT that does not match the scope we will ask for
     MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
                                                                                  RT:@"i am a refresh token!"
@@ -191,11 +191,11 @@
     MSIDRequestParameters *requestParams = [MSIDTestRequestParams v2DefaultParams];
     requestParams.clientId = UNIT_TEST_CLIENT_ID;
     MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    BOOL result = [tokenCache saveTokensWithFactory:factory
-                                       requestParams:requestParams
-                                            response:response
-                                             context:nil
-                                               error:nil];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
+                                           requestParams:requestParams
+                                                response:response
+                                                 context:nil
+                                                   error:nil];
     XCTAssertTrue(result);
     
     NSError *error = nil;
@@ -203,7 +203,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:&error];
     XCTAssertNotNil(application);
-    application.tokenCache = tokenCache;
+    application.tokenCache = self.tokenCache;
 
     // Set up the network responses for OIDC discovery and the RT response
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
