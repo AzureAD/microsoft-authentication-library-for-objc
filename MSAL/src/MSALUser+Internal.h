@@ -35,8 +35,6 @@
 
 @property (nonatomic) MSIDAccount *account;
 
-- (instancetype)initWithAccount:(MSIDAccount *)account;
-
 - (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
            clientInfo:(MSIDClientInfo *)clientInfo
           environment:(NSString *)environment;

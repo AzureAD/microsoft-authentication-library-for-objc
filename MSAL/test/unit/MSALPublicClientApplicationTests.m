@@ -44,6 +44,7 @@
 #import "MSALUser+Internal.h"
 #import "MSIDAADOauth2Factory.h"
 #import "MSIDAADV2IdTokenWrapper.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -860,7 +861,12 @@
     XCTAssertTrue(result);
     
     MSIDAccount *account = [factory accountFromResponse:msidResponse request:requestParameters];
-    MSALUser *user = [[MSALUser alloc] initWithAccount:account];
+    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:account.username
+                                                        name:account.firstName
+                                            identityProvider:nil
+                                                         uid:account.clientInfo.uid
+                                                        utid:account.clientInfo.utid
+                                                 environment:account.authority.msidHostWithPortIfNecessary];
 
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application users:nil].count, 1);

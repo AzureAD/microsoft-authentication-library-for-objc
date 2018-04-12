@@ -86,23 +86,6 @@
     return self;
 }
 
-- (instancetype)initWithAccount:(MSIDAccount *)account
-{
-    self = [self initWithDisplayableId:account.username
-                                  name:account.firstName
-                      identityProvider:nil
-                                   uid:account.clientInfo.uid
-                                  utid:account.clientInfo.utid
-                           environment:account.authority.msidHostWithPortIfNecessary];
-    
-    if (self)
-    {
-        _account = account;
-    }
-    
-    return self;
-}
-
 - (NSString *)userIdentifier
 {
     return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
