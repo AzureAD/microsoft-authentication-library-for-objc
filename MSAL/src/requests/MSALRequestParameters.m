@@ -44,11 +44,6 @@
     self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
 }
 
-- (void)setUnvalidatedAuthority:(NSURL *)unvalidatedAuthority
-{
-    _unvalidatedAuthority = unvalidatedAuthority;
-}
-
 - (BOOL)setAuthorityFromString:(NSString *)authority
                          error:(NSError * __autoreleasing *)error
 {
