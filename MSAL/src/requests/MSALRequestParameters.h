@@ -35,7 +35,7 @@
 @class MSALUser;
 @class MSIDRequestParameters;
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext, MSIDRequestContext>
+@interface MSALRequestParameters : NSObject <MSALRequestContext>
 
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
