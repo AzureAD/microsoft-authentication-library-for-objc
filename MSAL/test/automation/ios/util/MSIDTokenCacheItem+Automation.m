@@ -25,11 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-//#import "MSALAccessTokenCacheItem.h"
-//
-//@interface MSALAccessTokenCacheItem (Automation)
-//
-//- (NSDictionary *)itemAsDictionary;
-//
-//@end
+#import "MSIDTokenCacheItem+Automation.h"
+#import "MSALUser+Automation.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+
+@implementation MSIDTokenCacheItem (Automation)
+
+- (NSDictionary *)itemAsDictionary
+{
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:self.idToken];
+    NSMutableDictionary *resultDict = [[self jsonDictionary] mutableCopy];
+    [resultDict setValue:idToken.tenantId forKey:@"tenant_id"];
+    
+    return resultDict;
+}
+
+@end
 

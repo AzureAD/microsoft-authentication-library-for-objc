@@ -36,10 +36,9 @@
 #import "MSIDRefreshToken.h"
 #import "MSIDAccessToken.h"
 #import "MSIDIdToken.h"
-#import "MSIDDefaultTokenCacheKey.h"
-#import "MSIDJsonSerializer.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDLegacyTokenCacheKey.h"
+#import "MSIDAccount.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -129,21 +128,9 @@
 
     MSIDAccessToken *token = (MSIDAccessToken *)rowItem.item;
     token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-
-    MSIDTokenCacheItem *cacheItem = token.tokenCacheItem;
     
-    MSIDTokenCacheKey *key = [MSIDDefaultTokenCacheKey keyForAccessTokenWithUniqueUserId:token.uniqueUserId
-                                                             authority:token.authority
-                                                              clientId:token.clientId
-                                                                scopes:[cacheItem.target scopeSet]];
-    
-    [MSIDKeychainTokenCache.defaultKeychainCache saveToken:cacheItem
-                                                       key:key
-                                                serializer:[MSIDJsonSerializer new]
-                                                   context:nil
-                                                     error:nil];
-    
-    
+    MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
+    [self.defaultAccessor saveAccessToken:token account:account context:nil error:nil];
 
     [self loadCache];
 }
@@ -192,11 +179,11 @@
     MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:token.username uniqueUserId:token.uniqueUserId];
     if (isLegacy)
     {
-        [self.legacyAccessor saveToken:token account:account context:nil error:nil];
+        [self.legacyAccessor saveRefreshToken:token account:account context:nil error:nil];
     }
     else
     {
-        [self.defaultAccessor saveToken:token account:account context:nil error:nil];
+        [self.defaultAccessor saveRefreshToken:token account:account context:nil error:nil];
     }
 
     [self loadCache];

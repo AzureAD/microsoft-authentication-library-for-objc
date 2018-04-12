@@ -51,7 +51,7 @@ static BOOL s_runningTest = NO;
     {
         __auto_type account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
         token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-        [cache saveToken:token account:account context:nil error:nil];
+        [cache saveAccessToken:token account:account context:nil error:nil];
     }
 }
 
