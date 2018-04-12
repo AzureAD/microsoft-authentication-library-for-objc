@@ -197,7 +197,7 @@ static MSALScopes *s_reservedScopes = nil;
          
          if (!error)
          {
-             jsonDictionary = [response.body msidToJson:&error];
+             jsonDictionary = [response.body msidToJsonDictionary:&error];
          }
          
          if (error)
