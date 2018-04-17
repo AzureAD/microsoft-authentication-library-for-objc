@@ -78,6 +78,14 @@
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error
 {
+    return [self initWithClientId:clientId authority:authority group:nil error:error];
+}
+
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+                 group:(NSString *)sharedGroup
+                 error:(NSError * __autoreleasing *)error
+{
     if (!(self = [super init]))
     {
         return nil;
@@ -101,7 +109,7 @@
     
     id<MSALTokenCacheAccessor> dataSource;
 #if TARGET_OS_IPHONE
-    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+    dataSource = [MSALKeychainTokenCache sharedKeychainCacheWithGroup:sharedGroup];
 #else
     dataSource = [MSALWrapperTokenCache defaultCache];
 #endif
