@@ -165,7 +165,9 @@
     
     for (MSALUser *user in users)
     {
-        if ([user.userIdentifier isEqualToString:identifier])
+        BOOL isFound = [user.userIdentifier isEqualToString:identifier];
+        isFound &= [user.environment isEqualToString:self.authority.msidHostWithPortIfNecessary];
+        if (isFound)
         {
             return user;
         }
