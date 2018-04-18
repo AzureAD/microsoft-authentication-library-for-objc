@@ -38,6 +38,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDAccount.h"
 #import "MSIDRequestParameters.h"
 #import "MSIDAccessToken.h"
@@ -49,7 +50,8 @@
 }
 
 @property (nonatomic) MSIDSharedTokenCache *tokenCache;
-@property (nonatomic) MSIDDefaultTokenCacheAccessor *cacheAccessor;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
+@property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 
 @end
 
@@ -83,9 +85,10 @@
     }];
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
-    
-    self.cacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.cacheAccessor otherCacheAccessors:nil];
+
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.defaultAccessor otherCacheAccessors:@[self.legacyAccessor]];
 }
 
 #pragma mark - Segue
@@ -289,7 +292,7 @@
         __auto_type accessToken = [self.tokenCache getATForAccount:account requestParams:msidParams context:nil error:nil];
         accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
 
-        BOOL resut = [self.cacheAccessor saveAccessToken:accessToken account:account context:nil error:nil];
+        BOOL resut = [self.defaultAccessor saveAccessToken:accessToken account:account context:nil error:nil];
 
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, resut ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
         [self displayOperationResultString:resultString];
@@ -318,7 +321,7 @@
         __auto_type refreshToken = [self.tokenCache getRTForAccount:account requestParams:msidParams context:nil error:nil];
         refreshToken.refreshToken = @"bad-refresh-token";
         
-        BOOL resut = [self.cacheAccessor saveRefreshToken:refreshToken account:account context:nil error:nil];
+        BOOL resut = [self.defaultAccessor saveRefreshToken:refreshToken account:account context:nil error:nil];
 
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_INVALIDATED_REFRESH_TOKEN_PARAM, resut ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
 
@@ -330,8 +333,10 @@
 
 - (IBAction)clearCache:(__unused id)sender
 {
-    NSUInteger allCount = [self.cacheAccessor allTokensWithContext:nil error:nil].count;
-    [self.cacheAccessor clearWithContext:nil error:nil];
+    NSUInteger allCount = [self.defaultAccessor allTokensWithContext:nil error:nil].count;
+    allCount += [self.legacyAccessor allTokensWithContext:nil error:nil].count;
+    [self.defaultAccessor clearWithContext:nil error:nil];
+    [self.legacyAccessor clearWithContext:nil error:nil];
 
     NSString *resultCountsString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_CLEARED_TOKENS_COUNT_PARAM, (unsigned long)allCount];
     [self displayResultJson:resultCountsString logs:_resultLogs];
@@ -341,7 +346,8 @@
 {
     NSMutableDictionary *cacheDictionary = [NSMutableDictionary dictionary];
     
-    __auto_type allTokens = [self.cacheAccessor allTokensWithContext:nil error:nil];
+    NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
+    [allTokens addObjectsFromArray:[self.legacyAccessor allTokensWithContext:nil error:nil]];
     [cacheDictionary setObject:@(allTokens.count) forKey:MSAL_ITEM_COUNT_PARAM];
     
     NSMutableArray *accessTokenItems = [NSMutableArray array];
