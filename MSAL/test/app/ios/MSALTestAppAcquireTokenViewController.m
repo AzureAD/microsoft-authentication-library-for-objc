@@ -557,7 +557,7 @@
     }
     else
     {
-        _resultView.text = @"Failed to clear the cache.";
+        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
 }
 
