@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "MSAL"
   s.version      = "0.1.3"
-  s.summary      = "The ADAL SDK for iOS gives you the ability to add Azure Identity authentication to your application"
+  s.summary      = "Microsoft Authentication Library (MSAL) Preview for iOS"
 
   s.description  = <<-DESC
                    The MSAL library preview for iOS gives your app the ability to begin using the Microsoft Cloud by supporting Microsoft Azure Active Directory and Microsoft Accounts in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports Microsoft Azure B2C for those using our hosted identity management service.
