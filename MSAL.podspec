@@ -38,7 +38,7 @@ Pod::Spec.new do |s|
   	app.requires_arc = true
   end
   
-  # Note, ADAL has limited support for running in app extensions.
+  # Note, MSAL has limited support for running in app extensions.
   s.subspec 'extension' do |ext|
   	ext.compiler_flags = '-DADAL_EXTENSION_SAFE=1'
   	ext.source_files = "MSAL/src/**/*.{h,m}"
