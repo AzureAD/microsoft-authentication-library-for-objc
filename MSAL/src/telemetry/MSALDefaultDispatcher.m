@@ -87,7 +87,7 @@
     if ([events count])
     {
         NSArray* eventsToBeDispatched = @[[_defaultEvent getProperties]];
-        [_dispatcher dispatchEvent:[eventsToBeDispatched arrayByAddingObjectsFromArray:events]];
+        [self dispatchEvents:[eventsToBeDispatched arrayByAddingObjectsFromArray:events]];
     }
 }
 
@@ -116,6 +116,30 @@
     }
     
     [_dispatchLock unlock];
+}
+
+- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents;
+{
+    NSMutableArray *eventsToBeDispatched = [NSMutableArray new];
+    
+    for (NSDictionary *event in rawEvents)
+    {
+        [eventsToBeDispatched addObject:[self appendPrefixForEvent:event]];
+    }
+    
+    [_dispatcher dispatchEvent:eventsToBeDispatched];
+}
+
+- (NSDictionary *)appendPrefixForEvent:(NSDictionary *)event
+{
+    NSMutableDictionary *eventWithPrefix = [NSMutableDictionary new];
+    
+    for (NSString *propertyName in [event allKeys])
+    {
+        [eventWithPrefix setValue:event[propertyName] forKey:TELEMETRY_KEY(propertyName)];
+    }
+    
+    return eventWithPrefix;
 }
 
 @end
