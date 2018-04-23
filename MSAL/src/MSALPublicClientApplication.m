@@ -39,11 +39,25 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDMacTokenCache.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAccount.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSALUser+Internal.h"
+#import "MSIDRefreshToken.h"
+#import "MSALIdToken.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+
+@interface MSALPublicClientApplication()
+
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+
+@end
 
 @implementation MSALPublicClientApplication
-{
-    MSALTokenCache *_tokenCache;
-}
 
 - (BOOL)generateRedirectUriWithClientId:(NSString *)clientId
                                   error:(NSError * __autoreleasing *)error
@@ -99,13 +113,27 @@
     CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
                                                      error:error]);
     
-    id<MSALTokenCacheAccessor> dataSource;
 #if TARGET_OS_IPHONE
-    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+    MSIDKeychainTokenCache *dataSource;
+    if (self.keychainGroup)
+    {
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:self.keychainGroup];
+    }
+    else
+    {
+        dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    }
+    
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
 #else
-    dataSource = [MSALWrapperTokenCache defaultCache];
+    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:nil];
 #endif
-    _tokenCache = [[MSALTokenCache alloc] initWithDataSource:dataSource];
     
     _validateAuthority = YES;
     
@@ -116,16 +144,36 @@
 
 - (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
 {
-    return [_tokenCache getUsers:self.clientId context:nil error:error];
+    NSMutableSet *users = [NSMutableSet new];
+    
+    __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
+    for (MSIDRefreshToken *token in tokens)
+    {
+        MSALUser *user = [[MSALUser alloc] initWithIdToken:[[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:token.idToken]
+                                                clientInfo:token.clientInfo environment:token.authority.msidHostWithPortIfNecessary];
+        
+         [users addObject:user];
+    }
+
+    return [users allObjects];
 }
 
 - (MSALUser *)userForIdentifier:(NSString *)identifier
                           error:(NSError * __autoreleasing *)error
 {
-    return [_tokenCache getUserForIdentifier:identifier
-                                    clientId:self.clientId
-                                 environment:[self.authority host]
-                                       error:error];
+    __auto_type users = [self users:error];
+    
+    for (MSALUser *user in users)
+    {
+        BOOL isFound = [user.userIdentifier isEqualToString:identifier];
+        isFound &= [user.environment isEqualToString:self.authority.msidHostWithPortIfNecessary];
+        if (isFound)
+        {
+            return user;
+        }
+    }
+    
+    return nil;
 }
 
 #pragma SafariViewController Support
@@ -444,13 +492,13 @@
     
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = _tokenCache;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
                                               behavior:uiBehavior
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     if (!request)
     {
@@ -511,11 +559,12 @@
     }
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = _tokenCache;
     params.urlSession = [MSALURLSession createMSALSession:params];
 
-    MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
+    MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
+                                                                  forceRefresh:forceRefresh
+                                                                    tokenCache:self.tokenCache
+                                                                         error:&error];
     
     if (!request)
     {
@@ -541,23 +590,16 @@
         return YES;
     }
     
-    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId context:nil error:error];
+    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
+    if (!result) return NO;
+    
+    return [self.tokenCache removeAccount:user.account context:nil error:error];
 }
 
 @end
 
 
 @implementation MSALPublicClientApplication (Internal)
-
-- (MSALTokenCache *)tokenCache
-{
-    return _tokenCache;
-}
-
-- (void)setTokenCache:(MSALTokenCache *)tokenCache
-{
-    _tokenCache = tokenCache;
-}
 
 + (NSDictionary *)defaultSliceParameters
 {

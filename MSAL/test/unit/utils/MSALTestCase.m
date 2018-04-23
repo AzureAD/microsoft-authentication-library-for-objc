@@ -31,7 +31,6 @@
 #import "MSALWebUI.h"
 
 #import "MSALTestBundle.h"
-#import "MSALTestCacheDataUtil.h"
 #import "MSALTestSwizzle.h"
 
 #import "MSIDTestURLSession.h"
@@ -49,7 +48,6 @@
     [MSALTestBundle reset];
     [MSALTestSwizzle reset];
     [MSALAuthority initialize];
-    [[MSALTestCacheDataUtil defaultUtil] reset];
     
     [MSIDTestURLSession clearResponses];
     

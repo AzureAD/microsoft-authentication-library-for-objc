@@ -25,22 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccessTokenCacheItem+Automation.h"
-#import "MSALUser+Automation.h"
+#import "MSALUser.h"
 
-@implementation MSALAccessTokenCacheItem (Automation)
+@class MSIDAccount;
+@class MSIDAADV2IdTokenWrapper;
+@class MSIDClientInfo;
 
-- (NSDictionary *)itemAsDictionary
-{
-    NSMutableDictionary *resultDict = [self->_json mutableCopy];
-    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
-    
-    if (self.user)
-    {
-        [resultDict addEntriesFromDictionary:[self.user itemAsDictionary]];
-    }
-    
-    return resultDict;
-}
+@interface MSALUser ()
+
+@property (nonatomic) MSIDAccount *account;
+
+- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
+           clientInfo:(MSIDClientInfo *)clientInfo
+          environment:(NSString *)environment;
 
 @end

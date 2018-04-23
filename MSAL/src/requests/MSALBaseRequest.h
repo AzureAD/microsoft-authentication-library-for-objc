@@ -29,10 +29,9 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALAuthority.h"
 
-@class MSALTokenCache;
-@class MSALTokenResponse;
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;
+@class MSIDSharedTokenCache;
 
 @interface MSALBaseRequest : NSObject
 {
@@ -40,16 +39,18 @@
     MSALRequestParameters *_parameters;
     MSALAuthority *_authority;
     MSALTelemetryApiId _apiId;
+    MSIDSharedTokenCache *_tokenCache;
 }
 
-@property (nullable) MSALTokenResponse *response;
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
 @property (nonnull, readonly) MSALRequestParameters *parameters;
+@property (nullable, nonatomic, readonly) MSIDSharedTokenCache *tokenCache;
 
 /* Returns the complete set of scopes to be sent out with a token request */
 - (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
 
 - (nullable id)initWithParameters:(nonnull MSALRequestParameters *)parameters
+                       tokenCache:(nullable MSIDSharedTokenCache *)tokenCache
                             error:(NSError * __nullable __autoreleasing * __nullable)error;
 
 - (BOOL)validateScopeInput:(nullable MSALScopes *)scopes

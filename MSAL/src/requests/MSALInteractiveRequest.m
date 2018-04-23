@@ -50,9 +50,11 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 - (id)initWithParameters:(MSALRequestParameters *)parameters
     extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
+              tokenCache:(MSIDSharedTokenCache *)tokenCache
                    error:(NSError * __autoreleasing *)error
 {
     if (!(self = [super initWithParameters:parameters
+                                tokenCache:tokenCache
                                      error:error]))
     {
         return nil;

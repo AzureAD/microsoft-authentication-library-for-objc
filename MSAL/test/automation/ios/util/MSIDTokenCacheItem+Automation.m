@@ -25,20 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenCacheAccessor.h"
+#import "MSIDTokenCacheItem+Automation.h"
+#import "MSALUser+Automation.h"
+#import "MSIDAADV2IdTokenWrapper.h"
 
-@interface MSALKeychainTokenCache : NSObject
+@implementation MSIDTokenCacheItem (Automation)
 
-+ (nonnull MSALKeychainTokenCache *)defaultKeychainCache;
+- (NSDictionary *)itemAsDictionary
+{
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:self.idToken];
+    NSMutableDictionary *resultDict = [[self jsonDictionary] mutableCopy];
+    [resultDict setValue:idToken.tenantId forKey:@"tenant_id"];
+    
+    return resultDict;
+}
 
 @end
 
-@interface MSALKeychainTokenCache (Internal) <MSALTokenCacheAccessor>
-
-- (nonnull NSDictionary *)defaultKeychainQuery;
-
-/*! This method should *only* be called in test code, it should never be called
- in production code */
-- (void)testRemoveAll;
-
-@end

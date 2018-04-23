@@ -26,21 +26,40 @@
 //------------------------------------------------------------------------------
 
 #import "MSALUser.h"
-#import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
+#import "MSIDAccount.h"
+#import "MSALUser+Internal.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSIDAuthority.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+
+@interface MSALUser ()
+
+@property (nonatomic) NSString *userIdentifier;
+@property (nonatomic) NSString *displayableId;
+@property (nonatomic) NSString *name;
+@property (nonatomic) NSString *identityProvider;
+@property (nonatomic) NSString *environment;
+@property (nonatomic) MSIDClientInfo *clientInfo;
+@property (nonatomic) NSString *uid;
+@property (nonatomic) NSString *utid;
+
+@end
 
 @implementation MSALUser
 
-- (id)initWithIdToken:(MSALIdToken *)idToken
-           clientInfo:(MSALClientInfo *)clientInfo
+- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
+           clientInfo:(MSIDClientInfo *)clientInfo
           environment:(NSString *)environment
 {
-    return [self initWithDisplayableId:idToken.preferredUsername
-                                  name:idToken.name
-                      identityProvider:idToken.issuer
-                                   uid:clientInfo.uid
-                                  utid:clientInfo.utid
-                           environment:environment];
+    self = [self initWithDisplayableId:idToken.preferredUsername name:idToken.name identityProvider:idToken.issuer uid:clientInfo.uid utid:clientInfo.utid environment:environment];
+    
+    if (self)
+    {
+        _clientInfo = clientInfo;
+    }
+    
+    return self;
 }
 
 - (id)initWithDisplayableId:(NSString *)displayableId
@@ -55,12 +74,14 @@
         return nil;
     }
     
-    _displayableId = displayableId;
-    _name = name;
-    _identityProvider = identityProvider;
-    _uid = uid;
-    _utid = utid;
-    _environment = environment;
+    _displayableId = [displayableId copy];
+    _name = [name copy];
+    _identityProvider = [identityProvider copy];
+    _uid = [uid copy];
+    _utid = [utid copy];
+    _environment = [environment copy];
+    _account = [[MSIDAccount alloc] initWithLegacyUserId:_displayableId uniqueUserId:self.userIdentifier];
+    _account.authority = [NSURL msidURLWithEnvironment:_environment];
     
     return self;
 }
@@ -70,60 +91,66 @@
     return [NSString stringWithFormat:@"%@.%@", self.uid, self.utid];
 }
 
-- (id)copyWithZone:(NSZone*) zone
-{
-    MSALUser* user = [[MSALUser allocWithZone:zone] init];
+#pragma mark - NSCopying
 
-    user->_displayableId = [_displayableId copyWithZone:zone];
-    user->_name = [_name copyWithZone:zone];
-    user->_identityProvider = [_identityProvider copyWithZone:zone];
-    user->_uid = [_uid copyWithZone:zone];
-    user->_utid = [_utid copyWithZone:zone];
-    user->_environment = [_environment copyWithZone:zone];
+- (id)copyWithZone:(NSZone *)zone
+{
+    MSALUser *user = [[MSALUser allocWithZone:zone] init];
+
+    user.displayableId = [self.displayableId copyWithZone:zone];
+    user.name = [self.name copyWithZone:zone];
+    user.identityProvider = [self.identityProvider copyWithZone:zone];
+    user.environment = [self.environment copyWithZone:zone];
+    user.uid = [self.uid copyWithZone:zone];
+    user.utid = [self.utid copyWithZone:zone];
     
     return user;
 }
 
+#pragma mark - NSObject
+
 - (BOOL)isEqual:(id)object
 {
-    if (![object isKindOfClass:[MSALUser class]])
+    if (self == object)
+    {
+        return YES;
+    }
+    
+    if (![object isKindOfClass:MSALUser.class])
     {
         return NO;
     }
     
-    MSALUser *other = (MSALUser *)object;
+    return [self isEqualToUser:(MSALUser *)object];
+}
+
+- (NSUInteger)hash
+{
+    NSUInteger hash = 0;
+    hash = hash * 31 + self.userIdentifier.hash;
+    hash = hash * 31 + self.displayableId.hash;
+    hash = hash * 31 + self.name.hash;
+    hash = hash * 31 + self.identityProvider.hash;
+    hash = hash * 31 + self.environment.hash;
+    hash = hash * 31 + self.uid.hash;
+    hash = hash * 31 + self.utid.hash;
+    return hash;
+}
+
+- (BOOL)isEqualToUser:(MSALUser *)user
+{
+    if (!user) return NO;
     
-    if (_displayableId && ![_displayableId isEqualToString:other->_displayableId])
-    {
-        return NO;
-    }
+    BOOL result = YES;
+    result &= (!self.userIdentifier && !user.userIdentifier) || [self.userIdentifier isEqualToString:user.userIdentifier];
+    result &= (!self.displayableId && !user.displayableId) || [self.displayableId isEqualToString:user.displayableId];
+    result &= (!self.name && !user.name) || [self.name isEqualToString:user.name];
+    result &= (!self.identityProvider && !user.identityProvider) || [self.identityProvider isEqualToString:user.identityProvider];
+    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
+    result &= (!self.uid && !user.uid) || [self.uid isEqualToString:user.uid];
+    result &= (!self.utid && !user.utid) || [self.utid isEqualToString:user.utid];
     
-    if (_uid && ![_uid isEqualToString:other->_uid])
-    {
-        return NO;
-    }
-    
-    if (_utid && ![_utid isEqualToString:other->_utid])
-    {
-        return NO;
-    }
-    
-    if (_name && ![_name isEqualToString:other->_name])
-    {
-        return NO;
-    }
-    
-    if (_environment && ![_environment isEqualToString:other->_environment])
-    {
-        return NO;
-    }
-    
-    if (_identityProvider && ![_identityProvider isEqualToString:other->_identityProvider])
-    {
-        return NO;
-    }
-    
-    return YES;
+    return result;
 }
 
 @end
