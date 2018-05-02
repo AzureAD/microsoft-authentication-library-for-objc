@@ -124,6 +124,7 @@ static NSDateFormatter *s_df = nil;
 {
     if (![self checkTimestamp])
     {
+        completionBlock(_cachedEvents, nil);
         return;
     }
     

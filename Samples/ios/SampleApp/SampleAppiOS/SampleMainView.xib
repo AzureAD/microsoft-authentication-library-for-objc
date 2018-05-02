@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -13,6 +13,7 @@
             <connections>
                 <outlet property="_nameLabel" destination="HEj-3D-Ut6" id="5Ew-vB-FRs"/>
                 <outlet property="_profileImageView" destination="sD3-kT-6Ug" id="qOp-SH-NpH"/>
+                <outlet property="_spinner" destination="5KK-Rx-faS" id="qA0-Om-pzi"/>
                 <outlet property="_tableView" destination="78H-hT-ck2" id="413-eh-F7V"/>
                 <outlet property="view" destination="xQl-Rl-JkZ" id="qdh-G5-XrB"/>
             </connections>
@@ -54,7 +55,11 @@
                         <constraint firstAttribute="width" constant="112" id="sHB-Eu-awA"/>
                     </constraints>
                 </imageView>
-                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="78H-hT-ck2">
+                <activityIndicatorView opaque="NO" alpha="0.0" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="5KK-Rx-faS">
+                    <rect key="frame" x="169" y="315" width="37" height="37"/>
+                    <color key="color" cocoaTouchSystemColor="darkTextColor"/>
+                </activityIndicatorView>
+                <tableView clipsSubviews="YES" alpha="0.0" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="78H-hT-ck2">
                     <rect key="frame" x="0.0" y="206" width="375" height="461"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
@@ -63,9 +68,11 @@
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="sD3-kT-6Ug" firstAttribute="centerX" secondItem="xQl-Rl-JkZ" secondAttribute="centerX" id="10V-Go-L52"/>
+                <constraint firstItem="5KK-Rx-faS" firstAttribute="centerX" secondItem="xQl-Rl-JkZ" secondAttribute="centerX" id="2k4-tP-Z1c"/>
                 <constraint firstItem="x7J-TL-LJq" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" constant="8" id="7Lb-fV-epe"/>
                 <constraint firstAttribute="trailing" secondItem="02G-N7-auS" secondAttribute="trailing" id="A9I-We-kZS"/>
                 <constraint firstAttribute="trailing" secondItem="78H-hT-ck2" secondAttribute="trailing" id="F1h-af-26A"/>
+                <constraint firstItem="5KK-Rx-faS" firstAttribute="centerY" secondItem="xQl-Rl-JkZ" secondAttribute="centerY" id="H9p-v4-q0R"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" id="NvN-DG-Cvm"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="top" secondItem="xQl-Rl-JkZ" secondAttribute="top" id="avk-C3-Ekm"/>
                 <constraint firstItem="78H-hT-ck2" firstAttribute="top" secondItem="x7J-TL-LJq" secondAttribute="bottom" constant="8" id="dUi-g6-Hvp"/>

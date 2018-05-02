@@ -32,6 +32,7 @@
     IBOutlet UIImageView *_profileImageView;
     IBOutlet UILabel *_nameLabel;
     IBOutlet UITableView *_tableView;
+    IBOutlet UIActivityIndicatorView *_spinner;
 }
 
 + (instancetype)sharedViewController;

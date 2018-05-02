@@ -40,7 +40,7 @@
 
 @end
 
-@implementation SampleMainViewController\
+@implementation SampleMainViewController
 {
     NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *_events;
     NSArray<NSDate *> *_keys;
@@ -97,6 +97,9 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
+    _spinner.alpha = 1.0f;
+    [_spinner startAnimating];
+
     // Set the photo first to "no_photo" so we have something there if we have
     // to wait for network lag
     [self loadPhoto];
@@ -136,8 +139,12 @@
         
         _events = events;
         [self updateKeys];
-        
+
+        _tableView.alpha = 1.0f;
         [_tableView reloadData];
+        
+        _spinner.alpha = 0;
+        [_spinner stopAnimating];
     }];
 }
 

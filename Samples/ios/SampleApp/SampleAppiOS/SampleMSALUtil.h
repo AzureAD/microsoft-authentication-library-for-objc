@@ -58,20 +58,6 @@
 - (void)signOut;
 
 /*!
-    Acquires a token to use against graph for the current user
- */
-- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
-                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
-
-/*!
-    Acquires a token using an interactive flow for the current user. Used if
-    the library returns MSALErrorInteractionRequired.
- */
-- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
-                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
-
-
-/*!
     Acquires a token first with the silent flow, falling back to a interactive call if required.
  */
 - (void)acquireTokenForCurrentUser:(NSArray<NSString *> *)scopes

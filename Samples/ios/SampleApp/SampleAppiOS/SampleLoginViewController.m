@@ -35,6 +35,8 @@
 
 @interface SampleLoginViewController ()
 
+@property (nonatomic, strong) IBOutlet UIActivityIndicatorView *spinner;
+
 @end
 
 @implementation SampleLoginViewController
@@ -63,8 +65,14 @@
 
 - (IBAction)signIn:(id)sender
 {
+    self.spinner.alpha = 1;
+    [self.spinner startAnimating];
+
     [[SampleMSALUtil sharedUtil] signInUser:^(MSALUser *user, NSString *token, NSError *error)
     {
+        self.spinner.alpha = 0;
+        [self.spinner stopAnimating];
+
         if (error)
         {
             // Don't bother showing an error if the user cancels the sign in flow.
