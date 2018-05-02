@@ -132,6 +132,11 @@
     
     [_tableView reloadData];
     [util getEvents:^(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error) {
+
+        _tableView.alpha = 1.0f;
+        _spinner.alpha = 0;
+        [_spinner stopAnimating];
+
         if (error)
         {
             return;
@@ -139,12 +144,7 @@
         
         _events = events;
         [self updateKeys];
-
-        _tableView.alpha = 1.0f;
         [_tableView reloadData];
-        
-        _spinner.alpha = 0;
-        [_spinner stopAnimating];
     }];
 }
 
