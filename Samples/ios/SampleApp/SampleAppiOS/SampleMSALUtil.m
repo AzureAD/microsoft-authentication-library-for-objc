@@ -35,6 +35,8 @@
 
 #define CURRENT_USER_KEY @"MSALCurrentUserIdentifier"
 #define CLIENT_ID @"f3e5cf63-6c0d-42cb-b5aa-ee58b1ef7523"
+#define AUTHORITY_HOST @"https://login.microsoftonline.com/"
+#define DEFAULT_AUTHORITY AUTHORITY_HOST"common"
 
 @interface SampleMSALUtil()
 
@@ -80,7 +82,14 @@
     // Request as many scopes as possible up front that you know your application will
     // want to use so the service can request consent for them up front and minimize
     // how much users are interrupted for interactive auth.
+
     [self.application acquireTokenForScopes:@[@"User.Read", @"Calendars.Read"]
+                       extraScopesToConsent:@[@"api://a88bb933-319c-41b5-9f04-eff36d985612/access_as_user"]
+                                  loginHint:nil
+                                 uiBehavior:MSALUIBehaviorDefault
+                       extraQueryParameters:nil
+                                  authority:DEFAULT_AUTHORITY
+                              correlationId:nil
                             completionBlock:^(MSALResult *result, NSError *error)
     {
         if (error)
@@ -251,7 +260,7 @@
     // tokens of varying authorities for this user in the cache. Because we are trying to get a token specifically
     // for graph in this sample it's best to specify the user's home authority to remove any possibility of there
     // being any ambiquity in the cache lookup.
-    NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", user.utid];
+    NSString *homeAuthority = [NSString stringWithFormat:@"%@%@", AUTHORITY_HOST, user.utid];
     return homeAuthority;
 }
 

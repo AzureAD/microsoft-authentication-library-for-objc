@@ -41,7 +41,12 @@
 /*
     Retrieves updated todos list from Demo API
  */
-- (void)getTodos:(void (^)(NSArray<SampleTODO *> *todos, NSError *error))completionBlock;
+- (void)getTodosFromCache:(BOOL)useCache completion:(void (^)(NSArray<SampleTODO *> *todos, NSError *error))completionBlock;
+
+/*
+ Adds new Todo using Demo API
+ */
+- (void)addTodoWithTitle:(NSString *)todoTitle completion:(void (^)(NSError *error))completionBlock;
 
 /*
     Returns cached todos (if any) for the current user

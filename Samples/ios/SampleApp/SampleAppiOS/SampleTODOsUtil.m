@@ -45,6 +45,7 @@
 @interface SampleTodosRequest : SampleAPIRequest
 
 - (void)getTodos:(void (^)(NSArray *todos, NSError *error))completionBlock;
+- (void)addTodo:(NSString *)todo completion:(void (^)(NSError *error))completionBlock;
 
 @end
 
@@ -92,13 +93,30 @@ static NSString * const kTodos = @"todos";
         return YES;
     }
 
-    // Only check for updated todos every 30 minutes
-    return (-[lastChecked timeIntervalSinceNow] > 30 * 60);
+    // Only check for updated todos every 1 minute
+    return (-[lastChecked timeIntervalSinceNow] > 1 * 60);
 }
 
-- (void)getTodos:(void (^)(NSArray<SampleTODO *> *todos, NSError *error))completionBlock
+- (void)addTodoWithTitle:(NSString *)todoTitle completion:(void (^)(NSError *error))completionBlock
 {
-    if (![self checkTimestamp])
+    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentUser:@[@"api://a88bb933-319c-41b5-9f04-eff36d985612/access_as_user"]
+                                            completionBlock:^(NSString *token, NSError *error)
+     {
+         if (error)
+         {
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 completionBlock(error);
+             });
+             return;
+         }
+
+         [[SampleTodosRequest requestWithToken:token] addTodo:todoTitle completion:completionBlock];
+     }];
+}
+
+- (void)getTodosFromCache:(BOOL)useCache completion:(void (^)(NSArray<SampleTODO *> *todos, NSError *error))completionBlock
+{
+    if (![self checkTimestamp] && useCache)
     {
         completionBlock(_cachedTodos, nil);
         return;
@@ -212,6 +230,21 @@ static NSString * const kTodos = @"todos";
          }
          completionBlock((NSArray *)todos, nil);
      }];
+}
+
+- (void)addTodo:(NSString *)todo completion:(void (^)(NSError *error))completionBlock
+{
+    NSURL *url = [NSURL URLWithString:@"https://buildtodoservice.azurewebsites.net/api/todolist"];
+
+    NSDictionary *dictionary = @{@"title": todo};
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:nil];
+
+    [super postJSONWithURL:url json:jsonData completionHandler:^(NSData *data, NSError *error) {
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completionBlock(error);
+        });
+    }];
 }
 
 @end

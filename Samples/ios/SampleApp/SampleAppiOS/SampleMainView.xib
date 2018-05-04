@@ -26,9 +26,52 @@
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="02G-N7-auS">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="87"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9hl-i9-UMV">
+                            <rect key="frame" x="331" y="24" width="20" height="20"/>
+                            <subviews>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="S45-9u-8e1">
+                                    <rect key="frame" x="0.0" y="9" width="20" height="2"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="2" id="ZEl-7x-2q3"/>
+                                    </constraints>
+                                </view>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yHn-ti-4qu">
+                                    <rect key="frame" x="9" y="0.0" width="2" height="20"/>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="2" id="oVy-ct-qr5"/>
+                                    </constraints>
+                                </view>
+                            </subviews>
+                            <constraints>
+                                <constraint firstAttribute="trailing" secondItem="S45-9u-8e1" secondAttribute="trailing" id="G1R-Qc-JpM"/>
+                                <constraint firstItem="S45-9u-8e1" firstAttribute="centerY" secondItem="9hl-i9-UMV" secondAttribute="centerY" id="Qk4-t3-fgs"/>
+                                <constraint firstItem="yHn-ti-4qu" firstAttribute="centerX" secondItem="9hl-i9-UMV" secondAttribute="centerX" id="WYf-aO-17A"/>
+                                <constraint firstItem="yHn-ti-4qu" firstAttribute="top" secondItem="9hl-i9-UMV" secondAttribute="top" id="dY2-LQ-pR8"/>
+                                <constraint firstItem="S45-9u-8e1" firstAttribute="leading" secondItem="9hl-i9-UMV" secondAttribute="leading" id="psd-75-KLQ"/>
+                                <constraint firstAttribute="height" constant="20" id="rdo-iS-5DE"/>
+                                <constraint firstAttribute="width" constant="20" id="w6A-Nk-3nb"/>
+                                <constraint firstAttribute="bottom" secondItem="yHn-ti-4qu" secondAttribute="bottom" id="y8Q-jx-C25"/>
+                            </constraints>
+                        </view>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jr9-B3-9Ir">
+                            <rect key="frame" x="321" y="14" width="40" height="40"/>
+                            <connections>
+                                <action selector="addTodo:" destination="-1" eventType="touchUpInside" id="J5V-0X-Gtp"/>
+                            </connections>
+                        </button>
+                    </subviews>
                     <color key="backgroundColor" red="0.26324986760000002" green="0.56124190409999997" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="87" id="FYQ-QN-elg"/>
+                        <constraint firstItem="9hl-i9-UMV" firstAttribute="width" secondItem="Jr9-B3-9Ir" secondAttribute="width" constant="-20" id="HdQ-LF-o8z"/>
+                        <constraint firstAttribute="trailing" secondItem="9hl-i9-UMV" secondAttribute="trailing" constant="24" id="Nkr-0i-sIc"/>
+                        <constraint firstItem="9hl-i9-UMV" firstAttribute="height" secondItem="Jr9-B3-9Ir" secondAttribute="height" constant="-20" id="U2D-tm-tQf"/>
+                        <constraint firstItem="9hl-i9-UMV" firstAttribute="top" secondItem="02G-N7-auS" secondAttribute="top" constant="24" id="Vl5-JL-j6g"/>
+                        <constraint firstItem="9hl-i9-UMV" firstAttribute="leading" secondItem="Jr9-B3-9Ir" secondAttribute="leading" constant="10" id="bEv-f6-y37"/>
+                        <constraint firstItem="Jr9-B3-9Ir" firstAttribute="top" secondItem="9hl-i9-UMV" secondAttribute="top" constant="-10" id="u6g-jG-lYD"/>
                     </constraints>
                 </view>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="x7J-TL-LJq">

@@ -38,4 +38,13 @@ extern const NSErrorDomain SampleAPIErrorDomain;
 - (void)getJSONWithURL:(NSURL *)url completionHandler:(void(^)(NSObject *json, NSError *error))completionBlock;
 - (void)getDataWithURL:(NSURL *)url completionHandler:(void (^)(NSData *, NSError *))completionBlock;
 
+- (void)postDataWithURL:(NSURL *)url
+               httpBody:(NSData *)body
+            contentType:(NSString *)contentType
+      completionHandler:(void (^)(NSData *data, NSError *error))completionBlock;
+
+- (void)postJSONWithURL:(NSURL *)url
+                   json:(NSData *)jsonData
+      completionHandler:(void (^)(NSData *data, NSError *error))completionBlock;
+
 @end

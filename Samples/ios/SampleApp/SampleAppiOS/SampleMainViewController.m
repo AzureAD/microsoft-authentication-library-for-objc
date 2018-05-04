@@ -149,7 +149,7 @@
     }];
 }
 
-- (void)loadTODOs
+- (void)loadTODOs:(BOOL)useCache
 {
     [self startLoading];
 
@@ -158,7 +158,7 @@
 
     [_tableView reloadData];
 
-    [util getTodos:^(NSArray<SampleTODO *> *todos, NSError *error) {
+    [util getTodosFromCache:useCache completion:^(NSArray<SampleTODO *> *todos, NSError *error) {
 
         [self stopLoading];
 
@@ -170,6 +170,26 @@
         _todos = todos;
         [_tableView reloadData];
 
+    }];
+}
+
+- (void)addTodoWithTitle:(NSString *)todoTitle
+{
+    [self startLoading];
+
+    SampleTODOsUtil *util = [SampleTODOsUtil sharedUtil];
+
+    [util addTodoWithTitle:todoTitle
+                completion:^(NSError *error) {
+
+                    if (error)
+                    {
+                        [self showTodoAdditionError];
+                        [self stopLoading];
+                        return;
+                    }
+
+                    [self loadTODOs:NO];
     }];
 }
 
@@ -197,13 +217,50 @@
         }
         case 1:
         {
-            [self loadTODOs];
+            [self loadTODOs:YES];
             break;
         }
 
         default:
             break;
     }
+}
+
+- (IBAction)addTodo:(id)sender
+{
+    UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Add a new todo"
+                                                                        message:nil
+                                                                 preferredStyle:UIAlertControllerStyleAlert];
+
+    [controller addTextFieldWithConfigurationHandler:nil];
+    [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [controller addAction:[UIAlertAction actionWithTitle:@"Save"
+                                                   style:UIAlertActionStyleDefault
+                                                 handler:^(UIAlertAction * _Nonnull action) {
+
+                                                     UITextField *txtField = controller.textFields[0];
+
+                                                     if (!txtField.text.length)
+                                                     {
+                                                         [self showTodoAdditionError];
+                                                     }
+                                                     else
+                                                     {
+                                                         [self addTodoWithTitle:txtField.text];
+                                                     }
+    }]];
+
+    [self presentViewController:controller animated:YES completion:nil];
+}
+
+- (void)showTodoAdditionError
+{
+    UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Failed to add TODO :("
+                                                                        message:nil
+                                                                 preferredStyle:UIAlertControllerStyleAlert];
+
+    [controller addAction:[UIAlertAction actionWithTitle:@"Ok, let me retry" style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:controller animated:YES completion:nil];
 }
 
 - (float)startY
