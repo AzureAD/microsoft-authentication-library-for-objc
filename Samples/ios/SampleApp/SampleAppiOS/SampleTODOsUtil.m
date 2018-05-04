@@ -136,13 +136,15 @@ static NSString * const kTodos = @"todos";
          [[SampleTodosRequest requestWithToken:token] getTodos:^(NSArray *todos, NSError *error)
           {
               [self setLastChecked];
+
+              NSArray<NSDictionary *> *checkedTodos = [self checkTodos:todos];
               
-              NSArray<SampleTODO *> *processedTodos = [self processTodos:todos];
+              NSArray<SampleTODO *> *processedTodos = [self processTodos:checkedTodos];
               
               dispatch_async(dispatch_get_main_queue(), ^{
                   if (!error)
                   {
-                      [self storeTodos:todos];
+                      [self storeTodos:checkedTodos];
                       _cachedTodos = processedTodos;
                   }
                   
@@ -150,6 +152,37 @@ static NSString * const kTodos = @"todos";
               });
           }];
      }];
+}
+
+/*
+
+ Because API might return us TODOs without any content,
+ this method will verify that all TODOs are valid
+ */
+- (NSArray<NSDictionary *> *)checkTodos:(NSArray *)todos
+{
+    if (!todos || ![todos isKindOfClass:[NSArray class]])
+    {
+        return nil;
+    }
+
+    NSMutableArray *resultTodos = [NSMutableArray new];
+
+    for (NSDictionary *jsonTodo in todos)
+    {
+        NSString *owner = jsonTodo[@"owner"];
+        NSString *title = jsonTodo[@"title"];
+
+        if ([owner isKindOfClass:[NSString class]]
+            && owner.length
+            && [title isKindOfClass:[NSString class]]
+            && title.length)
+        {
+            [resultTodos addObject:jsonTodo];
+        }
+    }
+
+    return resultTodos;
 }
 
 - (NSArray<SampleTODO *> *)processTodos:(NSArray *)todos
