@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B22676C3209C20CF00558F20 /* SampleAPIRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B22676BA209C20CE00558F20 /* SampleAPIRequest.m */; };
+		B288D1FF209B852A00067424 /* SampleTODOsUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B288D1FE209B852900067424 /* SampleTODOsUtil.m */; };
 		D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */; };
 		D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3301E95B22500BA782C /* SampleAppErrors.m */; };
 		D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3331E95CE4800BA782C /* SampleBaseViewController.m */; };
@@ -27,19 +29,19 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B288D1FC209B852900067424 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D672279F1EBD111900F3422A;
+			remoteInfo = "unit-test-host";
+		};
 		D621518C1E9EA65D00B96A7D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
 			remoteInfo = "MSAL (iOS Framework)";
-		};
-		D62CF4951E9595CE006C0217 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D62CF48A1E9595CE006C0217 /* MSAL.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D6DFF3A21E2579360012891A;
-			remoteInfo = "MSAL (iOS Static Lib)";
 		};
 		D62CF4971E9595CE006C0217 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -114,6 +116,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B22676BA209C20CE00558F20 /* SampleAPIRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleAPIRequest.m; sourceTree = "<group>"; };
+		B22676C2209C20CE00558F20 /* SampleAPIRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleAPIRequest.h; sourceTree = "<group>"; };
+		B288D1F4209B852900067424 /* SampleTODOsUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleTODOsUtil.h; sourceTree = "<group>"; };
+		B288D1FE209B852900067424 /* SampleTODOsUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTODOsUtil.m; sourceTree = "<group>"; };
 		D611E3251E95A5CD00BA782C /* SampleMSALUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleMSALUtil.h; sourceTree = "<group>"; };
 		D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleMSALUtil.m; sourceTree = "<group>"; };
 		D611E32F1E95B22500BA782C /* SampleAppErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleAppErrors.h; sourceTree = "<group>"; };
@@ -158,7 +164,6 @@
 		D62CF48B1E9595CE006C0217 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D62CF4961E9595CE006C0217 /* libMSAL.a */,
 				D62CF4981E9595CE006C0217 /* MSAL.framework */,
 				D62CF49A1E9595CE006C0217 /* "MSAL-iOS-Unit-Tests".xctest */,
 				D62CF49C1E9595CE006C0217 /* MSAL.framework */,
@@ -166,6 +171,7 @@
 				D62CF4A01E9595CE006C0217 /* MSAL Test App.app */,
 				D62CF4A21E9595CE006C0217 /* MSAL Test App.app */,
 				D62CF4A41E9595CE006C0217 /* MSAL Test Automation (iOS).app */,
+				B288D1FD209B852900067424 /* unit-test-host.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -212,6 +218,10 @@
 				D6B88B0D1EA55B3E00A2374B /* SamplePhotoUtil.m */,
 				D6B58A451EB177E8000B3A5F /* SampleCalendarUtil.h */,
 				D6B58A461EB177E8000B3A5F /* SampleCalendarUtil.m */,
+				B288D1F4209B852900067424 /* SampleTODOsUtil.h */,
+				B288D1FE209B852900067424 /* SampleTODOsUtil.m */,
+				B22676C2209C20CE00558F20 /* SampleAPIRequest.h */,
+				B22676BA209C20CE00558F20 /* SampleAPIRequest.m */,
 				D6BFE3DD1EB6B0BE00F2B7E8 /* SampleGraphRequest.h */,
 				D6BFE3DE1EB6B0BE00F2B7E8 /* SampleGraphRequest.m */,
 			);
@@ -291,11 +301,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		D62CF4961E9595CE006C0217 /* libMSAL.a */ = {
+		B288D1FD209B852900067424 /* unit-test-host.app */ = {
 			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libMSAL.a;
-			remoteRef = D62CF4951E9595CE006C0217 /* PBXContainerItemProxy */;
+			fileType = wrapper.application;
+			path = "unit-test-host.app";
+			remoteRef = B288D1FC209B852900067424 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D62CF4981E9595CE006C0217 /* MSAL.framework */ = {
@@ -375,7 +385,9 @@
 				D6B58A471EB177E8000B3A5F /* SampleCalendarUtil.m in Sources */,
 				D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */,
 				D6AEBD6D1E92DBB300C31082 /* main.m in Sources */,
+				B22676C3209C20CF00558F20 /* SampleAPIRequest.m in Sources */,
 				D62CF4821E9593ED006C0217 /* SampleMainViewController.m in Sources */,
+				B288D1FF209B852A00067424 /* SampleTODOsUtil.m in Sources */,
 				D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */,
 				D6B88B0E1EA55B3E00A2374B /* SamplePhotoUtil.m in Sources */,
 				D62CF4851E9593FB006C0217 /* SampleLoginViewController.m in Sources */,

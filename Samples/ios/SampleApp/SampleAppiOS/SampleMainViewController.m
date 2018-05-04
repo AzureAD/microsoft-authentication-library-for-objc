@@ -35,15 +35,19 @@
 #import "SampleLoginViewController.h"
 #import "SampleMSALUtil.h"
 #import "SamplePhotoUtil.h"
+#import "SampleTODOsUtil.h"
 
 @interface SampleMainViewController () <UITableViewDataSource>
+
+@property (nonatomic, strong) IBOutlet UISegmentedControl *apiSegmentedControl;
 
 @end
 
 @implementation SampleMainViewController
 {
     NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *_events;
-    NSArray<NSDate *> *_keys;
+    NSArray<SampleTODO *> *_todos;
+    NSArray<NSDate *> *_eventKeys;
     
     NSDateFormatter *_dayFormatter;
     NSDateFormatter *_timeFormatter;
@@ -97,14 +101,13 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    _spinner.alpha = 1.0f;
-    [_spinner startAnimating];
+    [self startLoading];
 
     // Set the photo first to "no_photo" so we have something there if we have
     // to wait for network lag
     [self loadPhoto];
     [self loadEvents];
-    
+
     _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [[SampleMSALUtil sharedUtil] currentUser:nil].name];
 }
 
@@ -133,9 +136,7 @@
     [_tableView reloadData];
     [util getEvents:^(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error) {
 
-        _tableView.alpha = 1.0f;
-        _spinner.alpha = 0;
-        [_spinner stopAnimating];
+        [self stopLoading];
 
         if (error)
         {
@@ -148,9 +149,33 @@
     }];
 }
 
+- (void)loadTODOs
+{
+    [self startLoading];
+
+    SampleTODOsUtil *util = [SampleTODOsUtil sharedUtil];
+    _todos = [util cachedTodos];
+
+    [_tableView reloadData];
+
+    [util getTodos:^(NSArray<SampleTODO *> *todos, NSError *error) {
+
+        [self stopLoading];
+
+        if (error)
+        {
+            return;
+        }
+
+        _todos = todos;
+        [_tableView reloadData];
+
+    }];
+}
+
 - (void)updateKeys
 {
-    _keys = [[_events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+    _eventKeys = [[_events allKeys] sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
         return [obj1 compare:obj2];
     }];
 }
@@ -159,6 +184,26 @@
 {
     [[SampleMSALUtil sharedUtil] signOut];
     [SampleAppDelegate setCurrentViewController:[SampleLoginViewController sharedViewController]];
+    _apiSegmentedControl.selectedSegmentIndex = 0;
+}
+
+- (IBAction)changeAPISelection:(UISegmentedControl *)sender
+{
+    switch (sender.selectedSegmentIndex) {
+        case 0:
+        {
+            [self loadEvents];
+            break;
+        }
+        case 1:
+        {
+            [self loadTODOs];
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 - (float)startY
@@ -166,21 +211,61 @@
     return 1.0f;
 }
 
+#pragma mark - Spinner
+
+- (void)startLoading
+{
+    _tableView.alpha = 0.0f;
+    _spinner.alpha = 1.0f;
+    [_spinner startAnimating];
+}
+
+- (void)stopLoading
+{
+    _tableView.alpha = 1.0f;
+    _spinner.alpha = 0.0f;
+    [_spinner stopAnimating];
+}
+
 #pragma mark UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return _keys.count;
+    switch (self.apiSegmentedControl.selectedSegmentIndex) {
+        case 0:
+            return _eventKeys.count;
+        case 1:
+            return 1;
+
+        default:
+            return 0;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _events[_keys[section]].count;
+    switch (self.apiSegmentedControl.selectedSegmentIndex) {
+        case 0:
+            return _events[_eventKeys[section]].count;
+        case 1:
+            return _todos.count;
+
+        default:
+            return 0;
+    }
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return [_dayFormatter stringFromDate:_keys[section]];
+    switch (self.apiSegmentedControl.selectedSegmentIndex) {
+        case 0:
+            return [_dayFormatter stringFromDate:_eventKeys[section]];
+        case 1:
+            return @"Remaining tasks";
+
+        default:
+            return nil;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -190,12 +275,27 @@
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"eventCell"];
     }
-    
-    NSDate *section = _keys[[indexPath indexAtPosition:0]];
-    SampleCalendarEvent *event = _events[section][[indexPath indexAtPosition:1]];
-    
-    cell.textLabel.text = event.subject;
-    cell.detailTextLabel.text = [_timeFormatter stringFromDate:event.startDate];
+
+    switch (self.apiSegmentedControl.selectedSegmentIndex) {
+        case 0:
+        {
+            NSDate *section = _eventKeys[[indexPath indexAtPosition:0]];
+            SampleCalendarEvent *event = _events[section][[indexPath indexAtPosition:1]];
+            cell.textLabel.text = event.subject;
+            cell.detailTextLabel.text = [_timeFormatter stringFromDate:event.startDate];
+            break;
+        }
+        case 1:
+        {
+            SampleTODO *todo = _todos[indexPath.row];
+            cell.textLabel.text = todo.title;
+            cell.detailTextLabel.text = todo.owner;
+            break;
+        }
+        default:
+            break;
+    }
+
     return cell;
 }
 

@@ -25,26 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "SampleGraphRequest.h"
+#import <Foundation/Foundation.h>
 
-@implementation SampleGraphRequest
+@interface SampleTODO : NSObject
 
-+ (NSURL *)graphURLWithPath:(NSString *)path
-{
-    NSString *urlString = [NSString stringWithFormat:@"https://graph.microsoft.com/beta/%@", path];
-    return [NSURL URLWithString:urlString];
-}
+@property (nonatomic, strong) NSString *title;
+@property (nonatomic, strong) NSString *owner;
 
-- (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock
-{
-    NSURL *url = [SampleGraphRequest graphURLWithPath:path];
-    [self getDataWithURL:url completionHandler:completionBlock];
-}
+@end
 
-- (void)getJSON:(NSString *)path completionHandler:(void(^)(NSObject *json, NSError *error))completionBlock
-{
-    NSURL *url = [SampleGraphRequest graphURLWithPath:path];
-    [self getJSONWithURL:url completionHandler:completionBlock];
-}
+@interface SampleTODOsUtil : NSObject
+
++ (instancetype)sharedUtil;
+
+/*
+    Retrieves updated todos list from Demo API
+ */
+- (void)getTodos:(void (^)(NSArray<SampleTODO *> *todos, NSError *error))completionBlock;
+
+/*
+    Returns cached todos (if any) for the current user
+ */
+- (NSArray<SampleTODO *> *)cachedTodos;
+
+/*
+    Clears any cached events for the current user
+ */
+- (void)clearCache;
 
 @end

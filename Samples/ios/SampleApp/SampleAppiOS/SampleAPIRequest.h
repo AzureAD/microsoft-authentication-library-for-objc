@@ -25,26 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "SampleGraphRequest.h"
+#import <Foundation/Foundation.h>
 
-@implementation SampleGraphRequest
+// For these errors the error will be a HTTP error code, and the userInfo dictionary will be the
+// error dictionary from the JSON response in the body (if any)
+extern const NSErrorDomain SampleAPIErrorDomain;
 
-+ (NSURL *)graphURLWithPath:(NSString *)path
-{
-    NSString *urlString = [NSString stringWithFormat:@"https://graph.microsoft.com/beta/%@", path];
-    return [NSURL URLWithString:urlString];
-}
+@interface SampleAPIRequest : NSObject
 
-- (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock
-{
-    NSURL *url = [SampleGraphRequest graphURLWithPath:path];
-    [self getDataWithURL:url completionHandler:completionBlock];
-}
++ (instancetype)requestWithToken:(NSString *)token;
 
-- (void)getJSON:(NSString *)path completionHandler:(void(^)(NSObject *json, NSError *error))completionBlock
-{
-    NSURL *url = [SampleGraphRequest graphURLWithPath:path];
-    [self getJSONWithURL:url completionHandler:completionBlock];
-}
+- (void)getJSONWithURL:(NSURL *)url completionHandler:(void(^)(NSObject *json, NSError *error))completionBlock;
+- (void)getDataWithURL:(NSURL *)url completionHandler:(void (^)(NSData *, NSError *))completionBlock;
 
 @end

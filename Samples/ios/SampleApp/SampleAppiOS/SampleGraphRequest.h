@@ -26,16 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "SampleAPIRequest.h"
 
-// For these errors the error will be a HTTP error code, and the userInfo dictionary will be the
-// error dictionary from the JSON response in the body (if any)
-extern const NSErrorDomain SampleGraphErrorDomain;
+@interface SampleGraphRequest : SampleAPIRequest
 
-@interface SampleGraphRequest : NSObject
-
-+ (instancetype)requestWithToken:(NSString *)token;
-
-- (void)getJSON:(NSString *)path completionHandler:(void(^)(NSDictionary *json, NSError *error))completionBlock;
+- (void)getJSON:(NSString *)path completionHandler:(void(^)(NSObject *json, NSError *error))completionBlock;
 - (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock;
 
 @end

@@ -226,14 +226,14 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
 
 @implementation SamplePhotoRequest
 
-- (void)getMetadata:(void (^)(NSDictionary *json, NSError *error))metadataBlock
+- (void)getMetadata:(void (^)(NSObject *json, NSError *error))metadataBlock
 {
     [self getJSON:@"me/photo" completionHandler:metadataBlock];
 }
 
 - (void)getPhotoData:(void (^)(NSData *data, NSError *error))photoBlock
 {
-    [self getMetadata:^(NSDictionary *json, NSError *error)
+    [self getMetadata:^(NSObject *json, NSError *error)
     {
         if (error || !json)
         {

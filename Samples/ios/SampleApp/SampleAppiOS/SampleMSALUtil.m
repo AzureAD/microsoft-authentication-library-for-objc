@@ -31,9 +31,10 @@
 #import "SampleAppErrors.h"
 #import "SampleCalendarUtil.h"
 #import "SamplePhotoUtil.h"
+#import "SampleTODOsUtil.h"
 
 #define CURRENT_USER_KEY @"MSALCurrentUserIdentifier"
-#define CLIENT_ID @"11744750-bfe5-4818-a1c0-655455f68fa7"
+#define CLIENT_ID @"f3e5cf63-6c0d-42cb-b5aa-ee58b1ef7523"
 
 @interface SampleMSALUtil()
 
@@ -173,6 +174,7 @@
 {
     [[SamplePhotoUtil sharedUtil] clearPhotoCache];
     [[SampleCalendarUtil sharedUtil] clearCache];
+    [[SampleTODOsUtil sharedUtil] clearCache];
     
     // Leave around the user identifier as the last piece of state to clean up as you will probably need
     // it to clean up user-specific state

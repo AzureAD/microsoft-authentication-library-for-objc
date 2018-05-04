@@ -15,6 +15,7 @@
                 <outlet property="_profileImageView" destination="sD3-kT-6Ug" id="qOp-SH-NpH"/>
                 <outlet property="_spinner" destination="5KK-Rx-faS" id="qA0-Om-pzi"/>
                 <outlet property="_tableView" destination="78H-hT-ck2" id="413-eh-F7V"/>
+                <outlet property="apiSegmentedControl" destination="hND-KX-iLy" id="1Ej-Of-pIw"/>
                 <outlet property="view" destination="xQl-Rl-JkZ" id="qdh-G5-XrB"/>
             </connections>
         </placeholder>
@@ -59,10 +60,21 @@
                     <rect key="frame" x="169" y="315" width="37" height="37"/>
                     <color key="color" cocoaTouchSystemColor="darkTextColor"/>
                 </activityIndicatorView>
-                <tableView clipsSubviews="YES" alpha="0.0" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="78H-hT-ck2">
-                    <rect key="frame" x="0.0" y="206" width="375" height="461"/>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="78H-hT-ck2">
+                    <rect key="frame" x="-3" y="206" width="381" height="461"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
+                    <segmentedControl key="tableHeaderView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" id="hND-KX-iLy">
+                        <rect key="frame" x="0.0" y="0.0" width="381" height="30"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <segments>
+                            <segment title="Calendar"/>
+                            <segment title="TODO-s"/>
+                        </segments>
+                        <connections>
+                            <action selector="changeAPISelection:" destination="-1" eventType="valueChanged" id="AOj-jN-Nhj"/>
+                        </connections>
+                    </segmentedControl>
                 </tableView>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -71,14 +83,14 @@
                 <constraint firstItem="5KK-Rx-faS" firstAttribute="centerX" secondItem="xQl-Rl-JkZ" secondAttribute="centerX" id="2k4-tP-Z1c"/>
                 <constraint firstItem="x7J-TL-LJq" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" constant="8" id="7Lb-fV-epe"/>
                 <constraint firstAttribute="trailing" secondItem="02G-N7-auS" secondAttribute="trailing" id="A9I-We-kZS"/>
-                <constraint firstAttribute="trailing" secondItem="78H-hT-ck2" secondAttribute="trailing" id="F1h-af-26A"/>
                 <constraint firstItem="5KK-Rx-faS" firstAttribute="centerY" secondItem="xQl-Rl-JkZ" secondAttribute="centerY" id="H9p-v4-q0R"/>
+                <constraint firstAttribute="trailing" secondItem="78H-hT-ck2" secondAttribute="trailing" constant="-3" id="K7m-of-CCk"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" id="NvN-DG-Cvm"/>
+                <constraint firstItem="78H-hT-ck2" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" constant="-3" id="aCa-A0-HLH"/>
                 <constraint firstItem="02G-N7-auS" firstAttribute="top" secondItem="xQl-Rl-JkZ" secondAttribute="top" id="avk-C3-Ekm"/>
                 <constraint firstItem="78H-hT-ck2" firstAttribute="top" secondItem="x7J-TL-LJq" secondAttribute="bottom" constant="8" id="dUi-g6-Hvp"/>
                 <constraint firstAttribute="trailing" secondItem="x7J-TL-LJq" secondAttribute="trailing" constant="8" id="gaw-sa-nWT"/>
                 <constraint firstItem="sD3-kT-6Ug" firstAttribute="top" secondItem="xQl-Rl-JkZ" secondAttribute="top" constant="27" id="nYf-NG-PY5"/>
-                <constraint firstItem="78H-hT-ck2" firstAttribute="leading" secondItem="xQl-Rl-JkZ" secondAttribute="leading" id="uiX-BF-88n"/>
                 <constraint firstAttribute="bottom" secondItem="78H-hT-ck2" secondAttribute="bottom" id="wgi-SW-wT9"/>
                 <constraint firstItem="x7J-TL-LJq" firstAttribute="top" secondItem="sD3-kT-6Ug" secondAttribute="bottom" constant="8" id="yqt-c5-C60"/>
             </constraints>

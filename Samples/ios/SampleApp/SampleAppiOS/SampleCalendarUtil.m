@@ -233,15 +233,17 @@ static NSDateFormatter *s_df = nil;
 
 - (void)getEvents:(void (^)(NSArray *events, NSError *error))completionBlock
 {
-    [super getJSON:@"me/events?$select=subject,start" completionHandler:^(NSDictionary *json, NSError *error)
+    [super getJSON:@"me/events?$select=subject,start" completionHandler:^(NSObject *json, NSError *error)
     {
         if (error)
         {
             completionBlock(nil, error);
             return;
         }
+
+        NSDictionary *jsonDictionary = (NSDictionary *)json;
+        NSArray *events = jsonDictionary[@"value"];
         
-        NSArray *events = json[@"value"];
         if (!events || ![events isKindOfClass:[NSArray class]])
         {
             completionBlock(nil, SA_ERROR(SampleAppServerInvalidResponseError, nil));
