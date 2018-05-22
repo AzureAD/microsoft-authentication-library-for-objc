@@ -33,7 +33,7 @@
 
 @class MSALAuthority;
 @class MSALUser;
-@class MSIDRequestParameters;
+@class MSIDConfiguration;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
@@ -55,7 +55,7 @@
 @property NSString *telemetryRequestId;
 @property NSURLSession *urlSession;
 
-@property (retain, nonatomic, readonly) MSIDRequestParameters *msidParameters;
+@property (retain, nonatomic, readonly) MSIDConfiguration *msidConfiguration;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

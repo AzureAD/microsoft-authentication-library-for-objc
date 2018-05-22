@@ -30,11 +30,11 @@
 // If modifying this make sure UT_SLICE_PARAMS_QUERY matches
 #define DEFAULT_SLICE_PARAMS
 
-@class MSIDSharedTokenCache;
+@class MSIDDefaultTokenCacheAccessor;
 
 @interface MSALPublicClientApplication (Internal)
 
-@property (nonatomic, nonnull) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
 
 + (nullable NSDictionary<NSString *, NSString *> *)defaultSliceParameters;
 

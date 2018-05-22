@@ -31,8 +31,9 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDClientInfo.h"
 #import "MSALIdToken.h"
-#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSIDAADV2IdTokenClaims.h"
 #import "MSALUser+Internal.h"
+#import "MSIDIdToken.h"
 
 @implementation MSALResult
 
@@ -55,24 +56,27 @@
     result->_tenantId = tenantId;
     result->_user = user;
     result->_idToken = idToken;
-    result->_uniqueId = uniqueId;
+    result->_uniqueId = uniqueId; // Why do we need unique id here?
     result->_scopes = scopes;
     
     return result;
 }
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
+                              idToken:(MSIDIdToken *)idToken
 {
-    __auto_type idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:accessToken.idToken];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
+    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken];
+
+    // TODO: we don't need to create a user here anymore!
+    MSALUser *user = [[MSALUser alloc] initWithIdToken:idTokenClaims
                                             clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                               tenantId:accessToken.authority.msidTenant
                                   user:user
-                               idToken:accessToken.idToken
-                              uniqueId:idToken.uniqueId
+                               idToken:idToken.rawIdToken
+                              uniqueId:idTokenClaims.uniqueId
                                 scopes:[accessToken.scopes array]];
 }
 

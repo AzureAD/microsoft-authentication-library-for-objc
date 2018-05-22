@@ -38,7 +38,7 @@
 #import "MSALTelemetryApiId.h"
 #import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccessToken.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAADV2TokenResponse.h"
@@ -50,7 +50,7 @@ static MSALScopes *s_reservedScopes = nil;
 
 @interface MSALBaseRequest()
 
-@property (nullable, nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 
 @end
 
@@ -62,7 +62,7 @@ static MSALScopes *s_reservedScopes = nil;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
-              tokenCache:(MSIDSharedTokenCache *)tokenCache
+              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError * __nullable __autoreleasing * __nullable)error
 {
     if (!(self = [super init]))
@@ -234,22 +234,25 @@ static MSALScopes *s_reservedScopes = nil;
              completionBlock(nil, userMismatchError);
              return;
          }
-         
+
+         MSIDConfiguration *configuration = _parameters.msidConfiguration;
+
          BOOL isSaved = [self.tokenCache saveTokensWithFactory:factory
-                                                  requestParams:_parameters.msidParameters
-                                                       response:tokenResponse
-                                                        context:_parameters error:&error];
+                                                 configuration:configuration
+                                                      response:tokenResponse
+                                                       context:_parameters
+                                                         error:&error];
          
          if (!isSaved)
          {
              completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
+
+         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse configuration:configuration];
+         MSIDIdToken *idToken = [factory idTokenFromResponse:tokenResponse configuration:configuration];
          
-         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse
-                                                                  request:_parameters.msidParameters];
-         
-         MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
+         MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
          
          [event setUser:result.user];
          [self stopTelemetryEvent:event error:nil];

@@ -39,7 +39,6 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
-#import "MSIDSharedTokenCache.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
@@ -49,11 +48,12 @@
 #import "MSALUser+Internal.h"
 #import "MSIDRefreshToken.h"
 #import "MSALIdToken.h"
-#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALPublicClientApplication()
 
-@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 
 @end
 
@@ -124,15 +124,15 @@
         dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     }
     
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
     
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
+    self.tokenCache = defaultAccessor;
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
-    
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:nil];
+
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    self.tokenCache = defaultAccessor;
 #endif
     
     _validateAuthority = YES;
@@ -144,6 +144,7 @@
 
 - (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
 {
+    /*
     NSMutableSet *users = [NSMutableSet new];
     
     __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
@@ -155,7 +156,8 @@
          [users addObject:user];
     }
 
-    return [users allObjects];
+    return [users allObjects];*/
+    return nil; // TODO
 }
 
 - (MSALUser *)userForIdentifier:(NSString *)identifier
@@ -589,11 +591,22 @@
     {
         return YES;
     }
-    
-    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
-    if (!result) return NO;
-    
-    return [self.tokenCache removeAccount:user.account context:nil error:error];
+
+    NSError *msidError = nil;
+
+    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account
+                                                 environment:self.authority.msidHostWithPortIfNecessary
+                                                    clientId:self.clientId
+                                                     context:nil
+                                                       error:&msidError];
+
+    if (msidError && error)
+    {
+        *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+    }
+
+    // TODO: remove account too!
+    return result;
 }
 
 @end

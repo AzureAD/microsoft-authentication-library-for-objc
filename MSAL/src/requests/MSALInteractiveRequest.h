@@ -41,7 +41,7 @@
 - (id)initWithParameters:(MSALRequestParameters *)parameters
     extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
-              tokenCache:(MSIDSharedTokenCache *)tokenCache
+              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError * __autoreleasing *)error;
 
 - (NSURL *)authorizationUrl;

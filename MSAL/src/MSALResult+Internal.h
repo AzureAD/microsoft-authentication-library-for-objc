@@ -28,6 +28,7 @@
 #import "MSALResult.h"
 
 @class MSIDAccessToken;
+@class MSIDIdToken;
 
 @interface MSALResult (Internal)
 
@@ -39,6 +40,7 @@
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes;
 
-+ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken;
++ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
+                              idToken:(MSIDIdToken *)idToken;
 
 @end

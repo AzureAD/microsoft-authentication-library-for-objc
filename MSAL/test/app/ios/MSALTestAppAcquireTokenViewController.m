@@ -34,7 +34,7 @@
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALStressTestHelper.h"
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 

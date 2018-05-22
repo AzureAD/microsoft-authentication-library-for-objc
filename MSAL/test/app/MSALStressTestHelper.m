@@ -31,9 +31,11 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDAccessToken.h"
 #import "MSIDAccount.h"
+#import "MSIDAccountCredentialCache.h"
 
 @implementation MSALStressTestHelper
 
@@ -44,14 +46,13 @@ static BOOL s_runningTest = NO;
 
 + (void)expireAllTokensWithClientId:(NSString *)clientId
 {
-    __auto_type cache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:clientId context:nil error:nil];
+    MSIDAccountCredentialCache *cache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    NSArray<MSIDCredentialCacheItem *> *accessTokens = [cache getAllCredentialsWithType:MSIDAccessTokenType context:nil error:nil];
 
-    for (MSIDAccessToken *token in tokens)
+    for (MSIDCredentialCacheItem *token in accessTokens)
     {
-        __auto_type account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
         token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-        [cache saveAccessToken:token account:account context:nil error:nil];
+        [cache saveCredential:token context:nil error:nil];
     }
 }
 

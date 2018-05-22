@@ -282,6 +282,20 @@
 			remoteGlobalIDString = D626FFDF1FBD1F5700EE4487;
 			remoteInfo = "IdentityTest Mac";
 		};
+		B29520A120B4CB9F0068C021 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B27551C8208179EE00AA7A38;
+			remoteInfo = "IdentityAutomation iOS";
+		};
+		B29520A320B4CB9F0068C021 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B27551D520817A1E00AA7A38;
+			remoteInfo = "IdentityAutomation Mac";
+		};
 		B2C17AFD1FC8D95A0070A514 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -1273,6 +1287,8 @@
 				D6A2062B1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
 				D6A2062D1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
 				231CE9D31FEC641D00E95D3E /* MSIDTestsHostApp.app */,
+				B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */,
+				B29520A420B4CB9F0068C021 /* libIdentityAutomation Mac.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1567,6 +1583,7 @@
 					};
 					D61A64321E5A29580086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -1643,6 +1660,20 @@
 			fileType = wrapper.application;
 			path = MSIDTestsHostApp.app;
 			remoteRef = 231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libIdentityAutomation iOS.a";
+			remoteRef = B29520A120B4CB9F0068C021 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		B29520A420B4CB9F0068C021 /* libIdentityAutomation Mac.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = "libIdentityAutomation Mac.dylib";
+			remoteRef = B29520A320B4CB9F0068C021 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D6A206231FC50A4D00755A51 /* libIdentityCore.a */ = {
@@ -2109,7 +2140,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PROVISIONING_PROFILE = "";
@@ -2123,7 +2154,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PROVISIONING_PROFILE = "";
 			};

@@ -31,7 +31,8 @@
 #import "MSALUser+Internal.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDAuthority.h"
-#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSIDAccountIdentifier.h"
 
 @interface MSALUser ()
 
@@ -48,7 +49,7 @@
 
 @implementation MSALUser
 
-- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
+- (id)initWithIdToken:(MSIDAADV2IdTokenClaims *)idToken
            clientInfo:(MSIDClientInfo *)clientInfo
           environment:(NSString *)environment
 {
@@ -80,8 +81,7 @@
     _uid = [uid copy];
     _utid = [utid copy];
     _environment = [environment copy];
-    _account = [[MSIDAccount alloc] initWithLegacyUserId:_displayableId uniqueUserId:self.userIdentifier];
-    _account.authority = [NSURL msidURLWithEnvironment:_environment];
+    _account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:displayableId homeAccountId:self.userIdentifier];
     
     return self;
 }
