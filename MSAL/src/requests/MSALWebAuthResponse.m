@@ -110,22 +110,26 @@ NSString *const s_kWwwAuthenticateHeader = @"Accept";
         }
         default:
         {
-            // TODO: Check for right error code and details.
-            //   Perhaps a utility class to generate NSError would be nice
             NSString *body = [[NSString alloc] initWithData:response.body encoding:NSUTF8StringEncoding];
             NSString *errorData = [NSString stringWithFormat:@"Full response: %@", body];
             
-            NSString* message = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
+            NSString* message = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n", @"Domain", (long)response.statusCode];
             
-            NSDictionary *userInfo = @{NSLocalizedDescriptionKey: message};
+            NSString* messagePII = [NSString stringWithFormat:@"Error raised: (Domain: \"%@\" Response Code: %ld \n%@", @"Domain", (long)response.statusCode, errorData];
             
-            NSError *error = [NSError errorWithDomain:@"Domain"
-                                                 code:MSALErrorNetworkFailure
-                                             userInfo:userInfo];
+            NSMutableDictionary *userInfo = [@{MSALHTTPResponseCodeKey : [NSString stringWithFormat: @"%ld", (long)response.statusCode]} mutableCopy];
             
-            LOG_WARN(_context, @"%@", message);
+            if (response.headers)
+            {
+                userInfo[MSALHTTPHeadersKey] = response.headers;
+            }
             
-            completionHandler(response, error);
+            NSError *httpError = MSALCreateError(MSALErrorDomain, MSALErrorNetworkFailure, messagePII, nil, nil, nil, userInfo);
+            
+            MSID_LOG_WARN(_context, @"%@", message);
+            MSID_LOG_WARN(_context, @"%@", messagePII);
+            
+            completionHandler(response, httpError);
             
             break;
         }

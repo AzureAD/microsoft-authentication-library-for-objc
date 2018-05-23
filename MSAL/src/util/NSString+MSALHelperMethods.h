@@ -29,34 +29,6 @@
 
 @interface NSString (MSALHelperMethods)
 
-/*! Encodes string to the Base64 encoding. */
-- (NSString *)msalBase64UrlEncode;
-/*! Decodes string from the Base64 encoding. */
-- (NSString *)msalBase64UrlDecode;
-
-/*! Converts NSData to base64 String */
-+ (NSString *)msalBase64UrlEncodeData:(NSData *)data;
-/*! Converts base64 String to NSData */
-+ (NSData *)msalBase64UrlDecodeData:(NSString *)encodedString;
-
-/*! Returns YES if the string is nil, or contains only white space */
-+ (BOOL)msalIsStringNilOrBlank:(NSString *)string;
-
-/*! Returns the same string, but without the leading and trailing whitespace */
-- (NSString *)msalTrimmedString;
-
-/*! Decodes a previously URL encoded string. */
-- (NSString *)msalUrlFormDecode;
-
-/*! Encodes the string to pass it as a URL agrument. */
-- (NSString *)msalUrlFormEncode;
-
-/*! Computes a SHA256 hash of the string in hex string */
-- (NSString *)msalComputeSHA256Hex;
-
-/*! Shorter hex string for friendlier logs */
-- (NSString *)msalShortSHA256Hex;
-
 /*! Generate a URL-safe string of random data */
 + (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size;
 

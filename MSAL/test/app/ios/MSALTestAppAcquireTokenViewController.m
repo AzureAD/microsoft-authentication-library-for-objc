@@ -33,6 +33,8 @@
 #import "MSALTestAppScopesViewController.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALStressTestHelper.h"
+#import "MSALPublicClientApplication+Internal.h"
+#import "MSIDSharedTokenCache.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -324,7 +326,7 @@
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *loginHint = settings.loginHint;
-    if (![NSString msalIsStringNilOrBlank:loginHint])
+    if (![NSString msidIsStringNilOrBlank:loginHint])
     {
         _loginHintField.text = loginHint;
     }
@@ -361,7 +363,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msalShortSHA256Hex], result.expiresOn, result.tenantId, result.user, result.scopes];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.user, result.scopes];
     
     [_resultView setText:resultText];
     
@@ -404,38 +406,53 @@
     
     __block BOOL fBlockHit = NO;
     
-    [application acquireTokenForScopes:[settings.scopes allObjects]
-                                  user:settings.currentUser
-                            uiBehavior:MSALUIBehaviorDefault
-                  extraQueryParameters:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         if (fBlockHit)
-         {
-             dispatch_async(dispatch_get_main_queue(), ^{
-                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
-                                                                                message:@"Completion block was hit multiple times!"
-                                                                         preferredStyle:UIAlertControllerStyleAlert];
-                 [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
-                 [self presentViewController:alert animated:YES completion:nil];
-             });
-             
-             return;
-         }
-         fBlockHit = YES;
-         
-         dispatch_async(dispatch_get_main_queue(), ^{
-             if (result)
-             {
-                 [self updateResultView:result];
-             }
-             else
-             {
-                 [self updateResultViewError:error];
-             }
-             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-         });
-     }];
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        
+        if (fBlockHit)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
+                                                                               message:@"Completion block was hit multiple times!"
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:YES completion:nil];
+            });
+            
+            return;
+        }
+        fBlockHit = YES;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (result)
+            {
+                [self updateResultView:result];
+            }
+            else
+            {
+                [self updateResultViewError:error];
+            }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    };
+    
+    if ([_loginHintField.text length])
+    {
+        [application acquireTokenForScopes:[settings.scopes allObjects]
+                                 loginHint:_loginHintField.text
+                                uiBehavior:[self uiBehavior]
+                      extraQueryParameters:nil
+                           completionBlock:completionBlock];
+    }
+    else
+    {
+        [application acquireTokenForScopes:[settings.scopes allObjects]
+                                      user:settings.currentUser
+                                uiBehavior:[self uiBehavior]
+                      extraQueryParameters:nil
+                           completionBlock:completionBlock];
+    }
 }
 
 - (IBAction)cancelAuth:(id)sender
@@ -513,18 +530,24 @@
     }];
 }
 
-- (IBAction)clearCache:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
-    (void)sender;
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
-    NSDictionary *query = [[MSALKeychainTokenCache defaultKeychainCache] defaultKeychainQuery];
-    OSStatus status = SecItemDelete((CFDictionaryRef)query);
+    // Delete accounts.
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
     
-    if (status == errSecSuccess || status == errSecItemNotFound)
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    
+    BOOL result = [application.tokenCache clearWithContext:nil error:&error];
+    
+    if (result)
     {
         _resultView.text = @"Successfully cleared cache.";
         
-        MSALTestAppSettings *settings = [MSALTestAppSettings settings];
         settings.currentUser = nil;
         
         [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
@@ -534,7 +557,7 @@
     }
     else
     {
-        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %d", (int)status];
+        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
 }
 

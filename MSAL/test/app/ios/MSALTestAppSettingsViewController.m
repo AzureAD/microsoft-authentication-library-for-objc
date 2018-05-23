@@ -34,8 +34,8 @@ static NSArray* s_deviceRows = nil;
 @interface MSALTestAppSettingsRow : NSObject
 
 @property (nonatomic, retain) NSString* title;
-@property (nonatomic, copy) NSString*(^valueBlock)();
-@property (nonatomic, copy) void(^action)();
+@property (nonatomic, copy) NSString*(^valueBlock)(void);
+@property (nonatomic, copy) void(^action)(void);
 
 + (MSALTestAppSettingsRow*)rowWithTitle:(NSString *)title;
 
@@ -51,7 +51,7 @@ static NSArray* s_deviceRows = nil;
 }
 
 + (MSALTestAppSettingsRow*)rowWithTitle:(NSString *)title
-                                value:(NSString*(^)())value
+                                value:(NSString*(^)(void))value
 {
     MSALTestAppSettingsRow* row = [MSALTestAppSettingsRow new];
     row.title = title;

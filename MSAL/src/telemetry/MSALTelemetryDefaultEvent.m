@@ -22,88 +22,20 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetryDefaultEvent.h"
-#import "MSALTelemetryEventStrings.h"
-#import "MSALIpAddressHelper.h"
-#import "MSALLogger+Internal.h"
-#include <CoreFoundation/CoreFoundation.h>
-
-#if !TARGET_OS_IPHONE
-#include <IOKit/IOKitLib.h>
-#endif
 
 @implementation MSALTelemetryDefaultEvent
 
 - (id)initWithName:(NSString *)eventName
-         context:(id<MSALRequestContext>)context
+           context:(id<MSALRequestContext>)context
 {
     if (!(self = [super initWithName:eventName context:context]))
     {
         return nil;
     }
     
-    [self addDefaultParameters];
+    [self addDefaultProperties];
     
     return self;
 }
-
-- (void)addDefaultParameters
-{
-    static dispatch_once_t s_parametersOnce;
-    
-    dispatch_once(&s_parametersOnce, ^{
-        
-#if TARGET_OS_IPHONE
-        //iOS:
-        NSString *deviceId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-        NSString *applicationName = [[NSBundle mainBundle] bundleIdentifier];
-#else
-        CFStringRef macSerialNumber = nil;
-        CopySerialNumber(&macSerialNumber);
-        NSString *deviceId = CFBridgingRelease(macSerialNumber);
-        NSString *applicationName = [[NSProcessInfo processInfo] processName];
-#endif
-        
-        [self setProperty:MSAL_TELEMETRY_KEY_DEVICE_ID value:[deviceId msalComputeSHA256Hex]];
-        [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_NAME value:applicationName];
-        [self setProperty:MSAL_TELEMETRY_KEY_APPLICATION_VERSION value:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
-        
-        NSDictionary *msalIds = [MSALLogger msalId];
-        for (NSString *key in msalIds)
-        {
-            NSString *propertyName = [NSString stringWithFormat:@"msal.%@",
-                                      [[key lowercaseString] stringByReplacingOccurrencesOfString:@"-" withString:@"_"]];
-            
-            [self setProperty:propertyName value:[msalIds objectForKey:key]];
-        }
-    });
-    
-    [self setProperty:MSAL_TELEMETRY_KEY_DEVICE_IP_ADDRESS value:[MSALIpAddressHelper msalDeviceIpAddress]];
-}
-
-#if !TARGET_OS_IPHONE
-// Returns the serial number as a CFString.
-// It is the caller's responsibility to release the returned CFString when done with it.
-void CopySerialNumber(CFStringRef *serialNumber)
-{
-    if (serialNumber != NULL) {
-        *serialNumber = NULL;
-        
-        io_service_t    platformExpert = IOServiceGetMatchingService(kIOMasterPortDefault,
-                                                                     IOServiceMatching("IOPlatformExpertDevice"));
-        
-        if (platformExpert) {
-            CFTypeRef serialNumberAsCFString =
-            IORegistryEntryCreateCFProperty(platformExpert,
-                                            CFSTR(kIOPlatformSerialNumberKey),
-                                            kCFAllocatorDefault, 0);
-            if (serialNumberAsCFString) {
-                *serialNumber = serialNumberAsCFString;
-            }
-            
-            IOObjectRelease(platformExpert);
-        }
-    }
-}
-#endif
 
 @end

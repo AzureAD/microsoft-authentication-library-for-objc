@@ -28,9 +28,12 @@
 #import "MSALStressTestHelper.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppSettings.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "MSALAccessTokenCacheItem+TestAppUtil.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDAccessToken.h"
+#import "MSIDAccount.h"
 
 @implementation MSALStressTestHelper
 
@@ -39,15 +42,16 @@ static BOOL s_runningTest = NO;
 
 #pragma mark - Helpers
 
-+ (void)expireAllTokens
++ (void)expireAllTokensWithClientId:(NSString *)clientId
 {
-    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
-    
-    for (MSALAccessTokenCacheItem *item in tokenCacheItems)
+    __auto_type cache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:clientId context:nil error:nil];
+
+    for (MSIDAccessToken *token in tokens)
     {
-        item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-        [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
+        __auto_type account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
+        token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
+        [cache saveAccessToken:token account:account context:nil error:nil];
     }
 }
 
@@ -84,10 +88,9 @@ static BOOL s_runningTest = NO;
                  {
                      (void)error;
                      
-                     if (expireToken
-                         && result.user)
+                     if (expireToken && result.user)
                      {
-                         [self expireAllTokens];
+                         [self expireAllTokensWithClientId:application.clientId];
                      }
                      
                      dispatch_semaphore_signal(sem);

@@ -22,55 +22,20 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetryAPIEvent.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetryEventStrings.h"
 #import "NSOrderedSet+MSALExtensions.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALTelemetryAPIEvent
 
-- (void)setRequestId:(NSString *)requestId
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_REQUEST_ID value:[requestId lowercaseString]];
-}
-
-- (void)setCorrelationId:(NSUUID *)correlationId
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_CORRELATION_ID value:[[correlationId UUIDString] lowercaseString]];
-}
-
-- (void)setExtendedExpiresOnSetting:(NSString *)extendedExpiresOnSetting
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_EXTENDED_EXPIRES_ON_SETTING value:extendedExpiresOnSetting];
-}
-
 - (void)setUser:(MSALUser *)user
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_USER_ID value:[[user displayableId] msalComputeSHA256Hex]];
-}
-
-- (void)setClientId:(NSString *)clientId
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_CLIENT_ID value:clientId];
+    [self setProperty:MSID_TELEMETRY_KEY_USER_ID value:[user displayableId]];
 }
 
 - (void)setLoginHint:(NSString *)loginHint
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_LOGIN_HINT value:[loginHint msalComputeSHA256Hex]];
-}
-
-- (void)setIsExtendedLifeTimeToken:(NSString *)isExtendedLifeToken
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_IS_EXTENED_LIFE_TIME_TOKEN value:isExtendedLifeToken];
-}
-
-- (void)setProtocolCode:(NSString *)protocolCode
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_PROTOCOL_CODE value:protocolCode];
-}
-
-- (void)setAuthorityValidationStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_VALIDATION_STATUS value:status];
+    [self setProperty:MSID_TELEMETRY_KEY_LOGIN_HINT value:loginHint];
 }
 
 - (void)setAuthorityType:(MSALAuthorityType)authorityType
@@ -80,40 +45,25 @@
     // set authority type
     switch (authorityType) {
         case AADAuthority:
-            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_AAD;
+            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_AAD;
             
             break;
             
         case ADFSAuthority:
-            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_ADFS;
+            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_ADFS;
             break;
             
         case B2CAuthority:
-            authorityTypeString = MSAL_TELEMETRY_VALUE_AUTHORITY_B2C;
+            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_B2C;
             break;
     }
     
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY_TYPE value:authorityTypeString];
+    [super setAuthorityType:authorityTypeString];
 }
 
-- (void)setAuthority:(NSURL *)authority
+- (void)setMSALApiId:(MSALTelemetryApiId)apiId
 {
-    [self setProperty:MSAL_TELEMETRY_KEY_AUTHORITY value:[authority scrubbedHttpPath]];
-}
-
-- (void)setGrantType:(NSString *)grantType
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_GRANT_TYPE value:grantType];
-}
-
-- (void)setAPIStatus:(NSString *)status
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_API_STATUS value:status];
-}
-
-- (void)setApiId:(MSALTelemetryApiId)apiId
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ID value:[NSString stringWithFormat:@"%d", (int)apiId]];
+    [super setApiId:[NSString stringWithFormat:@"%d", (int)apiId]];
 }
 
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior
@@ -133,7 +83,7 @@
             uiBehaviorString = @"select_account";
     }
     
-    [self setProperty:MSAL_TELEMETRY_KEY_UI_BEHAVIOR value:uiBehaviorString];
+    [self setProperty:MSID_TELEMETRY_KEY_UI_BEHAVIOR value:uiBehaviorString];
 }
 
 #pragma mark -
@@ -142,17 +92,7 @@
 - (void)setErrorCode:(MSALErrorCode)errorCode
 {
     self.errorInEvent = YES;
-    [self setProperty:MSAL_TELEMETRY_KEY_API_ERROR_CODE value:MSALStringForErrorCode(errorCode)];
-}
-
-- (void)setErrorDescription:(NSString *)errorDescription
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DESCRIPTION value:errorDescription];
-}
-
-- (void)setErrorDomain:(NSString *)errorDomain
-{
-    [self setProperty:MSAL_TELEMETRY_KEY_ERROR_DOMAIN value:errorDomain];
+    [self setProperty:MSID_TELEMETRY_KEY_API_ERROR_CODE value:MSALStringForErrorCode(errorCode)];
 }
 
 @end

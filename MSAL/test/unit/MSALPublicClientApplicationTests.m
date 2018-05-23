@@ -30,11 +30,21 @@
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
-#import "MSALTestTokenCache.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
 #import "MSALWebUI.h"
+#import "MSIDClientInfo.h"
+#import "NSDictionary+MSIDTestUtil.h"
+#import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAADV2TokenResponse.h"
+#import "MSIDAccount.h"
+#import "MSALUser+Internal.h"
+#import "MSIDAADOauth2Factory.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+#import "NSURL+MSIDExtensions.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -49,17 +59,29 @@
 
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
+@property (nonatomic) MSIDClientInfo *clientInfo;
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
+
 @end
 
 @implementation MSALPublicClientApplicationTests
 
-- (void)setUp {
+- (void)setUp
+{
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+ 
+    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
+    self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
+    
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
+    
+    [self.tokenCache clearWithContext:nil error:nil];
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+- (void)tearDown
+{
     [super tearDown];
 }
 
@@ -206,7 +228,7 @@
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
-         XCTAssertNil(params.component);
+         XCTAssertNil(params.logComponent);
          XCTAssertNotNil(params.correlationId);
          
          completionBlock(nil, nil);
@@ -614,8 +636,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -677,8 +700,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -744,8 +768,9 @@
          XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
          XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
-         XCTAssertEqualObjects(params.user.uid, @"1");
+         XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.user.uid, @"1");
          XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -789,50 +814,60 @@
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     NSError *error = nil;
-    
+
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                     error:nil];
-    application.tokenCache = [MSALTestTokenCache createTestAccessor];
-    id<MSALTokenCacheAccessor> dataSource = application.tokenCache.dataSource;
-    
+    application.tokenCache = self.tokenCache;
+
     // Make sure no users are showing up in the cache
     XCTAssertEqual([application users:nil].count, 0);
-    
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
-    NSString *rawClientInfo = [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
-    //store an access token in cache
+    //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msalBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    MSALAccessTokenCacheItem *at =
-    [[MSALAccessTokenCacheItem alloc] initWithJson:@{
-                                                     @"authority" : @"https://login.microsoftonline.com/fake_tenant",
-                                                     @"scope": @"fakescope1 fakescope2",
-                                                     @"client_id": clientId,
-                                                     @"id_token": rawIdToken,
-                                                     @"client_info": rawClientInfo,
-                                                     }
-                                             error:nil];
-    [dataSource addOrUpdateAccessTokenItem:at context:nil error:nil];
-    MSALRefreshTokenCacheItem *rt =
-    [[MSALRefreshTokenCacheItem alloc] initWithJson:@{
-                                                      @"environment" : @"login.microsoftonline.com",
-                                                      @"client_id": clientId,
-                                                      @"client_info": rawClientInfo,
-                                                      @"refresh_token": @"fakeRefreshToken"
-                                                      }
-                                              error:nil];
-    [dataSource addOrUpdateRefreshTokenItem:rt context:nil error:nil];
+                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
     
+    MSIDAADV2TokenResponse *msidResponse =
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
+                                                             @"access_token": @"access_token",
+                                                             @"refresh_token": @"fakeRefreshToken",
+                                                             @"authority" : @"https://login.microsoftonline.com/common",
+                                                             @"scope": @"fakescope1 fakescope2",
+                                                             @"client_id": UNIT_TEST_CLIENT_ID,
+                                                             @"id_token": rawIdToken,
+                                                             @"client_info": rawClientInfo,
+                                                             @"expires_on" : @"1"
+                                                             }
+                                                     error:nil];
+
+    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:[[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"]
+                                                                                    redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                                                                       clientId:UNIT_TEST_CLIENT_ID
+                                                                                         target:@"fakescope1 fakescope2"];
+    
+    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    BOOL result = [self.tokenCache saveTokensWithFactory:factory
+                                             requestParams:requestParameters
+                                                  response:msidResponse
+                                                   context:nil
+                                                    error:nil];
+    XCTAssertTrue(result);
+    
+    MSIDAccount *account = [factory accountFromResponse:msidResponse request:requestParameters];
+    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:account.username
+                                                        name:account.firstName
+                                            identityProvider:nil
+                                                         uid:account.clientInfo.uid
+                                                        utid:account.clientInfo.utid
+                                                 environment:account.authority.msidHostWithPortIfNecessary];
+
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application users:nil].count, 1);
     XCTAssertEqualObjects([application users:nil][0], user);
@@ -848,20 +883,20 @@
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     NSError *error = nil;
-    
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:nil];
-    application.tokenCache = [MSALTestTokenCache createTestAccessor];
-    
+
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims error:nil];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+
     XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
 }
@@ -879,14 +914,15 @@
 
     MSALUser *user = [MSALUser new];
     
-    [MSALTestSwizzle instanceMethod:@selector(deleteAllTokensForUser:clientId:context:error:)
-                              class:[MSALTokenCache class]
-                              block:(id)^(id obj, MSALUser *user, NSString *clientId, id<MSALRequestContext> ctx, NSError **error)
+    [MSALTestSwizzle instanceMethod:@selector(removeAllTokensForAccount:context:error:)
+                              class:[MSIDSharedTokenCache class]
+                              block:(id)^(id obj, MSIDAccount *account, id<MSIDRequestContext> ctx, NSError **error)
      {
          (void)obj;
-         (void)user;
-         (void)clientId;
-         MSAL_KEYCHAIN_ERROR(ctx, -34018, @"fetching team ID.");
+         (void)account;
+         
+         *error = MSALCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil);
+         
          return NO;
      }];
     

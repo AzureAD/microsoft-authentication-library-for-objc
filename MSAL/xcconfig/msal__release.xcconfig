@@ -1,6 +1,2 @@
-
-DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-ENABLE_NS_ASSERTIONS = NO;
-MTL_ENABLE_DEBUG_INFO = NO;
-VALIDATE_PRODUCT = YES;
-				
+#include "msal__common.xcconfig"
+#include "../IdentityCore/IdentityCore/xcconfig/identitycore__release.xcconfig"

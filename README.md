@@ -98,6 +98,7 @@ If your project is managed in a git repository you can include MSAL as a git sub
 * `git submodule add https://github.com/AzureAD/microsoft-authentication-library-for-objc msal`
 * `cd msal`
 * `git checkout tags/<latest_release_tag>`
+* `git submodule update --init --recursive`
 * `cd ..`
 * `git add msal`
 * `git commit -m "Use MSAL git submodule at <latest_release_tag>"`

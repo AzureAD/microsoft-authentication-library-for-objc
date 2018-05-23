@@ -56,6 +56,11 @@
 + (nonnull MSALTelemetry *)sharedInstance;
 
 /*!
+ Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
+ */
+@property (nonatomic) BOOL piiEnabled;
+
+/*!
  Register a telemetry dispatcher for receiving telemetry events.
  @param dispatcher              An instance of MSALDispatcher implementation.
  @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;

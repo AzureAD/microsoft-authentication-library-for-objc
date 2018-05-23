@@ -26,26 +26,32 @@
 //------------------------------------------------------------------------------
 
 #import "MSAL.h"
-#import "MSALLogger+Internal.h"
-
+#import "MSIDLogger+Internal.h"
 #import "MSALAutoMainViewController.h"
 #import "MSALAutoResultViewController.h"
 #import "MSALAutoRequestViewController.h"
-#import "MSALAccessTokenCacheItem+TestAppUtil.h"
-
-#import "MSALAccessTokenCacheItem+Automation.h"
-#import "MSALRefreshTokenCacheItem+Automation.h"
+#import "MSIDTokenCacheItem+Automation.h"
 #import "MSALUser+Automation.h"
 #import "MSALResult+Automation.h"
-
 #import "MSALAutomationConstants.h"
-
 #import "MSAL.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDAccount.h"
+#import "MSIDRequestParameters.h"
+#import "MSIDAccessToken.h"
+#import "MSIDRefreshToken.h"
 
 @interface MSALAutoMainViewController ()
 {
     NSMutableString *_resultLogs;
 }
+
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
+@property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 
 @end
 
@@ -79,6 +85,10 @@
     }];
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
+
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.defaultAccessor otherCacheAccessors:@[self.legacyAccessor]];
 }
 
 #pragma mark - Segue
@@ -264,7 +274,34 @@
 
 #pragma mark - Cache
 
-- (IBAction)expireAccessToken:(id)sender
+- (IBAction)expireAccessToken:(__unused id)sender
+{
+    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
+    {
+        if (![self checkParametersError:parameters])
+        {
+            return;
+        }
+
+        MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
+        __auto_type *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+                                                                       redirectUri:nil
+                                                                          clientId:parameters[MSAL_CLIENT_ID_PARAM]
+                                                                            target:parameters[MSAL_SCOPES_PARAM]];
+
+        __auto_type accessToken = [self.tokenCache getATForAccount:account requestParams:msidParams context:nil error:nil];
+        accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
+
+        BOOL resut = [self.defaultAccessor saveAccessToken:accessToken account:account context:nil error:nil];
+
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, resut ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+        [self displayOperationResultString:resultString];
+    };
+
+    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
+}
+
+- (IBAction)invalidateRefreshToken:(__unused id)sender
 {
     (void)sender;
     
@@ -275,115 +312,61 @@
             return;
         }
         
-        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+        MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
+        __auto_type *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+                                                                       redirectUri:nil
+                                                                          clientId:parameters[MSAL_CLIENT_ID_PARAM]
+                                                                            target:parameters[MSAL_SCOPES_PARAM]];
         
-        MSALScopes *scopes = [NSOrderedSet orderedSetWithArray:(NSArray *)parameters[MSAL_SCOPES_PARAM]];
+        __auto_type refreshToken = [self.tokenCache getRTForAccount:account requestParams:msidParams context:nil error:nil];
+        refreshToken.refreshToken = @"bad-refresh-token";
         
-        MSALAccessTokenCacheKey *tokenCacheKey = [[MSALAccessTokenCacheKey alloc] initWithAuthority:parameters[MSAL_AUTHORITY_PARAM]
-                                                                                           clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                                                              scope:scopes
-                                                                                     userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
-                                                                                        environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]];
-        
-        NSArray *tokenCacheItems = [cache getAccessTokenItemsWithKey:tokenCacheKey context:nil error:nil];
-        
-        NSUInteger accessTokenCount = 0;
-        
-        for (MSALAccessTokenCacheItem *item in tokenCacheItems)
-        {
-            item.expiresOnString = [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:-1.0] timeIntervalSince1970]];
-            [cache addOrUpdateAccessTokenItem:item context:nil error:nil];
-            accessTokenCount++;
-        }
-        
-        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, (unsigned long)accessTokenCount];
+        BOOL resut = [self.defaultAccessor saveRefreshToken:refreshToken account:account context:nil error:nil];
+
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_INVALIDATED_REFRESH_TOKEN_PARAM, resut ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+
         [self displayOperationResultString:resultString];
     };
-    
+
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
-- (IBAction)invalidateRefreshToken:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
-    (void)sender;
-    
-    MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
-    {
-        if (![self checkParametersError:parameters])
-        {
-            return;
-        }
-        
-        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-        
-        MSALRefreshTokenCacheKey *tokenCacheKey = [[MSALRefreshTokenCacheKey alloc] initWithEnvironment:parameters[MSAL_USER_ENVIRONMENT_PARAM]
-                                                                                               clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                                                         userIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]];
-        
-        MSALRefreshTokenCacheItem *tokenCacheItem = [cache getRefreshTokenItemForKey:tokenCacheKey context:nil error:nil];
-        
-        if (tokenCacheItem)
-        {
-            tokenCacheItem.refreshToken = BAD_REFRESH_TOKEN;
-            [cache addOrUpdateRefreshTokenItem:tokenCacheItem context:nil error:nil];
-        }
-        
-        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_INVALIDATED_REFRESH_TOKEN_PARAM, tokenCacheItem ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
-        
-        [self displayOperationResultString:resultString];
-    };
-    
-    [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
-}
+    NSUInteger allCount = [self.defaultAccessor allTokensWithContext:nil error:nil].count;
+    allCount += [self.legacyAccessor allTokensWithContext:nil error:nil].count;
+    [self.defaultAccessor clearWithContext:nil error:nil];
+    [self.legacyAccessor clearWithContext:nil error:nil];
 
-- (IBAction)clearCache:(id)sender
-{
-    (void)sender;
-    
-    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    
-    NSArray *allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
-    NSArray *allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
-    
-    NSUInteger allCount = allAccessTokenItems.count + allRefreshTokenItems.count;
-    
-    [cache testRemoveAll];
-    
     NSString *resultCountsString = [NSString stringWithFormat:@"{\"%@\":\"%lu\"}", MSAL_CLEARED_TOKENS_COUNT_PARAM, (unsigned long)allCount];
     [self displayResultJson:resultCountsString logs:_resultLogs];
 }
 
-- (IBAction)readCache:(id)sender
+- (IBAction)readCache:(__unused id)sender
 {
-    (void)sender;
-    
-    MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
-    
-    NSArray *allAccessTokenItems = [cache getAccessTokenItemsWithKey:nil context:nil error:nil];
-    NSArray *allRefreshTokenItems = [cache allRefreshTokens:nil context:nil error:nil];
-    
     NSMutableDictionary *cacheDictionary = [NSMutableDictionary dictionary];
-    NSUInteger allCount = allAccessTokenItems.count + allRefreshTokenItems.count;
     
-    [cacheDictionary setObject:@(allCount) forKey:MSAL_ITEM_COUNT_PARAM];
+    NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
+    [allTokens addObjectsFromArray:[self.legacyAccessor allTokensWithContext:nil error:nil]];
+    [cacheDictionary setObject:@(allTokens.count) forKey:MSAL_ITEM_COUNT_PARAM];
     
     NSMutableArray *accessTokenItems = [NSMutableArray array];
-    
-    for (MSALAccessTokenCacheItem *accessToken in allAccessTokenItems)
-    {
-        [accessTokenItems addObject:[accessToken itemAsDictionary]];
-    }
-    
-    [cacheDictionary setObject:accessTokenItems forKey:MSAL_ACCESS_TOKENS_PARAM];
-    
     NSMutableArray *refreshTokenItems = [NSMutableArray array];
     
-    for (MSALRefreshTokenCacheItem *refreshToken in allRefreshTokenItems)
+    for (MSIDBaseToken *token in allTokens)
     {
-        [refreshTokenItems addObject:[refreshToken itemAsDictionary]];
+        if (token.tokenType == MSIDTokenTypeAccessToken)
+        {
+            [accessTokenItems addObject:[token.tokenCacheItem itemAsDictionary]];
+        }
+        else if (token.tokenType == MSIDTokenTypeRefreshToken)
+        {
+            [refreshTokenItems addObject:[token.tokenCacheItem itemAsDictionary]];
+        }
     }
     
     [cacheDictionary setObject:refreshTokenItems forKey:MSAL_REFRESH_TOKENS_PARAM];
+    [cacheDictionary setObject:accessTokenItems forKey:MSAL_ACCESS_TOKENS_PARAM];
     
     [self displayResultJson:[self createJsonStringFromDictionary:cacheDictionary]
                        logs:_resultLogs];
@@ -391,10 +374,8 @@
 
 #pragma mark - Users
 
-- (IBAction)signOut:(id)sender
+- (IBAction)signOut:(__unused id)sender
 {
-    (void)sender;
-    
     MSALAutoParamBlock completionBlock = ^void (NSDictionary<NSString *, NSString *> * parameters)
     {
         if (![self checkParametersError:parameters])
@@ -402,19 +383,16 @@
             return;
         }
         
-        MSALKeychainTokenCache *cache = MSALKeychainTokenCache.defaultKeychainCache;
+        MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
         
-        BOOL result = [cache removeAllTokensForUserIdentifier:parameters[MSAL_USER_IDENTIFIER_PARAM]
-                                                  environment:parameters[MSAL_USER_ENVIRONMENT_PARAM]
-                                                     clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                      context:nil
-                                                        error:nil];
-        
+        BOOL result = [self.tokenCache removeAllTokensForAccount:account context:nil error:nil];
+        result &= [self.tokenCache removeAccount:account context:nil error:nil];
+
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
-        
+
         [self displayOperationResultString:resultString];
     };
-    
+
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 

@@ -27,12 +27,13 @@
 
 
 #import <Foundation/Foundation.h>
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
+#import "MSIDTestURLSession.h"
 
 @interface MSALTestURLSessionDataTask : NSObject
 
 - (id)initWithRequest:(NSURLRequest *)request
-              session:(MSALTestURLSession *)session
+              session:(MSIDTestURLSession *)session
     completionHandler:(MSALTestHttpCompletionBlock)completionHandler;
 
 

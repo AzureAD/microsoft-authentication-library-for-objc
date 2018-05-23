@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 #import "MSALAuthority.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALTestSwizzle.h"
 #import "MSALB2CAuthorityResolver.h"
 

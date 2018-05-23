@@ -60,6 +60,14 @@
     called MSAL. */
 @property NSString *component;
 
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
+ */
+@property (nonatomic) NSString *keychainGroup;
+#endif
+
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
  
@@ -92,6 +100,7 @@
     @param  error   The error that occured trying to retrieve users, if any, if you're
                     not interested in the specific error pass in nil.
  */
+
 - (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error;
 
 /*!
