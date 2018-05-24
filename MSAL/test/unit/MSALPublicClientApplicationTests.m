@@ -434,7 +434,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -461,7 +461,7 @@
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
-         XCTAssertEqualObjects(params.user, user);
+         XCTAssertEqualObjects(params.account, user);
          
          completionBlock(nil, nil);
      }];
@@ -493,7 +493,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -520,7 +520,7 @@
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
-         XCTAssertEqualObjects(params.user, user);
+         XCTAssertEqualObjects(params.account, user);
          
          completionBlock(nil, nil);
      }];
@@ -555,7 +555,7 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -583,7 +583,7 @@
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
-         XCTAssertEqualObjects(params.user, user);
+         XCTAssertEqualObjects(params.account, user);
          
          completionBlock(nil, nil);
      }];
@@ -633,13 +633,13 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
-         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
-         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.account.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.account.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertNil(params.unvalidatedAuthority);
@@ -654,7 +654,7 @@
          completionBlock(nil, nil);
      }];
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -697,13 +697,13 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAndAuthority);
-         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
-         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.account.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.account.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
@@ -718,7 +718,7 @@
          completionBlock(nil, nil);
      }];
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -765,13 +765,13 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId);
-         XCTAssertEqualObjects(params.user.displayableId, @"displayableId");
-         XCTAssertEqualObjects(params.user.name, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.displayableId, @"displayableId");
+         XCTAssertEqualObjects(params.account.name, @"user@contoso.com");
          XCTAssertEqualObjects(params.user.identityProvider, @"identifyProvider");
          XCTAssertEqualObjects(params.user.userIdentifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.utid, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.user.uid, @"1");
-         XCTAssertEqualObjects(params.user.environment, @"https://login.microsoftonline.com");
+         XCTAssertEqualObjects(params.account.environment, @"https://login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
@@ -787,7 +787,7 @@
          completionBlock(nil, nil);
      }];
     
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:@"displayableId"
+    MSALAccount *user = [[MSALAccount alloc] initWithDisplayableId:@"displayableId"
                                                         name:@"user@contoso.com"
                                             identityProvider:@"identifyProvider"
                                                          uid:@"1"
@@ -824,7 +824,7 @@
     application.tokenCache = self.tokenCache;
 
     // Make sure no users are showing up in the cache
-    XCTAssertEqual([application users:nil].count, 0);
+    XCTAssertEqual([application accounts:nil].count, 0);
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
@@ -861,7 +861,7 @@
     XCTAssertTrue(result);
     
     MSIDAccount *account = [factory accountFromResponse:msidResponse request:requestParameters];
-    MSALUser *user = [[MSALUser alloc] initWithDisplayableId:account.username
+    MSALAccount *user = [[MSALUser alloc] initWithDisplayableId:account.username
                                                         name:account.firstName
                                             identityProvider:nil
                                                          uid:account.clientInfo.uid
@@ -869,14 +869,14 @@
                                                  environment:account.authority.msidHostWithPortIfNecessary];
 
     // Make sure that the user is properly showing up in the cache
-    XCTAssertEqual([application users:nil].count, 1);
-    XCTAssertEqualObjects([application users:nil][0], user);
+    XCTAssertEqual([application accounts:nil].count, 1);
+    XCTAssertEqualObjects([application accounts:nil][0], user);
 
     XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
     
     // Make sure the user is now gone
-    XCTAssertEqual([application users:nil].count, 0);
+    XCTAssertEqual([application accounts:nil].count, 0);
 }
 
 - (void)testRemove_whenUserDontExist_shouldReturnTrueWithNoError
@@ -895,7 +895,7 @@
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
     
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
 
     XCTAssertTrue([application removeUser:user error:&error]);
     XCTAssertNil(error);
@@ -912,7 +912,7 @@
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:nil];
 
-    MSALUser *user = [MSALUser new];
+    MSALAccount *user = [MSALAccount new];
     
     [MSALTestSwizzle instanceMethod:@selector(removeAllTokensForAccount:context:error:)
                               class:[MSIDSharedTokenCache class]

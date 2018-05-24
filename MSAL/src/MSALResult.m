@@ -32,7 +32,7 @@
 #import "MSIDClientInfo.h"
 #import "MSALIdToken.h"
 #import "MSIDAADV2IdTokenClaims.h"
-#import "MSALUser+Internal.h"
+#import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
 
 @implementation MSALResult
@@ -44,7 +44,7 @@
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
                              tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
+                              account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
@@ -54,9 +54,9 @@
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_tenantId = tenantId;
-    result->_user = user;
+    result->_user = account;
     result->_idToken = idToken;
-    result->_uniqueId = uniqueId; // Why do we need unique id here?
+    result->_uniqueId = uniqueId;
     result->_scopes = scopes;
     
     return result;
@@ -67,14 +67,17 @@
 {
     __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken];
 
-    // TODO: we don't need to create a user here anymore!
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idTokenClaims
-                                            clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
+    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:idTokenClaims.preferredUsername
+                                                                 name:idTokenClaims.name
+                                                        homeAccountId:idToken.homeAccountId
+                                                       localAccountId:idTokenClaims.objectId
+                                                          environment:idToken.authority.msidHostWithPortIfNecessary
+                                                             tenantId:idTokenClaims.tenantId];
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                               tenantId:accessToken.authority.msidTenant
-                                  user:user
+                               account:account
                                idToken:idToken.rawIdToken
                               uniqueId:idTokenClaims.uniqueId
                                 scopes:[accessToken.scopes array]];

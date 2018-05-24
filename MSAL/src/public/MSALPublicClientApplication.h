@@ -29,7 +29,7 @@
 #import <MSAL/MSAL.h>
 
 @class MSALResult;
-@class MSALUser;
+@class MSALAccount;
 @class MSALTokenRequest;
 
 @interface MSALPublicClientApplication : NSObject
@@ -95,23 +95,43 @@
                  error:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns an array of users visible to this application
+    Returns an array of accounts visible to this application
  
-    @param  error   The error that occured trying to retrieve users, if any, if you're
+    @param  error   The error that occured trying to retrieve accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 
-- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error;
+- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns a specific user for the identifier given (received from a user object returned
+    Returns accounts for for the home identifier given (received from an account object returned
     in a previous acquireToken call)
  
-    @param  error   The error that occured trying to the user, if any, if you're
+    @param  error   The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
-- (MSALUser *)userForIdentifier:(NSString *)identifier
-                          error:(NSError * __autoreleasing *)error;
+- (NSArray<MSALAccount *> *)accountsForHomeAccountId:(NSString *)homeAccountId
+                                               error:(NSError * __autoreleasing *)error;
+
+/*!
+    Returns account for for the home identifier and tenant given (received from an account object returned
+    in a previous acquireToken call)
+
+    @param  error   The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                   error:(NSError * __autoreleasing *)error;
+
+/*!
+    Returns account for for the local account identifier (received from an account object returned
+    in a previous acquireToken call)
+
+    @param  error   The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForLocalAccountId:(NSString *)localAccountId
+                                    error:(NSError * __autoreleasing *)error;
 
 #pragma SafariViewController Support
 
@@ -136,7 +156,7 @@
 #pragma mark acquireToken
 
 /*!
-    Acquire a token for a new user using interactive authentication
+    Acquire a token for a new account using interactive authentication
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
@@ -152,13 +172,13 @@
 
 
 /*!
-    Acquire a token for a new user using interactive authentication
+    Acquire a token for a new account using interactive authentication
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
                             gauranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
-                            beginning of the interactive authentication flow. The user returned
+                            beginning of the interactive authentication flow. The account returned
                             in the completion block is not guaranteed to match the loginHint.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
@@ -168,13 +188,13 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token for a new user using interactive authentication
+    Acquire a token for a new account using interactive authentication
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
                             gauranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
-                            beginning of the interactive authentication flow. The user returned
+                            beginning of the interactive authentication flow. The account returned
                             in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior      A specific UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
@@ -189,16 +209,16 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token for a new user using interactive authentication
+    Acquire a token for a new account using interactive authentication
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  extraScopesToConsent    Permissions you want the user to consent to in the same
+    @param  extraScopesToConsent    Permissions you want the account to consent to in the same
                                     authentication flow, but won't be included in the returned
                                     access token
     @param  loginHint               A loginHint (usually an email) to pass to the service at the
-                                    beginning of the interactive authentication flow. The user returned
+                                    beginning of the interactive authentication flow. The account returned
                                     in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
@@ -223,32 +243,32 @@
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
-#pragma mark acquireToken using User
+#pragma mark acquireToken using Account
 
 /*!
-    Acquire a token interactively for an existing user. This is typically used after receiving
+    Acquire a token interactively for an existing account. This is typically used after receiving
     a MSALErrorInteractionRequired error.
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
                             gauranteed to be included in the access token returned.
-    @param  user            A user object retrieved from the application object that the
+    @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token interactively for an existing user. This is typically used after receiving
+    Acquire a token interactively for an existing account. This is typically used after receiving
     a MSALErrorInteractionRequired error.
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  user                    A user object retrieved from the application object that the
+    @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
@@ -257,22 +277,22 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token interactively for an existing user. This is typically used after receiving
+    Acquire a token interactively for an existing account. This is typically used after receiving
     a MSALErrorInteractionRequired error.
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  extraScopesToConsent    Permissions you want the user to consent to in the same
+    @param  extraScopesToConsent    Permissions you want the account to consent to in the same
                                     authentication flow, but won't be included in the returned
                                     access token
-    @param  user                    A user object retrieved from the application object that the
+    @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
@@ -289,8 +309,8 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-             extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                         user:(MSALUser *)user
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
+                      account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSString *)authority
@@ -301,27 +321,27 @@
 #pragma mark acquireTokenSilent
 
 /*!
-    Acquire a token silently for an existing user.
+    Acquire a token silently for an existing account.
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
                             gauranteed to be included in the access token returned.
-    @param  user            A user object retrieved from the application object that the
+    @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token silently for an existing user.
+    Acquire a token silently for an existing account.
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
                                     gauranteed to be included in the access token returned.
-    @param  user                    A user object retrieved from the application object that the
+    @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance/<tenant>, where
@@ -334,16 +354,16 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                           authority:(NSString *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
-    Acquire a token silently for an existing user.
+    Acquire a token silently for an existing account.
  
     @param  scopes                  Scopes to request from the server, the scopes that come back
                                     can differ from the ones in the original call
-    @param  user                    A user object retrieved from the application object that the
+    @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance/<tenant>, where
@@ -359,22 +379,23 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                           authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 #pragma mark -
-#pragma mark remove user from cache
+#pragma mark remove account from cache
 
 /*!
-    Removes all tokens from the cache for this application for the provided user
+    Removes all tokens from the cache for this application for the provided account
+    User will need to enter his credentials again after calling this API
  
-    @param  user    The user to remove from the cache
+    @param  account    The account to remove from the cache
  */
-- (BOOL)removeUser:(MSALUser *)user
-             error:(NSError * __autoreleasing *)error;
+- (BOOL)removeAccount:(MSALAccount *)account
+                error:(NSError * __autoreleasing *)error;
 
 
 @end

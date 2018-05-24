@@ -63,7 +63,7 @@ static BOOL s_runningTest = NO;
                                     application:(MSALPublicClientApplication *)application
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSArray<MSALUser *> *users = [application users:nil];
+    NSArray<MSALAccount *> *users = [application accounts:nil];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
@@ -76,7 +76,7 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
-                MSALUser *user = users[userIndex];
+                MSALAccount *account = users[userIndex];
                 
                 if (multipleUsers)
                 {
@@ -84,7 +84,7 @@ static BOOL s_runningTest = NO;
                 }
                 
                 [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                                    user:user
+                                                 account:account
                                          completionBlock:^(MSALResult *result, NSError *error)
                  {
                      (void)error;
@@ -114,16 +114,16 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
-                NSArray *users = [application users:nil];
+                NSArray *accounts = [application accounts:nil];
                 
-                if (![users count])
+                if (![accounts count])
                 {
                     dispatch_semaphore_signal(sem);
                 }
                 else
                 {
                     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                                        user:users[0]
+                                                     account:accounts[0]
                                              completionBlock:^(MSALResult *result, NSError *error)
                      {
                          (void)error;

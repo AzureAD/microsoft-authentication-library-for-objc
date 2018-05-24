@@ -45,7 +45,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccount.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSALUser+Internal.h"
+#import "MSALAccount+Internal.h"
 #import "MSIDRefreshToken.h"
 #import "MSALIdToken.h"
 #import "MSIDAADV2IdTokenClaims.h"
@@ -142,39 +142,85 @@
     return self;
 }
 
-- (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
+- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
 {
-    /*
-    NSMutableSet *users = [NSMutableSet new];
-    
-    __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
-    for (MSIDRefreshToken *token in tokens)
+    NSError *msidError = nil;
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:self.authority.msidHostWithPortIfNecessary
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+
+
+    if (msidError)
     {
-        MSALUser *user = [[MSALUser alloc] initWithIdToken:[[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:token.idToken]
-                                                clientInfo:token.clientInfo environment:token.authority.msidHostWithPortIfNecessary];
-        
-         [users addObject:user];
+        *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        return nil;
     }
 
-    return [users allObjects];*/
-    return nil; // TODO
-}
+    NSMutableSet *msalAccounts = [NSMutableSet new];
 
-- (MSALUser *)userForIdentifier:(NSString *)identifier
-                          error:(NSError * __autoreleasing *)error
-{
-    __auto_type users = [self users:error];
-    
-    for (MSALUser *user in users)
+    for (MSIDAccount *msidAccount in msidAccounts)
     {
-        BOOL isFound = [user.userIdentifier isEqualToString:identifier];
-        isFound &= [user.environment isEqualToString:self.authority.msidHostWithPortIfNecessary];
-        if (isFound)
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+
+        if (msalAccount)
         {
-            return user;
+            [msalAccounts addObject:msalAccount];
         }
     }
-    
+
+    return [msalAccounts allObjects];
+}
+
+- (NSArray<MSALAccount *> *)accountsForHomeAccountId:(NSString *)homeAccountId
+                                               error:(NSError * __autoreleasing *)error
+{
+    NSArray<MSALAccount *> *accounts = [self accounts:error];
+    NSMutableArray *resultAccounts = [NSMutableArray array];
+
+    for (MSALAccount *account in accounts)
+    {
+        if ([account.homeAccountId isEqualToString:homeAccountId])
+        {
+            [resultAccounts addObject:account];
+        }
+    }
+
+    return accounts;
+}
+
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                   error:(NSError * __autoreleasing *)error
+{
+    NSArray<MSALAccount *> *accounts = [self accounts:error];
+
+    for (MSALAccount *account in accounts)
+    {
+        if ([account.homeAccountId isEqualToString:homeAccountId]
+            && [account.utid isEqualToString:account.tenantId])
+        {
+            return account;
+        }
+    }
+
+    return nil;
+}
+
+- (MSALAccount *)accountForLocalAccountId:(NSString *)localAccountId
+                                    error:(NSError * __autoreleasing *)error
+{
+    NSArray<MSALAccount *> *accounts = [self accounts:error];
+
+    for (MSALAccount *account in accounts)
+    {
+        if ([account.localAccountId isEqualToString:localAccountId])
+        {
+            return account;
+        }
+    }
+
     return nil;
 }
 
@@ -233,7 +279,7 @@
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:nil
-                           user:nil
+                        account:nil
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
@@ -252,7 +298,7 @@
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:nil
-                           user:nil
+                        account:nil
                       loginHint:loginHint
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
@@ -270,7 +316,7 @@
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:nil
-                           user:nil
+                        account:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -291,7 +337,7 @@
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:extraScopesToConsent
-                           user:nil
+                        account:nil
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -302,16 +348,16 @@
 }
 
 #pragma mark -
-#pragma mark User
+#pragma mark Account
 
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:nil
-                           user:user
+                        account:account
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
@@ -323,14 +369,14 @@
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:nil
-                           user:user
+                        account:account
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -342,7 +388,7 @@
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(NSString *)authority
@@ -351,7 +397,7 @@
 {
     [self acquireTokenForScopes:scopes
            extraScopesToConsent:extraScopesToConsent
-                           user:user
+                        account:account
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
@@ -366,11 +412,11 @@
 #pragma mark Silent
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
-                                 user:user
+                              account:account
                             authority:nil
                          forceRefresh:NO
                         correlationId:nil
@@ -379,12 +425,12 @@
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                           authority:(NSString *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
-                                 user:user
+                              account:account
                             authority:authority
                          forceRefresh:NO
                         correlationId:nil
@@ -393,14 +439,14 @@
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                           authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
-                                 user:user
+                              account:account
                             authority:authority
                          forceRefresh:forceRefresh
                         correlationId:correlationId
@@ -434,7 +480,7 @@
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                         user:(MSALUser *)user
+                      account:(MSALAccount *)account
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
@@ -447,30 +493,30 @@
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.logComponent = _component;
     params.apiId = apiId;
-    params.user = user;
+    params.account = account;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
     
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
-              "                                               user:%@\n"
+              "                                            account:%@\n"
               "                                          loginHint:%@\n"
               "                                         uiBehavior:%@\n"
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
-                  "                                               user:%@\n"
+                  "                                            account:%@\n"
                   "                                          loginHint:%@\n"
                   "                                         uiBehavior:%@\n"
                   "                               extraQueryParameters:%@\n"
                   "                                          authority:%@\n"
                   "                                      correlationId:%@]",
-                 scopes, extraScopesToConsent, user.userIdentifier, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
@@ -516,7 +562,7 @@
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                               user:(MSALUser *)user
+                            account:(MSALAccount *)account
                           authority:(NSString *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
@@ -525,7 +571,7 @@
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.user = user;
+    params.account = account;
     params.apiId = apiId;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
@@ -534,18 +580,18 @@
     
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-              "                                                     user:%@\n"
+              "                                                  account:%@\n"
               "                                             forceRefresh:%@\n"
               "                                            correlationId:%@\n]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                  "                                                     user:%@\n"
+                  "                                                  account:%@\n"
                   "                                             forceRefresh:%@\n"
                   "                                            correlationId:%@\n]",
-                 scopes, user, forceRefresh ? @"Yes" : @"No", correlationId);
+                 scopes, account, forceRefresh ? @"Yes" : @"No", correlationId);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
@@ -582,19 +628,19 @@
 }
 
 #pragma mark -
-#pragma mark remove user from cache
+#pragma mark remove account from cache
 
-- (BOOL)removeUser:(MSALUser *)user
-             error:(NSError * __autoreleasing *)error
+- (BOOL)removeAccount:(MSALAccount *)account
+                error:(NSError * __autoreleasing *)error
 {
-    if (!user)
+    if (!account)
     {
         return YES;
     }
 
     NSError *msidError = nil;
 
-    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account
+    BOOL result = [self.tokenCache removeAllTokensForAccount:account.lookupAccountIdentifier
                                                  environment:self.authority.msidHostWithPortIfNecessary
                                                     clientId:self.clientId
                                                      context:nil

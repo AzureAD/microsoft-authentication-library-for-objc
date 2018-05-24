@@ -179,7 +179,7 @@
     // and that second call doesn't overwrite first one, since policies are different
     XCTAssertEqual(accessTokens.count, 2);
     XCTAssertEqual(refreshTokens.count, 2);
-    XCTAssertEqual([[application users:nil] count], 2);
+    XCTAssertEqual([[application accounts:nil] count], 2);
 }
 
 @end

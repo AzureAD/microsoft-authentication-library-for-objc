@@ -448,7 +448,7 @@
     else
     {
         [application acquireTokenForScopes:[settings.scopes allObjects]
-                                      user:settings.currentUser
+                                   account:settings.currentAccount
                                 uiBehavior:[self uiBehavior]
                       extraQueryParameters:nil
                            completionBlock:completionBlock];
@@ -467,7 +467,7 @@
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
-    if (!settings.currentUser)
+    if (!settings.currentAccount)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error!"
                                                                        message:@"User needs to be selected for acquire token silent call"
@@ -497,7 +497,7 @@
     _acquireSilentButton.enabled = NO;
     
     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                        user:settings.currentUser
+                                     account:settings.currentAccount
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)
@@ -548,7 +548,7 @@
     {
         _resultView.text = @"Successfully cleared cache.";
         
-        settings.currentUser = nil;
+        settings.currentAccount = nil;
         
         [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
                      forState:UIControlStateNormal];
@@ -665,7 +665,7 @@
         return;
     }
     
-    NSUInteger existingUserCount = [[application users:nil] count];
+    NSUInteger existingUserCount = [[application accounts:nil] count];
     NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
     
     if (existingUserCount != requiredUserCount)

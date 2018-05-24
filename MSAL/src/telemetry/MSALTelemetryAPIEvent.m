@@ -28,7 +28,7 @@
 
 @implementation MSALTelemetryAPIEvent
 
-- (void)setUser:(MSALUser *)user
+- (void)setUser:(MSALAccount *)user
 {
     [self setProperty:MSID_TELEMETRY_KEY_USER_ID value:[user displayableId]];
 }

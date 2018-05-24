@@ -27,19 +27,21 @@
 
 #import "MSALUser+Automation.h"
 #import "MSIDClientInfo.h"
+#import "MSALAccount+Internal.h"
 
-@implementation MSALUser (Automation)
+@implementation MSALAccount (Automation)
 
 - (NSDictionary *)itemAsDictionary
 {
     NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
     [resultDict setValue:self.displayableId forKey:@"displayable_id"];
     [resultDict setValue:self.name forKey:@"name"];
-    [resultDict setValue:self.identityProvider forKey:@"identity_provider"];
+    [resultDict setValue:self.homeAccountId forKey:@"home_account_id"];
+    [resultDict setValue:self.localAccountId forKey:@"local_account_id"];
     [resultDict setValue:self.uid forKey:@"uid"];
     [resultDict setValue:self.utid forKey:@"utid"];
     [resultDict setValue:self.environment forKey:@"environment"];
-    [resultDict setValue:self.userIdentifier forKey:@"user_identifier"];
+    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
     
     return resultDict;
 }

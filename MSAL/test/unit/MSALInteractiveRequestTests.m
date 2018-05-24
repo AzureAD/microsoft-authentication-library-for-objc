@@ -35,7 +35,7 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
-#import "MSALUser.h"
+#import "MSALAccount.h"
 #import "MSALWebUI.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestConstants.h"
@@ -194,7 +194,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"preferredUserName"
+    parameters.account = [[MSALAccount alloc] initWithDisplayableId:@"preferredUserName"
                                                          name:@"user@contoso.com"
                                              identityProvider:@"identifyProvider"
                                                           uid:@"1"
@@ -430,7 +430,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
+    parameters.account = [[MSALAccount alloc] initWithDisplayableId:@"User"
                                                          name:@"user@contoso.com"
                                              identityProvider:@"identifyProvider"
                                                           uid:@"1"
@@ -604,7 +604,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
+    parameters.account = [[MSALAccount alloc] initWithDisplayableId:@"User"
                                                          name:@"user@contoso.com"
                                              identityProvider:@"identifyProvider"
                                                           uid:@"2"

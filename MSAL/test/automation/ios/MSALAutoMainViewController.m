@@ -36,20 +36,19 @@
 #import "MSALAutomationConstants.h"
 #import "MSAL.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDAccount.h"
-#import "MSIDRequestParameters.h"
+#import "MSIDConfiguration.h"
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDAccountIdentifier.h"
 
 @interface MSALAutoMainViewController ()
 {
     NSMutableString *_resultLogs;
 }
 
-@property (nonatomic) MSIDSharedTokenCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 
@@ -86,9 +85,8 @@
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
 
-    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.defaultAccessor otherCacheAccessors:@[self.legacyAccessor]];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
 }
 
 #pragma mark - Segue
@@ -149,18 +147,18 @@
     return clientApplication;
 }
 
-- (MSALUser *)userWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
-                     application:(MSALPublicClientApplication *)application
+- (MSALAccount *)accountWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
+                           application:(MSALPublicClientApplication *)application
 {
-    NSString *userIdentifier = parameters[MSAL_USER_IDENTIFIER_PARAM];
-    MSALUser *user = nil;
+    NSString *accountIdentifier = parameters[MSAL_USER_IDENTIFIER_PARAM];
+    MSALAccount *account = nil;
     
     NSError *error = nil;
     
-    if (userIdentifier)
+    if (accountIdentifier)
     {
-        user = [application userForIdentifier:userIdentifier error:&error];
-        
+        account = [application accountForHomeAccountId:accountIdentifier error:&error];
+
         if (error)
         {
             [self displayResultJson:[self createJsonStringFromError:error]
@@ -169,7 +167,7 @@
         }
     }
     
-    return user;
+    return account;
 }
 
 - (void)handleMSALResult:(MSALResult *)result error:(NSError *)error
@@ -204,7 +202,7 @@
             return;
         }
         
-        MSALUser *user = [self userWithParameters:parameters application:application]; // User is not required for acquiretoken
+        MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
         
         NSArray *scopes = (NSArray *)parameters[MSAL_SCOPES_PARAM];
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
@@ -213,7 +211,7 @@
         
         [application acquireTokenForScopes:scopes
                       extraScopesToConsent:extraScopes
-                                      user:user
+                                   account:account
                                 uiBehavior:MSALUIBehaviorDefault
                       extraQueryParameters:extraQueryParameters
                                  authority:nil // Will use the authority passed in with the application object
@@ -245,10 +243,10 @@
         {
             return;
         }
-        
-        MSALUser *user = [self userWithParameters:parameters application:application];
-        
-        if (!user)
+
+        MSALAccount *account = [self accountWithParameters:parameters application:application];
+
+        if (!account)
         {
             // Acquiretoken silent requires having a user
             return;
@@ -259,7 +257,7 @@
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         
         [application acquireTokenSilentForScopes:scopes
-                                            user:user
+                                         account:account
                                        authority:nil
                                     forceRefresh:forceRefresh
                                    correlationId:correlationId
@@ -382,6 +380,11 @@
         {
             return;
         }
+
+
+
+        MSIDAccountIdentifier *accountIdentifier = [MSIDAccountIdentifier alloc]
+        BOOL result = [self.defaultAccessor removeAllTokensForAccount:<#(MSIDAccountIdentifier *)#> environment:<#(NSString *)#> clientId:<#(NSString *)#> context:<#(id<MSIDRequestContext>)#> error:<#(NSError *__autoreleasing *)#>]
         
         MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
         
@@ -415,7 +418,7 @@
         }
         
         NSError *error = nil;
-        NSArray *users = [application users:nil];
+        NSArray *users = [application accounts:nil];
         
         if (error)
         {
@@ -428,7 +431,7 @@
         
         NSMutableArray *items = [NSMutableArray array];
         
-        for (MSALUser *user in users)
+        for (MSALAccount *user in users)
         {
             [items addObject:[user itemAsDictionary]];
         }

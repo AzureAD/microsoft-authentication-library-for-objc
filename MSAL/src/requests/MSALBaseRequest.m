@@ -29,7 +29,7 @@
 #import "MSALAuthority.h"
 #import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
-#import "MSALUser.h"
+#import "MSALAccount.h"
 #import "MSALWebAuthRequest.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -143,9 +143,9 @@ static MSALScopes *s_reservedScopes = nil;
 - (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
 {
     NSString *upn = nil;
-    if (_parameters.user)
+    if (_parameters.account)
     {
-        upn = _parameters.user.displayableId;
+        upn = _parameters.account.displayableId;
     }
     else if(_parameters.loginHint)
     {
@@ -227,8 +227,8 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
 
-         if (_parameters.user != nil &&
-             ![_parameters.user.userIdentifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
+         if (_parameters.account != nil &&
+             ![_parameters.account.homeAccountId isEqualToString:tokenResponse.clientInfo.userIdentifier])
          {
              NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);

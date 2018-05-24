@@ -35,7 +35,7 @@
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
                              tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
+                              account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes;

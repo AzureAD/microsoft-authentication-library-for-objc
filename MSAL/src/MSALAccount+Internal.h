@@ -25,61 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAccount.h"
 
-@interface MSALUser : NSObject <NSCopying>
+@class MSIDAccountIdentifier;
+@class MSIDAADV2IdTokenClaims;
+@class MSIDClientInfo;
+@class MSIDAccount;
 
-/*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
- */
-@property (readonly) NSString *displayableId;
+@interface MSALAccount ()
 
-/*!
- The given name of the user. Can be nil if not returned by the service.
- */
-@property (readonly) NSString *name;
-
-/*!
- The identity provider of the user authenticated. Can be nil if not returned by the service.
- */
-@property (readonly) NSString *identityProvider;
+@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
+@property (nonatomic) NSString *uid;
+@property (nonatomic) NSString *utid;
 
 /*!
- Unique identifier of the user. Can be nil if not returned by the service.
- */
-@property (readonly) NSString *uid;
+ Initialize an MSALAccount with given information
 
-/*!
- Unique tenant identifier of the user. Can be nil if not returned by the service.
- */
-@property (readonly) NSString *utid;
-
-/*!
- Host part of the authority string used for authentication.
- */
-@property (readonly) NSString *environment;
-
-/*!
- Initialize a MSALUser with given information
- 
  @param  displayableId       The displayable value in UserPrincipleName(UPN) format
  @param  name                The given name of the user
- @param  identityProvider    The identity provider of the user authenticated
- @param  uid                 Unique identifier of the user
- @param  utid                Unique tenant identifier of the user
+ @param  homeAccountId       Unique identifier of the account in the home directory
+ @param  localAccountId      Unique identifier of the account in the signed in directory.
  @param  environment         Host part of the authority string
+ @param  tenantId            An identifier for the tenant that the account was acquired from
  */
 - (id)initWithDisplayableId:(NSString *)displayableId
                        name:(NSString *)name
-           identityProvider:(NSString *)identityProvider
-                        uid:(NSString *)uid
-                       utid:(NSString *)utid
-                environment:(NSString *)environment;
+              homeAccountId:(NSString *)homeAccountId
+             localAccountId:(NSString *)localAccountId
+                environment:(NSString *)environment
+                   tenantId:(NSString *)tenantId;
 
 /*!
- Returns the unique identifier of the user, which is a combination of uid and utid properties
+ Initialize an MSALAccount with MSIDAccount
+ @param  account             MSID account
  */
-- (NSString *)userIdentifier;
+- (id)initWithMSIDAccount:(MSIDAccount *)account;
 
 @end
-

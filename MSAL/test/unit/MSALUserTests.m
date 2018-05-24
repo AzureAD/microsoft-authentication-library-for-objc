@@ -63,7 +63,7 @@
     
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
     XCTAssertNotNil(user);
     XCTAssertEqualObjects(user.uid, @"uid");
@@ -87,9 +87,9 @@
                                         };
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);
-    MSALUser *user2 = [user copy];
+    MSALAccount *user2 = [user copy];
     
     XCTAssertNotNil(user2);
     // The two objects should have different pointers
@@ -114,9 +114,9 @@
                                         };
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
+    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);
-    MSALUser *user2 = [user copy];
+    MSALAccount *user2 = [user copy];
     
     XCTAssertNotNil(user2);
     XCTAssertEqualObjects(user, user2);

@@ -32,7 +32,7 @@
 #import "MSIDRequestContext.h"
 
 @class MSALAuthority;
-@class MSALUser;
+@class MSALAccount;
 @class MSIDConfiguration;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
@@ -45,7 +45,7 @@
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
 @property NSString *prompt;
-@property MSALUser *user;
+@property MSALAccount *account;
 @property MSALTelemetryApiId apiId;
 @property NSDictionary<NSString *, NSString *> *sliceParameters;
 

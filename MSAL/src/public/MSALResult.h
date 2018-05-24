@@ -27,7 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALUser;
+@class MSALAccount;
 
 @interface MSALResult : NSObject
 
@@ -48,7 +48,7 @@
 /*!
     The user object that holds user information.
  */
-@property (readonly) MSALUser *user;
+@property (readonly) MSALAccount *user;
 
 /*!
     The raw id token if it's returned by the service or nil if no id token is returned.

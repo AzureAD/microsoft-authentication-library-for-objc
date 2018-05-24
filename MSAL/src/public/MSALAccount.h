@@ -25,18 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALUser.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
+@interface MSALAccount : NSObject <NSCopying>
 
-@interface MSALUser ()
+/*!
+ The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ */
+@property (readonly) NSString *displayableId;
 
-@property (nonatomic) MSIDAccountIdentifier *account;
+/*!
+ The displayable name of the account. Can be nil if not returned by the service.
+ */
+@property (readonly) NSString *name;
 
-- (id)initWithIdToken:(MSIDAADV2IdTokenClaims *)idToken
-           clientInfo:(MSIDClientInfo *)clientInfo
-          environment:(NSString *)environment;
+/*!
+ Unique identifier of the account in the home directory.
+ */
+@property (readonly) NSString *homeAccountId;
+
+/*!
+ Unique identifier of the account in the signed in directory.
+ */
+@property (readonly) NSString *localAccountId;
+
+/*!
+ Host part of the authority string used for authentication.
+ */
+@property (readonly) NSString *environment;
+
+/*!
+ An identifier for the tenant that the account was acquired from. This property will be nil if tenant information is not returned by the service.
+ */
+@property (readonly) NSString *tenantId;
 
 @end
+

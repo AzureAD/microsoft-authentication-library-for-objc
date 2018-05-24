@@ -29,7 +29,7 @@
 @interface MSALTelemetryAPIEvent : MSIDTelemetryAPIEvent
 
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
-- (void)setUser:(MSALUser *)user;
+- (void)setUser:(MSALAccount *)user;
 - (void)setAuthorityType:(MSALAuthorityType)authorityType;
 - (void)setMSALApiId:(MSALTelemetryApiId)apiId;
 - (void)setErrorCode:(MSALErrorCode)errorCode;

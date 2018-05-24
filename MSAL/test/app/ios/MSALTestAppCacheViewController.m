@@ -30,7 +30,7 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSALUser+Internal.h"
+#import "MSALAccount+Internal.h"
 #import "MSIDBaseToken.h"
 #import "MSIDRefreshToken.h"
 #import "MSIDAccessToken.h"
@@ -393,9 +393,9 @@
             [_cacheTableView reloadData];
             [self.refreshControl endRefreshing];
             
-            if (!_userMap[MSALTestAppSettings.settings.currentUser.userIdentifier])
+            if (!_userMap[MSALTestAppSettings.settings.currentAccount.homeAccountId])
             {
-                MSALTestAppSettings.settings.currentUser = nil;
+                MSALTestAppSettings.settings.currentAccount = nil;
             }
         });
     });

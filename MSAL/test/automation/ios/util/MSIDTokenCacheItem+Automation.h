@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSIDTokenCacheItem.h"
+#import "MSIDCredentialCacheItem.h"
 
-@interface MSIDTokenCacheItem (Automation)
+@interface MSIDCredentialCacheItem (Automation)
 
 - (NSDictionary *)itemAsDictionary;
 

@@ -86,7 +86,7 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
-                                        user:(MSALUser *)user
+                                        user:(MSALAccount *)user
 {
     NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];

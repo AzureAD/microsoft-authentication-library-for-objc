@@ -32,7 +32,7 @@
 #import "MSIDTelemetryEventStrings.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
-#import "MSALUser+Internal.h"
+#import "MSALAccount+Internal.h"
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
 #import "MSIDConfiguration.h"
@@ -65,14 +65,14 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
+    CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
     
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     
     if (!_forceRefresh)
     {
         NSError *error = nil;
-        MSIDAccessToken *accessToken = [self.tokenCache getAccessTokenForAccount:_parameters.user.account
+        MSIDAccessToken *accessToken = [self.tokenCache getAccessTokenForAccount:_parameters.account.lookupAccountIdentifier
                                                                    configuration:msidConfiguration
                                                                          context:_parameters
                                                                            error:&error];
@@ -97,7 +97,7 @@
         
         if (accessToken && !accessToken.isExpired)
         {
-            MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.user.account
+            MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
                                                            configuration:msidConfiguration
                                                                  context:_parameters
                                                                    error:&error];
@@ -122,7 +122,7 @@
 
     NSError *msidError = nil;
 
-    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.user.account
+    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
                                                            familyId:nil
                                                       configuration:msidConfiguration
                                                             context:_parameters

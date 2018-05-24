@@ -185,7 +185,7 @@
     
     MSIDAccount *account = [[MSIDAccount alloc] initWithLegacyUserId:nil
                                                         uniqueUserId:clientInfo.userIdentifier];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:account.authority.msidHostWithPortIfNecessary];
+    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:account.authority.msidHostWithPortIfNecessary];
     
     // Add AT & RT.
     MSIDRequestParameters *requestParams = [MSIDTestRequestParams v2DefaultParams];
