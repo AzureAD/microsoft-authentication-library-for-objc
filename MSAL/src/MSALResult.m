@@ -54,7 +54,7 @@
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_tenantId = tenantId;
-    result->_user = account;
+    result->_account = account;
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
@@ -72,7 +72,8 @@
                                                         homeAccountId:idToken.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
                                                           environment:idToken.authority.msidHostWithPortIfNecessary
-                                                             tenantId:idTokenClaims.tenantId];
+                                                             tenantId:idTokenClaims.tenantId
+                                                           clientInfo:accessToken.clientInfo];
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn

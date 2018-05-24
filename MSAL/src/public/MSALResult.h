@@ -46,9 +46,9 @@
 @property (readonly) NSString *tenantId;
 
 /*!
-    The user object that holds user information.
+    The account object that holds account information.
  */
-@property (readonly) MSALAccount *user;
+@property (readonly) MSALAccount *account;
 
 /*!
     The raw id token if it's returned by the service or nil if no id token is returned.

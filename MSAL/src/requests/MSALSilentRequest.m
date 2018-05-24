@@ -105,7 +105,7 @@
             MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [event setUser:result.user];
+            [event setUser:result.account];
             [self stopTelemetryEvent:event error:nil];
 
             completionBlock(result, nil);

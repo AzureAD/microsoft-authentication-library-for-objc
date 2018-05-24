@@ -51,6 +51,7 @@
              localAccountId:(NSString *)localAccountId
                 environment:(NSString *)environment
                    tenantId:(NSString *)tenantId
+                 clientInfo:(MSIDClientInfo *)clientInfo
 {
     self = [super init];
 
@@ -58,11 +59,14 @@
     {
         _displayableId = [displayableId copy];
         _name = [name copy];
-        _homeAccountId = [_homeAccountId copy];
-        _localAccountId = [_localAccountId copy];
-        _environment = [_environment copy];
-        _tenantId = [_tenantId copy];
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:displayableId homeAccountId:_homeAccountId];
+        _homeAccountId = [homeAccountId copy];
+        _localAccountId = [localAccountId copy];
+        _environment = [environment copy];
+        _tenantId = [tenantId copy];
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:displayableId homeAccountId:homeAccountId];
+        _uid = clientInfo.uid;
+        _utid = clientInfo.utid;
+        [self initDerivedProperties];
     }
 
     return self;
@@ -70,31 +74,28 @@
 
 - (id)initWithMSIDAccount:(MSIDAccount *)account
 {
-    self = [self initWithDisplayableId:account.username
+    return [self initWithDisplayableId:account.username
                                   name:account.name
                          homeAccountId:account.homeAccountId
                         localAccountId:account.localAccountId
                            environment:account.authority.msidHostWithPortIfNecessary
-                              tenantId:account.authority.msidTenant];
+                              tenantId:account.authority.msidTenant
+                            clientInfo:account.clientInfo];
+}
 
-    if (self)
+- (void)initDerivedProperties
+{
+    // TODO: this should never happen, but double check before removing it
+    if (!self.uid && !self.utid && self.homeAccountId)
     {
-        _uid = account.clientInfo.uid;
-        _utid = account.clientInfo.utid;
+        NSArray *accountIdComponents = [self.homeAccountId componentsSeparatedByString:@"."];
 
-        if (!account.clientInfo)
+        if ([accountIdComponents count] == 2)
         {
-            NSArray *accountIdComponents = [account.homeAccountId componentsSeparatedByString:@"."];
-
-            if ([accountIdComponents count] == 2)
-            {
-                _uid = accountIdComponents[0];
-                _utid = accountIdComponents[1];
-            }
+            _uid = accountIdComponents[0];
+            _utid = accountIdComponents[1];
         }
     }
-
-    return self;
 }
 
 #pragma mark - NSCopying

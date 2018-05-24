@@ -254,7 +254,7 @@ static MSALScopes *s_reservedScopes = nil;
          
          MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
          
-         [event setUser:result.user];
+         [event setUser:result.account];
          [self stopTelemetryEvent:event error:nil];
 
          completionBlock(result, nil);

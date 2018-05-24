@@ -363,7 +363,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.user, result.scopes];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes];
     
     [_resultView setText:resultText];
     

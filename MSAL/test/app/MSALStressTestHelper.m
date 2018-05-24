@@ -89,7 +89,7 @@ static BOOL s_runningTest = NO;
                  {
                      (void)error;
                      
-                     if (expireToken && result.user)
+                     if (expireToken && result.account)
                      {
                          [self expireAllTokensWithClientId:application.clientId];
                      }
