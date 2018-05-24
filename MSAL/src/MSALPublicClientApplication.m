@@ -181,8 +181,7 @@
 
     for (MSALAccount *account in accounts)
     {
-        if ([account.homeAccountId isEqualToString:homeAccountId]
-            && [account.utid isEqualToString:account.tenantId])
+        if ([account.homeAccountId isEqualToString:homeAccountId])
         {
             return account;
         }
@@ -623,18 +622,17 @@
 
     NSError *msidError = nil;
 
-    BOOL result = [self.tokenCache removeAllTokensForAccount:account.lookupAccountIdentifier
-                                                 environment:self.authority.msidHostWithPortIfNecessary
-                                                    clientId:self.clientId
-                                                     context:nil
-                                                       error:&msidError];
+    BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
+                                            environment:self.authority.msidHostWithPortIfNecessary
+                                               clientId:self.clientId
+                                                context:nil
+                                                  error:&msidError];
 
     if (msidError && error)
     {
         *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     }
 
-    // TODO: remove account too!
     return result;
 }
 

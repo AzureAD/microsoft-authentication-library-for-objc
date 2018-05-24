@@ -36,6 +36,7 @@
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
 #import "MSIDConfiguration.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALSilentRequest()
 
@@ -130,7 +131,9 @@
 
     if (msidError)
     {
-        // TODO
+        NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        completionBlock(nil, msalError);
+        return;
     }
     
     CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")

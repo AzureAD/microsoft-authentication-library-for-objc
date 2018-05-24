@@ -131,6 +131,8 @@
     return [self isEqualToUser:(MSALAccount *)object];
 }
 
+/*
+ TODO: this is correct implementation, but we can't use it until we agree on the public API changes
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
@@ -159,6 +161,30 @@
     result &= (!self.uid && !user.uid) || [self.uid isEqualToString:user.uid];
     result &= (!self.utid && !user.utid) || [self.utid isEqualToString:user.utid];
     
+    return result;
+}*/
+
+/* TODO: this is a temporary solution that maintains previous MSAL behavior of having one account per environment.
+   This is a temporary solution to test the overall app and will be removed once we agree on the public API changes. */
+
+- (NSUInteger)hash
+{
+    NSUInteger hash = 0;
+    hash = hash * 31 + self.displayableId.hash;
+    hash = hash * 31 + self.homeAccountId.hash;
+    hash = hash * 31 + self.environment.hash;
+    return hash;
+}
+
+- (BOOL)isEqualToUser:(MSALAccount *)user
+{
+    if (!user) return NO;
+
+    BOOL result = YES;
+    result &= (!self.displayableId && !user.displayableId) || [self.displayableId isEqualToString:user.displayableId];
+    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId isEqualToString:user.homeAccountId];
+    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
+
     return result;
 }
 
