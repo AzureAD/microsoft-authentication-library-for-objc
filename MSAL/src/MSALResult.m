@@ -69,9 +69,9 @@
 
     MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:idTokenClaims.preferredUsername
                                                                  name:idTokenClaims.name
-                                                        homeAccountId:idToken.homeAccountId
+                                                        homeAccountId:accessToken.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
-                                                          environment:idToken.authority.msidHostWithPortIfNecessary
+                                                          environment:accessToken.authority.msidHostWithPortIfNecessary
                                                              tenantId:idTokenClaims.tenantId
                                                            clientInfo:accessToken.clientInfo];
     
