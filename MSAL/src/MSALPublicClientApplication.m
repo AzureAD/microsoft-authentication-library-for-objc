@@ -174,23 +174,6 @@
     return [msalAccounts allObjects];
 }
 
-- (NSArray<MSALAccount *> *)accountsForHomeAccountId:(NSString *)homeAccountId
-                                               error:(NSError * __autoreleasing *)error
-{
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
-    NSMutableArray *resultAccounts = [NSMutableArray array];
-
-    for (MSALAccount *account in accounts)
-    {
-        if ([account.homeAccountId isEqualToString:homeAccountId])
-        {
-            [resultAccounts addObject:account];
-        }
-    }
-
-    return accounts;
-}
-
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {

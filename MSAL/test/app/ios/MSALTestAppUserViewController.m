@@ -144,7 +144,7 @@
 + (NSString *)currentTitle
 {
     MSALAccount *currentAccount = MSALTestAppSettings.settings.currentAccount;
-    return currentAccount ? currentAccount.name : @"(nil)";
+    return currentAccount ? currentAccount.displayableId : @"(nil)";
 }
 
 @end

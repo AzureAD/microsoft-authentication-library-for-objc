@@ -104,16 +104,6 @@
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns accounts for for the home identifier given (received from an account object returned
-    in a previous acquireToken call)
- 
-    @param  error   The error that occured trying to get the accounts, if any, if you're
-                    not interested in the specific error pass in nil.
- */
-- (NSArray<MSALAccount *> *)accountsForHomeAccountId:(NSString *)homeAccountId
-                                               error:(NSError * __autoreleasing *)error;
-
-/*!
     Returns account for for the home identifier and tenant given (received from an account object returned
     in a previous acquireToken call)
 
@@ -123,15 +113,6 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error;
 
-/*!
-    Returns account for for the local account identifier (received from an account object returned
-    in a previous acquireToken call)
-
-    @param  error   The error that occured trying to get the accounts, if any, if you're
-                    not interested in the specific error pass in nil.
- */
-- (MSALAccount *)accountForLocalAccountId:(NSString *)localAccountId
-                                    error:(NSError * __autoreleasing *)error;
 
 #pragma SafariViewController Support
 

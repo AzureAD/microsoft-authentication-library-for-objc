@@ -65,10 +65,12 @@
 @end
 
 @implementation MSALTestAppCacheViewController
-
 {
+    NSMutableArray *_accounts;
+    NSMutableDictionary<NSString *, NSArray *> *_tokensPerAccount;
+
     UITableView *_cacheTableView;
-    
+
     NSMutableDictionary *_cacheMap;
     
     NSMutableDictionary *_userMap;
@@ -155,7 +157,7 @@
     
     if (tokens.count > 1)
     {
-        // Get 2nd cache item, 1st is envirment title.
+        // Get 2nd cache item, 1st is enviroment title.
         MSALTestAppCacheRowItem *cacheItem = tokens[1];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:userId];

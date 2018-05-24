@@ -39,10 +39,7 @@
 
 @property (nonatomic) NSString *homeAccountId;
 @property (nonatomic) NSString *displayableId;
-@property (nonatomic) NSString *name;
-@property (nonatomic) NSString *localAccountId;
 @property (nonatomic) NSString *environment;
-@property (nonatomic) NSString *tenantId;
 
 @end
 
