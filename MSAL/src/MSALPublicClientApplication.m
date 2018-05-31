@@ -50,6 +50,7 @@
 #import "MSALIdToken.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
+#import "MSALAccountId.h"
 
 @interface MSALPublicClientApplication()
 
@@ -181,7 +182,7 @@
 
     for (MSALAccount *account in accounts)
     {
-        if ([account.homeAccountId isEqualToString:homeAccountId])
+        if ([account.homeAccountId.identifier isEqualToString:homeAccountId])
         {
             return account;
         }
@@ -197,7 +198,7 @@
 
     for (MSALAccount *account in accounts)
     {
-        if ([account.localAccountId isEqualToString:localAccountId])
+        if ([account.localAccountId.identifier isEqualToString:localAccountId])
         {
             return account;
         }

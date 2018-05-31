@@ -108,7 +108,7 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:user.name
+                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.displayableId
                                                                                        tenantId:tid ? tid : user.utid],
                                              @"id_token_expires_in" : @"1200",

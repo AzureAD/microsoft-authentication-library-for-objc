@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,34 +15,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
 
-@class MSALAccountId;
-
-@interface MSALAccount : NSObject <NSCopying>
+@interface MSALAccountId : NSObject <NSCopying>
 
 /*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ Unique identifier of the account in directory
  */
-@property (readonly) NSString *displayableId;
+@property (nonatomic, readonly) NSString *identifier;
 
 /*!
- Unique identifier of the account in the home directory.
+ Object id of the account in the directory
  */
-@property (readonly) MSALAccountId *homeAccountId;
+@property (nonatomic, readonly) NSString *objectId;
 
 /*!
- Host part of the authority string used for authentication.
+ An identifier for the tenant that the account was acquired from
  */
-@property (readonly) NSString *environment;
+@property (nonatomic, readonly) NSString *tenantId;
 
 @end
-

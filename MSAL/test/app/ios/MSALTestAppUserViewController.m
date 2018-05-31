@@ -28,6 +28,7 @@
 #import "MSALTestAppUserViewController.h"
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
+#import "MSALAccountId.h"
 
 @interface MSALTestAppUserViewController ()
 
@@ -125,20 +126,16 @@
         return 0;
     }
     
-    NSString *currentAccountId = currentAccount.homeAccountId;
+    NSString *currentAccountId = currentAccount.homeAccountId.identifier;
     
     for (NSInteger i = 0; i < _users.count; i++)
     {
-        if ([currentAccountId isEqualToString:_users[i].homeAccountId])
+        if ([currentAccountId isEqualToString:_users[i].homeAccountId.identifier])
         {
             return i + 1;
         }
     }
-    
-    // TODO: How to handle better?
-    @throw @"Couldn't find the user!";
-    
-    return 0;
+    return -1;
 }
 
 + (NSString *)currentTitle

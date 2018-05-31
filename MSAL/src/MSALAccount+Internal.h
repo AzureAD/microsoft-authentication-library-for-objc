@@ -31,30 +31,26 @@
 @class MSIDAADV2IdTokenClaims;
 @class MSIDClientInfo;
 @class MSIDAccount;
+@class MSALAccountId;
 
 @interface MSALAccount ()
 
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-@property (nonatomic) NSString *uid;
-@property (nonatomic) NSString *utid;
 
 /* TODO: These properties will be public once we agree on having an account per tenant.
-         For now, will keep them here.
+   For now, will keep them here.
  */
+
+/*!
+ Account identifier for the target tenant
+ */
+@property (nonatomic) MSALAccountId *localAccountId;
 
 /*!
  The displayable name of the account. Can be nil if not returned by the service.
  */
 @property (nonatomic) NSString *name;
 
-/*!
- Unique identifier of the account in the signed in directory.
- */
-@property (nonatomic) NSString *localAccountId;
-/*!
- An identifier for the tenant that the account was acquired from. This property will be nil if tenant information is not returned by the service.
- */
-@property (nonatomic) NSString *tenantId;
 
 /*!
  Initialize an MSALAccount with given information

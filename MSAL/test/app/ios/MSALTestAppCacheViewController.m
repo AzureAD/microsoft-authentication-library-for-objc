@@ -42,6 +42,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDLegacyRefreshToken.h"
 #import "MSIDLegacyAccessToken.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -154,18 +155,8 @@
 - (void)invalidateTokenAtPath:(NSIndexPath *)indexPath
 {
     MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) [self tokenForPath:indexPath];
-
-    if ([refreshToken isKindOfClass:[MSIDLegacyRefreshToken class]])
-    {
-        // Unsupported
-        return;
-    }
-    else
-    {
-        refreshToken.refreshToken = BAD_REFRESH_TOKEN;
-        [_tokenCache saveCredential:refreshToken.tokenCacheItem context:nil error:nil];
-    }
-
+    refreshToken.refreshToken = BAD_REFRESH_TOKEN;
+    [_tokenCache saveCredential:refreshToken.tokenCacheItem context:nil error:nil];
     [self loadCache];
 }
 
@@ -293,11 +284,11 @@
         {
             if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
             {
-                cell.textLabel.text = @"Legacy refresh token";
+                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@", token.authority.msidTenant];
             }
             else
             {
-                cell.textLabel.text = @"Refresh token";
+                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@", token.authority.msidTenant];
             }
 
             MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
@@ -309,16 +300,8 @@
         }
         case MSIDAccessTokenType:
         {
-            if ([token isKindOfClass:[MSIDLegacyAccessToken class]])
-            {
-                cell.textLabel.text = @"Legacy access token";
-            }
-            else
-            {
-                cell.textLabel.text = @"Access token";
-            }
-
             MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
+            cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.authority.msidTenant];
 
             if (accessToken.isExpired)
             {
@@ -328,7 +311,7 @@
         }
         case MSIDIDTokenType:
         {
-            cell.textLabel.text = @"ID token";
+            cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.authority.msidTenant];
             break;
         }
         case MSIDLegacySingleResourceTokenType:
@@ -392,11 +375,20 @@
         {
             case MSIDRefreshTokenType:
             {
+                if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
+                {
+                    return @[deleteTokenAction];
+                }
+
                 return @[deleteTokenAction, invalidateAction];
             }
             case MSIDAccessTokenType:
             {
                 return @[deleteTokenAction, expireTokenAction];
+            }
+            case MSIDIDTokenType:
+            {
+                return @[deleteTokenAction];
             }
             default:
                 return nil;

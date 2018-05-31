@@ -23,6 +23,7 @@
 
 #import "MSALTestAppSettings.h"
 #import "MSALAuthority.h"
+#import "MSALAccountId.h"
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
@@ -151,7 +152,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 - (void)setCurrentAccount:(MSALAccount *)currentAccount
 {
-    [self setValue:currentAccount.homeAccountId forKey:@"currentHomeAccountId"];
+    [self setValue:currentAccount.homeAccountId.identifier forKey:@"currentHomeAccountId"];
     _currentAccount = currentAccount;
 }
 

@@ -25,26 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAccountId.h"
 
-@class MSALAccountId;
+@interface MSALAccountId ()
 
-@interface MSALAccount : NSObject <NSCopying>
+- (instancetype)initWithHomeAccountIdentifier:(NSString *)identifier
+                                          uid:(NSString *)uid
+                                         utid:(NSString *)utid;
 
-/*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
- */
-@property (readonly) NSString *displayableId;
-
-/*!
- Unique identifier of the account in the home directory.
- */
-@property (readonly) MSALAccountId *homeAccountId;
-
-/*!
- Host part of the authority string used for authentication.
- */
-@property (readonly) NSString *environment;
+- (instancetype)initWithLocalAccountIdentifier:(NSString *)identifier
+                                      objectId:(NSString *)objectId
+                                      tenantId:(NSString *)tenantId;
 
 @end
-

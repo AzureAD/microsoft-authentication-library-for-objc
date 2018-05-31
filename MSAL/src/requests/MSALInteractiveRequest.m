@@ -39,6 +39,7 @@
 #import "MSIDTelemetryEventStrings.h"
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
+#import "MSALAccountId.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
@@ -134,8 +135,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     if (account)
     {
         parameters[MSID_OAUTH2_LOGIN_HINT] = account.displayableId;
-        parameters[MSID_OAUTH2_LOGIN_REQ] = account.uid;
-        parameters[MSID_OAUTH2_DOMAIN_REQ] = account.utid;
+        parameters[MSID_OAUTH2_LOGIN_REQ] = account.homeAccountId.objectId;
+        parameters[MSID_OAUTH2_DOMAIN_REQ] = account.homeAccountId.tenantId;
     }
     
     _state = [[NSUUID UUID] UUIDString];

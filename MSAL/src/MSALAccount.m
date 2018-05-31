@@ -34,10 +34,11 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccount.h"
+#import "MSALAccountId+Internal.h"
 
 @interface MSALAccount ()
 
-@property (nonatomic) NSString *homeAccountId;
+@property (nonatomic) MSALAccountId *homeAccountId;
 @property (nonatomic) NSString *displayableId;
 @property (nonatomic) NSString *environment;
 
@@ -62,11 +63,31 @@
         _homeAccountId = [homeAccountId copy];
         _localAccountId = [localAccountId copy];
         _environment = [environment copy];
-        _tenantId = [tenantId copy];
+
+        NSString *uid = clientInfo.uid;
+        NSString *utid = clientInfo.utid;
+
+        // TODO: this should never happen, but double check before removing it
+        if (!uid && !utid)
+        {
+            NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
+
+            if ([accountIdComponents count] == 2)
+            {
+                uid = accountIdComponents[0];
+                utid = accountIdComponents[1];
+            }
+        }
+
+        _homeAccountId = [[MSALAccountId alloc] initWithHomeAccountIdentifier:homeAccountId
+                                                                          uid:uid
+                                                                         utid:utid];
+
+        _localAccountId = [[MSALAccountId alloc] initWithLocalAccountIdentifier:localAccountId
+                                                                       objectId:localAccountId
+                                                                       tenantId:tenantId];
+
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:displayableId homeAccountId:homeAccountId];
-        _uid = clientInfo.uid;
-        _utid = clientInfo.utid;
-        [self initDerivedProperties];
     }
 
     return self;
@@ -83,21 +104,6 @@
                             clientInfo:account.clientInfo];
 }
 
-- (void)initDerivedProperties
-{
-    // TODO: this should never happen, but double check before removing it
-    if (!self.uid && !self.utid && self.homeAccountId)
-    {
-        NSArray *accountIdComponents = [self.homeAccountId componentsSeparatedByString:@"."];
-
-        if ([accountIdComponents count] == 2)
-        {
-            _uid = accountIdComponents[0];
-            _utid = accountIdComponents[1];
-        }
-    }
-}
-
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone
@@ -108,9 +114,6 @@
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
     account.localAccountId = [self.localAccountId copyWithZone:zone];
     account.environment = [self.environment copyWithZone:zone];
-    account.tenantId = [self.tenantId copyWithZone:zone];
-    account.uid = [self.uid copyWithZone:zone];
-    account.utid = [self.utid copyWithZone:zone];
     return account;
 }
 
@@ -182,7 +185,7 @@
 
     BOOL result = YES;
     result &= (!self.displayableId && !user.displayableId) || [self.displayableId isEqualToString:user.displayableId];
-    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId isEqualToString:user.homeAccountId];
+    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
 
     return result;
