@@ -245,7 +245,7 @@
       @"x-client-CPU" : msalId[@"x-client-CPU"],
       @"return-client-request-id" : correlationId.UUIDString,
       @"state" : request.state,
-      @"login_hint" : @"preferredUserName",
+      @"login_hint" : @"User",
       @"login_req" : @"1",
       @"domain_req" : @"1234-5678-90abcdefg",
       @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -609,8 +609,8 @@
     parameters.correlationId = correlationId;
     MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"User"
                                                                  name:@"user@contoso.com"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
+                                                        homeAccountId:@"2.1234-5678-90abcdefg"
+                                                       localAccountId:@"2"
                                                           environment:@"login.microsoftonline.com"
                                                              tenantId:@"1234-5678-90abcdefg"
                                                            clientInfo:nil];
