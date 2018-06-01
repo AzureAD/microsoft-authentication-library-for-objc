@@ -30,6 +30,7 @@
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestConstants.h"
+#import "MSALAccountId.h"
 
 @implementation MSIDTestURLResponse (MSAL)
 
@@ -110,9 +111,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.displayableId
-                                                                                       tenantId:tid ? tid : user.utid],
+                                                                                       tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.uid, @"utid" : user.utid} msidBase64UrlJson] } ];
+                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson] } ];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     

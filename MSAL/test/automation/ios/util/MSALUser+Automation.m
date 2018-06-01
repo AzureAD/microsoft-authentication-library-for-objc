@@ -28,6 +28,7 @@
 #import "MSALUser+Automation.h"
 #import "MSIDClientInfo.h"
 #import "MSALAccount+Internal.h"
+#import "MSALAccountId.h"
 
 @implementation MSALAccount (Automation)
 
@@ -38,10 +39,9 @@
     [resultDict setValue:self.name forKey:@"name"];
     [resultDict setValue:self.homeAccountId forKey:@"home_account_id"];
     [resultDict setValue:self.localAccountId forKey:@"local_account_id"];
-    [resultDict setValue:self.uid forKey:@"uid"];
-    [resultDict setValue:self.utid forKey:@"utid"];
+    [resultDict setValue:self.homeAccountId.objectId forKey:@"homeAccountId.objectId"];
+    [resultDict setValue:self.homeAccountId.tenantId forKey:@"homeAccountId.tenantId"];
     [resultDict setValue:self.environment forKey:@"environment"];
-    [resultDict setValue:self.tenantId forKey:@"tenant_id"];
     
     return resultDict;
 }

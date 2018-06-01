@@ -38,12 +38,12 @@
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
-#import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSALAccountId.h"
+#import "MSIDBaseToken.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
-@property (nonatomic) MSIDSharedTokenCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 
 @end
@@ -56,8 +56,7 @@
     
     [MSIDKeychainTokenCache reset];
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 }
 
 - (void)tearDown
@@ -139,7 +138,7 @@
          XCTAssertNotNil(result);
          
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
-         XCTAssertEqualObjects(result.user.userIdentifier, userIdentifier);
+         XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
          dispatch_semaphore_signal(dsem);
      }];
     
@@ -168,17 +167,31 @@
                            XCTAssertNotNil(result);
                            
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
-                           XCTAssertEqualObjects(result.user.userIdentifier, userIdentifier);
+                           XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
         
     }];
-    
-    __auto_type accessTokens = [self.tokenCacheAccessor getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
-    __auto_type refreshTokens = [self.tokenCacheAccessor getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+
+    __auto_type allTokens = [self.tokenCacheAccessor allTokensWithContext:nil error:nil];
+
+    NSMutableArray *ats = [NSMutableArray array];
+    NSMutableArray *rts = [NSMutableArray array];
+
+    for (MSIDBaseToken *token in allTokens)
+    {
+        if (token.credentialType == MSIDAccessTokenType)
+        {
+            [ats addObject:token];
+        }
+        else if (token.credentialType == MSIDRefreshTokenType)
+        {
+            [rts addObject:token];
+        }
+    }
     
     // Ensure we have two different accesstokens in cache
     // and that second call doesn't overwrite first one, since policies are different
-    XCTAssertEqual(accessTokens.count, 2);
-    XCTAssertEqual(refreshTokens.count, 2);
+    XCTAssertEqual(ats.count, 2);
+    XCTAssertEqual(rts.count, 2);
     XCTAssertEqual([[application accounts:nil] count], 2);
 }
 

@@ -45,6 +45,7 @@ extern NSString *const MSAL_CLEARED_TOKENS_COUNT_PARAM;
 extern NSString *const MSAL_ITEM_COUNT_PARAM;
 extern NSString *const MSAL_ACCESS_TOKENS_PARAM;
 extern NSString *const MSAL_REFRESH_TOKENS_PARAM;
+extern NSString *const MSAL_ID_TOKENS_PARAM;
 extern NSString *const MSAL_SIGNOUT_RESULT_PARAM;
 extern NSString *const MSAL_USER_COUNT_PARAM;
 extern NSString *const MSAL_USERS_PARAM;

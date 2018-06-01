@@ -28,8 +28,10 @@
 #import "MSALTestCase.h"
 #import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
-#import "MSIDAADV2IdTokenWrapper.h"
-#import "MSALUser+Internal.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDAccount.h"
+#import "MSALAccountId.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -47,79 +49,74 @@
     [super tearDown];
 }
 
-- (void)testInitWithIdToken_whenValidJson_shouldInit
+- (void)testInitWithMSIDAccount_whenValidAccount_shouldInit
 {
-    NSDictionary *idTokenClaims = @{ @"name" : @"User",
-                                     @"preferred_username" : @"user@contoso.com",
-                                     @"iss" : @"issuer",
-                                     @"tid" : @"id_token_tid"
-                                     };
-    
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.homeAccountId = @"uid.utid";
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"localoid";
+    msidAccount.authority = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
     
     
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    
-    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
-    
-    XCTAssertNotNil(user);
-    XCTAssertEqualObjects(user.uid, @"uid");
-    XCTAssertEqualObjects(user.utid, @"utid");
-    XCTAssertEqualObjects(user.identityProvider, @"issuer");
-    XCTAssertEqualObjects(user.name, @"User");
-    XCTAssertEqualObjects(user.displayableId, @"user@contoso.com");
+    msidAccount.clientInfo = clientInfo;
+
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
+    XCTAssertEqualObjects(account.name, @"User");
+    XCTAssertEqualObjects(account.displayableId, @"user@contoso.com");
 }
 
-- (void)testCopy_whenValidUser_shouldCopy
+- (void)testCopy_whenValidAccount_shouldCopy
 {
-    NSDictionary *idTokenClaims = @{ @"name" : @"User",
-                                     @"preferred_username" : @"user@contoso.com",
-                                     @"iss" : @"issuer",
-                                     @"tid" : @"id_token_tid"
-                                     };
+    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"displayableID"
+                                                                 name:@"name"
+                                                        homeAccountId:@"1.2"
+                                                       localAccountId:@"2.3"
+                                                          environment:@"login.microsoftonline.com"
+                                                             tenantId:@"3"
+                                                           clientInfo:nil];
+    XCTAssertNotNil(account);
+
+    MSALAccount *account2 = [account copy];
     
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
-    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
-                                        @"utid" : @"utid"
-                                        };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    
-    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
-    XCTAssertNotNil(user);
-    MSALAccount *user2 = [user copy];
-    
-    XCTAssertNotNil(user2);
+    XCTAssertNotNil(account2);
     // The two objects should have different pointers
-    XCTAssertNotEqual(user2, user);
+    XCTAssertNotEqual(account, account2);
     
-    XCTAssertEqualObjects(user.uid, user2.uid);
-    XCTAssertEqualObjects(user.utid, user2.utid);
-    XCTAssertEqualObjects(user.identityProvider, user2.identityProvider);
-    XCTAssertEqualObjects(user.name, user2.name);
+    XCTAssertEqualObjects(account.homeAccountId.objectId, account2.homeAccountId.objectId);
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, account2.homeAccountId.tenantId);
+    XCTAssertEqualObjects(account.displayableId, account2.displayableId);
+    XCTAssertEqualObjects(account.name, account2.name);
 }
 
 - (void)testEquals_whenEqual_shouldReturnTrue
 {
-    NSDictionary *idTokenClaims = @{ @"preferred_username" : @"User",
-                                     @"iss" : @"issuer",
-                                     @"tid" : @"id_token_tid"
-                                     };
-    
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"displayableID"
+                                                                 name:@"name"
+                                                        homeAccountId:@"1.2"
+                                                       localAccountId:@"2.3"
+                                                          environment:@"login.microsoftonline.com"
+                                                             tenantId:@"3"
+                                                           clientInfo:clientInfo];
     
-    MSALAccount *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
-    XCTAssertNotNil(user);
-    MSALAccount *user2 = [user copy];
+    XCTAssertNotNil(account);
+    MSALAccount *account2 = [account copy];
     
-    XCTAssertNotNil(user2);
-    XCTAssertEqualObjects(user, user2);
+    XCTAssertNotNil(account2);
+    XCTAssertEqualObjects(account, account2);
 }
 
 @end

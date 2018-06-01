@@ -43,6 +43,7 @@ NSString *const MSAL_CLEARED_TOKENS_COUNT_PARAM                 = @"cleared_item
 NSString *const MSAL_ITEM_COUNT_PARAM                           = @"item_count";
 NSString *const MSAL_ACCESS_TOKENS_PARAM                        = @"access_tokens";
 NSString *const MSAL_REFRESH_TOKENS_PARAM                       = @"refresh_tokens";
+NSString *const MSAL_ID_TOKENS_PARAM                            = @"id_tokens";
 NSString *const MSAL_SIGNOUT_RESULT_PARAM                       = @"user_signout_result";
 NSString *const MSAL_USER_COUNT_PARAM                           = @"user_count";
 NSString *const MSAL_USERS_PARAM                                = @"users";
