@@ -74,7 +74,8 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
 
-    [[[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache] clearWithContext:nil error:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
 - (void)tearDown
@@ -766,7 +767,7 @@
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId);
          XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
-         XCTAssertEqualObjects(params.account.name, @"Name");
+         XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.objectId, @"1");
@@ -857,15 +858,16 @@
                                                    configuration:configuration
                                                         response:msidResponse
                                                          context:nil
-                                                           error:nil];
+                                                           error:&error];
     XCTAssertTrue(result);
+    XCTAssertNil(error);
     
     MSIDAccount *account = [factory accountFromResponse:msidResponse configuration:configuration];
     MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
 
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application accounts:nil].count, 1);
-    XCTAssertEqualObjects([application accounts:nil][0], account);
+    XCTAssertEqualObjects([application accounts:nil][0], msalAccount);
 
     XCTAssertTrue([application removeAccount:msalAccount error:&error]);
     XCTAssertNil(error);
@@ -911,7 +913,7 @@
 
     [MSALTestSwizzle instanceMethod:@selector(clearCacheForAccount:environment:clientId:context:error:)
                               class:[MSIDDefaultTokenCacheAccessor class]
-                              block:(id)^(id account, NSString *environment, NSString *clientId, id<MSIDRequestContext> ctx, NSError **error)
+                              block:(id)^(id obj, id account, NSString *environment, NSString *clientId, id<MSIDRequestContext> ctx, NSError **error)
      {
          (void)environment;
          (void)account;
@@ -926,6 +928,5 @@
     XCTAssertNotNil(error);
     XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
 }
-
 
 @end
