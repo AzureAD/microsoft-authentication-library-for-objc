@@ -55,6 +55,7 @@
 #import "MSIDAADOauth2Factory.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -672,7 +673,7 @@
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
 
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"preferredUserName"
@@ -703,7 +704,7 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
+    MSIDAADOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
                                                    configuration:parameters.msidConfiguration
                                                         response:msidResponse
@@ -737,7 +738,7 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
                                              }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
