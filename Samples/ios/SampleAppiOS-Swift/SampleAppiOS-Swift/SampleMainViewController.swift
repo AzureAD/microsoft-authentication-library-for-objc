@@ -69,10 +69,10 @@ class SampleMainViewController: UIViewController {
         loadEvents()
         
         do {
-            let user = try SampleMSALUtil.shared.currentUser()
-            nameLabel.text = "Welcome, \(user.name!)"
+            let account = try SampleMSALUtil.shared.currentAccount()
+            nameLabel.text = "Welcome, \(account.displayableId!)"
         } catch let error {
-            print("Loading current user name error: \(error)")
+            print("Loading current account name error: \(error)")
         }
         
         

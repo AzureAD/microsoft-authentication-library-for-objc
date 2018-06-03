@@ -115,8 +115,8 @@
     // not be blocked on not having consent for edge features.
     __block NSArray *scopesRequired = @[@"User.Read"];
     
-    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentUser:scopesRequired
-                                            completionBlock:^(NSString *token, NSError *error)
+    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentAccount:scopesRequired
+                                               completionBlock:^(NSString *token, NSError *error)
      {
          if (error)
          {
@@ -159,7 +159,7 @@ static NSString * const kLastPhotoCheck = @"last_photo_check";
 
 - (NSString *)cachedImagePath
 {
-    return [NSString stringWithFormat:@"%@/%@", [self cachedImageDirectory], [[SampleMSALUtil sharedUtil] currentUserIdentifer]];
+    return [NSString stringWithFormat:@"%@/%@", [self cachedImageDirectory], [[SampleMSALUtil sharedUtil] currentAccountIdentifer]];
 }
 
 - (BOOL)checkTimestamp

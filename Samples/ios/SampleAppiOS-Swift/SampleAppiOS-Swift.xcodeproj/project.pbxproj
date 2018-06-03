@@ -121,6 +121,7 @@
 		96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SamplePhotoUtil.swift; sourceTree = "<group>"; };
 		96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphRequest.swift; sourceTree = "<group>"; };
 		96DFD2B11ECD25A6007ED2A1 /* SampleGraphScopes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphScopes.swift; sourceTree = "<group>"; };
+		B221CEFE20C4856D002F5E94 /* SampleAppiOS-Swift.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SampleAppiOS-Swift.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +156,7 @@
 		96672D981EC7912C00878AC5 /* SampleAppiOS-Swift */ = {
 			isa = PBXGroup;
 			children = (
+				B221CEFE20C4856D002F5E94 /* SampleAppiOS-Swift.entitlements */,
 				96672D991EC7912C00878AC5 /* AppDelegate.swift */,
 				9622AAC41ECA3D900052B975 /* SampleAppErrors.swift */,
 				96672DC61EC7919500878AC5 /* Authentication */,
@@ -264,6 +266,11 @@
 						CreatedOnToolsVersion = 8.3.1;
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -510,6 +517,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -523,6 +531,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "SampleAppiOS-Swift/SampleAppiOS-Swift.entitlements";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "SampleAppiOS-Swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
