@@ -161,9 +161,6 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-/*
- I'll be fixing this scenario, when authority is not known in a separate PR
- The logic will be changed hugely, so commenting this test right now
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -233,6 +230,6 @@
      }];
 
     [self waitForExpectations:@[expectation] timeout:1];
-}*/
+}
 
 @end

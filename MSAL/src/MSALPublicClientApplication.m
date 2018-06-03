@@ -51,6 +51,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+#import "MSIDAuthority.h"
 
 @interface MSALPublicClientApplication()
 
@@ -398,9 +399,21 @@
                             account:(MSALAccount *)account
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
+    NSURL *authority = self.authority;
+
+    /*
+     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+     unless they override the default authority in the public client application with a tenanted authority.
+     */
+    if ([MSIDAuthority isTenantless:self.authority]
+        || [MSIDAuthority isConsumerInstanceURL:self.authority])
+    {
+        authority = [MSIDAuthority cacheUrlForAuthority:self.authority tenantId:account.homeAccountId.tenantId];
+    }
+
     [self acquireTokenSilentForScopes:scopes
                               account:account
-                            authority:nil
+                            authority:authority.absoluteString
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
