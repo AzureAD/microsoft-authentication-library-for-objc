@@ -49,7 +49,7 @@ MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
 
 - (id)initWithRawIdToken:(NSString *)rawIdTokenString
 {
-    if ([NSString msalIsStringNilOrBlank:rawIdTokenString])
+    if ([NSString msidIsStringNilOrBlank:rawIdTokenString])
     {
         return nil;
     }
@@ -57,17 +57,17 @@ MSAL_JSON_ACCESSOR(ID_TOKEN_HOME_OBJECT_ID, homeObjectId)
     NSArray* parts = [rawIdTokenString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"."]];
     if (parts.count != 3)
     {
-        LOG_WARN(nil, @"Id token is invalid.");
+        MSID_LOG_WARN(nil, @"Id token is invalid.");
         return nil;
     }
     
-    NSData *decoded =  [[parts[1] msalBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *decoded =  [[parts[1] msidBase64UrlDecode] dataUsingEncoding:NSUTF8StringEncoding];
     NSError *error = nil;
     if (!(self = [super initWithData:decoded error:&error]))
     {
         if (error)
         {
-            LOG_WARN(nil, @"Id token is invalid. Error: %@", error.localizedDescription);
+            MSID_LOG_WARN(nil, @"Id token is invalid. Error: %@", error.localizedDescription);
         }
         return nil;
     }

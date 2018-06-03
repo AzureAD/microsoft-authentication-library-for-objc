@@ -1,0 +1,6 @@
+#include "msal__common__mac.xcconfig"
+#include "msal__common__framework__mac.xcconfig"
+
+INFOPLIST_FILE = test/unit/resources/mac/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-Mac-Unit-Tests;
+PRODUCT_NAME = "MSAL-Mac-Unit-Tests"

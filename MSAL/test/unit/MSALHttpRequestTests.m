@@ -28,7 +28,10 @@
 #import "MSALTestCase.h"
 #import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
+#import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
 
 @interface MSALHttpRequestTests : MSALTestCase
 
@@ -107,14 +110,14 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *testURLString = @"https://somehttprequest.com";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:testURLString
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:testURLString
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponsestring.com"
@@ -122,7 +125,7 @@
                                                          httpHeaderFields:nil
                                                          dictionaryAsJSON:@{@"endpoint" : @"valid"}];
     
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
                                                             context:params];

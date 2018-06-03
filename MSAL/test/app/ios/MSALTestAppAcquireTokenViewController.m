@@ -33,6 +33,8 @@
 #import "MSALTestAppScopesViewController.h"
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALStressTestHelper.h"
+#import "MSALPublicClientApplication+Internal.h"
+#import "MSIDSharedTokenCache.h"
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -324,7 +326,7 @@
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *loginHint = settings.loginHint;
-    if (![NSString msalIsStringNilOrBlank:loginHint])
+    if (![NSString msidIsStringNilOrBlank:loginHint])
     {
         _loginHintField.text = loginHint;
     }
@@ -361,7 +363,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msalShortSHA256Hex], result.expiresOn, result.tenantId, result.user, result.scopes];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.user, result.scopes];
     
     [_resultView setText:resultText];
     
@@ -528,18 +530,24 @@
     }];
 }
 
-- (IBAction)clearCache:(id)sender
+- (IBAction)clearCache:(__unused id)sender
 {
-    (void)sender;
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
-    NSDictionary *query = [[MSALKeychainTokenCache defaultKeychainCache] defaultKeychainQuery];
-    OSStatus status = SecItemDelete((CFDictionaryRef)query);
+    // Delete accounts.
+    NSString *authority = [settings authority];
+    NSString *clientId = TEST_APP_CLIENT_ID;
     
-    if (status == errSecSuccess || status == errSecItemNotFound)
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    
+    BOOL result = [application.tokenCache clearWithContext:nil error:&error];
+    
+    if (result)
     {
         _resultView.text = @"Successfully cleared cache.";
         
-        MSALTestAppSettings *settings = [MSALTestAppSettings settings];
         settings.currentUser = nil;
         
         [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
@@ -549,7 +557,7 @@
     }
     else
     {
-        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %d", (int)status];
+        _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
 }
 

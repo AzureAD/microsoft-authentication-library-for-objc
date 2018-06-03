@@ -29,6 +29,8 @@
 #import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
 #import "MSALAuthority.h"
+#import "MSIDRequestParameters.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @implementation MSALRequestParameters
 
@@ -59,6 +61,16 @@
     self.unvalidatedAuthority = authorityUrl;
     
     return YES;
+}
+
+- (MSIDRequestParameters *)msidParameters
+{
+    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:self.unvalidatedAuthority
+                                                                                    redirectUri:self.redirectUri.absoluteString
+                                                                                       clientId:self.clientId
+                                                                                         target:self.scopes.msidToString];
+    
+    return requestParameters;
 }
 
 @end

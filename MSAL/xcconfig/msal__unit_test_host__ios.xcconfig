@@ -1,0 +1,7 @@
+#include "msal__common__ios.xcconfig"
+
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+INFOPLIST_FILE = test/unit/ios/unit-test-host/Info.plist;
+LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.unit-test-host;
+PRODUCT_NAME = unit-test-host;

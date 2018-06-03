@@ -45,24 +45,11 @@
 // Internal MSAL Files
 
 #import "MSAL_Internal.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
-#import "NSDictionary+MSALExtensions.h"
+#import "MSIDLogger+Internal.h"
+#import "NSString+MSIDExtensions.h"
+#import "NSDictionary+MSIDExtensions.h"
 #import "NSOrderedSet+MSALExtensions.h"
-#import "MSALOAuth2Constants.h"
-
-#import "MSALTokenCache.h"
-#import "MSALAccessTokenCacheKey.h"
-#import "MSALRefreshTokenCacheKey.h"
-#import "MSALAccessTokenCacheItem.h"
-#import "MSALRefreshTokenCacheItem.h"
-#import "MSALTokenCacheAccessor.h"
-
-#if TARGET_OS_IPHONE
-#import "MSALKeychainTokenCache.h"
-#else
-#import "MSALWrapperTokenCache+Internal.h"
-#endif
+#import "MSIDOAuth2Constants.h"
 
 
 #endif /* MSAL_pch */

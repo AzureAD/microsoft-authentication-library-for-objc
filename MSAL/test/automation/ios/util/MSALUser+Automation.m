@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALUser+Automation.h"
+#import "MSIDClientInfo.h"
 
 @implementation MSALUser (Automation)
 

@@ -31,39 +31,60 @@
 #import "MSALTestConstants.h"
 #import "MSALTestSwizzle.h"
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALWebUI.h"
-#import "NSDictionary+MSALTestUtil.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
-#import "MSALTestCacheDataUtil.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse+MSAL.h"
+#import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
+
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 
 @end
 
 @implementation MSALB2CPolicyTests
 
+- (void)setUp
+{
+    [super setUp];
+    
+    [MSIDKeychainTokenCache reset];
+    
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
+}
+
+- (void)tearDown
+{
+    [super tearDown];
+}
+
 - (void)setupURLSessionWithB2CAuthority:(NSString *)authority policy:(NSString *)policy
 {
     NSString *query = [NSString stringWithFormat:@"p=%@", policy];
     
-    MSALTestURLResponse *oidcResponse =
-    [MSALTestURLResponse oidcResponseForAuthority:authority
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:authority
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:query];
     
     NSString *uid = [NSString stringWithFormat:@"1-%@", policy];
     
     // User identifier should be uid-policy
-    MSALTestURLResponse *tokenResponse =
-    [MSALTestURLResponse authCodeResponse:@"i am an auth code"
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
                                clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
     
-    [MSALTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 }
 
 
@@ -77,8 +98,6 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
-    MSALTestCacheDataUtil *cacheUtil = [MSALTestCacheDataUtil defaultUtil];
     
     // Setup acquireToken with first policy (b2c_1_policy)
     NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
@@ -94,7 +113,7 @@
          XCTAssertNotNil(url);
          
          // State preserving and url are tested separately
-         NSDictionary *QPs = [NSDictionary msalURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          NSString *state = QPs[@"state"];
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];
@@ -108,9 +127,6 @@
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                 authority:firstAuthority
                                                     error:&error];
-    
-    application.tokenCache = cacheUtil.cache;
-    
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -156,10 +172,13 @@
         
     }];
     
+    __auto_type accessTokens = [self.tokenCacheAccessor getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+    __auto_type refreshTokens = [self.tokenCacheAccessor getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+    
     // Ensure we have two different accesstokens in cache
     // and that second call doesn't overwrite first one, since policies are different
-    XCTAssertEqual(cacheUtil.allAccessTokens.count, 2);
-    XCTAssertEqual(cacheUtil.allRefreshTokens.count, 2);
+    XCTAssertEqual(accessTokens.count, 2);
+    XCTAssertEqual(refreshTokens.count, 2);
     XCTAssertEqual([[application users:nil] count], 2);
 }
 

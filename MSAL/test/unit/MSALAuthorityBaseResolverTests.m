@@ -27,8 +27,11 @@
 
 #import "MSALTestCase.h"
 #import "MSALAuthorityBaseResolver.h"
-#import "MSALTestURLSession.h"
+#import "MSIDTestURLSession+MSAL.h"
 #import "MSALTenantDiscoveryResponse.h"
+#import "MSIDDeviceId.h"
+#import "MSIDTestURLSession.h"
+#import "MSIDTestURLResponse.h"
 
 @interface MSALAuthorityBaseResolverTests : MSALTestCase
 
@@ -59,14 +62,14 @@
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:tenantDiscoveryEndpoint
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -74,7 +77,7 @@
                                                          httpHeaderFields:@{}
                                                          dictionaryAsJSON:json];
     
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     MSALAuthorityBaseResolver *resolver = [MSALAuthorityBaseResolver new];
     [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:tenantDiscoveryEndpoint]
@@ -107,14 +110,14 @@
     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
 
     MSALRequestParameters *params = [MSALRequestParameters new];
-    params.urlSession = [MSALTestURLSession createMockSession];
+    params.urlSession = [MSIDTestURLSession createMockSession];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
-    NSMutableDictionary *reqHeaders = [[MSALLogger msalId] mutableCopy];
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     
-    MSALTestURLResponse *response = [MSALTestURLResponse requestURLString:tenantDiscoveryEndpoint
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:tenantDiscoveryEndpoint
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -122,7 +125,7 @@
                                                          httpHeaderFields:@{}
                                                          dictionaryAsJSON:json];
     
-    [MSALTestURLSession addResponse:response];
+    [MSIDTestURLSession addResponse:response];
     
     MSALAuthorityBaseResolver *resolver = [MSALAuthorityBaseResolver new];
     [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:tenantDiscoveryEndpoint]

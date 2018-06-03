@@ -1,0 +1,9 @@
+#include "msal__common__ios.xcconfig"
+
+INFOPLIST_FILE = test/app/ios/resources/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+PRODUCT_NAME = MSAL Test App;
+OTHER_LDFLAGS = "-ObjC";
+

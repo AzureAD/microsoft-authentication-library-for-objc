@@ -22,8 +22,12 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetry.h"
-#import "MSALTelemetryEventInterface.h"
+#import "MSIDTelemetryEventInterface.h"
 #import "MSALDefaultDispatcher.h"
+#import "MSIDTelemetryEventInterface.h"
+#import "MSIDTelemetryBaseEvent.h"
+#import "MSALTelemetryDefaultEvent.h"
+#import "MSIDTelemetryEventStrings.h"
 
 @interface MSALDefaultDispatcher ()
 {
@@ -31,6 +35,9 @@
     id<MSALDispatcher> _dispatcher;
     NSLock* _dispatchLock;
     BOOL _setTelemetryOnFailure;
+    NSMutableArray *_errorEvents;
+    
+    MSALTelemetryDefaultEvent *_defaultEvent;
 }
 @end
 
@@ -42,10 +49,13 @@
     if (self)
     {
         _objectsToBeDispatched = [NSMutableDictionary new];
+        _errorEvents = [NSMutableArray new];
         _dispatchLock = [NSLock new];
         
         _dispatcher = dispatcher;
         _setTelemetryOnFailure = setTelemetryOnFailure;
+        
+        _defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
     }
     return self;
 }
@@ -55,25 +65,81 @@
     return _dispatcher == dispatcher;
 }
 
-- (void)flush:(NSArray *)events errorInEvent:(BOOL)errorInEvent
+- (void)flush:(NSString *)requestId
 {
+    BOOL errorInEvent = [_errorEvents containsObject:requestId];
+    
+    [_dispatchLock lock];
+    // Remove requestId as we won't need it anymore
+    [_errorEvents removeObject:requestId];
+    [_dispatchLock unlock];
+    
     if (_setTelemetryOnFailure && !errorInEvent)
     {
         return;
     }
     
-    [_dispatcher dispatchEvent:events];
+    [_dispatchLock lock]; //avoid access conflict when manipulating _objectsToBeDispatched
+    NSArray* events = [_objectsToBeDispatched objectForKey:requestId];
+    [_objectsToBeDispatched removeObjectForKey:requestId];
+    [_dispatchLock unlock];
+    
+    if ([events count])
+    {
+        NSArray* eventsToBeDispatched = @[[_defaultEvent getProperties]];
+        [self dispatchEvents:[eventsToBeDispatched arrayByAddingObjectsFromArray:events]];
+    }
 }
 
-- (void)receive:(NSString *)requestId
-          event:(id<MSALTelemetryEventInterface>)event
+- (void)receive:(__unused NSString *)requestId
+          event:(id<MSIDTelemetryEventInterface>)event
 {
-    (void)requestId;
-    NSDictionary *properties = [event getProperties];
-    if (properties)
+    if ([NSString msidIsStringNilOrBlank:requestId] || !event)
     {
-        [_dispatcher dispatchEvent:@[properties]];
+        return;
+        
     }
+    
+    [_dispatchLock lock]; //make sure no one changes _objectsToBeDispatched while using it
+    NSMutableArray* eventsForRequestId = [_objectsToBeDispatched objectForKey:requestId];
+    if (!eventsForRequestId)
+    {
+        eventsForRequestId = [NSMutableArray new];
+        [_objectsToBeDispatched setObject:eventsForRequestId forKey:requestId];
+    }
+    
+    [eventsForRequestId addObject:[event getProperties]];
+    
+    if ([event errorInEvent])
+    {
+        [_errorEvents addObject:requestId];
+    }
+    
+    [_dispatchLock unlock];
+}
+
+- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents;
+{
+    NSMutableArray *eventsToBeDispatched = [NSMutableArray new];
+    
+    for (NSDictionary *event in rawEvents)
+    {
+        [eventsToBeDispatched addObject:[self appendPrefixForEvent:event]];
+    }
+    
+    [_dispatcher dispatchEvent:eventsToBeDispatched];
+}
+
+- (NSDictionary *)appendPrefixForEvent:(NSDictionary *)event
+{
+    NSMutableDictionary *eventWithPrefix = [NSMutableDictionary new];
+    
+    for (NSString *propertyName in [event allKeys])
+    {
+        [eventWithPrefix setValue:event[propertyName] forKey:TELEMETRY_KEY(propertyName)];
+    }
+    
+    return eventWithPrefix;
 }
 
 @end

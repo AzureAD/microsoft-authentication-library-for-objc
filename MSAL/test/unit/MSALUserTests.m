@@ -27,7 +27,9 @@
 
 #import "MSALTestCase.h"
 #import "MSALIdToken.h"
-#import "MSALClientInfo.h"
+#import "MSIDClientInfo.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSALUser+Internal.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -53,13 +55,13 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     
@@ -79,13 +81,11 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);
@@ -108,13 +108,11 @@
                                      @"tid" : @"id_token_tid"
                                      };
     
-    MSALIdToken *idToken = [[MSALIdToken alloc] initWithJson:idTokenClaims
-                                                       error:nil];
+    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };
-    MSALClientInfo *clientInfo = [[MSALClientInfo alloc] initWithJson:clientInfoClaims
-                                                                error:nil];
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     
     MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:@"login.microsoftonline.com"];
     XCTAssertNotNil(user);

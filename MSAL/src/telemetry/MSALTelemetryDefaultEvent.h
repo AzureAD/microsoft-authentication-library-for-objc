@@ -21,9 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
-#import "MSALTelemetryBaseEvent.h"
+#import "MSIDTelemetryBaseEvent.h"
 
-@interface MSALTelemetryDefaultEvent : MSALTelemtryBaseEvent
+@interface MSALTelemetryDefaultEvent : MSIDTelemetryBaseEvent
 
 @end

@@ -39,11 +39,25 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
+#import "MSIDSharedTokenCache.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDMacTokenCache.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAccount.h"
+#import "NSURL+MSIDExtensions.h"
+#import "MSALUser+Internal.h"
+#import "MSIDRefreshToken.h"
+#import "MSALIdToken.h"
+#import "MSIDAADV2IdTokenWrapper.h"
+
+@interface MSALPublicClientApplication()
+
+@property (nonatomic) MSIDSharedTokenCache *tokenCache;
+
+@end
 
 @implementation MSALPublicClientApplication
-{
-    MSALTokenCache *_tokenCache;
-}
 
 - (BOOL)generateRedirectUriWithClientId:(NSString *)clientId
                                   error:(NSError * __autoreleasing *)error
@@ -99,13 +113,27 @@
     CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
                                                      error:error]);
     
-    id<MSALTokenCacheAccessor> dataSource;
 #if TARGET_OS_IPHONE
-    dataSource = [MSALKeychainTokenCache defaultKeychainCache];
+    MSIDKeychainTokenCache *dataSource;
+    if (self.keychainGroup)
+    {
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:self.keychainGroup];
+    }
+    else
+    {
+        dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    }
+    
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:@[legacyAccessor]];
 #else
-    dataSource = [MSALWrapperTokenCache defaultCache];
+    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource];
+    
+    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:defaultAccessor otherCacheAccessors:nil];
 #endif
-    _tokenCache = [[MSALTokenCache alloc] initWithDataSource:dataSource];
     
     _validateAuthority = YES;
     
@@ -116,16 +144,36 @@
 
 - (NSArray <MSALUser *> *)users:(NSError * __autoreleasing *)error
 {
-    return [_tokenCache getUsers:self.clientId context:nil error:error];
+    NSMutableSet *users = [NSMutableSet new];
+    
+    __auto_type tokens = [self.tokenCache getAllClientRTs:self.clientId context:nil error:error];
+    for (MSIDRefreshToken *token in tokens)
+    {
+        MSALUser *user = [[MSALUser alloc] initWithIdToken:[[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:token.idToken]
+                                                clientInfo:token.clientInfo environment:token.authority.msidHostWithPortIfNecessary];
+        
+         [users addObject:user];
+    }
+
+    return [users allObjects];
 }
 
 - (MSALUser *)userForIdentifier:(NSString *)identifier
                           error:(NSError * __autoreleasing *)error
 {
-    return [_tokenCache getUserForIdentifier:identifier
-                                    clientId:self.clientId
-                                 environment:[self.authority host]
-                                       error:error];
+    __auto_type users = [self users:error];
+    
+    for (MSALUser *user in users)
+    {
+        BOOL isFound = [user.userIdentifier isEqualToString:identifier];
+        isFound &= [user.environment isEqualToString:self.authority.msidHostWithPortIfNecessary];
+        if (isFound)
+        {
+            return user;
+        }
+    }
+    
+    return nil;
 }
 
 #pragma SafariViewController Support
@@ -143,18 +191,18 @@
         return NO;
     }
     
-    if ([NSString msalIsStringNilOrBlank:response.query])
+    if ([NSString msidIsStringNilOrBlank:response.query])
     {
         return NO;
     }
     
-    NSDictionary *qps = [NSDictionary msalURLFormDecode:response.query];
+    NSDictionary *qps = [NSDictionary msidURLFormDecode:response.query];
     if (!qps)
     {
         return NO;
     }
     
-    NSString *state = qps[OAUTH2_STATE];
+    NSString *state = qps[MSID_OAUTH2_STATE];
     if (!state)
     {
         return NO;
@@ -162,8 +210,8 @@
     
     if (![request.state isEqualToString:state])
     {
-        LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        MSID_LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
+        MSID_LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
         return NO;
     }
     
@@ -370,15 +418,15 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
-        LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        MSID_LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
+        MSID_LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
     }
     
     if (result)
     {
-        NSString *hashedAT = [result.accessToken msalShortSHA256Hex];
-        LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
-        LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        NSString *hashedAT = [result.accessToken msidTokenHash];
+        MSID_LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
+        MSID_LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
@@ -395,13 +443,13 @@
 {
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.component = _component;
+    params.logComponent = _component;
     params.apiId = apiId;
     params.user = user;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
     
-    LOG_INFO(params,
+    MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
               "                                               user:%@\n"
@@ -411,7 +459,7 @@
               "                                          authority:%@\n"
               "                                      correlationId:%@]",
              _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(user.userIdentifier), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
-    LOG_INFO_PII(params,
+    MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
                   "                                               user:%@\n"
@@ -444,13 +492,13 @@
     
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = _tokenCache;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
                                               behavior:uiBehavior
+                                            tokenCache:self.tokenCache
                                                  error:&error];
     if (!request)
     {
@@ -482,7 +530,7 @@
     
     [params setScopesFromArray:scopes];
     
-    LOG_INFO(params,
+    MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                     user:%@\n"
               "                                             forceRefresh:%@\n"
@@ -490,7 +538,7 @@
              _PII_NULLIFY(scopes), _PII_NULLIFY(user), forceRefresh ? @"Yes" : @"No", correlationId);
     
     
-    LOG_INFO_PII(params,
+    MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                     user:%@\n"
                   "                                             forceRefresh:%@\n"
@@ -511,11 +559,12 @@
     }
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.tokenCache = _tokenCache;
     params.urlSession = [MSALURLSession createMSALSession:params];
 
-    MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:params forceRefresh:forceRefresh error:&error];
+    MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
+                                                                  forceRefresh:forceRefresh
+                                                                    tokenCache:self.tokenCache
+                                                                         error:&error];
     
     if (!request)
     {
@@ -541,23 +590,16 @@
         return YES;
     }
     
-    return [_tokenCache deleteAllTokensForUser:user clientId:self.clientId context:nil error:error];
+    BOOL result = [self.tokenCache removeAllTokensForAccount:user.account context:nil error:error];
+    if (!result) return NO;
+    
+    return [self.tokenCache removeAccount:user.account context:nil error:error];
 }
 
 @end
 
 
 @implementation MSALPublicClientApplication (Internal)
-
-- (MSALTokenCache *)tokenCache
-{
-    return _tokenCache;
-}
-
-- (void)setTokenCache:(MSALTokenCache *)tokenCache
-{
-    _tokenCache = tokenCache;
-}
 
 + (NSDictionary *)defaultSliceParameters
 {

@@ -1,12 +1,12 @@
 language: objective-c
-osx_image: xcode8.3
+osx_image: xcode9.1
 
 # Set up our rubygems (slather and xcpretty, namely)
 install: 
  - gem install xcpretty slather -N
  
 before_script:
-# Start by nuking any lingering codecov files. These can cause issues when the xcode version changes
+# Start by removing any lingering codecov files. These can cause issues when the xcode version changes
   - find . -name "*.gcda" -print0 | xargs -0 rm
 
 # Tell the shell to echo failure codes up the pipe so that Travis will properly fail the

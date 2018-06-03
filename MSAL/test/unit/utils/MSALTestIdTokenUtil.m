@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestIdTokenUtil.h"
-#import "NSDictionary+MSALTestUtil.h"
+#import "NSDictionary+MSIDTestUtil.h"
 
 @implementation MSALTestIdTokenUtil
 
@@ -65,12 +65,12 @@
             preferredUsername:(NSString *)preferredUsername
                      tenantId:(NSString *)tid
 {
-    NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} base64UrlJson];
+    NSString *idTokenp1 = [@{ @"typ": @"JWT", @"alg": @"RS256", @"kid": @"_UgqXG_tMLduSJ1T8caHxU7cOtc"} msidBase64UrlJson];
     NSString *idTokenp2 = [@{ @"iss" : @"issuer",
                               @"name" : name,
                               @"preferred_username" : preferredUsername,
                               @"tid" : tid ? tid : [self defaultTenantId],
-                              @"oid" : [self defaultUniqueId]} base64UrlJson];
+                              @"oid" : [self defaultUniqueId]} msidBase64UrlJson];
     return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
 }
 

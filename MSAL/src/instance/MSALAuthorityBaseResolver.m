@@ -57,13 +57,13 @@
         NSString *tokenEndpoint = tenantDiscoveryResponse.token_endpoint;
         NSString *issuer = tenantDiscoveryResponse.issuer;
         
-        if ([NSString msalIsStringNilOrBlank:authorizationEndpoint] ||
-            [NSString msalIsStringNilOrBlank:tokenEndpoint] ||
-            [NSString msalIsStringNilOrBlank:issuer])
+        if ([NSString msidIsStringNilOrBlank:authorizationEndpoint] ||
+            [NSString msidIsStringNilOrBlank:tokenEndpoint] ||
+            [NSString msidIsStringNilOrBlank:issuer])
         {
             MSALLogError(context, MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil,  __FUNCTION__, __LINE__);
             
-            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil);
+            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil, nil);
             completionBlock(nil, discoveryError);
             return;
         }

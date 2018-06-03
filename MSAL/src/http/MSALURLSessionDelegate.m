@@ -26,10 +26,10 @@
 //------------------------------------------------------------------------------
 
 #import "MSALURLSessionDelegate.h"
-#import "MSALLogger+Internal.h"
-#import "NSString+MSALHelperMethods.h"
+#import "MSIDLogger+Internal.h"
+#import "NSString+MSIDExtensions.h"
 #import "MSALAuthority.h"
-#import "NSURL+MSALExtensions.h"
+#import "NSURL+MSIDExtensions.h"
 
 @implementation MSALURLSessionDelegate
 
@@ -55,10 +55,10 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     (void)response;
     (void)task;
     
-    LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
+    MSID_LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
              [NSString stringWithFormat:@"%@://%@", request.URL.scheme, request.URL.host]
              : @"unknown host");
-    LOG_INFO_PII(self.context, @"Redirecting to %@", request.URL.absoluteString);
+    MSID_LOG_INFO_PII(self.context, @"Redirecting to %@", request.URL.absoluteString);
     
     completionHandler(request);
 }

@@ -29,9 +29,9 @@
 #import "MSALTelemetryTestDispatcher.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry.h"
-#import "MSALTelemetry+Internal.h"
-#import "MSALTelemetryHttpEvent.h"
-#import "MSALTelemetryEventStrings.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDTelemetryHttpEvent.h"
+#import "MSIDTelemetryEventStrings.h"
 
 @interface MSALTestRequestContext : NSObject<MSALRequestContext>
 {
@@ -68,7 +68,7 @@
     return _requestId;
 }
 
-- (NSString *)component
+- (NSString *)logComponent
 {
     return nil;
 }
@@ -111,10 +111,10 @@
     
     [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
-    NSString *requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
     // Flush without adding any additional events
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     // Verify that default event is not added in such case
     XCTAssertEqual([receivedEvents count], 0);
@@ -134,26 +134,25 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // API event
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
     MSALTelemetryAPIEvent *apiEvent = [[MSALTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:ctx];
     [apiEvent setProperty:@"api_property" value:@"api_value"];
-    [apiEvent setRequestId:requestId];
     [apiEvent setCorrelationId:correlationId];
-    [[MSALTelemetry sharedInstance] stopEvent:requestId event:apiEvent];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:apiEvent];
     
     // HTTP event
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
     
-    [[MSALTelemetry sharedInstance] stopEvent:requestId
-                                        event:[[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx]];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId
+                                        event:[[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx]];
     
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     // Verify results: there should be 3 events (default, HTTP, API)
     XCTAssertEqual([receivedEvents count], 3);
@@ -181,7 +180,7 @@
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.stop_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.correlation_id"]);
-    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.elapsed_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.response_time"]);
     XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.request_id"]);
     
     XCTAssertTrue([[apiEventProperties objectForKey:@"msal.event_name"] compare:@"apiEvent"
@@ -194,7 +193,7 @@
     NSArray *httpEventPropertyNames = [httpEventProperties allKeys];
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.start_time"]);
     XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.stop_time"]);
-    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.elapsed_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.response_time"]);
     
     XCTAssertTrue([[httpEventProperties objectForKey:@"msal.event_name"] compare:@"httpEvent"
                                                                                    options:NSCaseInsensitiveSearch] == NSOrderedSame);
@@ -213,23 +212,23 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // HTTP event
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
-    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
     [httpEvent setHttpErrorCode:@"error_code_123"];
-    [[MSALTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
     
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     // Verify results
     XCTAssertEqual([receivedEvents count], 2);
     
-    NSString *errorCode = [[receivedEvents objectAtIndex:1] objectForKey:MSAL_TELEMETRY_KEY_HTTP_RESPONSE_CODE];
+    NSString *errorCode = [[receivedEvents objectAtIndex:1] objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_HTTP_RESPONSE_CODE)];
     
     XCTAssertNotNil(errorCode);
     XCTAssertTrue([errorCode compare:@"error_code_123" options:NSCaseInsensitiveSearch] == NSOrderedSame);
@@ -248,17 +247,17 @@
          receivedEvents = event;
      }];
     
-    NSString* requestId = [[MSALTelemetry sharedInstance] telemetryRequestId];
+    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // HTTP event
-    [[MSALTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
-    MSALTelemetryHttpEvent *httpEvent = [[MSALTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
-    [[MSALTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:ctx];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
     
-    [[MSALTelemetry sharedInstance] flush:requestId];
+    [[MSIDTelemetry sharedInstance] flush:requestId];
     
     // Verify results
     XCTAssertNil(receivedEvents);

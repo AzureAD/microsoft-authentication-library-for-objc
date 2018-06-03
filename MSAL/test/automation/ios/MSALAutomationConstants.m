@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Constants.h"
-
 NSString *const MSAL_VALIDATE_AUTHORITY_PARAM                   = @"validate_authority";
 NSString *const MSAL_CLIENT_ID_PARAM                            = @"client_id";
 NSString *const MSAL_AUTHORITY_PARAM                            = @"authority";
