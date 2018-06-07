@@ -50,7 +50,7 @@
     if (self)
     {
         _identifier = identifier;
-        _objectId = identifier;
+        _objectId = objectId;
         _tenantId = tenantId;
     }
 
