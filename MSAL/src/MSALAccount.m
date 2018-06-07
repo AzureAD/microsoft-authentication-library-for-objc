@@ -58,16 +58,13 @@
 
     if (self)
     {
-        _displayableId = [displayableId copy];
-        _name = [name copy];
-        _homeAccountId = [homeAccountId copy];
-        _localAccountId = [localAccountId copy];
-        _environment = [environment copy];
+        _displayableId = displayableId;
+        _name = name;
+        _environment = environment;
 
         NSString *uid = clientInfo.uid;
         NSString *utid = clientInfo.utid;
 
-        // TODO: this should never happen, but double check before removing it
         if (!uid && !utid)
         {
             NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
