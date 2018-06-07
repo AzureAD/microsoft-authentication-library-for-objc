@@ -399,21 +399,9 @@
                             account:(MSALAccount *)account
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    NSURL *authority = self.authority;
-
-    /*
-     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-     unless they override the default authority in the public client application with a tenanted authority.
-     */
-    if ([MSIDAuthority isTenantless:self.authority]
-        || [MSIDAuthority isConsumerInstanceURL:self.authority])
-    {
-        authority = [MSIDAuthority cacheUrlForAuthority:self.authority tenantId:account.homeAccountId.tenantId];
-    }
-
     [self acquireTokenSilentForScopes:scopes
                               account:account
-                            authority:authority.absoluteString
+                            authority:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
@@ -565,6 +553,25 @@
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
+    NSString *authorityString = authority;
+
+    if (!authorityString)
+    {
+        NSURL *defaultAuthority = self.authority;
+
+        /*
+         In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+         unless they override the default authority in the public client application with a tenanted authority.
+         */
+        if ([MSIDAuthority isTenantless:self.authority]
+            || [MSIDAuthority isConsumerInstanceURL:self.authority])
+        {
+            defaultAuthority = [MSIDAuthority cacheUrlForAuthority:self.authority tenantId:account.homeAccountId.tenantId];
+        }
+
+        authorityString = defaultAuthority.absoluteString;
+    }
+
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.account = account;
@@ -596,7 +603,7 @@
     };
 
     NSError *error = nil;
-    if (![params setAuthorityFromString:authority error:&error])
+    if (![params setAuthorityFromString:authorityString error:&error])
     {
         block(nil, error);
         return;

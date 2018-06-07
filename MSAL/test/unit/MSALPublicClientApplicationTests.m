@@ -737,6 +737,71 @@
     
 }
 
+- (void)testAcquireSilentScopesUser_whenNoAuthority_andCommonAuthorityInPublicClientApplication_shouldUseAccountHomeAuthority
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:@"https://login.microsoftonline.com/common"
+                                                    error:&error];
+    application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALSilentRequest class]]);
+
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
+         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.name, @"name");
+         XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.account.homeAccountId.objectId, @"1");
+         XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
+
+         XCTAssertFalse(obj.forceRefresh);
+
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
+
+         XCTAssertNotNil(params.correlationId);
+
+         completionBlock(nil, nil);
+     }];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
+                                                                 name:@"name"
+                                                        homeAccountId:@"1.1234-5678-90abcdefg"
+                                                       localAccountId:@"1"
+                                                          environment:@"login.microsoftonline.com"
+                                                             tenantId:@"custom_guest_tenant"
+                                                           clientInfo:nil];
+
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+
+}
+
 - (void)testAcquireSilentScopesUser_whenNoAuthority_andNonCommonAuthorityInPublicClientApplication_shouldUseThatAuthority
 {
     NSError *error = nil;
@@ -794,6 +859,72 @@
 
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNil(error);
+     }];
+
+}
+
+- (void)testAcquireSilentScopesUser_whenNilAuthority_andNonCommonAuthorityInPublicClientApplication_shouldUseThatAuthority
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:@"https://login.microsoftonline.com/custom_guest_tenant"
+                                                    error:&error];
+    application.component = @"unittests";
+    application.sliceParameters = @{ @"slice" : @"myslice" };
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+
+    [MSALTestSwizzle instanceMethod:@selector(run:)
+                              class:[MSALBaseRequest class]
+                              block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSALSilentRequest class]]);
+
+         MSALRequestParameters *params = [obj parameters];
+         XCTAssertNotNil(params);
+
+         XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAndAuthority);
+         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.name, @"name");
+         XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.account.homeAccountId.objectId, @"1");
+         XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+
+         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
+
+         XCTAssertFalse(obj.forceRefresh);
+
+         XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
+         XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
+
+         XCTAssertNotNil(params.correlationId);
+
+         completionBlock(nil, nil);
+     }];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
+                                                                 name:@"name"
+                                                        homeAccountId:@"1.1234-5678-90abcdefg"
+                                                       localAccountId:@"1"
+                                                          environment:@"login.microsoftonline.com"
+                                                             tenantId:@"custom_guest_tenant"
+                                                           clientInfo:nil];
+
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                                   authority:nil
                              completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
