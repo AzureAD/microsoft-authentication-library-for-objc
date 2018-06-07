@@ -78,22 +78,13 @@
                                                                          context:_parameters
                                                                            error:&error];
         
-        if (!accessToken)
+        if (!accessToken && error)
         {
-            if (error == nil && !msidConfiguration.authority)
-            {
-                error = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
-                                         @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
-            }
-            
-            if (error)
-            {
-                MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-                [self stopTelemetryEvent:event error:error];
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [self stopTelemetryEvent:event error:error];
 
-                completionBlock(nil, error);
-                return;
-            }
+            completionBlock(nil, error);
+            return;
         }
         
         if (accessToken && !accessToken.isExpired)
@@ -112,12 +103,7 @@
             completionBlock(result, nil);
             return;
         }
-        
-        if (!msidConfiguration.authority)
-        {
-            msidConfiguration.authority = accessToken.authority;
-        }
-        
+
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
 
