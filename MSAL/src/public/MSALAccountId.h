@@ -26,7 +26,7 @@
 @interface MSALAccountId : NSObject <NSCopying>
 
 /*!
- Unique identifier of the account in directory
+ Account identifier in the directory
  */
 @property (nonatomic, readonly) NSString *identifier;
 
