@@ -44,7 +44,7 @@ static BOOL s_runningTest = NO;
 
 #pragma mark - Helpers
 
-+ (void)expireAllTokensWithClientId:(NSString *)clientId
++ (void)expireAllAccessTokens
 {
     MSIDAccountCredentialCache *cache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     NSArray<MSIDCredentialCacheItem *> *accessTokens = [cache getAllCredentialsWithType:MSIDAccessTokenType context:nil error:nil];
@@ -91,7 +91,7 @@ static BOOL s_runningTest = NO;
                      
                      if (expireToken && result.account)
                      {
-                         [self expireAllTokensWithClientId:application.clientId];
+                         [self expireAllAccessTokens];
                      }
                      
                      dispatch_semaphore_signal(sem);
