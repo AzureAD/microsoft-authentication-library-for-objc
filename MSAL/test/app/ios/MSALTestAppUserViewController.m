@@ -93,7 +93,7 @@
     {
         return @"(nil)";
     }
-    return _users[row - 1].displayableId;
+    return _users[row - 1].username;
 }
 
 - (NSString *)subLabelForRow:(NSInteger)row
@@ -141,7 +141,7 @@
 + (NSString *)currentTitle
 {
     MSALAccount *currentAccount = MSALTestAppSettings.settings.currentAccount;
-    return currentAccount ? currentAccount.displayableId : @"(nil)";
+    return currentAccount ? currentAccount.username : @"(nil)";
 }
 
 @end

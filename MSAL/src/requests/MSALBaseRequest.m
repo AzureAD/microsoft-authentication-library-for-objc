@@ -146,7 +146,7 @@ static MSALScopes *s_reservedScopes = nil;
     NSString *upn = nil;
     if (_parameters.account)
     {
-        upn = _parameters.account.displayableId;
+        upn = _parameters.account.username;
     }
     else if(_parameters.loginHint)
     {

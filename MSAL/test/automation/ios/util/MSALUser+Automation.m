@@ -35,7 +35,7 @@
 - (NSDictionary *)itemAsDictionary
 {
     NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [resultDict setValue:self.displayableId forKey:@"displayable_id"];
+    [resultDict setValue:self.username forKey:@"username"];
     [resultDict setValue:self.name forKey:@"name"];
     [resultDict setValue:self.homeAccountId forKey:@"home_account_id"];
     [resultDict setValue:self.localAccountId forKey:@"local_account_id"];

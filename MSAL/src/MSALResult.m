@@ -67,7 +67,7 @@
 {
     __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:idTokenClaims.preferredUsername
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
                                                                  name:idTokenClaims.name
                                                         homeAccountId:accessToken.homeAccountId
                                                        localAccountId:idTokenClaims.objectId

@@ -34,7 +34,7 @@
 /*!
  The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
  */
-@property (readonly) NSString *displayableId;
+@property (readonly) NSString *username;
 
 /*!
  Unique identifier of the account in the home directory.

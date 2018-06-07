@@ -39,26 +39,26 @@
 @interface MSALAccount ()
 
 @property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *displayableId;
+@property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
 
 @end
 
 @implementation MSALAccount
 
-- (id)initWithDisplayableId:(NSString *)displayableId
-                       name:(NSString *)name
-              homeAccountId:(NSString *)homeAccountId
-             localAccountId:(NSString *)localAccountId
-                environment:(NSString *)environment
-                   tenantId:(NSString *)tenantId
-                 clientInfo:(MSIDClientInfo *)clientInfo
+- (id)initWithUsername:(NSString *)username
+                  name:(NSString *)name
+         homeAccountId:(NSString *)homeAccountId
+        localAccountId:(NSString *)localAccountId
+           environment:(NSString *)environment
+              tenantId:(NSString *)tenantId
+            clientInfo:(MSIDClientInfo *)clientInfo
 {
     self = [super init];
 
     if (self)
     {
-        _displayableId = displayableId;
+        _username = username;
         _name = name;
         _environment = environment;
 
@@ -84,7 +84,7 @@
                                                                        objectId:localAccountId
                                                                        tenantId:tenantId];
 
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:displayableId homeAccountId:homeAccountId];
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:homeAccountId];
     }
 
     return self;
@@ -92,7 +92,7 @@
 
 - (id)initWithMSIDAccount:(MSIDAccount *)account
 {
-    return [self initWithDisplayableId:account.username
+    return [self initWithUsername:account.username
                                   name:account.name
                          homeAccountId:account.homeAccountId
                         localAccountId:account.localAccountId
@@ -106,7 +106,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
-    account.displayableId = [self.displayableId copyWithZone:zone];
+    account.username = [self.username copyWithZone:zone];
     account.name = [self.name copyWithZone:zone];
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
     account.localAccountId = [self.localAccountId copyWithZone:zone];
@@ -136,7 +136,7 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    hash = hash * 31 + self.displayableId.hash;
+    hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.name.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.localAccountId.hash;
@@ -152,7 +152,7 @@
     if (!user) return NO;
     
     BOOL result = YES;
-    result &= (!self.displayableId && !user.displayableId) || [self.displayableId isEqualToString:user.displayableId];
+    result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.name && !user.name) || [self.name isEqualToString:user.name];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId isEqualToString:user.homeAccountId];
     result &= (!self.localAccountId && !user.localAccountId) || [self.localAccountId isEqualToString:user.localAccountId];
@@ -170,7 +170,7 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    hash = hash * 31 + self.displayableId.hash;
+    hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
     return hash;
@@ -181,7 +181,7 @@
     if (!user) return NO;
 
     BOOL result = YES;
-    result &= (!self.displayableId && !user.displayableId) || [self.displayableId isEqualToString:user.displayableId];
+    result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
 

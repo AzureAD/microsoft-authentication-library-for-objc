@@ -110,7 +110,7 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
-                                                                              preferredUsername:user.displayableId
+                                                                              preferredUsername:user.username
                                                                                        tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
                                              @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson] } ];
