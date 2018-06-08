@@ -764,7 +764,7 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -784,13 +784,13 @@
          completionBlock(nil, nil);
      }];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"custom_guest_tenant"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"custom_guest_tenant"
+                                                      clientInfo:nil];
 
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -829,7 +829,7 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -849,13 +849,13 @@
          completionBlock(nil, nil);
      }];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"custom_guest_tenant"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"custom_guest_tenant"
+                                                      clientInfo:nil];
 
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -894,7 +894,7 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAndAuthority);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -914,13 +914,13 @@
          completionBlock(nil, nil);
      }];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"custom_guest_tenant"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"custom_guest_tenant"
+                                                      clientInfo:nil];
 
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
