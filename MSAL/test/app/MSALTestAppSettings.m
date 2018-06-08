@@ -52,11 +52,13 @@ static NSArray<NSString *> *s_scopes_available = nil;
     for (NSString *host in trustedHosts)
     {
         [authorities addObject:[NSString stringWithFormat:@"https://%@/common", host]];
+        [authorities addObject:[NSString stringWithFormat:@"https://%@/organizations", host]];
+        [authorities addObject:[NSString stringWithFormat:@"https://%@/consumers", host]];
     }
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read"];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default"];
 
 }
 
