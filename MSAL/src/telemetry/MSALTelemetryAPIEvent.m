@@ -30,7 +30,7 @@
 
 - (void)setUser:(MSALAccount *)user
 {
-    [self setProperty:MSID_TELEMETRY_KEY_USER_ID value:[user displayableId]];
+    [self setProperty:MSID_TELEMETRY_KEY_USER_ID value:[user username]];
 }
 
 - (void)setLoginHint:(NSString *)loginHint

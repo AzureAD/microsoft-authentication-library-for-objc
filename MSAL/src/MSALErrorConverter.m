@@ -45,20 +45,20 @@ static NSDictionary *s_userInfoKeyMapping;
     s_errorCodeMapping = @{
                            MSIDErrorDomain:@{
                                    @(MSIDErrorInternal) : @(MSALErrorInternal),
-                                   @(MSIDErrorInvalidInternalParameter) : @(MSIDErrorInternal),
+                                   @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
                                    @(MSIDErrorAmbiguousAuthority) : @(MSALErrorAmbiguousAuthority),
                                    @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
-                                   @(MSIDErrorCacheMultipleUsers) : @(MSIDErrorInternal),
+                                   @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
                                    @(MSIDErrorTokenCacheItemFailure) : @(MSALErrorTokenCacheItemFailure),
                                    @(MSIDErrorWrapperCacheFailure) : @(MSALErrorWrapperCacheFailure),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
-                                   @(MSIDErrorCacheVersionMismatch) : @(MSIDErrorInternal),
+                                   @(MSIDErrorCacheVersionMismatch) : @(MSALErrorInternal),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
                                    @(MSIDErrorDeveloperAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
-                                   @(MSIDErrorUnsupportedFunctionality): @(MSIDErrorInternal)
+                                   @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal)
                                    },
                            MSIDOAuthErrorDomain:@{
                                    @(MSIDErrorInvalidRequest) :@(MSALErrorInvalidRequest),

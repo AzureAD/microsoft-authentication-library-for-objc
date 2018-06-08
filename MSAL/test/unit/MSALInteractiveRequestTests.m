@@ -193,13 +193,13 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"User"
-                                                                 name:@"user@contoso.com"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
 
     parameters.account = account;
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
@@ -402,7 +402,7 @@
          XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
          XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
-         XCTAssertEqualObjects(result.account.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
          XCTAssertNotNil(result.accessToken);
@@ -432,7 +432,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"User"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                                  name:@"user@contoso.com"
                                                         homeAccountId:@"1.1234-5678-90abcdefg"
                                                        localAccountId:@"1"
@@ -567,7 +567,7 @@
          XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
          XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
          XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
-         XCTAssertEqualObjects(result.account.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
          XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.com");
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
@@ -607,13 +607,13 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"User"
-                                                                 name:@"user@contoso.com"
-                                                        homeAccountId:@"2.1234-5678-90abcdefg"
-                                                       localAccountId:@"2"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"2.1234-5678-90abcdefg"
+                                                  localAccountId:@"2"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     parameters.account = account;
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)

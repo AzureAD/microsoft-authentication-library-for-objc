@@ -432,13 +432,13 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -492,13 +492,13 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -555,13 +555,13 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -634,7 +634,7 @@
          XCTAssertNotNil(params);
 
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUser);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -654,13 +654,13 @@
          completionBlock(nil, nil);
      }];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -698,7 +698,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAndAuthority);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -718,13 +718,13 @@
          completionBlock(nil, nil);
      }];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -962,7 +962,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId);
-         XCTAssertEqualObjects(params.account.displayableId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.account.username, @"user@contoso.com");
          XCTAssertEqualObjects(params.account.name, @"name");
          XCTAssertEqualObjects(params.account.homeAccountId.identifier, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
@@ -983,13 +983,13 @@
          completionBlock(nil, nil);
      }];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1083,13 +1083,13 @@
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                     error:nil];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"user@contoso.com"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                            name:@"name"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
     XCTAssertTrue([application removeAccount:account error:&error]);
     XCTAssertNil(error);
 }

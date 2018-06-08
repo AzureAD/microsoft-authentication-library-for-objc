@@ -70,7 +70,7 @@ class SampleMainViewController: UIViewController {
         
         do {
             let account = try SampleMSALUtil.shared.currentAccount()
-            nameLabel.text = "Welcome, \(account.displayableId!)"
+            nameLabel.text = "Welcome, \(account.username!)"
         } catch let error {
             print("Loading current account name error: \(error)")
         }

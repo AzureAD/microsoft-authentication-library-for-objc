@@ -115,7 +115,7 @@
 
     if (currentRow != -1)
     {
-        NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
         [_tableView selectRowAtIndexPath:indexPath
                                 animated:NO
                           scrollPosition:UITableViewScrollPositionNone];

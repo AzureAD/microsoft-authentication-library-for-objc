@@ -71,12 +71,12 @@
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
     XCTAssertEqualObjects(account.name, @"User");
-    XCTAssertEqualObjects(account.displayableId, @"user@contoso.com");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
 }
 
 - (void)testCopy_whenValidAccount_shouldCopy
 {
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"displayableID"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                                  name:@"name"
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
@@ -93,7 +93,7 @@
     
     XCTAssertEqualObjects(account.homeAccountId.objectId, account2.homeAccountId.objectId);
     XCTAssertEqualObjects(account.homeAccountId.tenantId, account2.homeAccountId.tenantId);
-    XCTAssertEqualObjects(account.displayableId, account2.displayableId);
+    XCTAssertEqualObjects(account.username, account2.username);
     XCTAssertEqualObjects(account.name, account2.name);
 }
 
@@ -104,7 +104,7 @@
                                         };
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"displayableID"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                                  name:@"name"
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
