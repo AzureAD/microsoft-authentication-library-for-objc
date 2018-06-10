@@ -69,7 +69,7 @@ class SampleCalendarUtil  {
             return
         }
         
-        SampleMSALUtil.shared.acquireTokenForCurrentUser(forScopes: [GraphScopes.CalendarsRead.rawValue]) {
+        SampleMSALUtil.shared.acquireTokenForCurrentAccount(forScopes: [GraphScopes.CalendarsRead.rawValue]) {
             (token: String?, error: Error?) in
             
             guard let accessToken = token else {

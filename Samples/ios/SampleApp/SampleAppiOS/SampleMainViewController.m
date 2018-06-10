@@ -102,7 +102,7 @@
     [self loadPhoto];
     [self loadEvents];
     
-    _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [[SampleMSALUtil sharedUtil] currentUser:nil].name];
+    _nameLabel.text = [NSString stringWithFormat:@"Welcome, %@", [[SampleMSALUtil sharedUtil] currentAccount:nil].username];
 }
 
 - (void)loadPhoto

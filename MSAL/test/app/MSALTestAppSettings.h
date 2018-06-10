@@ -34,7 +34,7 @@ extern NSString* MSALTestAppCacheChangeNotification;
 @interface MSALTestAppSettings : NSObject
 
 @property (nonatomic) NSString *authority;
-@property (nonatomic) MSALUser *currentUser;
+@property (nonatomic) MSALAccount *currentAccount;
 @property (nonatomic) NSString *loginHint;
 @property (nonatomic) BOOL validateAuthority;
 @property (nonatomic, readonly) NSSet<NSString *> *scopes;

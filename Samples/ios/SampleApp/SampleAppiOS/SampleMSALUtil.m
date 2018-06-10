@@ -32,7 +32,7 @@
 #import "SampleCalendarUtil.h"
 #import "SamplePhotoUtil.h"
 
-#define CURRENT_USER_KEY @"MSALCurrentUserIdentifier"
+#define CURRENT_ACCOUNT_KEY @"MSALCurrentAccountIdentifier"
 #define CLIENT_ID @"11744750-bfe5-4818-a1c0-655455f68fa7"
 
 @implementation SampleMSALUtil
@@ -56,7 +56,7 @@
         // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
         // containsPII == NO. In this case, you only need to capture either one set of messages.
         // however the containsPII version might contain Personally Identifiable Information (PII)
-        // about the user being logged in.
+        // about the account being logged in.
         
         // if message is "redirect to https://somehost.com",
         if (!containsPII)
@@ -81,19 +81,19 @@
     return [[MSALPublicClientApplication alloc] initWithClientId:CLIENT_ID error:nil];
 }
 
-- (NSString *)currentUserIdentifer
+- (NSString *)currentAccountIdentifer
 {
-    return [[NSUserDefaults standardUserDefaults] stringForKey:CURRENT_USER_KEY];
+    return [[NSUserDefaults standardUserDefaults] stringForKey:CURRENT_ACCOUNT_KEY];
 }
 
-- (MSALUser *)currentUser:(NSError * __autoreleasing *)error
+- (MSALAccount *)currentAccount:(NSError *__autoreleasing *)error
 {
-    // We retrieve our current user by checking for the userIdentifier that we stored in NSUserDefaults when
-    // we first signed in the user.
-    NSString *currentUserIdentifier = [self currentUserIdentifer];
-    if (!currentUserIdentifier)
+    // We retrieve our current account by checking for the accountIdentifier that we stored in NSUserDefaults when
+    // we first signed in the account.
+    NSString *currentAccountIdentifer = [self currentAccountIdentifer];
+    if (!currentAccountIdentifer)
     {
-        // If we did not find an identifier then return nil with a no user signed
+        // If we did not find an identifier then return nil with a no account signed
         // in error specific for the application.
         if (error)
         {
@@ -107,13 +107,13 @@
     // an error back so we can inspect it after.
     NSError *localError = nil;
     
-    // Ask MSALPublicClientApplication object to retrieve the user from the cache.
-    MSALUser *user = [[self createClientApplication] userForIdentifier:currentUserIdentifier error:&localError];
+    // Ask MSALPublicClientApplication object to retrieve the account from the cache.
+    MSALAccount *account = [[self createClientApplication] accountForHomeAccountId:currentAccountIdentifer error:&localError];
     
-    // If we did not find a user because it wasn't found in the cache then that must mean someone else removed
-    // the user underneath us, either due to multiple apps sharing a client ID, or due to the user restoring an
+    // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
+    // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
     // image from another device. In this case it is best to detect that case and clean up local state.
-    if (!user && [localError.domain isEqualToString:MSALErrorDomain] && localError.code == MSALErrorUserNotFound)
+    if (!account && [localError.domain isEqualToString:MSALErrorDomain] && localError.code == MSALErrorUserNotFound)
     {
         [self cleanupLocalState];
     }
@@ -125,15 +125,15 @@
         *error = localError;
     }
     
-    return user;
+    return account;
 }
 
-- (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock
+- (void)signInAccount:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock
 {
     MSALPublicClientApplication *application = [self createClientApplication];
     
-    // When signing in a user for the first time we acquire a token without providing
-    // a user object. If you've previously asked the user for an email address,
+    // When signing in an account for the first time we acquire a token without providing
+    // an account object. If you've previously asked the user for an email address,
     // or phone number you can provide that as a "login hint."
     
     // Request as many scopes as possible up front that you know your application will
@@ -148,41 +148,41 @@
             return;
         }
         
-        // In the initial acquire token call we'll want to look at the user object
+        // In the initial acquire token call we'll want to look at the account object
         // that comes back in the result.
-        MSALUser *user = result.user;
+        MSALAccount *account = result.account;
         
-        // The userIdentifier in the MSALUser is the key to retrieve this user from
+        // The identifier in the MSALAccount is the key to retrieve this account from
         // the cache in the future. Save this piece of information in a place you can
         // easily retrieve in your app. In this case we're going to store it in
         // NSUserDefaults.
-        [[NSUserDefaults standardUserDefaults] setValue:user.userIdentifier forKey:CURRENT_USER_KEY];
+        [[NSUserDefaults standardUserDefaults] setValue:account.homeAccountId.identifier forKey:CURRENT_ACCOUNT_KEY];
         
-        signInBlock(user, result.accessToken, error);
+        signInBlock(account, result.accessToken, error);
     }];
 }
 
-- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
-                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+- (void)acquireTokenSilentForCurrentAccount:(NSArray<NSString *> *)scopes
+                            completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
     MSALPublicClientApplication *application = [self createClientApplication];
     
     NSError *error = nil;
-    MSALUser *currentUser = [self currentUser:&error];
-    if (!currentUser)
+    MSALAccount *currentAccount = [self currentAccount:&error];
+    if (!currentAccount)
     {
         acquireTokenBlock(nil, error);
         return;
     }
     
-    // Depending on how this user has been used with this application before it is possible for there to be multiple
-    // tokens of varying authorities for this user in the cache. Because we are trying to get a token specifically
-    // for graph in this sample it's best to specify the user's home authority to remove any possibility of there
+    // Depending on how this account has been used with this application before it is possible for there to be multiple
+    // tokens of varying authorities for this account in the cache. Because we are trying to get a token specifically
+    // for graph in this sample it's best to specify the account's home authority to remove any possibility of there
     // being any ambiquity in the cache lookup.
-    NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentUser.utid];
+    NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentAccount.homeAccountId.tenantId];
     
     [application acquireTokenSilentForScopes:scopes
-                                        user:currentUser
+                                     account:currentAccount
                                    authority:homeAuthority
                                 forceRefresh:NO
                                correlationId:nil
@@ -192,21 +192,21 @@
     }];
 }
 
-- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
-                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+- (void)acquireTokenInteractiveForCurrentAccount:(NSArray<NSString *> *)scopes
+                                 completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
     MSALPublicClientApplication *application = [self createClientApplication];
     
     NSError *error = nil;
-    MSALUser *currentUser = [self currentUser:&error];
-    if (!currentUser)
+    MSALAccount *currentAccount = [self currentAccount:&error];
+    if (!currentAccount)
     {
         acquireTokenBlock(nil, error);
         return;
     }
 
     [application acquireTokenForScopes:scopes
-                                  user:currentUser
+                               account:currentAccount
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -215,11 +215,11 @@
      }];
 }
 
-- (void)acquireTokenForCurrentUser:(NSArray<NSString *> *)scopes
-                   completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
+- (void)acquireTokenForCurrentAccount:(NSArray<NSString *> *)scopes
+                      completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
-    [self acquireTokenSilentForCurrentUser:scopes
-                           completionBlock:^(NSString *token, NSError *error)
+    [self acquireTokenSilentForCurrentAccount:scopes
+                              completionBlock:^(NSString *token, NSError *error)
      {
          if (!error)
          {
@@ -228,15 +228,15 @@
          }
          
          // What an app does on an InteractionRequired error will vary from app to app. Most apps
-         // will want to present a notification to the user in an unobtrusive way (such as on a
+         // will want to present a notification to the account in an unobtrusive way (such as on a
          // status bar in the application UI) before bringing up the modal interactive login dialog,
-         // otherwise it can appear to be out of context for the user, and confuse them as to why
+         // otherwise it can appear to be out of context for the account, and confuse them as to why
          // they are seeing an authentication prompt.
          if ([error.domain isEqualToString:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
          {
              dispatch_async(dispatch_get_main_queue(), ^{
-                 [self acquireTokenInteractiveForCurrentUser:scopes
-                                             completionBlock:acquireTokenBlock];
+                 [self acquireTokenInteractiveForCurrentAccount:scopes
+                                                completionBlock:acquireTokenBlock];
              });
              return;
          }
@@ -249,18 +249,18 @@
 
 {
     MSALPublicClientApplication *application = [self createClientApplication];
-    MSALUser *currentUser = [self currentUser:nil];
+    MSALAccount *currentAccount = [self currentAccount:nil];
     [self cleanupLocalState];
     
-    // Signing out a user requires removing this from MSAL and cleaning up any extra state that the application
-    // might be maintaining outside of MSAL for the user.
+    // Signing out an account requires removing this from MSAL and cleaning up any extra state that the application
+    // might be maintaining outside of MSAL for the account.
     
-    // This remove call only removes the user's tokens for this client ID in the local keychain cache. It does
-    // not sign the user completely out of the device or remove tokens for the user for other client IDs. If
-    // you have multiple applications sharing a client ID this will make the user effectively "disappear" for
+    // This remove call only removes the account's tokens for this client ID in the local keychain cache. It does
+    // not sign the account completely out of the device or remove tokens for the account for other client IDs. If
+    // you have multiple applications sharing a client ID this will make the account effectively "disappear" for
     // those applications as well if you are using Keychain Cache Sharing (not currently available in MSAL
     // build preview). We do not recommend sharing a ClientID among multiple apps.
-    [application removeUser:currentUser error:nil];
+    [application removeAccount:currentAccount error:nil];
     
 }
 
@@ -269,9 +269,9 @@
     [[SamplePhotoUtil sharedUtil] clearPhotoCache];
     [[SampleCalendarUtil sharedUtil] clearCache];
     
-    // Leave around the user identifier as the last piece of state to clean up as you will probably need
+    // Leave around the account identifier as the last piece of state to clean up as you will probably need
     // it to clean up user-specific state
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CURRENT_USER_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:CURRENT_ACCOUNT_KEY];
 }
 
 @end

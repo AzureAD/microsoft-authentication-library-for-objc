@@ -35,7 +35,7 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
-#import "MSALUser.h"
+#import "MSALAccount.h"
 #import "MSALWebUI.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestConstants.h"
@@ -43,15 +43,15 @@
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse.h"
 #import "NSDictionary+MSIDTestUtil.h"
-#import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
+#import "MSALAccount+Internal.h"
+#import "MSALAccountId.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
-@property (nonatomic) MSIDSharedTokenCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 
 @end
@@ -63,14 +63,12 @@
     [super setUp];
     
 #if TARGET_OS_IPHONE
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 #else
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDMacTokenCache new]];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDMacTokenCache new] otherCacheAccessors:nil];
 #endif
-    
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
-    
-    [self.tokenCache clearWithContext:nil error:nil];
+
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
 - (void)tearDown
@@ -194,12 +192,16 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"preferredUserName"
-                                                         name:@"user@contoso.com"
-                                             identityProvider:@"identifyProvider"
-                                                          uid:@"1"
-                                                         utid:@"1234-5678-90abcdefg"
-                                                  environment:@"https://login.microsoftonline.com"];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
+
+    parameters.account = account;
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
                            block:(id)^(id obj, NSUInteger size)
@@ -243,7 +245,7 @@
       @"x-client-CPU" : msalId[@"x-client-CPU"],
       @"return-client-request-id" : correlationId.UUIDString,
       @"state" : request.state,
-      @"login_hint" : @"preferredUserName",
+      @"login_hint" : @"User",
       @"login_req" : @"1",
       @"domain_req" : @"1234-5678-90abcdefg",
       @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -291,7 +293,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                   extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:self.tokenCache
+                                            tokenCache:self.tokenCacheAccessor
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -396,11 +398,11 @@
          fAlreadyHit = YES;
          XCTAssertNotNil(result);
          XCTAssertNil(error);
-         XCTAssertNotNil(result.user);
-         XCTAssertEqualObjects(result.user.uid, @"1");
-         XCTAssertEqualObjects(result.user.utid, @"1234-5678-90abcdefg");
-         XCTAssertEqualObjects(result.user.name, [MSALTestIdTokenUtil defaultName]);
-         XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertNotNil(result.account);
+         XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
+         XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
+         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
          XCTAssertNotNil(result.accessToken);
@@ -430,12 +432,14 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
-                                                         name:@"user@contoso.com"
-                                             identityProvider:@"identifyProvider"
-                                                          uid:@"1"
-                                                         utid:@"1234-5678-90abcdefg"
-                                                  environment:@"https://login.microsoftonline.com"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
+                                                                 name:@"user@contoso.com"
+                                                        homeAccountId:@"1.1234-5678-90abcdefg"
+                                                       localAccountId:@"1"
+                                                          environment:@"login.microsoftonline.com"
+                                                             tenantId:@"1234-5678-90abcdefg"
+                                                           clientInfo:nil];
+    parameters.account = account;
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -452,7 +456,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:self.tokenCache
+                                            tokenCache:self.tokenCacheAccessor
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -559,13 +563,12 @@
          fAlreadyHit = YES;
          XCTAssertNotNil(result);
          XCTAssertNil(error);
-         XCTAssertNotNil(result.user);
-         XCTAssertEqualObjects(result.user.uid, @"1");
-         XCTAssertEqualObjects(result.user.utid, @"1234-5678-90abcdefg");
-         XCTAssertEqualObjects(result.user.name, [MSALTestIdTokenUtil defaultName]);
-         XCTAssertEqualObjects(result.user.displayableId, [MSALTestIdTokenUtil defaultUsername]);
-         XCTAssertEqualObjects(result.user.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(result.user.identityProvider, @"issuer");
+         XCTAssertNotNil(result.account);
+         XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
+         XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
+         XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
+         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
+         XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.com");
          XCTAssertNotNil(result.tenantId);
          XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
          XCTAssertNotNil(result.idToken);
@@ -604,12 +607,14 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.user = [[MSALUser alloc] initWithDisplayableId:@"User"
-                                                         name:@"user@contoso.com"
-                                             identityProvider:@"identifyProvider"
-                                                          uid:@"2"
-                                                         utid:@"1234-5678-90abcdefg"
-                                                  environment:@"https://login.microsoftonline.com"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"2.1234-5678-90abcdefg"
+                                                  localAccountId:@"2"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:nil];
+    parameters.account = account;
     
     [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
                            class:[NSString class]
@@ -626,7 +631,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:self.tokenCache
+                                            tokenCache:self.tokenCacheAccessor
                                                  error:&error];
     
     XCTAssertNotNil(request);
@@ -776,7 +781,7 @@
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                   extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:self.tokenCache
+                                            tokenCache:self.tokenCacheAccessor
                                                  error:&error];
     
     XCTAssertNotNil(request);

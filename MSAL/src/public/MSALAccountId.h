@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,26 +15,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import "MSALUser.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDAccount;
-@class MSIDAADV2IdTokenWrapper;
-@class MSIDClientInfo;
+@interface MSALAccountId : NSObject <NSCopying>
 
-@interface MSALUser ()
+/*!
+ Account identifier in the directory
+ */
+@property (nonatomic, readonly) NSString *identifier;
 
-@property (nonatomic) MSIDAccount *account;
+/*!
+ Object id of the account in the directory
+ */
+@property (nonatomic, readonly) NSString *objectId;
 
-- (id)initWithIdToken:(MSIDAADV2IdTokenWrapper *)idToken
-           clientInfo:(MSIDClientInfo *)clientInfo
-          environment:(NSString *)environment;
+/*!
+ An identifier for the tenant that the account was acquired from
+ */
+@property (nonatomic, readonly) NSString *tenantId;
 
 @end

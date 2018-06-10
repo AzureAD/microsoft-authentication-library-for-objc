@@ -28,6 +28,7 @@
 #import "MSALTestAppUserViewController.h"
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
+#import "MSALAccountId.h"
 
 @interface MSALTestAppUserViewController ()
 
@@ -35,7 +36,7 @@
 
 @implementation MSALTestAppUserViewController
 {
-    NSArray<MSALUser *> *_users;
+    NSArray<MSALAccount *> *_users;
 }
 
 + (instancetype)sharedController
@@ -76,7 +77,7 @@
         return;
     }
     
-    _users = [application users:nil];
+    _users = [application accounts:nil];
     
     [super refresh];
 }
@@ -92,7 +93,7 @@
     {
         return @"(nil)";
     }
-    return _users[row - 1].displayableId;
+    return _users[row - 1].username;
 }
 
 - (NSString *)subLabelForRow:(NSInteger)row
@@ -109,42 +110,38 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     if (row == 0)
     {
-        settings.currentUser = nil;
+        settings.currentAccount = nil;
     }
     else
     {
-        settings.currentUser = _users[row - 1];
+        settings.currentAccount = _users[row - 1];
     }
 }
 
 - (NSInteger)currentRow
 {
-    MSALUser *currentUser = MSALTestAppSettings.settings.currentUser;
-    if (!currentUser)
+    MSALAccount *currentAccount = MSALTestAppSettings.settings.currentAccount;
+    if (!currentAccount)
     {
         return 0;
     }
     
-    NSString *currentUserId = currentUser.userIdentifier;
+    NSString *currentAccountId = currentAccount.homeAccountId.identifier;
     
     for (NSInteger i = 0; i < _users.count; i++)
     {
-        if ([currentUserId isEqualToString:_users[i].userIdentifier])
+        if ([currentAccountId isEqualToString:_users[i].homeAccountId.identifier])
         {
             return i + 1;
         }
     }
-    
-    // TODO: How to handle better?
-    @throw @"Couldn't find the user!";
-    
-    return 0;
+    return -1;
 }
 
 + (NSString *)currentTitle
 {
-    MSALUser *currentUser = MSALTestAppSettings.settings.currentUser;
-    return currentUser ? currentUser.name : @"(nil)";
+    MSALAccount *currentAccount = MSALTestAppSettings.settings.currentAccount;
+    return currentAccount ? currentAccount.username : @"(nil)";
 }
 
 @end

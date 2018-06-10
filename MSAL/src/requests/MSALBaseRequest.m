@@ -29,7 +29,7 @@
 #import "MSALAuthority.h"
 #import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
-#import "MSALUser.h"
+#import "MSALAccount.h"
 #import "MSALWebAuthRequest.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -38,19 +38,20 @@
 #import "MSALTelemetryApiId.h"
 #import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDSharedTokenCache.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccessToken.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "NSData+MSIDExtensions.h"
 #import "MSALErrorConverter.h"
+#import "MSALAccountId.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
 @interface MSALBaseRequest()
 
-@property (nullable, nonatomic) MSIDSharedTokenCache *tokenCache;
+@property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 
 @end
 
@@ -62,7 +63,7 @@ static MSALScopes *s_reservedScopes = nil;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
-              tokenCache:(MSIDSharedTokenCache *)tokenCache
+              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError * __nullable __autoreleasing * __nullable)error
 {
     if (!(self = [super init]))
@@ -143,9 +144,9 @@ static MSALScopes *s_reservedScopes = nil;
 - (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
 {
     NSString *upn = nil;
-    if (_parameters.user)
+    if (_parameters.account)
     {
-        upn = _parameters.user.displayableId;
+        upn = _parameters.account.username;
     }
     else if(_parameters.loginHint)
     {
@@ -227,31 +228,34 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
 
-         if (_parameters.user != nil &&
-             ![_parameters.user.userIdentifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
+         if (_parameters.account != nil &&
+             ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
          {
              NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);
              return;
          }
-         
+
+         MSIDConfiguration *configuration = _parameters.msidConfiguration;
+
          BOOL isSaved = [self.tokenCache saveTokensWithFactory:factory
-                                                  requestParams:_parameters.msidParameters
-                                                       response:tokenResponse
-                                                        context:_parameters error:&error];
+                                                 configuration:configuration
+                                                      response:tokenResponse
+                                                       context:_parameters
+                                                         error:&error];
          
          if (!isSaved)
          {
              completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
+
+         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse configuration:configuration];
+         MSIDIdToken *idToken = [factory idTokenFromResponse:tokenResponse configuration:configuration];
          
-         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse
-                                                                  request:_parameters.msidParameters];
+         MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
          
-         MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
-         
-         [event setUser:result.user];
+         [event setUser:result.account];
          [self stopTelemetryEvent:event error:nil];
 
          completionBlock(result, nil);

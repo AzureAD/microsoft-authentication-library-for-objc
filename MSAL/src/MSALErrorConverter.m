@@ -45,19 +45,20 @@ static NSDictionary *s_userInfoKeyMapping;
     s_errorCodeMapping = @{
                            MSIDErrorDomain:@{
                                    @(MSIDErrorInternal) : @(MSALErrorInternal),
-                                   @(MSIDErrorInvalidInternalParameter) : @(MSIDErrorInternal),
+                                   @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
                                    @(MSIDErrorAmbiguousAuthority) : @(MSALErrorAmbiguousAuthority),
                                    @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
-                                   @(MSIDErrorCacheMultipleUsers) : @(MSIDErrorInternal),
+                                   @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
                                    @(MSIDErrorTokenCacheItemFailure) : @(MSALErrorTokenCacheItemFailure),
                                    @(MSIDErrorWrapperCacheFailure) : @(MSALErrorWrapperCacheFailure),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
-                                   @(MSIDErrorCacheVersionMismatch) : @(MSIDErrorInternal),
+                                   @(MSIDErrorCacheVersionMismatch) : @(MSALErrorInternal),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
                                    @(MSIDErrorDeveloperAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal)
                                    },
                            MSIDOAuthErrorDomain:@{
                                    @(MSIDErrorInvalidRequest) :@(MSALErrorInvalidRequest),
@@ -101,7 +102,7 @@ static NSDictionary *s_userInfoKeyMapping;
         }
         else
         {
-            MSID_LOG_ERROR(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msidError.domain, msidError.code);
+            MSID_LOG_ERROR(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msidError.domain, (long)msidError.code);
         }
     }
     

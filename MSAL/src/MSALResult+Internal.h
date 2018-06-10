@@ -28,17 +28,19 @@
 #import "MSALResult.h"
 
 @class MSIDAccessToken;
+@class MSIDIdToken;
 
 @interface MSALResult (Internal)
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
                              tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
+                              account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes;
 
-+ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken;
++ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
+                              idToken:(MSIDIdToken *)idToken;
 
 @end
