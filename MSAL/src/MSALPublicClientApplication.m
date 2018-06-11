@@ -52,6 +52,7 @@
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
 #import "MSIDAuthority.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALPublicClientApplication()
 
@@ -125,15 +126,17 @@
     {
         dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     }
+
+    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:factory];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:factory];
     
     self.tokenCache = defaultAccessor;
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
 
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     self.tokenCache = defaultAccessor;
 #endif
     

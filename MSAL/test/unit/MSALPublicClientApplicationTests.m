@@ -46,6 +46,7 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSALAccountId.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -74,7 +75,7 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
 
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -1050,11 +1051,10 @@
                                                                              target:@"fakescope1 fakescope2"];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:configuration
-                                                        response:msidResponse
-                                                         context:nil
-                                                           error:&error];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:&error];
     XCTAssertTrue(result);
     XCTAssertNil(error);
     

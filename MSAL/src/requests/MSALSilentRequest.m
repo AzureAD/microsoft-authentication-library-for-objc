@@ -37,6 +37,7 @@
 #import "MSIDRefreshToken.h"
 #import "MSIDConfiguration.h"
 #import "MSALErrorConverter.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALSilentRequest()
 
@@ -66,8 +67,8 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
-    
+    CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorAccountRequired, @"user parameter cannot be nil");
+
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     
     if (!_forceRefresh)
@@ -122,7 +123,7 @@
         return;
     }
     
-    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
+    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
 
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)

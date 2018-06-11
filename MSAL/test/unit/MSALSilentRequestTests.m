@@ -73,7 +73,7 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
     
     [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
@@ -143,7 +143,7 @@
         XCTAssertNil(result);
         XCTAssertNotNil(error);
 
-        XCTAssertTrue(error.code == MSALErrorUserRequired);
+        XCTAssertTrue(error.code == MSALErrorAccountRequired);
 
         [expectation fulfill];
     }];
@@ -188,12 +188,10 @@
                                                                                                 }
                                                                                         error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:response
-                                                         context:nil
-                                                           error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:response
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
@@ -264,12 +262,10 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                            configuration:parameters.msidConfiguration
-                                                 response:msidResponse
-                                                  context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -322,7 +318,7 @@
      }];
 }
 
-- (void)testAtsNoAuthorityATExpired
+- (void)testAtsHomeAuthorityATExpired
 {
     NSError *error = nil;
     NSUUID *correlationId = [NSUUID new];
@@ -368,12 +364,10 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:msidResponse
-                                                         context:nil
-                                                           error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -383,7 +377,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
+    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -404,7 +398,7 @@
 
     [MSIDTestURLSession addResponse:response];
 
-    parameters.unvalidatedAuthority = nil;
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
@@ -472,12 +466,10 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:msidResponse
-                                                         context:nil
-                                                           error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
@@ -548,11 +540,10 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:msidResponse
-                                                            context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
@@ -705,11 +696,10 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:msidResponse
-                                                         context:nil
-                                                           error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
@@ -815,11 +805,10 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
-                                                   configuration:parameters.msidConfiguration
-                                                        response:msidResponse
-                                                         context:nil
-                                                           error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.

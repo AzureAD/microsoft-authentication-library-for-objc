@@ -108,7 +108,6 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorMismatchedUser             = -42101,
     MSALErrorNoAuthorizationResponse    = -42102,
     MSALErrorBadAuthorizationResponse   = -42103,
-    MSALErrorUserRequired               = -42104,
     
     /*!
         The user or application failed to authenticate in the interactive flow.
@@ -122,6 +121,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         Check to make sure your application is consented to get all of the scopes you are asking for.
      */
     MSALErrorNoAccessTokenInResponse = -42105,
+
+    /*!
+     MSAL requires a non-nil account for the acquire token silent call
+     */
+    MSALErrorAccountRequired = -42106,
     
     /*!
         MSAL encounted an error when trying to store or retrieve items from

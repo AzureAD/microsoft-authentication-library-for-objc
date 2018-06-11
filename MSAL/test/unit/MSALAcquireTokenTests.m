@@ -76,7 +76,7 @@
 #else
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
-    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     
     [self.tokenCache clearWithContext:nil error:nil];
 }
@@ -190,12 +190,10 @@
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
-    MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                           configuration:configuration
-                                                response:response
-                                                 context:nil
-                                                   error:nil];
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
     XCTAssertTrue(result);
     
     NSError *error = nil;
