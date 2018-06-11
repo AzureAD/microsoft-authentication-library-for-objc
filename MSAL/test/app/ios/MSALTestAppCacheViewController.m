@@ -284,16 +284,17 @@
     switch (token.credentialType) {
         case MSIDRefreshTokenType:
         {
+            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+
             if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.msidTenant, refreshToken.clientId];
             }
             else
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.msidTenant, refreshToken.familyId];
             }
 
-            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
             if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
             {
                 cell.textLabel.textColor = [UIColor orangeColor];
