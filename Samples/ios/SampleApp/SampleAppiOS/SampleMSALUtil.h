@@ -27,7 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALUser;
+@class MSALAccount;
 
 @interface SampleMSALUtil : NSObject
 
@@ -39,42 +39,42 @@
 + (void)setup;
 
 
-- (NSString *)currentUserIdentifer;
+- (NSString *)currentAccountIdentifer;
 
 /*!
-    Returns the current user for the application
+    Returns the current account for the application
  */
-- (MSALUser *)currentUser:(NSError * __autoreleasing *)error;
+- (MSALAccount *)currentAccount:(NSError * __autoreleasing *)error;
 
 /*!
-    Signs in a user using MSAL.
+    Signs in an account using MSAL.
  */
-- (void)signInUser:(void (^)(MSALUser *user, NSString *token, NSError *error))signInBlock;
+- (void)signInAccount:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock;
 
 /*!
-    Removes MSAL user state from the application.
+    Removes MSAL account state from the application.
  */
 
 - (void)signOut;
 
 /*!
-    Acquires a token to use against graph for the current user
+    Acquires a token to use against graph for the current account
  */
-- (void)acquireTokenSilentForCurrentUser:(NSArray<NSString *> *)scopes
-                         completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenSilentForCurrentAccount:(NSArray<NSString *> *)scopes
+                            completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 /*!
-    Acquires a token using an interactive flow for the current user. Used if
+    Acquires a token using an interactive flow for the current account. Used if
     the library returns MSALErrorInteractionRequired.
  */
-- (void)acquireTokenInteractiveForCurrentUser:(NSArray<NSString *> *)scopes
-                              completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenInteractiveForCurrentAccount:(NSArray<NSString *> *)scopes
+                                 completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 
 /*!
     Acquires a token first with the silent flow, falling back to a interactive call if required.
  */
-- (void)acquireTokenForCurrentUser:(NSArray<NSString *> *)scopes
-                   completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenForCurrentAccount:(NSArray<NSString *> *)scopes
+                      completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 @end

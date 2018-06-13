@@ -70,7 +70,9 @@
                               @"name" : name,
                               @"preferred_username" : preferredUsername,
                               @"tid" : tid ? tid : [self defaultTenantId],
-                              @"oid" : [self defaultUniqueId]} msidBase64UrlJson];
+                              @"oid" : [self defaultUniqueId],
+                              @"ver": @"2.0"
+                              } msidBase64UrlJson];
     return [NSString stringWithFormat:@"%@.%@.%@", idTokenp1, idTokenp2, idTokenp1];
 }
 

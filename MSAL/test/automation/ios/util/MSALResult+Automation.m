@@ -37,7 +37,7 @@
              @"tenantId" : (self.tenantId) ? self.tenantId : @"",
              @"expires_on" : [NSString stringWithFormat:@"%f", self.expiresOn.timeIntervalSince1970],
              @"id_token" : self.idToken ? self.idToken : @"",
-             @"user" : self.user ? [self.user itemAsDictionary] : @""};
+             @"user" : self.account ? [self.account itemAsDictionary] : @""};
 }
 
 @end

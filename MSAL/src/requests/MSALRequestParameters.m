@@ -29,7 +29,7 @@
 #import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
 #import "MSALAuthority.h"
-#import "MSIDRequestParameters.h"
+#import "MSIDConfiguration.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 
 @implementation MSALRequestParameters
@@ -63,14 +63,14 @@
     return YES;
 }
 
-- (MSIDRequestParameters *)msidParameters
+- (MSIDConfiguration *)msidConfiguration
 {
-    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:self.unvalidatedAuthority
-                                                                                    redirectUri:self.redirectUri.absoluteString
-                                                                                       clientId:self.clientId
-                                                                                         target:self.scopes.msidToString];
+    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:self.unvalidatedAuthority
+                                                                 redirectUri:self.redirectUri.absoluteString
+                                                                    clientId:self.clientId
+                                                                      target:self.scopes.msidToString];
     
-    return requestParameters;
+    return config;
 }
 
 @end

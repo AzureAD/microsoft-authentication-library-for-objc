@@ -76,7 +76,7 @@ class SamplePhotoUtil {
         UserDefaults.standard.removeObject(forKey: kLastPhotoCheckKey)
         currentUserPhoto = nil
         
-        if let _ = SampleMSALUtil.shared.currentUserIdentifier {
+        if let _ = SampleMSALUtil.shared.currentAccountIdentifier {
             
             guard let imagePath = cachedImagePath() else {
                 print("User is not signed in. There is nothing to delete")
@@ -103,7 +103,7 @@ fileprivate extension SamplePhotoUtil {
     }
     
     func cachedImagePath() -> String? {
-        if let currentUserIdentifier = SampleMSALUtil.shared.currentUserIdentifier {
+        if let currentUserIdentifier = SampleMSALUtil.shared.currentAccountIdentifier {
             return cachedImageDirectory() + "/" + currentUserIdentifier
         }
         return nil
@@ -160,7 +160,7 @@ fileprivate extension SamplePhotoUtil {
         // not be blocked on not having consent for edge features.
         let scopesRequired = [GraphScopes.UserRead.rawValue];
         
-        SampleMSALUtil.shared.acquireTokenForCurrentUser(forScopes: scopesRequired) {
+        SampleMSALUtil.shared.acquireTokenForCurrentAccount(forScopes: scopesRequired) {
             (token, error) in
             
             guard let accessToken = token else {

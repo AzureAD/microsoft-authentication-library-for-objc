@@ -25,25 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALUser+Automation.h"
-#import "MSIDClientInfo.h"
-#import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 
-@implementation MSALAccount (Automation)
+@interface MSALAccountId ()
 
-- (NSDictionary *)itemAsDictionary
-{
-    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [resultDict setValue:self.username forKey:@"username"];
-    [resultDict setValue:self.name forKey:@"name"];
-    [resultDict setValue:self.homeAccountId forKey:@"home_account_id"];
-    [resultDict setValue:self.localAccountId forKey:@"local_account_id"];
-    [resultDict setValue:self.homeAccountId.objectId forKey:@"homeAccountId.objectId"];
-    [resultDict setValue:self.homeAccountId.tenantId forKey:@"homeAccountId.tenantId"];
-    [resultDict setValue:self.environment forKey:@"environment"];
-    
-    return resultDict;
-}
+- (instancetype)initWithHomeAccountIdentifier:(NSString *)identifier
+                                          uid:(NSString *)uid
+                                         utid:(NSString *)utid;
+
+- (instancetype)initWithLocalAccountIdentifier:(NSString *)identifier
+                                      objectId:(NSString *)objectId
+                                      tenantId:(NSString *)tenantId;
 
 @end

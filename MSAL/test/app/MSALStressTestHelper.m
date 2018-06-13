@@ -31,9 +31,11 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDAccessToken.h"
 #import "MSIDAccount.h"
+#import "MSIDAccountCredentialCache.h"
 
 @implementation MSALStressTestHelper
 
@@ -42,16 +44,15 @@ static BOOL s_runningTest = NO;
 
 #pragma mark - Helpers
 
-+ (void)expireAllTokensWithClientId:(NSString *)clientId
++ (void)expireAllAccessTokens
 {
-    __auto_type cache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    __auto_type tokens = [cache getAllTokensOfType:MSIDTokenTypeAccessToken withClientId:clientId context:nil error:nil];
+    MSIDAccountCredentialCache *cache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    NSArray<MSIDCredentialCacheItem *> *accessTokens = [cache getAllCredentialsWithType:MSIDAccessTokenType context:nil error:nil];
 
-    for (MSIDAccessToken *token in tokens)
+    for (MSIDCredentialCacheItem *token in accessTokens)
     {
-        __auto_type account = [[MSIDAccount alloc] initWithLegacyUserId:nil uniqueUserId:token.uniqueUserId];
         token.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-        [cache saveAccessToken:token account:account context:nil error:nil];
+        [cache saveCredential:token context:nil error:nil];
     }
 }
 
@@ -62,7 +63,7 @@ static BOOL s_runningTest = NO;
                                     application:(MSALPublicClientApplication *)application
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSArray<MSALUser *> *users = [application users:nil];
+    NSArray<MSALAccount *> *users = [application accounts:nil];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
@@ -75,7 +76,7 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
-                MSALUser *user = users[userIndex];
+                MSALAccount *account = users[userIndex];
                 
                 if (multipleUsers)
                 {
@@ -83,14 +84,14 @@ static BOOL s_runningTest = NO;
                 }
                 
                 [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                                    user:user
+                                                 account:account
                                          completionBlock:^(MSALResult *result, NSError *error)
                  {
                      (void)error;
                      
-                     if (expireToken && result.user)
+                     if (expireToken && result.account)
                      {
-                         [self expireAllTokensWithClientId:application.clientId];
+                         [self expireAllAccessTokens];
                      }
                      
                      dispatch_semaphore_signal(sem);
@@ -113,16 +114,16 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 
-                NSArray *users = [application users:nil];
+                NSArray *accounts = [application accounts:nil];
                 
-                if (![users count])
+                if (![accounts count])
                 {
                     dispatch_semaphore_signal(sem);
                 }
                 else
                 {
                     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                                        user:users[0]
+                                                     account:accounts[0]
                                              completionBlock:^(MSALResult *result, NSError *error)
                      {
                          (void)error;

@@ -32,8 +32,8 @@
 #import "MSIDRequestContext.h"
 
 @class MSALAuthority;
-@class MSALUser;
-@class MSIDRequestParameters;
+@class MSALAccount;
+@class MSIDConfiguration;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
@@ -45,7 +45,7 @@
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
 @property NSString *prompt;
-@property MSALUser *user;
+@property MSALAccount *account;
 @property MSALTelemetryApiId apiId;
 @property NSDictionary<NSString *, NSString *> *sliceParameters;
 
@@ -55,7 +55,7 @@
 @property NSString *telemetryRequestId;
 @property NSURLSession *urlSession;
 
-@property (retain, nonatomic, readonly) MSIDRequestParameters *msidParameters;
+@property (retain, nonatomic, readonly) MSIDConfiguration *msidConfiguration;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

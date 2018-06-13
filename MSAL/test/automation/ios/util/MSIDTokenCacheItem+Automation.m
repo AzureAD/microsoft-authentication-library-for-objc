@@ -27,13 +27,13 @@
 
 #import "MSIDTokenCacheItem+Automation.h"
 #import "MSALUser+Automation.h"
-#import "MSIDAADV2IdTokenWrapper.h"
+#import "MSIDAADV2IdTokenClaims.h"
 
-@implementation MSIDTokenCacheItem (Automation)
+@implementation MSIDCredentialCacheItem (Automation)
 
 - (NSDictionary *)itemAsDictionary
 {
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:self.idToken];
+    MSIDAADV2IdTokenClaims *idToken = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:self.secret];
     NSMutableDictionary *resultDict = [[self jsonDictionary] mutableCopy];
     [resultDict setValue:idToken.tenantId forKey:@"tenant_id"];
     

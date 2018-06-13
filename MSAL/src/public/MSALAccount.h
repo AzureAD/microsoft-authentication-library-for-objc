@@ -25,25 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALUser+Automation.h"
-#import "MSIDClientInfo.h"
-#import "MSALAccount+Internal.h"
-#import "MSALAccountId.h"
+#import <Foundation/Foundation.h>
 
-@implementation MSALAccount (Automation)
+@class MSALAccountId;
 
-- (NSDictionary *)itemAsDictionary
-{
-    NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
-    [resultDict setValue:self.username forKey:@"username"];
-    [resultDict setValue:self.name forKey:@"name"];
-    [resultDict setValue:self.homeAccountId forKey:@"home_account_id"];
-    [resultDict setValue:self.localAccountId forKey:@"local_account_id"];
-    [resultDict setValue:self.homeAccountId.objectId forKey:@"homeAccountId.objectId"];
-    [resultDict setValue:self.homeAccountId.tenantId forKey:@"homeAccountId.tenantId"];
-    [resultDict setValue:self.environment forKey:@"environment"];
-    
-    return resultDict;
-}
+@interface MSALAccount : NSObject <NSCopying>
+
+/*!
+ The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ */
+@property (readonly) NSString *username;
+
+/*!
+ Unique identifier of the account in the home directory.
+ */
+@property (readonly) MSALAccountId *homeAccountId;
+
+/*!
+ Host part of the authority string used for authentication.
+ */
+@property (readonly) NSString *environment;
 
 @end
+

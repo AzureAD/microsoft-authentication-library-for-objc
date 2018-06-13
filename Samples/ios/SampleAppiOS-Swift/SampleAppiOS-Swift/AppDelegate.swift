@@ -44,7 +44,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let initialViewController: UIViewController
         do {
-            try SampleMSALUtil.shared.currentUser()
+            try SampleMSALUtil.shared.currentAccount()
             initialViewController = mainVC()
             
         } catch {
