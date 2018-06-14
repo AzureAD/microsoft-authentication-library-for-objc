@@ -31,10 +31,12 @@
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDSharedTokenCache.h"
-#import "MSALUser+Internal.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSALAccount+Internal.h"
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDConfiguration.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALSilentRequest()
 
@@ -46,7 +48,7 @@
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
-              tokenCache:(MSIDSharedTokenCache *)tokenCache
+              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError *__autoreleasing  _Nullable *)error;
 {
     if (!(self = [super initWithParameters:parameters
@@ -64,21 +66,21 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(_parameters.user, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
+    CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorUserRequired, @"user parameter cannot be nil");
     
-    MSIDRequestParameters *msidParameters = _parameters.msidParameters;
+    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     
     if (!_forceRefresh)
     {
         NSError *error = nil;
-        MSIDAccessToken *accessToken = [self.tokenCache getATForAccount:_parameters.user.account
-                                                          requestParams:msidParameters
-                                                                context:_parameters
-                                                                  error:&error];
+        MSIDAccessToken *accessToken = [self.tokenCache getAccessTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                                   configuration:msidConfiguration
+                                                                         context:_parameters
+                                                                           error:&error];
         
         if (!accessToken)
         {
-            if (error == nil && !msidParameters.authority)
+            if (error == nil && !msidConfiguration.authority)
             {
                 error = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorNoAccessTokensFound,
                                          @"Failed to find any access tokens matching user and client ID in cache, and we have no authority to use.");
@@ -96,28 +98,43 @@
         
         if (accessToken && !accessToken.isExpired)
         {
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken];
+            MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                           configuration:msidConfiguration
+                                                                 context:_parameters
+                                                                   error:&error];
+
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [event setUser:result.user];
+            [event setUser:result.account];
             [self stopTelemetryEvent:event error:nil];
 
             completionBlock(result, nil);
             return;
         }
         
-        if (!msidParameters.authority)
+        if (!msidConfiguration.authority)
         {
-            msidParameters.authority = accessToken.authority;
+            msidConfiguration.authority = accessToken.authority;
         }
         
-        _parameters.unvalidatedAuthority = msidParameters.authority;
+        _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
-    
-    self.refreshToken = [self.tokenCache getRTForAccount:_parameters.user.account
-                                           requestParams:msidParameters
-                                                 context:_parameters
-                                                   error:nil];
+
+    NSError *msidError = nil;
+
+    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+                                                           familyId:nil
+                                                      configuration:msidConfiguration
+                                                            context:_parameters
+                                                              error:&msidError];
+
+    if (msidError)
+    {
+        NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        completionBlock(nil, msalError);
+        return;
+    }
     
     CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorAuthorizationFailed, @"No token matching arguments found in the cache")
 

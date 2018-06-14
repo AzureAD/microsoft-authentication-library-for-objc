@@ -127,8 +127,8 @@ static NSDateFormatter *s_df = nil;
         return;
     }
     
-    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentUser:@[@"Calendars.Read"]
-                                            completionBlock:^(NSString *token, NSError *error)
+    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentAccount:@[@"Calendars.Read"]
+                                               completionBlock:^(NSString *token, NSError *error)
      {
          if (error)
          {

@@ -36,7 +36,7 @@
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
-              tokenCache:(MSIDSharedTokenCache *)tokenCache
+              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError *__autoreleasing *)error;
 
 @end

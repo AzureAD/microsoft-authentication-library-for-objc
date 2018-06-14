@@ -27,7 +27,7 @@
 
 #import "MSIDTestURLResponse.h"
 
-@class MSALUser;
+@class MSALAccount;
 
 @interface MSIDTestURLResponse (MSAL)
 
@@ -40,7 +40,7 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
-                                        user:(MSALUser *)user;
+                                        user:(MSALAccount *)user;
 
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority

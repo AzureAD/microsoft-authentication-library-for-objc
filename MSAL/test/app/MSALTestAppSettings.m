@@ -23,6 +23,7 @@
 
 #import "MSALTestAppSettings.h"
 #import "MSALAuthority.h"
+#import "MSALAccountId.h"
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
@@ -51,11 +52,13 @@ static NSArray<NSString *> *s_scopes_available = nil;
     for (NSString *host in trustedHosts)
     {
         [authorities addObject:[NSString stringWithFormat:@"https://%@/common", host]];
+        [authorities addObject:[NSString stringWithFormat:@"https://%@/organizations", host]];
+        [authorities addObject:[NSString stringWithFormat:@"https://%@/consumers", host]];
     }
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read"];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default"];
 
 }
 
@@ -78,9 +81,9 @@ static NSArray<NSString *> *s_scopes_available = nil;
     return s_authorities;
 }
 
-- (MSALUser *)userForUserIdentifier:(NSString *)userIdentifier
+- (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
 {
-    if (!userIdentifier)
+    if (!accountIdentifier)
     {
         return nil;
     }
@@ -95,26 +98,9 @@ static NSArray<NSString *> *s_scopes_available = nil;
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
         return nil;
     }
-    
-    NSArray<MSALUser *> *users = [application users:nil];
-    if (!users)
-    {
-        MSID_LOG_ERROR(nil, @"no users came back from the application");
-        return nil;
-    }
-    
-    for (MSALUser *user in users)
-    {
-        if ([userIdentifier isEqualToString:user.userIdentifier])
-        {
-            return user;
-        }
-    }
-    
-    MSID_LOG_WARN(nil, @"failed to find user identifier among users.");
-    MSID_LOG_WARN_PII(nil, @"failed to find user identifier \"%@\" among users.", userIdentifier);
-    
-    return nil;
+
+    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    return account;
 }
 
 - (void)readFromDefaults
@@ -129,8 +115,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
     _validateAuthority = validate ? [validate boolValue] : YES;
-    _currentUser = [self userForUserIdentifier:[settings objectForKey:@"currentUser"]];
-    
+    _currentAccount = [self accountForAccountHomeIdentifier:[settings objectForKey:@"currentHomeAccountId"]];
 }
 
 - (void)setValue:(id)value
@@ -167,11 +152,10 @@ static NSArray<NSString *> *s_scopes_available = nil;
     _validateAuthority = validateAuthority;
 }
 
-- (void)setCurrentUser:(MSALUser *)currentUser
+- (void)setCurrentAccount:(MSALAccount *)currentAccount
 {
-    [self setValue:currentUser.userIdentifier
-            forKey:@"currentUser"];
-    _currentUser = currentUser;
+    [self setValue:currentAccount.homeAccountId.identifier forKey:@"currentHomeAccountId"];
+    _currentAccount = currentAccount;
 }
 
 + (NSArray<NSString *> *)availableScopes

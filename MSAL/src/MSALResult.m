@@ -31,8 +31,9 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDClientInfo.h"
 #import "MSALIdToken.h"
-#import "MSIDAADV2IdTokenWrapper.h"
-#import "MSALUser+Internal.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdToken.h"
 
 @implementation MSALResult
 
@@ -43,7 +44,7 @@
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
                              tenantId:(NSString *)tenantId
-                                 user:(MSALUser *)user
+                              account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
@@ -53,7 +54,7 @@
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
     result->_tenantId = tenantId;
-    result->_user = user;
+    result->_account = account;
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
@@ -62,17 +63,24 @@
 }
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
+                              idToken:(MSIDIdToken *)idToken
 {
-    __auto_type idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithRawIdToken:accessToken.idToken];
-    MSALUser *user = [[MSALUser alloc] initWithIdToken:idToken
-                                            clientInfo:accessToken.clientInfo environment:accessToken.authority.msidHostWithPortIfNecessary];
+    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
+                                                                 name:idTokenClaims.name
+                                                        homeAccountId:accessToken.homeAccountId
+                                                       localAccountId:idTokenClaims.objectId
+                                                          environment:accessToken.authority.msidHostWithPortIfNecessary
+                                                             tenantId:idTokenClaims.tenantId
+                                                           clientInfo:accessToken.clientInfo];
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                               tenantId:accessToken.authority.msidTenant
-                                  user:user
-                               idToken:accessToken.idToken
-                              uniqueId:idToken.uniqueId
+                               account:account
+                               idToken:idToken.rawIdToken
+                              uniqueId:idTokenClaims.uniqueId
                                 scopes:[accessToken.scopes array]];
 }
 

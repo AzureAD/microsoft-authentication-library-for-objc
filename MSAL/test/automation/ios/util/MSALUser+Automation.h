@@ -27,7 +27,7 @@
 
 #import <MSAL/MSAL.h>
 
-@interface MSALUser (Automation)
+@interface MSALAccount (Automation)
 
 - (NSDictionary *)itemAsDictionary;
 

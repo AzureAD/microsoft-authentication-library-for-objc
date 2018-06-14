@@ -110,10 +110,16 @@
 - (void)refresh
 {
     [_tableView reloadData];
-    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
-    [_tableView selectRowAtIndexPath:indexPath
-                            animated:NO
-                      scrollPosition:UITableViewScrollPositionNone];
+
+    NSInteger currentRow = [self currentRow];
+
+    if (currentRow != -1)
+    {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self currentRow] inSection:0];
+        [_tableView selectRowAtIndexPath:indexPath
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionNone];
+    }
 }
 
 - (NSInteger)numberOfRows

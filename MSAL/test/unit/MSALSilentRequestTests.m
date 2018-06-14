@@ -44,23 +44,22 @@
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse.h"
 #import "NSDictionary+MSIDTestUtil.h"
-#import "MSIDSharedTokenCache.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDTestTokenResponse.h"
-#import "MSIDTestRequestParams.h"
+#import "MSIDTestConfiguration.h"
 #import "MSIDAADV2TokenResponse.h"
 #import "MSIDAccount.h"
 #import "MSIDAccessToken.h"
 #import "MSIDAADOauth2Factory.h"
-#import "MSIDAADV2IdTokenWrapper.h"
-#import "MSALUser+Internal.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
 @property (nonatomic) MSIDClientInfo *clientInfo;
-@property (nonatomic) MSIDSharedTokenCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 
 @end
@@ -74,10 +73,8 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-    self.tokenCache = [[MSIDSharedTokenCache alloc] initWithPrimaryCacheAccessor:self.tokenCacheAccessor otherCacheAccessors:nil];
-    
-    [self.tokenCache clearWithContext:nil error:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
     
     [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
                            class:[MSALAuthority class]
@@ -114,7 +111,7 @@
     parameters.correlationId = correlationId;
     
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
     
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -134,7 +131,7 @@
     parameters.correlationId = correlationId;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -170,11 +167,10 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
+    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
 
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -193,15 +189,15 @@
                                                                                         error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:response
-                                                  context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:response
+                                                         context:nil
+                                                           error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -236,13 +232,20 @@
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
-
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
 
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
@@ -262,8 +265,8 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                            configuration:parameters.msidConfiguration
                                                  response:msidResponse
                                                   context:nil
                                                     error:nil];
@@ -298,7 +301,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -334,13 +337,21 @@
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
 
     //store at & rt in cache
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
@@ -358,11 +369,11 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:msidResponse
-                                                  context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:msidResponse
+                                                         context:nil
+                                                           error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -396,7 +407,7 @@
     parameters.unvalidatedAuthority = nil;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -431,12 +442,19 @@
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
 
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
@@ -455,15 +473,15 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:msidResponse
-                                                  context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:msidResponse
+                                                         context:nil
+                                                           error:nil];
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -497,13 +515,20 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
-
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
 
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
@@ -523,17 +548,16 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:msidResponse
-                                                  context:nil
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:msidResponse
+                                                            context:nil
                                                     error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
-    result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
+    result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -566,7 +590,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -600,15 +624,21 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
-
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -643,12 +673,20 @@
     parameters.correlationId = correlationId;
     parameters.urlSession = [MSIDTestURLSession createMockSession];
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
 
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
@@ -666,18 +704,17 @@
                                                              }
                                                      error:nil];
     
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:msidResponse
-                                                  context:nil
-                                                    error:nil];
+    MSIDAADOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:msidResponse
+                                                         context:nil
+                                                           error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
-    result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
+    result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -701,7 +738,7 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
                                              }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
@@ -709,7 +746,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -747,10 +784,18 @@
     parameters.urlSession = [MSIDTestURLSession createMockSession];
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    MSIDAADV2IdTokenWrapper *idToken = [[MSIDAADV2IdTokenWrapper alloc] initWithJSONDictionary:idTokenClaims error:nil];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.user = [[MSALUser alloc] initWithIdToken:idToken clientInfo:clientInfo environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
 
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
@@ -770,18 +815,17 @@
                                                      error:nil];
     
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                            requestParams:parameters.msidParameters
-                                                 response:msidResponse
-                                                  context:nil
-                                                    error:nil];
+    BOOL result = [self.tokenCacheAccessor saveTokensWithFactory:factory
+                                                   configuration:parameters.msidConfiguration
+                                                        response:msidResponse
+                                                         context:nil
+                                                           error:nil];
     XCTAssertTrue(result);
     
     // Delete AT.
-    MSIDAccount *account = [factory accountFromResponse:msidResponse request:parameters.msidParameters];
-    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse request:parameters.msidParameters];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
     
-    result = [self.tokenCache removeToken:accessToken forAccount:account context:nil error:nil];
+    result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
     XCTAssertTrue(result);
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
@@ -811,7 +855,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCache error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
