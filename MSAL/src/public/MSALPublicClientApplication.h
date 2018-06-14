@@ -61,12 +61,6 @@
 @property NSString *component;
 
 /*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
- */
-@property (nonatomic, readonly) NSString *keychainGroup;
-
-/*!
     Initialize a MSALPublicClientApplication with a given clientID
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
@@ -92,6 +86,13 @@
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error;
 
+
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
+ */
+@property (nonatomic, readonly) NSString *keychainGroup;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID
@@ -124,6 +125,7 @@
          keychainGroup:(NSString *)keychainGroup
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error;
+#endif
 
 /*!
     Returns an array of accounts visible to this application
