@@ -43,6 +43,7 @@
 #import "MSIDLegacyRefreshToken.h"
 #import "MSIDLegacyAccessToken.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -75,8 +76,9 @@
     [self setExtendedLayoutIncludesOpaqueBars:NO];
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
 
-    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
-    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
+    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
     return self;
@@ -282,16 +284,17 @@
     switch (token.credentialType) {
         case MSIDRefreshTokenType:
         {
+            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+
             if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.msidTenant, refreshToken.clientId];
             }
             else
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.msidTenant, refreshToken.familyId];
             }
 
-            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
             if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
             {
                 cell.textLabel.textColor = [UIColor orangeColor];

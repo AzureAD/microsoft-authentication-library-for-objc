@@ -44,6 +44,7 @@
 #import "MSIDRefreshToken.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -87,8 +88,9 @@
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
 
-    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
-    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
+    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
     self.accountCredentialCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
 }
 

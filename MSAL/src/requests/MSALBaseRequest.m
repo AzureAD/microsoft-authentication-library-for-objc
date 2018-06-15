@@ -52,6 +52,7 @@ static MSALScopes *s_reservedScopes = nil;
 @interface MSALBaseRequest()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nullable, nonatomic) MSIDAADV2Oauth2Factory *oauth2Factory;
 
 @end
 
@@ -94,6 +95,7 @@ static MSALScopes *s_reservedScopes = nil;
     }
     
     _tokenCache = tokenCache;
+    _oauth2Factory = [MSIDAADV2Oauth2Factory new];
     
     return self;
 }
@@ -209,8 +211,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
+         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
 
          if (!tokenResponse)
          {
@@ -220,7 +221,7 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
          
-         if (![factory verifyResponse:tokenResponse context:nil error:&error])
+         if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&error])
          {
              [self stopTelemetryEvent:event error:error];
              
@@ -238,11 +239,10 @@ static MSALScopes *s_reservedScopes = nil;
 
          MSIDConfiguration *configuration = _parameters.msidConfiguration;
 
-         BOOL isSaved = [self.tokenCache saveTokensWithFactory:factory
-                                                 configuration:configuration
-                                                      response:tokenResponse
-                                                       context:_parameters
-                                                         error:&error];
+         BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                            response:tokenResponse
+                                                             context:_parameters
+                                                               error:&error];
          
          if (!isSaved)
          {
@@ -250,8 +250,8 @@ static MSALScopes *s_reservedScopes = nil;
              return;
          }
 
-         MSIDAccessToken *accessToken = [factory accessTokenFromResponse:tokenResponse configuration:configuration];
-         MSIDIdToken *idToken = [factory idTokenFromResponse:tokenResponse configuration:configuration];
+         MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
+         MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
          
          MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
          

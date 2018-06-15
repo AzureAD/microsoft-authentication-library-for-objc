@@ -32,6 +32,7 @@
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;
 @class MSIDDefaultTokenCacheAccessor;
+@class MSIDAADV2Oauth2Factory;
 
 @interface MSALBaseRequest : NSObject
 {
@@ -45,6 +46,7 @@
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
 @property (nonnull, readonly) MSALRequestParameters *parameters;
 @property (nullable, nonatomic, readonly) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nullable, nonatomic, readonly) MSIDAADV2Oauth2Factory *oauth2Factory;
 
 /* Returns the complete set of scopes to be sent out with a token request */
 - (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;
