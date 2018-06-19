@@ -138,6 +138,7 @@
             errorCode == MSIDErrorInvalidRequest ||
             errorCode == MSIDErrorInvalidClient ||
             errorCode == MSIDErrorInvalidGrant ||
+            errorCode == MSIDErrorInvalidScope ||
             errorCode == MSIDErrorInvalidParameter)
         {
             domain = MSIDOAuthErrorDomain;

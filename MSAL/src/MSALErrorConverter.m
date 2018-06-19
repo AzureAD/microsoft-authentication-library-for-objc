@@ -64,6 +64,7 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInvalidRequest) :@(MSALErrorInvalidRequest),
                                    @(MSIDErrorInvalidClient) : @(MSALErrorInvalidClient),
                                    @(MSIDErrorInvalidGrant) : @(MSALErrorInvalidParameter),
+                                   @(MSIDErrorInvalidScope) : @(MSALErrorInvalidParameter),
                                    @(MSIDErrorInvalidParameter) : @(MSALErrorInvalidParameter),
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
