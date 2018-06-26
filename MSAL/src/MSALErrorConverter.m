@@ -57,7 +57,7 @@ static NSDictionary *s_userInfoKeyMapping;
                                    // Interactive flow
                                    @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
-                                   @(MSIDErrorSessionCanceledProgramatically) : @(MSALErrorSessionCanceled),
+                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorSessionCanceled),
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
