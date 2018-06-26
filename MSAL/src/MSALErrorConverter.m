@@ -44,29 +44,35 @@ static NSDictionary *s_userInfoKeyMapping;
     
     s_errorCodeMapping = @{
                            MSIDErrorDomain:@{
+                                   // General
                                    @(MSIDErrorInternal) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
-                                   @(MSIDErrorAmbiguousAuthority) : @(MSALErrorAmbiguousAuthority),
-                                   @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
+                                   @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal),
+                                   // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
-                                   @(MSIDErrorTokenCacheItemFailure) : @(MSALErrorTokenCacheItemFailure),
-                                   @(MSIDErrorWrapperCacheFailure) : @(MSALErrorWrapperCacheFailure),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
-                                   @(MSIDErrorCacheVersionMismatch) : @(MSALErrorInternal),
-                                   @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
-                                   @(MSIDErrorDeveloperAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
-                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
-                                   @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
-                                   @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal)
+                                   // Authority Validation
+                                   @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
+                                   // Interactive flow
+                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
+                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorSessionCanceled),
+                                   @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
+                                   @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
+                                   @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
                                    },
                            MSIDOAuthErrorDomain:@{
-                                   @(MSIDErrorInvalidRequest) :@(MSALErrorInvalidRequest),
-                                   @(MSIDErrorInvalidClient) : @(MSALErrorInvalidClient),
-                                   @(MSIDErrorInvalidGrant) : @(MSALErrorInvalidParameter),
-                                   @(MSIDErrorInvalidParameter) : @(MSALErrorInvalidParameter),
-                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
+                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorRefreshTokenRejected),
+                                   @(MSIDErrorServerInvalidRequest) :@(MSALErrorInvalidRequest),
+                                   @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
+                                   @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
+                                   @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
+                                   @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect)
                                    }
                            };
     

@@ -92,7 +92,7 @@
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
     
-    NSError *msidError = MSIDCreateError(MSIDErrorDomain,
+    NSError *msidError = MSIDCreateError(MSIDOAuthErrorDomain,
                                          errorCode,
                                          errorDescription,
                                          oauthError,
@@ -126,29 +126,20 @@
  */
 - (void)testErrorConversion_whenErrorConverterInitialized_shouldMapAllMSIDErrors
 {
-    NSInteger errorCode = MSIDErrorCodeFirst;
+    NSDictionary *domainsAndCodes = MSIDErrorDomainsAndCodes();
     
-    while (errorCode >= MSIDErrorCodeLast)
+    for (NSString *domain in domainsAndCodes)
     {
-        // All error codes in MSIDError.h are of MSIDErrorDomain except that,
-        // the following six are of MSIDOAuthErrorDomain
-        NSString *domain = MSIDErrorDomain;
-        if (errorCode == MSIDErrorServerRefreshTokenRejected ||
-            errorCode == MSIDErrorServerOauth ||
-            errorCode == MSIDErrorInvalidRequest ||
-            errorCode == MSIDErrorInvalidClient ||
-            errorCode == MSIDErrorInvalidGrant ||
-            errorCode == MSIDErrorInvalidParameter)
+        NSArray *codes = domainsAndCodes[domain];
+        for (NSNumber *code in codes)
         {
-            domain = MSIDOAuthErrorDomain;
+            MSIDErrorCode errorCode = [code integerValue];
+            NSError *msidError = MSIDCreateError(domain, errorCode, @"test", nil, nil, nil, nil, nil);
+            NSError *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+            
+            XCTAssertNotEqual(error.code, errorCode);
+            
         }
-        
-        NSError *msidError = MSIDCreateError(domain, errorCode, @"test", nil, nil, nil, nil, nil);
-        NSError *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
-        
-        XCTAssertNotEqual(error.code, errorCode);
-        
-        errorCode--;
     }
 }
 
