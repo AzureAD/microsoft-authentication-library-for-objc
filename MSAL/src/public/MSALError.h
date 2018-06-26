@@ -191,5 +191,14 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorInvalidResponse = -42600,
     
+    /*!
+     Server returned a refresh token reject response
+     */
+    MSALErrorRefreshTokenRejected = -42601,
+    
+    /*!
+     Server tried to redirect to non http URL
+     */
+    MSALErrorNonHttpsRedirect = -42602,
 };
 

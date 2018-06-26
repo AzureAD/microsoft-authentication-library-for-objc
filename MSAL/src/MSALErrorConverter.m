@@ -66,13 +66,13 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
-                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorRefreshTokenRejected),
                                    @(MSIDErrorServerInvalidRequest) :@(MSALErrorInvalidRequest),
                                    @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
                                    @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
                                    @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
-                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorInternal)
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect)
                                    }
                            };
     
