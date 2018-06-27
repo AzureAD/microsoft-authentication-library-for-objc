@@ -155,7 +155,7 @@ static MSALScopes *s_reservedScopes = nil;
         upn = _parameters.loginHint;
     }
     
-    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority
+    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority.url
                               userPrincipalName:upn
                                        validate:_parameters.validateAuthority
                                         context:_parameters
@@ -275,7 +275,7 @@ static MSALScopes *s_reservedScopes = nil;
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
     [event setAuthorityType:_authority.authorityType];
-    [event setAuthority:_parameters.unvalidatedAuthority.absoluteString];
+    [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
     [event setClientId:_parameters.clientId];
     
     // Login hint is an optional parameter and might not be present

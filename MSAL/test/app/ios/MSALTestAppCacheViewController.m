@@ -44,6 +44,7 @@
 #import "MSIDLegacyAccessToken.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAuthority.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -276,7 +277,7 @@
     if (!token)
     {
         MSIDAccount *account = _accounts[indexPath.section];
-        cell.textLabel.text = account.authority.msidHostWithPortIfNecessary;
+        cell.textLabel.text = account.authority.url.msidHostWithPortIfNecessary;
         cell.backgroundColor = [UIColor colorWithRed:0.27 green:0.43 blue:0.7 alpha:1.0];
         return cell;
     }
@@ -288,11 +289,11 @@
 
             if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.msidTenant, refreshToken.clientId];
+                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.url.msidTenant, refreshToken.clientId];
             }
             else
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.msidTenant, refreshToken.familyId];
+                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.url.msidTenant, refreshToken.familyId];
             }
 
             if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
@@ -304,7 +305,7 @@
         case MSIDAccessTokenType:
         {
             MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
-            cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.authority.msidTenant];
+            cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.authority.url.msidTenant];
 
             if (accessToken.isExpired)
             {
@@ -314,7 +315,7 @@
         }
         case MSIDIDTokenType:
         {
-            cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.authority.msidTenant];
+            cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.authority.url.msidTenant];
             break;
         }
         case MSIDLegacySingleResourceTokenType:

@@ -32,6 +32,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDAccount.h"
 #import "MSALAccountId.h"
+#import "MSIDAADAuthority.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -56,7 +57,9 @@
     msidAccount.username = @"user@contoso.com";
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"localoid";
-    msidAccount.authority = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.authority = authority;
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
                                         @"utid" : @"utid"
                                         };

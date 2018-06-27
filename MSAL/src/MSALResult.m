@@ -34,6 +34,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSIDAuthority.h"
 
 @implementation MSALResult
 
@@ -78,13 +79,13 @@
                                                                  name:idTokenClaims.name
                                                         homeAccountId:accessToken.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
-                                                          environment:accessToken.authority.msidHostWithPortIfNecessary
+                                                          environment:accessToken.authority.url.msidHostWithPortIfNecessary
                                                              tenantId:idTokenClaims.tenantId
                                                            clientInfo:accessToken.clientInfo];
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
-                              tenantId:accessToken.authority.msidTenant
+                              tenantId:accessToken.authority.url.msidTenant
                                account:account
                                idToken:idToken.rawIdToken
                               uniqueId:idTokenClaims.uniqueId

@@ -96,8 +96,8 @@
                                   name:account.name
                          homeAccountId:account.homeAccountId
                         localAccountId:account.localAccountId
-                           environment:account.authority.msidHostWithPortIfNecessary
-                              tenantId:account.authority.msidTenant
+                           environment:account.authority.url.msidHostWithPortIfNecessary
+                              tenantId:account.authority.url.msidTenant
                             clientInfo:account.clientInfo];
 }
 

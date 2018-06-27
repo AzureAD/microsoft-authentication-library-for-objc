@@ -27,6 +27,8 @@
 
 #import "MSALTestAppAuthorityViewController.h"
 #import "MSALTestAppSettings.h"
+#import "MSIDAuthority.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALTestAppAuthorityViewController ()
 
@@ -34,8 +36,8 @@
 
 @implementation MSALTestAppAuthorityViewController
 {
-    NSMutableArray *_authorities;
-    NSMutableArray *_savedAuthorities;
+    NSMutableArray <MSIDAuthority *> *_authorities;
+    NSMutableArray <MSIDAuthority *> *_savedAuthorities;
 }
 
 + (instancetype)sharedController
@@ -57,7 +59,7 @@
         return nil;
     }
     
-    NSString *currentAuthority = MSALTestAppSettings.settings.authority;
+    MSIDAuthority *currentAuthority = MSALTestAppSettings.settings.authority;
     _authorities = [[MSALTestAppSettings authorities] mutableCopy];
     if (currentAuthority && ![_authorities containsObject:currentAuthority])
     {
@@ -96,7 +98,10 @@
     [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
 
-        NSString *authority = controller.textFields[0].text;
+        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityUrl = [[NSURL alloc] initWithString:controller.textFields[0].text];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        
         [self saveAuthority:authority];
     }]];
 
@@ -104,7 +109,7 @@
 
 }
 
-- (void)saveAuthority:(NSString *)authority
+- (void)saveAuthority:(MSIDAuthority *)authority
 {
     [_savedAuthorities addObject:authority];
     [[NSUserDefaults standardUserDefaults] setObject:_savedAuthorities forKey:@"saved_authorities"];
@@ -127,7 +132,8 @@
     {
         return @"(default)";
     }
-    return _authorities[row - 1];
+    
+    return _authorities[row - 1].url.absoluteString;
 }
 
 - (void)rowSelected:(NSInteger)row
@@ -145,7 +151,7 @@
 
 - (NSInteger)currentRow
 {
-    NSString *currentAuthority = MSALTestAppSettings.settings.authority;
+    MSIDAuthority *currentAuthority = MSALTestAppSettings.settings.authority;
     if (currentAuthority == nil)
     {
         return 0;
@@ -155,8 +161,8 @@
 
 + (NSString *)currentTitle
 {
-    NSString *currentAuthority = MSALTestAppSettings.settings.authority;
-    return currentAuthority ? currentAuthority : @"(default)";
+    MSIDAuthority *currentAuthority = MSALTestAppSettings.settings.authority;
+    return currentAuthority ? currentAuthority.url.absoluteString : @"(default)";
 }
 
 

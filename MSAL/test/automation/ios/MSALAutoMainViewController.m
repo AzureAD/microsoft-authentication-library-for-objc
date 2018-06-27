@@ -45,6 +45,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -133,12 +134,15 @@
 - (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
+    __auto_type authorityFactory = [MSIDAuthorityFactory new];
+    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     
     NSError *error = nil;
     
     MSALPublicClientApplication *clientApplication =
     [[MSALPublicClientApplication alloc] initWithClientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                authority:parameters[MSAL_AUTHORITY_PARAM]
+                                                authority:authority
                                                     error:&error];
     
     clientApplication.validateAuthority = validateAuthority;
@@ -286,8 +290,12 @@
             return;
         }
 
+        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];
@@ -314,9 +322,13 @@
         {
             return;
         }
+        
+        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];

@@ -53,6 +53,10 @@
 #import "MSALAccountId.h"
 #import "MSIDAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSIDAADAuthority.h"
+
+static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @interface MSALPublicClientApplication()
 
@@ -92,8 +96,8 @@
 }
 
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSString *)authority
-                 error:(NSError * __autoreleasing *)error
+             authority:(MSIDAuthority *)authority
+                 error:(NSError **)error
 {
     if (!(self = [super init]))
     {
@@ -104,13 +108,16 @@
     
     if (authority)
     {
-        _authority = [MSALAuthority checkAuthorityString:authority error:error];
+        _authority = authority;
         CHECK_RETURN_NIL(_authority);
     }
     else
     {
         // TODO: Rationalize our default authority behavior (#93)
-        _authority = [MSALAuthority defaultAuthority];
+        __auto_type factory = [MSIDAuthorityFactory new];
+        __auto_type authorityUrl = [[NSURL alloc] initWithString:s_defaultAuthorityUrlString];
+        
+        _authority = [factory authorityFromUrl:authorityUrl context:nil error:error];
     }
     
     CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
@@ -151,7 +158,7 @@
 {
     NSError *msidError = nil;
 
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:self.authority.msidHostWithPortIfNecessary
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:self.authority.url.msidHostWithPortIfNecessary
                                                                  clientId:self.clientId
                                                                  familyId:nil
                                                                   context:nil
@@ -318,7 +325,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSIDAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -378,7 +385,7 @@
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSIDAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -413,7 +420,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSIDAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
@@ -427,7 +434,7 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSIDAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
@@ -471,7 +478,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSIDAuthority *)authority
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -519,7 +526,7 @@
     {
         params.unvalidatedAuthority = _authority;
     }
-    else if (![params setAuthorityFromString:authority error:&error])
+    else if (![params setAuthorityFromString:authority.url.absoluteString error:&error])
     {
         block(nil, error);
         return;
@@ -550,29 +557,30 @@
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSIDAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    NSString *authorityString = authority;
-
-    if (!authorityString)
+    if (!authority)
     {
-        NSURL *defaultAuthority = self.authority;
+        authority = self.authority;
 
         /*
          In the acquire token silent call we assume developer wants to get access token for account's home tenant,
          unless they override the default authority in the public client application with a tenanted authority.
          */
-        if ([MSIDAuthority isTenantless:self.authority]
-            || [MSIDAuthority isConsumerInstanceURL:self.authority])
+        // TODO: fix
+        if ([authority isKindOfClass:MSIDAADAuthority.class])
         {
-            defaultAuthority = [MSIDAuthority cacheUrlForAuthority:self.authority tenantId:account.homeAccountId.tenantId];
+            __auto_type aadAuthority = (MSIDAADAuthority *)self.authority;
+            if ([aadAuthority.tenant isTenantless] || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers)
+            {
+                __auto_type authorityFactory = [MSIDAuthorityFactory new];
+                authority = [authorityFactory authorityFromUrl:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
+            }
         }
-
-        authorityString = defaultAuthority.absoluteString;
     }
 
     MSALRequestParameters* params = [MSALRequestParameters new];
@@ -605,16 +613,12 @@
         completionBlock(result, error);
     };
 
-    NSError *error = nil;
-    if (![params setAuthorityFromString:authorityString error:&error])
-    {
-        block(nil, error);
-        return;
-    }
+    params.unvalidatedAuthority = authority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
 
+    NSError *error = nil;
     MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
                                                                   forceRefresh:forceRefresh
                                                                     tokenCache:self.tokenCache
@@ -647,7 +651,7 @@
     NSError *msidError = nil;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
-                                            environment:self.authority.msidHostWithPortIfNecessary
+                                            environment:self.authority.url.msidHostWithPortIfNecessary
                                                clientId:self.clientId
                                                 context:nil
                                                   error:&msidError];

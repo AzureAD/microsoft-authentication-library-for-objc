@@ -388,7 +388,7 @@
 {
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     //NSURL* redirectUri = [settings redirectUri];
     
@@ -477,7 +477,7 @@
         return;
     }
     
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;
@@ -536,7 +536,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;
@@ -653,7 +653,7 @@
         return;
     }
     
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;

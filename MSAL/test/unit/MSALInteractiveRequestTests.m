@@ -50,6 +50,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSIDTestUtil.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -87,7 +88,7 @@
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -113,7 +114,7 @@
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -142,7 +143,7 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
     
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
@@ -188,7 +189,7 @@
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -224,7 +225,7 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
     
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     NSURL *authorizationUrl = [request authorizationUrl];
     XCTAssertNotNil(authorizationUrl);
@@ -272,7 +273,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -301,7 +302,7 @@
     XCTAssertNil(error);
     
     // Setting MSALAuthority ahead of time short-circuits authority validation for this test
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
@@ -428,7 +429,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -464,7 +465,7 @@
     XCTAssertNil(error);
     
     // Setting MSALAuthority ahead of time short-circuits authority validation for this test
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
@@ -603,7 +604,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -639,7 +640,7 @@
     XCTAssertNil(error);
     
     // Setting MSALAuthority ahead of time short-circuits authority validation for this test
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
@@ -760,7 +761,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
@@ -789,7 +790,7 @@
     XCTAssertNil(error);
     
     // Setting MSALAuthority ahead of time short-circuits authority validation for this test
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority.url];
     
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)

@@ -34,10 +34,11 @@
 @class MSALAuthority;
 @class MSALAccount;
 @class MSIDConfiguration;
+@class MSIDAuthority;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
-@property (nonatomic) NSURL *unvalidatedAuthority;
+@property (nonatomic) MSIDAuthority *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property MSALScopes *scopes;
 @property NSURL *redirectUri;

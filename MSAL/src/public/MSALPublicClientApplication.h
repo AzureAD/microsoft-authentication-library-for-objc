@@ -31,6 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
+@class MSIDAuthority;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -42,7 +43,7 @@
 @property BOOL validateAuthority;
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly) NSURL *authority;
+@property (readonly) MSIDAuthority *authority;
 
 /*! The client ID of the application, this should come from the app developer portal. */
 @property (readonly) NSString *clientId;
@@ -81,7 +82,7 @@
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
-    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
+    @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
@@ -91,7 +92,7 @@
                         not interested in the specific error pass in nil.
  */
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSString *)authority
+             authority:(MSIDAuthority *)authority
                  error:(NSError * __autoreleasing *)error;
 
 /*!
@@ -204,7 +205,7 @@
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
                                     it is of the form https://<instance/<tenant>, where <instance> is the
                                     directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                                     identifier within the directory itself (e.g. a domain associated to the
@@ -219,7 +220,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSIDAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -278,7 +279,7 @@
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -294,7 +295,7 @@
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSIDAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -324,7 +325,7 @@
                                     gauranteed to be included in the access token returned.
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -336,7 +337,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSIDAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
@@ -346,7 +347,7 @@
                                     can differ from the ones in the original call
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -361,7 +362,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSIDAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;

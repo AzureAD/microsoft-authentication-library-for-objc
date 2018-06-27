@@ -57,6 +57,8 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDB2CAuthority.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -92,9 +94,10 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
-    NSString *authority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
+    __auto_type authorityUrl = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msidUrl];
+    __auto_type authority = [[MSIDB2CAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:authority
+    [MSIDTestURLResponse oidcResponseForAuthority:authority.url.absoluteString
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:@"p=b2c_1_policy"];
     MSIDTestURLResponse *tokenResponse =
@@ -154,10 +157,10 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         
+
          [expectation fulfill];
      }];
-    
+
     [self waitForExpectations:@[expectation] timeout:1];
 }
 

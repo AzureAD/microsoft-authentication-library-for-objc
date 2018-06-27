@@ -42,6 +42,8 @@
 #import "MSALAccountId.h"
 #import "MSIDBaseToken.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSIDB2CAuthority.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -65,12 +67,12 @@
     [super tearDown];
 }
 
-- (void)setupURLSessionWithB2CAuthority:(NSString *)authority policy:(NSString *)policy
+- (void)setupURLSessionWithB2CAuthority:(MSIDAuthority *)authority policy:(NSString *)policy
 {
     NSString *query = [NSString stringWithFormat:@"p=%@", policy];
     
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:authority
+    [MSIDTestURLResponse oidcResponseForAuthority:authority.url.absoluteString
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:query];
     
@@ -100,7 +102,9 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     // Setup acquireToken with first policy (b2c_1_policy)
-    NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
+    NSURL *firstAuthorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy"];
+    __auto_type authorityFactory = [MSIDAuthorityFactory new];
+    __auto_type firstAuthority = [authorityFactory authorityFromUrl:firstAuthorityUrl context:nil error:nil];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
     
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
@@ -149,7 +153,8 @@
     }
     
     // Now acquiretoken call with second policy (b2c_2_policy)
-    NSString *secondAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy";
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy"];
+    __auto_type secondAuthority = [[MSIDB2CAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     // Override oidc and token responses for the second policy
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];

@@ -56,6 +56,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSIDTestUtil.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -104,7 +105,7 @@
     
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -124,7 +125,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -161,7 +162,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -170,7 +171,7 @@
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
+    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.url.msidHostWithPortIfNecessary tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
 
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -223,7 +224,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -325,7 +326,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -398,7 +399,7 @@
 
     [MSIDTestURLSession addResponse:response];
 
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/1234-5678-90abcdefg" authority];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
@@ -429,7 +430,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -501,7 +502,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -609,7 +610,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -657,7 +658,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -766,7 +767,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
