@@ -186,6 +186,7 @@
                                                                                          correlationId:_parameters.correlationId
                                                                                             enablePkce:YES];
     config.promptBehavior = MSALParameterStringForBehavior(_uiBehavior);
+    
     _webviewConfig = config;
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error) {
@@ -207,6 +208,7 @@
     {
         [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
                                                               oauth2Factory:_parameters.msidOAuthFactory
+                                                                    webview:_parameters.customWebview
                                                                     context:_parameters
                                                           completionHandler:webAuthCompletion];
     }

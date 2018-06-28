@@ -508,6 +508,7 @@
     params.urlSession = [MSALURLSession createMSALSession:params];
     
     params.webviewSelection = _webviewSelection;
+    params.customWebview = _customWebview;
     
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params

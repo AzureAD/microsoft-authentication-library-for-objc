@@ -35,6 +35,7 @@
 @class MSALAccount;
 @class MSIDConfiguration;
 @class MSIDOauth2Factory;
+@class WKWebView;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
@@ -51,6 +52,8 @@
 @property NSDictionary<NSString *, NSString *> *sliceParameters;
 
 @property MSALWebviewSelection webviewSelection;
+
+@property WKWebView *customWebview;
 
 #pragma mark MSALRequestContext properties
 @property NSUUID *correlationId;

@@ -73,10 +73,9 @@
 
 #endif
 
-/*! Gets or sets the webview, which will be used for the credentials.
-    If nil, the library will create a webview object
- when needed, leveraging the parentController property. */
-@property (weak) WKWebView *customWebview;
+/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewSelectionEmbedded.
+    For iOS, this will be ignored if MSALWebviewSelectionSystemDefault is chosen. */
+@property WKWebView *customWebview;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
