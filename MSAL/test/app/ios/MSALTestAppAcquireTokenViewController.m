@@ -54,6 +54,7 @@
     UIButton *_acquireSilentButton;
     
     UISegmentedControl *_uiBehavior;
+    UISegmentedControl *_webviewSelection;
     
     UITextView *_resultView;
     
@@ -152,8 +153,11 @@
     _uiBehavior.selectedSegmentIndex = 0;
     [layout addControl:_uiBehavior title:@"behavior"];
     
-    
-    
+    //_webviewSelection
+    _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[@"Embedded", @"System"]];
+    _webviewSelection.selectedSegmentIndex = 0;
+    [layout addControl:_webviewSelection title:@"webview"];
+
     UIButton *clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
     [clearCache addTarget:self action:@selector(clearCache:) forControlEvents:UIControlEventTouchUpInside];
@@ -403,6 +407,8 @@
     }
     
     application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    
+    application.webviewSelection = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewSelectionEmbedded : MSALWebviewSelectionSystemDefault;
     
     __block BOOL fBlockHit = NO;
     
