@@ -34,13 +34,14 @@
 @class MSALAuthority;
 @class MSALAccount;
 @class MSIDConfiguration;
+@class MSIDOauth2Factory;
 
 @interface MSALRequestParameters : NSObject <MSALRequestContext>
 
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property MSALScopes *scopes;
-@property NSURL *redirectUri;
+@property NSString *redirectUri;
 @property NSString *loginHint;
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
@@ -49,6 +50,8 @@
 @property MSALTelemetryApiId apiId;
 @property NSDictionary<NSString *, NSString *> *sliceParameters;
 
+@property MSALWebviewSelection webviewSelection;
+
 #pragma mark MSALRequestContext properties
 @property NSUUID *correlationId;
 @property NSString *logComponent;
@@ -56,6 +59,7 @@
 @property NSURLSession *urlSession;
 
 @property (retain, nonatomic, readonly) MSIDConfiguration *msidConfiguration;
+@property (retain, nonatomic) MSIDOauth2Factory *msidOAuthFactory;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

@@ -32,7 +32,7 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 
-#import "MSALPkce.h"
+#import "MSIDPkce.h"
 
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -41,12 +41,13 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 
-static MSALInteractiveRequest *s_currentRequest = nil;
+#import "MSIDWebviewAuthorization.h"
 
 @implementation MSALInteractiveRequest
 {
+    MSIDWebviewConfiguration *_webviewConfig;
+    
     NSString *_code;
-    MSALPkce *_pkce;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -72,15 +73,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     }
     
     _uiBehavior = behavior;
-    _pkce = [MSALPkce new];
     
     return self;
 }
 
-+ (MSALInteractiveRequest *)currentActiveRequest
-{
-    return s_currentRequest;
-}
 
 - (NSMutableDictionary<NSString *, NSString *> *)authorizationParameters
 {
@@ -93,18 +89,19 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     parameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
     parameters[MSID_OAUTH2_SCOPE] = [allScopes msalToString];
     parameters[MSID_OAUTH2_RESPONSE_TYPE] = MSID_OAUTH2_CODE;
-    parameters[MSID_OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    parameters[MSID_OAUTH2_REDIRECT_URI] = _parameters.redirectUri;
     parameters[MSID_OAUTH2_CORRELATION_ID_REQUEST] = [_parameters.correlationId UUIDString];
     parameters[MSID_OAUTH2_LOGIN_HINT] = _parameters.loginHint;
 
+    MSIDPkce *pkce = [MSIDPkce new];
     // PKCE:
-    parameters[MSID_OAUTH2_CODE_CHALLENGE] = _pkce.codeChallenge;
-    parameters[MSID_OAUTH2_CODE_CHALLENGE_METHOD] = _pkce.codeChallengeMethod;
-    
+    parameters[MSID_OAUTH2_CODE_CHALLENGE] = pkce.codeChallenge;
+    parameters[MSID_OAUTH2_CODE_CHALLENGE_METHOD] = pkce.codeChallengeMethod;
+
     NSDictionary *msalId = [MSIDDeviceId deviceId];
     [parameters addEntriesFromDictionary:msalId];
     [parameters addEntriesFromDictionary:MSALParametersForBehavior(_uiBehavior)];
-    
+
     return parameters;
 }
 
@@ -113,7 +110,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     NSURLComponents *urlComponents =
     [[NSURLComponents alloc] initWithURL:_authority.authorizationEndpoint
                  resolvingAgainstBaseURL:NO];
-    
+
     // Query parameters can come through from the OIDC discovery on the authorization endpoint as well
     // and we need to retain them when constructing our authorization uri
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
@@ -125,12 +122,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
             [parameters addEntriesFromDictionary:authorizationQueryParams];
         }
     }
-    
+
     if (_parameters.sliceParameters)
     {
         [parameters addEntriesFromDictionary:_parameters.sliceParameters];
     }
-    
+
     MSALAccount *account = _parameters.account;
     if (account)
     {
@@ -138,14 +135,15 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         parameters[MSID_OAUTH2_LOGIN_REQ] = account.homeAccountId.objectId;
         parameters[MSID_OAUTH2_DOMAIN_REQ] = account.homeAccountId.tenantId;
     }
-    
+
     _state = [[NSUUID UUID] UUIDString];
     parameters[MSID_OAUTH2_STATE] = _state;
-    
+
     urlComponents.percentEncodedQuery = [parameters msidURLFormEncode];
-    
+
     return [urlComponents URL];
 }
+
 
 - (void)run:(MSALCompletionBlock)completionBlock
 {
@@ -178,63 +176,108 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
-    NSURL *authorizationUrl = [self authorizationUrl];
+    NSURL *legacyStartURL = [self authorizationUrl];
+    NSLog(@"starting\n%@", legacyStartURL);
     
-    MSID_LOG_INFO(_parameters, @"Launching Web UI");
-    MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
-    s_currentRequest = self;
+    MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
+                                                                                           redirectUri:_parameters.redirectUri
+                                                                                              clientId:_parameters.clientId resource:nil
+                                                                                                scopes:_parameters.scopes
+                                                                                         correlationId:_parameters.correlationId
+                                                                                            enablePkce:YES];
+    config.promptBehavior = MSALParameterStringForBehavior(_uiBehavior);
+    _webviewConfig = config;
     
-    [MSALWebUI startWebUIWithURL:authorizationUrl
-                         context:_parameters
-                 completionBlock:^(NSURL *response, NSError *error)
-     {
-         s_currentRequest = nil;
-         if (error)
-         {
-             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, error);
-             return;
-         }
-         
-         if ([NSString msidIsStringNilOrBlank:response.absoluteString])
-         {
-             // This error case *really* shouldn't occur. If we're seeing it it's almost certainly a developer bug
-             ERROR_COMPLETION(_parameters, MSALErrorNoAuthorizationResponse, @"No authorization response received from server.");
-         }
-         
-         NSDictionary *params = [NSDictionary msidURLFormDecode:response.query];
-         CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
-         
-         CHECK_ERROR_COMPLETION([_state isEqualToString:params[MSID_OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");
-         
-         _code = params[MSID_OAUTH2_CODE];
-         if (_code)
-         {
-             [super acquireToken:completionBlock];
-             return;
-         }
-         
-         NSString *authorizationError = params[MSID_OAUTH2_ERROR];
-         if (authorizationError)
-         {
-             NSString *errorDescription = params[MSID_OAUTH2_ERROR_DESCRIPTION];
-             NSString *subError = params[MSID_OAUTH2_SUB_ERROR];
-             MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
-             MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
-             
-             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil, nil);
-                          
-             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-             [self stopTelemetryEvent:event error:msalError];
-             
-             completionBlock(nil, msalError);
-             return;
-         }
-         
-         ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
-     }];
+    void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error) {
+        NSLog(@"%@ %@", response, error);
+        
+        if ([response isKindOfClass:MSIDWebOAuth2Response.class])
+        {
+            MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
+            _code = oauthResponse.authorizationCode;
+            [super acquireToken:completionBlock];
+            return;
+        }
+        completionBlock(nil, error);
+    };
+    
+    
+    
+    if (_parameters.webviewSelection == MSALWebviewSelectionEmbedded)
+    {
+        [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
+                                                              oauth2Factory:_parameters.msidOAuthFactory
+                                                                    context:_parameters
+                                                          completionHandler:webAuthCompletion];
+    }
+    
+    else if (_parameters.webviewSelection == MSALWebviewSelectionSystemDefault)
+    {
+        [MSIDWebviewAuthorization startSystemWebviewWebviewAuthWithConfiguration:config
+                                                                   oauth2Factory:_parameters.msidOAuthFactory
+                                                                         context:_parameters
+                                                               completionHandler:webAuthCompletion];
+    }
+
+//
+//
+//    NSURL *authorizationUrl = [self authorizationUrl];
+//
+//    MSID_LOG_INFO(_parameters, @"Launching Web UI");
+//    MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
+//    s_currentRequest = self;
+//
+//    [MSALWebUI startWebUIWithURL:authorizationUrl
+//                         context:_parameters
+//                 completionBlock:^(NSURL *response, NSError *error)
+//     {
+//         s_currentRequest = nil;
+//         if (error)
+//         {
+//             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+//             [self stopTelemetryEvent:event error:error];
+//
+//             completionBlock(nil, error);
+//             return;
+//         }
+//
+//         if ([NSString msidIsStringNilOrBlank:response.absoluteString])
+//         {
+//             // This error case *really* shouldn't occur. If we're seeing it it's almost certainly a developer bug
+//             ERROR_COMPLETION(_parameters, MSALErrorNoAuthorizationResponse, @"No authorization response received from server.");
+//         }
+//
+//         NSDictionary *params = [NSDictionary msidURLFormDecode:response.query];
+//         CHECK_ERROR_COMPLETION(params, _parameters, MSALErrorBadAuthorizationResponse, @"Authorization response from the server code not be decoded.");
+//
+//         CHECK_ERROR_COMPLETION([_state isEqualToString:params[MSID_OAUTH2_STATE]], _parameters, MSALErrorInvalidState, @"State returned from the server does not match");
+//
+//         _code = params[MSID_OAUTH2_CODE];
+//         if (_code)
+//         {
+//             [super acquireToken:completionBlock];
+//             return;
+//         }
+//
+//         NSString *authorizationError = params[MSID_OAUTH2_ERROR];
+//         if (authorizationError)
+//         {
+//             NSString *errorDescription = params[MSID_OAUTH2_ERROR_DESCRIPTION];
+//             NSString *subError = params[MSID_OAUTH2_SUB_ERROR];
+//             MSALErrorCode code = MSALErrorCodeForOAuthError(authorizationError, MSALErrorAuthorizationFailed);
+//             MSALLogError(_parameters, MSALErrorDomain, code, errorDescription, authorizationError, subError, __FUNCTION__, __LINE__);
+//
+//             NSError *msalError = MSALCreateError(MSALErrorDomain, code, errorDescription, authorizationError, subError, nil, nil);
+//
+//             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+//             [self stopTelemetryEvent:event error:msalError];
+//
+//             completionBlock(nil, msalError);
+//             return;
+//         }
+//
+//         ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
+//     }];
 
     
 }
@@ -243,10 +286,10 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 {
     parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_AUTHORIZATION_CODE;
     parameters[MSID_OAUTH2_CODE] = _code;
-    parameters[MSID_OAUTH2_REDIRECT_URI] = [_parameters.redirectUri absoluteString];
+    parameters[MSID_OAUTH2_REDIRECT_URI] = _parameters.redirectUri;
     
     // PKCE
-    parameters[MSID_OAUTH2_CODE_VERIFIER] = _pkce.codeVerifier;
+    parameters[MSID_OAUTH2_CODE_VERIFIER] = _webviewConfig.pkce.codeVerifier;
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent

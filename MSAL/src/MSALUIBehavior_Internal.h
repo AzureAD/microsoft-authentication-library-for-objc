@@ -29,6 +29,7 @@
 #define MSALUIBehavior_Internal_h
 
 extern NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
+extern NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior);
 extern NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior);
 
 #endif /* MSALUIBehavior_Internal_h */

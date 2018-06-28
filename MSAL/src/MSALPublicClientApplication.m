@@ -36,7 +36,7 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALURLSession.h"
-#import "MSALWebUI.h"
+
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #import "MSIDKeychainTokenCache.h"
@@ -51,8 +51,13 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+
 #import "MSIDAuthority.h"
+
 #import "MSIDAADV2Oauth2Factory.h"
+
+#import "MSIDWebviewAuthorization.h"
+#import "MSIDWebviewSession.h"
 
 @interface MSALPublicClientApplication()
 
@@ -75,7 +80,7 @@
         if ([urlSchemes containsObject:scheme])
         {
             NSString *redirectUri = [NSString stringWithFormat:@"%@://auth", scheme];
-            _redirectUri = [NSURL URLWithString:redirectUri];
+            _redirectUri = redirectUri;
             return YES;
         }
     }
@@ -133,6 +138,9 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:factory];
     
     self.tokenCache = defaultAccessor;
+    
+    _webviewSelection = MSALWebviewSelectionDefault;
+    
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
 
@@ -215,47 +223,15 @@
 
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
-    if (!response)
-    {
-        return NO;
-    }
+    MSIDWebviewSession *session = [MSIDWebviewAuthorization currentSession];
+    if (!session) return NO;
     
-    MSALInteractiveRequest *request = [MSALInteractiveRequest currentActiveRequest];
-    if (!request)
-    {
-        return NO;
-    }
-    
-    if ([NSString msidIsStringNilOrBlank:response.query])
-    {
-        return NO;
-    }
-    
-    NSDictionary *qps = [NSDictionary msidURLFormDecode:response.query];
-    if (!qps)
-    {
-        return NO;
-    }
-    
-    NSString *state = qps[MSID_OAUTH2_STATE];
-    if (!state)
-    {
-        return NO;
-    }
-    
-    if (![request.state isEqualToString:state])
-    {
-        MSID_LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        MSID_LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        return NO;
-    }
-    
-    return [MSALWebUI handleResponse:response];
+    return [MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response];
 }
 
 + (void)cancelCurrentWebAuthSession
 {
-    [MSALWebUI cancelCurrentWebAuthSession];
+    [MSIDWebviewAuthorization cancelCurrentSession];
 }
 
 #pragma mark -
@@ -476,7 +452,9 @@
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSALRequestParameters* params = [MSALRequestParameters new];
+    MSALRequestParameters *params = [MSALRequestParameters new];
+
+    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.logComponent = _component;
     params.apiId = apiId;
@@ -529,6 +507,8 @@
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
+    params.webviewSelection = _webviewSelection;
+    
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
@@ -576,6 +556,7 @@
     }
 
     MSALRequestParameters* params = [MSALRequestParameters new];
+    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.account = account;
     params.apiId = apiId;

@@ -31,6 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
+@class WKWebView;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -48,7 +49,7 @@
 @property (readonly) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly) NSURL *redirectUri;
+@property (readonly) NSString *redirectUri;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
@@ -61,12 +62,21 @@
 @property NSString *component;
 
 #if TARGET_OS_IPHONE
-/*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
- */
+/*! The keychain sharing group to use for the token cache.
+    If it is nil, default MSAL group will be used. */
 @property (nonatomic) NSString *keychainGroup;
+
+
+/*! The webview selection to be used for authentication.
+    By default, it is going to use embedded webview - WKWebView, to authenticate.  */
+@property MSALWebviewSelection webviewSelection;
+
 #endif
+
+/*! Gets or sets the webview, which will be used for the credentials.
+    If nil, the library will create a webview object
+ when needed, leveraging the parentController property. */
+@property (weak) WKWebView *customWebview;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID

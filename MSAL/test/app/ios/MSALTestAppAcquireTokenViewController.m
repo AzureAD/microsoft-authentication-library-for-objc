@@ -437,6 +437,8 @@
         });
     };
     
+//    application.webviewSelection = MSALWebviewSelectionEmbedded;
+    
     if ([_loginHintField.text length])
     {
         [application acquireTokenForScopes:[settings.scopes allObjects]

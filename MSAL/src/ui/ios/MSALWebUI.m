@@ -182,7 +182,7 @@ static MSALWebUI *s_currentWebSession = nil;
     {
         [_safariViewController dismissViewControllerAnimated:YES completion:nil];
     }
-    else
+    
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             [_safariViewController dismissViewControllerAnimated:YES completion:nil];

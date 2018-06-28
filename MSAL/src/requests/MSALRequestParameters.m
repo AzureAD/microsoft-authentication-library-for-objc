@@ -66,7 +66,7 @@
 - (MSIDConfiguration *)msidConfiguration
 {
     MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:self.unvalidatedAuthority
-                                                                 redirectUri:self.redirectUri.absoluteString
+                                                                 redirectUri:self.redirectUri
                                                                     clientId:self.clientId
                                                                       target:self.scopes.msidToString];
     
