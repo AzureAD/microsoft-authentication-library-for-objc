@@ -44,6 +44,9 @@ static MSALWebUI *s_currentWebSession = nil;
 {
     NSURL *_url;
     SFSafariViewController *_safariViewController;
+#ifdef __IPHONE_11_0
+    id _authSession;
+#endif
     MSALWebUICompletionBlock _completionBlock;
     id<MSALRequestContext> _context;
     NSString *_telemetryRequestId;
@@ -52,13 +55,14 @@ static MSALWebUI *s_currentWebSession = nil;
 
 + (void)startWebUIWithURL:(NSURL *)url
                   context:(id<MSALRequestContext>)context
+           callbackScheme:(NSString *)callbackScheme
           completionBlock:(MSALWebUICompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(url, context, MSALErrorInternal, @"Attempted to start WebUI with nil URL");
     
     MSALWebUI *webUI = [MSALWebUI new];
     webUI->_context = context;
-    [webUI startWithURL:url completionBlock:completionBlock];
+    [webUI startWithURL:url callbackScheme:callbackScheme completionBlock:completionBlock];
 }
 
 + (MSALWebUI *)getAndClearCurrentWebSession
@@ -121,6 +125,7 @@ static MSALWebUI *s_currentWebSession = nil;
 }
 
 - (void)startWithURL:(NSURL *)url
+      callbackScheme:(NSString *)callbackScheme
      completionBlock:(MSALWebUICompletionBlock)completionBlock
 {
     @synchronized ([MSALWebUI class])
@@ -138,6 +143,37 @@ static MSALWebUI *s_currentWebSession = nil;
     [_telemetryEvent setIsCancelled:NO];
     
     dispatch_async(dispatch_get_main_queue(), ^{
+#ifdef __IPHONE_11_0
+        if (@available(iOS 11.0, *)) {
+            _authSession =
+            [[SFAuthenticationSession alloc] initWithURL:url
+                                       callbackURLScheme:callbackScheme
+                                       completionHandler:^(NSURL * _Nullable callbackURL, NSError * _Nullable error)
+             {
+                 [MSALWebUI getAndClearCurrentWebSession];
+                 
+                 if (error)
+                 {
+                     LOG_ERROR(_context, @"SFAuthenticationSession failed: %@", error);
+                     LOG_ERROR_PII(_context, @"SFAuthenticationSession failed: %@", error);
+                     completionBlock(nil, error);
+                     return;
+                 }
+                 
+                 completionBlock(callbackURL, nil);
+             }];
+            
+            if (![(SFAuthenticationSession *)_authSession start])
+            {
+                [self clearCurrentWebSession];
+                ERROR_COMPLETION(_context, MSALErrorInternal, @"Unable to start SFAuthenticationSession");
+            }
+            
+            return;
+        }
+#else
+        (void)callbackScheme;
+#endif
         _safariViewController = [[SFSafariViewController alloc] initWithURL:url
                                   entersReaderIfAvailable:NO];
         _safariViewController.delegate = self;
@@ -175,17 +211,32 @@ static MSALWebUI *s_currentWebSession = nil;
     return [webSession completeSessionWithResponse:url orError:nil];
 }
 
+- (void)cancelUI
+{
+#ifdef __IPHONE_11_0
+    if (_authSession)
+    {
+        [_authSession cancel];
+        
+        _authSession = nil;
+        return;
+    }
+#endif
+    
+    [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (BOOL)completeSessionWithResponse:(NSURL *)response
                             orError:(NSError *)error
 {
     if ([NSThread isMainThread])
     {
-        [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+        [self cancelUI];
     }
     else
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [_safariViewController dismissViewControllerAnimated:YES completion:nil];
+            [self cancelUI];
         });
     }
     
