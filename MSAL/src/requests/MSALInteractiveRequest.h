@@ -34,8 +34,6 @@
     MSALUIBehavior _uiBehavior;
 }
 
-@property NSString *state;
-
 - (id)initWithParameters:(MSALRequestParameters *)parameters
     extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
