@@ -214,6 +214,16 @@
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         
+        NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
+        if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
+        {
+            application.webviewSelection = MSALWebviewSelectionEmbedded;
+        }
+        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
+        {
+            application.webviewSelection = MSALWebviewSelectionSystemDefault;
+        }
+        
         [application acquireTokenForScopes:scopes
                       extraScopesToConsent:extraScopes
                                    account:account
