@@ -104,9 +104,9 @@
     NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
 
-    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
          

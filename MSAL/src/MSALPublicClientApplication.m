@@ -139,7 +139,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewSelection = MSALWebviewSelectionDefault;
+    _webviewSelection = MSALWebviewSelectionEmbedded;
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;

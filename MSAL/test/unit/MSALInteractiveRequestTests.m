@@ -95,7 +95,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionSystemDefault;
+    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -111,9 +111,9 @@
     request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
     
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
@@ -209,7 +209,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionSystemDefault;
+    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                                  name:@"user@contoso.com"
@@ -234,9 +234,9 @@
     request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
 
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
@@ -342,7 +342,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionSystemDefault;
+    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                             name:@"user@contoso.com"
@@ -376,9 +376,9 @@
     request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
 
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
@@ -467,7 +467,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionSystemDefault;
+    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
 
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -483,9 +483,9 @@
     request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
 
     // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
