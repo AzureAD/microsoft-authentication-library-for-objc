@@ -136,7 +136,7 @@
                                                                     context:_parameters
                                                           completionHandler:webAuthCompletion];
     }
-    
+#if TARGET_OS_IPHONE
     else if (_parameters.webviewSelection == MSALWebviewSelectionSystemDefault)
     {
         [MSIDWebviewAuthorization startSystemWebviewWebviewAuthWithConfiguration:config
@@ -144,6 +144,7 @@
                                                                          context:_parameters
                                                                completionHandler:webAuthCompletion];
     }
+#endif
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

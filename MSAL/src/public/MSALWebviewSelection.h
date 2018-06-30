@@ -29,13 +29,15 @@ typedef NS_ENUM(NSInteger, MSALWebviewSelection)
     // Uses WKWebView
     MSALWebviewSelectionEmbedded,
     
+#if TARGET_OS_IPHONE
     // Uses system default:
     //  iOS 9  - SFSafariViewController
     //  iOS 10 - SFSafariViewController
     //  iOS 11 - SFAuthenticationSession
     MSALWebviewSelectionSystemDefault,
+#endif
     
-    MSALWebviewSelectionDefault = MSALWebviewSelectionSystemDefault
+    MSALWebviewSelectionDefault = MSALWebviewSelectionEmbedded
 };
 
 #endif /* MSALWebviewSelection_h */

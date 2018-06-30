@@ -139,7 +139,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewSelection = MSALWebviewSelectionEmbedded;
+    _webviewSelection = MSALWebviewSelectionDefault;
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
@@ -223,10 +223,14 @@
 
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
+#if TARGET_OS_IPHONE
     MSIDWebviewSession *session = [MSIDWebviewAuthorization currentSession];
     if (!session) return NO;
     
     return [MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response];
+#else
+    return NO;
+#endif
 }
 
 + (void)cancelCurrentWebAuthSession

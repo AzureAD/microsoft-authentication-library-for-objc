@@ -61,7 +61,6 @@
     called MSAL. */
 @property NSString *component;
 
-#if TARGET_OS_IPHONE
 /*! The keychain sharing group to use for the token cache.
     If it is nil, default MSAL group will be used. */
 @property (nonatomic) NSString *keychainGroup;
@@ -70,8 +69,6 @@
 /*! The webview selection to be used for authentication.
     By default, it is going to use embedded webview - WKWebView, to authenticate.  */
 @property MSALWebviewSelection webviewSelection;
-
-#endif
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewSelectionEmbedded.
     For iOS, this will be ignored if MSALWebviewSelectionSystemDefault is chosen. */
