@@ -33,7 +33,6 @@
 #import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
-#import "MSALWebUI.h"
 #import "MSIDClientInfo.h"
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
@@ -132,63 +131,11 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
     
     application = nil;
 }
 
-- (void)testHandleMSALResponse_whenInvalid_returnsNo
-{
-    __block MSALFakeInteractiveRequest *request = nil;
-    [MSALTestSwizzle classMethod:@selector(currentActiveRequest)
-                           class:[MSALInteractiveRequest class]
-                           block:(id)^id(id obj)
-     {
-         (void)obj;
-         return request;
-     }];
-
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:nil]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/resp"]]);
-    
-    request = [MSALFakeInteractiveRequest new];
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal?"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
-    
-    request.state = @"some_other_state";
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
-    XCTAssertFalse([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
-}
-
-- (void)testHandleMSALResponse_whenValid_returnsYesAndHandlesResponse
-{
-    __block MSALFakeInteractiveRequest *request = [MSALFakeInteractiveRequest new];
-    [MSALTestSwizzle classMethod:@selector(currentActiveRequest)
-                           class:[MSALInteractiveRequest class]
-                           block:(id)^id(id obj)
-     {
-         (void)obj;
-         return request;
-     }];
-    
-    [MSALTestSwizzle classMethod:@selector(handleResponse:)
-                           class:[MSALWebUI class]
-                           block:(id)^BOOL(id obj, NSURL *url)
-     {
-         (void)obj;
-         (void)url;
-         return YES;
-     }];
-    
-    request.state = @"fake_state";
-    XCTAssertTrue([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/?code=iamacode&state=fake_state"]]);
-    XCTAssertTrue([MSALPublicClientApplication handleMSALResponse:[NSURL URLWithString:@"https://host/msal?error=iamaerror&error_description=evenmoreinfo&state=fake_state"]]);
-}
 
 #pragma 
 #pragma mark - acquireToken
@@ -223,7 +170,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI]);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
@@ -282,7 +229,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
@@ -333,7 +280,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
@@ -390,7 +337,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
@@ -456,7 +403,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraQueryParameters);
@@ -516,7 +463,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
@@ -580,7 +527,7 @@
          XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
-         XCTAssertEqualObjects(params.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+         XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));

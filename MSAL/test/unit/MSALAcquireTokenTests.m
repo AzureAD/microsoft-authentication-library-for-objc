@@ -31,7 +31,6 @@
 #import "MSALTestConstants.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
-#import "MSALWebUI.h"
 
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDeviceId.h"
@@ -57,6 +56,8 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+
+#import "MSIDWebviewAuthorization.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -86,6 +87,7 @@
     [super tearDown];
 }
 
+
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -105,38 +107,16 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
-                           class:[MSALWebUI class]
-                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+    [MSALTestSwizzle classMethod:@selector(startSystemWebviewWebviewAuthWithConfiguration:oauth2Factory:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         (void)obj;
-         (void)context;
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
          
-         XCTAssertNotNil(url);
-         XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(url.path, @"/contosob2c/v2.0/oauth/authorize");
-         NSMutableDictionary *expectedQPs =
-         [@{
-           @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
-           @"state" : [MSIDTestRequireValueSentinel sentinel],
-           @"prompt" : @"select_account",
-           @"client_id" : UNIT_TEST_CLIENT_ID,
-           @"scope" : @"fakeb2cscopes openid profile offline_access",
-           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
-           @"response_type" : @"code",
-           @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
-           @"code_challenge_method" : @"S256",
-           @"p" : @"b2c_1_policy",
-           UT_SLICE_PARAMS_DICT
-           } mutableCopy];
-         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                   context:nil error:nil];
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
-         completionBlock([NSURL URLWithString:responseString], nil);
+         completionHandler(oauthResponse, nil);
      }];
     
     NSError *error = nil;

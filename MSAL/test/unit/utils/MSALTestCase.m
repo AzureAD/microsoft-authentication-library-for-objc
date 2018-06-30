@@ -28,7 +28,6 @@
 #import "MSALTestCase.h"
 
 #import "MSALAuthority.h"
-#import "MSALWebUI.h"
 
 #import "MSALTestBundle.h"
 #import "MSALTestSwizzle.h"
@@ -60,7 +59,6 @@
 - (void)tearDown
 {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-    XCTAssertFalse([MSALWebUI cancelCurrentWebAuthSession]);
     [super tearDown];
 }
 
