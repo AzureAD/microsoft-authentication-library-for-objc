@@ -67,10 +67,44 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
+    NSString *upn = nil;
+    if (_parameters.account)
+    {
+        upn = _parameters.account.username;
+    }
+    else if(_parameters.loginHint)
+    {
+        upn = _parameters.loginHint;
+    }
+    
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+          {
+              if (error)
+              {
+                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                  [self stopTelemetryEvent:event error:error];
+                  
+                  completionBlock(nil, error);
+                  return;
+              }
+              
+              _authority = _parameters.unvalidatedAuthority;
+              [self acquireTokenImpl:completionBlock];
+          }];
+     }];
+}
+
+- (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
+{
     CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorAccountRequired, @"user parameter cannot be nil");
 
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    
+
     if (!_forceRefresh)
     {
         NSError *error = nil;
@@ -78,7 +112,7 @@
                                                                    configuration:msidConfiguration
                                                                          context:_parameters
                                                                            error:&error];
-        
+
         if (!accessToken && error)
         {
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
@@ -87,7 +121,7 @@
             completionBlock(nil, error);
             return;
         }
-        
+
         if (accessToken && !accessToken.isExpired)
         {
             MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
@@ -122,26 +156,13 @@
         completionBlock(nil, msalError);
         return;
     }
-    
+
     CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
 
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
-        {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-
-            completionBlock(nil, error);
-            return;
-        }
-
-        MSID_LOG_INFO(_parameters, @"Refreshing access token");
-        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
-
-        _authority = authority;
-
-        [super acquireToken:completionBlock];
-    }];
+    MSID_LOG_INFO(_parameters, @"Refreshing access token");
+    MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
+    
+    [super acquireToken:completionBlock];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
@@ -149,6 +170,5 @@
     parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
     parameters[MSID_OAUTH2_REFRESH_TOKEN] = [self.refreshToken refreshToken];
 }
-
 
 @end

@@ -31,7 +31,6 @@
 #import "MSALRequestContext.h"
 #import "MSIDRequestContext.h"
 
-@class MSALAuthority;
 @class MSALAccount;
 @class MSIDConfiguration;
 @class MSIDAuthority;

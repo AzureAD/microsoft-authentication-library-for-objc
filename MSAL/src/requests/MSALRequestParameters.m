@@ -28,7 +28,6 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
-#import "MSALAuthority.h"
 #import "MSIDConfiguration.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAuthorityFactory.h"

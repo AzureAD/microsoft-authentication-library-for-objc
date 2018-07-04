@@ -25,10 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-
 #import "MSALPublicClientApplication+Internal.h"
-
-#import "MSALAuthority.h"
 #import "MSALError.h"
 #import "MSALError_Internal.h"
 #import "MSALInteractiveRequest.h"

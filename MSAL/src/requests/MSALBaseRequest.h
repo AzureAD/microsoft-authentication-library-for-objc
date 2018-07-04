@@ -38,7 +38,7 @@
 {
     @protected
     MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    MSIDAuthority *_authority;
     MSALTelemetryApiId _apiId;
     MSIDDefaultTokenCacheAccessor *_tokenCache;
 }
@@ -62,8 +62,6 @@
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 - (void)addAdditionalRequestParameters:(nonnull NSMutableDictionary<NSString *, NSString *> *)parameters;
-
-- (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
 - (nonnull MSALTelemetryAPIEvent *)getTelemetryAPIEvent;
 

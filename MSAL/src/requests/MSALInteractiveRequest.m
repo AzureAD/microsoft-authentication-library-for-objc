@@ -40,6 +40,8 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSIDAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 
@@ -108,12 +110,11 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return parameters;
 }
 
-- (NSURL *)authorizationUrl
+- (NSURL *)authorizationUrlWithUrl:(NSURL *)authorizationEndpoint
 {
     NSURLComponents *urlComponents =
-    [[NSURLComponents alloc] initWithURL:_authority.authorizationEndpoint
-                 resolvingAgainstBaseURL:NO];
-    
+    [[NSURLComponents alloc] initWithURL:authorizationEndpoint resolvingAgainstBaseURL:NO];
+
     // Query parameters can come through from the OIDC discovery on the authorization endpoint as well
     // and we need to retain them when constructing our authorization uri
     NSMutableDictionary <NSString *, NSString *> *parameters = [self authorizationParameters];
@@ -125,12 +126,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
             [parameters addEntriesFromDictionary:authorizationQueryParams];
         }
     }
-    
+
     if (_parameters.sliceParameters)
     {
         [parameters addEntriesFromDictionary:_parameters.sliceParameters];
     }
-    
+
     MSALAccount *account = _parameters.account;
     if (account)
     {
@@ -138,12 +139,12 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         parameters[MSID_OAUTH2_LOGIN_REQ] = account.homeAccountId.objectId;
         parameters[MSID_OAUTH2_DOMAIN_REQ] = account.homeAccountId.tenantId;
     }
-    
+
     _state = [[NSUUID UUID] UUIDString];
     parameters[MSID_OAUTH2_STATE] = _state;
-    
+
     urlComponents.percentEncodedQuery = [parameters msidURLFormEncode];
-    
+
     return [urlComponents URL];
 }
 
@@ -161,24 +162,41 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
-        {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-            
-            completionBlock(nil, error);
-            return;
-        }
-        
-        _authority = authority;
-        [self acquireTokenImpl:completionBlock];
-    }];
+    NSString *upn = nil;
+    if (_parameters.account)
+    {
+        upn = _parameters.account.username;
+    }
+    else if(_parameters.loginHint)
+    {
+        upn = _parameters.loginHint;
+    }
+    
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+         {
+             if (error)
+             {
+                 MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                 [self stopTelemetryEvent:event error:error];
+                 
+                 completionBlock(nil, error);
+                 return;
+             }
+             
+             _authority = _parameters.unvalidatedAuthority;
+             [self acquireTokenImpl:completionBlock];
+         }];
+     }];
 }
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
-    NSURL *authorizationUrl = [self authorizationUrl];
+    NSURL *authorizationUrl = [self authorizationUrlWithUrl:_authority.metadata.authorizationEndpoint];
     
     MSID_LOG_INFO(_parameters, @"Launching Web UI");
     MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);
@@ -235,8 +253,6 @@ static MSALInteractiveRequest *s_currentRequest = nil;
          
          ERROR_COMPLETION(_parameters, MSALErrorBadAuthorizationResponse, @"No code or error in server response.");
      }];
-
-    
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

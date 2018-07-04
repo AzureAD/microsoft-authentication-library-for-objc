@@ -46,6 +46,8 @@
 #import "NSData+MSIDExtensions.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+#import "MSIDAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -143,31 +145,12 @@ static MSALScopes *s_reservedScopes = nil;
     [self acquireToken:completionBlock];
 }
 
-- (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
-{
-    NSString *upn = nil;
-    if (_parameters.account)
-    {
-        upn = _parameters.account.username;
-    }
-    else if(_parameters.loginHint)
-    {
-        upn = _parameters.loginHint;
-    }
-    
-    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority.url
-                              userPrincipalName:upn
-                                       validate:_parameters.validateAuthority
-                                        context:_parameters
-                                completionBlock:completionBlock];
-}
-
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
     // TODO: Remove once uid+utid work hits PROD
-    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
+    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.metadata.tokenEndpoint resolvingAgainstBaseURL:NO];
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
     
@@ -189,7 +172,7 @@ static MSALScopes *s_reservedScopes = nil;
     reqParameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
     reqParameters[MSID_OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
     reqParameters[MSID_OAUTH2_CLIENT_INFO] = @"1";
-
+    
     [self addAdditionalRequestParameters:reqParameters];
     authRequest.bodyParameters = reqParameters;
     
@@ -212,7 +195,7 @@ static MSALScopes *s_reservedScopes = nil;
          }
          
          MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
-
+         
          if (!tokenResponse)
          {
              [self stopTelemetryEvent:event error:error];
@@ -228,7 +211,7 @@ static MSALScopes *s_reservedScopes = nil;
              completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
-
+         
          if (_parameters.account != nil &&
              ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.userIdentifier])
          {
@@ -236,9 +219,9 @@ static MSALScopes *s_reservedScopes = nil;
              completionBlock(nil, userMismatchError);
              return;
          }
-
+         
          MSIDConfiguration *configuration = _parameters.msidConfiguration;
-
+         
          BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
                                                             response:tokenResponse
                                                              context:_parameters
@@ -249,7 +232,7 @@ static MSALScopes *s_reservedScopes = nil;
              completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
              return;
          }
-
+         
          MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
          MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
          
@@ -257,7 +240,7 @@ static MSALScopes *s_reservedScopes = nil;
          
          [event setUser:result.account];
          [self stopTelemetryEvent:event error:nil];
-
+         
          completionBlock(result, nil);
      }];
 }
@@ -274,7 +257,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
-    [event setAuthorityType:_authority.authorityType];
+    [event setAuthorityType:[_authority authorityType]];
     [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
     [event setClientId:_parameters.clientId];
     
