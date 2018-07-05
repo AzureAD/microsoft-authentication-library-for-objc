@@ -44,4 +44,6 @@
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError * __autoreleasing *)error;
 
+- (NSURL *)authorizationUrlWithEndpoint:(NSURL *)authorizationEndpoint;
+
 @end

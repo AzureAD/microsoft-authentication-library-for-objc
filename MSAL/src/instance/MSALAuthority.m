@@ -127,87 +127,87 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
                              context:(id<MSALRequestContext>)context
                      completionBlock:(MSALAuthorityCompletion)completionBlock
 {
-//    NSError *error = nil;
-//    NSURL *updatedAuthority = [self checkAuthorityString:unvalidatedAuthority.absoluteString error:&error];
-//    CHECK_COMPLETION(!error);
-//
-//    MSALAuthorityType authorityType;
-//    NSString *firstPathComponent = updatedAuthority.pathComponents[1].lowercaseString;
-//    NSString *tenant = nil;
-//
-//    id<MSALAuthorityResolver> resolver;
-//    
-//    if ([firstPathComponent isEqualToString:@"adfs"])
-//    {
-//        NSError *error = CREATE_MSID_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
-//        completionBlock(nil, error);
-//        return;
-//    }
-//    else if ([firstPathComponent isEqualToString:@"tfp"])
-//    {
-//        authorityType = B2CAuthority;
-//        resolver = [MSALB2CAuthorityResolver new];
-//        tenant = updatedAuthority.pathComponents[2].lowercaseString;
-//    }
-//    else
-//    {
-//        authorityType = AADAuthority;
-//        resolver = [MSALAadAuthorityResolver new];
-//        tenant = firstPathComponent;
-//    }
-//
-//    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority
-//                                                          authorityType:authorityType
-//                                                      userPrincipalName:userPrincipalName];
-//
-//    if (authorityInCache)
-//    {
-//        if (!validate ||
-//            (validate && authorityInCache.validatedAuthority))
-//        {
-//            completionBlock(authorityInCache, nil);
-//            return;
-//        }
-//    }
-//
-//    TenantDiscoveryCallback tenantDiscoveryCallback = ^void
-//    (MSALTenantDiscoveryResponse *response, NSError *error)
-//    {
-//        CHECK_COMPLETION(!error);
-//
-//        MSALAuthority *authority = [MSALAuthority new];
-//        authority.canonicalAuthority = updatedAuthority;
-//        authority.authorityType = authorityType;
-//        authority.validatedAuthority = validate;
-//        authority.isTenantless = [self isTenantless:updatedAuthority];
-//
-//        // Only happens for AAD authority
-//        NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
-//        NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
-//        NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
-//
-//        authority.authorizationEndpoint = [NSURL URLWithString:authorizationEndpoint];
-//        authority.tokenEndpoint = [NSURL URLWithString:tokenEndpoint];
-//        authority.endSessionEndpoint = nil;
-//        authority.selfSignedJwtAudience = issuer;
-//
-//        [MSALAuthority addToResolvedAuthority:authority userPrincipalName:userPrincipalName];
-//
-//        completionBlock(authority, nil);
-//    };
-//
-//    [resolver openIDConfigurationEndpointForAuthority:updatedAuthority
-//                                    userPrincipalName:userPrincipalName
-//                                             validate:validate
-//                                              context:context
-//                                      completionBlock:^(NSString *endpoint, NSError *error)
-//    {
-//        CHECK_COMPLETION(!error);
-//
-//        [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:endpoint]
-//                                  context:context completionBlock:tenantDiscoveryCallback];
-//
-//    }];
+    NSError *error = nil;
+    NSURL *updatedAuthority = [self checkAuthorityString:unvalidatedAuthority.absoluteString error:&error];
+    CHECK_COMPLETION(!error);
+
+    MSALAuthorityType authorityType;
+    NSString *firstPathComponent = updatedAuthority.pathComponents[1].lowercaseString;
+    NSString *tenant = nil;
+
+    id<MSALAuthorityResolver> resolver;
+    
+    if ([firstPathComponent isEqualToString:@"adfs"])
+    {
+        NSError *error = CREATE_MSID_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
+        completionBlock(nil, error);
+        return;
+    }
+    else if ([firstPathComponent isEqualToString:@"tfp"])
+    {
+        authorityType = B2CAuthority;
+        resolver = [MSALB2CAuthorityResolver new];
+        tenant = updatedAuthority.pathComponents[2].lowercaseString;
+    }
+    else
+    {
+        authorityType = AADAuthority;
+        resolver = [MSALAadAuthorityResolver new];
+        tenant = firstPathComponent;
+    }
+
+    MSALAuthority *authorityInCache = [MSALAuthority authorityFromCache:updatedAuthority
+                                                          authorityType:authorityType
+                                                      userPrincipalName:userPrincipalName];
+
+    if (authorityInCache)
+    {
+        if (!validate ||
+            (validate && authorityInCache.validatedAuthority))
+        {
+            completionBlock(authorityInCache, nil);
+            return;
+        }
+    }
+
+    TenantDiscoveryCallback tenantDiscoveryCallback = ^void
+    (MSALTenantDiscoveryResponse *response, NSError *error)
+    {
+        CHECK_COMPLETION(!error);
+
+        MSALAuthority *authority = [MSALAuthority new];
+        authority.canonicalAuthority = updatedAuthority;
+        authority.authorityType = authorityType;
+        authority.validatedAuthority = validate;
+        authority.isTenantless = [self isTenantless:updatedAuthority];
+
+        // Only happens for AAD authority
+        NSString *authorizationEndpoint = [response.authorization_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *tokenEndpoint = [response.token_endpoint stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+        NSString *issuer = [response.issuer stringByReplacingOccurrencesOfString:TENANT_ID_STRING_IN_PAYLOAD withString:tenant];
+
+        authority.authorizationEndpoint = [NSURL URLWithString:authorizationEndpoint];
+        authority.tokenEndpoint = [NSURL URLWithString:tokenEndpoint];
+        authority.endSessionEndpoint = nil;
+        authority.selfSignedJwtAudience = issuer;
+
+        [MSALAuthority addToResolvedAuthority:authority userPrincipalName:userPrincipalName];
+
+        completionBlock(authority, nil);
+    };
+
+    [resolver openIDConfigurationEndpointForAuthority:updatedAuthority
+                                    userPrincipalName:userPrincipalName
+                                             validate:validate
+                                              context:context
+                                      completionBlock:^(NSString *endpoint, NSError *error)
+    {
+        CHECK_COMPLETION(!error);
+
+        [resolver tenantDiscoveryEndpoint:[NSURL URLWithString:endpoint]
+                                  context:context completionBlock:tenantDiscoveryCallback];
+
+    }];
 }
 
 + (BOOL)isKnownHost:(NSURL *)url

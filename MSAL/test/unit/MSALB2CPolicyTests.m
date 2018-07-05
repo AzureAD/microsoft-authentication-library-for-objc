@@ -44,6 +44,7 @@
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDAuthorityFactory.h"
 #import "MSIDB2CAuthority.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -60,11 +61,15 @@
     [MSIDKeychainTokenCache reset];
     
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)tearDown
 {
     [super tearDown];
+    
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
 - (void)setupURLSessionWithB2CAuthority:(MSIDAuthority *)authority policy:(NSString *)policy
@@ -134,8 +139,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
-    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -144,13 +148,10 @@
          
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
          XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
-         dispatch_semaphore_signal(dsem);
+         [expectation fulfill];
      }];
     
-    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
-    {
-        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
-    }
+    [self waitForExpectationsWithTimeout:1 handler:nil];
     
     // Now acquiretoken call with second policy (b2c_2_policy)
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy"];
@@ -160,6 +161,7 @@
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
     
     // Use an authority with a different policy in the second acquiretoken call
+    expectation = [self expectationWithDescription:@"Acquire Token."];
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                   extraScopesToConsent:nil
                              loginHint:nil
@@ -174,8 +176,11 @@
                            
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
+                           [expectation fulfill];
         
     }];
+    
+    [self waitForExpectationsWithTimeout:1 handler:nil];
 
     __auto_type allTokens = [self.tokenCacheAccessor allTokensWithContext:nil error:nil];
 

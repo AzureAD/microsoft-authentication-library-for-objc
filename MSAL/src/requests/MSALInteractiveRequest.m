@@ -110,7 +110,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return parameters;
 }
 
-- (NSURL *)authorizationUrlWithUrl:(NSURL *)authorizationEndpoint
+- (NSURL *)authorizationUrlWithEndpoint:(NSURL *)authorizationEndpoint
 {
     NSURLComponents *urlComponents =
     [[NSURLComponents alloc] initWithURL:authorizationEndpoint resolvingAgainstBaseURL:NO];
@@ -196,7 +196,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
-    NSURL *authorizationUrl = [self authorizationUrlWithUrl:_authority.metadata.authorizationEndpoint];
+    NSURL *authorizationUrl = [self authorizationUrlWithEndpoint:_authority.metadata.authorizationEndpoint];
     
     MSID_LOG_INFO(_parameters, @"Launching Web UI");
     MSID_LOG_INFO_PII(_parameters, @"Launching Web UI with URL: %@", authorizationUrl);

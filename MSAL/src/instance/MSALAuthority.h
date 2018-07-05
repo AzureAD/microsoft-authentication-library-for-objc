@@ -56,7 +56,7 @@ typedef NS_ENUM(NSInteger, MSALAuthorityType)
 
 @class MSALAuthority;
 
-typedef void(^MSALAuthorityCompletion)(MSIDAuthority *authority, NSError *error);
+typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
 
 @interface MSALAuthority : NSObject
 
