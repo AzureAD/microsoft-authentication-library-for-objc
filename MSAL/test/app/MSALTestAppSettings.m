@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSALTestAppSettings.h"
-#import "MSALAuthority.h"
+#import "MSIDAuthority.h"
 #import "MSALAccountId.h"
 #import "MSIDAuthorityFactory.h"
 #import "MSIDAuthority.h"
@@ -50,7 +50,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 {
     NSMutableArray<MSIDAuthority *> *authorities = [NSMutableArray new];
     
-    NSSet<NSString *> *trustedHosts = [MSALAuthority trustedHosts];
+    NSSet<NSString *> *trustedHosts = [MSIDAuthority trustedHosts];
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers"];

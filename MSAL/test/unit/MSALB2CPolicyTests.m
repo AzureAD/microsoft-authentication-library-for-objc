@@ -63,6 +63,7 @@
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
 - (void)tearDown
@@ -70,6 +71,7 @@
     [super tearDown];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
 - (void)setupURLSessionWithB2CAuthority:(MSIDAuthority *)authority policy:(NSString *)policy

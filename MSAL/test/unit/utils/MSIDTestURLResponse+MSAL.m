@@ -40,6 +40,7 @@
     NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
+    [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
     
     NSDictionary *oidcJson =
     @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority],
@@ -48,7 +49,7 @@
        };
     
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration?x-client-Ver=%@", authority, [MSIDVersion sdkVersion]]
                            requestHeaders:oidcReqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"

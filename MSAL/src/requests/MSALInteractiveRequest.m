@@ -27,7 +27,6 @@
 
 #import "MSALInteractiveRequest.h"
 
-#import "MSALAuthority.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"

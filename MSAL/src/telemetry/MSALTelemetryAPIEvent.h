@@ -23,7 +23,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryApiId.h"
-#import "MSALAuthority.h"
 #import "MSIDTelemetryAPIEvent.h"
 
 @interface MSALTelemetryAPIEvent : MSIDTelemetryAPIEvent
