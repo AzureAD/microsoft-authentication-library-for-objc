@@ -61,6 +61,7 @@
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSIDTestUtil.h"
+#import "MSIDTestURLResponse+MSAL.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -124,7 +125,7 @@
          XCTAssertNotNil(url);
          XCTAssertEqualObjects(url.scheme, @"https");
          XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(url.path, @"/contosob2c/v2.0/oauth/authorize");
+         XCTAssertEqualObjects(url.path, @"/contosob2c/oauth2/v2.0/authorize");
          NSMutableDictionary *expectedQPs =
          [@{
            @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],

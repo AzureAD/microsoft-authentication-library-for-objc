@@ -43,8 +43,8 @@
     [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
     
     NSDictionary *oidcJson =
-    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority],
-       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize", authority],
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/authorize", authority],
        @"issuer" : @"issuer"
        };
     
@@ -70,8 +70,8 @@
     [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
     
     NSDictionary *oidcJson =
-    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", responseAuthority, query],
-       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize?%@", responseAuthority, query],
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/token?%@", responseAuthority, query],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/authorize?%@", responseAuthority, query],
        @"issuer" : @"issuer"
        };
     
@@ -99,7 +99,7 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token" UT_SLICE_PARAMS_QUERY, authority]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY, authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],
@@ -157,11 +157,11 @@
     NSString *requestUrlStr = nil;
     if (tokenQPs.count > 0)
     {
-        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msidURLFormEncode]];
+        requestUrlStr = [NSString stringWithFormat:@"%@/oauth2/v2.0/token?%@", authority, [tokenQPs msidURLFormEncode]];
     }
     else
     {
-        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token", authority];
+        requestUrlStr = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
     }
     
     MSIDTestURLResponse *tokenResponse =
