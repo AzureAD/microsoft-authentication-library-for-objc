@@ -78,12 +78,6 @@ typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error)
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error;
 
-+ (void)resolveEndpointsForAuthority:(NSURL *)unvalidatedAuthority
-                   userPrincipalName:(NSString *)userPrincipalName
-                            validate:(BOOL)validate
-                             context:(id<MSALRequestContext>)context
-                     completionBlock:(MSALAuthorityCompletion)completionBlock;
-
 + (BOOL)isKnownHost:(NSURL *)url;
 
 /*!
