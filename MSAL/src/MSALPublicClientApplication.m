@@ -48,10 +48,12 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSIDAADAuthority.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSALAADAuthority.h"
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
@@ -93,7 +95,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 }
 
 - (id)initWithClientId:(NSString *)clientId
-             authority:(MSIDAuthority *)authority
+             authority:(MSALAuthority *)authority
                  error:(NSError **)error
 {
     if (!(self = [super init]))
@@ -111,10 +113,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     else
     {
         // TODO: Rationalize our default authority behavior (#93)
-        __auto_type factory = [MSIDAuthorityFactory new];
-        __auto_type authorityUrl = [[NSURL alloc] initWithString:s_defaultAuthorityUrlString];
-        
-        _authority = [factory authorityFromUrl:authorityUrl context:nil error:error];
+        _authority = [[MSALAADAuthority alloc] initWithURL:[s_defaultAuthorityUrlString msidUrl] context:nil error:error];
     }
     
     CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
@@ -154,13 +153,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:self.authority.url.msidHostWithPortIfNecessary
+    __auto_type host = self.authority.msidAuthority.url.msidHostWithPortIfNecessary;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:host
                                                                  clientId:self.clientId
                                                                  familyId:nil
                                                                   context:nil
                                                                     error:&msidError];
-
 
     if (msidError)
     {
@@ -322,7 +320,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSIDAuthority *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -382,7 +380,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSIDAuthority *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -417,7 +415,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(MSIDAuthority *)authority
+                          authority:(MSALAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
     [self acquireTokenSilentForScopes:scopes
@@ -431,7 +429,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(MSIDAuthority *)authority
+                          authority:(MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
@@ -475,7 +473,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSIDAuthority *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -518,21 +516,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
-    NSError *error = nil;
-    if (!authority)
-    {
-        params.unvalidatedAuthority = _authority;
-    }
-    else if (![params setAuthorityFromString:authority.url.absoluteString error:&error])
-    {
-        block(nil, error);
-        return;
-    }
-    
+    params.unvalidatedAuthority = authority.msidAuthority ?: _authority.msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
+    NSError *error = nil;
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
@@ -554,30 +543,36 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(MSIDAuthority *)authority
+                          authority:(MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
+    MSIDAuthority *msidAuthority;
+    
     if (!authority)
     {
-        authority = self.authority;
+        msidAuthority = self.authority.msidAuthority;
 
         /*
          In the acquire token silent call we assume developer wants to get access token for account's home tenant,
          unless they override the default authority in the public client application with a tenanted authority.
          */
         // TODO: fix
-        if ([authority isKindOfClass:MSIDAADAuthority.class])
+        if ([msidAuthority isKindOfClass:MSIDAADAuthority.class])
         {
             __auto_type aadAuthority = (MSIDAADAuthority *)self.authority;
             if ([aadAuthority.tenant isTenantless] || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers)
             {
                 __auto_type authorityFactory = [MSIDAuthorityFactory new];
-                authority = [authorityFactory authorityFromUrl:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
+                msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
             }
         }
+    }
+    else
+    {
+        msidAuthority = authority.msidAuthority;
     }
 
     MSALRequestParameters* params = [MSALRequestParameters new];
@@ -610,7 +605,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         completionBlock(result, error);
     };
 
-    params.unvalidatedAuthority = authority;
+    params.unvalidatedAuthority = msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
@@ -646,9 +641,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     NSError *msidError = nil;
-
+    __auto_type host = self.authority.msidAuthority.url.msidHostWithPortIfNecessary;
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
-                                            environment:self.authority.url.msidHostWithPortIfNecessary
+                                            environment:host
                                                clientId:self.clientId
                                                 context:nil
                                                   error:&msidError];

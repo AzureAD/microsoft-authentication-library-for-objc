@@ -59,6 +59,5 @@
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
-- (BOOL)setAuthorityFromString:(NSString *)authority
-                         error:(NSError * __autoreleasing *)error;
+
 @end

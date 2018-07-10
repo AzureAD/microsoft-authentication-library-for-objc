@@ -27,27 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@interface MSALAuthorityFactory : NSObject
 
-@class MSALAuthority;
+- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
+                                     context:(nullable id<MSIDRequestContext>)context
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<MSALAuthority *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
+                                   rawTenant:(nullable NSString *)rawTenant
+                                     context:(nullable id<MSIDRequestContext>)context
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

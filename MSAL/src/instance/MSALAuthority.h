@@ -26,81 +26,19 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-@class MSALTenantDiscoveryResponse;
-
-typedef void(^OpenIDConfigEndpointCallback)(NSString *endpoint, NSError *error);
-typedef void(^TenantDiscoveryCallback)(MSALTenantDiscoveryResponse *response, NSError *error);
-
-@protocol MSALAuthorityResolver
-
-- (void)openIDConfigurationEndpointForAuthority:(NSURL *)authority
-                              userPrincipalName:(NSString *)userPrincipalName
-                                       validate:(BOOL)validate
-                                        context:(id<MSALRequestContext>)context
-                                completionBlock:(OpenIDConfigEndpointCallback)completionBlock;
-
-- (NSString *)defaultOpenIdConfigurationEndpointForAuthority:(NSURL *)authority;
-
-- (void)tenantDiscoveryEndpoint:(NSURL *)url
-                        context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback)completionBlock;
-
-@end
-
-typedef NS_ENUM(NSInteger, MSALAuthorityType)
-{
-    AADAuthority,
-    ADFSAuthority,
-    B2CAuthority
-};
-
-@class MSALAuthority;
-
-typedef void(^MSALAuthorityCompletion)(MSALAuthority *authority, NSError *error);
 
 @interface MSALAuthority : NSObject
 
-@property MSALAuthorityType authorityType;
-@property NSURL *canonicalAuthority;
-@property BOOL validatedAuthority;
-@property BOOL isTenantless;
-@property NSURL *authorizationEndpoint;
-@property NSURL *tokenEndpoint;
-@property NSURL *endSessionEndpoint;
-// For AAD, currently, the v2.0 endpoint doesn't support the OpenID Connect end_session_endpoint
-// https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-protocols-oidc
-@property NSString *selfSignedJwtAudience;
+- (instancetype _Nullable )init NS_UNAVAILABLE;
++ (instancetype _Nullable )new NS_UNAVAILABLE;
 
-/*!
-    Performs cursory validation on the passed in authority string to make sure it is
-    a proper HTTPS URL and contains a tenant or common.
- */
-+ (NSURL *)checkAuthorityString:(NSString *)authority
-                          error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
-+ (BOOL)isKnownHost:(NSURL *)url;
-
-/*!
-    Returns YES if the URL includes a specific tenant NO if it does not.
- */
-+ (BOOL)isTenantless:(NSURL *)authority;
-
-+ (NSURL *)defaultAuthority;
-
-/*!
-    Returns the URL to use in the cache key for a given authority input string
-    and tenant ID returned with the token response.
- */
-+ (NSURL *)cacheUrlForAuthority:(NSURL *)authority
-                       tenantId:(NSString *)tenantId;
-
-+ (NSSet<NSString *> *)trustedHosts;
-
-+ (BOOL)addToResolvedAuthority:(MSALAuthority *)authority
-             userPrincipalName:(NSString *)userPrincipalName;
-
-+ (MSALAuthority *)authorityFromCache:(NSURL *)authority
-                        authorityType:(MSALAuthorityType)authorityType
-                    userPrincipalName:(NSString *)userPrincipalName;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(nullable NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

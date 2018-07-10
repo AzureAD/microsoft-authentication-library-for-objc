@@ -34,6 +34,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSALAuthority.h"
 #import "MSIDAuthority.h"
 
 @implementation MSALResult

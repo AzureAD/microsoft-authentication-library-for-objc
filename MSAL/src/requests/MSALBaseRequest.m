@@ -45,7 +45,7 @@
 #import "NSData+MSIDExtensions.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
 
 static MSALScopes *s_reservedScopes = nil;

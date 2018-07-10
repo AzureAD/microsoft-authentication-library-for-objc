@@ -30,11 +30,12 @@
 #import "MSIDAccount.h"
 #import "MSALAccount+Internal.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccount.h"
 #import "MSALAccountId+Internal.h"
+#import "MSIDAuthority.h"
 
 @interface MSALAccount ()
 

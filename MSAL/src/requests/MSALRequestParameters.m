@@ -31,6 +31,7 @@
 #import "MSIDConfiguration.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAuthorityFactory.h"
+#import "MSALAuthority.h"
 
 @implementation MSALRequestParameters
 
@@ -42,27 +43,6 @@
         [scopesLowercase addObject:scope.lowercaseString];
     }
     self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
-}
-
-- (BOOL)setAuthorityFromString:(NSString *)authorityString
-                         error:(NSError * __autoreleasing *)error
-{
-    if (!authorityString)
-    {
-        return YES;
-    }
-    
-    __auto_type authorityFactory = [MSIDAuthorityFactory new];
-    __auto_type authority = [authorityFactory authorityFromUrl:[authorityString msidUrl] context:nil error:error];
-    
-    if (!authority)
-    {
-        return NO;
-    }
-    
-    self.unvalidatedAuthority = authority;
-    
-    return YES;
 }
 
 - (MSIDConfiguration *)msidConfiguration

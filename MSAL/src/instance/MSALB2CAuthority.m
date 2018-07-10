@@ -25,29 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALB2CAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDB2CAuthority.h"
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@implementation MSALB2CAuthority
 
-@class MSALAuthority;
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
 
-extern NSString* MSALTestAppCacheChangeNotification;
+    return self;
+}
 
-@interface MSALTestAppSettings : NSObject
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError **)error
+{
+    self = [self initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
 
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-
-+ (NSArray<MSALAuthority *> *)authorities;
-
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+    return self;
+}
 
 @end

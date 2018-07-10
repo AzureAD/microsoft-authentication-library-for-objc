@@ -37,6 +37,7 @@
 #import "MSIDTelemetry+Internal.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDeviceId.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 NSString *const MSALHttpHeaderAccept = @"Accept";
 NSString *const MSALHttpHeaderApplicationJSON = @"application/json";
@@ -177,8 +178,10 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
     [event setHttpMethod:request.HTTPMethod];
     [event setHttpPath:newURL.absoluteString];
     
+    __auto_type isAADPublicCloud = [MSIDAADNetworkConfiguration.defaultConfiguration isAADPublicCloud:request.URL.absoluteString];
+    
     MSID_LOG_INFO(_context, @"HTTP request %@",
-             [MSALAuthority isKnownHost:request.URL] ? [NSString stringWithFormat:@"%@://%@", [request.URL msidHostWithPortIfNecessary], request.URL.host]
+             isAADPublicCloud ? [NSString stringWithFormat:@"%@://%@", [request.URL msidHostWithPortIfNecessary], request.URL.host]
              : @"unknown host");
     MSID_LOG_INFO_PII(_context, @"HTTP request %@", request.URL.absoluteString);
     

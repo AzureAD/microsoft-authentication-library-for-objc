@@ -24,8 +24,10 @@
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
+#import "MSALAuthorityFactory.h"
 #import "MSIDAuthority.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
@@ -33,7 +35,7 @@
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
-static NSArray<MSIDAuthority *> *s_authorities = nil;
+static NSArray<MSALAuthority *> *s_authorities = nil;
 
 static NSArray<NSString *> *s_scopes_available = nil;
 
@@ -48,7 +50,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 + (void)initialize
 {
-    NSMutableArray<MSIDAuthority *> *authorities = [NSMutableArray new];
+    NSMutableArray<MSALAuthority *> *authorities = [NSMutableArray new];
     
     NSSet<NSString *> *trustedHosts = [MSIDAuthority trustedHosts];
     for (NSString *host in trustedHosts)
@@ -59,7 +61,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
             __auto_type authorityUrl = [[NSURL alloc] initWithString:authorityString];
-            __auto_type authorityFactory = [MSIDAuthorityFactory new];
+            __auto_type authorityFactory = [MSALAuthorityFactory new];
             __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
             
             [authorities addObject:authority];
@@ -86,7 +88,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
     return s_settings;
 }
 
-+ (NSArray<MSIDAuthority *> *)authorities
++ (NSArray<MSALAuthority *> *)authorities
 {
     return s_authorities;
 }
@@ -125,7 +127,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
     if (authorityString)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         _authority = authority;
     }
@@ -151,9 +153,9 @@ static NSArray<NSString *> *s_scopes_available = nil;
                                               forKey:MSAL_APP_SETTINGS_KEY];
 }
 
-- (void)setAuthority:(MSIDAuthority *)authority
+- (void)setAuthority:(MSALAuthority *)authority
 {
-    [self setValue:authority.url.absoluteString forKey:@"authority"];
+    [self setValue:authority.msidAuthority.url.absoluteString forKey:@"authority"];
     _authority = authority;
 }
 

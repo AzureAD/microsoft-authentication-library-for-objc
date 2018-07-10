@@ -28,6 +28,8 @@
 #import "MSALTestAppSettingsViewController.h"
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 
 static NSArray* s_profileRows = nil;
 static NSArray* s_deviceRows = nil;
@@ -95,7 +97,7 @@ static NSArray* s_deviceRows = nil;
     MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
     clientIdRow.valueBlock = ^NSString *{ return TEST_APP_CLIENT_ID; };
     MSALTestAppSettingsRow* authorityRow = [MSALTestAppSettingsRow rowWithTitle:@"authority"];
-    authorityRow.valueBlock = ^NSString *{ return MSALTestAppSettings.settings.authority.url.absoluteString; };
+    authorityRow.valueBlock = ^NSString *{ return MSALTestAppSettings.settings.authority.msidAuthority.url.absoluteString; };
     
     _profileRows = @[ authorityRow, clientIdRow ];
     

@@ -39,8 +39,9 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAuthority.h"
 
 static MSALInteractiveRequest *s_currentRequest = nil;
 

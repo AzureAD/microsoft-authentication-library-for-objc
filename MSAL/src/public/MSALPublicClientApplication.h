@@ -31,7 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
-@class MSIDAuthority;
+@class MSALAuthority;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -43,7 +43,7 @@
 @property BOOL validateAuthority;
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly) MSIDAuthority *authority;
+@property (readonly) MSALAuthority *authority;
 
 /*! The client ID of the application, this should come from the app developer portal. */
 @property (readonly) NSString *clientId;
@@ -92,7 +92,7 @@
                         not interested in the specific error pass in nil.
  */
 - (id)initWithClientId:(NSString *)clientId
-             authority:(MSIDAuthority *)authority
+             authority:(MSALAuthority *)authority
                  error:(NSError * __autoreleasing *)error;
 
 /*!
@@ -220,7 +220,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSIDAuthority *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -295,7 +295,7 @@
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSIDAuthority *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -337,7 +337,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(MSIDAuthority *)authority
+                          authority:(MSALAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
@@ -362,7 +362,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(MSIDAuthority *)authority
+                          authority:(MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;

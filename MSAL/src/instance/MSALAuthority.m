@@ -26,165 +26,25 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthority.h"
-#import "MSALError_Internal.h"
-#import "MSALHttpRequest.h"
-#import "MSALHttpResponse.h"
-#import "MSALURLSession.h"
-#import "NSURL+MSIDExtensions.h"
+#import "MSALAuthority_Internal.h"
 
 @implementation MSALAuthority
 
-#define TENANT_ID_STRING_IN_PAYLOAD @"{tenantid}"
-
-static NSSet<NSString *> *s_trustedHostList;
-static NSMutableDictionary *s_resolvedAuthorities;
-static NSMutableDictionary *s_resolvedUsersForAuthority;
-
-#pragma mark - helper functions
-+ (BOOL)isTenantless:(NSURL *)authority
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
 {
-    NSArray *authorityURLPaths = authority.pathComponents;
+    self = [super init];
     
-    NSString *tenameName = [authorityURLPaths[1] lowercaseString];
-    if ([tenameName isEqualToString:@"common"] ||
-        [tenameName isEqualToString:@"organizations"])
-    {
-        return YES;
-    }
-    return NO;
+    return self;
 }
 
-+ (NSURL *)cacheUrlForAuthority:(NSURL *)authority
-                       tenantId:(NSString *)tenantId
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(nullable NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    if (![MSALAuthority isTenantless:authority])
-    {
-        return authority;
-    }
-    
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authority msidHostWithPortIfNecessary], tenantId]];
-}
-
-
-#pragma mark - class methods
-+ (void)initialize
-{
-    s_trustedHostList = [NSSet setWithObjects: @"login.windows.net",
-                         @"login.chinacloudapi.cn",
-                         @"login-us.microsoftonline.com",
-                         @"login.cloudgovapi.us",
-                         @"login.microsoftonline.com",
-                         @"login.microsoftonline.de", nil];
-    
-    s_resolvedAuthorities = [NSMutableDictionary new];
-    s_resolvedUsersForAuthority = [NSMutableDictionary new];
-}
-
-+ (NSSet<NSString *> *)trustedHosts
-{
-    return s_trustedHostList;
-}
-
-+ (NSURL *)defaultAuthority
-{
-    return [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-}
-
-+ (NSURL *)checkAuthorityString:(NSString *)authority
-                          error:(NSError * __autoreleasing *)error
-{
-    REQUIRED_STRING_PARAMETER(authority, nil);
-    
-    NSURL *authorityUrl = [NSURL URLWithString:authority];
-    NSArray *pathComponents = [authorityUrl pathComponents];
-    CHECK_ERROR_RETURN_NIL(authorityUrl, nil, MSALErrorInvalidParameter, @"\"authority\" must be a valid URI");
-    CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
-    CHECK_ERROR_RETURN_NIL((pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
-    
-    
-    // B2C
-    if ([pathComponents[1] caseInsensitiveCompare:@"tfp"] == NSOrderedSame)
-    {
-        CHECK_ERROR_RETURN_NIL((pathComponents.count > 3), nil, MSALErrorInvalidParameter,
-                               @"B2C authority should have at least 3 segments in the path (i.e. https://<host>/tfp/<tenant>/<policy>/...)");
-        
-        NSString *updatedAuthorityString = [NSString stringWithFormat:@"https://%@/%@/%@/%@", [authorityUrl msidHostWithPortIfNecessary], authorityUrl.pathComponents[1], authorityUrl.pathComponents[2], authorityUrl.pathComponents[3]];
-        return [NSURL URLWithString:updatedAuthorityString];
-    }
-    
-    // ADFS and AAD
-    return [NSURL URLWithString:[NSString stringWithFormat:@"https://%@/%@", [authorityUrl msidHostWithPortIfNecessary], authorityUrl.pathComponents[1]]];
-}
-
-+ (BOOL)isKnownHost:(NSURL *)url
-{
-    return [s_trustedHostList containsObject:url.host.lowercaseString];
-}
-
-+ (BOOL)addToResolvedAuthority:(MSALAuthority *)authority
-             userPrincipalName:(NSString *)userPrincipalName
-{
-    if (!authority)
-    {
-        return NO;
-    }
-    
-    if (!authority.canonicalAuthority ||
-        (authority.authorityType == ADFSAuthority &&  [NSString msidIsStringNilOrBlank:userPrincipalName]))
-    {
-        return NO;
-    }
-    
-    NSString *authorityKey = authority.canonicalAuthority.absoluteString;
-    
-    @synchronized ([MSALAuthority class])
-    {
-        if (authority.authorityType == ADFSAuthority)
-        {
-            NSMutableSet<NSString *> *usersInDomain = s_resolvedUsersForAuthority[authorityKey];
-            if (!usersInDomain)
-            {
-                usersInDomain = [NSMutableSet new];
-                s_resolvedUsersForAuthority[authorityKey] = usersInDomain;
-            }
-            [usersInDomain addObject:userPrincipalName];
-        }
-        s_resolvedAuthorities[authorityKey] = authority;
-    }
-
-    return YES;
-}
-
-+ (MSALAuthority *)authorityFromCache:(NSURL *)authority
-                        authorityType:(MSALAuthorityType)authorityType
-                    userPrincipalName:(NSString *)userPrincipalName
-{
-    if (!authority)
-    {
-        return nil;
-    }
-    
-    NSString *authorityKey = authority.absoluteString;
-    
-    @synchronized ([MSALAuthority class])
-    {
-        if (authorityType == ADFSAuthority)
-        {
-            if (!userPrincipalName)
-            {
-                return nil;
-            }
-            
-            NSSet *validatedUsers = s_resolvedUsersForAuthority[authorityKey];
-            
-            if (![validatedUsers containsObject:userPrincipalName])
-            {
-                return nil;
-            }
-        }
-        
-        return s_resolvedAuthorities[authorityKey];
-    }
+    return [self initWithURL:url context:context error:error];
 }
 
 @end

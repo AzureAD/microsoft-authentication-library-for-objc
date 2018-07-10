@@ -45,7 +45,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDAuthorityFactory.h"
+#import "MSALAuthorityFactory.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -135,7 +135,7 @@
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
     __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
-    __auto_type authorityFactory = [MSIDAuthorityFactory new];
+    __auto_type authorityFactory = [MSALAuthorityFactory new];
     __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     
     NSError *error = nil;
