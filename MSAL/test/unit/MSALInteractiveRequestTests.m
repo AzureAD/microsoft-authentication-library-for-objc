@@ -30,7 +30,6 @@
 #import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALPkce.h"
-#import "MSALTestAuthority.h"
 #import "MSALTestBundle.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestSwizzle.h"
@@ -50,6 +49,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSALTestUtil.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDTestURLResponse+MSAL.h"
@@ -73,14 +73,14 @@
 #endif
 
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
-    
+
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)tearDown
 {
     [super tearDown];
-    
+
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
@@ -357,19 +357,6 @@
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                        block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-
-    {
-        (void)obj;
-        (void)context;
-        (void)userPrincipalName;
-        (void)validate;
-
-        completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-    }];
-
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
@@ -399,10 +386,10 @@
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
     [MSIDTestURLSession addResponse:response];
-    
+
     __auto_type httpResponse = [NSHTTPURLResponse new];
     __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
+
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
                                                                   reponse:httpResponse];
     NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
@@ -539,19 +526,6 @@
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
-
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
@@ -581,10 +555,10 @@
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
     [MSIDTestURLSession addResponse:response];
-    
+
     __auto_type httpResponse = [NSHTTPURLResponse new];
     __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
+
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
                                                                   reponse:httpResponse];
     NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
@@ -731,19 +705,6 @@
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-         
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
-
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
@@ -773,10 +734,10 @@
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
     [MSIDTestURLSession addResponse:response];
-    
+
     __auto_type httpResponse = [NSHTTPURLResponse new];
     __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
+
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
                                                                   reponse:httpResponse];
     NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
@@ -803,7 +764,7 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          XCTAssertEqual(error.code, MSALErrorMismatchedUser);
-         
+
          [expectation fulfill];
      }];
 
@@ -895,19 +856,6 @@
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
 
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
-
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
@@ -935,10 +883,10 @@
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
     [MSIDTestURLSession addResponse:response];
-    
+
     __auto_type httpResponse = [NSHTTPURLResponse new];
     __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
+
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
                                                                   reponse:httpResponse];
     NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];

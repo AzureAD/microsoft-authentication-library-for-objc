@@ -60,8 +60,9 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
-#import "NSString+MSIDTestUtil.h"
+#import "NSString+MSALTestUtil.h"
 #import "MSIDTestURLResponse+MSAL.h"
+#import "MSALB2CAuthority.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -101,9 +102,9 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
-    __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" authority];
+    __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:authority.url.absoluteString
+    [MSIDTestURLResponse oidcResponseForAuthority:authority.msidAuthority.url.absoluteString
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:@"p=b2c_1_policy"];
     MSIDTestURLResponse *tokenResponse =

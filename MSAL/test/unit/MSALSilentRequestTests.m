@@ -28,7 +28,6 @@
 #import "MSALTestCase.h"
 
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestAuthority.h"
 #import "MSALTestSwizzle.h"
 #import "MSALSilentRequest.h"
 
@@ -56,6 +55,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSALTestUtil.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDAADNetworkConfiguration.h"
@@ -78,19 +78,6 @@
 
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
-
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }

@@ -45,6 +45,7 @@
 #import "MSIDAuthorityFactory.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "NSString+MSALTestUtil.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -57,11 +58,11 @@
 - (void)setUp
 {
     [super setUp];
-    
+
     [MSIDKeychainTokenCache reset];
-    
+
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
-    
+
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
@@ -69,22 +70,22 @@
 - (void)tearDown
 {
     [super tearDown];
-    
+
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
-- (void)setupURLSessionWithB2CAuthority:(MSIDAuthority *)authority policy:(NSString *)policy
+- (void)setupURLSessionWithB2CAuthority:(MSALAuthority *)authority policy:(NSString *)policy
 {
     NSString *query = [NSString stringWithFormat:@"p=%@", policy];
-    
+
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse oidcResponseForAuthority:authority.url.absoluteString
+    [MSIDTestURLResponse oidcResponseForAuthority:authority.msidAuthority.url.absoluteString
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:query];
-    
+
     NSString *uid = [NSString stringWithFormat:@"1-%@", policy];
-    
+
     // User identifier should be uid-policy
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
@@ -92,7 +93,7 @@
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
                                clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
-    
+
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 }
 
@@ -107,32 +108,30 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     // Setup acquireToken with first policy (b2c_1_policy)
-    NSURL *firstAuthorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy"];
-    __auto_type authorityFactory = [MSIDAuthorityFactory new];
-    __auto_type firstAuthority = [authorityFactory authorityFromUrl:firstAuthorityUrl context:nil error:nil];
+    __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
-    
+
     [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
                            class:[MSALWebUI class]
                            block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
      {
          (void)obj;
          (void)context;
-         
+
          XCTAssertNotNil(url);
-         
+
          // State preserving and url are tested separately
          NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          NSString *state = QPs[@"state"];
-         
+
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];
          completionBlock([NSURL URLWithString:responseString], nil);
      }];
-    
+
     NSError *error = nil;
-    
+
     // Create application object with the first policy as authority
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -140,28 +139,27 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
-         
+
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
          XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
          [expectation fulfill];
      }];
-    
+
     [self waitForExpectationsWithTimeout:1 handler:nil];
-    
+
     // Now acquiretoken call with second policy (b2c_2_policy)
-    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy"];
-    __auto_type secondAuthority = [[MSIDB2CAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
-    
+    __auto_type secondAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy" msalAuthority];
+
     // Override oidc and token responses for the second policy
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
-    
+
     // Use an authority with a different policy in the second acquiretoken call
     expectation = [self expectationWithDescription:@"Acquire Token."];
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
@@ -172,16 +170,16 @@
                              authority:secondAuthority
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error) {
-                           
+
                            XCTAssertNil(error);
                            XCTAssertNotNil(result);
-                           
+
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
                            [expectation fulfill];
-        
+
     }];
-    
+
     [self waitForExpectationsWithTimeout:1 handler:nil];
 
     __auto_type allTokens = [self.tokenCacheAccessor allTokensWithContext:nil error:nil];
@@ -200,7 +198,7 @@
             [rts addObject:token];
         }
     }
-    
+
     // Ensure we have two different accesstokens in cache
     // and that second call doesn't overwrite first one, since policies are different
     XCTAssertEqual(ats.count, 2);

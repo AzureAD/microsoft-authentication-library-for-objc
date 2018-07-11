@@ -48,7 +48,9 @@
 #import "MSALAccountId.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDAADAuthority.h"
-#import "NSString+MSIDTestUtil.h"
+#import "NSString+MSALTestUtil.h"
+#import "MSALAADAuthority.h"
+#import "MSALAuthority_Internal.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -203,7 +205,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -225,7 +227,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquire);
-         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/common" authority]);
+         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/common" msalAuthority].msidAuthority);
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI]);
@@ -262,7 +264,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -316,7 +318,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -374,7 +376,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -414,7 +416,7 @@
      }];
     
     authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/contoso.com"];
-    authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                       extraScopesToConsent:@[@"fakescope3"]
@@ -441,7 +443,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -504,7 +506,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -568,7 +570,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -617,7 +619,7 @@
      }];
     
     authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/contoso.com"];
-    authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                       extraScopesToConsent:@[@"fakescope3"]
@@ -645,7 +647,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -675,7 +677,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" authority]);
+         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" msalAuthority].msidAuthority);
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -712,7 +714,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -755,7 +757,7 @@
      }];
     
     authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoft.com/common"];
-    authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"name"
@@ -784,7 +786,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -852,7 +854,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/custom_guest_tenant"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -920,7 +922,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/custom_guest_tenant"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -989,7 +991,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
-    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -1043,7 +1045,7 @@
                                                       clientInfo:nil];
     
     authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoft.com/common"];
-    authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1098,7 +1100,7 @@
                                                              }
                                                      error:nil];
 
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[@"https://login.microsoftonline.com/common" authority]
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[@"https://login.microsoftonline.com/common" msalAuthority].msidAuthority
                                                                         redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                                            clientId:UNIT_TEST_CLIENT_ID
                                                                              target:@"fakescope1 fakescope2"];

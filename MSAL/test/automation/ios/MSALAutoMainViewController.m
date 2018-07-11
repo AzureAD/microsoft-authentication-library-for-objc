@@ -46,6 +46,8 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSALAuthorityFactory.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -290,12 +292,12 @@
             return;
         }
 
-        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority.msidAuthority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];
@@ -323,12 +325,12 @@
             return;
         }
         
-        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_USER_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority.msidAuthority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];

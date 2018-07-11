@@ -562,7 +562,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         // TODO: fix
         if ([msidAuthority isKindOfClass:MSIDAADAuthority.class])
         {
-            __auto_type aadAuthority = (MSIDAADAuthority *)self.authority;
+            __auto_type aadAuthority = (MSIDAADAuthority *)msidAuthority;
             if ([aadAuthority.tenant isTenantless] || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers)
             {
                 __auto_type authorityFactory = [MSIDAuthorityFactory new];
