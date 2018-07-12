@@ -121,18 +121,21 @@
         if ([response isKindOfClass:MSIDWebOAuth2Response.class])
         {
             MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
-            _code = oauthResponse.authorizationCode;
             
-            if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+            if (oauthResponse.authorizationCode)
             {
-                _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
+                _code = oauthResponse.authorizationCode;
+                if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+                {
+                    _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
+                }
+                [super acquireToken:completionBlock];
+                return;
             }
             
-            [super acquireToken:completionBlock];
+            completionBlock(nil, oauthResponse.oauthError);
             return;
         }
-        
-
         completionBlock(nil, error);
     };
     
