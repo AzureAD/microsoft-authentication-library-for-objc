@@ -38,6 +38,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 #import "MSIDWebviewAuthorization.h"
+#import "MSIDWebAADAuthResponse.h"
 
 @implementation MSALInteractiveRequest
 {
@@ -121,9 +122,17 @@
         {
             MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
             _code = oauthResponse.authorizationCode;
+            
+            if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+            {
+                _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
+            }
+            
             [super acquireToken:completionBlock];
             return;
         }
+        
+
         completionBlock(nil, error);
     };
     
