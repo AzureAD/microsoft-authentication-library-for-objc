@@ -28,6 +28,7 @@
 #import "MSIDAuthority.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
@@ -52,7 +53,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 {
     NSMutableArray<MSALAuthority *> *authorities = [NSMutableArray new];
     
-    NSSet<NSString *> *trustedHosts = [MSIDAuthority trustedHosts];
+    NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers"];
