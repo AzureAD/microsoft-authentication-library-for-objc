@@ -559,16 +559,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
          In the acquire token silent call we assume developer wants to get access token for account's home tenant,
          unless they override the default authority in the public client application with a tenanted authority.
          */
-        // TODO: fix
-        if ([msidAuthority isKindOfClass:MSIDAADAuthority.class])
-        {
-            __auto_type aadAuthority = (MSIDAADAuthority *)msidAuthority;
-            if ([aadAuthority.tenant isTenantless] || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers)
-            {
-                __auto_type authorityFactory = [MSIDAuthorityFactory new];
-                msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
-            }
-        }
+        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
     }
     else
     {
