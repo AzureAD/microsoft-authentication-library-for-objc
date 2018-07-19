@@ -89,13 +89,15 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     MSALErrorInvalidRequest              = -42002,
     MSALErrorInvalidClient               = -42003,
-    
+    MSALErrorInvalidGrant               = -42004,
+    MSALErrorInvalidScope               = -42005,
+
     /*! 
         The passed in authority URL does not pass validation.
         If you're trying to use B2C, you must disable authority validation by
         setting validateAuthority of MSALPublicClientApplication to NO.
      */
-    MSALErrorFailedAuthorityValidation = -42004,
+    MSALErrorFailedAuthorityValidation = -42010,
     
     /*!
         Interaction required errors occur because of a wide variety of errors
@@ -182,12 +184,28 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     /*!
      Response was received in a network call, but the response body was invalid.
-     
+     R
      e.g. Response was to be expected a key-value pair with "key1" and
      the json response does not contain "key1" elements
      
      */
     MSALErrorInvalidResponse = -42600,
     
+    /*!
+     Server returned a refresh token reject response
+     */
+    MSALErrorRefreshTokenRejected = -42601,
+    
+    /*!
+     Server tried to redirect to non http URL
+     */
+    MSALErrorNonHttpsRedirect = -42602,
+
+    /*!
+        The requested resource is protected by an Intune Conditional Access policy.
+        The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+        please see https://aka.ms/intuneMAMSDK for more information.
+     */
+    MSALErrorServerProtectionPoliciesRequired = -42603
 };
 

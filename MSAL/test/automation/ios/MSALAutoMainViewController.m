@@ -304,8 +304,7 @@
         MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                                                 target:parameters[MSAL_SCOPES_PARAM]
-                                                                          correlationId:nil];
+                                                                                 target:parameters[MSAL_SCOPES_PARAM]];
 
         __auto_type accessToken = [self.defaultAccessor getAccessTokenForAccount:account configuration:configuration context:nil error:nil];
         accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
@@ -334,8 +333,7 @@
         MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                                                 target:parameters[MSAL_SCOPES_PARAM]
-                                                                          correlationId:nil];
+                                                                                 target:parameters[MSAL_SCOPES_PARAM]];
 
         __auto_type refreshToken = [self.defaultAccessor getRefreshTokenWithAccount:account
                                                                            familyId:nil

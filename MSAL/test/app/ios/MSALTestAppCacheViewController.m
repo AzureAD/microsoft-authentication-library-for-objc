@@ -44,6 +44,7 @@
 #import "MSIDLegacyAccessToken.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAccountIdentifier.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -205,7 +206,7 @@
 
         for (MSIDAccount *account in _accounts)
         {
-            _tokensPerAccount[account.homeAccountId] = [NSMutableArray array];
+            _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
         }
 
         NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
@@ -214,7 +215,7 @@
 
         for (MSIDBaseToken *token in allTokens)
         {
-            NSMutableArray *tokens = _tokensPerAccount[token.homeAccountId];
+            NSMutableArray *tokens = _tokensPerAccount[[self rowIdentifier:token.accountIdentifier]];
             [tokens addObject:token];
         }
         
@@ -223,6 +224,11 @@
             [self.refreshControl endRefreshing];
         });
     });
+}
+
+- (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
+{
+    return accountIdentifier.homeAccountId ? accountIdentifier.homeAccountId : accountIdentifier.legacyAccountId;
 }
 
 #pragma mark - UITableViewDataSource
@@ -235,13 +241,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     MSIDAccount *account = _accounts[section];
-    return [_tokensPerAccount[account.homeAccountId] count] + 1;
+    return [_tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] count] + 1;
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     MSIDAccount *account = _accounts[section];
-    NSString *title = [NSString stringWithFormat:@"%@ (%@)", account.username, account.homeAccountId];
+    NSString *title = [NSString stringWithFormat:@"%@ (%@)", account.username, [self rowIdentifier:account.accountIdentifier]];
     return title;
 }
 
@@ -250,7 +256,7 @@
     if (indexPath.row >= 1)
     {
         MSIDAccount *account = _accounts[indexPath.section];
-        return _tokensPerAccount[account.homeAccountId][indexPath.row - 1];
+        return _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]][indexPath.row - 1];
     }
 
     return nil;
