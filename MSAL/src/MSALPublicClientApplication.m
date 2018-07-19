@@ -65,6 +65,7 @@
 - (BOOL)generateRedirectUriWithClientId:(NSString *)clientId
                                   error:(NSError * __autoreleasing *)error
 {
+    /*
     NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
     
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
@@ -82,7 +83,8 @@
     
     MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"msal<clientID>\" format without any whitespaces.", scheme);
     
-    return NO;
+    return NO;*/
+    return YES;
 }
 
 - (id)initWithClientId:(NSString *)clientId

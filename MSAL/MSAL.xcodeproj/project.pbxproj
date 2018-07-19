@@ -122,6 +122,8 @@
 		B2C17B111FC9010A0070A514 /* NSString+MSALHelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B0D1FC8E0B00070A514 /* NSString+MSALHelperMethods.m */; };
 		B2C17B121FC9010D0070A514 /* NSString+MSALHelperMethods.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C17B0C1FC8E0B00070A514 /* NSString+MSALHelperMethods.h */; };
 		B2C17B131FC9010E0070A514 /* NSString+MSALHelperMethods.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C17B0C1FC8E0B00070A514 /* NSString+MSALHelperMethods.h */; };
+		B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; };
+		B2FE601B20E5BB5800502BA6 /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D61A64941E5AA7D60086D120 /* MSALTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64801E5AA7C60086D120 /* MSALTestAppDelegate.m */; };
 		D61A64951E5AA7D60086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64811E5AA7C60086D120 /* main.m */; };
 		D61A64971E5AA7E20086D120 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A648C1E5AA7C60086D120 /* main.m */; };
@@ -316,6 +318,13 @@
 			remoteGlobalIDString = D626FF5A1FBA6E9500EE4487;
 			remoteInfo = "IdentityCore Mac";
 		};
+		B2FE601C20E5BB5800502BA6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
+			remoteInfo = "MSAL (iOS Framework)";
+		};
 		D61F5BC61E59333000912CB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -403,6 +412,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		B2FE601E20E5BB5900502BA6 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B2FE601B20E5BB5800502BA6 /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D672279A1EBD10B500F3422A /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -687,6 +707,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */,
 				D6A2063E1FC511EB00755A51 /* UIKit.framework in Frameworks */,
 				D67227931EBD100D00F3422A /* MSAL.framework in Frameworks */,
 			);
@@ -1438,10 +1459,12 @@
 				962E37A91E720C5D00DE71FE /* Sources */,
 				962E37B51E720C5D00DE71FE /* Frameworks */,
 				962E37B71E720C5D00DE71FE /* Resources */,
+				B2FE601E20E5BB5900502BA6 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B2FE601D20E5BB5800502BA6 /* PBXTargetDependency */,
 			);
 			name = "MSAL Test Automation (iOS)";
 			productName = MSALTestApp;
@@ -1590,6 +1613,7 @@
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					962E37A61E720C5D00DE71FE = {
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -1613,6 +1637,7 @@
 					};
 					D65A6F421E3FD30A00C69FBA = {
 						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 					};
 					D65A6F4F1E3FD32D00C69FBA = {
@@ -2067,6 +2092,11 @@
 			name = "IdentityCore Mac";
 			targetProxy = B2C17B051FC8D9600070A514 /* PBXContainerItemProxy */;
 		};
+		B2FE601D20E5BB5800502BA6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */;
+			targetProxy = B2FE601C20E5BB5800502BA6 /* PBXContainerItemProxy */;
+		};
 		D61F5BC71E59333000912CB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D65A6F421E3FD30A00C69FBA /* MSAL (iOS Framework) */;
@@ -2132,9 +2162,12 @@
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -2144,9 +2177,11 @@
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -2200,7 +2235,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				GCC_OPTIMIZATION_LEVEL = 0;
 			};
 			name = Debug;
@@ -2211,7 +2246,7 @@
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 			};
 			name = Release;
 		};

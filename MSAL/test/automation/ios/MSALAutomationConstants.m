@@ -35,6 +35,7 @@ NSString *const MSAL_EXTRA_QP_PARAM                             = @"extra_qp";
 NSString *const MSAL_CORRELATION_ID_PARAM                       = @"correlation_id";
 NSString *const MSAL_FORCE_REFRESH_PARAM                        = @"force_refresh";
 NSString *const MSAL_USER_ENVIRONMENT_PARAM                     = @"user_environment";
+NSString *const MSAL_REDIRECT_URI_PARAM                         = @"redirect_uri";
 
 NSString *const MSAL_AUTOMATION_ERROR_PARAM                     = @"error";
 NSString *const MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM            = @"expired_access_token_count";
@@ -47,6 +48,8 @@ NSString *const MSAL_ID_TOKENS_PARAM                            = @"id_tokens";
 NSString *const MSAL_SIGNOUT_RESULT_PARAM                       = @"user_signout_result";
 NSString *const MSAL_USER_COUNT_PARAM                           = @"user_count";
 NSString *const MSAL_USERS_PARAM                                = @"users";
+NSString *const MSAL_SLICE_PARAMS                               = @"slice_params";
+NSString *const MSAL_UI_BEHAVIOR                                = @"ui_behavior";
 
 NSString *const MSAL_AUTOMATION_SUCCESS_VALUE                   = @"yes";
 NSString *const MSAL_AUTOMATION_FAILURE_VALUE                   = @"no";

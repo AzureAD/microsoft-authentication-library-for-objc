@@ -45,6 +45,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSIDExtensions.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -130,7 +131,7 @@
     return YES;
 }
 
-- (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
+- (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
     
@@ -142,6 +143,8 @@
                                                     error:&error];
     
     clientApplication.validateAuthority = validateAuthority;
+    clientApplication.redirectUri = [NSURL URLWithString:parameters[MSAL_REDIRECT_URI_PARAM]];
+    clientApplication.sliceParameters = parameters[MSAL_SLICE_PARAMS];
     
     if (error)
     {
@@ -209,15 +212,26 @@
         
         MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
         
-        NSArray *scopes = (NSArray *)parameters[MSAL_SCOPES_PARAM];
+        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+
+        MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+
+        if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"force"])
+        {
+            uiBehavior = MSALForceLogin;
+        }
+        else if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"consent"])
+        {
+            uiBehavior = MSALForceConsent;
+        }
         
-        [application acquireTokenForScopes:scopes
+        [application acquireTokenForScopes:[scopes array]
                       extraScopesToConsent:extraScopes
                                    account:account
-                                uiBehavior:MSALUIBehaviorDefault
+                                uiBehavior:uiBehavior
                       extraQueryParameters:extraQueryParameters
                                  authority:nil // Will use the authority passed in with the application object
                              correlationId:correlationId
@@ -257,11 +271,11 @@
             return;
         }
         
-        NSArray *scopes = (NSArray *)parameters[MSAL_SCOPES_PARAM];
+        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
         BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         
-        [application acquireTokenSilentForScopes:scopes
+        [application acquireTokenSilentForScopes:[scopes array]
                                          account:account
                                        authority:nil
                                     forceRefresh:forceRefresh
@@ -296,9 +310,9 @@
         __auto_type accessToken = [self.defaultAccessor getAccessTokenForAccount:account configuration:configuration context:nil error:nil];
         accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
 
-        BOOL resut = [self.accountCredentialCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
+        BOOL result = [self.accountCredentialCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
 
-        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, resut ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, accessToken && result ? @"1" : @"0"];
         [self displayOperationResultString:resultString];
     };
 

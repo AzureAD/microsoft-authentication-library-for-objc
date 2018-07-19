@@ -37,6 +37,7 @@ extern NSString *const MSAL_EXTRA_QP_PARAM;
 extern NSString *const MSAL_CORRELATION_ID_PARAM;
 extern NSString *const MSAL_FORCE_REFRESH_PARAM;
 extern NSString *const MSAL_USER_ENVIRONMENT_PARAM;
+extern NSString *const MSAL_REDIRECT_URI_PARAM;
 
 extern NSString *const MSAL_AUTOMATION_ERROR_PARAM;
 extern NSString *const MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM;
@@ -49,6 +50,8 @@ extern NSString *const MSAL_ID_TOKENS_PARAM;
 extern NSString *const MSAL_SIGNOUT_RESULT_PARAM;
 extern NSString *const MSAL_USER_COUNT_PARAM;
 extern NSString *const MSAL_USERS_PARAM;
+extern NSString *const MSAL_SLICE_PARAMS;
+extern NSString *const MSAL_UI_BEHAVIOR;
 
 extern NSString *const MSAL_AUTOMATION_SUCCESS_VALUE;
 extern NSString *const MSAL_AUTOMATION_FAILURE_VALUE;
