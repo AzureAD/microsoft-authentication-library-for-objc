@@ -34,6 +34,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALResult
 
@@ -76,7 +77,7 @@
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
                                                                  name:idTokenClaims.name
-                                                        homeAccountId:accessToken.homeAccountId
+                                                        homeAccountId:accessToken.accountIdentifier.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
                                                           environment:accessToken.authority.msidHostWithPortIfNecessary
                                                              tenantId:idTokenClaims.tenantId
