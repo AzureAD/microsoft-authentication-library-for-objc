@@ -174,6 +174,18 @@
             return nil;
         }
     }
+    else if (parameters[@"user_legacy_identifier"])
+    {
+        NSArray *accounts = [application accounts:nil];
+
+        for (MSALAccount *account in accounts)
+        {
+            if ([account.username isEqualToString:parameters[@"user_legacy_identifier"]])
+            {
+                return account;
+            }
+        }
+    }
     
     return account;
 }
