@@ -57,6 +57,9 @@
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+#if TARGET_OS_IPHONE
+@property (nonatomic, readwrite) NSString *keychainGroup;
+#endif
 
 @end
 
@@ -88,10 +91,28 @@
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
-    return [self initWithClientId:clientId authority:nil error:error];
+    return [self initWithClientId:clientId keychainGroup:nil authority:nil error:error];
+    
 }
 
 - (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+                 error:(NSError * __autoreleasing *)error
+{
+    return [self initWithClientId:clientId keychainGroup:keychainGroup authority:nil error:error];
+}
+
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error
+
+{
+    return [self initWithClientId:clientId keychainGroup:nil authority:authority error:error];
+    
+}
+
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error
 {
@@ -101,7 +122,7 @@
     }
     REQUIRED_PARAMETER(clientId, nil);
     _clientId = clientId;
-    
+
     if (authority)
     {
         _authority = [MSALAuthority checkAuthorityString:authority error:error];
@@ -117,10 +138,13 @@
                                                      error:error]);
     
 #if TARGET_OS_IPHONE
+    // Optional Paramater
+    _keychainGroup = keychainGroup;
+
     MSIDKeychainTokenCache *dataSource;
-    if (self.keychainGroup)
+    if (_keychainGroup != nil)
     {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:self.keychainGroup];
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
     }
     else
     {

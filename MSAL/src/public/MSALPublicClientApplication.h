@@ -60,14 +60,6 @@
     called MSAL. */
 @property NSString *component;
 
-#if TARGET_OS_IPHONE
-/*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
- */
-@property (nonatomic) NSString *keychainGroup;
-#endif
-
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
  
@@ -93,6 +85,47 @@
 - (id)initWithClientId:(NSString *)clientId
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error;
+
+
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
+ */
+@property (nonatomic, readonly) NSString *keychainGroup;
+
+/*!
+ Initialize a MSALPublicClientApplication with a given clientID
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+ If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  error          The error that occurred creating the application object, if any (optional)
+ */
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+                 error:(NSError * __autoreleasing *)error;
+
+/*!
+ Initialize a MSALPublicClientApplication with a given clientID and authority
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+ If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  authority      A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
+ it is of the form https://<instance/<tenant>, where <instance> is the
+ directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+ identifier within the directory itself (e.g. a domain associated to the
+ tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+ TenantID property of the directory)
+ @param  error          The error that occurred creating the application object, if any, if you're
+ not interested in the specific error pass in nil.
+ */
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error;
+#endif
 
 /*!
     Returns an array of accounts visible to this application
