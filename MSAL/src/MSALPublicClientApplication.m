@@ -51,6 +51,8 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+#import "MSIDAuthority.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALPublicClientApplication()
 
@@ -148,15 +150,17 @@
     {
         dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     }
+
+    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:factory];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:factory];
     
     self.tokenCache = defaultAccessor;
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
 
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     self.tokenCache = defaultAccessor;
 #endif
     
@@ -576,6 +580,25 @@
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
+    NSString *authorityString = authority;
+
+    if (!authorityString)
+    {
+        NSURL *defaultAuthority = self.authority;
+
+        /*
+         In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+         unless they override the default authority in the public client application with a tenanted authority.
+         */
+        if ([MSIDAuthority isTenantless:self.authority]
+            || [MSIDAuthority isConsumerInstanceURL:self.authority])
+        {
+            defaultAuthority = [MSIDAuthority cacheUrlForAuthority:self.authority tenantId:account.homeAccountId.tenantId];
+        }
+
+        authorityString = defaultAuthority.absoluteString;
+    }
+
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.account = account;
@@ -607,7 +630,7 @@
     };
 
     NSError *error = nil;
-    if (![params setAuthorityFromString:authority error:&error])
+    if (![params setAuthorityFromString:authorityString error:&error])
     {
         block(nil, error);
         return;

@@ -34,6 +34,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALResult
 
@@ -65,11 +66,18 @@
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
                               idToken:(MSIDIdToken *)idToken
 {
-    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken];
+    NSError *error = nil;
+    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&error];
+
+    if (error)
+    {
+        MSID_LOG_WARN(nil, @"Invalid ID token");
+        MSID_LOG_WARN_PII(nil, @"Invalid ID token, error %@", error);
+    }
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
                                                                  name:idTokenClaims.name
-                                                        homeAccountId:accessToken.homeAccountId
+                                                        homeAccountId:accessToken.accountIdentifier.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
                                                           environment:accessToken.authority.msidHostWithPortIfNecessary
                                                              tenantId:idTokenClaims.tenantId

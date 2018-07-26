@@ -49,7 +49,7 @@
 #import "MSIDTestTokenResponse.h"
 #import "MSIDTestConfiguration.h"
 #import "MSIDAADV2TokenResponse.h"
-#import "MSIDTestCacheIdentifiers.h"
+#import "MSIDTestIdentifiers.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDClientInfo.h"
 #import "MSIDTestIdTokenUtil.h"
@@ -76,7 +76,7 @@
 #else
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
-    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     
     [self.tokenCache clearWithContext:nil error:nil];
 }
@@ -161,9 +161,6 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-/*
- I'll be fixing this scenario, when authority is not known in a separate PR
- The logic will be changed hugely, so commenting this test right now
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -182,23 +179,21 @@
     NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithDisplayableId:@"preferredUserName"
-                                                                 name:@"user@contoso.com"
-                                                        homeAccountId:@"1.1234-5678-90abcdefg"
-                                                       localAccountId:@"1"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:clientInfo];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
     
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
-    MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    BOOL result = [self.tokenCache saveTokensWithFactory:factory
-                                           configuration:configuration
-                                                response:response
-                                                 context:nil
-                                                   error:nil];
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
     XCTAssertTrue(result);
     
     NSError *error = nil;
@@ -233,6 +228,6 @@
      }];
 
     [self waitForExpectations:@[expectation] timeout:1];
-}*/
+}
 
 @end

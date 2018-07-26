@@ -43,6 +43,8 @@
 #import "MSIDLegacyRefreshToken.h"
 #import "MSIDLegacyAccessToken.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAccountIdentifier.h"
 
 #define BAD_REFRESH_TOKEN @"bad-refresh-token"
 
@@ -75,8 +77,9 @@
     [self setExtendedLayoutIncludesOpaqueBars:NO];
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
 
-    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
-    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
+    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
     return self;
@@ -203,7 +206,7 @@
 
         for (MSIDAccount *account in _accounts)
         {
-            _tokensPerAccount[account.homeAccountId] = [NSMutableArray array];
+            _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
         }
 
         NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
@@ -212,7 +215,7 @@
 
         for (MSIDBaseToken *token in allTokens)
         {
-            NSMutableArray *tokens = _tokensPerAccount[token.homeAccountId];
+            NSMutableArray *tokens = _tokensPerAccount[[self rowIdentifier:token.accountIdentifier]];
             [tokens addObject:token];
         }
         
@@ -221,6 +224,11 @@
             [self.refreshControl endRefreshing];
         });
     });
+}
+
+- (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
+{
+    return accountIdentifier.homeAccountId ? accountIdentifier.homeAccountId : accountIdentifier.legacyAccountId;
 }
 
 #pragma mark - UITableViewDataSource
@@ -233,13 +241,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     MSIDAccount *account = _accounts[section];
-    return [_tokensPerAccount[account.homeAccountId] count] + 1;
+    return [_tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] count] + 1;
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     MSIDAccount *account = _accounts[section];
-    NSString *title = [NSString stringWithFormat:@"%@ (%@)", account.username, account.homeAccountId];
+    NSString *title = [NSString stringWithFormat:@"%@ (%@)", account.username, [self rowIdentifier:account.accountIdentifier]];
     return title;
 }
 
@@ -248,7 +256,7 @@
     if (indexPath.row >= 1)
     {
         MSIDAccount *account = _accounts[indexPath.section];
-        return _tokensPerAccount[account.homeAccountId][indexPath.row - 1];
+        return _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]][indexPath.row - 1];
     }
 
     return nil;
@@ -282,16 +290,17 @@
     switch (token.credentialType) {
         case MSIDRefreshTokenType:
         {
+            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
+
             if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.msidTenant, refreshToken.clientId];
             }
             else
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@", token.authority.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.msidTenant, refreshToken.familyId];
             }
 
-            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) token;
             if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
             {
                 cell.textLabel.textColor = [UIColor orangeColor];

@@ -495,9 +495,10 @@
     
     __block BOOL fBlockHit = NO;
     _acquireSilentButton.enabled = NO;
-    
+
     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
                                      account:settings.currentAccount
+                                   authority:settings.authority
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)

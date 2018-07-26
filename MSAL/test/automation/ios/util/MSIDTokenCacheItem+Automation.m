@@ -33,7 +33,7 @@
 
 - (NSDictionary *)itemAsDictionary
 {
-    MSIDAADV2IdTokenClaims *idToken = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:self.secret];
+    MSIDAADV2IdTokenClaims *idToken = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:self.secret error:nil];
     NSMutableDictionary *resultDict = [[self jsonDictionary] mutableCopy];
     [resultDict setValue:idToken.tenantId forKey:@"tenant_id"];
     
