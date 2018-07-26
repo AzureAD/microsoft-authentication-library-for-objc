@@ -105,8 +105,6 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
     CHECK_ERROR_RETURN_NIL((pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
     
-    CHECK_ERROR_RETURN_NIL(![authorityUrl.host.lowercaseString isEqualToString:@"login.windows.net"], nil, MSALErrorInvalidParameter, @"login.windows.net has been deprecated. Use login.microsoftonline.com instead.");
-    
     
     // B2C
     if ([pathComponents[1] caseInsensitiveCompare:@"tfp"] == NSOrderedSame)

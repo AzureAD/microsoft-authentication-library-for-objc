@@ -35,6 +35,7 @@
 @implementation MSALTestAppAuthorityViewController
 {
     NSMutableArray *_authorities;
+    NSMutableArray *_savedAuthorities;
 }
 
 + (instancetype)sharedController
@@ -62,6 +63,15 @@
     {
         [_authorities addObject:currentAuthority];
     }
+
+    _savedAuthorities = [[[NSUserDefaults standardUserDefaults] objectForKey:@"saved_authorities"] mutableCopy];
+
+    if (!_savedAuthorities)
+    {
+        _savedAuthorities = [NSMutableArray array];
+    }
+
+    [_authorities addObjectsFromArray:_savedAuthorities];
     
     return self;
 }
@@ -71,9 +81,35 @@
 
 - (void)viewDidLoad
 {
-    
     self.navigationItem.title = @"Select Authority";
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addAuthority:)];
     [super viewDidLoad];
+}
+
+- (void)addAuthority:(id)sender
+{
+    UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Add authority" message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [controller addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"Authority";
+    }];
+
+    [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
+    [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+
+        NSString *authority = controller.textFields[0].text;
+        [self saveAuthority:authority];
+    }]];
+
+    [self presentViewController:controller animated:YES completion:nil];
+
+}
+
+- (void)saveAuthority:(NSString *)authority
+{
+    [_savedAuthorities addObject:authority];
+    [[NSUserDefaults standardUserDefaults] setObject:_savedAuthorities forKey:@"saved_authorities"];
+    [_authorities addObject:authority];
+    [super refresh];
 }
 
 - (void)refresh

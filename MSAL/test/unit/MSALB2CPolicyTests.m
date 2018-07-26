@@ -41,6 +41,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALAccountId.h"
 #import "MSIDBaseToken.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -56,7 +57,7 @@
     
     [MSIDKeychainTokenCache reset];
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
 }
 
 - (void)tearDown

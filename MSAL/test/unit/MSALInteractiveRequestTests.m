@@ -49,6 +49,7 @@
 #import "MSIDMacTokenCache.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSIDAADV2Oauth2Factory.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
@@ -63,7 +64,7 @@
     [super setUp];
     
 #if TARGET_OS_IPHONE
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
 #else
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDMacTokenCache new] otherCacheAccessors:nil];
 #endif
