@@ -47,6 +47,7 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSALAccountId.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDMacTokenCache.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -75,7 +76,15 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
 
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    id<MSIDTokenCacheDataSource> dataSource = nil;
+
+#if TARGET_OS_IPHONE
+    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+#else
+    dataSource = MSIDMacTokenCache.defaultCache;
+#endif
+
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -100,24 +109,6 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
-- (void)testRedirectUriError
-{
-    // By default the initializer for MSALPublicClientApplication should fail due to the redirect URI
-    // not being listed in the info plist
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
-    NSError *error = nil;
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                    error:&error];
-    
-    XCTAssertNil(application);
-    XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
-    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-}
-
 - (void)testInit
 {
     NSError *error = nil;
@@ -133,9 +124,156 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
-    
-    application = nil;
+#if TARGET_OS_IPHONE
+    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+#endif
 }
+
+- (void)testInitWithClientIdAndAuthority_whenValidClientIdAndAuthority_shouldReturnApplicationAndNilError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                    error:&error];
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+#if TARGET_OS_IPHONE
+    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+#endif
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenValidClientIdAndAuthorityAndRedirectUri_shouldReturnApplicationAndNilError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:&error];
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, @"mycustom.redirect://bundle_id");
+#if TARGET_OS_IPHONE
+    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+#endif
+}
+
+#if TARGET_OS_IPHONE
+
+- (void)testInitWithClientId_whenSchemeNotRegistered_shouldReturnNilApplicationAndFillError
+{
+    // By default the initializer for MSALPublicClientApplication should fail due to the redirect URI
+    // not being listed in the info plist
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                    error:&error];
+
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                              redirectUri:@"mycustom.wrong.redirect://bundle_id"
+                                                    error:&error];
+
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+}
+
+- (void)testInitWithClientIdAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:@"com.contoso.msalcache"
+                                                    error:&error];
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+}
+
+- (void)testInitWithClientIdAndAuthorityAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:@"com.contoso.msalcache"
+                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                    error:&error];
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
+{
+    NSError *error = nil;
+
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:@"com.contoso.msalcache"
+                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:&error];
+
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.redirectUri.absoluteString, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+}
+
+#endif
 
 - (void)testHandleMSALResponse_whenInvalid_returnsNo
 {
@@ -1008,6 +1146,8 @@
 #pragma
 #pragma mark - remove user
 
+#if TARGET_OS_IPHONE
+
 - (void)testRemoveUser_whenUserExists_shouldRemoveUser
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -1071,6 +1211,8 @@
     // Make sure the user is now gone
     XCTAssertEqual([application accounts:nil].count, 0);
 }
+
+#endif
 
 - (void)testRemove_whenUserDontExist_shouldReturnTrueWithNoError
 {

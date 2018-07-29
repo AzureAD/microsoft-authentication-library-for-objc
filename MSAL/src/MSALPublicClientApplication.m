@@ -93,15 +93,12 @@
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
-    return [self initWithClientId:clientId keychainGroup:nil authority:nil error:error];
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:nil
+                      redirectUri:nil
+                            error:error];
     
-}
-
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-                 error:(NSError * __autoreleasing *)error
-{
-    return [self initWithClientId:clientId keychainGroup:keychainGroup authority:nil error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -109,8 +106,37 @@
                  error:(NSError * __autoreleasing *)error
 
 {
-    return [self initWithClientId:clientId keychainGroup:nil authority:authority error:error];
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:authority
+                      redirectUri:nil
+                            error:error];
     
+}
+
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+           redirectUri:(NSString *)redirectUri
+                 error:(NSError **)error
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:authority
+                      redirectUri:redirectUri
+                            error:error];
+}
+
+#if TARGET_OS_IPHONE
+
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+                 error:(NSError * __autoreleasing *)error
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:keychainGroup
+                        authority:nil
+                      redirectUri:nil
+                            error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -119,12 +145,16 @@
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
+                    keychainGroup:keychainGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
 }
 
+#endif
+
 - (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
              authority:(NSString *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error
@@ -160,6 +190,7 @@
     }
     else
     {
+        _keychainGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
         dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     }
 
