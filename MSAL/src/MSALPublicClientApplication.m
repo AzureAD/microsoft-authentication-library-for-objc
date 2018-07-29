@@ -53,11 +53,11 @@
 #import "MSALAccountId.h"
 #import "MSIDAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSALRedirectUriVerifier.h"
 
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
-@property (nonatomic) BOOL brokerEnabled;
 
 @end
 
@@ -66,56 +66,25 @@
 // Make sure scheme is registered in info.plist
 // If broker is enabled, make sure redirect uri has bundle id in it
 // If no redirect uri is provided, generate a default one, which is compatible with broker if broker is enabled
-- (BOOL)verifyRedirectUri:(NSURL *)redirectUri
+- (BOOL)verifyRedirectUri:(NSString *)redirectUriString
                  clientId:(NSString *)clientId
                     error:(NSError * __autoreleasing *)error
 {
-    NSString *scheme = nil;
-    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    NSURL *redirectUri = [MSALRedirectUriVerifier generateRedirectUri:redirectUriString
+                                                             clientId:clientId
+                                                        brokerEnabled:NO
+                                                                error:error];
 
-    if (redirectUri)
+    if (!redirectUri)
     {
-        scheme = redirectUri.scheme;
-        _redirectUri = redirectUri;
-
-        if (_brokerEnabled)
-        {
-            NSString *host = [_redirectUri host];
-            if (![host isEqualToString:bundleId])
-            {
-                MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"Your MSALPublicClientApplication is configured to allow brokered authentication but your redirect URI is not setup properly. Make sure your redirect URI is in the form of <app-scheme>://<bundle-id> (e.g. \"x-msauth-testapp://com.microsoft.msal.testapp\") and that the \"app-scheme\" you choose is registered in your application's info.plist.");
-                return NO;
-            }
-        }
-    }
-    else
-    {
-        scheme = [NSString stringWithFormat:@"msal%@", clientId];
-        NSString *hostComponent = _brokerEnabled ? bundleId : @"auth";
-        NSString *redirectUriString = [NSString stringWithFormat:@"%@://%@", scheme, hostComponent];
-        _redirectUri = [NSURL URLWithString:redirectUriString];
+        return NO;
     }
 
-    return [self verifySchemeIsRegistered:scheme error:error];
-}
+    _redirectUri = redirectUri;
 
-- (BOOL)verifySchemeIsRegistered:(NSString *)scheme
-                           error:(NSError * __autoreleasing *)error
-{
-    NSArray *urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
-
-    for (NSDictionary *urlRole in urlTypes)
-    {
-        NSArray *urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
-        if ([urlSchemes containsObject:scheme])
-        {
-            return YES;
-        }
-    }
-
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme \"%@\" is not registered in the app's info.plist file. Please add \"%@\" into Info.plist under CFBundleURLSchemes without any whitespaces.", scheme, scheme);
-
-    return NO;
+    return [MSALRedirectUriVerifier verifyRedirectUri:_redirectUri
+                                        brokerEnabled:NO
+                                                error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -128,7 +97,10 @@
              authority:(NSString *)authority
                  error:(NSError * __autoreleasing *)error
 {
-    return [self initWithClientId:clientId authority:authority redirectUri:nil error:error];
+    return [self initWithClientId:clientId
+                        authority:authority
+                      redirectUri:nil
+                            error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
