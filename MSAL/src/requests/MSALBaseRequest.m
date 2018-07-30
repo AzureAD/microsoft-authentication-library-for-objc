@@ -30,7 +30,9 @@
 #import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
 #import "MSALAccount.h"
-#import "MSALWebAuthRequest.h"
+#import "MSIDAADAuthorizationCodeGrantRequest.h"
+#import "MSIDAADRefreshTokenGrantRequest.h"
+#import "MSALInteractiveRequest.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
@@ -164,9 +166,72 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
-    NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
+    MSIDTokenRequest *authRequest = [self tokenRequest];
     
-    // TODO: Remove once uid+utid work hits PROD
+    [authRequest sendWithBlock:^(id response, NSError *error) {
+        
+        [authRequest finishAndInvalidate];
+        
+        if (error)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        
+        NSMutableDictionary *jsonDictionary = (NSMutableDictionary *)response;
+        
+        MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
+        
+        if (!tokenResponse)
+        {
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            return;
+        }
+        
+        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&error])
+        {
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            return;
+        }
+        
+        if (_parameters.account.homeAccountId.identifier != nil &&
+            ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
+        {
+            NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+            completionBlock(nil, userMismatchError);
+            return;
+        }
+        
+        MSIDConfiguration *configuration = _parameters.msidConfiguration;
+        
+        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                           response:tokenResponse
+                                                            context:_parameters
+                                                              error:&error];
+        
+        if (!isSaved)
+        {
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            return;
+        }
+        
+        MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
+        MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
+        
+        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+        
+        completionBlock(result, nil);
+    }];
+}
+
+- (MSIDTokenRequest *)tokenRequest
+{
+    // Implemented in subclasses
+    return nil;
+}
+
+- (NSURL *)tokenEndpointWithSliceParameter
+{
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
@@ -183,88 +248,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     tokenEndpoint.query = [endpointQPs msidURLFormEncode];
     
-    MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
-                                                                      context:_parameters];
-    
-    reqParameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
-    reqParameters[MSID_OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
-    reqParameters[MSID_OAUTH2_CLIENT_INFO] = @"1";
-
-    [self addAdditionalRequestParameters:reqParameters];
-    authRequest.bodyParameters = reqParameters;
-    
-    [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
-     {
-         MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-         NSDictionary *jsonDictionary;
-         
-         if (!error)
-         {
-             jsonDictionary = [response.body msidToJsonDictionary:&error];
-         }
-         
-         if (error)
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, error);
-             return;
-         }
-         
-         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
-
-         if (!tokenResponse)
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-         
-         if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&error])
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-
-         if (_parameters.account.homeAccountId.identifier != nil &&
-             ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
-         {
-             NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
-             completionBlock(nil, userMismatchError);
-             return;
-         }
-
-         MSIDConfiguration *configuration = _parameters.msidConfiguration;
-
-         BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
-                                                            response:tokenResponse
-                                                             context:_parameters
-                                                               error:&error];
-         
-         if (!isSaved)
-         {
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-
-         MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
-         MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
-         
-         MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
-         
-         [event setUser:result.account];
-         [self stopTelemetryEvent:event error:nil];
-
-         completionBlock(result, nil);
-     }];
-}
-
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
-{
-    (void)parameters;
+    return tokenEndpoint.URL;
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent

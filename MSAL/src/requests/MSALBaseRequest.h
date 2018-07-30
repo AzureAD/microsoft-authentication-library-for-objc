@@ -33,6 +33,7 @@
 @class MSALTelemetryAPIEvent;
 @class MSIDDefaultTokenCacheAccessor;
 @class MSIDAADV2Oauth2Factory;
+@class MSIDTokenRequest;
 
 @interface MSALBaseRequest : NSObject
 {
@@ -61,7 +62,8 @@
 - (void)run:(nonnull MSALCompletionBlock)completionBlock;
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
-- (void)addAdditionalRequestParameters:(nonnull NSMutableDictionary<NSString *, NSString *> *)parameters;
+- (nullable MSIDTokenRequest *)tokenRequest;
+- (nonnull NSURL *)tokenEndpointWithSliceParameter;
 
 - (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
