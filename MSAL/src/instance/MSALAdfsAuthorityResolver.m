@@ -34,7 +34,6 @@
 #import "MSALWebAuthRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
-#import "MSIDAADRequestConfigurator.h"
 
 // Trusted realm for webFinger
 #define TRUSTED_REALM       @"http://schemas.microsoft.com/rel/trusted-realm"
