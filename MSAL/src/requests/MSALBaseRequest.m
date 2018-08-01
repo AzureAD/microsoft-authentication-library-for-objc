@@ -179,7 +179,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if(response && ![response isKindOfClass:[NSMutableDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: MSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
             completionBlock(nil, localError);
             return;
         }

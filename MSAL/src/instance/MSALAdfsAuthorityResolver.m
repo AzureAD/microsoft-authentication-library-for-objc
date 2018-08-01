@@ -142,7 +142,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
         
         if(response && ![response isKindOfClass:[NSMutableDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: MSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
             completionBlock(nil, localError);
             return;
         }
@@ -226,7 +226,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
         
         if(response && ![response isKindOfClass:[NSMutableDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: MSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
             completionBlock(nil, localError);
             return;
         }
