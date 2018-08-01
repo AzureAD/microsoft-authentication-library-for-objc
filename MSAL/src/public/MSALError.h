@@ -200,5 +200,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      Server tried to redirect to non http URL
      */
     MSALErrorNonHttpsRedirect = -42602,
+
+    /*!
+        The requested resource is protected by an Intune Conditional Access policy.
+        The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+        please see https://aka.ms/intuneMAMSDK for more information.
+     */
+    MSALErrorServerProtectionPoliciesRequired = -42603
 };
 
