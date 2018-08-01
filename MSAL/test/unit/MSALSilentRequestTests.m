@@ -56,6 +56,7 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDTestURLResponse+MSAL.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -274,8 +275,9 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice"
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -376,8 +378,9 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY
+    [MSIDTestURLResponse requestURLString:url UT_SLICE_PARAMS_QUERY
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -557,8 +560,9 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -713,8 +717,9 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
@@ -823,8 +828,9 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
                                              @"scope" : @"fakescope1 fakescope2 openid profile offline_access",

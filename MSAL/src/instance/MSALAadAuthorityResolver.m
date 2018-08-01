@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAadAuthorityResolver.h"
-#import "MSALHttpRequest.h"
 #import "MSALHttpResponse.h"
 #import "MSALInstanceDiscoveryResponse.h"
+#import "MSIDAADAuthorityValidationRequest.h"
 
 @implementation MSALAadAuthorityResolver
 
@@ -64,22 +64,30 @@
         completionBlock(endpoint, nil);
         return;
     }
-
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT]
-                                                            context:context];
-    [request setValue:API_VERSION_VALUE forQueryParameter:API_VERSION];
-    [request setValue:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString forQueryParameter:AUTHORIZATION_ENDPOINT];
     
-    [request sendGet:^(MSALHttpResponse *response, NSError *error)
-     {
+    NSURLComponents *requestUrlComp = [[NSURLComponents alloc] initWithURL:[NSURL URLWithString:AAD_INSTANCE_DISCOVERY_ENDPOINT] resolvingAgainstBaseURL:NO];
+    NSMutableArray *queryItems = [NSMutableArray new];
+    [queryItems addObject:[[NSURLQueryItem alloc] initWithName:API_VERSION value:API_VERSION_VALUE]];
+    [queryItems addObject:[[NSURLQueryItem alloc] initWithName:AUTHORIZATION_ENDPOINT
+                                                         value:[authority URLByAppendingPathComponent:TOKEN_ENDPOINT_SUFFIX].absoluteString]];
+    requestUrlComp.queryItems = queryItems;
+    
+    
+    MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:requestUrlComp.URL
+                                                                                                context:context];
+    [request sendWithBlock:^(id response, NSError *error) {
+        
+        [request finishAndInvalidate];
+
          if (error)
          {
              completionBlock(nil, error);
              return;
          }
          
+         NSMutableDictionary *responseDic = (NSMutableDictionary *)response;
          NSError *jsonError = nil;
-         MSALInstanceDiscoveryResponse *json = [[MSALInstanceDiscoveryResponse alloc] initWithData:response.body
+         MSALInstanceDiscoveryResponse *json = [[MSALInstanceDiscoveryResponse alloc] initWithJson:responseDic
                                                                                              error:&jsonError];
          if (jsonError)
          {

@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthorityBaseResolver.h"
-#import "MSALHttpRequest.h"
-#import "MSALHttpResponse.h"
 #import "MSALTenantDiscoveryResponse.h"
+#import "MSIDAADAuthorityValidationRequest.h"
 
 @implementation MSALAuthorityBaseResolver
 
@@ -38,14 +37,17 @@
                         context:(id<MSALRequestContext>)context
                 completionBlock:(TenantDiscoveryCallback)completionBlock
 {
-    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:url
-                                                            context:context];
-
-    [request sendGet:^(MSALHttpResponse *response, NSError *error) {
+    MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
+                                                                                                context:context];
+    [request sendWithBlock:^(id response, NSError *error) {
+        
+        [request finishAndInvalidate];
+        
         CHECK_COMPLETION(!error);
 
+        NSMutableDictionary *responseDic = (NSMutableDictionary *)response;
         NSError *jsonError = nil;
-        MSALTenantDiscoveryResponse *tenantDiscoveryResponse = [[MSALTenantDiscoveryResponse alloc] initWithData:response.body
+        MSALTenantDiscoveryResponse *tenantDiscoveryResponse = [[MSALTenantDiscoveryResponse alloc] initWithJson:responseDic
                                                                                                            error:&jsonError];
         if (jsonError)
         {
