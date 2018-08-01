@@ -27,7 +27,6 @@
 
 #import "MSALBaseRequest.h"
 #import "MSALAuthority.h"
-#import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
 #import "MSALAccount.h"
 #import "MSIDAADAuthorizationCodeGrantRequest.h"

@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAadAuthorityResolver.h"
-#import "MSALHttpResponse.h"
 #import "MSALInstanceDiscoveryResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
 

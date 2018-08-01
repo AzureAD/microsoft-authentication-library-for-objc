@@ -30,9 +30,6 @@
 
 #import "MSALDrsDiscoveryResponse.h"
 #import "MSALWebFingerResponse.h"
-
-#import "MSALWebAuthRequest.h"
-#import "MSALHttpResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
 
 // Trusted realm for webFinger

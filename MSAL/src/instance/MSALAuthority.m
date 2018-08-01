@@ -30,7 +30,6 @@
 #import "MSALAadAuthorityResolver.h"
 #import "MSALAdfsAuthorityResolver.h"
 #import "MSALB2CAuthorityResolver.h"
-#import "MSALHttpResponse.h"
 #import "MSALURLSession.h"
 #import "MSALTenantDiscoveryResponse.h"
 #import "NSURL+MSIDExtensions.h"
