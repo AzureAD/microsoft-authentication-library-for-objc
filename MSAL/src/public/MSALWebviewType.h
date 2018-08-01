@@ -30,10 +30,7 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeWKWebView,
     
 #if TARGET_OS_IPHONE
-    // Uses system default:
-    //  iOS 9  - SFSafariViewController
-    //  iOS 10 - SFSafariViewController
-    //  iOS 11 - SFAuthenticationSession
+
     MSALWebviewTypeSafariViewController,
     MSALWebviewTypeAuthenticationSession,
 #endif
