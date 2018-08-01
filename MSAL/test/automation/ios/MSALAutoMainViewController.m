@@ -45,6 +45,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSALWebviewType_Internal.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -217,11 +218,11 @@
         NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
         if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
         {
-            application.webviewSelection = MSALWebviewSelectionEmbedded;
+            application.webviewType = MSALWebviewTypeWKWebView;
         }
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
         {
-            application.webviewSelection = MSALWebviewSelectionSystemDefault;
+            application.webviewType = MSALDefaultWebviewTypeSystem();
         }
         
         [application acquireTokenForScopes:scopes

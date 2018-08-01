@@ -166,9 +166,7 @@ static MSALScopes *s_reservedScopes = nil;
 {
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
-    // TODO: Remove once uid+utid work hits PROD
-    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint
-                                                resolvingAgainstBaseURL:NO];
+    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     
     if (_cloudAuthority)
     {

@@ -21,23 +21,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef MSALWebviewSelection_h
-#define MSALWebviewSelection_h
+#ifndef MSALWebviewType_h
+#define MSALWebviewType_h
 
-typedef NS_ENUM(NSInteger, MSALWebviewSelection)
+typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
     // Uses WKWebView
-    MSALWebviewSelectionEmbedded,
+    MSALWebviewTypeWKWebView,
     
 #if TARGET_OS_IPHONE
     // Uses system default:
     //  iOS 9  - SFSafariViewController
     //  iOS 10 - SFSafariViewController
     //  iOS 11 - SFAuthenticationSession
-    MSALWebviewSelectionSystemDefault,
+    MSALWebviewTypeSafariViewController,
+    MSALWebviewTypeAuthenticationSession,
 #endif
-    
-    MSALWebviewSelectionDefault = MSALWebviewSelectionEmbedded
 };
 
-#endif /* MSALWebviewSelection_h */
+
+#endif /* MSALWebviewType_h */

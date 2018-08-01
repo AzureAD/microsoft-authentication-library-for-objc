@@ -51,7 +51,7 @@
 @property MSALTelemetryApiId apiId;
 @property NSDictionary<NSString *, NSString *> *sliceParameters;
 
-@property MSALWebviewSelection webviewSelection;
+@property MSALWebviewType webviewType;
 
 @property WKWebView *customWebview;
 

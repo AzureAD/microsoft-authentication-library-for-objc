@@ -59,6 +59,8 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
 
+#import "MSALWebviewType_Internal.h"
+
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
@@ -163,7 +165,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewSelection = MSALWebviewSelectionDefault;
+    _webviewType = MSALDefaultWebviewType();
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
@@ -248,9 +250,6 @@
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
 #if TARGET_OS_IPHONE
-    MSIDWebviewSession *session = [MSIDWebviewAuthorization currentSession];
-    if (!session) return NO;
-    
     return [MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response];
 #else
     return NO;
@@ -445,6 +444,7 @@
                       completionBlock:completionBlock];
 }
 
+
 #pragma mark -
 #pragma mark - private methods
 
@@ -535,7 +535,7 @@
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
-    params.webviewSelection = _webviewSelection;
+    params.webviewType = _webviewType;
     params.customWebview = _customWebview;
     
     MSALInteractiveRequest *request =

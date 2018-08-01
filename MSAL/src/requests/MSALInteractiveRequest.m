@@ -117,18 +117,17 @@
     config.loginHint = _parameters.loginHint;
     _webviewConfig = config;
     
-    void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error) {
-        if ([response isKindOfClass:MSIDWebOAuth2Response.class])
+    void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
+    {
+        if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
         {
-            MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
+            MSIDWebAADAuthResponse *oauthResponse = (MSIDWebAADAuthResponse *)response;
             
             if (oauthResponse.authorizationCode)
             {
                 _code = oauthResponse.authorizationCode;
-                if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
-                {
-                    _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
-                }
+                _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
+                
                 [super acquireToken:completionBlock];
                 return;
             }
@@ -136,27 +135,38 @@
             completionBlock(nil, oauthResponse.oauthError);
             return;
         }
+        
         completionBlock(nil, error);
     };
     
-    
-    if (_parameters.webviewSelection == MSALWebviewSelectionEmbedded)
-    {
-        [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
-                                                              oauth2Factory:_parameters.msidOAuthFactory
-                                                                    webview:_parameters.customWebview
-                                                                    context:_parameters
-                                                          completionHandler:webAuthCompletion];
-    }
+    switch (_parameters.webviewType) {
+        case MSALWebviewTypeWKWebView:
+            [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
+                                                                  oauth2Factory:_parameters.msidOAuthFactory
+                                                                        webview:_parameters.customWebview
+                                                                        context:_parameters
+                                                              completionHandler:webAuthCompletion];
+            break;
 #if TARGET_OS_IPHONE
-    else if (_parameters.webviewSelection == MSALWebviewSelectionSystemDefault)
-    {
-        [MSIDWebviewAuthorization startSystemWebviewWebviewAuthWithConfiguration:config
-                                                                   oauth2Factory:_parameters.msidOAuthFactory
-                                                                         context:_parameters
-                                                               completionHandler:webAuthCompletion];
-    }
+        case MSALWebviewTypeSafariViewController:
+            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
+                                                                oauth2Factory:_parameters.msidOAuthFactory
+                                                      useSafariViewController:YES
+                                                                      context:_parameters
+                                                            completionHandler:webAuthCompletion];
+            break;
+        case MSALWebviewTypeAuthenticationSession:
+            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
+                                                                oauth2Factory:_parameters.msidOAuthFactory
+                                                      useSafariViewController:NO
+                                                                      context:_parameters
+                                                            completionHandler:webAuthCompletion];
+            break;
 #endif
+        default:
+            assert(1);
+            break;
+    }
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

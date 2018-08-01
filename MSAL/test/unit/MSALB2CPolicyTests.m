@@ -43,6 +43,7 @@
 #import "MSIDAADV2Oauth2Factory.h"
 
 #import "MSIDWebviewAuthorization.h"
+#import "MSIDWebAADAuthResponse.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -110,8 +111,8 @@
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
          
-         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
-                                                                                   context:nil error:nil];    
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                    context:nil error:nil];    
          completionHandler(oauthResponse, nil);
      }];
 
@@ -125,6 +126,8 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
+    application.webviewType = MSALWebviewTypeWKWebView;
+    
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
 
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]

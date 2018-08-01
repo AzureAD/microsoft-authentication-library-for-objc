@@ -27,7 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+#define TEST_APP_CLIENT_ID @"d326c1ce-6cc6-4de2-bebc-4591e5e13ef0"
 
 extern NSString* MSALTestAppCacheChangeNotification;
 

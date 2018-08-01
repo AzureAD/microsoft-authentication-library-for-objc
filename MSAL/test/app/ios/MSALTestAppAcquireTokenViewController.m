@@ -36,6 +36,7 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import <WebKit/WebKit.h>
+#import "MSALWebviewType_Internal.h"
 
 #define TEST_EMBEDDED_WVTYPE @"Embedded"
 #define TEST_SYSTEM_WVTYPE   @"System"
@@ -509,17 +510,15 @@
         });
     };
     
-    application.webviewSelection = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewSelectionEmbedded : MSALWebviewSelectionSystemDefault;
+    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALDefaultWebviewTypeSystem();
     
-    if (application.webviewSelection == MSALWebviewSelectionEmbedded &&
+    if (application.webviewType == MSALWebviewTypeWKWebView &&
         [[_customWebViewSelection titleForSegmentAtIndex:_customWebViewSelection.selectedSegmentIndex] isEqualToString:TEST_EMBEDDED_CUSTOM])
     {
         application.customWebview = _webView;
         
-        [UIView animateWithDuration:0.5 animations:^{
-            [_acquireSettingsView setHidden:YES];
-            [_authView setHidden:NO];
-        }];
+        [_acquireSettingsView setHidden:YES];
+        [_authView setHidden:NO];
     }
     
     if ([_loginHintField.text length])

@@ -96,7 +96,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
+    parameters.webviewType = MSALWebviewTypeWKWebView;
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -118,8 +118,8 @@
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
-         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
-                                                                                   context:nil error:nil];
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                    context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
 
@@ -212,7 +212,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
+    parameters.webviewType = MSALWebviewTypeWKWebView;
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -328,7 +328,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
+    parameters.webviewType = MSALWebviewTypeWKWebView;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                                  name:@"user@contoso.com"
@@ -359,7 +359,7 @@
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
-         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                    context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -461,7 +461,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
+    parameters.webviewType = MSALWebviewTypeWKWebView;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                             name:@"user@contoso.com"
@@ -501,7 +501,7 @@
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
-         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                    context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];
@@ -586,7 +586,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.webviewSelection = MSALWebviewSelectionEmbedded;
+    parameters.webviewType = MSALWebviewTypeWKWebView;
 
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -608,7 +608,7 @@
      {
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode"];
          
-         MSIDWebOAuth2Response *oauthResponse = [[MSIDWebOAuth2Response alloc] initWithURL:[NSURL URLWithString:responseString]
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                    context:nil error:nil];
          completionHandler(oauthResponse, nil);
      }];

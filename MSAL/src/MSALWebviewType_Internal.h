@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,38 +15,16 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
 
+extern MSALWebviewType MSALDefaultWebviewType(void);
+
 #if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
+extern MSALWebviewType MSALDefaultWebviewTypeSystem(void);
 #endif
-
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
-
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-@class MSALResult;
-
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALWebviewType.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>

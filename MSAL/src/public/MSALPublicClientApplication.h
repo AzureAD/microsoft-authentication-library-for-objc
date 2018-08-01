@@ -63,10 +63,10 @@
 
 /*! The webview selection to be used for authentication.
     By default, it is going to use embedded webview - WKWebView, to authenticate.  */
-@property MSALWebviewSelection webviewSelection;
+@property MSALWebviewType webviewType;
 
-/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewSelectionEmbedded.
-    For iOS, this will be ignored if MSALWebviewSelectionSystemDefault is chosen. */
+/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
+    For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property WKWebView *customWebview;
 
 /*!
