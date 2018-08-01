@@ -2139,6 +2139,7 @@
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
@@ -2152,6 +2153,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
