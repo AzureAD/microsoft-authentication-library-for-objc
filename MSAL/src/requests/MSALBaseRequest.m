@@ -177,6 +177,13 @@ static MSALScopes *s_reservedScopes = nil;
             return;
         }
         
+        if(response && ![response isKindOfClass:[NSMutableDictionary class]])
+        {
+            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: MSMutableDictionary.");
+            completionBlock(nil, localError);
+            return;
+        }
+        
         NSMutableDictionary *jsonDictionary = (NSMutableDictionary *)response;
         
         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
@@ -229,7 +236,7 @@ static MSALScopes *s_reservedScopes = nil;
     return nil;
 }
 
-- (NSURL *)tokenEndpointWithSliceParameter
+- (NSURL *)tokenEndpoint
 {
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     

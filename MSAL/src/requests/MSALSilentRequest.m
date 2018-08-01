@@ -148,7 +148,7 @@
 
 - (MSIDTokenRequest *)tokenRequest
 {
-    return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpointWithSliceParameter]
+    return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
                                                                scope:[[self requestScopes:nil] msalToString]
                                                         refreshToken:[self.refreshToken refreshToken]

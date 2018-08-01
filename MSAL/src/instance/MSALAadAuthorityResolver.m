@@ -83,6 +83,13 @@
              completionBlock(nil, error);
              return;
          }
+        
+        if(response && ![response isKindOfClass:[NSMutableDictionary class]])
+        {
+            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: MSMutableDictionary.");
+            completionBlock(nil, localError);
+            return;
+        }
          
          NSMutableDictionary *responseDic = (NSMutableDictionary *)response;
          NSError *jsonError = nil;

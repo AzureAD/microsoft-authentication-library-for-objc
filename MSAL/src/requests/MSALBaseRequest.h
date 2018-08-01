@@ -63,7 +63,7 @@
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
 
 - (nullable MSIDTokenRequest *)tokenRequest;
-- (nonnull NSURL *)tokenEndpointWithSliceParameter;
+- (nonnull NSURL *)tokenEndpoint;
 
 - (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
