@@ -30,12 +30,15 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeWKWebView,
     
 #if TARGET_OS_IPHONE
-    // Use System Web View.
-    // Starting iOS 11, SafariViewController will not share cookies with
-    // other instance of Safari.
-    // AuthenticationSessions will share cookies for SSO.
-    MSALWebviewTypeSafariViewController,
-    MSALWebviewTypeAuthenticationSession,
+    // For iOS 11 and up, use AuthenticationSession (ASAuthenticationSession or
+    // SFAuthenticationSession). For older versions, with AuthenticationSession not
+    // being available, use SafariViewController.
+    MSALAuthenticationSessionAllowSafariViewController,
+    
+    // For iOS 11 and up, use AuthenticationSession (ASAuthenticationSession or
+    // SFAuthenticationSession). For older versions, with AuthenticationSession not
+    // being available, stop webview interaction
+    MSALAuthenticationSessionNotAllowSafariViewController,
 #endif
 };
 

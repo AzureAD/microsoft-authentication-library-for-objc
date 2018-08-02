@@ -76,9 +76,9 @@
                                   error:(NSError * __autoreleasing *)error
 {
     NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    
+
     NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
-    
+
     for (NSDictionary* urlRole in urlTypes)
     {
         NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
@@ -89,9 +89,9 @@
             return YES;
         }
     }
-    
+
     MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"msal<clientID>\" format without any whitespaces.", scheme);
-    
+
     return NO;
 }
 

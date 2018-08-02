@@ -23,22 +23,10 @@
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-MSALWebviewType MSALDefaultWebviewTypeSystem(void)
-{
-    if (@available(iOS 11.0, *))
-    {
-        return MSALWebviewTypeAuthenticationSession;
-    }
-    
-    return MSALWebviewTypeSafariViewController;
-}
-#endif
-
 MSALWebviewType MSALDefaultWebviewType()
 {
 #if TARGET_OS_IPHONE
-    return MSALDefaultWebviewTypeSystem();
+    return MSALAuthenticationSessionAllowSafariViewController;
 #else
     return MSALWebviewTypeWKWebView;
 #endif

@@ -222,7 +222,7 @@
         }
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
         {
-            application.webviewType = MSALDefaultWebviewTypeSystem();
+            application.webviewType = MSALAuthenticationSessionAllowSafariViewController;
         }
         
         [application acquireTokenForScopes:scopes

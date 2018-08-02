@@ -24,7 +24,3 @@
 #import <Foundation/Foundation.h>
 
 extern MSALWebviewType MSALDefaultWebviewType(void);
-
-#if TARGET_OS_IPHONE
-extern MSALWebviewType MSALDefaultWebviewTypeSystem(void);
-#endif
