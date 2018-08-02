@@ -39,6 +39,9 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     // SFAuthenticationSession). For older versions, with AuthenticationSession not
     // being available, stop webview interaction
     MSALAuthenticationSessionNotAllowSafariViewController,
+    
+    // Use SFSafariViewController for all versions.
+    MSALSafariViewController
 #endif
 };
 

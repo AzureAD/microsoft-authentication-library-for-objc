@@ -151,6 +151,7 @@
         case MSALAuthenticationSessionAllowSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
+                                                     useAuthenticationSession:YES
                                                     allowSafariViewController:YES
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
@@ -158,7 +159,16 @@
         case MSALAuthenticationSessionNotAllowSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
+                                                     useAuthenticationSession:YES
                                                     allowSafariViewController:NO
+                                                                      context:_parameters
+                                                            completionHandler:webAuthCompletion];
+            break;
+        case MSALSafariViewController:
+            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
+                                                                oauth2Factory:_parameters.msidOAuthFactory
+                                                     useAuthenticationSession:NO
+                                                    allowSafariViewController:YES
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
             break;
