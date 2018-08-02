@@ -26,7 +26,7 @@
 MSALWebviewType MSALDefaultWebviewType()
 {
 #if TARGET_OS_IPHONE
-    return MSALAuthenticationSessionAllowSafariViewController;
+    return MSALWebviewTypeAuthenticationSessionAllowSafariViewController;
 #else
     return MSALWebviewTypeWKWebView;
 #endif

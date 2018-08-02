@@ -148,7 +148,7 @@
                                                               completionHandler:webAuthCompletion];
             break;
 #if TARGET_OS_IPHONE
-        case MSALAuthenticationSessionAllowSafariViewController:
+        case MSALWebviewTypeAuthenticationSessionAllowSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
                                                      useAuthenticationSession:YES
@@ -156,7 +156,7 @@
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
             break;
-        case MSALAuthenticationSessionNotAllowSafariViewController:
+        case MSALWebviewTypeAuthenticationSessionNotAllowSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
                                                      useAuthenticationSession:YES
@@ -164,7 +164,7 @@
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
             break;
-        case MSALSafariViewController:
+        case MSALWebviewTypeSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
                                                      useAuthenticationSession:NO
