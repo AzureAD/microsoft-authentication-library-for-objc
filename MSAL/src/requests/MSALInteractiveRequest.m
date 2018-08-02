@@ -71,6 +71,11 @@ static MSALInteractiveRequest *s_currentRequest = nil;
         }
     }
     
+    if (parameters.claims)
+    {
+        if (![self validateClaims:parameters error:error]) return nil;
+    }
+    
     _uiBehavior = behavior;
     _pkce = [MSALPkce new];
     
@@ -125,6 +130,8 @@ static MSALInteractiveRequest *s_currentRequest = nil;
             [parameters addEntriesFromDictionary:authorizationQueryParams];
         }
     }
+    
+    if (_parameters.claims) [parameters setValue:_parameters.claims forKey:MSID_OAUTH2_CLAIMS];
     
     if (_parameters.sliceParameters)
     {
@@ -254,6 +261,33 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     MSALTelemetryAPIEvent *event = [super getTelemetryAPIEvent];
     [event setUIBehavior:_uiBehavior];
     return event;
+}
+
+- (BOOL)validateClaims:(MSALRequestParameters *)parameters
+                 error:(NSError * __nullable __autoreleasing * __nullable)error
+
+{
+    if (!parameters.claims)
+    {
+        return YES;
+    }
+    
+    if (parameters.extraQueryParameters[MSID_OAUTH2_CLAIMS])
+    {
+        MSAL_ERROR_PARAM(_parameters, MSALErrorInvalidParameter, @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+        return NO;
+    }
+    
+    // Make sure claims is properly encoded
+    NSString* claimsParams = parameters.claims.msidTrimmedString;
+    NSURL* url = [NSURL URLWithString:[NSMutableString stringWithFormat:@"%@?claims=%@", parameters.unvalidatedAuthority.absoluteString, claimsParams]];
+    if (!url)
+    {
+        MSAL_ERROR_PARAM(_parameters, MSALErrorInvalidParameter, @"claims is not properly encoded. Please make sure it is URL encoded.");
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

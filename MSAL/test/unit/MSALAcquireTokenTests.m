@@ -230,4 +230,221 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenInteractive_whenClaimsIsPassedViaOverloadedAcquireToken_shouldSendClaims
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    // Mock auth code grant response
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:DEFAULT_TEST_AUTHORITY
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
+    
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    // Check claims is in start url
+    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
+                           class:[MSALWebUI class]
+                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+     {
+         (void)obj;
+         (void)context;
+         
+         XCTAssertNotNil(url);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         
+         NSMutableDictionary *expectedQPs =
+         [@{
+            @"claims" : @"fake_claims", //claims should be in the QPs
+            @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"state" : [MSIDTestRequireValueSentinel sentinel],
+            @"prompt" : @"select_account",
+            @"client_id" : UNIT_TEST_CLIENT_ID,
+            @"scope" : @"fakescopes openid profile offline_access",
+            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+            @"response_type" : @"code",
+            @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
+            @"code_challenge_method" : @"S256",
+            @"eqpKey" : @"eqpValue",
+            UT_SLICE_PARAMS_DICT
+            } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         completionBlock([NSURL URLWithString:responseString], nil);
+     }];
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:DEFAULT_TEST_AUTHORITY
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
+                                claims:@"fake_claims"
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+     }];
+}
+
+- (void)testAcquireTokenInteractive_whenClaimsIsNotProperlyEncoded_shouldReturnError
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:DEFAULT_TEST_AUTHORITY
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:nil
+                                claims:@"{\"unencoded_fake_claims\"}"
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNotNil(error);
+         XCTAssertNil(result);
+         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"claims is not properly encoded. Please make sure it is URL encoded.");
+     }];
+}
+
+- (void)testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    // Mock auth code grant response
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:DEFAULT_TEST_AUTHORITY
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
+    
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    // Check claims is in start url
+    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
+                           class:[MSALWebUI class]
+                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+     {
+         (void)obj;
+         (void)context;
+         
+         XCTAssertNotNil(url);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         
+         NSMutableDictionary *expectedQPs =
+         [@{
+            //claims should not be in the QPs
+            @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"state" : [MSIDTestRequireValueSentinel sentinel],
+            @"prompt" : @"select_account",
+            @"client_id" : UNIT_TEST_CLIENT_ID,
+            @"scope" : @"fakescopes openid profile offline_access",
+            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+            @"response_type" : @"code",
+            @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
+            @"code_challenge_method" : @"S256",
+            UT_SLICE_PARAMS_DICT
+            } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         completionBlock([NSURL URLWithString:responseString], nil);
+     }];
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:DEFAULT_TEST_AUTHORITY
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:nil
+                                claims:@""
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+     }];
+}
+
+- (void)testAcquireTokenInteractive_whenDuplicateClaimsIsPassedInEQP_shouldReturnError
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:DEFAULT_TEST_AUTHORITY
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{@"eqpKey":@"eqpValue", @"claims":@"claims_value"}
+                                claims:@"fake_claims"
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNotNil(error);
+         XCTAssertNil(result);
+         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+     }];
+}
+
 @end
