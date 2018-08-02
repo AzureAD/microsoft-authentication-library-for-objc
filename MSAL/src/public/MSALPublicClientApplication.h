@@ -48,7 +48,7 @@
 @property (readonly) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readwrite) NSURL *redirectUri;
+@property (readonly) NSURL *redirectUri;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints

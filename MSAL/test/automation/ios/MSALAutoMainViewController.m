@@ -140,10 +140,10 @@
     MSALPublicClientApplication *clientApplication =
     [[MSALPublicClientApplication alloc] initWithClientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                 authority:parameters[MSAL_AUTHORITY_PARAM]
+                                              redirectUri:parameters[MSAL_REDIRECT_URI_PARAM]
                                                     error:&error];
     
     clientApplication.validateAuthority = validateAuthority;
-    clientApplication.redirectUri = [NSURL URLWithString:parameters[MSAL_REDIRECT_URI_PARAM]];
     clientApplication.sliceParameters = parameters[MSAL_SLICE_PARAMS];
     
     if (error)
