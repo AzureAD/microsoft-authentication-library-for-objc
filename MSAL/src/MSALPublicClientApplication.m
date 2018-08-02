@@ -53,48 +53,109 @@
 #import "MSALAccountId.h"
 #import "MSIDAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSALRedirectUriVerifier.h"
 
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+#if TARGET_OS_IPHONE
+@property (nonatomic, readwrite) NSString *keychainGroup;
+#endif
 
 @end
 
 @implementation MSALPublicClientApplication
 
-- (BOOL)generateRedirectUriWithClientId:(NSString *)clientId
-                                  error:(NSError * __autoreleasing *)error
+// Make sure scheme is registered in info.plist
+// If broker is enabled, make sure redirect uri has bundle id in it
+// If no redirect uri is provided, generate a default one, which is compatible with broker if broker is enabled
+- (BOOL)verifyRedirectUri:(NSString *)redirectUriString
+                 clientId:(NSString *)clientId
+                    error:(NSError * __autoreleasing *)error
 {
-    /*
-    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    
-    NSArray* urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
-    
-    for (NSDictionary* urlRole in urlTypes)
+    NSURL *redirectUri = [MSALRedirectUriVerifier generateRedirectUri:redirectUriString
+                                                             clientId:clientId
+                                                        brokerEnabled:NO
+                                                                error:error];
+
+    if (!redirectUri)
     {
-        NSArray* urlSchemes = [urlRole objectForKey:@"CFBundleURLSchemes"];
-        if ([urlSchemes containsObject:scheme])
-        {
-            NSString *redirectUri = [NSString stringWithFormat:@"%@://auth", scheme];
-            _redirectUri = [NSURL URLWithString:redirectUri];
-            return YES;
-        }
+        return NO;
     }
-    
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme (%@) is not registered in the app's info.plist file. Make sure the URI scheme matches exactly \"msal<clientID>\" format without any whitespaces.", scheme);
-    
-    return NO;*/
-    return YES;
+
+    _redirectUri = redirectUri;
+
+    return [MSALRedirectUriVerifier verifyRedirectUri:_redirectUri
+                                        brokerEnabled:NO
+                                                error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
-    return [self initWithClientId:clientId authority:nil error:error];
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:nil
+                      redirectUri:nil
+                            error:error];
+    
 }
 
 - (id)initWithClientId:(NSString *)clientId
              authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error
+
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:authority
+                      redirectUri:nil
+                            error:error];
+}
+
+- (id)initWithClientId:(NSString *)clientId
+             authority:(NSString *)authority
+           redirectUri:(NSString *)redirectUri
+                 error:(NSError **)error
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:nil
+                        authority:authority
+                      redirectUri:redirectUri
+                            error:error];
+}
+
+#if TARGET_OS_IPHONE
+
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+                 error:(NSError * __autoreleasing *)error
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:keychainGroup
+                        authority:nil
+                      redirectUri:nil
+                            error:error];
+}
+
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(NSString *)authority
+                 error:(NSError * __autoreleasing *)error
+{
+    return [self initWithClientId:clientId
+                    keychainGroup:keychainGroup
+                        authority:authority
+                      redirectUri:nil
+                            error:error];
+}
+
+#endif
+
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(NSString *)authority
+           redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error
 {
     if (!(self = [super init]))
@@ -103,7 +164,7 @@
     }
     REQUIRED_PARAMETER(clientId, nil);
     _clientId = clientId;
-    
+
     if (authority)
     {
         _authority = [MSALAuthority checkAuthorityString:authority error:error];
@@ -114,18 +175,21 @@
         // TODO: Rationalize our default authority behavior (#93)
         _authority = [MSALAuthority defaultAuthority];
     }
-    
-    CHECK_RETURN_NIL([self generateRedirectUriWithClientId:_clientId
-                                                     error:error]);
+
+    CHECK_RETURN_NIL([self verifyRedirectUri:redirectUri clientId:clientId error:error]);
     
 #if TARGET_OS_IPHONE
+    // Optional Paramater
+    _keychainGroup = keychainGroup;
+
     MSIDKeychainTokenCache *dataSource;
-    if (self.keychainGroup)
+    if (_keychainGroup != nil)
     {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:self.keychainGroup];
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
     }
     else
     {
+        _keychainGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
         dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     }
 

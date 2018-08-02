@@ -1,3 +1,7 @@
+## [0.1.3] - 2018-04-23
+### Added
+- CocoaPods podspec
+
 ## [0.1.2] - 2018-01-30
 ### Added
 - GDPR compliance mechanism for MSAL logs and telemetry through PII enabled/disabled flags
