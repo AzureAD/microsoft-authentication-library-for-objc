@@ -510,7 +510,7 @@
         });
     };
     
-    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALAuthenticationSessionAllowSafariViewController;
+    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeAuthenticationSessionAllowSafariViewController;
     
     if (application.webviewType == MSALWebviewTypeWKWebView &&
         [[_customWebViewSelection titleForSegmentAtIndex:_customWebViewSelection.selectedSegmentIndex] isEqualToString:TEST_EMBEDDED_CUSTOM])

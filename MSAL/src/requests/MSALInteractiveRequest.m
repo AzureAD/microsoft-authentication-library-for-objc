@@ -107,14 +107,17 @@
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
+    
     MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
                                                                                               clientId:_parameters.clientId resource:nil
-                                                                                                scopes:_parameters.scopes
+                                                                                                scopes:[self requestScopes:_extraScopesToConsent]
                                                                                          correlationId:_parameters.correlationId
                                                                                             enablePkce:YES];
     config.promptBehavior = MSALParameterStringForBehavior(_uiBehavior);
     config.loginHint = _parameters.loginHint;
+    config.extraQueryParameters = _parameters.extraQueryParameters;
+
     _webviewConfig = config;
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
