@@ -45,7 +45,6 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALWebviewType_Internal.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -222,7 +221,7 @@
         }
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
         {
-            application.webviewType = MSALAuthenticationSessionAllowSafariViewController;
+            application.webviewType = MSALWebviewTypeAutomatic;
         }
         
         [application acquireTokenForScopes:scopes
