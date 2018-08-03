@@ -30,19 +30,20 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeWKWebView,
     
 #if TARGET_OS_IPHONE
-    // For iOS 11 and up, use AuthenticationSession (ASAuthenticationSession or
-    // SFAuthenticationSession). For older versions, with AuthenticationSession not
-    // being available, use SafariViewController.
-    MSALWebviewTypeAuthenticationSessionAllowSafariViewController,
     
-    // For iOS 11 and up, use AuthenticationSession (ASAuthenticationSession or
-    // SFAuthenticationSession). For older versions, with AuthenticationSession not
-    // being available, stop webview interaction
-    MSALWebviewTypeAuthenticationSessionNotAllowSafariViewController,
+    // Use SFAuthenticationSession/ASWebview
+    MSALWebviewTypeAuthenticationSession,
     
     // Use SFSafariViewController for all versions.
-    MSALWebviewTypeSafariViewController
+    MSALWebviewTypeSafariViewController,
+    
 #endif
+    
+    // For iOS 11 and up, uses AuthenticationSession (ASAuthenticationSession or
+    // SFAuthenticationSession).
+    // For older versions, with AuthenticationSession not being available, uses
+    // SafariViewController.
+    MSALWebviewTypeAutomatic
 };
 
 

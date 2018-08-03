@@ -39,6 +39,7 @@
 #import "MSALAccountId.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebMSAuthResponse.h"
 
 @implementation MSALInteractiveRequest
 {
@@ -139,27 +140,18 @@
             return;
         }
         
+        else if([response isKindOfClass:MSIDWebMSAuthResponse.class])
+        {
+            // Todo: Install broker prompt
+        }
+        
         completionBlock(nil, error);
     };
     
     switch (_parameters.webviewType) {
-        case MSALWebviewTypeWKWebView:
-            [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
-                                                                  oauth2Factory:_parameters.msidOAuthFactory
-                                                                        webview:_parameters.customWebview
-                                                                        context:_parameters
-                                                              completionHandler:webAuthCompletion];
-            break;
+        
 #if TARGET_OS_IPHONE
-        case MSALWebviewTypeAuthenticationSessionAllowSafariViewController:
-            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
-                                                                oauth2Factory:_parameters.msidOAuthFactory
-                                                     useAuthenticationSession:YES
-                                                    allowSafariViewController:YES
-                                                                      context:_parameters
-                                                            completionHandler:webAuthCompletion];
-            break;
-        case MSALWebviewTypeAuthenticationSessionNotAllowSafariViewController:
+        case MSALWebviewTypeAuthenticationSession:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
                                                      useAuthenticationSession:YES
@@ -167,6 +159,7 @@
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
             break;
+
         case MSALWebviewTypeSafariViewController:
             [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                                 oauth2Factory:_parameters.msidOAuthFactory
@@ -175,9 +168,23 @@
                                                                       context:_parameters
                                                             completionHandler:webAuthCompletion];
             break;
+        case MSALWebviewTypeAutomatic:
+            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
+                                                                oauth2Factory:_parameters.msidOAuthFactory
+                                                     useAuthenticationSession:YES
+                                                    allowSafariViewController:YES
+                                                                      context:_parameters
+                                                            completionHandler:webAuthCompletion];
+            break;
+#else
+        case MSALWebviewTypeAutomatic:
 #endif
-        default:
-            assert(1);
+        case MSALWebviewTypeWKWebView:
+            [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
+                                                                  oauth2Factory:_parameters.msidOAuthFactory
+                                                                        webview:_parameters.customWebview
+                                                                        context:_parameters
+                                                              completionHandler:webAuthCompletion];
             break;
     }
 }

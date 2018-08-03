@@ -59,8 +59,6 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
 
-#import "MSALWebviewType_Internal.h"
-
 @interface MSALPublicClientApplication()
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
@@ -165,7 +163,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewType = MSALDefaultWebviewType();
+    _webviewType = MSALWebviewTypeAutomatic;
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
