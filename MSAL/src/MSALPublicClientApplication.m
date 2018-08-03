@@ -39,7 +39,9 @@
 #import "MSALWebUI.h"
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
+#if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
+#endif
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
