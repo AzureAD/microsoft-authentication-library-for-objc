@@ -43,7 +43,6 @@
 
 
 // Internal MSAL Files
-
 #import "MSAL_Internal.h"
 #import "MSIDLogger+Internal.h"
 #import "NSString+MSIDExtensions.h"
