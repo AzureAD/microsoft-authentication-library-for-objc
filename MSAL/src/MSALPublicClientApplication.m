@@ -73,17 +73,17 @@
                  clientId:(NSString *)clientId
                     error:(NSError * __autoreleasing *)error
 {
-    NSURL *redirectUri = [MSALRedirectUriVerifier generateRedirectUri:redirectUriString
-                                                             clientId:clientId
-                                                        brokerEnabled:NO
-                                                                error:error];
+    NSURL *generatedRedirectUri = [MSALRedirectUriVerifier generateRedirectUri:redirectUriString
+                                                                      clientId:clientId
+                                                                 brokerEnabled:NO
+                                                                         error:error];
 
-    if (!redirectUri)
+    if (!generatedRedirectUri)
     {
         return NO;
     }
 
-    _redirectUri = redirectUri;
+    _redirectUri = generatedRedirectUri;
 
     return [MSALRedirectUriVerifier verifyRedirectUri:_redirectUri
                                         brokerEnabled:NO

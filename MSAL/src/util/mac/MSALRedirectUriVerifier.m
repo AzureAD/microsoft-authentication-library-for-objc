@@ -42,23 +42,21 @@
                  brokerEnabled:(BOOL)brokerEnabled
                          error:(NSError **)error
 {
+    if (![NSString msidIsStringNilOrBlank:inputRedirectUri])
+    {
+        return [NSURL URLWithString:inputRedirectUri];
+    }
+
     if ([NSString msidIsStringNilOrBlank:clientId])
     {
         MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"The client ID provided is empty or nil.");
         return nil;
     }
 
-    if (![NSString msidIsStringNilOrBlank:inputRedirectUri])
-    {
-        return [NSURL URLWithString:inputRedirectUri];
-    }
-    else
-    {
-        // macOS doesn't support broker
-        NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-        NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
-        return [NSURL URLWithString:redirectUriString];
-    }
+    // macOS doesn't support broker
+    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
+    NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
+    return [NSURL URLWithString:redirectUriString];
 }
 
 @end
