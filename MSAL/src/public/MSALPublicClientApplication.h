@@ -62,7 +62,10 @@
 @property NSString *component;
 
 /*! The webview selection to be used for authentication.
-    By default, it is going to use embedded webview - WKWebView, to authenticate.  */
+ By default, it is going to use the following to authenticate.
+ - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+ - macOS:  WKWebView
+ */
 @property MSALWebviewType webviewType;
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
