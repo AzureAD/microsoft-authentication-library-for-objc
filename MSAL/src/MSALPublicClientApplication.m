@@ -165,6 +165,7 @@
 #endif
     
     _validateAuthority = YES;
+    _extendedLifetimeEnabled = NO;
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
     
@@ -604,6 +605,7 @@
     params.account = account;
     params.apiId = apiId;
     params.validateAuthority = _validateAuthority;
+    params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.sliceParameters = _sliceParameters;
     
     [params setScopesFromArray:scopes];

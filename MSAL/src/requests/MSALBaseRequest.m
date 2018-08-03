@@ -224,7 +224,7 @@ static MSALScopes *s_reservedScopes = nil;
         MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
         MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
         
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
         
         completionBlock(result, nil);
     }];

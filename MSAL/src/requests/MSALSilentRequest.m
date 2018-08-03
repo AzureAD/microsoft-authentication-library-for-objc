@@ -48,6 +48,9 @@
 @end
 
 @implementation MSALSilentRequest
+{
+    MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
+}
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
@@ -97,7 +100,7 @@
                                                                  context:_parameters
                                                                    error:&error];
 
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
@@ -105,6 +108,12 @@
 
             completionBlock(result, nil);
             return;
+        }
+        
+        // If the access token is good in terms of extended lifetime then store it for later use
+        if (accessToken && accessToken.isExtendedLifetimeValid)
+        {
+            _extendedLifetimeAccessToken = accessToken;
         }
 
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
@@ -142,7 +151,15 @@
 
         _authority = authority;
 
-        [super acquireToken:completionBlock];
+        [super acquireToken:^(MSALResult *result, NSError *error)
+         {
+             // Logic for returning extended lifetime token
+             if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
+             {
+             }
+             
+             completionBlock(result, error);
+         }];
     }];
 }
 
@@ -153,6 +170,16 @@
                                                                scope:[[self requestScopes:nil] msalToString]
                                                         refreshToken:[self.refreshToken refreshToken]
                                                              context:_parameters];
+}
+
+- (BOOL)isServerUnavailable:(NSError *)error
+{
+    if (![error.domain isEqualToString:ADHTTPErrorCodeDomain])
+    {
+        return NO;
+    }
+    
+    return ([result.error code] >= 500 && [result.error code] <= 599);
 }
 
 @end
