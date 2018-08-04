@@ -25,30 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
+#import "MSALRedirectUriVerifier.h"
 
+@implementation MSALRedirectUriVerifier
 
-//
-// System APIs
-//
++ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
+            brokerEnabled:(BOOL)brokerEnabled
+                    error:(NSError **)error
+{
+    // There's currently no verification necessary for macOS redirectUri
+    return YES;
+}
 
-#import <Foundation/Foundation.h>
++ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
+                      clientId:(NSString *)clientId
+                 brokerEnabled:(BOOL)brokerEnabled
+                         error:(NSError **)error
+{
+    if (![NSString msidIsStringNilOrBlank:inputRedirectUri])
+    {
+        return [NSURL URLWithString:inputRedirectUri];
+    }
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+    if ([NSString msidIsStringNilOrBlank:clientId])
+    {
+        MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"The client ID provided is empty or nil.");
+        return nil;
+    }
 
+    // macOS doesn't support broker
+    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
+    NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
+    return [NSURL URLWithString:redirectUriString];
+}
 
-// Internal MSAL Files
-#import "MSAL_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "NSString+MSIDExtensions.h"
-#import "NSDictionary+MSIDExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSIDOAuth2Constants.h"
-
-
-#endif /* MSAL_pch */
+@end

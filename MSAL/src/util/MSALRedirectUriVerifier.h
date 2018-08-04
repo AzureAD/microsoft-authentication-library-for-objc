@@ -25,30 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSAL_pch
-#define MSAL_pch
-
-
-//
-// System APIs
-//
-
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+@interface MSALRedirectUriVerifier : NSObject
 
++ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
+            brokerEnabled:(BOOL)brokerEnabled
+                    error:(NSError * __autoreleasing *)error;
 
-// Internal MSAL Files
-#import "MSAL_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "NSString+MSIDExtensions.h"
-#import "NSDictionary+MSIDExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
-#import "MSIDOAuth2Constants.h"
++ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
+                      clientId:(NSString *)clientId
+                 brokerEnabled:(BOOL)brokerEnabled
+                         error:(NSError * __autoreleasing *)error;
 
-
-#endif /* MSAL_pch */
+@end

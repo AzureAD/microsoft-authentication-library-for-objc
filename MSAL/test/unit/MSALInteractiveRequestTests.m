@@ -196,122 +196,122 @@
     }
 }
 
-
-- (void)testInteractiveRequestFlow_whenValidWithCloudHostName_shouldReturnResultWithNoError
-{
-    NSError *error = nil;
-    
-    __block NSUUID *correlationId = [NSUUID new];
-    
-    MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
-    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
-    parameters.clientId = UNIT_TEST_CLIENT_ID;
-    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
-    parameters.loginHint = @"fakeuser@contoso.com";
-    parameters.correlationId = correlationId;
-    parameters.webviewType = MSALWebviewTypeWKWebView;
-    
-    __block MSALInteractiveRequest *request =
-    [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                  extraScopesToConsent:@[@"fakescope3"]
-                                              behavior:MSALForceConsent
-                                            tokenCache:self.tokenCacheAccessor
-                                                 error:&error];
-    
-    XCTAssertNotNil(request);
-    XCTAssertNil(error);
-    
-    // Setting MSALAuthority ahead of time short-circuits authority validation for this test
-    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
-    
-    // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
-                           class:[MSIDWebviewAuthorization class]
-                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
-     {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode&cloud_instance_host_name=https%%3A%%2F%%2Fcloudhost.com"];
-         
-         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
-                                                                                     context:nil error:nil];
-    
-         completionHandler(oauthResponse, nil);
-     }];
-    
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-     
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-         
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
-    
-    [MSALTestSwizzle instanceMethod:@selector(codeVerifier) class:[MSIDPkce class] block:(id)^(id obj) { return @"code_verifier"; }];
-    
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
-    
-    MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://cloudhost.com/common/oauth2/v2.0/token"
-                           requestHeaders:reqHeaders
-                        requestParamsBody:@{ @"code" : @"iamafakecode",
-                                             @"client_id" : UNIT_TEST_CLIENT_ID,
-                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
-                                             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
-                                             @"grant_type" : @"authorization_code",
-                                             @"code_verifier" : @"code_verifier",
-                                             @"client_info" : @"1"}
-                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
-                             responseCode:200
-                         httpHeaderFields:nil
-                         dictionaryAsJSON:@{ @"access_token" : @"i am a access token!",
-                                             @"expires_in" : @"600",
-                                             @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
-                                             @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
-    
-    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
-    
-    [MSIDTestURLSession addResponse:response];
-    
-    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
-    __block BOOL fAlreadyHit = NO;
-    [request run:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertFalse(fAlreadyHit);
-         fAlreadyHit = YES;
-         XCTAssertNotNil(result);
-         XCTAssertNil(error);
-         XCTAssertNotNil(result.account);
-         XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
-         XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
-         XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
-         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
-         XCTAssertNotNil(result.tenantId);
-         XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
-         XCTAssertNotNil(result.accessToken);
-         XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
-         XCTAssertNil(error);
-         
-         dispatch_semaphore_signal(dsem);
-     }];
-    
-    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
-    {
-        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
-    }
-}
+// TODO: Re-introduce after instance aware flow
+//- (void)testInteractiveRequestFlow_whenValidWithCloudHostName_shouldReturnResultWithNoError
+//{
+//    NSError *error = nil;
+//    
+//    __block NSUUID *correlationId = [NSUUID new];
+//    
+//    MSALRequestParameters *parameters = [MSALRequestParameters new];
+//    parameters.urlSession = [MSIDTestURLSession createMockSession];
+//    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+//    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+//    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
+//    parameters.clientId = UNIT_TEST_CLIENT_ID;
+//    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
+//    parameters.loginHint = @"fakeuser@contoso.com";
+//    parameters.correlationId = correlationId;
+//    parameters.webviewType = MSALWebviewTypeWKWebView;
+//    
+//    __block MSALInteractiveRequest *request =
+//    [[MSALInteractiveRequest alloc] initWithParameters:parameters
+//                                  extraScopesToConsent:@[@"fakescope3"]
+//                                              behavior:MSALForceConsent
+//                                            tokenCache:self.tokenCacheAccessor
+//                                                 error:&error];
+//    
+//    XCTAssertNotNil(request);
+//    XCTAssertNil(error);
+//    
+//    // Setting MSALAuthority ahead of time short-circuits authority validation for this test
+//    request.authority = [MSALTestAuthority AADAuthority:parameters.unvalidatedAuthority];
+//    
+//    // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
+//    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+//                           class:[MSIDWebviewAuthorization class]
+//                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+//     {
+//         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamafakecode&cloud_instance_host_name=https%%3A%%2F%%2Fcloudhost.com"];
+//         
+//         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+//                                                                                     context:nil error:nil];
+//    
+//         completionHandler(oauthResponse, nil);
+//     }];
+//    
+//    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
+//                           class:[MSALAuthority class]
+//                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
+//     
+//     {
+//         (void)obj;
+//         (void)context;
+//         (void)userPrincipalName;
+//         (void)validate;
+//         
+//         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
+//     }];
+//    
+//    [MSALTestSwizzle instanceMethod:@selector(codeVerifier) class:[MSIDPkce class] block:(id)^(id obj) { return @"code_verifier"; }];
+//    
+//    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+//    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+//    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+//    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+//    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
+//    
+//    MSIDTestURLResponse *response =
+//    [MSIDTestURLResponse requestURLString:@"https://cloudhost.com/common/oauth2/v2.0/token"
+//                           requestHeaders:reqHeaders
+//                        requestParamsBody:@{ @"code" : @"iamafakecode",
+//                                             @"client_id" : UNIT_TEST_CLIENT_ID,
+//                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
+//                                             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+//                                             @"grant_type" : @"authorization_code",
+//                                             @"code_verifier" : @"code_verifier",
+//                                             @"client_info" : @"1"}
+//                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+//                             responseCode:200
+//                         httpHeaderFields:nil
+//                         dictionaryAsJSON:@{ @"access_token" : @"i am a access token!",
+//                                             @"expires_in" : @"600",
+//                                             @"refresh_token" : @"i am a refresh token",
+//                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+//                                             @"id_token_expires_in" : @"1200",
+//                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+//    
+//    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+//    
+//    [MSIDTestURLSession addResponse:response];
+//    
+//    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+//    __block BOOL fAlreadyHit = NO;
+//    [request run:^(MSALResult *result, NSError *error)
+//     {
+//         XCTAssertFalse(fAlreadyHit);
+//         fAlreadyHit = YES;
+//         XCTAssertNotNil(result);
+//         XCTAssertNil(error);
+//         XCTAssertNotNil(result.account);
+//         XCTAssertEqualObjects(result.account.homeAccountId.objectId, @"1");
+//         XCTAssertEqualObjects(result.account.homeAccountId.tenantId, @"1234-5678-90abcdefg");
+//         XCTAssertEqualObjects(result.account.name, [MSALTestIdTokenUtil defaultName]);
+//         XCTAssertEqualObjects(result.account.username, [MSALTestIdTokenUtil defaultUsername]);
+//         XCTAssertNotNil(result.tenantId);
+//         XCTAssertEqualObjects(result.tenantId, [MSALTestIdTokenUtil defaultTenantId]);
+//         XCTAssertNotNil(result.accessToken);
+//         XCTAssertEqualObjects(result.accessToken, @"i am a access token!");
+//         XCTAssertNil(error);
+//         
+//         dispatch_semaphore_signal(dsem);
+//     }];
+//    
+//    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+//    {
+//        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+//    }
+//}
 
 
 - (void)testInteractiveRequestFlow_whenValidWithUser_shouldReturnResultWithNoError
