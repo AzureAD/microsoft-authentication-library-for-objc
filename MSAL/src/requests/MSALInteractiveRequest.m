@@ -123,18 +123,20 @@
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
     {
-        if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+        if ([response isKindOfClass:MSIDWebOAuth2Response.class])
         {
-            MSIDWebAADAuthResponse *oauthResponse = (MSIDWebAADAuthResponse *)response;
+            MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
             
             if (oauthResponse.authorizationCode)
             {
                 _code = oauthResponse.authorizationCode;
-                _cloudAuthority = [NSURL URLWithString:((MSIDWebAADAuthResponse *)response).cloudHostName];
-                
+
+                // TODO: handle MSIDWebOAuth2Response and instance aware flow (cloud host)
+
                 [super acquireToken:completionBlock];
                 return;
             }
+            
             
             completionBlock(nil, oauthResponse.oauthError);
             return;
@@ -147,46 +149,44 @@
         
         completionBlock(nil, error);
     };
+
+    BOOL useAuthenticationSession;
+    BOOL allowSafariViewController;
     
     switch (_parameters.webviewType) {
-        
+
 #if TARGET_OS_IPHONE
         case MSALWebviewTypeAuthenticationSession:
-            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
-                                                                oauth2Factory:_parameters.msidOAuthFactory
-                                                     useAuthenticationSession:YES
-                                                    allowSafariViewController:NO
-                                                                      context:_parameters
-                                                            completionHandler:webAuthCompletion];
+            useAuthenticationSession = YES;
+            allowSafariViewController = NO;
             break;
 
         case MSALWebviewTypeSafariViewController:
-            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
-                                                                oauth2Factory:_parameters.msidOAuthFactory
-                                                     useAuthenticationSession:NO
-                                                    allowSafariViewController:YES
-                                                                      context:_parameters
-                                                            completionHandler:webAuthCompletion];
+            useAuthenticationSession = NO;
+            allowSafariViewController = YES;
             break;
         case MSALWebviewTypeAutomatic:
-            [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
-                                                                oauth2Factory:_parameters.msidOAuthFactory
-                                                     useAuthenticationSession:YES
-                                                    allowSafariViewController:YES
-                                                                      context:_parameters
-                                                            completionHandler:webAuthCompletion];
+            useAuthenticationSession = YES;
+            allowSafariViewController = YES;
             break;
-#else
-        case MSALWebviewTypeAutomatic:
 #endif
         case MSALWebviewTypeWKWebView:
+        {
             [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
                                                                   oauth2Factory:_parameters.msidOAuthFactory
                                                                         webview:_parameters.customWebview
                                                                         context:_parameters
                                                               completionHandler:webAuthCompletion];
-            break;
+            return;
+        }
     }
+    
+    [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
+                                                        oauth2Factory:_parameters.msidOAuthFactory
+                                             useAuthenticationSession:useAuthenticationSession
+                                            allowSafariViewController:allowSafariViewController
+                                                              context:_parameters
+                                                    completionHandler:webAuthCompletion];
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters

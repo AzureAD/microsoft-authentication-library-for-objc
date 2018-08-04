@@ -50,13 +50,3 @@ NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
         case MSALSelectAccount : return @"select_account";
     }
 }
-
-NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior)
-{
-    switch (behavior)
-    {
-        case MSALForceLogin : return @{ @"prompt" : @"login" };
-        case MSALForceConsent : return @{ @"prompt" : @"consent" };
-        case MSALSelectAccount : return @{ @"prompt" : @"select_account" };
-    }
-}

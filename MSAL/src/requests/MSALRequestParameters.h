@@ -61,8 +61,8 @@
 @property NSString *telemetryRequestId;
 @property NSURLSession *urlSession;
 
-@property (retain, nonatomic, readonly) MSIDConfiguration *msidConfiguration;
-@property (retain, nonatomic) MSIDOauth2Factory *msidOAuthFactory;
+@property (readonly) MSIDConfiguration *msidConfiguration;
+@property MSIDOauth2Factory *msidOAuthFactory;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;

@@ -161,6 +161,7 @@
 
 #pragma SafariViewController Support
 
+#if TARGET_OS_IPHONE
 /*!
     Ask MSAL to handle a URL response.
     
@@ -170,6 +171,7 @@
              NO otherwise.
  */
 + (BOOL)handleMSALResponse:(NSURL *)response;
+#endif
 
 /*!
     Cancels any currently running interactive web authentication session, resulting

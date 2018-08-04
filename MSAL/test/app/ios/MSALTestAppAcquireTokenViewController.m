@@ -37,10 +37,10 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import <WebKit/WebKit.h>
 
-#define TEST_EMBEDDED_WVTYPE @"Embedded"
-#define TEST_SYSTEM_WVTYPE   @"System"
-#define TEST_EMBEDDED_CUSTOM @"Passed In"
-#define TEST_EMBEDDED_MSAL   @"MSAL"
+#define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
+#define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
+#define TEST_EMBEDDED_WEBVIEW_MSAL 0
+#define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -164,12 +164,12 @@
     [layout addControl:_uiBehavior title:@"behavior"];
     
     //_webviewSelection
-    _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[TEST_EMBEDDED_WVTYPE, TEST_SYSTEM_WVTYPE]];
+    _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[@"Embedded", @"System"]];
     _webviewSelection.selectedSegmentIndex = 0;
     [_webviewSelection addTarget:self action:@selector(webviewTypeChanged:) forControlEvents:UIControlEventValueChanged];
     [layout addControl:_webviewSelection title:@"webview"];
     
-    _customWebViewSelection = [[UISegmentedControl alloc] initWithItems:@[TEST_EMBEDDED_MSAL, TEST_EMBEDDED_CUSTOM]];
+    _customWebViewSelection = [[UISegmentedControl alloc] initWithItems:@[@"MSAL", @"Passed In"]];
     _customWebViewSelection.selectedSegmentIndex = 0;
     [layout addControl:_customWebViewSelection title:@"embeddedWV"];
     
@@ -213,7 +213,7 @@
 
 - (void)webviewTypeChanged:(UISegmentedControl *)sender
 {
-    _customWebViewSelection.enabled = [[sender titleForSegmentAtIndex:sender.selectedSegmentIndex] isEqualToString:TEST_EMBEDDED_WVTYPE];
+    _customWebViewSelection.enabled = sender.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_TYPE_INDEX;
 }
 
 - (UIView *)createAcquireButtonsView
@@ -264,7 +264,7 @@
     _webView.translatesAutoresizingMaskIntoConstraints = NO;
     [contentView addSubview:_webView];
     
-    UIButton* cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
     cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
     [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
     [cancelButton addTarget:self action:@selector(cancelAuth:) forControlEvents:UIControlEventTouchUpInside];
@@ -501,18 +501,18 @@
                 [self updateResultViewError:error];
             }
             
-            [_webView loadHTMLString:@"<html><head></head><body>done!</body></html>" baseURL:nil];
+            [_webView loadHTMLString:@"<html><head></head></html>" baseURL:nil];
             [_authView setHidden:YES];
-            [self.view setNeedsDisplay];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
     
     application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeAutomatic;
+    application.customWebview = nil;
     
     if (application.webviewType == MSALWebviewTypeWKWebView &&
-        [[_customWebViewSelection titleForSegmentAtIndex:_customWebViewSelection.selectedSegmentIndex] isEqualToString:TEST_EMBEDDED_CUSTOM])
+        _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
         application.customWebview = _webView;
         

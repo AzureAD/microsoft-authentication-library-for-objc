@@ -60,6 +60,9 @@
 #import "MSIDWebviewSession.h"
 
 @interface MSALPublicClientApplication()
+{
+    WKWebView *_customWebview;
+}
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 #if TARGET_OS_IPHONE
@@ -170,11 +173,14 @@
 
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     self.tokenCache = defaultAccessor;
+    _webviewType = MSALWebviewTypeWKWebView;
+    
 #endif
     
     _validateAuthority = YES;
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
+    
     
     return self;
 }
@@ -245,14 +251,12 @@
 
 #pragma SafariViewController Support
 
+#if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
-#if TARGET_OS_IPHONE
     return [MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response];
-#else
-    return NO;
-#endif
 }
+#endif
 
 + (void)cancelCurrentWebAuthSession
 {
@@ -639,6 +643,21 @@
         [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
+}
+
+- (WKWebView *)customWebview
+{
+    return _customWebview;
+}
+
+- (void)setCustomWebview:(WKWebView *)customWebview
+{
+    if (_customWebview)
+    {
+        MSID_LOG_WARN(nil, @"Attempting to change the custom webview once MSALPublicClientApplication have been created is invalid.");
+        return;
+    }
+    _customWebview = customWebview;
 }
 
 #pragma mark -
