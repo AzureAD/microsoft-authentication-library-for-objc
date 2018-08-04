@@ -150,12 +150,12 @@
         completionBlock(nil, error);
     };
 
+#if TARGET_OS_IPHONE
     BOOL useAuthenticationSession;
     BOOL allowSafariViewController;
     
     switch (_parameters.webviewType) {
 
-#if TARGET_OS_IPHONE
         case MSALWebviewTypeAuthenticationSession:
             useAuthenticationSession = YES;
             allowSafariViewController = NO;
@@ -169,7 +169,6 @@
             useAuthenticationSession = YES;
             allowSafariViewController = YES;
             break;
-#endif
         case MSALWebviewTypeWKWebView:
         {
             [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
@@ -180,13 +179,20 @@
             return;
         }
     }
-    
+
     [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                         oauth2Factory:_parameters.msidOAuthFactory
                                              useAuthenticationSession:useAuthenticationSession
                                             allowSafariViewController:allowSafariViewController
                                                               context:_parameters
                                                     completionHandler:webAuthCompletion];
+#else
+    [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
+                                                          oauth2Factory:_parameters.msidOAuthFactory
+                                                                webview:_parameters.customWebview
+                                                                context:_parameters
+                                                      completionHandler:webAuthCompletion];
+#endif
 }
 
 - (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
