@@ -197,6 +197,7 @@
     [self closeResultView];
 }
 
+// TODO: server side bug!
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andForceLogin
 {
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
@@ -477,6 +478,7 @@
     [self assertAccessTokenNotNil];
 }
 
+// TODO: server side bug!
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
 {
     NSDictionary *params = @{

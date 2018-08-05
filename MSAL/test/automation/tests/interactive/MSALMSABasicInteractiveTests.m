@@ -63,7 +63,6 @@
     NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
 
     [self acquireToken:config];
-    [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Yes"];
 
@@ -115,8 +114,14 @@
 
 #pragma mark - Non-converged app
 
+// TODO: server side bug here
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin
 {
+    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    configurationRequest.appVersion = MSIDAppVersionV1;
+    configurationRequest.accountFeatures = @[];
+    [self loadTestConfiguration:configurationRequest];
+
     NSDictionary *params = @{
                              @"ui_behavior" : @"force",
                              @"validate_authority" : @YES,
@@ -129,7 +134,7 @@
     [self acquireToken:config];
     [self aadEnterEmail];
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept"];
+    [self acceptMSSTSConsentIfNecessary:@"Yes"];
     [self assertErrorCode:@"MSALErrorInvalidRequest"];
     [self assertErrorDescription:@"Please use the /organizations or tenant-specific endpoint."];
     [self closeResultView];
