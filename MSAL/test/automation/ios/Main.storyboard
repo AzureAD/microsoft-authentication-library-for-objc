@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -22,7 +22,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="sJS-NG-CXq">
-                                <rect key="frame" x="0.0" y="20" width="375" height="310"/>
+                                <rect key="frame" x="0.0" y="20" width="375" height="390"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ya-vf-XnD">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="30"/>
@@ -82,17 +82,28 @@
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wbg-Oq-UjV">
                                         <rect key="frame" x="0.0" y="200" width="375" height="30"/>
                                         <accessibility key="accessibilityConfiguration" identifier="invalidateToken"/>
-                                        <state key="normal" title="Clear Cache"/>
+                                        <state key="normal" title="Clear keychain"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCache"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearKeychain"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="clearCache:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="K5i-V5-FqF"/>
+                                            <action selector="clearKeychain:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="cRW-S3-u9i"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q0a-Ms-VBq">
+                                        <rect key="frame" x="0.0" y="240" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="invalidateToken"/>
+                                        <state key="normal" title="Clear Cookies"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCookies"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="clearCookies:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="aXU-nG-xde"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KCg-uq-e4H">
-                                        <rect key="frame" x="0.0" y="240" width="375" height="30"/>
-                                        <state key="normal" title="Get Users"/>
+                                        <rect key="frame" x="0.0" y="280" width="375" height="30"/>
+                                        <state key="normal" title="Get Accounts"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="getUsers"/>
                                         </userDefinedRuntimeAttributes>
@@ -101,13 +112,23 @@
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8EH-37-udP">
-                                        <rect key="frame" x="0.0" y="280" width="375" height="30"/>
+                                        <rect key="frame" x="0.0" y="320" width="375" height="30"/>
                                         <state key="normal" title="Sign Out"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="signOut"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="signOut:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="pxP-hm-5ZN"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cIU-CF-9ab">
+                                        <rect key="frame" x="0.0" y="360" width="375" height="30"/>
+                                        <state key="normal" title="Open URL in Safari"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="openUrlInSafari"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="openURLInSafari:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="kCl-gm-WrN"/>
                                         </connections>
                                     </button>
                                 </subviews>

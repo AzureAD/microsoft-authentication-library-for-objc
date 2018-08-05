@@ -28,7 +28,8 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>x-msauth-msalautomationapp</string>
-				<string>msal5a434691-ccb2-4fd1-b97b-b64bcfbc03fc</string>
+				<string>x-msauth-automationapp</string>
+				<string>msal3c62ac97-29eb-4aed-a3c8-add0298508da</string>
 			</array>
 		</dict>
 	</array>

@@ -30,7 +30,7 @@
 extern NSString *const MSAL_VALIDATE_AUTHORITY_PARAM;
 extern NSString *const MSAL_CLIENT_ID_PARAM;
 extern NSString *const MSAL_AUTHORITY_PARAM;
-extern NSString *const MSAL_USER_IDENTIFIER_PARAM;
+extern NSString *const MSAL_ACCOUNT_IDENTIFIER_PARAM;
 extern NSString *const MSAL_SCOPES_PARAM;
 extern NSString *const MSAL_EXTRA_SCOPES_PARAM;
 extern NSString *const MSAL_EXTRA_QP_PARAM;
@@ -38,6 +38,7 @@ extern NSString *const MSAL_CORRELATION_ID_PARAM;
 extern NSString *const MSAL_FORCE_REFRESH_PARAM;
 extern NSString *const MSAL_USER_ENVIRONMENT_PARAM;
 extern NSString *const MSAL_REDIRECT_URI_PARAM;
+extern NSString *const MSAL_LOGIN_HINT_PARAM;
 
 extern NSString *const MSAL_AUTOMATION_ERROR_PARAM;
 extern NSString *const MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM;
