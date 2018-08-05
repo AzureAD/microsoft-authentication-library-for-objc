@@ -165,6 +165,8 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
+    CHECK_ERROR_COMPLETION(completionBlock, _parameters, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
+    
     MSIDTokenRequest *authRequest = [self tokenRequest];
     
     [authRequest sendWithBlock:^(id response, NSError *error) {
@@ -173,30 +175,31 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (error)
         {
-            completionBlock(nil, error);
+            if(completionBlock) completionBlock(nil, error);
             return;
         }
         
-        if(response && ![response isKindOfClass:[NSMutableDictionary class]])
+        if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }
         
-        NSMutableDictionary *jsonDictionary = (NSMutableDictionary *)response;
-        
-        MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
+        NSDictionary *jsonDictionary = (NSDictionary *)response;
+        NSError *localError = nil;
+        MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&localError];
         
         if (!tokenResponse)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
             return;
         }
         
-        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&error])
+        localError = nil;
+        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
             return;
         }
         
@@ -210,19 +213,27 @@ static MSALScopes *s_reservedScopes = nil;
         
         MSIDConfiguration *configuration = _parameters.msidConfiguration;
         
+        localError = nil;
         BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
                                                            response:tokenResponse
                                                             context:_parameters
-                                                              error:&error];
+                                                              error:&localError];
         
         if (!isSaved)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
             return;
         }
         
         MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
         MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
+        
+        if (!accessToken || !idToken)
+        {
+            NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+            completionBlock(nil, userMismatchError);
+            return;
+        }
         
         MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
         

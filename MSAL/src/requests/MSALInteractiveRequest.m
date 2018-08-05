@@ -245,7 +245,7 @@ static MSALInteractiveRequest *s_currentRequest = nil;
     return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                                  clientId:_parameters.clientId
                                                                     scope:[[self requestScopes:nil] msalToString]
-                                                              redirectUri:[_parameters.redirectUri absoluteString]
+                                                              redirectUri:_parameters.redirectUri.absoluteString
                                                                      code:_code
                                                              codeVerifier:_pkce.codeVerifier
                                                                   context:_parameters];

@@ -56,6 +56,7 @@
                                 completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
     (void)userPrincipalName;
+    CHECK_ERROR_COMPLETION(completionBlock, context, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
     
     if (!validate || [MSALAuthority isKnownHost:authority])
     {
@@ -84,14 +85,14 @@
              return;
          }
         
-        if(response && ![response isKindOfClass:[NSMutableDictionary class]])
+        if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }
          
-         NSMutableDictionary *responseDic = (NSMutableDictionary *)response;
+         NSDictionary *responseDic = (NSDictionary *)response;
          NSError *jsonError = nil;
          MSALInstanceDiscoveryResponse *json = [[MSALInstanceDiscoveryResponse alloc] initWithJson:responseDic
                                                                                              error:&jsonError];

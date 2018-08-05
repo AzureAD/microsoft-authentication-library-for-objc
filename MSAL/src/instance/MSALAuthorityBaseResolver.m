@@ -37,6 +37,8 @@
                         context:(id<MSALRequestContext>)context
                 completionBlock:(TenantDiscoveryCallback)completionBlock
 {
+    CHECK_ERROR_COMPLETION(completionBlock, context, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
+    
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
@@ -45,14 +47,14 @@
         
         CHECK_COMPLETION(!error);
         
-        if(response && ![response isKindOfClass:[NSMutableDictionary class]])
+        if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSMutableDictionary.");
+            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }
 
-        NSMutableDictionary *responseDic = (NSMutableDictionary *)response;
+        NSDictionary *responseDic = (NSDictionary *)response;
         NSError *jsonError = nil;
         MSALTenantDiscoveryResponse *tenantDiscoveryResponse = [[MSALTenantDiscoveryResponse alloc] initWithJson:responseDic
                                                                                                            error:&jsonError];
