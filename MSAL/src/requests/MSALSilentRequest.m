@@ -40,6 +40,7 @@
 #import "MSALErrorConverter.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDAADRefreshTokenGrantRequest.h"
+#import "MSIDError.h"
 
 @interface MSALSilentRequest()
 
@@ -156,6 +157,13 @@
              // Logic for returning extended lifetime token
              if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
              {
+                 MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                                configuration:msidConfiguration
+                                                                      context:_parameters
+                                                                        error:&error];
+                 
+                 result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
+                 error = nil;
              }
              
              completionBlock(result, error);
@@ -174,12 +182,12 @@
 
 - (BOOL)isServerUnavailable:(NSError *)error
 {
-    if (![error.domain isEqualToString:ADHTTPErrorCodeDomain])
+    if (![error.domain isEqualToString:MSIDHttpErrorCodeDomain])
     {
         return NO;
     }
     
-    return ([result.error code] >= 500 && [result.error code] <= 599);
+    return ([error code] >= 500 && [error code] <= 599);
 }
 
 @end
