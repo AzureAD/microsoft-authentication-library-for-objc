@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,48 +15,36 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
+#ifndef MSALWebviewType_h
+#define MSALWebviewType_h
 
-#import "MSALTestCase.h"
-#import "MSALPkce.h"
-
-NSUInteger const kCodeVerifierMinLength = 43;
-NSUInteger const kCodeVerifierMaxLength = 128;
-
-@interface MSALPkceTests : MSALTestCase
-
-@end
-
-@implementation MSALPkceTests
-
-- (void)setUp {
-    [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-}
-
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
-
-- (void)testPkce
+typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
-    MSALPkce *pkce = [MSALPkce new];
-    XCTAssertTrue(pkce.codeVerifier.length >= kCodeVerifierMinLength);
-    XCTAssertTrue(pkce.codeVerifier.length <= kCodeVerifierMaxLength);
+    // Use WKWebView
+    MSALWebviewTypeWKWebView,
     
-    XCTAssertNotNil(pkce.codeChallenge);
+#if TARGET_OS_IPHONE
     
-    XCTAssertEqualObjects(@"S256", pkce.codeChallengeMethod);
-}
+    // Use SFAuthenticationSession/ASWebAuthenticationSession
+    MSALWebviewTypeAuthenticationSession,
+    
+    // Use SFSafariViewController for all versions.
+    MSALWebviewTypeSafariViewController,
+    
+    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
+    // or SFAuthenticationSession).
+    // For older versions, with AuthenticationSession not being available, uses
+    // SafariViewController.
+    MSALWebviewTypeAutomatic
+#endif
+
+};
 
 
-
-@end
+#endif /* MSALWebviewType_h */

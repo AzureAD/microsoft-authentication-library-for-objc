@@ -106,7 +106,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -126,7 +126,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -163,7 +163,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -225,7 +225,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -328,7 +328,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -433,7 +433,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -505,7 +505,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -614,7 +614,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -662,7 +662,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
@@ -772,7 +772,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
-    parameters.redirectUri = [NSURL URLWithString:UNIT_TEST_DEFAULT_REDIRECT_URI];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
