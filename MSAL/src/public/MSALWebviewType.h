@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -22,21 +20,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#ifndef MSALWebviewType_h
+#define MSALWebviewType_h
 
-typedef void (^MSALWebUICompletionBlock)(NSURL *response, NSError *error);
+typedef NS_ENUM(NSInteger, MSALWebviewType)
+{
+    // Use WKWebView
+    MSALWebviewTypeWKWebView,
+    
+#if TARGET_OS_IPHONE
+    
+    // Use SFAuthenticationSession/ASWebAuthenticationSession
+    MSALWebviewTypeAuthenticationSession,
+    
+    // Use SFSafariViewController for all versions.
+    MSALWebviewTypeSafariViewController,
+    
+    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
+    // or SFAuthenticationSession).
+    // For older versions, with AuthenticationSession not being available, uses
+    // SafariViewController.
+    MSALWebviewTypeAutomatic
+#endif
 
-@interface MSALWebUI : NSObject
+};
 
-+ (void)startWebUIWithURL:(NSURL *)url
-                  context:(id<MSALRequestContext>)context
-          completionBlock:(MSALWebUICompletionBlock)completionBlock;
 
-+ (BOOL)handleResponse:(NSURL *)url;
-
-+ (BOOL)cancelCurrentWebAuthSession;
-
-@end
+#endif /* MSALWebviewType_h */

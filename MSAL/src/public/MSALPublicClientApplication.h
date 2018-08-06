@@ -31,6 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
+@class WKWebView;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -48,7 +49,7 @@
 @property (readonly) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly) NSURL *redirectUri;
+@property (readonly) NSString *redirectUri;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
@@ -59,6 +60,17 @@
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
 @property NSString *component;
+
+/*! The webview selection to be used for authentication.
+ By default, it is going to use the following to authenticate.
+ - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+ - macOS:  WKWebView
+ */
+@property MSALWebviewType webviewType;
+
+/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
+    For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
+@property WKWebView *customWebview;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
@@ -190,6 +202,7 @@
 
 #pragma SafariViewController Support
 
+#if TARGET_OS_IPHONE
 /*!
     Ask MSAL to handle a URL response.
     
@@ -199,6 +212,7 @@
              NO otherwise.
  */
 + (BOOL)handleMSALResponse:(NSURL *)response;
+#endif
 
 /*!
     Cancels any currently running interactive web authentication session, resulting

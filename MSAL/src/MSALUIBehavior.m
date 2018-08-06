@@ -41,12 +41,12 @@ NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     @throw @"Unrecognized MSALUIBehavior";
 }
 
-NSDictionary *MSALParametersForBehavior(MSALUIBehavior behavior)
+NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
 {
     switch (behavior)
     {
-        case MSALForceLogin : return @{ @"prompt" : @"login" };
-        case MSALForceConsent : return @{ @"prompt" : @"consent" };
-        case MSALSelectAccount : return @{ @"prompt" : @"select_account" };
+        case MSALForceLogin : return @"login";
+        case MSALForceConsent : return @"consent";
+        case MSALSelectAccount : return @"select_account";
     }
 }

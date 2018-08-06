@@ -36,7 +36,7 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALURLSession.h"
-#import "MSALWebUI.h"
+
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #if TARGET_OS_IPHONE
@@ -53,11 +53,19 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+
 #import "MSIDAuthority.h"
+
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSALRedirectUriVerifier.h"
 
+#import "MSIDWebviewAuthorization.h"
+#import "MSIDWebviewSession.h"
+
 @interface MSALPublicClientApplication()
+{
+    WKWebView *_customWebview;
+}
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 #if TARGET_OS_IPHONE
@@ -85,9 +93,9 @@
         return NO;
     }
 
-    _redirectUri = generatedRedirectUri;
+    _redirectUri = generatedRedirectUri.absoluteString;
 
-    return [MSALRedirectUriVerifier verifyRedirectUri:_redirectUri
+    return [MSALRedirectUriVerifier verifyRedirectUri:generatedRedirectUri
                                         brokerEnabled:NO
                                                 error:error];
 }
@@ -100,7 +108,6 @@
                         authority:nil
                       redirectUri:nil
                             error:error];
-    
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -202,16 +209,22 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:factory];
     
     self.tokenCache = defaultAccessor;
+    
+    _webviewType = MSALWebviewTypeAutomatic;
+    
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
 
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     self.tokenCache = defaultAccessor;
+    _webviewType = MSALWebviewTypeWKWebView;
+    
 #endif
     
     _validateAuthority = YES;
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
+    
     
     return self;
 }
@@ -282,49 +295,16 @@
 
 #pragma SafariViewController Support
 
+#if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
-    if (!response)
-    {
-        return NO;
-    }
-    
-    MSALInteractiveRequest *request = [MSALInteractiveRequest currentActiveRequest];
-    if (!request)
-    {
-        return NO;
-    }
-    
-    if ([NSString msidIsStringNilOrBlank:response.query])
-    {
-        return NO;
-    }
-    
-    NSDictionary *qps = [NSDictionary msidURLFormDecode:response.query];
-    if (!qps)
-    {
-        return NO;
-    }
-    
-    NSString *state = qps[MSID_OAUTH2_STATE];
-    if (!state)
-    {
-        return NO;
-    }
-    
-    if (![request.state isEqualToString:state])
-    {
-        MSID_LOG_ERROR(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        MSID_LOG_ERROR_PII(request.parameters, @"State in response \"%@\" does not match request \"%@\"", state, request.state);
-        return NO;
-    }
-    
-    return [MSALWebUI handleResponse:response];
+    return [MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response];
 }
+#endif
 
 + (void)cancelCurrentWebAuthSession
 {
-    [MSALWebUI cancelCurrentWebAuthSession];
+    [MSIDWebviewAuthorization cancelCurrentSession];
 }
 
 #pragma mark -
@@ -510,6 +490,7 @@
                       completionBlock:completionBlock];
 }
 
+
 #pragma mark -
 #pragma mark - private methods
 
@@ -545,7 +526,9 @@
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSALRequestParameters* params = [MSALRequestParameters new];
+    MSALRequestParameters *params = [MSALRequestParameters new];
+
+    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.logComponent = _component;
     params.apiId = apiId;
@@ -598,6 +581,9 @@
     params.clientId = _clientId;
     params.urlSession = [MSALURLSession createMSALSession:params];
     
+    params.webviewType = _webviewType;
+    params.customWebview = _customWebview;
+    
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
@@ -645,6 +631,7 @@
     }
 
     MSALRequestParameters* params = [MSALRequestParameters new];
+    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.account = account;
     params.apiId = apiId;
@@ -700,6 +687,21 @@
         [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
+}
+
+- (WKWebView *)customWebview
+{
+    return _customWebview;
+}
+
+- (void)setCustomWebview:(WKWebView *)customWebview
+{
+    if (_customWebview)
+    {
+        MSID_LOG_WARN(nil, @"Attempting to change the custom webview once MSALPublicClientApplication have been created is invalid.");
+        return;
+    }
+    _customWebview = customWebview;
 }
 
 #pragma mark -
