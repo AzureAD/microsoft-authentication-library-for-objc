@@ -41,7 +41,10 @@
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
 #import "MSIDWebOpenBrowserResponse.h"
+
+#if TARGET_OS_IPHONE
 #import "MSIDAppExtensionUtil.h"
+#endif
 
 @implementation MSALInteractiveRequest
 {
