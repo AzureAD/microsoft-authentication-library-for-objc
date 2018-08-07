@@ -251,6 +251,11 @@ static MSALScopes *s_reservedScopes = nil;
 {
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
     
+    if (_cloudAuthority)
+    {
+        tokenEndpoint.host = _cloudAuthority.host;
+    }
+    
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
     
     if (!endpointQPs)

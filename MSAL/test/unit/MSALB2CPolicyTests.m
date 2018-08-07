@@ -32,7 +32,6 @@
 #import "MSALTestSwizzle.h"
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSIDTestURLSession+MSAL.h"
-#import "MSALWebUI.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
 #import "MSIDTestURLSession.h"
@@ -42,6 +41,9 @@
 #import "MSALAccountId.h"
 #import "MSIDBaseToken.h"
 #import "MSIDAADV2Oauth2Factory.h"
+
+#import "MSIDWebviewAuthorization.h"
+#import "MSIDWebAADAuthResponse.h"
 
 @interface MSALB2CPolicyTests : MSALTestCase
 
@@ -98,30 +100,24 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     // Setup acquireToken with first policy (b2c_1_policy)
     NSString *firstAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy";
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
-    
-    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
-                           class:[MSALWebUI class]
-                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         (void)obj;
-         (void)context;
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
          
-         XCTAssertNotNil(url);
-         
-         // State preserving and url are tested separately
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
-         NSString *state = QPs[@"state"];
-         
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", state];
-         completionBlock([NSURL URLWithString:responseString], nil);
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                    context:nil error:nil];    
+         completionHandler(oauthResponse, nil);
      }];
-    
+
     NSError *error = nil;
-    
+
     // Create application object with the first policy as authority
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -129,31 +125,33 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.webviewType = MSALWebviewTypeWKWebView;
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
-    
+
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
-         
+
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
          XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
          dispatch_semaphore_signal(dsem);
      }];
-    
+
     while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
     {
         [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
     }
-    
+
     // Now acquiretoken call with second policy (b2c_2_policy)
     NSString *secondAuthority = @"https://login.microsoftonline.com/tfp/contosob2c/b2c_2_policy";
-    
+
     // Override oidc and token responses for the second policy
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
-    
+
     // Use an authority with a different policy in the second acquiretoken call
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                   extraScopesToConsent:nil
@@ -163,15 +161,13 @@
                              authority:secondAuthority
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error) {
-                           
+
                            XCTAssertNil(error);
                            XCTAssertNotNil(result);
-                           
+
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
-                           
                            dispatch_semaphore_signal(dsem);
-        
     }];
     
     while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
@@ -195,7 +191,7 @@
             [rts addObject:token];
         }
     }
-    
+
     // Ensure we have two different accesstokens in cache
     // and that second call doesn't overwrite first one, since policies are different
     XCTAssertEqual(ats.count, 2);
