@@ -232,15 +232,6 @@
         return NO;
     }
     
-    // Make sure claims is properly encoded
-    NSString* claimsParams = parameters.claims.msidTrimmedString;
-    NSURL* url = [NSURL URLWithString:[NSMutableString stringWithFormat:@"%@?claims=%@", parameters.unvalidatedAuthority.absoluteString, claimsParams]];
-    if (!url)
-    {
-        MSAL_ERROR_PARAM(_parameters, MSALErrorInvalidParameter, @"claims is not properly encoded. Please make sure it is URL encoded.");
-        return NO;
-    }
-    
     return YES;
 }
 

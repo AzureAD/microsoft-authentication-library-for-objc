@@ -245,7 +245,7 @@
          
          NSMutableDictionary *expectedQPs =
          [@{
-            @"claims" : @"fake_claims", //claims should be in the QPs
+            @"claims" : @"{\"fake_claims\"}", //claims should be in the QPs
             @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
             @"return-client-request-id" : @"true",
             @"state" : [MSIDTestRequireValueSentinel sentinel],
@@ -284,7 +284,7 @@
                                account:nil
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:@"fake_claims"
+                                claims:@"{\"fake_claims\"}"
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -292,37 +292,6 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-     }];
-}
-
-- (void)testAcquireTokenInteractive_whenClaimsIsNotProperlyEncoded_shouldReturnError
-{
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
-    NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:DEFAULT_TEST_AUTHORITY
-                                                                                               error:&error];
-    XCTAssertNotNil(application);
-    XCTAssertNil(error);
-    
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            uiBehavior:MSALUIBehaviorDefault
-                  extraQueryParameters:nil
-                                claims:@"{\"unencoded_fake_claims\"}"
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertNil(result);
-         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
-         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"claims is not properly encoded. Please make sure it is URL encoded.");
      }];
 }
 

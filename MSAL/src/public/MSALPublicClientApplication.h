@@ -326,7 +326,7 @@
  @param  uiBehavior              A UI behavior for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
  the interactive authentication flow.
- @param  claims                  The claims parameter that needs to be sent to authorization endpoint. It should be URL-encoded.
+ @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
  it is of the form https://<instance/<tenant>, where <instance> is the
  directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -437,7 +437,7 @@
  @param  uiBehavior              A UI behavior for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
  the interactive authentication flow.
- @param  claims                  The claims parameter that needs to be sent to authorization endpoint. It should be URL-encoded.
+ @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
  Azure AD it is of the form https://<instance/<tenant>, where
  <instance> is the directory host
