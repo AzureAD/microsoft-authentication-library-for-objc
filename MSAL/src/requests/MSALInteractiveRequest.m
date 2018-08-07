@@ -165,13 +165,13 @@
             }
             else
             {
-                NSError *error = CREATE_MSID_LOG_ERROR(nil, MSALErrorAttemptToOpenBrowserFromExtension, @"unable to redirect to browser from extension");
+                NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenBrowserFromExtension, @"unable to redirect to browser from extension");
                 completionBlock(nil, error);
             }
 #else
             [[NSWorkspace sharedWorkspace] openURL:browserURL];
 #endif
-            NSError *error = CREATE_MSID_LOG_ERROR(nil, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.");
+            NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.");
             
             completionBlock(nil, error);
             return;
