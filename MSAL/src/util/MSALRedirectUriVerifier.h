@@ -27,10 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MSALPkce : NSObject
+@interface MSALRedirectUriVerifier : NSObject
 
-@property (readonly) NSString *codeVerifier;
-@property (readonly) NSString *codeChallenge;
-@property (readonly) NSString *codeChallengeMethod;
++ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
+            brokerEnabled:(BOOL)brokerEnabled
+                    error:(NSError * __autoreleasing *)error;
+
++ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
+                      clientId:(NSString *)clientId
+                 brokerEnabled:(BOOL)brokerEnabled
+                         error:(NSError * __autoreleasing *)error;
 
 @end

@@ -31,7 +31,6 @@
 #import "MSALTestConstants.h"
 #import "MSALTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
-#import "MSALWebUI.h"
 
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDDeviceId.h"
@@ -57,6 +56,10 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+
+#import "MSIDWebviewAuthorization.h"
+#import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebviewFactory.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -86,6 +89,7 @@
     [super tearDown];
 }
 
+
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -105,38 +109,16 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    // Swizzle out the main entry point for WebUI, WebUI is tested in its own component tests
-    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
-                           class:[MSALWebUI class]
-                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         (void)obj;
-         (void)context;
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
          
-         XCTAssertNotNil(url);
-         XCTAssertEqualObjects(url.scheme, @"https");
-         XCTAssertEqualObjects(url.msidHostWithPortIfNecessary, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(url.path, @"/contosob2c/v2.0/oauth/authorize");
-         NSMutableDictionary *expectedQPs =
-         [@{
-           @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
-           @"state" : [MSIDTestRequireValueSentinel sentinel],
-           @"prompt" : @"select_account",
-           @"client_id" : UNIT_TEST_CLIENT_ID,
-           @"scope" : @"fakeb2cscopes openid profile offline_access",
-           @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
-           @"response_type" : @"code",
-           @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
-           @"code_challenge_method" : @"S256",
-           @"p" : @"b2c_1_policy",
-           UT_SLICE_PARAMS_DICT
-           } mutableCopy];
-         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
-         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
-         completionBlock([NSURL URLWithString:responseString], nil);
+         completionHandler(oauthResponse, nil);
      }];
     
     NSError *error = nil;
@@ -146,6 +128,8 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+    
+    application.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenForScopes"];
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
@@ -251,20 +235,19 @@
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
-                           class:[MSALWebUI class]
-                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         (void)obj;
-         (void)context;
-         
+         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
             @"claims" : @"fake_claims", //claims should be in the QPs
-            @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"return-client-request-id" : @"true",
             @"state" : [MSIDTestRequireValueSentinel sentinel],
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -273,6 +256,7 @@
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
+            @"haschrome" : @"1",
             @"eqpKey" : @"eqpValue",
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
@@ -281,7 +265,9 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
-         completionBlock([NSURL URLWithString:responseString], nil);
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
      }];
     
     // Acquire token call
@@ -292,6 +278,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
+    application.webviewType = MSALWebviewTypeWKWebView;
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
@@ -344,7 +331,7 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
     [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
@@ -356,24 +343,23 @@
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
-    
+
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
-    
+
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startWebUIWithURL:context:completionBlock:)
-                           class:[MSALWebUI class]
-                           block:(id)^(id obj, NSURL *url, id<MSALRequestContext>context, MSALWebUICompletionBlock completionBlock)
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         (void)obj;
-         (void)context;
-         
+         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
          NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
-         
+
          NSMutableDictionary *expectedQPs =
          [@{
             //claims should not be in the QPs
-            @"return-client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"return-client-request-id" : @"true",
             @"state" : [MSIDTestRequireValueSentinel sentinel],
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
@@ -382,16 +368,19 @@
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
+            @"haschrome" : @"1",
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         
+
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
-         
+
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
-         completionBlock([NSURL URLWithString:responseString], nil);
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
      }];
-    
+
     // Acquire token call
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
@@ -399,7 +388,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    
+
+    application.webviewType = MSALWebviewTypeWKWebView;
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
