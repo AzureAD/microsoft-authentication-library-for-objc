@@ -171,6 +171,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorNoViewController = -42403,
     
     /*!
+        MSAL tried to open a browser from an extension, which is not allowed.
+     */
+    MSALErrorAttemptToOpenBrowserFromExtension = -42404,
+    
+    /*!
         An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
         in the userInfo dictionary for more detailed information about the specific
         error.
