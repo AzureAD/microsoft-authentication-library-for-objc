@@ -40,6 +40,11 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
+#import "MSIDWebOpenBrowserResponse.h"
+
+#if TARGET_OS_IPHONE
+#import "MSIDAppExtensionUtil.h"
+#endif
 
 @implementation MSALInteractiveRequest
 {
@@ -142,9 +147,35 @@
             return;
         }
         
-        else if([response isKindOfClass:MSIDWebMSAuthResponse.class])
+        else if ([response isKindOfClass:MSIDWebMSAuthResponse.class])
         {
             // Todo: Install broker prompt
+        }
+        
+        else if ([response isKindOfClass:MSIDWebOpenBrowserResponse.class])
+        {
+            NSURL *browserURL = ((MSIDWebOpenBrowserResponse *)response).browserURL;
+            
+#if TARGET_OS_IPHONE
+            if (![MSIDAppExtensionUtil isExecutingInAppExtension])
+            {
+                MSID_LOG_INFO(nil, @"Opening a browser");
+                MSID_LOG_INFO_PII(nil, @"Opening a browser - %@", browserURL);
+                [MSIDAppExtensionUtil sharedApplicationOpenURL:browserURL];
+            }
+            else
+            {
+                NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension");
+                completionBlock(nil, error);
+                return;
+            }
+#else
+            [[NSWorkspace sharedWorkspace] openURL:browserURL];
+#endif
+            NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.");
+            
+            completionBlock(nil, error);
+            return;
         }
         
         completionBlock(nil, error);
