@@ -188,8 +188,6 @@
             completionBlock(nil, error);
             return;
         }
-        
-        completionBlock(nil, error);
     };
 
 #if TARGET_OS_IPHONE
