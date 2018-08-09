@@ -463,6 +463,19 @@
 
 #pragma mark - SafariViewController
 
-// TODO
+- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andSafariViewController_andForceConsent
+{
+    // TODO: needs embedded webview
+}
+
+- (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSafariViewController_andSelectAccount
+{
+    // TODO: needs embedded webview
+}
+
+- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSafariViewController_andForceLogin
+{
+    // TODO: needs embedded webview
+}
 
 @end
