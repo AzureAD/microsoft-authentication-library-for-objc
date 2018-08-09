@@ -165,8 +165,9 @@
             }
             else
             {
-                NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenBrowserFromExtension, @"unable to redirect to browser from extension");
+                NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension");
                 completionBlock(nil, error);
+                return;
             }
 #else
             [[NSWorkspace sharedWorkspace] openURL:browserURL];
