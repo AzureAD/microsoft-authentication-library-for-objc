@@ -41,6 +41,7 @@
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
 #import "MSIDWebOpenBrowserResponse.h"
+#import "MSALErrorConverter.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDAppExtensionUtil.h"
@@ -116,18 +117,28 @@
     
     MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
-                                                                                              clientId:_parameters.clientId resource:nil
+                                                                                              clientId:_parameters.clientId
+                                                                                              resource:nil
                                                                                                 scopes:[self requestScopes:_extraScopesToConsent]
                                                                                          correlationId:_parameters.correlationId
                                                                                             enablePkce:YES];
     config.promptBehavior = MSALParameterStringForBehavior(_uiBehavior);
-    config.loginHint = _parameters.loginHint;
+    config.loginHint = _parameters.account ? _parameters.account.username : _parameters.loginHint;
+    config.uid = _parameters.account.homeAccountId.objectId;
+    config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
 
     _webviewConfig = config;
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
     {
+        if (error)
+        {
+            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
+            completionBlock(nil, msalError);
+            return;
+        }
+
         if ([response isKindOfClass:MSIDWebOAuth2Response.class])
         {
             MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
@@ -143,7 +154,7 @@
             }
             
             
-            completionBlock(nil, oauthResponse.oauthError);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError]);
             return;
         }
         

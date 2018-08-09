@@ -46,6 +46,7 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "NSString+MSIDExtensions.h"
+#import "MSAL_Internal.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -248,6 +249,10 @@
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
         {
             application.webviewType = MSALWebviewTypeAutomatic;
+        }
+        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI])
+        {
+            application.webviewType = MSALWebviewTypeSafariViewController;
         }
 
         if (account)

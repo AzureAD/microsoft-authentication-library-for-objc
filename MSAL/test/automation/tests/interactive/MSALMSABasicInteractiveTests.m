@@ -74,7 +74,7 @@
 
     // Assert UI appears again
     [self acquireToken:config];
-    [self assertAuthUIAppear];
+    [self assertAuthUIAppearWithEmbedded:NO safariViewController:NO];
 }
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin
@@ -109,7 +109,7 @@
 
     // Assert UI appears again
     [self acquireToken:config];
-    [self assertAuthUIAppear];
+    [self assertAuthUIAppearWithEmbedded:NO safariViewController:NO];
 }
 
 #pragma mark - Non-converged app

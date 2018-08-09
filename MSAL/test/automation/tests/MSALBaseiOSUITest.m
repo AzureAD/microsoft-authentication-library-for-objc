@@ -130,6 +130,14 @@
     [allowButton tap];
 }
 
+- (void)allowSFAuthenticationSessionAlert
+{
+    XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
+    __auto_type allowButton = springBoardApp.alerts.buttons[@"Continue"];
+    [self waitForElement:allowButton];
+    [allowButton tap];
+}
+
 - (void)waitForRedirectToTheTestApp
 {
     BOOL result = [self.testApp waitForState:XCUIApplicationStateRunningForeground timeout:30.0f];

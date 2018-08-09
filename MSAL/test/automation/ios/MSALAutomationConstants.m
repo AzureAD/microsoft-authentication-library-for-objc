@@ -55,6 +55,7 @@ NSString *const MSAL_UI_BEHAVIOR                                = @"ui_behavior"
 NSString *const MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM          = @"webview_selection";
 NSString *const MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED = @"webview_embedded";
 NSString *const MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM   = @"webview_system";
+NSString *const MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI   = @"webview_safari";
 
 NSString *const MSAL_AUTOMATION_SUCCESS_VALUE                   = @"yes";
 NSString *const MSAL_AUTOMATION_FAILURE_VALUE                   = @"no";

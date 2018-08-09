@@ -31,6 +31,7 @@
 - (XCUIApplication *)openDeviceRegistrationMenuInAuthenticator;
 - (void)openAppInstallURLForAppId:(NSString *)appId;
 - (void)allowNotificationsInSystemAlert;
+- (void)allowSFAuthenticationSessionAlert;
 - (void)waitForRedirectToTheTestApp;
 - (XCUIApplication *)installAppWithId:(NSString *)appId;
 - (XCUIApplication *)installAppWithIdWithSafariOpen:(NSString *)appId;

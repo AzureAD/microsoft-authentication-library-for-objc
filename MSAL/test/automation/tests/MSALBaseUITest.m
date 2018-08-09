@@ -86,16 +86,21 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     XCTAssertTrue([result[@"expired_access_token_count"] intValue] == 1);
 }
 
-- (void)assertAuthUIAppear
+- (void)assertAuthUIAppearWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController
 {
 #if TARGET_OS_IPHONE
-    XCUIElement *urlBar = self.testApp.buttons[@"URL"];
+    XCUIElement *webElement = self.testApp.buttons[@"URL"];
+
+    if (embedded)
+    {
+        webElement = self.testApp.buttons[@"Cancel"];
+    }
 #else
     // TODO
     // XCUIElement *webView = self.testApp.windows[@"MSAL_SIGN_IN_WINDOW"].firstMatch;
 #endif
     
-    BOOL result = [urlBar waitForExistenceWithTimeout:5.0];
+    BOOL result = [webElement waitForExistenceWithTimeout:5.0];
     
     XCTAssertTrue(result);
 }
@@ -315,9 +320,16 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 #endif
 }
 
-- (void)closeAuthUIWithSystemWebView
+- (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController
 {
-    [self.testApp.buttons[@"Done"] msidTap];
+    NSString *buttonTitle = @"Cancel";
+
+    if (safariViewController)
+    {
+        buttonTitle = @"Done";
+    }
+
+    [self.testApp.buttons[buttonTitle] msidTap];
 }
 
 - (void)closeResultView
@@ -421,6 +433,36 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     NSPredicate *existsPredicate = [NSPredicate predicateWithFormat:@"exists == 1"];
     [self expectationForPredicate:existsPredicate evaluatedWithObject:object handler:nil];
     [self waitForExpectationsWithTimeout:60.0f handler:nil];
+}
+
+#pragma mark - Config
+
+- (NSDictionary *)configDictionaryWithClientId:(NSString *)clientId
+                                        scopes:(NSString *)scopes
+                                   redirectUri:(NSString *)redirectUri
+                                     authority:(NSString *)authority
+                                    uiBehavior:(NSString *)uiBehavior
+                                     loginHint:(NSString *)loginHint
+                             validateAuthority:(BOOL)validateAuthority
+                            useEmbeddedWebView:(BOOL)useEmbedded
+                       useSafariViewController:(BOOL)useSFController
+                             accountIdentifier:(NSString *)accountIdentifier
+{
+    NSMutableDictionary *additionalConfig = [NSMutableDictionary dictionary];
+
+    if (clientId) additionalConfig[@"client_id"] = clientId;
+    if (redirectUri) additionalConfig[@"redirect_uri"] = redirectUri;
+    if (uiBehavior) additionalConfig[@"ui_behavior"] = uiBehavior;
+    if (authority) additionalConfig[@"authority"] = authority;
+    if (scopes) additionalConfig[@"scopes"] = scopes;
+    if (loginHint) additionalConfig[@"login_hint"] = loginHint;
+    if (useEmbedded) additionalConfig[@"webview_selection"] = @"webview_embedded";
+    if (useSFController) additionalConfig[@"webview_selection"] = @"webview_safari";
+    if (accountIdentifier) additionalConfig[@"home_account_identifier"] = accountIdentifier;
+
+    additionalConfig[@"validate_authority"] = @(validateAuthority);
+
+    return [self.testConfiguration configWithAdditionalConfiguration:additionalConfig];
 }
 
 @end

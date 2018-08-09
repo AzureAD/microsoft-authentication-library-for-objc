@@ -36,7 +36,7 @@
 
 - (void)assertRefreshTokenInvalidated;
 - (void)assertAccessTokenExpired;
-- (void)assertAuthUIAppear;
+- (void)assertAuthUIAppearWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertAccessTokenNotNil;
@@ -65,13 +65,23 @@
 - (void)adfsEnterPassword:(NSString *)password;
 - (void)adfsEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp;
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle;
-- (void)closeAuthUI;
-- (void)closeAuthUIWithSystemWebView;
+- (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)openURL:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
 - (NSDictionary *)resultDictionary;
 - (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
+
+- (NSDictionary *)configDictionaryWithClientId:(NSString *)clientId
+                                        scopes:(NSString *)scopes
+                                   redirectUri:(NSString *)redirectUri
+                                     authority:(NSString *)authority
+                                    uiBehavior:(NSString *)uiBehavior
+                                     loginHint:(NSString *)loginHint
+                             validateAuthority:(BOOL)validateAuthority
+                            useEmbeddedWebView:(BOOL)useEmbedded
+                       useSafariViewController:(BOOL)useSFController
+                             accountIdentifier:(NSString *)accountIdentifier;
 
 @end
