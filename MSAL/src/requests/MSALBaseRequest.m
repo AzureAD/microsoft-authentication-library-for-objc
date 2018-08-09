@@ -166,8 +166,12 @@ static MSALScopes *s_reservedScopes = nil;
 {
     NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
     
-    // TODO: Remove once uid+utid work hits PROD
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
+    
+    if (_cloudAuthority)
+    {
+        tokenEndpoint.host = _cloudAuthority.host;
+    }
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
     
@@ -232,7 +236,7 @@ static MSALScopes *s_reservedScopes = nil;
          if (_parameters.account.homeAccountId.identifier != nil &&
              ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
          {
-             NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+             NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
              completionBlock(nil, userMismatchError);
              return;
          }

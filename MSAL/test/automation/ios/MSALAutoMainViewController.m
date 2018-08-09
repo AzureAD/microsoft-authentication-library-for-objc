@@ -240,6 +240,16 @@
             uiBehavior = MSALForceConsent;
         }
 
+        NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
+        if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
+        {
+            application.webviewType = MSALWebviewTypeWKWebView;
+        }
+        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
+        {
+            application.webviewType = MSALWebviewTypeAutomatic;
+        }
+
         if (account)
         {
             [application acquireTokenForScopes:[scopes array]
