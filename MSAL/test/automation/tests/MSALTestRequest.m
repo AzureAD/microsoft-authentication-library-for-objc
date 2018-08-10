@@ -21,14 +21,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALBaseiOSUITest.h"
+#import "MSALTestRequest.h"
 
-@interface MSALBaseAADUITest : MSALBaseiOSUITest
+@implementation MSALTestRequest
 
-@property (nonatomic, strong) NSString *consentTitle;
++ (MSALTestRequest *)convergedAppRequest
+{
+    MSALTestRequest *request = [MSALTestRequest new];
 
-- (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
+    if (request)
+    {
+        request.clientId = @"3c62ac97-29eb-4aed-a3c8-add0298508da";
+        request.redirectUri = @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth";
+        request.validateAuthority = YES;
+    }
+
+    return request;
+}
+
++ (MSALTestRequest *)nonConvergedAppRequest
+{
+    MSALTestRequest *request = [MSALTestRequest new];
+
+    if (request)
+    {
+        request.validateAuthority = YES;
+    }
+
+    return request;
+}
 
 @end

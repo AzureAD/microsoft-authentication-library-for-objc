@@ -26,6 +26,7 @@
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfiguration.h"
 #import "MSIDTestAutomationConfigurationRequest.h"
+#import "MSALTestRequest.h"
 
 @interface MSALBaseUITest : XCTestCase
 
@@ -64,7 +65,7 @@
 - (void)adfsEnterPasswordInApp:(XCUIApplication *)app;
 - (void)adfsEnterPassword:(NSString *)password;
 - (void)adfsEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp;
-- (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle;
+- (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
 - (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)openURL:(NSDictionary *)config;
 
@@ -73,16 +74,6 @@
 - (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
 
-- (NSDictionary *)configDictionaryWithClientId:(NSString *)clientId
-                                        scopes:(NSString *)scopes
-                                   redirectUri:(NSString *)redirectUri
-                                     authority:(NSString *)authority
-                                    uiBehavior:(NSString *)uiBehavior
-                                     loginHint:(NSString *)loginHint
-                             validateAuthority:(BOOL)validateAuthority
-                            useEmbeddedWebView:(BOOL)useEmbedded
-                       useSafariViewController:(BOOL)useSFController
-                              usePassedWebView:(BOOL)usePassedWebView
-                             accountIdentifier:(NSString *)accountIdentifier;
+- (NSDictionary *)configWithTestRequest:(MSALTestRequest *)request;
 
 @end

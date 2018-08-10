@@ -259,7 +259,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [passwordTextField typeText:password];
 }
 
-- (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle
+- (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView
 {
     XCUIElement *consentAcceptButton = self.testApp.buttons[acceptButtonTitle];
 
@@ -274,7 +274,12 @@ static MSIDTestAccountsProvider *s_accountsProvider;
             return;
         }
         // If consent button is not there, but system webview is still shown, wait for 1 more second
-        else if ([self.testApp.buttons[@"URL"] exists])
+        else if ([self.testApp.buttons[@"URL"] exists] && !embeddedWebView)
+        {
+            sleep(1);
+            i++;
+        }
+        else if ([self.testApp.buttons[@"Cancel"] exists] && embeddedWebView)
         {
             sleep(1);
             i++;
@@ -437,32 +442,22 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 #pragma mark - Config
 
-- (NSDictionary *)configDictionaryWithClientId:(NSString *)clientId
-                                        scopes:(NSString *)scopes
-                                   redirectUri:(NSString *)redirectUri
-                                     authority:(NSString *)authority
-                                    uiBehavior:(NSString *)uiBehavior
-                                     loginHint:(NSString *)loginHint
-                             validateAuthority:(BOOL)validateAuthority
-                            useEmbeddedWebView:(BOOL)useEmbedded
-                       useSafariViewController:(BOOL)useSFController
-                              usePassedWebView:(BOOL)usePassedWebView
-                             accountIdentifier:(NSString *)accountIdentifier
+- (NSDictionary *)configWithTestRequest:(MSALTestRequest *)request
 {
     NSMutableDictionary *additionalConfig = [NSMutableDictionary dictionary];
 
-    if (clientId) additionalConfig[@"client_id"] = clientId;
-    if (redirectUri) additionalConfig[@"redirect_uri"] = redirectUri;
-    if (uiBehavior) additionalConfig[@"ui_behavior"] = uiBehavior;
-    if (authority) additionalConfig[@"authority"] = authority;
-    if (scopes) additionalConfig[@"scopes"] = scopes;
-    if (loginHint) additionalConfig[@"login_hint"] = loginHint;
-    if (useEmbedded) additionalConfig[@"webview_selection"] = @"webview_embedded";
-    if (useSFController) additionalConfig[@"webview_selection"] = @"webview_safari";
-    if (usePassedWebView) additionalConfig[@"webview_selection"] = @"passed_webview";
-    if (accountIdentifier) additionalConfig[@"home_account_identifier"] = accountIdentifier;
+    if (request.clientId) additionalConfig[@"client_id"] = request.clientId;
+    if (request.redirectUri) additionalConfig[@"redirect_uri"] = request.redirectUri;
+    if (request.uiBehavior) additionalConfig[@"ui_behavior"] = request.uiBehavior;
+    if (request.authority) additionalConfig[@"authority"] = request.authority;
+    if (request.scopes) additionalConfig[@"scopes"] = request.scopes;
+    if (request.loginHint) additionalConfig[@"login_hint"] = request.loginHint;
+    if (request.useEmbedded) additionalConfig[@"webview_selection"] = @"webview_embedded";
+    if (request.useSFController) additionalConfig[@"webview_selection"] = @"webview_safari";
+    if (request.usePassedWebView) additionalConfig[@"webview_selection"] = @"passed_webview";
+    if (request.accountIdentifier) additionalConfig[@"home_account_identifier"] = request.accountIdentifier;
 
-    additionalConfig[@"validate_authority"] = @(validateAuthority);
+    additionalConfig[@"validate_authority"] = @(request.validateAuthority);
 
     return [self.testConfiguration configWithAdditionalConfiguration:additionalConfig];
 }

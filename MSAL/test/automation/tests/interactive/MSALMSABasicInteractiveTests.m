@@ -27,6 +27,7 @@
 
 #import "MSALBaseUITest.h"
 #import "MSALBaseAADUITest.h"
+#import "XCUIElement+CrossPlat.h"
 
 @interface MSALMSABasicInteractiveTests : MSALBaseAADUITest
 
@@ -53,81 +54,138 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSystemWebView_andForceLogin
 {
-    NSArray *expectedScopes = @[@"user.read",
-                                @"tasks.read",
-                                @"openid", @"profile"];
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes =  @[@"user.read",
+                                      @"tasks.read",
+                                      @"openid", @"profile"];
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    NSString *homeAccountId = [self runSharedAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
-                                                           scopes:@"user.read tasks.read"
-                                             expectedResultScopes:expectedScopes
-                                                      redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
-                                                        authority:@"https://login.microsoftonline.com/common"
-                                                       uiBehavior:@"force"
-                                                        loginHint:self.primaryAccount.account
-                                                accountIdentifier:nil
-                                                validateAuthority:YES
-                                               useEmbeddedWebView:NO
-                                          useSafariViewController:NO
-                                                 usePassedWebView:NO
-                                                  expectedAccount:self.primaryAccount];
+    // 1. Do interactive login
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
 
-    [self runSharedAuthUIAppearsStepWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
-                                          scopes:@"user.read tasks.read"
-                                     redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
-                                       authority:@"https://login.microsoftonline.com/common"
-                                      uiBehavior:@"force"
-                                       loginHint:self.primaryAccount.account
-                               accountIdentifier:nil
-                               validateAuthority:YES
-                              useEmbeddedWebView:NO
-                         useSafariViewController:NO
-                                usePassedWebView:NO];
+    // 2. Run UI appears step
+    [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
-    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = homeAccountId;
+    request.authority = nil;
 
-    [self runSharedSilentAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
-                                       scopes:@"user.read tasks.read"
-                         expectedResultScopes:expectedScopes
-                              silentAuthority:authority
-                               cacheAuthority:authority
-                            accountIdentifier:homeAccountId
-                            validateAuthority:YES
-                              expectedAccount:self.primaryAccount];
+    // 3. Run silent
+    [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-- (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin
+- (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSafariViewController_andForceLogin
 {
-    NSArray *expectedScopes = @[@"user.read",
-                                @"tasks.read",
-                                @"openid", @"profile"];
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes =   @[@"user.read",
+                                       @"tasks.read",
+                                       @"openid", @"profile"];
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.authority = @"https://login.microsoftonline.com/consumers";
+    request.useSFController = YES;
 
-    NSString *homeAccountId = [self runSharedAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
-                                                           scopes:@"user.read tasks.read"
-                                             expectedResultScopes:expectedScopes
-                                                      redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
-                                                        authority:@"https://login.microsoftonline.com/consumers"
-                                                       uiBehavior:@"force"
-                                                        loginHint:self.primaryAccount.account
-                                                accountIdentifier:nil
-                                                validateAuthority:YES
-                                               useEmbeddedWebView:NO
-                                          useSafariViewController:NO
-                                                 usePassedWebView:NO
-                                                  expectedAccount:self.primaryAccount];
+    // 1. Run interactive login
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
 
     XCTAssertNotNil(homeAccountId);
 
-    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = homeAccountId;
 
-    [self runSharedSilentAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
-                                       scopes:@"user.read tasks.read"
-                         expectedResultScopes:expectedScopes
-                              silentAuthority:authority
-                               cacheAuthority:authority
-                            accountIdentifier:homeAccountId
-                            validateAuthority:YES
-                              expectedAccount:self.primaryAccount];
+    // 2. Run silent login
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin_angLoginHint
+{
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes =   @[@"user.read",
+                                       @"tasks.read",
+                                       @"openid", @"profile"];
+    request.uiBehavior = @"force";
+    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
+    request.authority = @"https://login.microsoftonline.com/consumers";
+
+    // 1. Run interactive login
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+
+    XCTAssertNotNil(homeAccountId);
+
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = homeAccountId;
+
+    // 2. Run silent login
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andEmbeddedWebview_andForceLogin_andLoginHint
+{
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes =   @[@"user.read",
+                                       @"tasks.read",
+                                       @"openid", @"profile"];
+    request.uiBehavior = @"force";
+    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
+    request.authority = @"https://login.microsoftonline.com/consumers";
+    request.useEmbedded = YES;
+
+    // 1. Run interactive login
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+
+    XCTAssertNotNil(homeAccountId);
+
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = homeAccountId;
+
+    // 2. Run silent login
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+// TODO: consumers doesn't support select account?
+- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSelectAccount
+{
+    // 1. Sign in first time to ensure account will be there
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.scopes = @"tasks.read";
+    request.expectedResultScopes = @[@"tasks.read", @"openid", @"profile"];
+    request.uiBehavior = @"force";
+    request.loginHint = self.primaryAccount.username;
+    request.testAccount = self.primaryAccount;
+    [self runSharedAADLoginWithTestRequest:request];
+
+    request.uiBehavior = @"select_account";
+    request.loginHint = nil;
+
+    NSDictionary *config = [self configWithTestRequest:request];
+    // 2. Now call acquire token with select account
+    [self acquireToken:config];
+    [self allowSFAuthenticationSessionAlert];
+
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
+    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+    // TODO: why am I asked to enter my password again in system webview?
+    [self aadEnterPassword];
+    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
 }
 
 #pragma mark - Non-converged app
@@ -140,25 +198,23 @@
     configurationRequest.accountFeatures = @[];
     [self loadTestConfiguration:configurationRequest];
 
-    NSDictionary *config = [self configDictionaryWithClientId:nil
-                                                       scopes:@"https://graph.microsoft.com/.default"
-                                                  redirectUri:nil
-                                                    authority:@"https://login.microsoftonline.com/consumers"
-                                                   uiBehavior:@"force"
-                                                    loginHint:nil
-                                            validateAuthority:YES
-                                           useEmbeddedWebView:NO
-                                      useSafariViewController:NO
-                                             usePassedWebView:NO
-                                            accountIdentifier:nil];
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.authority = @"https://login.microsoftonline.com/consumers";
+    request.uiBehavior = @"force";
+    request.scopes = @"https://graph.microsoft.com/.default";
+    request.testAccount = self.primaryAccount;
+
+    NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
     [self allowSFAuthenticationSessionAlert];
     [self aadEnterEmail];
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Yes"];
+    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
     [self assertErrorCode:@"MSALErrorInvalidRequest"];
     [self assertErrorDescription:@"Please use the /organizations or tenant-specific endpoint."];
     [self closeResultView];
 }
+
+// TODO: fix account selection bug
 
 @end

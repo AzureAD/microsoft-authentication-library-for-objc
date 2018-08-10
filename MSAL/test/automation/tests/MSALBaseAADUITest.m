@@ -28,90 +28,51 @@
 
 #pragma mark - Shared parameterized steps
 
-- (NSString *)runSharedAADLoginWithClientId:(NSString *)clientId
-                                     scopes:(NSString *)scopes
-                       expectedResultScopes:(NSArray *)expectedScopes
-                                redirectUri:(NSString *)redirectUri
-                                  authority:(NSString *)authority
-                                 uiBehavior:(NSString *)uiBehavior
-                                  loginHint:(NSString *)loginHint
-                          accountIdentifier:(NSString *)accountIdentifier
-                          validateAuthority:(BOOL)validateAuthority
-                         useEmbeddedWebView:(BOOL)useEmbedded
-                    useSafariViewController:(BOOL)useSFController
-                           usePassedWebView:(BOOL)usePassedWebView
-                            expectedAccount:(MSIDTestAccount *)testAccount
+- (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request
 {
-    NSDictionary *config = [self configDictionaryWithClientId:clientId
-                                                       scopes:scopes
-                                                  redirectUri:redirectUri
-                                                    authority:authority
-                                                   uiBehavior:uiBehavior
-                                                    loginHint:loginHint
-                                            validateAuthority:validateAuthority
-                                           useEmbeddedWebView:useEmbedded
-                                      useSafariViewController:useSFController
-                                             usePassedWebView:usePassedWebView
-                                            accountIdentifier:accountIdentifier];
+    NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!useSFController
-        && !useEmbedded
-        && !usePassedWebView)
+    if (!request.useSFController
+        && !request.useEmbedded
+        && !request.usePassedWebView)
     {
         [self allowSFAuthenticationSessionAlert];
     }
 
-    [self assertAuthUIAppearWithEmbedded:useEmbedded || usePassedWebView
-                    safariViewController:useSFController];
+    [self assertAuthUIAppearWithEmbedded:request.useEmbedded || request.usePassedWebView
+                    safariViewController:request.useSFController];
 
-    if (!loginHint && !accountIdentifier)
+    if (!request.loginHint && !request.accountIdentifier)
     {
         [self aadEnterEmail];
     }
 
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept"];
+    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.useEmbedded];
 
     [self assertAccessTokenNotNil];
-    [self assertScopesReturned:expectedScopes];
+    [self assertScopesReturned:request.expectedResultScopes];
 
     NSDictionary *resultDictionary = [self resultDictionary];
     NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
     XCTAssertNotNil(homeAccountId);
 
-    if (testAccount)
+    if (request.testAccount)
     {
         NSDictionary *result = [self resultDictionary];
         NSString *resultTenantId = result[@"tenantId"];
-        XCTAssertEqualObjects(resultTenantId, testAccount.targetTenantId);
-        XCTAssertEqualObjects(homeAccountId, testAccount.homeAccountId);
+        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
+        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
     }
 
     [self closeResultView];
     return homeAccountId;
 }
 
-- (void)runSharedSilentAADLoginWithClientId:(NSString *)clientId
-                                     scopes:(NSString *)scopes
-                       expectedResultScopes:(NSArray *)expectedScopes
-                            silentAuthority:(NSString *)silentAuthority
-                             cacheAuthority:(NSString *)cacheAuthority
-                          accountIdentifier:(NSString *)accountIdentifier
-                          validateAuthority:(BOOL)validateAuthority
-                            expectedAccount:(MSIDTestAccount *)testAccount
+- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request
 {
-    NSDictionary *config = [self configDictionaryWithClientId:clientId
-                                                       scopes:scopes
-                                                  redirectUri:nil
-                                                    authority:silentAuthority
-                                                   uiBehavior:nil
-                                                    loginHint:nil
-                                            validateAuthority:validateAuthority
-                                           useEmbeddedWebView:NO
-                                      useSafariViewController:NO
-                                             usePassedWebView:NO
-                                            accountIdentifier:accountIdentifier];
+    NSDictionary *config = [self configWithTestRequest:request];
     // Acquire token silently
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
@@ -121,7 +82,7 @@
 
     // The developer provided authority is not necessarily the authority that MSAL does cache lookups with
     // Therefore, authority used to expire access token might be different
-    if (cacheAuthority) mutableConfig[@"authority"] = cacheAuthority;
+    if (request.cacheAuthority) mutableConfig[@"authority"] = request.cacheAuthority;
 
     // Now expire access token
     [self expireAccessToken:mutableConfig];
@@ -134,55 +95,36 @@
     [self closeResultView];
 
     // Now lookup access token without authority
-    [mutableConfig removeObjectForKey:@"authority"];
+    mutableConfig[@"authority"] = request.authority;
     [self acquireTokenSilent:mutableConfig];
     [self assertAccessTokenNotNil];
 
-    if (testAccount)
+    if (request.testAccount)
     {
         NSDictionary *result = [self resultDictionary];
-        XCTAssertEqualObjects(result[@"tenantId"], testAccount.targetTenantId);
-        XCTAssertEqualObjects(result[@"user"][@"home_account_id"], testAccount.homeAccountId);
+        XCTAssertEqualObjects(result[@"tenantId"], request.testAccount.targetTenantId);
+        XCTAssertEqualObjects(result[@"user"][@"home_account_id"], request.testAccount.homeAccountId);
     }
 
-    [self assertScopesReturned:expectedScopes];
+    [self assertScopesReturned:request.expectedResultScopes];
     [self closeResultView];
 }
 
-- (void)runSharedAuthUIAppearsStepWithClientId:(NSString *)clientId
-                                        scopes:(NSString *)scopes
-                                   redirectUri:(NSString *)redirectUri
-                                     authority:(NSString *)authority
-                                    uiBehavior:(NSString *)uiBehavior
-                                     loginHint:(NSString *)loginHint
-                             accountIdentifier:(NSString *)accountIdentifier
-                             validateAuthority:(BOOL)validateAuthority
-                            useEmbeddedWebView:(BOOL)useEmbedded
-                       useSafariViewController:(BOOL)useSFController
-                              usePassedWebView:(BOOL)usePassedWebView
+- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request
 {
-    NSDictionary *config = [self configDictionaryWithClientId:clientId
-                                                       scopes:scopes
-                                                  redirectUri:redirectUri
-                                                    authority:authority
-                                                   uiBehavior:uiBehavior
-                                                    loginHint:loginHint
-                                            validateAuthority:validateAuthority
-                                           useEmbeddedWebView:useEmbedded
-                                      useSafariViewController:useSFController
-                                             usePassedWebView:usePassedWebView
-                                            accountIdentifier:accountIdentifier];
+    NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!useSFController
-        && !useEmbedded
-        && !usePassedWebView)
+    if (!request.useSFController
+        && !request.useEmbedded
+        && !request.usePassedWebView)
     {
         [self allowSFAuthenticationSessionAlert];
     }
 
-    [self assertAuthUIAppearWithEmbedded:(useEmbedded || usePassedWebView) safariViewController:useSFController];
-    [self closeAuthUIWithEmbedded:useEmbedded safariViewController:useSFController];
+    [self assertAuthUIAppearWithEmbedded:(request.useEmbedded || request.usePassedWebView)
+                    safariViewController:request.useSFController];
+    [self closeAuthUIWithEmbedded:request.useEmbedded safariViewController:request.useSFController];
     [self assertErrorCode:@"MSALErrorUserCanceled"];
     [self closeResultView];
 }

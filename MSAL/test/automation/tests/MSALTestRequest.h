@@ -21,14 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALBaseiOSUITest.h"
+#import <Foundation/Foundation.h>
+#import "MSIDTestAccountsProvider.h"
 
-@interface MSALBaseAADUITest : MSALBaseiOSUITest
+@interface MSALTestRequest : NSObject
 
-@property (nonatomic, strong) NSString *consentTitle;
+@property (nonatomic, strong) NSString *clientId;
+@property (nonatomic, strong) NSString *scopes;
+@property (nonatomic, strong) NSArray *expectedResultScopes;
+@property (nonatomic, strong) NSString *redirectUri;
+@property (nonatomic, strong) NSString *authority;
+@property (nonatomic, strong) NSString *cacheAuthority;
+@property (nonatomic, strong) NSString *uiBehavior;
+@property (nonatomic, strong) NSString *accountIdentifier;
+@property (nonatomic, strong) NSString *loginHint;
+@property (nonatomic, strong) MSIDTestAccount *testAccount;
+@property (nonatomic) BOOL useEmbedded;
+@property (nonatomic) BOOL useSFController;
+@property (nonatomic) BOOL usePassedWebView;
+@property (nonatomic) BOOL validateAuthority;
 
-- (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
++ (MSALTestRequest *)convergedAppRequest;
++ (MSALTestRequest *)nonConvergedAppRequest;
 
 @end
