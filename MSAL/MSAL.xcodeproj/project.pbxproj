@@ -146,8 +146,6 @@
 		D61A64B11E5AAC5C0086D120 /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		D61A64B21E5AAC5C0086D120 /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		D61A64B91E5ADBE80086D120 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D61A64B81E5ADBE80086D120 /* Images.xcassets */; };
-		D61BD2A21EBD09F90007E484 /* MSALAppExtensionUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D61F5B9E1E5795E400912CB8 /* MSALAppExtensionUtil.m */; };
-		D61BD2A31EBD09F90007E484 /* UIApplication+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = D61F5BA01E5795E400912CB8 /* UIApplication+MSALExtensions.m */; };
 		D61BD2A61EBD09F90007E484 /* NSOrderedSet+MSALExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB151E50486400952049 /* NSOrderedSet+MSALExtensions.m */; };
 		D61BD2A71EBD09F90007E484 /* NSMutableDictionary+MSALExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396EB1E7892AD004D6278 /* NSMutableDictionary+MSALExtension.m */; };
 		D61BD2A91EBD09F90007E484 /* MSALCryptoHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D62F7B1E8DCC3200941DEA /* MSALCryptoHelper.m */; };
@@ -582,10 +580,6 @@
 		D61A64AF1E5AAC5C0086D120 /* MSALTestAppSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppSettings.h; sourceTree = "<group>"; };
 		D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppSettings.m; sourceTree = "<group>"; };
 		D61A64B81E5ADBE80086D120 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		D61F5B9D1E5795E400912CB8 /* MSALAppExtensionUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAppExtensionUtil.h; sourceTree = "<group>"; };
-		D61F5B9E1E5795E400912CB8 /* MSALAppExtensionUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAppExtensionUtil.m; sourceTree = "<group>"; };
-		D61F5B9F1E5795E400912CB8 /* UIApplication+MSALExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIApplication+MSALExtensions.h"; sourceTree = "<group>"; };
-		D61F5BA01E5795E400912CB8 /* UIApplication+MSALExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIApplication+MSALExtensions.m"; sourceTree = "<group>"; };
 		D61F5BBE1E5913BE00912CB8 /* SFSafariViewController+TestOverrides.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SFSafariViewController+TestOverrides.h"; sourceTree = "<group>"; };
 		D61F5BBF1E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "SFSafariViewController+TestOverrides.m"; sourceTree = "<group>"; };
 		D61F5BC11E59193500912CB8 /* MSALFakeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALFakeViewController.h; sourceTree = "<group>"; };
@@ -1001,10 +995,6 @@
 			isa = PBXGroup;
 			children = (
 				B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */,
-				D61F5B9D1E5795E400912CB8 /* MSALAppExtensionUtil.h */,
-				D61F5B9E1E5795E400912CB8 /* MSALAppExtensionUtil.m */,
-				D61F5B9F1E5795E400912CB8 /* UIApplication+MSALExtensions.h */,
-				D61F5BA01E5795E400912CB8 /* UIApplication+MSALExtensions.m */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -1867,8 +1857,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D61BD2A31EBD09F90007E484 /* UIApplication+MSALExtensions.m in Sources */,
-				D61BD2A21EBD09F90007E484 /* MSALAppExtensionUtil.m in Sources */,
 				D61F5BCA1E59359900912CB8 /* MSALFramework.m in Sources */,
 				D61BD2C11EBD0A080007E484 /* MSALInteractiveRequest.m in Sources */,
 				D61BD2C41EBD0A080007E484 /* MSALRequestParameters.m in Sources */,
