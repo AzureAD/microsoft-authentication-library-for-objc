@@ -85,6 +85,7 @@
                                                 validateAuthority:YES
                                                useEmbeddedWebView:NO
                                           useSafariViewController:NO
+                                                 usePassedWebView:NO
                                                   expectedAccount:self.primaryAccount];
 
     XCTAssertNotNil(homeAccountId);
@@ -98,7 +99,8 @@
                                accountIdentifier:nil
                                validateAuthority:YES
                               useEmbeddedWebView:NO
-                         useSafariViewController:NO];
+                         useSafariViewController:NO
+                                usePassedWebView:NO];
 
     // Run silent
     [self runSharedSilentAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
@@ -131,6 +133,7 @@
                                                 validateAuthority:YES
                                                useEmbeddedWebView:NO
                                           useSafariViewController:NO
+                                                 usePassedWebView:NO
                                                   expectedAccount:self.primaryAccount];
 
     XCTAssertNotNil(homeAccountId);
@@ -164,6 +167,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 }
 
@@ -179,6 +183,7 @@
                                             validateAuthority:YES
                                            useEmbeddedWebView:NO
                                       useSafariViewController:NO
+                                             usePassedWebView:NO
                                             accountIdentifier:nil];
     [self acquireToken:config];
 
@@ -209,6 +214,7 @@
                                                 validateAuthority:YES
                                                useEmbeddedWebView:NO
                                           useSafariViewController:NO
+                                                 usePassedWebView:NO
                                                   expectedAccount:self.primaryAccount];
 
     XCTAssertNotNil(homeAccountId);
@@ -243,6 +249,7 @@
                                                 validateAuthority:YES
                                                useEmbeddedWebView:NO
                                           useSafariViewController:NO
+                                                 usePassedWebView:NO
                                                   expectedAccount:self.primaryAccount];
 
     [self runSharedSilentAADLoginWithClientId:nil
@@ -273,6 +280,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 
     // Now call acquire token with select account
@@ -285,6 +293,7 @@
                                             validateAuthority:YES
                                            useEmbeddedWebView:NO
                                       useSafariViewController:NO
+                                             usePassedWebView:NO
                                             accountIdentifier:nil];
 
     [self acquireToken:config];
@@ -318,6 +327,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 
     NSDictionary *config = [self configDictionaryWithClientId:nil
@@ -329,6 +339,7 @@
                                             validateAuthority:YES
                                            useEmbeddedWebView:NO
                                       useSafariViewController:NO
+                                             usePassedWebView:NO
                                             accountIdentifier:nil];
 
     // Now call acquire token with force consent
@@ -372,6 +383,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 }
 
@@ -393,6 +405,7 @@
                                                 validateAuthority:YES
                                                useEmbeddedWebView:NO
                                           useSafariViewController:NO
+                                                 usePassedWebView:NO
                                                   expectedAccount:self.primaryAccount];
 
     XCTAssertNotNil(homeAccountId);
@@ -409,6 +422,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 
 
@@ -431,6 +445,7 @@
                       validateAuthority:YES
                      useEmbeddedWebView:NO
                 useSafariViewController:NO
+                       usePassedWebView:NO
                         expectedAccount:self.primaryAccount];
 }
 
@@ -438,44 +453,228 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andEmbeddedWebView_andForceConsent
 {
-    // TODO: needs embedded webview
+    // Sign in first time to ensure account will be there
+    NSString *authority = @"https://login.microsoftonline.com/organizations";
+
+    [self runSharedAADLoginWithClientId:nil
+                                 scopes:@"https://graph.windows.net/.default"
+                   expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                            redirectUri:nil
+                              authority:authority
+                             uiBehavior:@"force"
+                              loginHint:self.primaryAccount.username
+                      accountIdentifier:nil
+                      validateAuthority:YES
+                     useEmbeddedWebView:YES
+                useSafariViewController:NO
+                       usePassedWebView:NO
+                        expectedAccount:self.primaryAccount];
+
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"https://graph.windows.net/.default"
+                                                  redirectUri:nil
+                                                    authority:authority
+                                                   uiBehavior:@"consent"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:YES
+                                      useSafariViewController:NO
+                                             usePassedWebView:NO
+                                            accountIdentifier:nil];
+
+    // Now call acquire token with force consent
+    [self acquireToken:config];
+    [self aadEnterEmail];
+    [self aadEnterPassword];
+
+    XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
+    [self waitForElement:permissionText];
+
+    XCUIElement *acceptButton = self.testApp.buttons[@"Accept"];
+    [acceptButton msidTap];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andEmbeddedWebView_andSelectAccount
 {
-    // TODO: needs embedded webview
+    // Sign in first time to ensure account will be there
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+
+    [self runSharedAADLoginWithClientId:nil
+                                 scopes:@"user.read tasks.read"
+                   expectedResultScopes:@[@"user.read", @"tasks.read", @"openid", @"profile"]
+                            redirectUri:nil
+                              authority:authority
+                             uiBehavior:@"force"
+                              loginHint:self.primaryAccount.username
+                      accountIdentifier:nil
+                      validateAuthority:YES
+                     useEmbeddedWebView:YES
+                useSafariViewController:NO
+                       usePassedWebView:NO
+                        expectedAccount:self.primaryAccount];
+
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"tasks.read user.read"
+                                                  redirectUri:nil
+                                                    authority:authority
+                                                   uiBehavior:@"select_account"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:YES
+                                      useSafariViewController:NO
+                                             usePassedWebView:NO
+                                            accountIdentifier:nil];
+
+    // Now call acquire token with force consent
+    [self acquireToken:config];
+
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
+    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+    // No persistent cookies in embedded webview, so user needs to enter password again
+    [self aadEnterPassword];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
 }
 
-- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andEmbeddedWebView_andForceLogin
+- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andPassedInEmbeddedWebView_andForceLogin
 {
-    // TODO: needs embedded webview
-}
+    [self runSharedAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                 scopes:@"user.read"
+                   expectedResultScopes:@[@"user.read", @"openid", @"profile"]
+                            redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
+                              authority:@"https://login.windows.net/common"
+                             uiBehavior:@"force"
+                              loginHint:self.primaryAccount.username
+                      accountIdentifier:nil
+                      validateAuthority:YES
+                     useEmbeddedWebView:NO
+                useSafariViewController:NO
+                       usePassedWebView:YES
+                        expectedAccount:self.primaryAccount];
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andTenantedEndpoint_andEmbeddedWebView_andForceLogin
-{
-    // TODO: needs embedded webview
-}
-
-- (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andOrganizationsEndpoint_andPassedInEmbeddedWebView_andForceLogin
-{
-    // TODO: needs passed embedded webview
+    [self runSharedAuthUIAppearsStepWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                          scopes:@"user.read"
+                                     redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
+                                       authority:@"https://login.windows.net/common"
+                                      uiBehavior:@"force"
+                                       loginHint:self.primaryAccount.username
+                               accountIdentifier:nil
+                               validateAuthority:YES
+                              useEmbeddedWebView:NO
+                         useSafariViewController:NO
+                                usePassedWebView:YES];
 }
 
 #pragma mark - SafariViewController
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andSafariViewController_andForceConsent
 {
-    // TODO: needs embedded webview
+    // Sign in first time to ensure account will be there
+    NSString *authority = @"https://login.microsoftonline.com/organizations";
+
+    [self runSharedAADLoginWithClientId:nil
+                                 scopes:@"https://graph.windows.net/.default"
+                   expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                            redirectUri:nil
+                              authority:authority
+                             uiBehavior:@"force"
+                              loginHint:self.primaryAccount.username
+                      accountIdentifier:nil
+                      validateAuthority:YES
+                     useEmbeddedWebView:NO
+                useSafariViewController:YES
+                       usePassedWebView:NO
+                        expectedAccount:self.primaryAccount];
+
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"https://graph.windows.net/.default"
+                                                  redirectUri:nil
+                                                    authority:authority
+                                                   uiBehavior:@"consent"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:NO
+                                      useSafariViewController:YES
+                                             usePassedWebView:NO
+                                            accountIdentifier:nil];
+
+    // Now call acquire token with force consent
+    [self acquireToken:config];
+
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
+    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+
+    XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
+    [self waitForElement:permissionText];
+
+    XCUIElement *acceptButton = self.testApp.buttons[@"Accept"];
+    [acceptButton msidTap];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSafariViewController_andSelectAccount
 {
-    // TODO: needs embedded webview
-}
+    // Sign in first time to ensure account will be there
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSafariViewController_andForceLogin
-{
-    // TODO: needs embedded webview
+    [self runSharedAADLoginWithClientId:nil
+                                 scopes:@"tasks.read"
+                   expectedResultScopes:@[@"tasks.read"]
+                            redirectUri:nil
+                              authority:authority
+                             uiBehavior:@"force"
+                              loginHint:self.primaryAccount.username
+                      accountIdentifier:nil
+                      validateAuthority:YES
+                     useEmbeddedWebView:NO
+                useSafariViewController:YES
+                       usePassedWebView:NO
+                        expectedAccount:self.primaryAccount];
+
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"tasks.read"
+                                                  redirectUri:nil
+                                                    authority:authority
+                                                   uiBehavior:@"select_account"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:NO
+                                      useSafariViewController:YES
+                                             usePassedWebView:NO
+                                            accountIdentifier:nil];
+
+    // Now call acquire token with force consent
+    [self acquireToken:config];
+
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
+    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
 }
 
 @end

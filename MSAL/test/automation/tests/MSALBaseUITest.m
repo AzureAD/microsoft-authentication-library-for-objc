@@ -446,6 +446,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
                              validateAuthority:(BOOL)validateAuthority
                             useEmbeddedWebView:(BOOL)useEmbedded
                        useSafariViewController:(BOOL)useSFController
+                              usePassedWebView:(BOOL)usePassedWebView
                              accountIdentifier:(NSString *)accountIdentifier
 {
     NSMutableDictionary *additionalConfig = [NSMutableDictionary dictionary];
@@ -458,6 +459,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     if (loginHint) additionalConfig[@"login_hint"] = loginHint;
     if (useEmbedded) additionalConfig[@"webview_selection"] = @"webview_embedded";
     if (useSFController) additionalConfig[@"webview_selection"] = @"webview_safari";
+    if (usePassedWebView) additionalConfig[@"webview_selection"] = @"passed_webview";
     if (accountIdentifier) additionalConfig[@"home_account_identifier"] = accountIdentifier;
 
     additionalConfig[@"validate_authority"] = @(validateAuthority);

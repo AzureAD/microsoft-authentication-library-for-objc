@@ -47,6 +47,7 @@
 #import "MSIDAADV2Oauth2Factory.h"
 #import "NSString+MSIDExtensions.h"
 #import "MSAL_Internal.h"
+#import "MSALPassedInWebController.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -56,6 +57,7 @@
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
 @property (nonatomic) MSIDAccountCredentialCache *accountCredentialCache;
+@property (nonatomic) MSALPassedInWebController *passedInController;
 
 @end
 
@@ -253,6 +255,15 @@
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI])
         {
             application.webviewType = MSALWebviewTypeSafariViewController;
+        }
+        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_PASSED])
+        {
+            application.webviewType = MSALWebviewTypeWKWebView;
+
+            UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            self.passedInController = (MSALPassedInWebController *) [sb instantiateViewControllerWithIdentifier:@"passed_in_controller"];
+            application.customWebview = self.passedInController.webView;
+            [self presentViewController:self.passedInController animated:YES completion:nil];
         }
 
         if (account)

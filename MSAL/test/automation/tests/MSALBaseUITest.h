@@ -82,6 +82,7 @@
                              validateAuthority:(BOOL)validateAuthority
                             useEmbeddedWebView:(BOOL)useEmbedded
                        useSafariViewController:(BOOL)useSFController
+                              usePassedWebView:(BOOL)usePassedWebView
                              accountIdentifier:(NSString *)accountIdentifier;
 
 @end

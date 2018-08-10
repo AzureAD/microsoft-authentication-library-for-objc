@@ -25,6 +25,8 @@
 
 @interface MSALBaseAADUITest : MSALBaseiOSUITest
 
+@property (nonatomic, strong) NSString *consentTitle;
+
 - (NSString *)runSharedAADLoginWithClientId:(NSString *)clientId
                                      scopes:(NSString *)scopes
                        expectedResultScopes:(NSArray *)expectedScopes
@@ -36,6 +38,7 @@
                           validateAuthority:(BOOL)validateAuthority
                          useEmbeddedWebView:(BOOL)useEmbedded
                     useSafariViewController:(BOOL)useSFController
+                           usePassedWebView:(BOOL)usePassedWebView
                             expectedAccount:(MSIDTestAccount *)testAccount;
 
 - (void)runSharedSilentAADLoginWithClientId:(NSString *)clientId
@@ -56,6 +59,7 @@
                              accountIdentifier:(NSString *)accountIdentifier
                              validateAuthority:(BOOL)validateAuthority
                             useEmbeddedWebView:(BOOL)useEmbedded
-                       useSafariViewController:(BOOL)useSFController;
+                       useSafariViewController:(BOOL)useSFController
+                              usePassedWebView:(BOOL)usePassedWebView;
 
 @end

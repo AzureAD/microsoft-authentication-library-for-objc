@@ -39,6 +39,7 @@
                           validateAuthority:(BOOL)validateAuthority
                          useEmbeddedWebView:(BOOL)useEmbedded
                     useSafariViewController:(BOOL)useSFController
+                           usePassedWebView:(BOOL)usePassedWebView
                             expectedAccount:(MSIDTestAccount *)testAccount
 {
     NSDictionary *config = [self configDictionaryWithClientId:clientId
@@ -50,16 +51,18 @@
                                             validateAuthority:validateAuthority
                                            useEmbeddedWebView:useEmbedded
                                       useSafariViewController:useSFController
+                                             usePassedWebView:usePassedWebView
                                             accountIdentifier:accountIdentifier];
     [self acquireToken:config];
 
     if (!useSFController
-        && !useEmbedded)
+        && !useEmbedded
+        && !usePassedWebView)
     {
         [self allowSFAuthenticationSessionAlert];
     }
 
-    [self assertAuthUIAppearWithEmbedded:useEmbedded
+    [self assertAuthUIAppearWithEmbedded:useEmbedded || usePassedWebView
                     safariViewController:useSFController];
 
     if (!loginHint && !accountIdentifier)
@@ -68,7 +71,7 @@
     }
 
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept"];
+    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept"];
 
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:expectedScopes];
@@ -107,6 +110,7 @@
                                             validateAuthority:validateAuthority
                                            useEmbeddedWebView:NO
                                       useSafariViewController:NO
+                                             usePassedWebView:NO
                                             accountIdentifier:accountIdentifier];
     // Acquire token silently
     [self acquireTokenSilent:config];
@@ -155,6 +159,7 @@
                              validateAuthority:(BOOL)validateAuthority
                             useEmbeddedWebView:(BOOL)useEmbedded
                        useSafariViewController:(BOOL)useSFController
+                              usePassedWebView:(BOOL)usePassedWebView
 {
     NSDictionary *config = [self configDictionaryWithClientId:clientId
                                                        scopes:scopes
@@ -165,16 +170,18 @@
                                             validateAuthority:validateAuthority
                                            useEmbeddedWebView:useEmbedded
                                       useSafariViewController:useSFController
+                                             usePassedWebView:usePassedWebView
                                             accountIdentifier:accountIdentifier];
     [self acquireToken:config];
 
     if (!useSFController
-        && !useEmbedded)
+        && !useEmbedded
+        && !usePassedWebView)
     {
         [self allowSFAuthenticationSessionAlert];
     }
 
-    [self assertAuthUIAppearWithEmbedded:useEmbedded safariViewController:useSFController];
+    [self assertAuthUIAppearWithEmbedded:(useEmbedded || usePassedWebView) safariViewController:useSFController];
     [self closeAuthUIWithEmbedded:useEmbedded safariViewController:useSFController];
     [self assertErrorCode:@"MSALErrorUserCanceled"];
     [self closeResultView];

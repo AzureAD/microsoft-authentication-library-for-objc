@@ -26,8 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseUITest.h"
+#import "MSALBaseAADUITest.h"
 
-@interface MSALMSABasicInteractiveTests : MSALBaseUITest
+@interface MSALMSABasicInteractiveTests : MSALBaseAADUITest
 
 @end
 
@@ -38,6 +39,8 @@
 - (void)setUp
 {
     [super setUp];
+
+    self.consentTitle = @"Yes";
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderMSA;
@@ -50,66 +53,81 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSystemWebView_andForceLogin
 {
-    NSDictionary *params = @{
-                             @"ui_behavior" : @"force",
-                             @"validate_authority" : @YES,
-                             @"authority": @"https://login.microsoftonline.com/consumers",
-                             @"scopes": @"user.read tasks.read",
-                             @"redirect_uri": @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth",
-                             @"client_id": @"3c62ac97-29eb-4aed-a3c8-add0298508da",
-                             @"login_hint": self.primaryAccount.account
-                             };
+    NSArray *expectedScopes = @[@"user.read",
+                                @"tasks.read",
+                                @"openid", @"profile"];
 
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
+    NSString *homeAccountId = [self runSharedAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                                           scopes:@"user.read tasks.read"
+                                             expectedResultScopes:expectedScopes
+                                                      redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
+                                                        authority:@"https://login.microsoftonline.com/common"
+                                                       uiBehavior:@"force"
+                                                        loginHint:self.primaryAccount.account
+                                                accountIdentifier:nil
+                                                validateAuthority:YES
+                                               useEmbeddedWebView:NO
+                                          useSafariViewController:NO
+                                                 usePassedWebView:NO
+                                                  expectedAccount:self.primaryAccount];
+    XCTAssertNotNil(homeAccountId);
 
-    [self acquireToken:config];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Yes"];
+    [self runSharedAuthUIAppearsStepWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                          scopes:@"user.read tasks.read"
+                                     redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
+                                       authority:@"https://login.microsoftonline.com/common"
+                                      uiBehavior:@"force"
+                                       loginHint:self.primaryAccount.account
+                               accountIdentifier:nil
+                               validateAuthority:YES
+                              useEmbeddedWebView:NO
+                         useSafariViewController:NO
+                                usePassedWebView:NO];
 
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:@[@"user.read",
-                                 @"tasks.read",
-                                 @"openid", @"profile"]];
-    [self closeResultView];
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    // Assert UI appears again
-    [self acquireToken:config];
-    [self assertAuthUIAppearWithEmbedded:NO safariViewController:NO];
+    [self runSharedSilentAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                       scopes:@"user.read tasks.read"
+                         expectedResultScopes:expectedScopes
+                              silentAuthority:authority
+                               cacheAuthority:authority
+                            accountIdentifier:homeAccountId
+                            validateAuthority:YES
+                              expectedAccount:self.primaryAccount];
 }
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin
 {
-    // Get MSA account
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderMSA;
-    configurationRequest.appVersion = MSIDAppVersionV1;
-    configurationRequest.accountFeatures = @[];
-    [self loadTestConfiguration:configurationRequest];
+    NSArray *expectedScopes = @[@"user.read",
+                                @"tasks.read",
+                                @"openid", @"profile"];
 
-    NSDictionary *params = @{
-                             @"ui_behavior" : @"force",
-                             @"validate_authority" : @YES,
-                             @"authority": @"https://login.microsoftonline.com/consumers",
-                             @"scopes": @"user.read tasks.read",
-                             @"redirect_uri": @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth",
-                             @"client_id": @"3c62ac97-29eb-4aed-a3c8-add0298508da",
-                             @"login_hint": self.primaryAccount.account
-                             };
+    NSString *homeAccountId = [self runSharedAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                                           scopes:@"user.read tasks.read"
+                                             expectedResultScopes:expectedScopes
+                                                      redirectUri:@"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"
+                                                        authority:@"https://login.microsoftonline.com/consumers"
+                                                       uiBehavior:@"force"
+                                                        loginHint:self.primaryAccount.account
+                                                accountIdentifier:nil
+                                                validateAuthority:YES
+                                               useEmbeddedWebView:NO
+                                          useSafariViewController:NO
+                                                 usePassedWebView:NO
+                                                  expectedAccount:self.primaryAccount];
 
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-    [self acquireToken:config];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Yes"];
+    XCTAssertNotNil(homeAccountId);
 
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:@[@"user.read",
-                                 @"tasks.read",
-                                 @"openid", @"profile"]];
-    [self closeResultView];
+    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    // Assert UI appears again
-    [self acquireToken:config];
-    [self assertAuthUIAppearWithEmbedded:NO safariViewController:NO];
+    [self runSharedSilentAADLoginWithClientId:@"3c62ac97-29eb-4aed-a3c8-add0298508da"
+                                       scopes:@"user.read tasks.read"
+                         expectedResultScopes:expectedScopes
+                              silentAuthority:authority
+                               cacheAuthority:authority
+                            accountIdentifier:homeAccountId
+                            validateAuthority:YES
+                              expectedAccount:self.primaryAccount];
 }
 
 #pragma mark - Non-converged app
@@ -122,16 +140,19 @@
     configurationRequest.accountFeatures = @[];
     [self loadTestConfiguration:configurationRequest];
 
-    NSDictionary *params = @{
-                             @"ui_behavior" : @"force",
-                             @"validate_authority" : @YES,
-                             @"authority": @"https://login.microsoftonline.com/consumers",
-                             @"scopes": @"https://graph.microsoft.com/.default",
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"https://graph.microsoft.com/.default"
+                                                  redirectUri:nil
+                                                    authority:@"https://login.microsoftonline.com/consumers"
+                                                   uiBehavior:@"force"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:NO
+                                      useSafariViewController:NO
+                                             usePassedWebView:NO
+                                            accountIdentifier:nil];
     [self acquireToken:config];
+    [self allowSFAuthenticationSessionAlert];
     [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Yes"];

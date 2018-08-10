@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseUITest.h"
+#import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
 
-@interface MSALAADMultiUserTests : MSALBaseUITest
+@interface MSALAADMultiUserTests : MSALBaseAADUITest
 
 @end
 
@@ -71,78 +71,69 @@
     // Sign in with first account
     self.primaryAccount = firstAccount;
 
-    NSDictionary *params = @{
-                             @"ui_behavior" : @"force",
-                             @"validate_authority" : @YES,
-                             @"authority": @"https://login.microsoftonline.com/organizations",
-                             @"scopes": @"https://graph.windows.net/.default"
-                             };
+    NSString *firstHomeAccountId = [self runSharedAADLoginWithClientId:nil
+                                                                scopes:@"https://graph.windows.net/.default"
+                                                  expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                                                           redirectUri:nil
+                                                             authority:@"https://login.microsoftonline.com/organizations"
+                                                            uiBehavior:@"force"
+                                                             loginHint:nil
+                                                     accountIdentifier:nil
+                                                     validateAuthority:YES
+                                                    useEmbeddedWebView:NO
+                                               useSafariViewController:NO
+                                                      usePassedWebView:NO
+                                                       expectedAccount:self.primaryAccount];
 
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept"];
-    [self assertScopesReturned:@[@"https://graph.windows.net/.default"]];
-    [self closeResultView];
+    XCTAssertNotNil(firstHomeAccountId);
 
     // Sign in with second account
     self.primaryAccount = secondaryAccount;
     [self loadPasswordForAccount:self.primaryAccount];
 
-    NSMutableDictionary *mutableConfig = [config mutableCopy];
-    mutableConfig[@"login_hint"] = self.primaryAccount.account;
-    [self acquireToken:mutableConfig];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept"];
-    [self assertScopesReturned:@[@"https://graph.windows.net/.default"]];
-    [self closeResultView];
+    NSString *secondHomeAccountId = [self runSharedAADLoginWithClientId:nil
+                                                                 scopes:@"https://graph.windows.net/.default"
+                                                   expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                                                            redirectUri:nil
+                                                              authority:@"https://login.microsoftonline.com/organizations"
+                                                             uiBehavior:@"force"
+                                                              loginHint:self.primaryAccount.account
+                                                      accountIdentifier:nil
+                                                      validateAuthority:YES
+                                                     useEmbeddedWebView:NO
+                                                useSafariViewController:NO
+                                                       usePassedWebView:NO
+                                                        expectedAccount:self.primaryAccount];
+
+    XCTAssertNotNil(secondHomeAccountId);
 
     // Now do silent token refresh for first account
     self.primaryAccount = firstAccount;
-    NSDictionary *silentParams = @{
-                                   @"home_account_identifier": self.primaryAccount.homeAccountId,
-                                   @"scopes": @"user.read"
-                                   };
 
-    config = [self.testConfiguration configWithAdditionalConfiguration:silentParams];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:@[@"user.read"]];
-    NSString *resultAccount = [self resultDictionary][@"user"][@"home_account_id"];
-    XCTAssertEqualObjects(resultAccount, self.primaryAccount.homeAccountId);
-    [self closeResultView];
+    NSString *cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    mutableConfig = [config mutableCopy];
-    NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    mutableConfig[@"authority"] = authority;
+    [self runSharedSilentAADLoginWithClientId:nil
+                                       scopes:@"user.read"
+                         expectedResultScopes:@[@"user.read"]
+                              silentAuthority:nil
+                               cacheAuthority:cacheAuthority
+                            accountIdentifier:firstHomeAccountId
+                            validateAuthority:YES
+                              expectedAccount:self.primaryAccount];
 
-    // Now expire access token for the first account
-    [self expireAccessToken:mutableConfig];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
+    // Do silent for user 2 now
+    self.primaryAccount = secondaryAccount;
 
-    // Now do access token refresh for the first account
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:@[@"user.read"]];
-    resultAccount = [self resultDictionary][@"user"][@"home_account_id"];
-    XCTAssertEqualObjects(resultAccount, self.primaryAccount.homeAccountId);
-    [self closeResultView];
+    cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    // Do silent for user 2
-    silentParams = @{
-                     @"home_account_identifier": secondaryAccount.homeAccountId,
-                     @"scopes": @"https://graph.windows.net/.default"
-                     };
-
-    config = [self.testConfiguration configWithAdditionalConfiguration:silentParams];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:@[@"https://graph.windows.net/.default"]];
-    resultAccount = [self resultDictionary][@"user"][@"home_account_id"];
-    XCTAssertEqualObjects(resultAccount, secondaryAccount.homeAccountId);
-    [self closeResultView];
+    [self runSharedSilentAADLoginWithClientId:nil
+                                       scopes:@"https://graph.windows.net/.default"
+                         expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                              silentAuthority:nil
+                               cacheAuthority:cacheAuthority
+                            accountIdentifier:secondHomeAccountId
+                            validateAuthority:YES
+                              expectedAccount:self.primaryAccount];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
@@ -160,28 +151,37 @@
     // Sign in first time to ensure account will be there
     NSString *authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
-    NSDictionary *params = @{
-                             @"ui_behavior" : @"force",
-                             @"validate_authority" : @YES,
-                             @"authority": authority,
-                             @"scopes": @"https://graph.windows.net/.default"
-                             };
+    NSString *homeAccountId = [self runSharedAADLoginWithClientId:nil
+                                                           scopes:@"https://graph.windows.net/.default"
+                                             expectedResultScopes:@[@"https://graph.windows.net/.default"]
+                                                      redirectUri:nil
+                                                        authority:authority
+                                                       uiBehavior:@"force"
+                                                        loginHint:nil
+                                                accountIdentifier:nil
+                                                validateAuthority:YES
+                                               useEmbeddedWebView:NO
+                                          useSafariViewController:NO
+                                                 usePassedWebView:NO
+                                                  expectedAccount:self.primaryAccount];
 
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept"];
-    [self assertScopesReturned:@[@"https://graph.windows.net/.default"]];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
+    XCTAssertNotNil(homeAccountId);
 
     // Now call acquire token with select account
-    NSMutableDictionary *mutableConfig = [config mutableCopy];
-    mutableConfig[@"ui_behavior"] = @"force";
-    mutableConfig[@"home_account_identifier"] = self.primaryAccount.homeAccountId;
-    [self acquireToken:mutableConfig];
+    NSDictionary *config = [self configDictionaryWithClientId:nil
+                                                       scopes:@"https://graph.windows.net/.default"
+                                                  redirectUri:nil
+                                                    authority:authority
+                                                   uiBehavior:@"select_account"
+                                                    loginHint:nil
+                                            validateAuthority:YES
+                                           useEmbeddedWebView:NO
+                                      useSafariViewController:NO
+                                             usePassedWebView:NO
+                                            accountIdentifier:homeAccountId];
+
+    [self acquireToken:config];
+    [self allowSFAuthenticationSessionAlert];
 
     XCUIElement *signIn = self.testApp.staticTexts[@"Sign in with another account"];
     [self waitForElement:signIn];
