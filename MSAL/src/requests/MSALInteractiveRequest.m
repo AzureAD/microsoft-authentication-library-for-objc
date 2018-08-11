@@ -227,9 +227,6 @@
                                                               context:_parameters
                                                     completionHandler:webAuthCompletion];
 #else
-    
-    
-
     [MSIDWebviewAuthorization startEmbeddedWebviewAuthWithConfiguration:config
                                                           oauth2Factory:_parameters.msidOAuthFactory
                                                                 webview:_parameters.customWebview

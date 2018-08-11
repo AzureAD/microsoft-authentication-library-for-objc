@@ -47,5 +47,4 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
 };
 
 
-
 #endif /* MSALWebviewType_h */
