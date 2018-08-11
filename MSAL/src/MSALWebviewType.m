@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,37 +17,27 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#ifndef MSALWebviewType_h
-#define MSALWebviewType_h
+#import <Foundation/Foundation.h>
+#define STRING_CASE(_CASE) case _CASE: return @#_CASE
 
-typedef NS_ENUM(NSInteger, MSALWebviewType)
+extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
 {
-    // Use WKWebView
-    MSALWebviewTypeWKWebView,
-    
+    switch (type) {
+            STRING_CASE(MSALWebviewTypeWKWebView);
 #if TARGET_OS_IPHONE
-    
-    // Use SFAuthenticationSession/ASWebAuthenticationSession
-    MSALWebviewTypeAuthenticationSession,
-    
-    // Use SFSafariViewController for all versions.
-    MSALWebviewTypeSafariViewController,
-    
-    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
-    // or SFAuthenticationSession).
-    // For older versions, with AuthenticationSession not being available, uses
-    // SafariViewController.
-    MSALWebviewTypeAutomatic
+            STRING_CASE(MSALWebviewTypeAutomatic);
+            STRING_CASE(MSALWebviewTypeSafariViewController);
+            STRING_CASE(MSALWebviewTypeAuthenticationSession);
 #endif
-
-};
-
-
-
-#endif /* MSALWebviewType_h */
+    }
+    
+    @throw @"Unrecognized MSALWebviewType";
+}
