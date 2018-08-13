@@ -21,30 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
-#import "MSIDTestAccountsProvider.h"
+#import "MSALBaseAADUITest.h"
 
-@interface MSALTestRequest : NSObject
+@interface MSALADFSBaseUITest : MSALBaseAADUITest
 
-@property (nonatomic, strong) NSString *clientId;
-@property (nonatomic, strong) NSString *scopes;
-@property (nonatomic, strong) NSArray *expectedResultScopes;
-@property (nonatomic, strong) NSString *redirectUri;
-@property (nonatomic, strong) NSString *authority;
-@property (nonatomic, strong) NSString *cacheAuthority;
-@property (nonatomic, strong) NSString *uiBehavior;
-@property (nonatomic, strong) NSString *accountIdentifier;
-@property (nonatomic, strong) NSString *loginHint;
-@property (nonatomic, strong) MSIDTestAccount *testAccount;
-@property (nonatomic) BOOL useEmbedded;
-@property (nonatomic) BOOL useSFController;
-@property (nonatomic) BOOL usePassedWebView;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic) NSString *b2cProvider;
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request
+                                       closeResultView:(BOOL)closeResultView;
 
-+ (MSALTestRequest *)convergedAppRequest;
-+ (MSALTestRequest *)nonConvergedAppRequest;
-+ (MSALTestRequest *)b2CRequestWithSigninPolicyWithAccount:(MSIDTestAccount *)account;
-+ (MSALTestRequest *)b2CRequestWithProfilePolicyWithAccount:(MSIDTestAccount *)account;
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request;
 
 @end

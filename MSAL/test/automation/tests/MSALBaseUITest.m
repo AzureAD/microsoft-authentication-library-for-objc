@@ -121,6 +121,14 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     XCTAssertTrue([errorDescriptionString containsString:errorDescription]);
 }
 
+- (void)assertErrorSubcode:(NSString *)errorSubcode
+{
+    NSDictionary *result = [self resultDictionary];
+    NSString *errorSubcodeString = result[@"subcode"];
+    XCTAssertNotEqual([errorSubcodeString length], 0);
+    XCTAssertEqualObjects(errorSubcodeString, errorSubcode);
+}
+
 - (void)assertAccessTokenNotNil
 {
     NSDictionary *result = [self resultDictionary];
@@ -279,7 +287,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
             sleep(1);
             i++;
         }
-        else if ([self.testApp.buttons[@"Cancel"] exists] && embeddedWebView)
+        else if ([[self.testApp.navigationBars firstMatch].buttons[@"Cancel"] exists] && embeddedWebView)
         {
             sleep(1);
             i++;

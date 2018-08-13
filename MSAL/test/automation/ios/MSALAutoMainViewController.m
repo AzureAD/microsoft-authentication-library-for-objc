@@ -435,6 +435,14 @@
         count++;
     }
 
+    // Clear WKWebView cookies
+    NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
+    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
+                                               modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
+                                           completionHandler:^{
+                                               NSLog(@"Completed!");
+                                           }];
+
     NSString *resultJson = [NSString stringWithFormat:@"{\"cleared_items_count\":\"%lu\"}", (unsigned long)count];
     [self displayResultJson:resultJson logs:_resultLogs];
 }
@@ -592,11 +600,23 @@
 {
     NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
 
-    NSDictionary *errorDictionary = @{@"error_title": errorString,
-                                      @"error_code": MSALStringForErrorCode(error.code),
-                                      @"error_description": error.userInfo[MSALErrorDescriptionKey],
-                                      @"subcode": [NSString stringWithFormat:@"%@", error.userInfo[MSALOAuthSubErrorKey]]
-                                      };
+    NSMutableDictionary *errorDictionary = [NSMutableDictionary new];
+    errorDictionary[@"error_title"] = errorString;
+
+    if ([error.domain isEqualToString:MSALErrorDomain])
+    {
+        errorDictionary[@"error_code"] = MSALStringForErrorCode(error.code);
+        errorDictionary[@"error_description"] = error.userInfo[MSALErrorDescriptionKey];
+
+        if (error.userInfo[MSALOAuthSubErrorKey])
+        {
+            errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
+        }
+    }
+    else if ([error.domain isEqualToString:MSIDErrorDomain])
+    {
+        @throw @"MSID errors should never be seen in MSAL";
+    }
 
     return [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:errorDictionary options:0 error:nil] encoding:NSUTF8StringEncoding];
 }

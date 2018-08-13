@@ -51,4 +51,30 @@
     return request;
 }
 
++ (MSALTestRequest *)b2CRequestWithSigninPolicyWithAccount:(MSIDTestAccount *)account
+{
+    MSALTestRequest *request = [MSALTestRequest new];
+
+    if (request)
+    {
+        request.validateAuthority = YES;
+        request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Signin", account.tenantName];
+    }
+
+    return request;
+}
+
++ (MSALTestRequest *)b2CRequestWithProfilePolicyWithAccount:(MSIDTestAccount *)account
+{
+    MSALTestRequest *request = [MSALTestRequest new];
+
+    if (request)
+    {
+        request.validateAuthority = YES;
+        request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Profile", account.tenantName];
+    }
+
+    return request;
+}
+
 @end

@@ -40,6 +40,7 @@
 - (void)assertAuthUIAppearWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
+- (void)assertErrorSubcode:(NSString *)errorSubcode;
 - (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
 - (NSDictionary *)resultIDTokenClaims;

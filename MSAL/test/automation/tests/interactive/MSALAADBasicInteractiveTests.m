@@ -95,6 +95,20 @@
 
     // 3. Run silent
     [self runSharedSilentAADLoginWithTestRequest:request];
+
+    // 4. Run silent with invalid scopes
+    request.scopes = @"Directory.ReadAll";
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+    [self assertErrorCode:@"MSALErrorInvalidScope"];
+    [self closeResultView];
+
+    // 5. Run silent with not consented scopes
+    request.scopes = @"Calendars.Read";
+    config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+    [self assertErrorCode:@"MSALErrorInvalidGrant"];
+    [self assertErrorSubcode:@"consent_required"];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
@@ -265,6 +279,33 @@
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
+}
+
+#pragma mark - Errors
+
+- (void)testInteractiveAADLogin_withConvergedApp_andForceConsent_andLoginHint_andRejectConsent
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.scopes = @"https://graph.windows.net/.default";
+    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+    request.loginHint = self.primaryAccount.username;
+    request.uiBehavior = @"consent";
+    request.testAccount = self.primaryAccount;
+
+    // 1. Sign in interactively
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self allowSFAuthenticationSessionAlert];
+    [self aadEnterPassword];
+
+    XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
+    [self waitForElement:permissionText];
+
+    XCUIElement *acceptButton = [self.testApp.webViews elementBoundByIndex:0].buttons[@"Cancel"];
+    [acceptButton msidTap];
+
+    [self assertErrorCode:@"MSALErrorAuthorizationFailed"];
 }
 
 #pragma mark - Login hint
