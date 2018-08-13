@@ -47,6 +47,8 @@
 #import "MSIDAppExtensionUtil.h"
 #endif
 
+#import "MSALWebviewType_Internal.h"
+
 @implementation MSALInteractiveRequest
 {
     MSIDWebviewConfiguration *_webviewConfig;
@@ -197,7 +199,7 @@
 #if TARGET_OS_IPHONE
     BOOL useAuthenticationSession;
     BOOL allowSafariViewController;
-    
+
     switch (_parameters.webviewType) {
 
         case MSALWebviewTypeAuthenticationSession:
@@ -223,7 +225,6 @@
             return;
         }
     }
-
     [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                         oauth2Factory:_parameters.msidOAuthFactory
                                              useAuthenticationSession:useAuthenticationSession
@@ -253,6 +254,7 @@
 {
     MSALTelemetryAPIEvent *event = [super getTelemetryAPIEvent];
     [event setUIBehavior:_uiBehavior];
+    [event setWebviewType:MSALStringForMSALWebviewType(_parameters.webviewType)];
     return event;
 }
 

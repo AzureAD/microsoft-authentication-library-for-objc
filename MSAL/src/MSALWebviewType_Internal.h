@@ -25,26 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#ifndef MSALWebviewType_Internal_h
+#define MSALWebviewType_Internal_h
 
-NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
-{
-    switch (behavior)
-    {
-            STRING_CASE(MSALSelectAccount);
-            STRING_CASE(MSALForceLogin);
-            STRING_CASE(MSALForceConsent);
-    }
-    
-    @throw @"Unrecognized MSALUIBehavior";
-}
+extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type);
 
-NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
-{
-    switch (behavior)
-    {
-        case MSALForceLogin : return @"login";
-        case MSALForceConsent : return @"consent";
-        case MSALSelectAccount : return @"select_account";
-    }
-}
+#endif /* MSALWebviewType_Internal_h */
