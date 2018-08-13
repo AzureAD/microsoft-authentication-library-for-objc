@@ -35,6 +35,8 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     {
         STRING_CASE(MSALErrorInvalidParameter);
         STRING_CASE(MSALErrorInvalidClient);
+        STRING_CASE(MSALErrorInvalidGrant);
+        STRING_CASE(MSALErrorInvalidScope);
         STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
         STRING_CASE(MSALErrorMismatchedUser);
