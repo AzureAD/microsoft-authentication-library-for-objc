@@ -45,6 +45,7 @@
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.needsMultipleUsers = YES;
+    // TODO: no other app returns multiple accounts
     configurationRequest.appName = @"IDLABSAPP";
     [self loadTestConfiguration:configurationRequest];
 

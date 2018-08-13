@@ -183,7 +183,7 @@
 #else
             [[NSWorkspace sharedWorkspace] openURL:browserURL];
 #endif
-            NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.");
+            NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically.");
             
             completionBlock(nil, error);
             return;

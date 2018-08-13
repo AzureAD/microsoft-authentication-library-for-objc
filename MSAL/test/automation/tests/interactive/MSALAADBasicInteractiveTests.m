@@ -308,6 +308,75 @@
     [self assertErrorCode:@"MSALErrorAuthorizationFailed"];
 }
 
+#pragma mark - MDM
+
+// 296732: Company Portal Install Prompt
+- (void)testCompanyPortalInstallPrompt_withNonConvergedApp_withSystemWebView
+{
+    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
+    configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
+    // TODO: remove me once lab is fixed
+    configurationRequest.additionalQueryParameters = @{@"AppID": @"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"};
+    [self loadTestConfiguration:configurationRequest];
+
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.uiBehavior = @"force";
+    request.scopes = @"user.read";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.loginHint = self.primaryAccount.account;
+
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self allowSFAuthenticationSessionAlert];
+    [self aadEnterPassword];
+
+    XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
+    [self waitForElement:enrollButton];
+    [enrollButton msidTap];
+
+    XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
+    [self waitForElement:getTheAppButton];
+    [self.testApp activate];
+}
+
+// 296732: Company Portal Install Prompt
+- (void)testCompanyPortalInstallPrompt_withConvergedApp_withEmbeddedWebview
+{
+    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
+    configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
+    // TODO: remove me once lab is fixed
+    configurationRequest.additionalQueryParameters = @{@"AppID": @"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"};
+    [self loadTestConfiguration:configurationRequest];
+
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.uiBehavior = @"force";
+    request.scopes = @"user.read";
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.useEmbedded = YES;
+    request.loginHint = self.primaryAccount.account;
+
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self aadEnterPassword];
+
+    XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
+    [self waitForElement:enrollButton];
+    [enrollButton msidTap];
+
+    XCUIApplication *safari = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.mobilesafari"];
+
+    BOOL result = [safari waitForState:XCUIApplicationStateRunningForeground timeout:20];
+    XCTAssertTrue(result);
+
+    XCUIElement *getTheAppButton = safari.staticTexts[@"GET THE APP"];
+    [self waitForElement:getTheAppButton];
+    [self.testApp activate];
+
+    [self assertErrorCode:@"MSALErrorSessionCanceled"];
+}
+
 #pragma mark - Login hint
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint
