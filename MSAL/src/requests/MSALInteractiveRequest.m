@@ -134,6 +134,7 @@
         if (error)
         {
             NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
             completionBlock(nil, msalError);
             return;
         }
@@ -152,8 +153,10 @@
                 return;
             }
             
-            
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError]);
+
+            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
+            completionBlock(nil, msalError);
             return;
         }
         
@@ -176,6 +179,7 @@
             else
             {
                 NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension");
+                [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
                 completionBlock(nil, error);
                 return;
             }
@@ -183,7 +187,8 @@
             [[NSWorkspace sharedWorkspace] openURL:browserURL];
 #endif
             NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.");
-            
+
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
             completionBlock(nil, error);
             return;
         }
