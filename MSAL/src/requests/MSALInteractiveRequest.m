@@ -47,6 +47,8 @@
 #import "MSIDAppExtensionUtil.h"
 #endif
 
+#import "MSALWebviewType_Internal.h"
+
 @implementation MSALInteractiveRequest
 {
     MSIDWebviewConfiguration *_webviewConfig;
@@ -134,6 +136,7 @@
         if (error)
         {
             NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
             completionBlock(nil, msalError);
             return;
         }
@@ -152,8 +155,10 @@
                 return;
             }
             
-            
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError]);
+
+            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
+            completionBlock(nil, msalError);
             return;
         }
         
@@ -176,6 +181,7 @@
             else
             {
                 NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension");
+                [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
                 completionBlock(nil, error);
                 return;
             }
@@ -183,7 +189,7 @@
             [[NSWorkspace sharedWorkspace] openURL:browserURL];
 #endif
             NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically.");
-            
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
             completionBlock(nil, error);
             return;
         }
@@ -192,7 +198,7 @@
 #if TARGET_OS_IPHONE
     BOOL useAuthenticationSession;
     BOOL allowSafariViewController;
-    
+
     switch (_parameters.webviewType) {
 
         case MSALWebviewTypeAuthenticationSession:
@@ -218,7 +224,6 @@
             return;
         }
     }
-
     [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                         oauth2Factory:_parameters.msidOAuthFactory
                                              useAuthenticationSession:useAuthenticationSession
@@ -248,6 +253,7 @@
 {
     MSALTelemetryAPIEvent *event = [super getTelemetryAPIEvent];
     [event setUIBehavior:_uiBehavior];
+    [event setWebviewType:MSALStringForMSALWebviewType(_parameters.webviewType)];
     return event;
 }
 
