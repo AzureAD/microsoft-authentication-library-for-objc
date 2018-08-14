@@ -27,8 +27,6 @@
 
 #import "MSALError_Internal.h"
 
-#define STRING_CASE(_CASE) case _CASE: return @#_CASE
-
 NSString *MSALStringForErrorCode(MSALErrorCode code)
 {
     switch (code)
