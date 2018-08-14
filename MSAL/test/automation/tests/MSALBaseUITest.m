@@ -466,6 +466,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     if (request.accountIdentifier) additionalConfig[@"home_account_identifier"] = request.accountIdentifier;
 
     additionalConfig[@"validate_authority"] = @(request.validateAuthority);
+    [additionalConfig addEntriesFromDictionary:request.additionalParameters];
 
     return [self.testConfiguration configWithAdditionalConfiguration:additionalConfig];
 }

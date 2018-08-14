@@ -40,7 +40,8 @@
 @property (nonatomic) BOOL useSFController;
 @property (nonatomic) BOOL usePassedWebView;
 @property (nonatomic) BOOL validateAuthority;
-@property (nonatomic) NSString *b2cProvider;
+@property (nonatomic, strong) NSString *b2cProvider;
+@property (nonatomic, strong) NSDictionary *additionalParameters;
 
 + (MSALTestRequest *)convergedAppRequest;
 + (MSALTestRequest *)nonConvergedAppRequest;

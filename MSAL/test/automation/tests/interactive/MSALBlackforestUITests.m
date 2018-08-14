@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseAADUITest.h"
+#import "XCUIElement+CrossPlat.h"
 
 @interface MSALBlackforestUITests : MSALBaseAADUITest
 
@@ -45,126 +46,133 @@
     configurationRequest.needsMultipleUsers = NO;
     configurationRequest.accountFeatures = @[];
     [self loadTestConfiguration:configurationRequest];
+
+    self.continueAfterFailure = YES;
 }
 
 #pragma mark - Interactive tests
 
-/*
-// #290995 iteration 13
-- (void)testInteractiveAADLogin_withBlackforestUser_withPromptAlways_withLoginHint_SystemWebView
+- (void)DISABLED_testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
+{
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.uiBehavior = @"force";
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.scopes = @"email";
+    request.expectedResultScopes = @[@"email", @"openid", @"profile"];
+    request.testAccount = self.primaryAccount;
+    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
+    request.useEmbedded = YES;
+
+    // 1. Run interactive
+    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountID);
+
+    // 2. Run auth UI appears step
+    [self runSharedAuthUIAppearsStepWithTestRequest:request];
+
+    // 3. Run silent with wrong authority
+    request.accountIdentifier = homeAccountID;
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+    [self assertErrorCode:@"no_account"];
+    [self closeResultView];
+
+    // 4. Run silent with correct authority
+    request.authority = @"https://login.microsoftonline.de/common";
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.scopes = @"https://graph.cloudapi.de/.default";
+    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
+    request.testAccount = self.primaryAccount;
+    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
+    request.useEmbedded = YES;
+
+    // 1. Run interactive
+    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountID);
+
+    // 2. Run auth UI appears step
+    [self runSharedAuthUIAppearsStepWithTestRequest:request];
+
+    // 3. Run silent with wrong authority
+    request.accountIdentifier = homeAccountID;
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+    [self assertErrorCode:@"no_account"];
+    [self closeResultView];
+
+    // 4. Run silent with correct authority
+    request.authority = @"https://login.microsoftonline.de/common";
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.uiBehavior = @"force";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.scopes = @"https://graph.cloudapi.de/.default";
+    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
+    request.testAccount = self.primaryAccount;
+    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
+    request.useEmbedded = YES;
     request.loginHint = self.primaryAccount.account;
 
-
-    // Do interactive login
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES,
-                             @"user_identifier" : self.primaryAccount.account,
-                             @"user_identifier_type" : @"optional_displayable",
-                             @"extra_qp": @"instance_aware=true",
-                             @"authority" : @"https://login.microsoftonline.com/common"
-                             };
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
+    // 1. Run interactive
+    NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-
     [self blackForestWaitForNextButton:self.testApp];
-    [self blackforestComEnterPassword];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    NSMutableDictionary *mutableConfig = [config mutableCopy];
-    [mutableConfig removeObjectForKey:@"user_identifier"];
-
-    // Acquire token again.
-    [self acquireToken:mutableConfig];
-    [self assertAuthUIAppear];
-
-    [self closeAuthUI];
-    [self assertError:@"AD_ERROR_UI_USER_CANCEL"];
-    [self closeResultView];
-
-    // First try silent with WW authority
-    NSDictionary *silentParams = @{
-                                   @"user_identifier" : self.primaryAccount.account,
-                                   @"client_id" : self.testConfiguration.clientId,
-                                   @"resource" : self.testConfiguration.resource,
-                                   @"authority" : @"https://login.microsoftonline.com/common"
-                                   };
-
-    config = [self.testConfiguration configWithAdditionalConfiguration:silentParams];
-    [self acquireTokenSilent:config];
-
-    [self assertError:@"AD_ERROR_SERVER_USER_INPUT_NEEDED"];
-    [self closeResultView];
-
-    // Now try silent with correct authority - #296889
-    silentParams = @{
-                     @"user_identifier" : self.primaryAccount.account,
-                     @"client_id" : self.testConfiguration.clientId,
-                     @"authority" : self.testConfiguration.authority,
-                     @"resource" : self.testConfiguration.resource
-                     };
-
-    config = [self.testConfiguration configWithAdditionalConfiguration:silentParams];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Now expire access token
-    [self expireAccessToken:config];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
-
-    // Now do access token refresh
-    [self acquireTokenSilent:config];
+    [self aadEnterPassword];
     [self assertAccessTokenNotNil];
 }
 
-// #290995 iteration 14
-- (void)testInteractiveAADLogin_withBlackforestUser_withPromptAlways_noLoginHint_ADALWebView
+- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES,
-                             @"extra_qp": @"instance_aware=true",
-                             @"authority" : @"https://login.microsoftonline.com/common"
-                             };
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.uiBehavior = @"force";
+    request.authority = @"https://login.microsoftonline.de/common";
+    request.scopes = @"https://graph.cloudapi.de/.default";
+    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
+    request.testAccount = self.primaryAccount;
+    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
 
-    [self acquireToken:config];
+    // 1. Run interactive
+    [self runSharedAADLoginWithTestRequest:request];
 
-    [self blackforestComEnterEmail];
-    [self blackforestComEnterPassword];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Acquire token again.
-    [self acquireToken:config];
-    [self assertAuthUIAppear];
+    // 2. Run silent with correct authority
+    request.authority = @"https://login.microsoftonline.de/common";
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-#pragma mark - Private
-
-- (void)blackforestComEnterEmail
+/*
+ There seems to be some flakiness around sovereign user with login hint provided,
+ where ESTS sometimes shows the username page with next button and sometimes redirects to the password page correctly. This portion of code waits for the "Next" button for 10 seconds if it appears.
+ */
+- (void)blackForestWaitForNextButton:(XCUIApplication *)application
 {
-    XCUIElement *emailTextField = self.testApp.textFields[@"Enter your email, phone, or Skype."];
-    [self waitForElement:emailTextField];
-    [self tapElementAndWaitForKeyboardToAppear:emailTextField];
-    [emailTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account]];
+    XCUIElement *emailTextField = application.textFields[@"Enter your email, phone, or Skype."];
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (emailTextField.exists)
+        {
+            [application.buttons[@"Next"] msidTap];
+            break;
+        }
+        else
+        {
+            sleep(1);
+        }
+    }
 }
-
-- (void)blackforestComEnterPassword
-{
-    XCUIElement *passwordTextField = self.testApp.secureTextFields[@"Enter password"];
-    [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
-    [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
-}*/
 
 @end

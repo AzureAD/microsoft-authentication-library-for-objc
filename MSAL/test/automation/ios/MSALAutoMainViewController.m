@@ -325,6 +325,11 @@
         if (!account)
         {
             // Acquiretoken silent requires having a user
+            [self dismissViewControllerAnimated:NO
+                                     completion:^{
+                                         [self displayResultJson:@"{\"error_code\":\"no_account\"}" logs:_resultLogs];
+                                     }];
+
             return;
         }
         
