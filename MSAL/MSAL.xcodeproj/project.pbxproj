@@ -152,6 +152,7 @@
 		B2C17B111FC9010A0070A514 /* NSString+MSALHelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B0D1FC8E0B00070A514 /* NSString+MSALHelperMethods.m */; };
 		B2C17B121FC9010D0070A514 /* NSString+MSALHelperMethods.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C17B0C1FC8E0B00070A514 /* NSString+MSALHelperMethods.h */; };
 		B2C17B131FC9010E0070A514 /* NSString+MSALHelperMethods.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C17B0C1FC8E0B00070A514 /* NSString+MSALHelperMethods.h */; };
+		B2C232A021224C21008092C1 /* MSALBlackforestUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */; };
 		B2D6672D210E766F00952595 /* MSALPublicClientApplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D673F07C1E4AAB0D0018BA91 /* MSALPublicClientApplicationTests.m */; };
 		B2F4571E2116B26C00818910 /* MSALAADMultiUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F4571D2116B26C00818910 /* MSALAADMultiUserTests.m */; };
 		B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */; };
@@ -637,6 +638,7 @@
 		B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSIDVersion.m; sourceTree = "<group>"; };
 		B2C17B0C1FC8E0B00070A514 /* NSString+MSALHelperMethods.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+MSALHelperMethods.h"; sourceTree = "<group>"; };
 		B2C17B0D1FC8E0B00070A514 /* NSString+MSALHelperMethods.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+MSALHelperMethods.m"; sourceTree = "<group>"; };
+		B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALBlackforestUITests.m; sourceTree = "<group>"; };
 		B2F4571D2116B26C00818910 /* MSALAADMultiUserTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAADMultiUserTests.m; sourceTree = "<group>"; };
 		B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALBaseAADUITest.m; sourceTree = "<group>"; };
 		B2F4572F211C0B5C00818910 /* MSALBaseAADUITest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALBaseAADUITest.h; sourceTree = "<group>"; };
@@ -1050,6 +1052,7 @@
 				B21F9DEE2120F0E800B1B40C /* MSALShibUITests.m */,
 				B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */,
 				B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */,
+				B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */,
 			);
 			path = interactive;
 			sourceTree = "<group>";
@@ -2039,6 +2042,7 @@
 				B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */,
 				B2F4571E2116B26C00818910 /* MSALAADMultiUserTests.m in Sources */,
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,
+				B2C232A021224C21008092C1 /* MSALBlackforestUITests.m in Sources */,
 				B21F9DF12120F5CE00B1B40C /* MSALGuestUserTests.m in Sources */,
 				B2BB73912112C3F3000EA4C5 /* XCUIElement+MSALiOSUITests.m in Sources */,
 				B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */,
