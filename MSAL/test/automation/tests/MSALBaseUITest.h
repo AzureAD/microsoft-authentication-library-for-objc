@@ -69,6 +69,7 @@
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
 - (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)openURL:(NSDictionary *)config;
+- (void)signout:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
 - (NSDictionary *)resultDictionary;

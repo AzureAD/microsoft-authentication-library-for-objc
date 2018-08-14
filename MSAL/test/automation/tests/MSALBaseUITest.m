@@ -428,6 +428,16 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [self.testApp.buttons[@"Go"] msidTap];
 }
 
+- (void)signout:(NSDictionary *)config
+{
+    NSString *jsonString = [config toJsonString];
+    [self.testApp.buttons[@"signOut"] msidTap];
+    [self.testApp.textViews[@"requestInfo"] msidTap];
+    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
+    sleep(1);
+    [self.testApp.buttons[@"Go"] msidTap];
+}
+
 #pragma mark - Helpers
 
 - (NSDictionary *)resultDictionary
