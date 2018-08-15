@@ -471,7 +471,7 @@
     request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
     request.uiBehavior = @"force";
     request.loginHint = self.primaryAccount.username;
-    request.useEmbedded = YES;
+    request.usePassedWebView = YES;
     request.testAccount = self.primaryAccount;
 
     // 1. Sign in first time to ensure account will be there

@@ -128,8 +128,25 @@
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
 		B25F1BC71EC3E4F700474D1B /* MSALAutomationConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC61EC3E4F700474D1B /* MSALAutomationConstants.m */; };
-		B26D3108211680B2002B493F /* MSALMSABasicInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */; };
 		B277241E1EAE97D700375C53 /* MSALStressTestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = B277241D1EAE97D700375C53 /* MSALStressTestHelper.m */; };
+		B29E2AC221238DCD00B170ED /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
+		B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
+		B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B29E2AC421238E0000B170ED /* SafariServices.framework */; };
+		B29E2AD921238F7600B170ED /* libIdentityAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */; };
+		B29E2ADA21238F7900B170ED /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
+		B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
+		B29E2ADC21238F8200B170ED /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B29E2AC421238E0000B170ED /* SafariServices.framework */; };
+		B29E2ADD21238FAE00B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */; };
+		B29E2ADE21238FB800B170ED /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
+		B29E2ADF21238FBE00B170ED /* MSALBaseiOSUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73812112C3F1000EA4C5 /* MSALBaseiOSUITest.m */; };
+		B29E2AE021238FBE00B170ED /* MSALADFSBaseUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DE92120E89E00B1B40C /* MSALADFSBaseUITest.m */; };
+		B29E2AE121238FBE00B170ED /* MSALBaseAADUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45729211C0B4800818910 /* MSALBaseAADUITest.m */; };
+		B29E2AE221238FBE00B170ED /* MSALBaseUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73862112C3F2000EA4C5 /* MSALBaseUITest.m */; };
+		B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB738A2112C3F2000EA4C5 /* NSDictionary+MSALiOSUITests.m */; };
+		B29E2AE421238FBE00B170ED /* XCTestCase+TextFieldTap.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73842112C3F2000EA4C5 /* XCTestCase+TextFieldTap.m */; };
+		B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB738B2112C3F2000EA4C5 /* XCUIElement+MSALiOSUITests.m */; };
+		B29E2AE621238FBE00B170ED /* XCUIElement+CrossPlat.m in Sources */ = {isa = PBXBuildFile; fileRef = B2BB738C2112C3F3000EA4C5 /* XCUIElement+CrossPlat.m */; };
+		B29E2AE721238FBE00B170ED /* MSALTestRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45741211D3CEA00818910 /* MSALTestRequest.m */; };
 		B2AD634A1EA5663800EFEEF1 /* MSALTestAppTelemetryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B2AD63491EA5663800EFEEF1 /* MSALTestAppTelemetryViewController.m */; };
 		B2AD634D1EA5665F00EFEEF1 /* MSALTestAppTelemetryDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = B2AD634C1EA5665F00EFEEF1 /* MSALTestAppTelemetryDispatcher.m */; };
 		B2B5F08B1FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = B2B5F0891FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h */; };
@@ -340,6 +357,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = B27551D520817A1E00AA7A38;
 			remoteInfo = "IdentityAutomation Mac";
+		};
+		B29E2AD321238F5200B170ED /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 962E37A61E720C5D00DE71FE;
+			remoteInfo = "MSAL Test Automation (iOS)";
 		};
 		B2BB73752112C32C000EA4C5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -618,6 +642,9 @@
 		B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMSABasicInteractiveTests.m; sourceTree = "<group>"; };
 		B277241C1EAE97D700375C53 /* MSALStressTestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALStressTestHelper.h; sourceTree = "<group>"; };
 		B277241D1EAE97D700375C53 /* MSALStressTestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALStressTestHelper.m; sourceTree = "<group>"; };
+		B29E2AC421238E0000B170ED /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
+		B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALNonUnifiedADALCoexistenceCacheTests.m; sourceTree = "<group>"; };
+		B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultiAppiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2AD63481EA5663800EFEEF1 /* MSALTestAppTelemetryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppTelemetryViewController.h; sourceTree = "<group>"; };
 		B2AD63491EA5663800EFEEF1 /* MSALTestAppTelemetryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppTelemetryViewController.m; sourceTree = "<group>"; };
 		B2AD634B1EA5665F00EFEEF1 /* MSALTestAppTelemetryDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppTelemetryDispatcher.h; sourceTree = "<group>"; };
@@ -803,12 +830,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B29E2ACB21238F5200B170ED /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B29E2ADC21238F8200B170ED /* SafariServices.framework in Frameworks */,
+				B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */,
+				B29E2ADA21238F7900B170ED /* libIdentityCore.a in Frameworks */,
+				B29E2AD921238F7600B170ED /* libIdentityAutomation iOS.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2BB736D2112C32C000EA4C5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2BB739C2112C7F9000EA4C5 /* Security.framework in Frameworks */,
+				B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */,
+				B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */,
+				B29E2AC221238DCD00B170ED /* libIdentityCore.a in Frameworks */,
 				B2BB73952112C46A000EA4C5 /* libIdentityAutomation iOS.a in Frameworks */,
+				B2BB739C2112C7F9000EA4C5 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1070,6 +1111,7 @@
 		B2C232B02122A733008092C1 /* multiapp */ = {
 			isa = PBXGroup;
 			children = (
+				B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */,
 			);
 			path = multiapp;
 			sourceTree = "<group>";
@@ -1474,6 +1516,7 @@
 		D6A2062E1FC5106F00755A51 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B29E2AC421238E0000B170ED /* SafariServices.framework */,
 				B2BB739B2112C7F9000EA4C5 /* Security.framework */,
 				96902DFC20E1590200200E6F /* SecurityInterface.framework */,
 				96902DFA20E158E700200E6F /* GSS.framework */,
@@ -1516,6 +1559,7 @@
 				962E37BC1E720C5D00DE71FE /* MSAL Test Automation (iOS).app */,
 				D672279F1EBD111900F3422A /* unit-test-host.app */,
 				B2BB73702112C32C000EA4C5 /* InteractiveiOSTests.xctest */,
+				B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1625,6 +1669,25 @@
 			productName = MSALTestApp;
 			productReference = 962E37BC1E720C5D00DE71FE /* MSAL Test Automation (iOS).app */;
 			productType = "com.apple.product-type.application";
+		};
+		B29E2ACD21238F5200B170ED /* MultiAppiOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B29E2AD521238F5200B170ED /* Build configuration list for PBXNativeTarget "MultiAppiOSTests" */;
+			buildPhases = (
+				B29E2ACA21238F5200B170ED /* Sources */,
+				B29E2ACB21238F5200B170ED /* Frameworks */,
+				B29E2ACC21238F5200B170ED /* Resources */,
+				B29E2AD821238F6C00B170ED /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B29E2AD421238F5200B170ED /* PBXTargetDependency */,
+			);
+			name = MultiAppiOSTests;
+			productName = MultiAppiOSTests;
+			productReference = B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		B2BB736F2112C32C000EA4C5 /* InteractiveiOSTests */ = {
 			isa = PBXNativeTarget;
@@ -1788,12 +1851,19 @@
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					962E37A61E720C5D00DE71FE = {
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
 							};
 						};
+					};
+					B29E2ACD21238F5200B170ED = {
+						CreatedOnToolsVersion = 9.4.1;
+						DevelopmentTeam = UBF8T346G9;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 962E37A61E720C5D00DE71FE;
 					};
 					B2BB736F2112C32C000EA4C5 = {
 						CreatedOnToolsVersion = 9.4.1;
@@ -1871,6 +1941,7 @@
 				962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */,
 				D672279E1EBD111900F3422A /* unit-test-host */,
 				B2BB736F2112C32C000EA4C5 /* InteractiveiOSTests */,
+				B29E2ACD21238F5200B170ED /* MultiAppiOSTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1952,6 +2023,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B29E2ACC21238F5200B170ED /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2BB736E2112C32C000EA4C5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2020,6 +2098,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		B29E2AD821238F6C00B170ED /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\nfi";
+		};
 		B2BB739A2112C588000EA4C5 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2054,6 +2145,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B29E2ACA21238F5200B170ED /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B29E2ADF21238FBE00B170ED /* MSALBaseiOSUITest.m in Sources */,
+				B29E2AE221238FBE00B170ED /* MSALBaseUITest.m in Sources */,
+				B29E2ADE21238FB800B170ED /* MSALUITests.swift in Sources */,
+				B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */,
+				B29E2AE121238FBE00B170ED /* MSALBaseAADUITest.m in Sources */,
+				B29E2AE421238FBE00B170ED /* XCTestCase+TextFieldTap.m in Sources */,
+				B29E2ADD21238FAE00B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */,
+				B29E2AE621238FBE00B170ED /* XCUIElement+CrossPlat.m in Sources */,
+				B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */,
+				B29E2AE021238FBE00B170ED /* MSALADFSBaseUITest.m in Sources */,
+				B29E2AE721238FBE00B170ED /* MSALTestRequest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2BB736C2112C32C000EA4C5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2075,7 +2184,6 @@
 				B2F45743211D3CF400818910 /* MSALTestRequest.m in Sources */,
 				B2F45745211E41C200818910 /* MSALB2CInteractiveTests.m in Sources */,
 				B2BB738F2112C3F3000EA4C5 /* MSALBaseUITest.m in Sources */,
-				B26D3108211680B2002B493F /* MSALMSABasicInteractiveTests.m in Sources */,
 				B2BB73902112C3F3000EA4C5 /* NSDictionary+MSALiOSUITests.m in Sources */,
 				B2BB738E2112C3F3000EA4C5 /* XCTestCase+TextFieldTap.m in Sources */,
 				B2BB73992112C51E000EA4C5 /* MSALUITests.swift in Sources */,
@@ -2314,6 +2422,11 @@
 			name = "IdentityTest Mac";
 			targetProxy = 231CE9DA1FEC678400E95D3E /* PBXContainerItemProxy */;
 		};
+		B29E2AD421238F5200B170ED /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
+			targetProxy = B29E2AD321238F5200B170ED /* PBXContainerItemProxy */;
+		};
 		B2BB73762112C32C000EA4C5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */;
@@ -2406,7 +2519,7 @@
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2421,14 +2534,14 @@
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				INFOPLIST_FILE = "$(SRCROOT)/test/automation/ios/resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
-		B2BB73772112C32C000EA4C5 /* Debug */ = {
+		B29E2AD621238F5200B170ED /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
@@ -2483,17 +2596,15 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveiOSTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MultiAppiOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "MSAL Test Automation (iOS)";
 			};
 			name = Debug;
 		};
-		B2BB73782112C32C000EA4C5 /* Release */ = {
+		B29E2AD721238F5200B170ED /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
@@ -2544,6 +2655,134 @@
 				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MultiAppiOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "MSAL Test Automation (iOS)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B2BB73772112C32C000EA4C5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				ENABLE_BITCODE = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks @executable_path/Frameworks $(inherited)";
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveiOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "MSAL Test Automation (iOS)";
+			};
+			name = Debug;
+		};
+		B2BB73782112C32C000EA4C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				ENABLE_BITCODE = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks @executable_path/Frameworks $(inherited)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveiOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2736,6 +2975,15 @@
 			buildConfigurations = (
 				962E37BA1E720C5D00DE71FE /* Debug */,
 				962E37BB1E720C5D00DE71FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B29E2AD521238F5200B170ED /* Build configuration list for PBXNativeTarget "MultiAppiOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B29E2AD621238F5200B170ED /* Debug */,
+				B29E2AD721238F5200B170ED /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
