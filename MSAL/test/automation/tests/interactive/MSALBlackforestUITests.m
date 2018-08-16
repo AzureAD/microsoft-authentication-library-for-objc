@@ -61,7 +61,7 @@
     request.expectedResultScopes = @[@"email", @"openid", @"profile"];
     request.testAccount = self.primaryAccount;
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -92,7 +92,7 @@
     request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
     request.testAccount = self.primaryAccount;
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -123,7 +123,7 @@
     request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
     request.testAccount = self.primaryAccount;
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.account;
 
     // 1. Run interactive

@@ -57,7 +57,9 @@
     __auto_type registerButton = brokerApp.tables.buttons[@"Register device"];
     [registerButton tap];
 
-    [self adfsEnterPasswordInApp:brokerApp];
+    NSString *password = [NSString stringWithFormat:@"%@\n", self.primaryAccount.password];
+
+    [self adfsEnterPassword:password app:brokerApp];
 }
 
 - (void)unregisterDeviceInAuthenticator
@@ -122,7 +124,7 @@
     [safariApp tap];
 }
 
-- (void)allowNotificationsInSystemAlert
+- (void)acceptNotificationsSystemDialog
 {
     XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
     __auto_type allowButton = [springBoardApp.alerts.buttons elementBoundByIndex:0];
@@ -130,12 +132,24 @@
     [allowButton tap];
 }
 
-- (void)allowSFAuthenticationSessionAlert
+- (void)acceptAuthSessionDialogIfNecessary:(MSALTestRequest *)request
 {
-    XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
-    __auto_type allowButton = springBoardApp.alerts.buttons[@"Continue"];
-    [self waitForElement:allowButton];
-    [allowButton tap];
+    if (request.webViewType == MSALWebviewTypeAutomatic
+        && !request.usesEmbeddedWebView)
+    {
+        [self acceptAuthSessionDialog];
+    }
+}
+
+- (void)acceptAuthSessionDialog
+{
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11.0f)
+    {
+        XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
+        __auto_type allowButton = springBoardApp.alerts.buttons[@"Continue"];
+        [self waitForElement:allowButton];
+        [allowButton tap];
+    }
 }
 
 - (void)waitForRedirectToTheTestApp
@@ -215,7 +229,7 @@
 
         if ([[[UIDevice currentDevice] systemVersion] floatValue] < 10.0f)
         {
-            deleteButton = springBoardApp.otherElements[@"Authenticator"].buttons[@"DeleteButton"];
+            deleteButton = springBoardApp.otherElements[appName].buttons[@"DeleteButton"];
         }
         else
         {

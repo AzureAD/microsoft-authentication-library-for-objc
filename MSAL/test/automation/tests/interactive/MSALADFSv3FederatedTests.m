@@ -74,7 +74,7 @@
     request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
-    request.useSFController = YES;
+    request.webViewType = MSALWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.username;
 
     // Do interactive login
@@ -90,7 +90,7 @@
     request.expectedResultScopes = @[@"https://graph.microsoft.com/.default", @"openid", @"profile"];
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.username;
 
     // Do interactive login

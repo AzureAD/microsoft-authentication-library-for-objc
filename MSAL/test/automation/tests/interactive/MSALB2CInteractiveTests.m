@@ -48,15 +48,9 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!request.useSFController
-        && !request.useEmbedded
-        && !request.usePassedWebView)
-    {
-        [self allowSFAuthenticationSessionAlert];
-    }
+    [self acceptAuthSessionDialogIfNecessary:request];
 
-    [self assertAuthUIAppearWithEmbedded:request.useEmbedded || request.usePassedWebView
-                    safariViewController:request.useSFController];
+    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
 
     if (!request.loginHint && !request.accountIdentifier)
     {
@@ -79,7 +73,7 @@
     }
 
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.useEmbedded];
+    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:request.expectedResultScopes];
@@ -113,7 +107,7 @@
     request.uiBehavior = @"force";
     request.testAccount = [self.primaryAccount copy];
     request.testAccount.homeObjectId = [NSString stringWithFormat:@"%@-b2c_1_signin", self.primaryAccount.homeObjectId];
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.b2cProvider = @"Microsoft";
 
     // 1. Start B2C login
@@ -149,7 +143,7 @@
     request.uiBehavior = @"force";
     request.testAccount = [self.primaryAccount copy];
     request.testAccount.homeObjectId = [NSString stringWithFormat:@"%@-b2c_1_signin", self.primaryAccount.homeObjectId];
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.b2cProvider = @"Microsoft";
 
     // 1. Start B2C login
@@ -185,7 +179,7 @@
     request.testAccount = [self.primaryAccount copy];
     request.testAccount.homeObjectId = [NSString stringWithFormat:@"%@-b2c_1_signin", self.primaryAccount.homeObjectId];
     request.b2cProvider = @"Microsoft";
-    request.useSFController = YES;
+    request.webViewType = MSALWebviewTypeSafariViewController;
 
     // 1. Start B2C login
     [self runSharedB2CLoginStartWithTestRequest:request];
@@ -206,7 +200,7 @@
 
 #pragma mark - Multi policy
 
-- (void)testInteractiveB2CLogin_withSafariViewController_withoutLoginHint_withSigninAndProfilePolicies_withTenantName_withMSAAccount
+- (void)testInteractiveB2CLogin_withPassedInWebView_withoutLoginHint_withSigninAndProfilePolicies_withTenantName_withMSAAccount
 {
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderB2CMSA;
@@ -220,7 +214,7 @@
     request.uiBehavior = @"force";
     request.testAccount = [self.primaryAccount copy];
     request.testAccount.homeObjectId = [NSString stringWithFormat:@"%@-b2c_1_signin", self.primaryAccount.homeObjectId];
-    request.useSFController = YES;
+    request.usePassedWebView = YES;
     request.b2cProvider = @"Microsoft";
 
     // 1. Start B2C login
@@ -237,7 +231,7 @@
     profileRequest.uiBehavior = @"force";
     profileRequest.testAccount = [self.primaryAccount copy];
     profileRequest.testAccount.homeObjectId = [NSString stringWithFormat:@"%@-b2c_1_profile", self.primaryAccount.homeObjectId];
-    profileRequest.useSFController = YES;
+    profileRequest.usePassedWebView = YES;
     profileRequest.b2cProvider = @"Microsoft";
 
     [self runSharedB2CLoginStartWithTestRequest:profileRequest];

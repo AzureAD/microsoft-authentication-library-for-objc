@@ -23,6 +23,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSIDTestAccountsProvider.h"
+#import <MSAL/MSAL.h>
 
 @interface MSALTestRequest : NSObject
 
@@ -36,9 +37,8 @@
 @property (nonatomic, strong) NSString *accountIdentifier;
 @property (nonatomic, strong) NSString *loginHint;
 @property (nonatomic, strong) MSIDTestAccount *testAccount;
-@property (nonatomic) BOOL useEmbedded;
-@property (nonatomic) BOOL useSFController;
 @property (nonatomic) BOOL usePassedWebView;
+@property (nonatomic) MSALWebviewType webViewType;
 @property (nonatomic) BOOL validateAuthority;
 @property (nonatomic, strong) NSString *b2cProvider;
 @property (nonatomic, strong) NSDictionary *additionalParameters;
@@ -47,5 +47,6 @@
 + (MSALTestRequest *)nonConvergedAppRequest;
 + (MSALTestRequest *)b2CRequestWithSigninPolicyWithAccount:(MSIDTestAccount *)account;
 + (MSALTestRequest *)b2CRequestWithProfilePolicyWithAccount:(MSIDTestAccount *)account;
+- (BOOL)usesEmbeddedWebView;
 
 @end

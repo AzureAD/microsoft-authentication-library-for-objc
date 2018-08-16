@@ -29,6 +29,7 @@
 #import "NSDictionary+MSALiOSUITests.h"
 #import "MSIDAADV1IdTokenClaims.h"
 #import "XCUIElement+CrossPlat.h"
+#import "MSIDAADIdTokenClaimsFactory.h"
 
 static MSIDTestAccountsProvider *s_accountsProvider;
 
@@ -75,30 +76,23 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 - (void)assertRefreshTokenInvalidated
 {
     NSDictionary *result = [self resultDictionary];
-    
     XCTAssertTrue([result[@"invalidated_refresh_token_count"] intValue] == 1);
 }
 
 - (void)assertAccessTokenExpired
 {
     NSDictionary *result = [self resultDictionary];
-    
     XCTAssertTrue([result[@"expired_access_token_count"] intValue] == 1);
 }
 
-- (void)assertAuthUIAppearWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController
+- (void)assertAuthUIAppearWithEmbeddedWebView:(BOOL)useEmbedded
 {
-#if TARGET_OS_IPHONE
     XCUIElement *webElement = self.testApp.buttons[@"URL"];
 
-    if (embedded)
+    if (useEmbedded)
     {
         webElement = self.testApp.buttons[@"Cancel"];
     }
-#else
-    // TODO
-    // XCUIElement *webView = self.testApp.windows[@"MSAL_SIGN_IN_WINDOW"].firstMatch;
-#endif
     
     BOOL result = [webElement waitForExistenceWithTimeout:5.0];
     
@@ -107,26 +101,28 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (void)assertErrorCode:(NSString *)expectedErrorCode
 {
-    NSDictionary *result = [self resultDictionary];
-    NSString *errorCodeString = result[@"error_code"];
-    XCTAssertNotEqual([errorCodeString length], 0);
-    XCTAssertEqualObjects(errorCodeString, expectedErrorCode);
+    [self assertErrorContent:expectedErrorCode key:@"error_code"];
 }
 
 - (void)assertErrorDescription:(NSString *)errorDescription
 {
     NSDictionary *result = [self resultDictionary];
-    NSString *errorDescriptionString = result[@"error_description"];
-    XCTAssertNotEqual([errorDescriptionString length], 0);
-    XCTAssertTrue([errorDescriptionString containsString:errorDescription]);
+    NSString *actualContent = result[@"error_description"];
+    XCTAssertNotEqual([actualContent length], 0);
+    XCTAssertTrue([actualContent containsString:errorDescription]);
 }
 
 - (void)assertErrorSubcode:(NSString *)errorSubcode
 {
+    [self assertErrorContent:errorSubcode key:@"subcode"];
+}
+
+- (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key
+{
     NSDictionary *result = [self resultDictionary];
-    NSString *errorSubcodeString = result[@"subcode"];
-    XCTAssertNotEqual([errorSubcodeString length], 0);
-    XCTAssertEqualObjects(errorSubcodeString, errorSubcode);
+    NSString *actualContent = result[key];
+    XCTAssertNotEqual([actualContent length], 0);
+    XCTAssertEqualObjects(actualContent, expectedContent);
 }
 
 - (void)assertAccessTokenNotNil
@@ -155,14 +151,13 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     NSString *idToken = result[@"id_token"];
     XCTAssertTrue([idToken length] > 0);
 
-    MSIDAADV1IdTokenClaims *idTokenWrapper = [[MSIDAADV1IdTokenClaims alloc] initWithRawIdToken:idToken error:nil];
-    return [idTokenWrapper jsonDictionary];
+    MSIDIdTokenClaims *idTokenClaims = [MSIDAADIdTokenClaimsFactory claimsFromRawIdToken:idToken error:nil];
+    return [idTokenClaims jsonDictionary];
 }
 
 - (void)assertRefreshTokenNotNil
 {
     NSDictionary *result = [self resultDictionary];
-    
     XCTAssertTrue([result[@"refresh_token"] length] > 0);
 }
 
@@ -214,7 +209,12 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 #pragma mark - Actions
 
-- (void)aadEnterEmail:(NSString *)email inApp:(XCUIApplication *)app
+- (void)aadEnterEmail
+{
+    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account] app:self.testApp];
+}
+
+- (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app
 {
     XCUIElement *emailTextField = app.textFields[@"Enter your email, phone, or Skype."];
     [self waitForElement:emailTextField];
@@ -228,42 +228,17 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [emailTextField typeText:email];
 }
 
-- (void)aadEnterEmail:(NSString *)email
-{
-    [self aadEnterEmail:email inApp:self.testApp];
-}
-
-- (void)aadEnterEmail
-{
-    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account] inApp:self.testApp];
-}
-
-- (void)aadEnterEmailInApp:(XCUIApplication *)app
-{
-    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.account] inApp:app];
-}
-
 - (void)aadEnterPassword
 {
-    [self aadEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
+    [self aadEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] app:self.testApp];
 }
 
-- (void)aadEnterPasswordInApp:(XCUIApplication *)app
-{
-    [self aadEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] testApp:app];
-}
-
-- (void)aadEnterPassword:(NSString *)password
-{
-    [self aadEnterPassword:password testApp:self.testApp];
-}
-
-- (void)aadEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp
+- (void)aadEnterPassword:(NSString *)password app:(XCUIApplication *)app
 {
     // Enter password
-    XCUIElement *passwordTextField = testApp.secureTextFields[@"Enter password"];
+    XCUIElement *passwordTextField = app.secureTextFields[@"Enter password"];
     [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:testApp];
+    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:app];
     [passwordTextField typeText:password];
 }
 
@@ -287,7 +262,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
             sleep(1);
             i++;
         }
-        else if ([[self.testApp.navigationBars firstMatch].buttons[@"Cancel"] exists] && embeddedWebView)
+        else if ([self.testApp.buttons[@"Cancel"] exists] && embeddedWebView)
         {
             sleep(1);
             i++;
@@ -303,34 +278,15 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (void)adfsEnterPassword
 {
-    [self adfsEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
+    [self adfsEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] app:self.testApp];
 }
 
-- (void)adfsEnterPasswordInApp:(XCUIApplication *)app
+- (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app
 {
-    [self adfsEnterPassword:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password] testApp:app];
-}
-
-- (void)adfsEnterPassword:(NSString *)password
-{
-    [self adfsEnterPassword:password testApp:self.testApp];
-}
-
-- (void)adfsEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp
-{
-    XCUIElement *passwordTextField = testApp.secureTextFields[@"Password"];
+    XCUIElement *passwordTextField = app.secureTextFields[@"Password"];
     [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:testApp];
+    [self tapElementAndWaitForKeyboardToAppear:passwordTextField app:app];
     [passwordTextField typeText:password];
-}
-
-- (void)closeAuthUI
-{
-#if TARGET_OS_IPHONE
-     [self.testApp.navigationBars[@"ADAuthenticationView"].buttons[@"Cancel"] msidTap];
-#else
-    [self.testApp.windows[@"MSAL_SIGN_IN_WINDOW"].buttons[XCUIIdentifierCloseWindow] click];
-#endif
 }
 
 - (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController
@@ -352,93 +308,63 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (void)invalidateRefreshToken:(NSDictionary *)config
 {
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"Invalidate Refresh Token"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
+    [self performAction:@"invalidateRefreshToken" withConfig:config];
 }
 
 - (void)expireAccessToken:(NSDictionary *)config
 {
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"Expire Access Token"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
+    [self performAction:@"expireAccessToken" withConfig:config];
 }
 
 - (void)acquireToken:(NSDictionary *)config
 {
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"Acquire Token"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
-}
-
-- (void)acquireTokenWithRefreshToken:(NSDictionary *)config
-{
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"acquireTokenByRefreshToken"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
+    [self performAction:@"acquireToken" withConfig:config];
 }
 
 - (void)acquireTokenSilent:(NSDictionary *)config
 {
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"Acquire Token Silent"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
-}
-
-- (void)clearCache
-{
-    [self.testApp.buttons[@"Clear Cache"] msidTap];
-    [self.testApp.buttons[@"Done"] msidTap];
+    [self performAction:@"acquireTokenSilent" withConfig:config];
 }
 
 - (void)clearKeychain
 {
-    [self.testApp.buttons[@"Clear keychain"] msidTap];
+    [self.testApp.buttons[@"clearKeychain"] msidTap];
     [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)clearCookies
 {
-    [self.testApp.buttons[@"Clear Cookies"] msidTap];
+    [self.testApp.buttons[@"clearCookies"] msidTap];
     [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)openURL:(NSDictionary *)config
 {
-    NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"openUrlInSafari"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidTap];
-    [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
-    sleep(1);
-    [self.testApp.buttons[@"Go"] msidTap];
+    [self performAction:@"openUrlInSafari" withConfig:config];
 }
 
 - (void)signout:(NSDictionary *)config
 {
+    [self performAction:@"signOut" withConfig:config];
+}
+
+- (void)readAccounts:(NSDictionary *)config
+{
+    [self performAction:@"getAccounts" withConfig:config];
+}
+
+#pragma mark - Helpers
+
+- (void)performAction:(NSString *)action
+           withConfig:(NSDictionary *)config
+{
     NSString *jsonString = [config toJsonString];
-    [self.testApp.buttons[@"signOut"] msidTap];
+    [self.testApp.buttons[action] msidTap];
     [self.testApp.textViews[@"requestInfo"] msidTap];
     [self.testApp.textViews[@"requestInfo"] msidPasteText:jsonString application:self.testApp];
     sleep(1);
     [self.testApp.buttons[@"Go"] msidTap];
 }
-
-#pragma mark - Helpers
 
 - (NSDictionary *)resultDictionary
 {
@@ -470,9 +396,26 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     if (request.authority) additionalConfig[@"authority"] = request.authority;
     if (request.scopes) additionalConfig[@"scopes"] = request.scopes;
     if (request.loginHint) additionalConfig[@"login_hint"] = request.loginHint;
-    if (request.useEmbedded) additionalConfig[@"webview_selection"] = @"webview_embedded";
-    if (request.useSFController) additionalConfig[@"webview_selection"] = @"webview_safari";
-    if (request.usePassedWebView) additionalConfig[@"webview_selection"] = @"passed_webview";
+
+    if (request.usePassedWebView)
+    {
+        additionalConfig[@"webview_selection"] = @"passed_webview";
+    }
+    else
+    {
+        switch (request.webViewType) {
+            case MSALWebviewTypeSafariViewController:
+                additionalConfig[@"webview_selection"] = @"webview_safari";
+                break;
+            case MSALWebviewTypeWKWebView:
+                additionalConfig[@"webview_selection"] = @"webview_embedded";
+                break;
+
+            default:
+                break;
+        }
+    }
+
     if (request.accountIdentifier) additionalConfig[@"home_account_identifier"] = request.accountIdentifier;
 
     additionalConfig[@"validate_authority"] = @(request.validateAuthority);

@@ -38,11 +38,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!request.useEmbedded
-        && !request.useSFController)
-    {
-        [self allowSFAuthenticationSessionAlert];
-    }
+    [self acceptAuthSessionDialogIfNecessary:request];
 
     if (!request.loginHint)
     {
@@ -50,22 +46,9 @@
     }
 
     [self enterADFSPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.useEmbedded || request.usePassedWebView];
+    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:request.expectedResultScopes];
-
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
-    XCTAssertNotNil(homeAccountId);
-
-    if (request.testAccount)
-    {
-        NSDictionary *result = [self resultDictionary];
-        NSString *resultTenantId = result[@"tenantId"];
-        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
-    }
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
     if (closeResultView)
     {

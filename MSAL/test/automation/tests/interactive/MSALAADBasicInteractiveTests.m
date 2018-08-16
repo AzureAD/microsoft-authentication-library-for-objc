@@ -158,7 +158,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
 
     [self aadEnterEmail];
     [self aadEnterPassword];
@@ -228,7 +228,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
 
     XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
     [self waitForElement:pickAccount];
@@ -260,7 +260,7 @@
 
     // Now call acquire token with force consent
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
 
     XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
     [self waitForElement:pickAccount];
@@ -296,7 +296,7 @@
     // 1. Sign in interactively
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
     [self aadEnterPassword];
 
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
@@ -328,7 +328,7 @@
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
     [self aadEnterPassword];
 
     XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
@@ -354,7 +354,7 @@
     request.uiBehavior = @"force";
     request.scopes = @"user.read";
     request.authority = @"https://login.microsoftonline.com/common";
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.account;
 
     NSDictionary *config = [self configWithTestRequest:request];
@@ -436,7 +436,7 @@
     request.scopes = @"https://graph.windows.net/.default";
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
     request.loginHint = self.primaryAccount.username;
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
 
@@ -463,7 +463,7 @@
     [self closeResultView];
 }
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andEmbeddedWebView_andSelectAccount
+- (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andPassedInWebView_andSelectAccount
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.scopes = @"user.read tasks.read";
@@ -492,8 +492,6 @@
     XCTAssertNotNil(element);
 
     [element msidTap];
-    // 3. No persistent cookies in embedded webview, so user needs to enter password again
-    [self aadEnterPassword];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
@@ -534,7 +532,7 @@
     request.uiBehavior = @"force";
     request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
-    request.useSFController = YES;
+    request.webViewType = MSALWebviewTypeSafariViewController;
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -578,7 +576,7 @@
     request.uiBehavior = @"force";
     request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
-    request.useSFController = YES;
+    request.webViewType = MSALWebviewTypeSafariViewController;
 
     [self runSharedAADLoginWithTestRequest:request];
 

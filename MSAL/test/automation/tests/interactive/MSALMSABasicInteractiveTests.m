@@ -88,7 +88,7 @@
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.authority = @"https://login.microsoftonline.com/consumers";
-    request.useSFController = YES;
+    request.webViewType = MSALWebviewTypeSafariViewController;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -137,7 +137,7 @@
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
     request.authority = @"https://login.microsoftonline.com/consumers";
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -170,7 +170,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     // 2. Now call acquire token with select account
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
 
     XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
     [self waitForElement:pickAccount];
@@ -206,7 +206,7 @@
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
     [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];

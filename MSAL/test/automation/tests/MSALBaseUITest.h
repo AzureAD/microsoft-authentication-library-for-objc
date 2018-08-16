@@ -35,12 +35,14 @@
 @property (nonatomic) MSIDTestAccount *primaryAccount;
 @property (nonatomic) MSIDTestAutomationConfiguration *testConfiguration;
 
+// Common checks/assertions
 - (void)assertRefreshTokenInvalidated;
 - (void)assertAccessTokenExpired;
-- (void)assertAuthUIAppearWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
+- (void)assertAuthUIAppearWithEmbeddedWebView:(BOOL)useEmbedded;
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
+- (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key;
 - (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
 - (NSDictionary *)resultIDTokenClaims;
@@ -51,26 +53,23 @@
 - (void)expireAccessToken:(NSDictionary *)config;
 - (void)acquireToken:(NSDictionary *)config;
 - (void)acquireTokenSilent:(NSDictionary *)config;
-- (void)acquireTokenWithRefreshToken:(NSDictionary *)config;
-- (void)clearCache;
 - (void)clearKeychain;
 - (void)clearCookies;
-- (void)aadEnterEmail:(NSString *)email;
+
 - (void)aadEnterEmail;
-- (void)aadEnterEmailInApp:(XCUIApplication *)app;
+- (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app;
+
 - (void)aadEnterPassword;
-- (void)aadEnterPassword:(NSString *)password;
-- (void)aadEnterPasswordInApp:(XCUIApplication *)app;
-- (void)aadEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp;
+- (void)aadEnterPassword:(NSString *)password app:(XCUIApplication *)app;
+
 - (void)adfsEnterPassword;
-- (void)adfsEnterPasswordInApp:(XCUIApplication *)app;
-- (void)adfsEnterPassword:(NSString *)password;
-- (void)adfsEnterPassword:(NSString *)password testApp:(XCUIApplication *)testApp;
+- (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
+
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
 - (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)openURL:(NSDictionary *)config;
 - (void)signout:(NSDictionary *)config;
-//- (void)readAccounts;
+- (void)readAccounts:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
 - (NSDictionary *)resultDictionary;

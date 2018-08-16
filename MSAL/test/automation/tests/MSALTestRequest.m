@@ -34,6 +34,7 @@
         request.clientId = @"3c62ac97-29eb-4aed-a3c8-add0298508da";
         request.redirectUri = @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth";
         request.validateAuthority = YES;
+        request.webViewType = MSALWebviewTypeAutomatic;
     }
 
     return request;
@@ -46,6 +47,7 @@
     if (request)
     {
         request.validateAuthority = YES;
+        request.webViewType = MSALWebviewTypeAutomatic;
     }
 
     return request;
@@ -59,6 +61,7 @@
     {
         request.validateAuthority = YES;
         request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Signin", account.tenantName];
+        request.webViewType = MSALWebviewTypeAutomatic;
     }
 
     return request;
@@ -72,9 +75,15 @@
     {
         request.validateAuthority = YES;
         request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Profile", account.tenantName];
+        request.webViewType = MSALWebviewTypeAutomatic;
     }
 
     return request;
+}
+
+- (BOOL)usesEmbeddedWebView
+{
+    return self.webViewType == MSALWebviewTypeWKWebView || self.usePassedWebView;
 }
 
 @end

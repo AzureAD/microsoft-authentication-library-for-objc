@@ -140,7 +140,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
-    [self allowSFAuthenticationSessionAlert];
+    [self acceptAuthSessionDialog];
 
     XCUIElement *signIn = self.testApp.staticTexts[@"Sign in with another account"];
     [self waitForElement:signIn];

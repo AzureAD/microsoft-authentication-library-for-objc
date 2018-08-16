@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSALBaseAADUITest.h"
+#import "XCTestCase+TextFieldTap.h"
 
 @interface MSALNonUnifiedADALCoexistenceCacheTests : MSALBaseAADUITest
 
@@ -54,222 +55,78 @@ static BOOL adalAppInstalled = NO;
 // #296895
 - (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_withAADAccount_andDoTokenRefresh
 {
-    // Install previous ADAL version
+    // 1. Install previous ADAL version and signin
     self.testApp = [self olderADALApp];
-
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch to MSAL
-    self.testApp = [XCUIApplication new];
-    [self.testApp activate];
 
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.validateAuthority = YES;
+    request.additionalParameters = @{@"prompt_behavior": @"always"};
+
+    NSDictionary *config = [self configWithTestRequest:request];
+
+    [self acquireToken:config];
+    [self aadEnterEmail];
+    [self aadEnterPassword];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+
+    // 2. Switch to MSAL and acquire token silently with common authority
+    self.testApp = [XCUIApplication new];
+    [self.testApp activate];
+
+    request.authority = @"https://login.windows.net/common";
+    request.additionalParameters = @{@"user_legacy_identifier": self.primaryAccount.account};
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+
+    [self runSharedSilentAADLoginWithTestRequest:request];
+
+    // 3. Acquire token silently with organizations authority
+    request.authority = @"https://login.windows.net/organizations";
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)testCoexistenceWithNonUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    
+    request.authority = @"https://login.windows.net/organizations";
+    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
 
-    // Acquire token silent
+    // 1. Sign into the MSAL test app
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountId);
 
+    // 2.Switch to non-unified ADAL and acquire token silently with common authority
+    self.testApp = [self olderADALApp];
+    request.additionalParameters = @{@"prompt_behavior": @"always"};
+    request.authority = @"https://login.microsoftonline.com/common";
+    NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
-    // Expire access token
+    // 3. Now expire token in non-unified ADAL
     [self expireAccessToken:config];
     [self assertAccessTokenExpired];
     [self closeResultView];
 
-    // Now do token refresh
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
-- (void)testCoexistenceWithNonUnifiedADAL_startSigninInUnifiedADAL_withAADAccount_andDoTokenRefresh
-{
-    // Sign in the new test app
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch to the previous version
-    self.testApp = [self olderADALApp];
-
-    // Acquire token silent
+    // 4. Now acquire token silently
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
-    // Expire access token
-    NSDictionary *expireParams = @{
-                                   @"authority": @"https://login.windows.net/common"
-                                   };
-
-    NSDictionary *expireConfig = [self.testConfiguration configWithAdditionalConfiguration:expireParams];
-
-    [self expireAccessToken:expireConfig];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
-
-    // Now do token refresh
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
-- (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_withADFSOnPremAccount_andDoTokenRefresh
-{
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
-    configurationRequest.appVersion = MSIDAppVersionOnPrem;
-    configurationRequest.accountProvider = MSIDTestAccountProviderADfsv3;
-    configurationRequest.accountFeatures = @[];
-    [self loadTestConfiguration:configurationRequest];
-
-    // Sign into the current version
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"user_identifier": self.primaryAccount.account,
-                             @"validate_authority" : @NO
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireToken:config];
-    [self enterADFSPassword];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch to the previous version
-    self.testApp = [self olderADALApp];
-
-    // Do silent first
-    config = [self.testConfiguration configWithAdditionalConfiguration:@{@"validate_authority" : @NO}];
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Now expire access token
-    [self expireAccessToken:config];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
-
-    // Now do access token refresh
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch back to the current version and do silent again
+    // 5. Run token refresh in MSAL again
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
 
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Now expire access token
-    [self expireAccessToken:config];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
-
-    // Now do access token refresh
-    [self acquireTokenSilent:config];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
+    request.accountIdentifier = homeAccountId;
+    [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-- (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_withAADAccount_andDoAuthorityMigration
-{
-    // Sign in the new test app
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES,
-                             @"authority": @"https://login.windows.net/common"
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch to the previous version
-    self.testApp = [self olderADALApp];
-
-    params = @{@"prompt_behavior" : @"always", @"validate_authority" : @YES};
-    NSDictionary *config2 = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireTokenSilent:config2];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    [self expireAccessToken:config];
-    [self assertAccessTokenExpired];
-    [self closeResultView];
-
-    [self acquireTokenSilent:config2];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
-- (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_withAADAccount_andUseFociToken
-{
-    self.testApp = [self olderADALApp];
-
-    NSDictionary *params = @{
-                             @"prompt_behavior" : @"always",
-                             @"validate_authority" : @YES,
-                             @"client_id": @"d3590ed6-52b3-4102-aeff-aad2292ab01c",
-                             @"redirect_uri": @"urn:ietf:wg:oauth:2.0:oob",
-                             };
-
-    NSDictionary *config = [self.testConfiguration configWithAdditionalConfiguration:params];
-    [self acquireToken:config];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-
-    // Switch back to the new ADAL app
-    self.testApp = [XCUIApplication new];
-    [self.testApp activate];
-
-    params = @{
-               @"prompt_behavior" : @"always",
-               @"validate_authority" : @YES,
-               @"client_id": @"af124e86-4e96-495a-b70a-90f90ab96707",
-               @"redirect_uri": @"ms-onedrive://com.microsoft.skydrive"
-               };
-
-    NSDictionary *config2 = [self.testConfiguration configWithAdditionalConfiguration:params];
-
-    [self acquireTokenSilent:config2];
-    [self assertAccessTokenNotNil];
-}
+// TODO: authority migration
+// TODO: FOCI
 
 - (XCUIApplication *)olderADALApp
 {

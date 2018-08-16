@@ -96,6 +96,10 @@
     self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
     self.accountCredentialCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.passedInController = (MSALPassedInWebController *) [sb instantiateViewControllerWithIdentifier:@"passed_in_controller"];
+    [self.passedInController loadViewIfNeeded];
 }
 
 #pragma mark - Segue
@@ -259,11 +263,8 @@
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_PASSED])
         {
             application.webviewType = MSALWebviewTypeWKWebView;
-
-            UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-            self.passedInController = (MSALPassedInWebController *) [sb instantiateViewControllerWithIdentifier:@"passed_in_controller"];
             application.customWebview = self.passedInController.webView;
-            [self presentViewController:self.passedInController animated:YES completion:nil];
+            [self.presentedViewController presentViewController:self.passedInController animated:NO completion:nil];
         }
 
         if (account)

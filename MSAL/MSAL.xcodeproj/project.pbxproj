@@ -118,6 +118,7 @@
 		B21F9DED2120EB3E00B1B40C /* MSALPingUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */; };
 		B21F9DEF2120F0E800B1B40C /* MSALShibUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DEE2120F0E800B1B40C /* MSALShibUITests.m */; };
 		B21F9DF12120F5CE00B1B40C /* MSALGuestUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */; };
+		B221BD9721251BD80020E952 /* MSALMSABasicInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */; };
 		B221CEDB20C0AC60002F5E94 /* MSALAccountId.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CED920C0AC60002F5E94 /* MSALAccountId.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B221CEDC20C0AC60002F5E94 /* MSALAccountId.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CED920C0AC60002F5E94 /* MSALAccountId.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B221CEDD20C0AC60002F5E94 /* MSALAccountId.m in Sources */ = {isa = PBXBuildFile; fileRef = B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */; };
@@ -2175,6 +2176,7 @@
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,
 				B2C232A021224C21008092C1 /* MSALBlackforestUITests.m in Sources */,
 				B21F9DF12120F5CE00B1B40C /* MSALGuestUserTests.m in Sources */,
+				B221BD9721251BD80020E952 /* MSALMSABasicInteractiveTests.m in Sources */,
 				B2BB73912112C3F3000EA4C5 /* XCUIElement+MSALiOSUITests.m in Sources */,
 				B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */,
 				B2BB73732112C32C000EA4C5 /* MSALAADBasicInteractiveTests.m in Sources */,
@@ -2599,6 +2601,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MultiAppiOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "MSAL Test Automation (iOS)";
 			};
@@ -2659,6 +2662,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MultiAppiOSTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "MSAL Test Automation (iOS)";
 				VALIDATE_PRODUCT = YES;

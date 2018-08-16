@@ -53,12 +53,7 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!request.useEmbedded
-        && !request.useSFController
-        && !request.usePassedWebView)
-    {
-        [self allowSFAuthenticationSessionAlert];
-    }
+    [self acceptAuthSessionDialogIfNecessary:request];
 
     if (!request.loginHint)
     {
@@ -69,23 +64,12 @@
     [self pingEnterPassword];
 
     [self acceptMSSTSConsentIfNecessary:@"Accept"
-                        embeddedWebView:request.useEmbedded || request.usePassedWebView];
+                        embeddedWebView:request.usesEmbeddedWebView];
 
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:request.expectedResultScopes];
 
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
-    XCTAssertNotNil(homeAccountId);
-
-    if (request.testAccount)
-    {
-        NSDictionary *result = [self resultDictionary];
-        NSString *resultTenantId = result[@"tenantId"];
-        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
-    }
-
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
     return homeAccountId;
 }
@@ -101,7 +85,7 @@
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
-    request.useEmbedded = YES;
+    request.webViewType = MSALWebviewTypeWKWebView;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
@@ -149,9 +133,6 @@
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);
-
-    // 2. Run UI appears step
-    [self runSharedAuthUIAppearsStepWithTestRequest:request];
 }
 
 #pragma mark - Private

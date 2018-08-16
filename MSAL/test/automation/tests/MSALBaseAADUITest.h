@@ -23,6 +23,7 @@
 
 #import "MSALBaseiOSUITest.h"
 
+// Multiple shared steps are defined here
 @interface MSALBaseAADUITest : MSALBaseiOSUITest
 
 @property (nonatomic, strong) NSString *consentTitle;
@@ -30,5 +31,6 @@
 - (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request;
 - (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
 - (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
+- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request;
 
 @end

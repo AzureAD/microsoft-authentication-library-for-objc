@@ -33,15 +33,13 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!request.useSFController
-        && !request.useEmbedded
-        && !request.usePassedWebView)
-    {
-        [self allowSFAuthenticationSessionAlert];
-    }
+    [self acceptAuthSessionDialogIfNecessary:request];
+    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
 
-    [self assertAuthUIAppearWithEmbedded:request.useEmbedded || request.usePassedWebView
-                    safariViewController:request.useSFController];
+    if (request.usePassedWebView)
+    {
+        XCTAssertTrue(self.testApp.staticTexts[@"PassedIN"]);
+    }
 
     if (!request.loginHint && !request.accountIdentifier)
     {
@@ -49,22 +47,9 @@
     }
 
     [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.useEmbedded];
+    [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    [self assertAccessTokenNotNil];
-    [self assertScopesReturned:request.expectedResultScopes];
-
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
-    XCTAssertNotNil(homeAccountId);
-
-    if (request.testAccount)
-    {
-        NSDictionary *result = [self resultDictionary];
-        NSString *resultTenantId = result[@"tenantId"];
-        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
-    }
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
     [self closeResultView];
     return homeAccountId;
@@ -96,17 +81,9 @@
 
     // Now lookup access token without authority
     mutableConfig[@"authority"] = request.authority;
+
     [self acquireTokenSilent:mutableConfig];
-    [self assertAccessTokenNotNil];
-
-    if (request.testAccount)
-    {
-        NSDictionary *result = [self resultDictionary];
-        XCTAssertEqualObjects(result[@"tenantId"], request.testAccount.targetTenantId);
-        XCTAssertEqualObjects(result[@"user"][@"home_account_id"], request.testAccount.homeAccountId);
-    }
-
-    [self assertScopesReturned:request.expectedResultScopes];
+    [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
 }
 
@@ -115,18 +92,32 @@
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
 
-    if (!request.useSFController
-        && !request.useEmbedded
-        && !request.usePassedWebView)
+    [self acceptAuthSessionDialogIfNecessary:request];
+
+    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
+    [self closeAuthUIWithEmbedded:request.usesEmbeddedWebView safariViewController:request.webViewType == MSALWebviewTypeSafariViewController];
+    [self assertErrorCode:request.usePassedWebView ? @"MSALErrorSessionCanceled" : @"MSALErrorUserCanceled"];
+    [self closeResultView];
+}
+
+- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request
+{
+    [self assertAccessTokenNotNil];
+    [self assertScopesReturned:request.expectedResultScopes];
+
+    NSDictionary *resultDictionary = [self resultDictionary];
+    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
+    XCTAssertNotNil(homeAccountId);
+
+    if (request.testAccount)
     {
-        [self allowSFAuthenticationSessionAlert];
+        NSDictionary *result = [self resultDictionary];
+        NSString *resultTenantId = result[@"tenantId"];
+        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
+        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
     }
 
-    [self assertAuthUIAppearWithEmbedded:(request.useEmbedded || request.usePassedWebView)
-                    safariViewController:request.useSFController];
-    [self closeAuthUIWithEmbedded:request.useEmbedded safariViewController:request.useSFController];
-    [self assertErrorCode:@"MSALErrorUserCanceled"];
-    [self closeResultView];
+    return homeAccountId;
 }
 
 @end
