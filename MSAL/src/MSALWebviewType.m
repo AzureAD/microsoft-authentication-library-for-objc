@@ -32,7 +32,7 @@ extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
     switch (type) {
             STRING_CASE(MSALWebviewTypeWKWebView);
 #if TARGET_OS_IPHONE
-            STRING_CASE(MSALWebviewTypeAutomatic);
+            STRING_CASE(MSALWebviewTypeDefault);
             STRING_CASE(MSALWebviewTypeSafariViewController);
             STRING_CASE(MSALWebviewTypeAuthenticationSession);
 #endif

@@ -210,7 +210,7 @@
             useAuthenticationSession = NO;
             allowSafariViewController = YES;
             break;
-        case MSALWebviewTypeAutomatic:
+        case MSALWebviewTypeDefault:
             useAuthenticationSession = YES;
             allowSafariViewController = YES;
             break;

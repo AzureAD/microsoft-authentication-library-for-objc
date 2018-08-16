@@ -221,7 +221,7 @@
         }
         else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
         {
-            application.webviewType = MSALWebviewTypeAutomatic;
+            application.webviewType = MSALWebviewTypeDefault;
         }
         
         [application acquireTokenForScopes:scopes
