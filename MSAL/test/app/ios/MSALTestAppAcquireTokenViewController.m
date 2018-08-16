@@ -508,7 +508,7 @@
         });
     };
     
-    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeAutomatic;
+    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     application.customWebview = nil;
     
     if (application.webviewType == MSALWebviewTypeWKWebView &&
