@@ -455,12 +455,12 @@
 
 - (IBAction)openURLInSafari:(id)sender
 {
-    __weak typeof(self) weakSelf = self;
-
     void (^completionBlock)(NSDictionary<NSString *, NSString *> * parameters) = ^void(NSDictionary<NSString *, NSString *> * parameters) {
 
-        NSString *resultJson = @"{\"success\":\"1\"}";
-        [weakSelf displayResultJson:resultJson logs:_resultLogs];
+        [self dismissViewControllerAnimated:NO
+                                 completion:^{
+                                     [self displayResultJson:@"{\"success\":\"1\"}" logs:_resultLogs];
+                                 }];
 
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:parameters[@"safari_url"]]];
     };

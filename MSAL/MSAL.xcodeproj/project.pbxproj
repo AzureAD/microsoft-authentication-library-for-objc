@@ -129,6 +129,9 @@
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
 		B25F1BC71EC3E4F700474D1B /* MSALAutomationConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC61EC3E4F700474D1B /* MSALAutomationConstants.m */; };
+		B2734C1A21253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */; };
+		B2734C1C21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */; };
+		B2734C1E21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1D21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m */; };
 		B277241E1EAE97D700375C53 /* MSALStressTestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = B277241D1EAE97D700375C53 /* MSALStressTestHelper.m */; };
 		B29E2AC221238DCD00B170ED /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
 		B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
@@ -641,6 +644,9 @@
 		B25F1BC51EC3E4F700474D1B /* MSALAutomationConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutomationConstants.h; sourceTree = "<group>"; };
 		B25F1BC61EC3E4F700474D1B /* MSALAutomationConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationConstants.m; sourceTree = "<group>"; };
 		B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMSABasicInteractiveTests.m; sourceTree = "<group>"; };
+		B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALUnifiedADALCacheCoexistenceTests.m; sourceTree = "<group>"; };
+		B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMultiAppCacheCoexistenceTests.m; sourceTree = "<group>"; };
+		B2734C1D21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDotNetCacheCoexistenceTests.m; sourceTree = "<group>"; };
 		B277241C1EAE97D700375C53 /* MSALStressTestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALStressTestHelper.h; sourceTree = "<group>"; };
 		B277241D1EAE97D700375C53 /* MSALStressTestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALStressTestHelper.m; sourceTree = "<group>"; };
 		B29E2AC421238E0000B170ED /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
@@ -1113,6 +1119,9 @@
 			isa = PBXGroup;
 			children = (
 				B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */,
+				B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */,
+				B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */,
+				B2734C1D21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m */,
 			);
 			path = multiapp;
 			sourceTree = "<group>";
@@ -2154,11 +2163,14 @@
 				B29E2AE221238FBE00B170ED /* MSALBaseUITest.m in Sources */,
 				B29E2ADE21238FB800B170ED /* MSALUITests.swift in Sources */,
 				B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */,
+				B2734C1E21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m in Sources */,
 				B29E2AE121238FBE00B170ED /* MSALBaseAADUITest.m in Sources */,
 				B29E2AE421238FBE00B170ED /* XCTestCase+TextFieldTap.m in Sources */,
 				B29E2ADD21238FAE00B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */,
 				B29E2AE621238FBE00B170ED /* XCUIElement+CrossPlat.m in Sources */,
+				B2734C1C21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m in Sources */,
 				B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */,
+				B2734C1A21253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */,
 				B29E2AE021238FBE00B170ED /* MSALADFSBaseUITest.m in Sources */,
 				B29E2AE721238FBE00B170ED /* MSALTestRequest.m in Sources */,
 			);
@@ -2581,6 +2593,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = UBF8T346G9;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -2645,6 +2658,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = UBF8T346G9;
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

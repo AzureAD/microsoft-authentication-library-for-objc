@@ -81,6 +81,36 @@
     return request;
 }
 
++ (MSALTestRequest *)fociRequestWithOfficeApp
+{
+    MSALTestRequest *request = [MSALTestRequest new];
+
+    if (request)
+    {
+        request.validateAuthority = YES;
+        request.webViewType = MSALWebviewTypeAutomatic;
+        request.clientId = @"d3590ed6-52b3-4102-aeff-aad2292ab01c";
+        request.redirectUri = @"urn:ietf:wg:oauth:2.0:oob";
+    }
+
+    return request;
+}
+
+ + (MSALTestRequest *)fociRequestWithOnedriveApp
+{
+    MSALTestRequest *request = [MSALTestRequest new];
+
+    if (request)
+    {
+        request.validateAuthority = YES;
+        request.webViewType = MSALWebviewTypeAutomatic;
+        request.clientId = @"af124e86-4e96-495a-b70a-90f90ab96707";
+        request.redirectUri = @"ms-onedrive://com.microsoft.skydrive";
+    }
+
+    return request;
+}
+
 - (BOOL)usesEmbeddedWebView
 {
     return self.webViewType == MSALWebviewTypeWKWebView || self.usePassedWebView;

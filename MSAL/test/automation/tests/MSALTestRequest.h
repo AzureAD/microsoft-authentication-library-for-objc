@@ -48,5 +48,7 @@
 + (MSALTestRequest *)b2CRequestWithSigninPolicyWithAccount:(MSIDTestAccount *)account;
 + (MSALTestRequest *)b2CRequestWithProfilePolicyWithAccount:(MSIDTestAccount *)account;
 - (BOOL)usesEmbeddedWebView;
++ (MSALTestRequest *)fociRequestWithOfficeApp;
++ (MSALTestRequest *)fociRequestWithOnedriveApp;
 
 @end

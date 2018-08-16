@@ -21,22 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALBaseUITest.h"
+#import "MSALBaseAADUITest.h"
 
-@interface MSALBaseiOSUITest : MSALBaseUITest
+@interface MSALDotNetCacheCoexistenceTests : MSALBaseAADUITest
 
-- (XCUIApplication *)brokerApp;
-- (void)registerDeviceInAuthenticator;
-- (void)unregisterDeviceInAuthenticator;
-- (XCUIApplication *)openDeviceRegistrationMenuInAuthenticator;
-- (void)openAppInstallURLForAppId:(NSString *)appId;
-- (void)acceptNotificationsSystemDialog;
-- (void)acceptAuthSessionDialogIfNecessary:(MSALTestRequest *)request;
-- (void)acceptAuthSessionDialog;
-- (void)waitForRedirectToTheTestApp;
-- (XCUIApplication *)installAppWithId:(NSString *)appId;
-- (XCUIApplication *)installAppWithIdWithSafariOpen:(NSString *)appId;
-- (void)removeAppWithId:(NSString *)appId;
-- (XCUIApplication *)openAppWithAppId:(NSString *)appId;
+@end
+
+@implementation MSALDotNetCacheCoexistenceTests
+
+// TODO in the future
 
 @end

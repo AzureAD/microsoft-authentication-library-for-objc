@@ -124,6 +124,18 @@
     [safariApp tap];
 }
 
+- (XCUIApplication *)openAppWithAppId:(NSString *)appId
+{
+    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:appId];
+    NSString *appBundleId = appConfiguration[@"app_bundle_id"];
+
+    XCUIApplication *otherApp = [[XCUIApplication alloc] initWithBundleIdentifier:appBundleId];
+    [otherApp activate];
+    BOOL result = [otherApp waitForState:XCUIApplicationStateRunningForeground timeout:30.0f];
+    XCTAssertTrue(result);
+    return otherApp;
+}
+
 - (void)acceptNotificationsSystemDialog
 {
     XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];
