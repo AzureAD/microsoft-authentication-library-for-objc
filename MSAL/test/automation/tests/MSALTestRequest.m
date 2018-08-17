@@ -34,7 +34,7 @@
         request.clientId = @"3c62ac97-29eb-4aed-a3c8-add0298508da";
         request.redirectUri = @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth";
         request.validateAuthority = YES;
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
     }
 
     return request;
@@ -47,7 +47,7 @@
     if (request)
     {
         request.validateAuthority = YES;
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
     }
 
     return request;
@@ -61,7 +61,7 @@
     {
         request.validateAuthority = YES;
         request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Signin", account.tenantName];
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
     }
 
     return request;
@@ -75,7 +75,7 @@
     {
         request.validateAuthority = YES;
         request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/tfp/%@/B2C_1_Profile", account.tenantName];
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
     }
 
     return request;
@@ -88,7 +88,7 @@
     if (request)
     {
         request.validateAuthority = YES;
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
         request.clientId = @"d3590ed6-52b3-4102-aeff-aad2292ab01c";
         request.redirectUri = @"urn:ietf:wg:oauth:2.0:oob";
     }
@@ -103,7 +103,7 @@
     if (request)
     {
         request.validateAuthority = YES;
-        request.webViewType = MSALWebviewTypeAutomatic;
+        request.webViewType = MSALWebviewTypeDefault;
         request.clientId = @"af124e86-4e96-495a-b70a-90f90ab96707";
         request.redirectUri = @"ms-onedrive://com.microsoft.skydrive";
     }
