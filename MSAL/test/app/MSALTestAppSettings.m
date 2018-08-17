@@ -33,7 +33,11 @@ NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotificat
 
 static NSArray<NSString *> *s_authorities = nil;
 
+static NSArray<NSString *> *s_b2cAuthorities = nil;
+
 static NSArray<NSString *> *s_scopes_available = nil;
+
+static NSArray<NSString *> *s_authorityTypes = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -47,7 +51,6 @@ static NSArray<NSString *> *s_scopes_available = nil;
 + (void)initialize
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
-    
     NSSet<NSString *> *trustedHosts = [MSALAuthority trustedHosts];
     for (NSString *host in trustedHosts)
     {
@@ -58,8 +61,13 @@ static NSArray<NSString *> *s_scopes_available = nil;
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default"];
-
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
+    
+    s_b2cAuthorities = @[@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy",
+                         @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy",
+                         @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy"];
+    
+    s_authorityTypes = @[@"AAD",@"B2C"];
 }
 
 + (MSALTestAppSettings*)settings
@@ -76,9 +84,19 @@ static NSArray<NSString *> *s_scopes_available = nil;
     return s_settings;
 }
 
-+ (NSArray<NSString *> *)authorities
++ (NSArray<NSString *> *)authorityTypes
+{
+    return s_authorityTypes;
+}
+
++ (NSArray<NSString *> *)aadAuthorities
 {
     return s_authorities;
+}
+
++ (NSArray<NSString *> *)b2cAuthorities
+{
+    return s_b2cAuthorities;
 }
 
 - (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
