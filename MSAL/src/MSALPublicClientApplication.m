@@ -209,7 +209,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewType = MSALWebviewTypeAutomatic;
+    _webviewType = MSALWebviewTypeDefault;
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
@@ -686,21 +686,6 @@
         [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
-}
-
-- (WKWebView *)customWebview
-{
-    return _customWebview;
-}
-
-- (void)setCustomWebview:(WKWebView *)customWebview
-{
-    if (_customWebview)
-    {
-        MSID_LOG_WARN(nil, @"Attempting to change the custom webview once MSALPublicClientApplication have been created is invalid.");
-        return;
-    }
-    _customWebview = customWebview;
 }
 
 #pragma mark -
