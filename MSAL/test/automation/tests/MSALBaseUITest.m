@@ -85,7 +85,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     XCTAssertTrue([result[@"expired_access_token_count"] intValue] == 1);
 }
 
-- (void)assertAuthUIAppearWithEmbeddedWebView:(BOOL)useEmbedded
+- (void)assertAuthUIAppearsUsingEmbeddedWebView:(BOOL)useEmbedded
 {
     XCUIElement *webElement = self.testApp.buttons[@"URL"];
 
@@ -289,7 +289,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [passwordTextField typeText:password];
 }
 
-- (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController
+- (void)closeAuthUIUsingEmbeddedWebview:(BOOL)embedded safariViewController:(BOOL)safariViewController
 {
     NSString *buttonTitle = @"Cancel";
 

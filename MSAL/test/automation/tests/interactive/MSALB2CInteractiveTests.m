@@ -50,7 +50,7 @@
 
     [self acceptAuthSessionDialogIfNecessary:request];
 
-    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
 
     if (!request.loginHint && !request.accountIdentifier)
     {

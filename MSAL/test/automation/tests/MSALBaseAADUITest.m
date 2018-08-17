@@ -34,7 +34,7 @@
     [self acquireToken:config];
 
     [self acceptAuthSessionDialogIfNecessary:request];
-    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
 
     if (request.usePassedWebView)
     {
@@ -94,8 +94,10 @@
 
     [self acceptAuthSessionDialogIfNecessary:request];
 
-    [self assertAuthUIAppearWithEmbeddedWebView:request.usesEmbeddedWebView];
-    [self closeAuthUIWithEmbedded:request.usesEmbeddedWebView safariViewController:request.webViewType == MSALWebviewTypeSafariViewController];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    [self closeAuthUIUsingEmbeddedWebview:request.usesEmbeddedWebView
+                     safariViewController:request.webViewType == MSALWebviewTypeSafariViewController];
+    
     [self assertErrorCode:request.usePassedWebView ? @"MSALErrorSessionCanceled" : @"MSALErrorUserCanceled"];
     [self closeResultView];
 }

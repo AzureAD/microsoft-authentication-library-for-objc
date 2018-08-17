@@ -38,7 +38,7 @@
 // Common checks/assertions
 - (void)assertRefreshTokenInvalidated;
 - (void)assertAccessTokenExpired;
-- (void)assertAuthUIAppearWithEmbeddedWebView:(BOOL)useEmbedded;
+- (void)assertAuthUIAppearsUsingEmbeddedWebView:(BOOL)useEmbedded;
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
@@ -66,7 +66,7 @@
 - (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
-- (void)closeAuthUIWithEmbedded:(BOOL)embedded safariViewController:(BOOL)safariViewController;
+- (void)closeAuthUIUsingEmbeddedWebview:(BOOL)embedded safariViewController:(BOOL)safariViewController;
 - (void)openURL:(NSDictionary *)config;
 - (void)signout:(NSDictionary *)config;
 - (void)readAccounts:(NSDictionary *)config;
