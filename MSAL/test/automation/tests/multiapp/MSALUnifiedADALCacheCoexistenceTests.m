@@ -103,7 +103,8 @@ static BOOL adalAppInstalled = NO;
     // 2.Switch to unified ADAL and acquire token silently with common authority
     self.testApp = [self adalUnifiedApp];
     request.additionalParameters = @{@"prompt_behavior": @"always",
-                                     @"resource": @"https://graph.windows.net"
+                                     @"resource": @"https://graph.windows.net",
+                                     @"user_identifier": self.primaryAccount.account
                                      };
 
     request.authority = @"https://login.microsoftonline.com/common";
@@ -115,8 +116,7 @@ static BOOL adalAppInstalled = NO;
     // 3. Now expire token in non-unified ADAL
     request.authority = @"https://login.windows.net/common";
     request.additionalParameters = @{@"user_identifier": self.primaryAccount.account,
-                                     @"resource": @"https://graph.windows.net",
-                                     @"user_identifier_type" : @"optional_displayable"
+                                     @"resource": @"https://graph.windows.net"
                                      };
     config = [self configWithTestRequest:request];
     [self expireAccessToken:config];
