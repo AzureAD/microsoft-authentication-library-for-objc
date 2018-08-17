@@ -83,6 +83,9 @@ static BOOL adalAppInstalled = NO;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 3. Switch back to ADAL and make sure ADAL still works
+    request.authority = @"https://login.windows.net/common";
+    request.additionalParameters = @{@"user_identifier": self.primaryAccount.account};
+    config = [self configWithTestRequest:request];
     self.testApp = [self olderADALApp];
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];

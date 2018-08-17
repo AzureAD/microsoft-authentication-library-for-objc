@@ -42,7 +42,7 @@ static BOOL msalAppInstalled = NO;
     if (!msalAppInstalled)
     {
         msalAppInstalled = YES;
-        [self installAppWithId:@"msal_objc"];
+        [self installAppWithId:@"msal_unified"];
         [self.testApp activate];
         [self closeResultView];
     }
@@ -65,10 +65,12 @@ static BOOL msalAppInstalled = NO;
     request.scopes = @"https://graph.windows.net/.default";
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
     request.authority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
+    request.uiBehavior = @"force";
 
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
+    [self acceptAuthSessionDialog];
     [self aadEnterEmail];
     [self aadEnterPassword];
 
@@ -112,7 +114,7 @@ static BOOL msalAppInstalled = NO;
     [self closeResultView];
 
     // 3. Now expire token in other MSAL Aapp
-    request.authority = @"https://login.windows.net/common";
+    request.authority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
     request.additionalParameters = @{@"user_identifier": self.primaryAccount.account,
                                      @"resource": @"https://graph.windows.net",
                                      @"user_identifier_type" : @"optional_displayable"
@@ -132,13 +134,13 @@ static BOOL msalAppInstalled = NO;
     [self.testApp activate];
 
     request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
+    request.authority = @"https://login.windows.net/organizations";
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (XCUIApplication *)otherMSALApp
 {
-    return [self openAppWithAppId:@"msal_objc"];
+    return [self openAppWithAppId:@"msal_unified"];
 }
 
 @end
