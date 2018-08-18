@@ -114,9 +114,6 @@
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);
-
-    // 2. Run UI appears step
-    [self runSharedAuthUIAppearsStepWithTestRequest:request];
 }
 
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView
