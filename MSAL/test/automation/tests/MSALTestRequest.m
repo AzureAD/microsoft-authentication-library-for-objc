@@ -48,6 +48,7 @@
     {
         request.validateAuthority = YES;
         request.webViewType = MSALWebviewTypeDefault;
+        request.redirectUri = @"x-msauth-msalautomationapp://com.microsoft.msal.automationapp";
     }
 
     return request;
