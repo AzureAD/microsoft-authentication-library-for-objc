@@ -413,7 +413,7 @@
 }
 
 // TODO: server side bug!
-- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
+- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.scopes = @"00000002-0000-0000-c000-000000000000/.default";
