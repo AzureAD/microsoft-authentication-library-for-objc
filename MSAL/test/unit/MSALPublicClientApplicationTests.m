@@ -1110,41 +1110,9 @@
     // Make sure no users are showing up in the cache
     XCTAssertEqual([application accounts:nil].count, 0);
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    [self msalStoreTokenResponseInCache];
     
-    //store at & rt in cache
-    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
-    MSIDAADV2TokenResponse *msidResponse =
-    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
-                                                             @"access_token": @"access_token",
-                                                             @"refresh_token": @"fakeRefreshToken",
-                                                             @"authority" : @"https://login.microsoftonline.com/common",
-                                                             @"scope": @"fakescope1 fakescope2",
-                                                             @"client_id": UNIT_TEST_CLIENT_ID,
-                                                             @"id_token": rawIdToken,
-                                                             @"client_info": rawClientInfo,
-                                                             @"expires_on" : @"1"
-                                                             }
-                                                     error:nil];
-
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"]
-                                                                        redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
-                                                                           clientId:UNIT_TEST_CLIENT_ID
-                                                                             target:@"fakescope1 fakescope2"];
-    
-    MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
-    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
-                                                              response:msidResponse
-                                                               context:nil
-                                                                 error:&error];
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
-    
-    MSIDAccount *account = [factory accountFromResponse:msidResponse configuration:configuration];
+    MSIDAccount *account = [[MSIDAADOauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse] configuration:[self msalDefaultConfiguration]];
     MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
 
     // Make sure that the user is properly showing up in the cache
@@ -1156,6 +1124,137 @@
     
     // Make sure the user is now gone
     XCTAssertEqual([application accounts:nil].count, 0);
+}
+
+- (void)testAllAccounts_whenNoAccountsExist_shouldReturnEmptyArrayNoError
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:&error];
+    XCTAssertNil(error);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    // Make sure no users are showing up in the cache
+    NSArray *accounts = [application accounts:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(accounts);
+    XCTAssertEqual([accounts count], 0);
+}
+
+- (void)testAllAccounts_whenAccountExists_shouldReturnAccountNoError
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    [self msalStoreTokenResponseInCache];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSError *error = nil;
+    NSArray *accounts = [application accounts:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(accounts);
+    XCTAssertEqual([accounts count], 1);
+
+    MSALAccount *account = accounts[0];
+    XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+}
+
+- (void)testAccountWithHomeAccountId_whenAccountExists_shouldReturnAccountNoError
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    [self msalStoreTokenResponseInCache];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSError *error = nil;
+    NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
+    MSALAccount *account = [application accountForHomeAccountId:homeAccountId error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
+
+    XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+}
+
+- (void)testAccountWithHomeAccountId_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
+{
+    [self msalStoreTokenResponseInCache];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSError *error = nil;
+    NSString *homeAccountId = @"other_uid.other_utid";
+    MSALAccount *account = [application accountForHomeAccountId:homeAccountId error:&error];
+    XCTAssertNil(error);
+    XCTAssertNil(account);
+}
+
+- (void)testAccountWithUsername_whenAccountExists_shouldReturnAccountNoError
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    [self msalStoreTokenResponseInCache];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSError *error = nil;
+    MSALAccount *account = [application accountForUsername:@"fakeuser@contoso.com" error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
+
+    XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+}
+
+- (void)testAccountWithUsername_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
+{
+    [self msalStoreTokenResponseInCache];
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                    error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSError *error = nil;
+    MSALAccount *account = [application accountForUsername:@"nonexisting@contoso.com" error:&error];
+    XCTAssertNil(error);
+    XCTAssertNil(account);
 }
 
 #endif
@@ -1211,6 +1310,56 @@
     XCTAssertFalse([application removeAccount:account error:&error]);
     XCTAssertNotNil(error);
     XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
+}
+
+#pragma mark - Helpers
+
+- (void)msalStoreTokenResponseInCache
+{
+    //store at & rt in cache
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponse];
+    MSIDConfiguration *configuration = [self msalDefaultConfiguration];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+}
+
+- (MSIDAADV2TokenResponse *)msalDefaultTokenResponse
+{
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+
+    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
+                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
+    MSIDAADV2TokenResponse *msidResponse =
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
+                                                             @"access_token": @"access_token",
+                                                             @"refresh_token": @"fakeRefreshToken",
+                                                             @"authority" : @"https://login.microsoftonline.com/common",
+                                                             @"scope": @"fakescope1 fakescope2",
+                                                             @"client_id": UNIT_TEST_CLIENT_ID,
+                                                             @"id_token": rawIdToken,
+                                                             @"client_info": rawClientInfo,
+                                                             @"expires_on" : @"1"
+                                                             }
+                                                     error:nil];
+
+    return msidResponse;
+}
+
+- (MSIDConfiguration *)msalDefaultConfiguration
+{
+    return [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"]
+                                            redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
+                                               clientId:UNIT_TEST_CLIENT_ID
+                                                 target:@"fakescope1 fakescope2"];
 }
 
 @end
