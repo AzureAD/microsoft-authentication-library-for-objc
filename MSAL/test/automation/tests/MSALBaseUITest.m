@@ -293,7 +293,10 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 {
     NSString *buttonTitle = @"Cancel";
 
-    if (safariViewController)
+    BOOL usesSafariAsFallback = ([[[UIDevice currentDevice] systemVersion] floatValue] <= 11.0f
+                                 && !embedded);
+
+    if (safariViewController || usesSafariAsFallback)
     {
         buttonTitle = @"Done";
     }
