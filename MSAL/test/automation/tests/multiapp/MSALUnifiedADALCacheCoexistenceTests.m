@@ -183,7 +183,7 @@ static BOOL adalAppInstalled = NO;
 
     secondAppRequest.accountIdentifier = homeAccountId;
     secondAppRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-    secondAppRequest.redirectUri = self.testConfiguration.redirectUri;
+    secondAppRequest.redirectUri = MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
     secondAppRequest.scopes = @"https://graph.windows.net/.default";
     secondAppRequest.expectedResultScopes = @[@"https://graph.windows.net/.default"];
     [self runSharedSilentAADLoginWithTestRequest:secondAppRequest];

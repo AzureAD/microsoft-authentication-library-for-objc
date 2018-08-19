@@ -25,6 +25,8 @@
 #import "MSIDTestAccountsProvider.h"
 #import <MSAL/MSAL.h>
 
+extern NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
+
 @interface MSALTestRequest : NSObject
 
 @property (nonatomic, strong) NSString *clientId;

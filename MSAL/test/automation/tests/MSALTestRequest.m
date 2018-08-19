@@ -23,6 +23,8 @@
 
 #import "MSALTestRequest.h"
 
+NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI = @"x-msauth-msalautomationapp://com.microsoft.msal.automationapp";
+
 @implementation MSALTestRequest
 
 + (MSALTestRequest *)convergedAppRequest
@@ -48,7 +50,7 @@
     {
         request.validateAuthority = YES;
         request.webViewType = MSALWebviewTypeDefault;
-        request.redirectUri = @"x-msauth-msalautomationapp://com.microsoft.msal.automationapp";
+        request.redirectUri = MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
     }
 
     return request;
