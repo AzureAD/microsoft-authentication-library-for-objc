@@ -172,8 +172,8 @@
 
 - (NSString *)eventAsShortString:(NSDictionary *)telemetryEvent
 {
-    NSString *eventName = telemetryEvent[MSID_TELEMETRY_KEY_EVENT_NAME];
-    NSString *startTime = telemetryEvent[MSID_TELEMETRY_KEY_START_TIME];
+    NSString *eventName = telemetryEvent[TELEMETRY_KEY(MSID_TELEMETRY_KEY_EVENT_NAME)];
+    NSString *startTime = telemetryEvent[TELEMETRY_KEY(MSID_TELEMETRY_KEY_START_TIME)];
     
     return [NSString stringWithFormat:@"[%@]\n%@", startTime ? startTime : @"N/A", eventName];
 }
