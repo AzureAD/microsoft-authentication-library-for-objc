@@ -109,6 +109,23 @@
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInvalidGrant"];
     [self assertErrorSubcode:@"consent_required"];
+    [self closeResultView];
+
+    // 6. Invalidate refresh token and expire access token
+    request.scopes = @"user.read";
+    request.authority = cacheAuthority;
+    config = [self configWithTestRequest:request];
+    [self invalidateRefreshToken:config];
+    [self assertRefreshTokenInvalidated];
+    [self closeResultView];
+
+    [self expireAccessToken:config];
+    [self assertAccessTokenExpired];
+    [self closeResultView];
+
+    // 7. Assert invalid grant, because RT is invalid
+    [self acquireTokenSilent:config];
+    [self assertErrorCode:@"MSALErrorInvalidGrant"];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin

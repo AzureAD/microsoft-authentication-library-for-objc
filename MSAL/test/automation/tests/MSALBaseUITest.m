@@ -76,7 +76,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 - (void)assertRefreshTokenInvalidated
 {
     NSDictionary *result = [self resultDictionary];
-    XCTAssertTrue([result[@"invalidated_refresh_token_count"] intValue] == 1);
+    XCTAssertTrue([result[@"invalidated_refresh_token"] boolValue] == YES);
 }
 
 - (void)assertAccessTokenExpired
