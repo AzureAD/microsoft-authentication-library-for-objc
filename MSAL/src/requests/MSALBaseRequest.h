@@ -41,7 +41,6 @@
     MSALAuthority *_authority;
     MSALTelemetryApiId _apiId;
     MSIDDefaultTokenCacheAccessor *_tokenCache;
-    NSURL *_cloudAuthority;
 }
 
 @property (nullable) MSALTokenCacheItem *accessTokenItem;

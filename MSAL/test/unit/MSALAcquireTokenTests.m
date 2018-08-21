@@ -59,6 +59,8 @@
 
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
+#import "MSIDWebviewFactory.h"
+
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -137,6 +139,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
          
          [expectation fulfill];
      }];
@@ -206,11 +209,104 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.com/" DEFAULT_TEST_UTID);
 
          [expectation fulfill];
      }];
 
     [self waitForExpectations:@[expectation] timeout:1];
 }
+
+- (void)testAcquireTokenInteractive_whenInstanceAware_shouldReturnCloudAuthorityInResult
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    
+    // Mock auth code grant response for instance-aware flow
+    // It will hit login.microsoftonline.de rather than login.microsoftonline.de.com
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:@"https://login.microsoftonline.de/common"
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
+    
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    
+    // Check if instance_aware parameter is in start url
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+         XCTAssertNotNil(url);
+         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         
+         NSMutableDictionary *expectedQPs =
+         [@{
+            @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"return-client-request-id" : @"true",
+            @"state" : [MSIDTestRequireValueSentinel sentinel],
+            @"prompt" : @"select_account",
+            @"client_id" : UNIT_TEST_CLIENT_ID,
+            @"scope" : @"fakescopes openid profile offline_access",
+            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+            @"response_type" : @"code",
+            @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
+            @"code_challenge_method" : @"S256",
+            @"haschrome" : @"1",
+            @"instance_aware" : @"true", //instance_aware parameter should be sent
+            UT_SLICE_PARAMS_DICT
+            } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         
+         // Mock auth code response with cloud_instance_host_name
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@", @"i+am+an+auth+code", QPs[@"state"], @"login.microsoftonline.de"];
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
+     }];
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:DEFAULT_TEST_AUTHORITY
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
+    
+    application.webviewType = MSALWebviewTypeWKWebView;
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{@"instance_aware":@"true"}
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         
+         // Expect authority to be cloud authority
+         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+         
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 
 @end

@@ -41,6 +41,7 @@
 
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
+@property NSURL *cloudAuthority;
 @property MSALScopes *scopes;
 @property NSString *redirectUri;
 @property NSString *loginHint;
@@ -68,4 +69,5 @@
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
 - (BOOL)setAuthorityFromString:(NSString *)authority
                          error:(NSError * __autoreleasing *)error;
+- (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
 @end

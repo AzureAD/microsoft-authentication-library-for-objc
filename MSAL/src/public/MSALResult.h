@@ -65,4 +65,11 @@
  */
 @property (readonly) NSArray<NSString *> *scopes;
 
+/*!
+ Represents the authority used for getting the token from STS and caching it.
+ This authority should be used for subsequent silent requests.
+ It will be different from the authority provided by developer for sovereign cloud scenarios.
+ */
+@property (readonly) NSString *authority;
+
 @end

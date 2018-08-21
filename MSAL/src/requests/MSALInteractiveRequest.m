@@ -149,7 +149,12 @@
             {
                 _code = oauthResponse.authorizationCode;
 
-                // TODO: handle MSIDWebOAuth2Response and instance aware flow (cloud host)
+                // handle instance aware flow (cloud host)
+                if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+                {
+                    MSIDWebAADAuthResponse *aadResponse = (MSIDWebAADAuthResponse *)response;
+                    [_parameters setCloudAuthorityWithCloudHostName:aadResponse.cloudHostName];
+                }
 
                 [super acquireToken:completionBlock];
                 return;

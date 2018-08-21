@@ -63,9 +63,17 @@
     return YES;
 }
 
+- (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName
+{
+    if ([NSString msidIsStringNilOrBlank:cloudHostName]) return;
+    
+    _cloudAuthority = [_unvalidatedAuthority msidAuthorityWithCloudInstanceHostname:cloudHostName];
+}
+
 - (MSIDConfiguration *)msidConfiguration
 {
-    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:self.unvalidatedAuthority
+    NSURL *authority = self.cloudAuthority ? self.cloudAuthority : self.unvalidatedAuthority;
+    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                  redirectUri:self.redirectUri
                                                                     clientId:self.clientId
                                                                       target:self.scopes.msidToString];
