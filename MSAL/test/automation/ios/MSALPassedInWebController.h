@@ -25,11 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
-// TODO: Change this for automation app
-#define AUTOMATION_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@interface MSALPassedInWebController : UIViewController
 
-@interface MSALAutoSettings : NSObject
+@property (nonatomic, strong) IBOutlet UIView *contentView;
+@property (nonatomic, strong) WKWebView *webView;
+
+- (IBAction)cancel:(id)sender;
 
 @end

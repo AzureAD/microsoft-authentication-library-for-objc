@@ -120,7 +120,6 @@
                         authority:authority
                       redirectUri:nil
                             error:error];
-    
 }
 
 - (id)initWithClientId:(NSString *)clientId
