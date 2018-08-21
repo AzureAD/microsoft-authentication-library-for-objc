@@ -297,7 +297,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     CGFloat osVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
 
     if (webViewType == MSALWebviewTypeSafariViewController
-        || (webViewType == MSALWebviewTypeDefault && osVersion < 11.0f))
+        || (webViewType == MSALWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
     {
         buttonTitle = @"Done";
     }
