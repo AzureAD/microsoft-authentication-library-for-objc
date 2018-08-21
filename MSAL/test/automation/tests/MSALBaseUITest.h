@@ -66,7 +66,7 @@
 - (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
-- (void)closeAuthUIUsingEmbeddedWebview:(BOOL)embedded safariViewController:(BOOL)safariViewController;
+- (void)closeAuthUIUsingWebViewType:(MSALWebviewType)webViewType passedInWebView:(BOOL)usesPassedInWebView;
 - (void)openURL:(NSDictionary *)config;
 - (void)signout:(NSDictionary *)config;
 - (void)readAccounts:(NSDictionary *)config;

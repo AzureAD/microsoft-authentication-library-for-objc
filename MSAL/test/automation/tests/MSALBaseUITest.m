@@ -289,14 +289,15 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [passwordTextField typeText:password];
 }
 
-- (void)closeAuthUIUsingEmbeddedWebview:(BOOL)embedded safariViewController:(BOOL)safariViewController
+- (void)closeAuthUIUsingWebViewType:(MSALWebviewType)webViewType
+                    passedInWebView:(BOOL)usesPassedInWebView
 {
     NSString *buttonTitle = @"Cancel";
 
-    BOOL usesSafariAsFallback = ([[[UIDevice currentDevice] systemVersion] floatValue] <= 11.0f
-                                 && !embedded);
+    CGFloat osVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
 
-    if (safariViewController || usesSafariAsFallback)
+    if (webViewType == MSALWebviewTypeSafariViewController
+        || (webViewType == MSALWebviewTypeDefault && osVersion < 11.0f))
     {
         buttonTitle = @"Done";
     }

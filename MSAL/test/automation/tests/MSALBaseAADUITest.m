@@ -95,8 +95,7 @@
     [self acceptAuthSessionDialogIfNecessary:request];
 
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
-    [self closeAuthUIUsingEmbeddedWebview:request.usesEmbeddedWebView
-                     safariViewController:request.webViewType == MSALWebviewTypeSafariViewController];
+    [self closeAuthUIUsingWebViewType:request.webViewType passedInWebView:request.usePassedWebView];
 
     [self assertErrorCode:request.usePassedWebView ? @"MSALErrorSessionCanceled" : @"MSALErrorUserCanceled"];
     [self closeResultView];
