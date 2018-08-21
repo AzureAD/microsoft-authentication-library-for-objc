@@ -80,7 +80,11 @@ static NSDictionary *s_userInfoKeyMapping;
     
     s_userInfoKeyMapping = @{
                              MSIDHTTPHeadersKey : MSALHTTPHeadersKey,
-                             MSIDHTTPResponseCodeKey : MSALHTTPResponseCodeKey
+                             MSIDHTTPResponseCodeKey : MSALHTTPResponseCodeKey,
+                             MSIDCorrelationIdKey : MSALCorrelationIDKey,
+                             MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
+                             MSIDOAuthErrorKey: MSALOAuthErrorKey,
+                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey
                              };
 }
 
@@ -124,10 +128,10 @@ static NSDictionary *s_userInfoKeyMapping;
     
     return MSALCreateError(domain,
                            errorCode,
-                           msidError.userInfo[MSIDErrorDescriptionKey],
-                           msidError.userInfo[MSIDOAuthErrorKey],
-                           msidError.userInfo[MSIDOAuthSubErrorKey],
-                           msidError.userInfo[NSUnderlyingErrorKey],
+                           nil,
+                           nil,
+                           nil,
+                           nil,
                            userInfo);
     
 }

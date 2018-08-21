@@ -51,6 +51,11 @@ extern NSString *MSALErrorDescriptionKey;
 extern NSString *MSALHTTPHeadersKey;
 
 /*!
+ Correlation ID used for the request
+ */
+extern NSString *MSALCorrelationIDKey;
+
+/*!
  Specifies http response code for error cases
  */
 extern NSString *MSALHTTPResponseCodeKey;
