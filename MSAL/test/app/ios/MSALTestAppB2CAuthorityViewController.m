@@ -25,28 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppB2CAuthorityViewController.h"
+#import "MSALTestAppSettings.h"
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
-#define B2C_TEST_APP_CLIENT_ID @"e3b9ad76-9763-4827-b088-80c7a7888f79"
+@interface MSALTestAppB2CAuthorityViewController ()
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@end
 
-@interface MSALTestAppSettings : NSObject
+@implementation MSALTestAppB2CAuthorityViewController
 
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
++ (instancetype)sharedController
+{
+    static MSALTestAppB2CAuthorityViewController *s_controller = nil;
+    static dispatch_once_t once;
+    
+    dispatch_once(&once, ^{
+        s_controller = [[MSALTestAppB2CAuthorityViewController alloc] init];
+    });
+    
+    return s_controller;
+}
 
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+- (instancetype)init
+{
+    return [super initWithAuthorities:[MSALTestAppSettings b2cAuthorities]
+               keyForSavedAuthorities:@"saved_b2cAuthorities"];
+}
 
 @end
