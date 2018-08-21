@@ -119,7 +119,8 @@
     
     MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
-                                                                                              clientId:_parameters.clientId resource:nil
+                                                                                              clientId:_parameters.clientId
+                                                                                              resource:nil
                                                                                                 scopes:[self requestScopes:_extraScopesToConsent]
                                                                                          correlationId:_parameters.correlationId
                                                                                             enablePkce:YES];

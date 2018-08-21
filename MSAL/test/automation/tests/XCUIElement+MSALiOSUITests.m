@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,19 +15,42 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "XCUIElement+MSALiOSUITests.h"
 
-// TODO: Change this for automation app
-#define AUTOMATION_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@implementation XCUIElement (MSALiOSUITests)
 
-@interface MSALAutoSettings : NSObject
+- (void)clearText
+{
+    if (![self.value isKindOfClass:NSString.class])
+    {
+        return;
+    }
+    
+    [self pressForDuration:0.5];
+    
+    NSString *string = (NSString *)self.value;
+    string = [@"" stringByPaddingToLength:string.length withString:XCUIKeyboardKeyDelete startingAtIndex:0];
+    
+    [self typeText:string];
+}
+
+- (void)forceTap
+{
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11.0f)
+    {
+        [self tap];
+    }
+    else
+    {
+        __auto_type coordinate = [self coordinateWithNormalizedOffset:CGVectorMake(0, 0)];
+        [coordinate tap];
+    }
+}
 
 @end

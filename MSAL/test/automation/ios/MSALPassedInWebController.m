@@ -25,11 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALPassedInWebController.h"
+#import <MSAL/MSAL.h>
 
-// TODO: Change this for automation app
-#define AUTOMATION_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+@implementation MSALPassedInWebController
 
-@interface MSALAutoSettings : NSObject
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.webView = [[WKWebView alloc] initWithFrame:self.contentView.frame];
+    [self.contentView addSubview:self.webView];
+}
+
+- (IBAction)cancel:(id)sender
+{
+    [MSALPublicClientApplication cancelCurrentWebAuthSession];
+    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
 
 @end
