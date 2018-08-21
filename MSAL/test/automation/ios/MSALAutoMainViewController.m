@@ -181,16 +181,15 @@
             return nil;
         }
     }
-    else if (parameters[@"user_legacy_identifier"])
+    else if (parameters[MSAL_LEGACY_USER_PARAM])
     {
-        NSArray *accounts = [application accounts:nil];
+        account = [application accountForUsername:parameters[MSAL_LEGACY_USER_PARAM] error:&error];
 
-        for (MSALAccount *account in accounts)
+        if (error)
         {
-            if ([account.username isEqualToString:parameters[@"user_legacy_identifier"]])
-            {
-                return account;
-            }
+            [self displayResultJson:[self createJsonStringFromError:error]
+                               logs:_resultLogs];
+            return nil;
         }
     }
     
