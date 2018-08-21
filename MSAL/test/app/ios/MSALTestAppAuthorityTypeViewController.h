@@ -25,28 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppSettingViewController.h"
 
-#define TEST_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
-#define B2C_TEST_APP_CLIENT_ID @"e3b9ad76-9763-4827-b088-80c7a7888f79"
+@interface MSALTestAppAuthorityTypeViewController : MSALTestAppSettingViewController
 
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
++ (instancetype)sharedController;
+- (instancetype)initWithAuthorities:(NSArray *)authorities;
 
 @end

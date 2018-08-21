@@ -36,6 +36,7 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import <WebKit/WebKit.h>
+#import "MSALTestAppAuthorityTypeViewController.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -457,11 +458,19 @@
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
-    //NSURL* redirectUri = [settings redirectUri];
+    NSString *clientId;
+    
+    if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
+    {
+        clientId = B2C_TEST_APP_CLIENT_ID;;
+    }
+    else
+    {
+        clientId = TEST_APP_CLIENT_ID;
+    }
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = 
+    MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     if (!application)
     {
@@ -654,7 +663,7 @@
 - (IBAction)selectAuthority:(id)sender
 {
     (void)sender;
-    [self.navigationController pushViewController:[MSALTestAppAuthorityViewController sharedController] animated:YES];
+    [self.navigationController pushViewController:[MSALTestAppAuthorityTypeViewController sharedController] animated:YES];
 }
 
 - (IBAction)selectUser:(id)sender

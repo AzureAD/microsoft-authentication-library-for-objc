@@ -276,14 +276,14 @@
     return nil;
 }
 
-- (MSALAccount *)accountForLocalAccountId:(NSString *)localAccountId
-                                    error:(NSError * __autoreleasing *)error
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error
 {
     NSArray<MSALAccount *> *accounts = [self accounts:error];
 
     for (MSALAccount *account in accounts)
     {
-        if ([account.localAccountId.identifier isEqualToString:localAccountId])
+        if ([account.username isEqualToString:username])
         {
             return account;
         }
