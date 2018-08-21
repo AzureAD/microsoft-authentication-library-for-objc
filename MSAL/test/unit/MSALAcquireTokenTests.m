@@ -230,7 +230,7 @@
                                             query:nil];
     
     // Mock auth code grant response for instance-aware flow
-    // It will hit login.microsoftonline.de rather than login.microsoftonline.de.com
+    // It will hit login.microsoftonline.de rather than login.microsoftonline.com
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
                                 authority:@"https://login.microsoftonline.de/common"
