@@ -186,16 +186,15 @@ static NSString *const s_kHttpHeaderDelimeter = @",";
                                              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error)
                                   {
                                       NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
-                                      NSInteger statusCode = error ? [error code] : httpResponse.statusCode;
-                                      if (error || statusCode!=200)
+                                      if (error || httpResponse.statusCode!=200)
                                       {
                                           if (!error)
                                           {
-                                              NSDictionary *userInfo = @{MSALHTTPResponseCodeKey : [NSString stringWithFormat: @"%ld", (long)statusCode]};
-                                              error = MSALCreateError(MSALErrorDomain, statusCode, nil, nil, nil, nil, userInfo);
+                                              NSDictionary *userInfo = @{MSALHTTPResponseCodeKey : [NSString stringWithFormat: @"%ld", (long)httpResponse.statusCode]};
+                                              error = MSALCreateError(MSALErrorDomain, MSALErrorInvalidRequest, [NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode], nil, nil, nil, userInfo);
                                           }
                                           
-                                          [event setHttpErrorCode:[NSString stringWithFormat: @"%ld", statusCode]];
+                                          [event setHttpErrorCode:[NSString stringWithFormat: @"%ld", [error code]]];
                                           [event setHttpErrorDomain:[error domain]];
                                           [[MSIDTelemetry sharedInstance] stopEvent:[_context telemetryRequestId] event:event];
                                           

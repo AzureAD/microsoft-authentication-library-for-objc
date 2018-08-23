@@ -181,5 +181,44 @@
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"nil"]);
 }
 
+- (void)testSendGet_whenResponse_shouldReturnUnHandledResponse
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    
+    MSALRequestParameters *params = [MSALRequestParameters new];
+    params.urlSession = [MSIDTestURLSession createMockSession];
+    
+    NSString *testURLString = @"https://somehttprequest.com";
+    
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:testURLString
+                                                           requestHeaders:reqHeaders
+                                                        requestParamsBody:nil
+                                                        responseURLString:@"https://someresponsestring.com"
+                                                             responseCode:404
+                                                         httpHeaderFields:nil
+                                                         dictionaryAsJSON:nil];
+    
+    [MSIDTestURLSession addResponse:response];
+    
+    MSALHttpRequest *request = [[MSALHttpRequest alloc] initWithURL:[NSURL URLWithString:testURLString]
+                                                            context:params];
+    
+    [request sendGet:^(MSALHttpResponse *response, NSError *error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqual(error.code, MSALErrorInvalidRequest);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqualObjects(error.userInfo[MSALHTTPResponseCodeKey],@"404");
+        XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], [NSHTTPURLResponse localizedStringForStatusCode:404]);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
+}
+
 
 @end
