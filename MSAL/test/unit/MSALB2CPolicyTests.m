@@ -167,8 +167,13 @@
 
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
-
+                           dispatch_semaphore_signal(dsem);
     }];
+    
+    while (dispatch_semaphore_wait(dsem, DISPATCH_TIME_NOW))
+    {
+        [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate: [NSDate distantFuture]];
+    }
 
     __auto_type allTokens = [self.tokenCacheAccessor allTokensWithContext:nil error:nil];
 

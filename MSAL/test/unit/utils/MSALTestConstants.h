@@ -32,6 +32,9 @@
 // Unit test client ID
 #define UNIT_TEST_CLIENT_ID                 @"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
 
+// Unit test correlation ID
+#define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
+
 // Unit test redirect scheme : msal<clientId>
 #define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
 
