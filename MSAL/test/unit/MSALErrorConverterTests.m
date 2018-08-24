@@ -66,7 +66,8 @@
                                          underlyingError,
                                          correlationId,
                                          @{MSIDHTTPHeadersKey : httpHeaders,
-                                           MSIDHTTPResponseCodeKey : httpResponseCode
+                                           MSIDHTTPResponseCodeKey : httpResponseCode,
+                                           @"additional_user_info": @"unmapped_userinfo"
                                            });
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
@@ -75,11 +76,17 @@
     XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
     XCTAssertEqual(msalError.code, errorCode);
     XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertNil(msalError.userInfo[MSIDErrorDescriptionKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthErrorKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthSubErrorKey]);
     XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPHeadersKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
+    XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
 }
 
 - (void)testErrorConversion_whenBothErrorDomainAndCodeAreMapped_shouldMapBoth {
@@ -100,7 +107,8 @@
                                          underlyingError,
                                          correlationId,
                                          @{MSIDHTTPHeadersKey : httpHeaders,
-                                           MSIDHTTPResponseCodeKey : httpResponseCode
+                                           MSIDHTTPResponseCodeKey : httpResponseCode,
+                                           @"additional_user_info": @"unmapped_userinfo"
                                            });
     NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
     
@@ -110,11 +118,17 @@
     XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
     XCTAssertEqual(msalError.code, expectedErrorCode);
     XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertNil(msalError.userInfo[MSIDErrorDescriptionKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthErrorKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertNil(msalError.userInfo[MSIDOAuthSubErrorKey]);
     XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPHeadersKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
+    XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
+    XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
 }
 
 /*!

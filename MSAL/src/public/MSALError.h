@@ -51,6 +51,11 @@ extern NSString *MSALErrorDescriptionKey;
 extern NSString *MSALHTTPHeadersKey;
 
 /*!
+ Correlation ID used for the request
+ */
+extern NSString *MSALCorrelationIDKey;
+
+/*!
  Specifies http response code for error cases
  */
 extern NSString *MSALHTTPResponseCodeKey;
@@ -169,6 +174,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         heirarchy to display the SFSafariViewController on top of.
      */
     MSALErrorNoViewController = -42403,
+    
+    /*!
+        MSAL tried to open a URL from an extension, which is not allowed.
+     */
+    MSALErrorAttemptToOpenURLFromExtension = -42404,
     
     /*!
         An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey

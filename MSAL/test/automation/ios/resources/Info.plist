@@ -16,6 +16,23 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>x-msauth-msalautomationapp</string>
+				<string>msal3c62ac97-29eb-4aed-a3c8-add0298508da</string>
+				<string>msale3b9ad76-9763-4827-b088-80c7a7888f79</string>
+				<string>msal0a7f52dd-260e-432f-94de-b47828c3f372</string>
+				<string>ms-onedrive</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -46,19 +63,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>msal5a434691-ccb2-4fd1-b97b-b64bcfbc03fc</string>
-			</array>
-		</dict>
 	</array>
 </dict>
 </plist>

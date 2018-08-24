@@ -75,7 +75,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
          {
              if (!error)
              {
-                 error = CREATE_MSID_LOG_ERROR(context, MSALErrorFailedAuthorityValidation, s_kDrsDiscoveryError);
+                 error = CREATE_MSAL_LOG_ERROR(context, MSALErrorFailedAuthorityValidation, s_kDrsDiscoveryError);
              }
              completionBlock(nil, error);
              return;
@@ -92,7 +92,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
               {
                   if (!error)
                   {
-                      error = CREATE_MSID_LOG_ERROR(context, MSALErrorFailedAuthorityValidation, s_kWebFingerError);
+                      error = CREATE_MSAL_LOG_ERROR(context, MSALErrorFailedAuthorityValidation, s_kWebFingerError);
                   }
                   completionBlock(nil, error);
                   return;
@@ -145,7 +145,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            NSError *localError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }
@@ -230,7 +230,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            NSError *localError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }

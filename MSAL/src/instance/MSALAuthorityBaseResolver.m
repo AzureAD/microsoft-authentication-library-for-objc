@@ -49,7 +49,7 @@
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            NSError *localError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }

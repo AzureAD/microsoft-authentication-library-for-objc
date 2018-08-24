@@ -27,7 +27,7 @@
 
 #import "MSALFakeViewController.h"
 #import "MSALTestSwizzle.h"
-#import "UIApplication+MSALExtensions.h"
+#import "UIApplication+MSIDExtensions.h"
 
 static BOOL s_returnNil = NO;
 
@@ -52,7 +52,7 @@ static id FakeCurrentViewController(id obj, SEL sel)
     
     // Because msalCurrentViewController is defined in a category we can't safely
     // override it in yet another category, instead, swizzling!
-    [[MSALTestSwizzle classMethod:@selector(msalCurrentViewController)
+    [[MSALTestSwizzle classMethod:@selector(msidCurrentViewController)
                             class:[UIApplication class]
                              impl:(IMP)FakeCurrentViewController] makePermanent];
 }

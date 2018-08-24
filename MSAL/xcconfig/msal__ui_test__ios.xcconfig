@@ -1,0 +1,6 @@
+#include "msal__common__ios.xcconfig"
+
+INFOPLIST_FILE = test/unit/resources/ios/Info.plist;
+PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.InteractiveiOSTests;
+PRODUCT_NAME = "InteractiveiOSTests";
+USER_HEADER_SEARCH_PATHS = $IDCORE_PATH/tests/automation/** $IDCORE_PATH/src/**;

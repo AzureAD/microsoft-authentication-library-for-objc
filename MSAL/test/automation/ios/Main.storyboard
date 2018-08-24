@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="O9I-0f-Qbv">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -22,7 +23,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="sJS-NG-CXq">
-                                <rect key="frame" x="0.0" y="20" width="375" height="310"/>
+                                <rect key="frame" x="0.0" y="20" width="375" height="390"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8ya-vf-XnD">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="30"/>
@@ -82,32 +83,53 @@
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wbg-Oq-UjV">
                                         <rect key="frame" x="0.0" y="200" width="375" height="30"/>
                                         <accessibility key="accessibilityConfiguration" identifier="invalidateToken"/>
-                                        <state key="normal" title="Clear Cache"/>
+                                        <state key="normal" title="Clear keychain"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCache"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearKeychain"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="clearCache:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="K5i-V5-FqF"/>
+                                            <action selector="clearKeychain:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="cRW-S3-u9i"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q0a-Ms-VBq">
+                                        <rect key="frame" x="0.0" y="240" width="375" height="30"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="invalidateToken"/>
+                                        <state key="normal" title="Clear Cookies"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="clearCookies"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="clearCookies:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="aXU-nG-xde"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KCg-uq-e4H">
-                                        <rect key="frame" x="0.0" y="240" width="375" height="30"/>
-                                        <state key="normal" title="Get Users"/>
+                                        <rect key="frame" x="0.0" y="280" width="375" height="30"/>
+                                        <state key="normal" title="Get Accounts"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="getUsers"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="getAccounts"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="getUsers:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="wQJ-ID-nS6"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8EH-37-udP">
-                                        <rect key="frame" x="0.0" y="280" width="375" height="30"/>
+                                        <rect key="frame" x="0.0" y="320" width="375" height="30"/>
                                         <state key="normal" title="Sign Out"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="signOut"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
                                             <action selector="signOut:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="pxP-hm-5ZN"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cIU-CF-9ab">
+                                        <rect key="frame" x="0.0" y="360" width="375" height="30"/>
+                                        <state key="normal" title="Open URL in Safari"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="accessibilityIdentifier" value="openUrlInSafari"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="openURLInSafari:" destination="O9I-0f-Qbv" eventType="touchUpInside" id="kCl-gm-WrN"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -188,6 +210,56 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4KP-Dc-s7U" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3545" y="-1145"/>
+        </scene>
+        <!--Passed In Web Controller-->
+        <scene sceneID="FtP-EY-gIB">
+            <objects>
+                <viewController storyboardIdentifier="passed_in_controller" id="pau-VZ-zpd" customClass="MSALPassedInWebController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="mfn-cb-waq"/>
+                        <viewControllerLayoutGuide type="bottom" id="dDj-N5-IDa"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="BXS-1N-RbS">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Iqh-Hh-52X">
+                                <rect key="frame" x="20" y="20" width="48" height="30"/>
+                                <state key="normal" title="Cancel"/>
+                                <connections>
+                                    <action selector="cancel:" destination="pau-VZ-zpd" eventType="touchUpInside" id="Inx-TF-dlq"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r5r-sN-Snf">
+                                <rect key="frame" x="16" y="50" width="343" height="617"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PassedIN" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="M2r-uR-ami">
+                                <rect key="frame" x="283" y="40" width="72" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="dDj-N5-IDa" firstAttribute="top" secondItem="r5r-sN-Snf" secondAttribute="bottom" id="0cX-ok-Zxl"/>
+                            <constraint firstItem="Iqh-Hh-52X" firstAttribute="leading" secondItem="BXS-1N-RbS" secondAttribute="leading" constant="20" id="0gI-Qh-f9u"/>
+                            <constraint firstAttribute="trailing" secondItem="M2r-uR-ami" secondAttribute="trailing" constant="20" id="8ZV-i4-AaQ"/>
+                            <constraint firstItem="r5r-sN-Snf" firstAttribute="leading" secondItem="BXS-1N-RbS" secondAttribute="leadingMargin" id="H0M-dI-TLT"/>
+                            <constraint firstItem="M2r-uR-ami" firstAttribute="top" secondItem="mfn-cb-waq" secondAttribute="bottom" constant="20" id="Tqh-IF-fqS"/>
+                            <constraint firstItem="r5r-sN-Snf" firstAttribute="top" secondItem="Iqh-Hh-52X" secondAttribute="bottom" id="bQe-vJ-opy"/>
+                            <constraint firstItem="Iqh-Hh-52X" firstAttribute="top" secondItem="BXS-1N-RbS" secondAttribute="top" constant="20" id="f8G-GN-tbW"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="r5r-sN-Snf" secondAttribute="trailing" id="uf4-JO-abi"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="contentView" destination="r5r-sN-Snf" id="crf-YW-f4o"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NYk-sS-FqQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4299" y="-1059"/>
         </scene>
         <!--Auto Result View Controller-->
         <scene sceneID="fN7-td-NMx">

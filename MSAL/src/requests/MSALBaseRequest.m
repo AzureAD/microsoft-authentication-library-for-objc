@@ -181,7 +181,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
-            NSError *localError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            NSError *localError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
             return;
         }
@@ -206,7 +206,7 @@ static MSALScopes *s_reservedScopes = nil;
         if (_parameters.account.homeAccountId.identifier != nil &&
             ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
         {
-            NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
             completionBlock(nil, userMismatchError);
             return;
         }
@@ -230,7 +230,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!accessToken || !idToken)
         {
-            NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
             completionBlock(nil, userMismatchError);
             return;
         }

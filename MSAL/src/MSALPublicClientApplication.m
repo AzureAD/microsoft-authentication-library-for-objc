@@ -120,7 +120,6 @@
                         authority:authority
                       redirectUri:nil
                             error:error];
-    
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -210,7 +209,7 @@
     
     self.tokenCache = defaultAccessor;
     
-    _webviewType = MSALWebviewTypeAutomatic;
+    _webviewType = MSALWebviewTypeDefault;
     
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
@@ -277,14 +276,14 @@
     return nil;
 }
 
-- (MSALAccount *)accountForLocalAccountId:(NSString *)localAccountId
-                                    error:(NSError * __autoreleasing *)error
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error
 {
     NSArray<MSALAccount *> *accounts = [self accounts:error];
 
     for (MSALAccount *account in accounts)
     {
-        if ([account.localAccountId.identifier isEqualToString:localAccountId])
+        if ([account.username isEqualToString:username])
         {
             return account;
         }
@@ -687,21 +686,6 @@
         [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
-}
-
-- (WKWebView *)customWebview
-{
-    return _customWebview;
-}
-
-- (void)setCustomWebview:(WKWebView *)customWebview
-{
-    if (_customWebview)
-    {
-        MSID_LOG_WARN(nil, @"Attempting to change the custom webview once MSALPublicClientApplication have been created is invalid.");
-        return;
-    }
-    _customWebview = customWebview;
 }
 
 #pragma mark -
