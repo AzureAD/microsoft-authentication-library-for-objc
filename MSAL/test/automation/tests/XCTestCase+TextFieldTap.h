@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,24 +15,17 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <XCTest/XCTest.h>
 
-@interface MSALAppExtensionUtil : NSObject
+@interface XCTestCase (TextFieldTap)
 
-/// Determine whether or not the host app is an application extension based on the main bundle path
-+ (BOOL)isExecutingInAppExtension;
-/// Application extension safe replacement for `[UIApplication sharedApplication]`. The caller should make sure `isExecutingInAppExtension == NO` before calling this method.
-+ (UIApplication*)sharedApplication;
-/// Application extension safe replacement for `[[UIApplication sharedApplication] openURL:]`. The caller should make sure `isExecutingInAppExtension == NO` before calling this method.
-+ (void)sharedApplicationOpenURL:(NSURL*)url;
-
+- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element;
+- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element app:(XCUIApplication *)application;
 
 @end

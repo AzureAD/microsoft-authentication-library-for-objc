@@ -25,50 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAppExtensionUtil.h"
+#ifndef MSALWebviewType_Internal_h
+#define MSALWebviewType_Internal_h
 
-@implementation MSALAppExtensionUtil
+extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type);
 
-+ (BOOL)isExecutingInAppExtension
-{
-    NSString* mainBundlePath = [[NSBundle mainBundle] bundlePath];
-    
-    if (mainBundlePath.length == 0)
-    {
-        MSID_LOG_ERROR(nil, @"Expected `[[NSBundle mainBundle] bundlePath]` to be non-nil. Defaulting to non-application-extension safe API.");
-        return NO;
-    }
-    
-    return [mainBundlePath hasSuffix:@"appex"];
-}
-
-#pragma mark - UIApplication
-
-+ (UIApplication*)sharedApplication
-{
-    if ([self isExecutingInAppExtension])
-    {
-        // The caller should do this check but we will double check to fail safely
-        return nil;
-    }
-    
-    return [UIApplication performSelector:NSSelectorFromString(@"sharedApplication")];
-}
-
-+ (void)sharedApplicationOpenURL:(NSURL*)url
-{
-    if ([self isExecutingInAppExtension])
-    {
-        // The caller should do this check but we will double check to fail safely
-        return;
-    }
-    
-#pragma clang diagnostic push
-    // performSelector always causes ARC warnings, due to ARC not knowing the
-    // exact memory semantics of the call being made.
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [[self sharedApplication] performSelector:NSSelectorFromString(@"openURL:") withObject:url];
-#pragma clang diagnostic pop
-}
-
-@end
+#endif /* MSALWebviewType_Internal_h */

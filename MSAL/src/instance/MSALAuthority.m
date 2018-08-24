@@ -137,7 +137,7 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
     
     if ([firstPathComponent isEqualToString:@"adfs"])
     {
-        NSError *error = CREATE_MSID_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
+        NSError *error = CREATE_MSAL_LOG_ERROR(context, MSALErrorInvalidRequest, @"ADFS is not a supported authority");
         completionBlock(nil, error);
         return;
     }
