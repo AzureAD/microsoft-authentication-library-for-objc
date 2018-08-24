@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 
 // TODO: Change this for automation app
-#define AUTOMATION_APP_CLIENT_ID @"5a434691-ccb2-4fd1-b97b-b64bcfbc03fc"
+#define AUTOMATION_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
 
 @interface MSALAutoSettings : NSObject
 

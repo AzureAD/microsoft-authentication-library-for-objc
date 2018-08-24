@@ -37,9 +37,18 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
+#import "MSIDWebOpenBrowserResponse.h"
+#import "MSALErrorConverter.h"
+
+#if TARGET_OS_IPHONE
+#import "MSIDAppExtensionUtil.h"
+#endif
+
+#import "MSALWebviewType_Internal.h"
 
 @implementation MSALInteractiveRequest
 {
@@ -115,12 +124,15 @@
     
     MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
-                                                                                              clientId:_parameters.clientId resource:nil
+                                                                                              clientId:_parameters.clientId
+                                                                                              resource:nil
                                                                                                 scopes:[self requestScopes:_extraScopesToConsent]
                                                                                          correlationId:_parameters.correlationId
                                                                                             enablePkce:YES];
     config.promptBehavior = MSALParameterStringForBehavior(_uiBehavior);
-    config.loginHint = _parameters.loginHint;
+    config.loginHint = _parameters.account ? _parameters.account.username : _parameters.loginHint;
+    config.uid = _parameters.account.homeAccountId.objectId;
+    config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
     config.claims = _parameters.claims;
 
@@ -128,6 +140,14 @@
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
     {
+        if (error)
+        {
+            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
+            completionBlock(nil, msalError);
+            return;
+        }
+
         if ([response isKindOfClass:MSIDWebOAuth2Response.class])
         {
             MSIDWebOAuth2Response *oauthResponse = (MSIDWebOAuth2Response *)response;
@@ -142,23 +162,50 @@
                 return;
             }
             
-            
-            completionBlock(nil, oauthResponse.oauthError);
+
+            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
+            completionBlock(nil, msalError);
             return;
         }
         
-        else if([response isKindOfClass:MSIDWebMSAuthResponse.class])
+        else if ([response isKindOfClass:MSIDWebMSAuthResponse.class])
         {
             // Todo: Install broker prompt
         }
         
-        completionBlock(nil, error);
+        else if ([response isKindOfClass:MSIDWebOpenBrowserResponse.class])
+        {
+            NSURL *browserURL = ((MSIDWebOpenBrowserResponse *)response).browserURL;
+            
+#if TARGET_OS_IPHONE
+            if (![MSIDAppExtensionUtil isExecutingInAppExtension])
+            {
+                MSID_LOG_INFO(nil, @"Opening a browser");
+                MSID_LOG_INFO_PII(nil, @"Opening a browser - %@", browserURL);
+                [MSIDAppExtensionUtil sharedApplicationOpenURL:browserURL];
+            }
+            else
+            {
+                NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension");
+                [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
+                completionBlock(nil, error);
+                return;
+            }
+#else
+            [[NSWorkspace sharedWorkspace] openURL:browserURL];
+#endif
+            NSError *error = CREATE_MSAL_LOG_ERROR(nil, MSALErrorSessionCanceled, @"Authorization session was cancelled programatically.");
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
+            completionBlock(nil, error);
+            return;
+        }
     };
 
 #if TARGET_OS_IPHONE
     BOOL useAuthenticationSession;
     BOOL allowSafariViewController;
-    
+
     switch (_parameters.webviewType) {
 
         case MSALWebviewTypeAuthenticationSession:
@@ -170,7 +217,7 @@
             useAuthenticationSession = NO;
             allowSafariViewController = YES;
             break;
-        case MSALWebviewTypeAutomatic:
+        case MSALWebviewTypeDefault:
             useAuthenticationSession = YES;
             allowSafariViewController = YES;
             break;
@@ -184,7 +231,6 @@
             return;
         }
     }
-
     [MSIDWebviewAuthorization startSystemWebviewAuthWithConfiguration:config
                                                         oauth2Factory:_parameters.msidOAuthFactory
                                              useAuthenticationSession:useAuthenticationSession
@@ -200,20 +246,22 @@
 #endif
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_AUTHORIZATION_CODE;
-    parameters[MSID_OAUTH2_CODE] = _code;
-    parameters[MSID_OAUTH2_REDIRECT_URI] = _parameters.redirectUri;
-    
-    // PKCE
-    parameters[MSID_OAUTH2_CODE_VERIFIER] = _webviewConfig.pkce.codeVerifier;
+    return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                                 clientId:_parameters.clientId
+                                                                    scope:[[self requestScopes:nil] msalToString]
+                                                              redirectUri:_parameters.redirectUri
+                                                                     code:_code
+                                                             codeVerifier:_webviewConfig.pkce.codeVerifier
+                                                                  context:_parameters];
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
 {
     MSALTelemetryAPIEvent *event = [super getTelemetryAPIEvent];
     [event setUIBehavior:_uiBehavior];
+    [event setWebviewType:MSALStringForMSALWebviewType(_parameters.webviewType)];
     return event;
 }
 

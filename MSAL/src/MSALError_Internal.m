@@ -27,14 +27,14 @@
 
 #import "MSALError_Internal.h"
 
-#define STRING_CASE(_CASE) case _CASE: return @#_CASE
-
 NSString *MSALStringForErrorCode(MSALErrorCode code)
 {
     switch (code)
     {
         STRING_CASE(MSALErrorInvalidParameter);
         STRING_CASE(MSALErrorInvalidClient);
+        STRING_CASE(MSALErrorInvalidGrant);
+        STRING_CASE(MSALErrorInvalidScope);
         STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
         STRING_CASE(MSALErrorMismatchedUser);
@@ -46,7 +46,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInvalidResponse);
         STRING_CASE(MSALErrorBadAuthorizationResponse);
         STRING_CASE(MSALErrorAuthorizationFailed);
-        STRING_CASE(MSALErrorNoAccessTokenInResponse);
+        STRING_CASE(MSALErrorBadTokenResponse);
         STRING_CASE(MSALErrorNoAuthorizationResponse);
         STRING_CASE(MSALErrorUserCanceled);
         STRING_CASE(MSALErrorSessionCanceled);

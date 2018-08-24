@@ -190,7 +190,7 @@
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns account for for the home identifier and tenant given (received from an account object returned
+    Returns account for for the given home identifier (received from an account object returned
     in a previous acquireToken call)
 
     @param  error   The error that occured trying to get the accounts, if any, if you're
@@ -198,6 +198,16 @@
  */
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error;
+
+/*!
+    Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
+
+    @param  username    The displayable value in UserPrincipleName(UPN) format
+    @param  error       The error that occured trying to get the accounts, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error;
 
 
 #pragma SafariViewController Support

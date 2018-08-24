@@ -32,6 +32,8 @@
 #import "MSIDDeviceId.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse.h"
+#import "MSIDTestURLResponse+MSAL.h"
+#import "MSALTestConstants.h"
 
 @interface MSALAuthorityBaseResolverTests : MSALTestCase
 
@@ -63,13 +65,16 @@
 
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [MSIDTestURLSession createMockSession];
+    params.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:tenantDiscoveryEndpoint
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@?%@", tenantDiscoveryEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode]
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -111,13 +116,16 @@
 
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [MSIDTestURLSession createMockSession];
+    params.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     NSString *tenantDiscoveryEndpoint = @"https://login.windows.net/common/v2.0/.well-known/openid-configuration";
     
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:tenantDiscoveryEndpoint
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@?%@", tenantDiscoveryEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode]
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"

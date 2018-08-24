@@ -25,19 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALJsonObject.h"
+#import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
-@interface MSALHttpResponse : NSObject
-{
-    NSHTTPURLResponse *_response;
-}
+@interface MSALPassedInWebController : UIViewController
 
-- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data error:(NSError * __autoreleasing *)error;
+@property (nonatomic, strong) IBOutlet UIView *contentView;
+@property (nonatomic, strong) WKWebView *webView;
 
-@property (strong, readonly) NSData *body;
-
-- (NSInteger)statusCode;
-- (NSDictionary *)headers;
+- (IBAction)cancel:(id)sender;
 
 @end

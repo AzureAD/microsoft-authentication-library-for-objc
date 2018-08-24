@@ -51,6 +51,11 @@ extern NSString *MSALErrorDescriptionKey;
 extern NSString *MSALHTTPHeadersKey;
 
 /*!
+ Correlation ID used for the request
+ */
+extern NSString *MSALCorrelationIDKey;
+
+/*!
  Specifies http response code for error cases
  */
 extern NSString *MSALHTTPResponseCodeKey;
@@ -119,10 +124,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
-        MSAL received a valid token response, but it didn't contain an access token.
+        MSAL received a bad token response, it didn't contain an access token or id token.
         Check to make sure your application is consented to get all of the scopes you are asking for.
      */
-    MSALErrorNoAccessTokenInResponse = -42105,
+    MSALErrorBadTokenResponse = -42105,
 
     /*!
      MSAL requires a non-nil account for the acquire token silent call
@@ -169,6 +174,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         heirarchy to display the SFSafariViewController on top of.
      */
     MSALErrorNoViewController = -42403,
+    
+    /*!
+        MSAL tried to open a URL from an extension, which is not allowed.
+     */
+    MSALErrorAttemptToOpenURLFromExtension = -42404,
     
     /*!
         An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey

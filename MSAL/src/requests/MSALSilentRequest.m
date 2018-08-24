@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALSilentRequest.h"
+#import "MSALBaseRequest.h"
 #import "MSALResult+Internal.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -38,6 +39,7 @@
 #import "MSIDConfiguration.h"
 #import "MSALErrorConverter.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADRefreshTokenGrantRequest.h"
 
 @interface MSALSilentRequest()
 
@@ -144,11 +146,13 @@
     }];
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
-    parameters[MSID_OAUTH2_REFRESH_TOKEN] = [self.refreshToken refreshToken];
+    return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                            clientId:_parameters.clientId
+                                                               scope:[[self requestScopes:nil] msalToString]
+                                                        refreshToken:[self.refreshToken refreshToken]
+                                                             context:_parameters];
 }
-
 
 @end

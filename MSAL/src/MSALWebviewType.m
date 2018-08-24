@@ -25,14 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-
 #import <Foundation/Foundation.h>
-#import "MSALHttpRequest.h"
 
-@interface MSALWebAuthRequest : MSALHttpRequest
-
-@property BOOL retryIfServerError;
-
-- (id)initWithURL:(NSURL *)endpoint context:(id<MSALRequestContext>)context;
-
-@end
+extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
+{
+    switch (type) {
+            STRING_CASE(MSALWebviewTypeWKWebView);
+#if TARGET_OS_IPHONE
+            STRING_CASE(MSALWebviewTypeDefault);
+            STRING_CASE(MSALWebviewTypeSafariViewController);
+            STRING_CASE(MSALWebviewTypeAuthenticationSession);
+#endif
+    }
+    
+    @throw @"Unrecognized MSALWebviewType";
+}

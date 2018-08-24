@@ -41,7 +41,7 @@
     
     if (validate && ![MSALAuthority isKnownHost:authority])
     {
-        NSError *error = CREATE_MSID_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
+        NSError *error = CREATE_MSAL_LOG_ERROR(context, MSALErrorInvalidRequest, UNSUPPORTED_AUTHORITY_VALIDATION);
         completionBlock(nil, error);
         return;
     }

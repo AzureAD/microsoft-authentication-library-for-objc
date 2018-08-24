@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,43 +15,17 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
+#import <XCTest/XCTest.h>
 
-#import "MSALHttpResponse.h"
-#import "MSIDLogger+Internal.h"
+@interface XCTestCase (TextFieldTap)
 
-@implementation MSALHttpResponse
-
-- (id)initWithResponse:(NSHTTPURLResponse *)response data:(NSData *)data error:(NSError * __autoreleasing *)error
-{
-    CHECK_ERROR_RETURN_NIL(response, nil, MSALErrorInternal, @"Attempt to initialize MSALHttpResponse with nil response");
-    
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    _response = response;
-    _body     = data;
-    
-    return self;
-}
-
-
-- (NSInteger)statusCode
-{
-    return _response.statusCode;
-}
-
-- (NSDictionary *)headers
-{
-    return _response.allHeaderFields;
-}
+- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element;
+- (void)tapElementAndWaitForKeyboardToAppear:(XCUIElement *)element app:(XCUIApplication *)application;
 
 @end
