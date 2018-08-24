@@ -121,4 +121,28 @@
     return homeAccountId;
 }
 
+- (void)selectAccountWithTitle:(NSString *)accountTitle
+{
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", accountTitle];
+
+    XCUIElementQuery *elementQuery = nil;
+
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 12.0f)
+    {
+        elementQuery = self.testApp.staticTexts;
+    }
+    else
+    {
+        elementQuery = self.testApp.buttons;
+    }
+
+    XCUIElement *element = [[elementQuery containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+}
+
 @end
