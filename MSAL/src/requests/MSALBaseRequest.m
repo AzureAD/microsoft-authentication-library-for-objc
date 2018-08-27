@@ -235,7 +235,7 @@ static MSALScopes *s_reservedScopes = nil;
             return;
         }
         
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
         
         completionBlock(result, nil);
     }];

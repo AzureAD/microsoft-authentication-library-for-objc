@@ -41,6 +41,7 @@
 
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
+@property BOOL extendedLifetimeEnabled;
 @property MSALScopes *scopes;
 @property NSString *redirectUri;
 @property NSString *loginHint;
