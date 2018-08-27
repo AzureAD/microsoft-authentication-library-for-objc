@@ -37,6 +37,7 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
@@ -245,14 +246,15 @@
 #endif
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_AUTHORIZATION_CODE;
-    parameters[MSID_OAUTH2_CODE] = _code;
-    parameters[MSID_OAUTH2_REDIRECT_URI] = _parameters.redirectUri;
-    
-    // PKCE
-    parameters[MSID_OAUTH2_CODE_VERIFIER] = _webviewConfig.pkce.codeVerifier;
+    return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                                 clientId:_parameters.clientId
+                                                                    scope:[[self requestScopes:nil] msalToString]
+                                                              redirectUri:_parameters.redirectUri
+                                                                     code:_code
+                                                             codeVerifier:_webviewConfig.pkce.codeVerifier
+                                                                  context:_parameters];
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent

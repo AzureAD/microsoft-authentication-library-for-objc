@@ -6,6 +6,7 @@
 	<array>
 		<string>$(AppIdentifierPrefix)com.microsoft.MSALAutomationApp</string>
 		<string>$(AppIdentifierPrefix)com.microsoft.adalcache</string>
+		<string>$(AppIdentifierPrefix)com.microsoft.workplacejoin</string>
 	</array>
 </dict>
 </plist>

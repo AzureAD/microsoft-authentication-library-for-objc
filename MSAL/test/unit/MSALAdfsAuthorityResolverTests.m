@@ -34,6 +34,7 @@
 #import "MSIDDeviceId.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+MSAL.h"
+#import "MSALTestConstants.h"
 
 #define TRUSTED_REALM @"http://schemas.microsoft.com/rel/trusted-realm"
 
@@ -79,14 +80,17 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
     NSDictionary *resultJson = customResponse? customResponse :
     @{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://fs.fabrikam.com/adfs/ls" }};
     
-    NSString *url = onPrems?
-    @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0" :
-    @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0";
+    NSString *urlFormat = onPrems?
+    @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0&%@" :
+    @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0&%@";
+    
+    NSString *url = [NSString stringWithFormat:urlFormat, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
@@ -103,10 +107,12 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
+    NSString *url = [NSString stringWithFormat:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     [MSIDTestURLSession addResponse:
-     [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0"
+     [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                               requestHeaders:reqHeaders
                                            requestParamsBody:nil]];
     
@@ -116,10 +122,12 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
+    NSString *url = [NSString stringWithFormat:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     [MSIDTestURLSession addResponse:
-     [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0"
+     [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                               requestHeaders:reqHeaders
                                            requestParamsBody:nil]];
 }
@@ -128,13 +136,15 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
     NSDictionary *resultJson = customResponse? customResponse :
     @{ @"links" : @[@{ @"rel" : TRUSTED_REALM, @"href" : @"https://fs.fabrikam.com/adfs/"}]};
     
+    NSString *url = [NSString stringWithFormat:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse requestURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+    [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
@@ -150,10 +160,12 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
 {
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
+    NSString *url = [NSString stringWithFormat:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     MSIDTestURLResponse *response =
-    [MSIDTestURLResponse serverNotFoundResponseForURLString:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/"
+    [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                              requestHeaders:reqHeaders
                                           requestParamsBody:nil];
     [MSIDTestURLSession addResponse:response];
@@ -303,6 +315,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:nil];
     [self addWebFingerSuccessResponse:nil];
@@ -333,6 +346,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -364,6 +378,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoveryForCloudFailureResponse];
@@ -393,6 +408,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:@{ @"IdentityProviderService" : @{ } }];
     [self addWebFingerSuccessResponse:nil];
@@ -425,6 +441,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoverySuccessResponseForOnPrems:@{ }];
     [self addWebFingerSuccessResponse:nil];
@@ -457,6 +474,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -489,6 +507,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -522,6 +541,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -557,6 +577,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     MSALAdfsAuthorityResolver *resolver = [MSALAdfsAuthorityResolver new];
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     [self addDrsDiscoveryForOnPremsFailureResponse];
     [self addDrsDiscoverySuccessResponseForCloud:nil];
@@ -583,5 +604,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
          XCTAssertNil(error);
      }];
 }
+
+
 
 @end

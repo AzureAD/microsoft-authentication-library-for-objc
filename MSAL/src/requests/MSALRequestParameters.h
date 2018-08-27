@@ -42,6 +42,7 @@
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
 @property NSURL *cloudAuthority;
+@property BOOL extendedLifetimeEnabled;
 @property MSALScopes *scopes;
 @property NSString *redirectUri;
 @property NSString *loginHint;

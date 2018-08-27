@@ -33,6 +33,8 @@
 #import "MSIDDeviceId.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse.h"
+#import "MSIDTestURLResponse+MSAL.h"
+#import "MSALTestConstants.h"
 
 @interface MSALAadAuthorityResolverTests : MSALTestCase
 
@@ -77,8 +79,8 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     
     MSALRequestParameters *params = [MSALRequestParameters new];
-    
     params.urlSession = [MSIDTestURLSession createMockSession];
+    params.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     NSString *authorityString = @"https://login.microsoftonline.in/mytenant.com";
     NSString *responseEndpoint = @"https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration";
@@ -86,8 +88,10 @@
     
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
@@ -156,14 +160,17 @@
     
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [MSIDTestURLSession createMockSession];
+    params.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     NSString *authorityString = @"https://somehost.com/sometenant.com";
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
@@ -198,13 +205,16 @@
     
     MSALRequestParameters *params = [MSALRequestParameters new];
     params.urlSession = [MSIDTestURLSession createMockSession];
+    params.correlationId = [[NSUUID alloc] initWithUUIDString:UNIT_TEST_CORRELATION_ID];
     
     NSString *authorizationEndpoint = @"https://somehost.com/sometenant.com/oauth2/v2.0/authorize";
     
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse request:[NSURL URLWithString:requestURLString]
                                                respondWithError:[NSError errorWithDomain:NSURLErrorDomain
