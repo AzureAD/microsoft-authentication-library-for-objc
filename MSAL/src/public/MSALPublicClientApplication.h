@@ -42,6 +42,9 @@
  */
 @property BOOL validateAuthority;
 
+/*! Enable to return access token with extended lifttime during server outage. */
+@property BOOL extendedLifetimeEnabled;
+
 /*! The authority the application will use to obtain tokens */
 @property (readonly) NSURL *authority;
 

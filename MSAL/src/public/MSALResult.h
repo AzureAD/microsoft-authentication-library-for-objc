@@ -41,6 +41,12 @@
 @property (readonly) NSDate *expiresOn;
 
 /*!
+    Some access tokens have extended lifetime when server is in an unavailable state.
+    This property indicates whether the access token is returned in such a state.
+ */
+@property (readonly) BOOL extendedLifeTimeToken;
+
+/*!
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
  */
 @property (readonly) NSString *tenantId;
