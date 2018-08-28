@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALSilentRequest.h"
+#import "MSALBaseRequest.h"
 #import "MSALResult+Internal.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -38,6 +39,8 @@
 #import "MSIDConfiguration.h"
 #import "MSALErrorConverter.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADRefreshTokenGrantRequest.h"
+#import "MSIDError.h"
 
 @interface MSALSilentRequest()
 
@@ -46,6 +49,9 @@
 @end
 
 @implementation MSALSilentRequest
+{
+    MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
+}
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
@@ -95,7 +101,7 @@
                                                                  context:_parameters
                                                                    error:&error];
 
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
@@ -103,6 +109,12 @@
 
             completionBlock(result, nil);
             return;
+        }
+        
+        // If the access token is good in terms of extended lifetime then store it for later use
+        if (accessToken && accessToken.isExtendedLifetimeValid)
+        {
+            _extendedLifetimeAccessToken = accessToken;
         }
 
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
@@ -140,15 +152,42 @@
 
         _authority = authority;
 
-        [super acquireToken:completionBlock];
+        [super acquireToken:^(MSALResult *result, NSError *error)
+         {
+             // Logic for returning extended lifetime token
+             if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
+             {
+                 MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                                configuration:msidConfiguration
+                                                                      context:_parameters
+                                                                        error:&error];
+                 
+                 result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
+                 error = nil;
+             }
+             
+             completionBlock(result, error);
+         }];
     }];
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
-    parameters[MSID_OAUTH2_REFRESH_TOKEN] = [self.refreshToken refreshToken];
+    return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                            clientId:_parameters.clientId
+                                                               scope:[[self requestScopes:nil] msalToString]
+                                                        refreshToken:[self.refreshToken refreshToken]
+                                                             context:_parameters];
 }
 
+- (BOOL)isServerUnavailable:(NSError *)error
+{
+    if (![error.domain isEqualToString:MSIDHttpErrorCodeDomain])
+    {
+        return NO;
+    }
+    
+    return ([error code] >= 500 && [error code] <= 599);
+}
 
 @end
