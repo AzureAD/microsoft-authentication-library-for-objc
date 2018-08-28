@@ -284,7 +284,8 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
+    XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
+    __block MSALResult *result = nil;
     
     application.webviewType = MSALWebviewTypeWKWebView;
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -294,19 +295,44 @@
                   extraQueryParameters:@{@"instance_aware":@"true"}
                              authority:nil
                          correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
+                       completionBlock:^(MSALResult *rlt, NSError *error)
      {
+         result = rlt;
+         
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
          
          // Expect authority to be cloud authority
          XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+         XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.de");
          
-         [expectation fulfill];
+         [expectationInteractive fulfill];
      }];
     
-    [self waitForExpectations:@[expectation] timeout:1];
+    [self waitForExpectations:@[expectationInteractive] timeout:1];
+    
+    // acquire token silently to verify that access token is stored under the correct authority
+    XCTestExpectation *expectationSilent = [self expectationWithDescription:@"acquireTokenSilent"];
+    MSALAccount *account = result.account;
+    [application acquireTokenSilentForScopes:@[@"fakescopes"]
+                                     account:account
+                                   authority:@"https://login.microsoftonline.de/" DEFAULT_TEST_UTID
+                                forceRefresh:NO
+                               correlationId:nil
+                       completionBlock:^(MSALResult *rlt, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(rlt);
+         XCTAssertEqualObjects(rlt.accessToken, @"i am an updated access token!");
+         
+         // authority cloud authority as expected
+         XCTAssertEqualObjects(rlt.authority, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+         
+         [expectationSilent fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectationSilent] timeout:1];
 }
 
 - (void)testAcquireTokenSilent_whenExtendedLifetimeTokenEnabledAndServiceUnavailable_shouldReturnExtendedLifetimeToken
