@@ -387,29 +387,6 @@
                 completionBlock:completionBlock];
 }
 
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                    loginHint:(NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
-                    authority:(NSString *)authority
-                correlationId:(NSUUID *)correlationId
-              completionBlock:(MSALCompletionBlock)completionBlock
-{
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:extraScopesToConsent
-                        account:nil
-                      loginHint:loginHint
-                     uiBehavior:uiBehavior
-           extraQueryParameters:extraQueryParameters
-                         claims:claims
-                      authority:authority
-                  correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId
-                completionBlock:completionBlock];
-}
-
 #pragma mark -
 #pragma mark Account
 

@@ -324,42 +324,6 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
-/*!
- Acquire a token for a new account using interactive authentication
- 
- @param  scopes                  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- @param  extraScopesToConsent    Permissions you want the account to consent to in the same
- authentication flow, but won't be included in the returned
- access token
- @param  loginHint               A loginHint (usually an email) to pass to the service at the
- beginning of the interactive authentication flow. The account returned
- in the completion block is not guaranteed to match the loginHint.
- @param  uiBehavior              A UI behavior for the interactive authentication flow
- @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
- the interactive authentication flow.
- @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
- @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
- it is of the form https://<instance/<tenant>, where <instance> is the
- directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
- identifier within the directory itself (e.g. a domain associated to the
- tenant, such as contoso.onmicrosoft.com, or the GUID representing the
- TenantID property of the directory)
- @param  correlationId           UUID to correlate this request with the server
- @param  completionBlock         The completion block that will be called when the authentication
- flow completes, or encounters an error.
- */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                    loginHint:(NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
-                    authority:(NSString *)authority
-                correlationId:(NSUUID *)correlationId
-              completionBlock:(MSALCompletionBlock)completionBlock;
-
 #pragma mark -
 #pragma mark acquireToken using Account
 
@@ -440,27 +404,27 @@
  a MSALErrorInteractionRequired error.
  
  @param  scopes                  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
+                                 in the result in the completionBlock. Not all scopes are
+                                 gauranteed to be included in the access token returned.
  @param  extraScopesToConsent    Permissions you want the account to consent to in the same
- authentication flow, but won't be included in the returned
- access token
+                                 authentication flow, but won't be included in the returned
+                                 access token
  @param  account                 An account object retrieved from the application object that the
- interactive authentication flow will be locked down to.
+                                 interactive authentication flow will be locked down to.
  @param  uiBehavior              A UI behavior for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
- the interactive authentication flow.
+                                 the interactive authentication flow.
  @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
- Azure AD it is of the form https://<instance/<tenant>, where
- <instance> is the directory host
- (e.g. https://login.microsoftonline.com) and <tenant> is a
- identifier within the directory itself (e.g. a domain associated
- to the tenant, such as contoso.onmicrosoft.com, or the GUID
- representing the TenantID property of the directory)
+                                 Azure AD it is of the form https://<instance/<tenant>, where
+                                 <instance> is the directory host
+                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 identifier within the directory itself (e.g. a domain associated
+                                 to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                 representing the TenantID property of the directory)
  @param  correlationId           UUID to correlate this request with the server
  @param  completionBlock         The completion block that will be called when the authentication
- flow completes, or encounters an error.
+                                 flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
