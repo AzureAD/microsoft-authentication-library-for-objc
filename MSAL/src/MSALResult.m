@@ -50,6 +50,7 @@
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
+                            authority:(NSString *)authority
 {
     MSALResult *result = [MSALResult new];
     
@@ -61,6 +62,7 @@
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
+    result->_authority = authority;
     
     return result;
 }
@@ -93,7 +95,8 @@
                                account:account
                                idToken:idToken.rawIdToken
                               uniqueId:idTokenClaims.uniqueId
-                                scopes:[accessToken.scopes array]];
+                                scopes:[accessToken.scopes array]
+                             authority:accessToken.authority.absoluteString];
 }
 
 @end
