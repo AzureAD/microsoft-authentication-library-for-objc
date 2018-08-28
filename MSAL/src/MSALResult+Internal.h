@@ -39,7 +39,8 @@
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
-                               scopes:(NSArray<NSString *> *)scopes;
+                               scopes:(NSArray<NSString *> *)scopes
+                            authority:(NSString *)authority;
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
                               idToken:(MSIDIdToken *)idToken

@@ -55,6 +55,7 @@
     UISegmentedControl *_validateAuthority;
     
     UITextField *_loginHintField;
+    UITextField* _extraQueryParamsField;
     UIButton *_userButton;
     UIButton *_scopesButton;
     
@@ -174,6 +175,10 @@
     _customWebViewSelection.selectedSegmentIndex = 0;
     [layout addControl:_customWebViewSelection title:@"embeddedWV"];
     
+    _extraQueryParamsField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 400, 20)];
+    _extraQueryParamsField.borderStyle = UITextBorderStyleRoundedRect;
+    _extraQueryParamsField.delegate = self;
+    [layout addControl:_extraQueryParamsField title:@"EQP"];
     
     UIButton *clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
@@ -431,8 +436,8 @@
 
 - (void)updateResultView:(MSALResult *)result
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
     
     [_resultView setText:resultText];
     
@@ -459,6 +464,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSString *authority = [settings authority];
     NSString *clientId;
+    NSDictionary *extraQueryParameters = [NSDictionary msidURLFormDecode:_extraQueryParamsField.text];
     
     if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
     {
@@ -534,7 +540,7 @@
         [application acquireTokenForScopes:[settings.scopes allObjects]
                                  loginHint:_loginHintField.text
                                 uiBehavior:[self uiBehavior]
-                      extraQueryParameters:nil
+                      extraQueryParameters:extraQueryParameters
                            completionBlock:completionBlock];
     }
     else
@@ -542,7 +548,7 @@
         [application acquireTokenForScopes:[settings.scopes allObjects]
                                    account:settings.currentAccount
                                 uiBehavior:[self uiBehavior]
-                      extraQueryParameters:nil
+                      extraQueryParameters:extraQueryParameters
                            completionBlock:completionBlock];
     }
 }
