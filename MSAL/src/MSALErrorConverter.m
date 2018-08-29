@@ -40,6 +40,7 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDErrorDomain : MSALErrorDomain,
                              MSIDOAuthErrorDomain : MSALErrorDomain,
                              MSIDKeychainErrorDomain : NSOSStatusErrorDomain,
+                             MSIDHttpErrorCodeDomain : MSALErrorDomain
                              };
     
     s_errorCodeMapping = @{
