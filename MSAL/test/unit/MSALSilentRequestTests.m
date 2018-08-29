@@ -873,4 +873,108 @@
      }];
 }
 
+- (void)testSilentRequest_when429ThrottledErrorReturned_shouldReturnAllHeadersAnd429ErrorCode
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
+    //store at & rt in cache
+    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
+                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
+    MSIDAADV2TokenResponse *msidResponse =
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
+                                                             @"access_token": @"access_token",
+                                                             @"refresh_token": @"fakeRefreshToken",
+                                                             @"authority" : @"https://login.microsoftonline.com/common",
+                                                             @"scope": @"fakescope1 fakescope2",
+                                                             @"client_id": UNIT_TEST_CLIENT_ID,
+                                                             @"id_token": rawIdToken,
+                                                             @"client_info": rawClientInfo,
+                                                             @"expires_on" : @"1"
+                                                             }
+                                                     error:nil];
+
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
+    XCTAssertTrue(result);
+
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
+
+    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    MSIDTestURLResponse *response =
+    [MSIDTestURLResponse requestURLString:url
+                           requestHeaders:reqHeaders
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
+                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
+                                             @"grant_type" : @"refresh_token",
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
+                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+                             responseCode:429
+                         httpHeaderFields:@{@"Retry-After": @"256",
+                                            @"Other-Header-Field": @"Other header field"
+                                            }
+                         dictionaryAsJSON:nil];
+
+    [response->_requestHeaders removeObjectForKey:@"Content-Length"];
+
+    [MSIDTestURLSession addResponse:response];
+
+    MSALSilentRequest *request =
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
+    [request run:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+         XCTAssertEqual(error.code, 429);
+         XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"256");
+         XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Other-Header-Field"], @"Other header field");
+         XCTAssertEqualObjects(error.userInfo[MSALHTTPResponseCodeKey], @(429));
+
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
 @end

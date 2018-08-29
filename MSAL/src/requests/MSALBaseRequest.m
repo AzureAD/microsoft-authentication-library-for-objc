@@ -175,7 +175,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (error)
         {
-            if(completionBlock) completionBlock(nil, error);
+            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
             return;
         }
         
