@@ -94,8 +94,9 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     MSALErrorInvalidRequest              = -42002,
     MSALErrorInvalidClient               = -42003,
-    MSALErrorInvalidGrant               = -42004,
-    MSALErrorInvalidScope               = -42005,
+    MSALErrorInvalidGrant                = -42004,
+    MSALErrorInvalidScope                = -42005,
+    MSALErrorUnhandledResponse           = -42006,
 
     /*! 
         The passed in authority URL does not pass validation.
