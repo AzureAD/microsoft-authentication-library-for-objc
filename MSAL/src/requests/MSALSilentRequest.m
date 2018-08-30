@@ -187,7 +187,9 @@
         return NO;
     }
     
-    return ([error code] >= 500 && [error code] <= 599);
+    NSInteger errorCode = [[error.userInfo objectForKey:MSIDHTTPResponseCodeKey] intValue];
+    
+    return errorCode >=500 && errorCode <=599;
 }
 
 @end
