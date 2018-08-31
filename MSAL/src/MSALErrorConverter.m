@@ -74,7 +74,8 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
                                    @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed)
+                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorServerInsufficientScopes) : @(MSALErrorServerInsufficientScopes)
                                    }
                            };
     
@@ -84,7 +85,9 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDCorrelationIdKey : MSALCorrelationIDKey,
                              MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
                              MSIDOAuthErrorKey: MSALOAuthErrorKey,
-                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey
+                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
+                             MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
+                             MSIDGrantedScopesKey: MSALGrantedScopesKey
                              };
 }
 

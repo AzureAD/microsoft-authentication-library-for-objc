@@ -29,6 +29,25 @@
 
 extern NSString *MSALErrorDomain;
 
+/* !
+
+    Following list of keys represents a set of optional
+    keys that can be found in error's userInfo that MSAL returns.
+
+    Examples of usage:
+
+    if (error && [error.domain isEqualToString:MSALErrorDomain])
+    {
+        NSInteger errorCode = error.code; // Get error code
+        NSString *oauthError = error.userInfo[MSALOAuthErrorKey]; // Get OAuth2 error code
+        NSString *subError = error.userInfo[MSALOAuthSubErrorKey]; // Get sub error
+        NSString *httpResponseCode = error.userInfo[MSALHTTPResponseCodeKey]; // Get HTTP response code
+
+        // ....
+    }
+
+ */
+
 /*!
     The OAuth error returned by the service.
  */
@@ -60,6 +79,26 @@ extern NSString *MSALCorrelationIDKey;
  */
 extern NSString *MSALHTTPResponseCodeKey;
 
+/*!
+ List of scopes that were requested from MSAL, but not granted in the response.
+
+ Apps normally request certain permissions that their app needs to function.
+ However, sometimes STS grants only a subset of those permissions.
+
+ This can happen in multiple cases:
+
+    * Requested scope is not supported
+    * Requested scope is not Recognized (According to OIDC, any scope values used that are not understood by an implementation SHOULD be ignored.)
+    * Requested scope is not supported for a particular account (Organizational scopes when it is a consumer account)
+
+ */
+extern NSString *MSALDeclinedScopesKey;
+
+/*!
+ List of granted scopes in case some scopes weren't granted (see MSALDeclinedScopesKey for more info)
+ */
+extern NSString *MSALGrantedScopesKey;
+
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
     /*!
@@ -90,12 +129,13 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
             </dict>
 
      */
-    MSALErrorRedirectSchemeNotRegistered = -42001,
+    MSALErrorRedirectSchemeNotRegistered    = -42001,
     
-    MSALErrorInvalidRequest              = -42002,
-    MSALErrorInvalidClient               = -42003,
-    MSALErrorInvalidGrant               = -42004,
-    MSALErrorInvalidScope               = -42005,
+    MSALErrorInvalidRequest                 = -42002,
+    MSALErrorInvalidClient                  = -42003,
+    MSALErrorInvalidGrant                   = -42004,
+    MSALErrorInvalidScope                   = -42005,
+    MSALErrorServerInsufficientScopes       = -42006,
 
     /*! 
         The passed in authority URL does not pass validation.
@@ -194,7 +234,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     /*!
      Response was received in a network call, but the response body was invalid.
-     R
+
      e.g. Response was to be expected a key-value pair with "key1" and
      the json response does not contain "key1" elements
      

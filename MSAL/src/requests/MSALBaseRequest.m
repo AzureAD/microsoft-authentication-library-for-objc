@@ -175,11 +175,11 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (error)
         {
-            if(completionBlock) completionBlock(nil, error);
+            if (completionBlock) completionBlock(nil, error);
             return;
         }
         
-        if(response && ![response isKindOfClass:[NSDictionary class]])
+        if (response && ![response isKindOfClass:[NSDictionary class]])
         {
             NSError *localError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
@@ -195,50 +195,70 @@ static MSALScopes *s_reservedScopes = nil;
             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
             return;
         }
-        
-        localError = nil;
-        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
+
+        NSError *verificationError = nil;
+        if (![self verifyTokenResponse:tokenResponse error:&verificationError])
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, verificationError);
             return;
         }
         
-        if (_parameters.account.homeAccountId.identifier != nil &&
-            ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
-        {
-            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
-            completionBlock(nil, userMismatchError);
-            return;
-        }
-        
-        MSIDConfiguration *configuration = _parameters.msidConfiguration;
-        
-        localError = nil;
-        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+        NSError *savingError = nil;
+        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:_parameters.msidConfiguration
                                                            response:tokenResponse
                                                             context:_parameters
-                                                              error:&localError];
+                                                              error:&savingError];
         
         if (!isSaved)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:savingError]);
             return;
         }
-        
-        MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
-        MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
-        
-        if (!accessToken || !idToken)
-        {
-            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
-            completionBlock(nil, userMismatchError);
-            return;
-        }
-        
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
-        
-        completionBlock(result, nil);
+
+        NSError *resultError = nil;
+        MSALResult *result = [self resultFromTokenResponse:tokenResponse error:&resultError];
+        completionBlock(result, resultError);
     }];
+}
+
+- (BOOL)verifyTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                      error:(NSError **)error
+{
+    NSError *msidError = nil;
+
+    if (![self.oauth2Factory verifyResponse:tokenResponse context:nil configuration:_parameters.msidConfiguration error:&msidError])
+    {
+        if (error) *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        return NO;
+    }
+
+    if (_parameters.account.homeAccountId.identifier != nil &&
+        ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
+    {
+        NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+        if (error) *error = userMismatchError;
+
+        return NO;
+    }
+
+    return YES;
+}
+
+- (MSALResult *)resultFromTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                                  error:(NSError **)error
+{
+    MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+    MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+
+    if (!accessToken || !idToken)
+    {
+        NSError *resultError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+
+        if (error) *error = resultError;
+    }
+
+    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
+    return result;
 }
 
 - (MSIDTokenRequest *)tokenRequest
