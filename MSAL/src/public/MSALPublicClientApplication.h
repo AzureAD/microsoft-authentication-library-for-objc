@@ -280,7 +280,7 @@
                             in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior      A specific UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should be url-decoded value.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
@@ -304,7 +304,7 @@
                                     in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should be url-decoded value.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
                                     it is of the form https://<instance>/<tenant>, where <instance> is the
                                     directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -354,7 +354,7 @@
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should be url-decoded value.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
@@ -378,7 +378,7 @@
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should be url-decoded value.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
                                     Azure AD it is of the form https://<instance>/<tenant>, where
                                     <instance> is the directory host
@@ -413,7 +413,7 @@
                                  interactive authentication flow will be locked down to.
  @param  uiBehavior              A UI behavior for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                 the interactive authentication flow. This should be url-decoded value.
+                                 the interactive authentication flow. This should not be url-encoded value.
  @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
                                  Azure AD it is of the form https://<instance/<tenant>, where
