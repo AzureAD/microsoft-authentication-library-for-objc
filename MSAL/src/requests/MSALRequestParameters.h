@@ -48,6 +48,7 @@
 @property NSString *loginHint;
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
+@property NSString *claims;
 @property NSString *prompt;
 @property MSALAccount *account;
 @property MSALTelemetryApiId apiId;

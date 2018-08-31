@@ -319,6 +319,7 @@
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
+                         claims:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquire
@@ -338,6 +339,7 @@
                       loginHint:loginHint
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
+                         claims:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHint
@@ -356,6 +358,7 @@
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
+                         claims:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters
@@ -377,6 +380,7 @@
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
+                         claims:nil
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId
@@ -397,6 +401,7 @@
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
+                         claims:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
@@ -416,6 +421,7 @@
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
+                         claims:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
@@ -437,6 +443,31 @@
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
+                         claims:nil
+                      authority:authority
+                  correlationId:correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
+                completionBlock:completionBlock];
+    
+}
+
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
+                      account:(MSALAccount *)account
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(NSString *)claims
+                    authority:(NSString *)authority
+                correlationId:(NSUUID *)correlationId
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:scopes
+           extraScopesToConsent:extraScopesToConsent
+                        account:account
+                      loginHint:nil
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                         claims:claims
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
@@ -521,6 +552,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(NSString *)claims
                     authority:(NSString *)authority
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
@@ -566,6 +598,7 @@
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
+    params.claims = [NSString msidIsStringNilOrBlank:claims] ? nil : claims;
     NSError *error = nil;
     if (!authority)
     {
