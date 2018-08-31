@@ -674,7 +674,7 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          XCTAssertEqualObjects(error.domain, MSIDHttpErrorCodeDomain);
-         XCTAssertEqual(error.code, 504);
+         XCTAssertEqual(error.code, MSIDErrorServerUnhandledResponse);
          
          [expectation fulfill];
      }];

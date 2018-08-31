@@ -40,6 +40,7 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDErrorDomain : MSALErrorDomain,
                              MSIDOAuthErrorDomain : MSALErrorDomain,
                              MSIDKeychainErrorDomain : NSOSStatusErrorDomain,
+                             MSIDHttpErrorCodeDomain : MSALErrorDomain
                              };
     
     s_errorCodeMapping = @{
@@ -74,7 +75,8 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
                                    @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed)
+                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
     
