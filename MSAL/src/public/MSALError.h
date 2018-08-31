@@ -130,12 +130,20 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
 
      */
     MSALErrorRedirectSchemeNotRegistered    = -42001,
-    
+
     MSALErrorInvalidRequest                 = -42002,
     MSALErrorInvalidClient                  = -42003,
     MSALErrorInvalidGrant                   = -42004,
     MSALErrorInvalidScope                   = -42005,
-    MSALErrorServerInsufficientScopes       = -42006,
+    
+    /*!
+     The server returned an unexpected http response. For instance, this code
+     is returned for 5xx server response when something has gone wrong on the server but the
+     server could not be more specific on what the exact problem is.
+     */
+    MSALErrorUnhandledResponse              = -42006,
+
+    MSALErrorServerInsufficientScopes       = -42007,
 
     /*! 
         The passed in authority URL does not pass validation.

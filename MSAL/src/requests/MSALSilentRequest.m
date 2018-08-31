@@ -187,7 +187,8 @@
         return NO;
     }
     
-    return ([error code] >= 500 && [error code] <= 599);
+    NSInteger responseCode = [[error.userInfo objectForKey:MSIDHTTPResponseCodeKey] intValue];
+    return error.code == MSIDErrorServerUnhandledResponse && responseCode >= 500 && responseCode <= 599;
 }
 
 @end
