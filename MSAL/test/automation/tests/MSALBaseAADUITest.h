@@ -32,5 +32,6 @@
 - (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
 - (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
 - (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request;
+- (void)selectAccountWithTitle:(NSString *)accountTitle;
 
 @end
