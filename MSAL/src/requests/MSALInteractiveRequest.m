@@ -79,11 +79,15 @@
         }
     }
     
+    if (parameters.claims)
+    {
+        if (![self validateClaims:parameters error:error]) return nil;
+    }
+    
     _uiBehavior = behavior;
     
     return self;
 }
-
 
 - (void)run:(MSALCompletionBlock)completionBlock
 {
@@ -130,6 +134,7 @@
     config.uid = _parameters.account.homeAccountId.objectId;
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
+    config.claims = _parameters.claims;
 
     _webviewConfig = config;
     
@@ -263,6 +268,24 @@
     [event setUIBehavior:_uiBehavior];
     [event setWebviewType:MSALStringForMSALWebviewType(_parameters.webviewType)];
     return event;
+}
+
+- (BOOL)validateClaims:(MSALRequestParameters *)parameters
+                 error:(NSError * __nullable __autoreleasing * __nullable)error
+
+{
+    if (!parameters.claims)
+    {
+        return YES;
+    }
+    
+    if (parameters.extraQueryParameters[MSID_OAUTH2_CLAIMS])
+    {
+        MSAL_ERROR_PARAM(_parameters, MSALErrorInvalidParameter, @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end
