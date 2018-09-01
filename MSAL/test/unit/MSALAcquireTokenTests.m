@@ -61,6 +61,7 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebviewFactory.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -196,6 +197,7 @@
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
     json[@"access_token"] = @"i am an updated access token!";
+    json[@"scope"] = [expectedScopes msidToString];
     [tokenResponse setResponseJSON:json];
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 

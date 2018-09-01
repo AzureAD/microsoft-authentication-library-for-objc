@@ -33,6 +33,7 @@
 #import "MSALAccountId.h"
 #import "MSIDConstants.h"
 #import "MSIDVersion.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @implementation MSIDTestURLResponse (MSAL)
 
@@ -183,7 +184,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [clientInfo msidBase64UrlJson] } ];
+                                             @"client_info" : [clientInfo msidBase64UrlJson],
+                                             @"scope": [scopes msidToString]
+                                             } ];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     

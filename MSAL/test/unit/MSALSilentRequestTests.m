@@ -292,7 +292,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
                                              @"id_token": rawIdToken,
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -395,7 +397,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
                                              @"id_token": rawIdToken,
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -577,7 +581,8 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
                                              @"id_token": rawIdToken,
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
                                              }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
@@ -733,7 +738,8 @@
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
+                                             @"client_info" : [@{ @"uid" : @"2", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
                                              }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
