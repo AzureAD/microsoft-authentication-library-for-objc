@@ -963,10 +963,10 @@
      {
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, 429);
+         XCTAssertEqual(error.code, MSALErrorUnhandledResponse);
          XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"256");
          XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Other-Header-Field"], @"Other header field");
-         XCTAssertEqualObjects(error.userInfo[MSALHTTPResponseCodeKey], @(429));
+         XCTAssertEqualObjects(error.userInfo[MSALHTTPResponseCodeKey], @"429");
 
          [expectation fulfill];
      }];

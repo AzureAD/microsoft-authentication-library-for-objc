@@ -77,6 +77,9 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
+                                   },
+                           MSIDHttpErrorCodeDomain: @{
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
     

@@ -673,8 +673,8 @@
          // Ensure error is returned
          XCTAssertNil(result);
          XCTAssertNotNil(error);
-         XCTAssertEqualObjects(error.domain, MSIDHttpErrorCodeDomain);
-         XCTAssertEqual(error.code, MSIDErrorServerUnhandledResponse);
+         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+         XCTAssertEqual(error.code, MSALErrorUnhandledResponse);
          
          [expectation fulfill];
      }];
