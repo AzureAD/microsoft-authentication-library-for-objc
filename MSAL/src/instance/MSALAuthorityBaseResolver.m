@@ -28,6 +28,7 @@
 #import "MSALAuthorityBaseResolver.h"
 #import "MSALTenantDiscoveryResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
+#import "MSALErrorConverter.h"
 
 @implementation MSALAuthorityBaseResolver
 
@@ -45,7 +46,11 @@
         
         [request finishAndInvalidate];
         
-        CHECK_COMPLETION(!error);
+        if (error)
+        {
+            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            return;
+        }
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {

@@ -28,6 +28,7 @@
 #import "MSALAadAuthorityResolver.h"
 #import "MSALInstanceDiscoveryResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
+#import "MSALErrorConverter.h"
 
 @implementation MSALAadAuthorityResolver
 
@@ -79,11 +80,11 @@
         
         [request finishAndInvalidate];
 
-         if (error)
-         {
-             completionBlock(nil, error);
-             return;
-         }
+        if (error)
+        {
+            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            return;
+        }
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
