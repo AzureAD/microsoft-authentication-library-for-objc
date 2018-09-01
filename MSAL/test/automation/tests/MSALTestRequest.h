@@ -34,6 +34,7 @@ extern NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
 @property (nonatomic, strong) NSArray *expectedResultScopes;
 @property (nonatomic, strong) NSString *redirectUri;
 @property (nonatomic, strong) NSString *authority;
+@property (nonatomic, strong) NSString *expectedResultAuthority;
 @property (nonatomic, strong) NSString *cacheAuthority;
 @property (nonatomic, strong) NSString *uiBehavior;
 @property (nonatomic, strong) NSString *accountIdentifier;
@@ -44,6 +45,7 @@ extern NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
 @property (nonatomic) BOOL validateAuthority;
 @property (nonatomic, strong) NSString *b2cProvider;
 @property (nonatomic, strong) NSDictionary *additionalParameters;
+@property (nonatomic, strong) NSDictionary *sliceParameters;
 
 + (MSALTestRequest *)convergedAppRequest;
 + (MSALTestRequest *)nonConvergedAppRequest;

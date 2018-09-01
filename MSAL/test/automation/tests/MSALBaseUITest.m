@@ -144,6 +144,16 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     }
 }
 
+- (void)assertAuthorityReturned:(NSString *)expectedAuthority
+{
+    if (!expectedAuthority) return;
+
+    NSDictionary *result = [self resultDictionary];
+    NSString *resultAuthority = result[@"authority"];
+    
+    XCTAssertEqualObjects(expectedAuthority, resultAuthority);
+}
+
 - (NSDictionary *)resultIDTokenClaims
 {
     NSDictionary *result = [self resultDictionary];
@@ -400,6 +410,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     if (request.authority) additionalConfig[@"authority"] = request.authority;
     if (request.scopes) additionalConfig[@"scopes"] = request.scopes;
     if (request.loginHint) additionalConfig[@"login_hint"] = request.loginHint;
+    if (request.sliceParameters) additionalConfig[@"slice_params"] = request.sliceParameters;
 
     if (request.usePassedWebView)
     {

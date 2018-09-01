@@ -105,6 +105,7 @@
 {
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:request.expectedResultScopes];
+    [self assertAuthorityReturned:request.expectedResultAuthority];
 
     NSDictionary *resultDictionary = [self resultDictionary];
     NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
