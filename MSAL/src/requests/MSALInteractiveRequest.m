@@ -135,6 +135,7 @@
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
     config.claims = _parameters.claims;
+    config.sliceParameters = _parameters.sliceParameters;
 
     _webviewConfig = config;
     
