@@ -41,11 +41,14 @@
 
 @property (nonatomic) NSURL *unvalidatedAuthority;
 @property BOOL validateAuthority;
+@property NSURL *cloudAuthority;
+@property BOOL extendedLifetimeEnabled;
 @property MSALScopes *scopes;
 @property NSString *redirectUri;
 @property NSString *loginHint;
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
+@property NSString *claims;
 @property NSString *prompt;
 @property MSALAccount *account;
 @property MSALTelemetryApiId apiId;
@@ -68,4 +71,5 @@
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
 - (BOOL)setAuthorityFromString:(NSString *)authority
                          error:(NSError * __autoreleasing *)error;
+- (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
 @end

@@ -34,13 +34,16 @@
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
+              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
-                               scopes:(NSArray<NSString *> *)scopes;
+                               scopes:(NSArray<NSString *> *)scopes
+                            authority:(NSString *)authority;
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
-                              idToken:(MSIDIdToken *)idToken;
+                              idToken:(MSIDIdToken *)idToken
+              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken;
 
 @end

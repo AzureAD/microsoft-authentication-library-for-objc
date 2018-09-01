@@ -44,27 +44,32 @@
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
+              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
+                            authority:(NSString *)authority
 {
     MSALResult *result = [MSALResult new];
     
     result->_accessToken = accessToken;
     result->_expiresOn = expiresOn;
+    result->_extendedLifeTimeToken = isExtendedLifetimeToken;
     result->_tenantId = tenantId;
     result->_account = account;
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
+    result->_authority = authority;
     
     return result;
 }
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
                               idToken:(MSIDIdToken *)idToken
+              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
 {
     NSError *error = nil;
     __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&error];
@@ -85,11 +90,13 @@
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
+               isExtendedLifetimeToken:isExtendedLifetimeToken
                               tenantId:accessToken.authority.msidTenant
                                account:account
                                idToken:idToken.rawIdToken
                               uniqueId:idTokenClaims.uniqueId
-                                scopes:[accessToken.scopes array]];
+                                scopes:[accessToken.scopes array]
+                             authority:accessToken.authority.absoluteString];
 }
 
 @end

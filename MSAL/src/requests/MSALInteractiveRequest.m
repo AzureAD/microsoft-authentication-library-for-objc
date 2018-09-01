@@ -37,6 +37,7 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebMSAuthResponse.h"
@@ -78,11 +79,15 @@
         }
     }
     
+    if (parameters.claims)
+    {
+        if (![self validateClaims:parameters error:error]) return nil;
+    }
+    
     _uiBehavior = behavior;
     
     return self;
 }
-
 
 - (void)run:(MSALCompletionBlock)completionBlock
 {
@@ -129,6 +134,7 @@
     config.uid = _parameters.account.homeAccountId.objectId;
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
+    config.claims = _parameters.claims;
 
     _webviewConfig = config;
     
@@ -150,7 +156,12 @@
             {
                 _code = oauthResponse.authorizationCode;
 
-                // TODO: handle MSIDWebOAuth2Response and instance aware flow (cloud host)
+                // handle instance aware flow (cloud host)
+                if ([response isKindOfClass:MSIDWebAADAuthResponse.class])
+                {
+                    MSIDWebAADAuthResponse *aadResponse = (MSIDWebAADAuthResponse *)response;
+                    [_parameters setCloudAuthorityWithCloudHostName:aadResponse.cloudHostName];
+                }
 
                 [super acquireToken:completionBlock];
                 return;
@@ -240,14 +251,15 @@
 #endif
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_AUTHORIZATION_CODE;
-    parameters[MSID_OAUTH2_CODE] = _code;
-    parameters[MSID_OAUTH2_REDIRECT_URI] = _parameters.redirectUri;
-    
-    // PKCE
-    parameters[MSID_OAUTH2_CODE_VERIFIER] = _webviewConfig.pkce.codeVerifier;
+    return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                                 clientId:_parameters.clientId
+                                                                    scope:[[self requestScopes:nil] msalToString]
+                                                              redirectUri:_parameters.redirectUri
+                                                                     code:_code
+                                                             codeVerifier:_webviewConfig.pkce.codeVerifier
+                                                                  context:_parameters];
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
@@ -256,6 +268,24 @@
     [event setUIBehavior:_uiBehavior];
     [event setWebviewType:MSALStringForMSALWebviewType(_parameters.webviewType)];
     return event;
+}
+
+- (BOOL)validateClaims:(MSALRequestParameters *)parameters
+                 error:(NSError * __nullable __autoreleasing * __nullable)error
+
+{
+    if (!parameters.claims)
+    {
+        return YES;
+    }
+    
+    if (parameters.extraQueryParameters[MSID_OAUTH2_CLAIMS])
+    {
+        MSAL_ERROR_PARAM(_parameters, MSALErrorInvalidParameter, @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

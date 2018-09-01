@@ -56,4 +56,7 @@
 + (MSIDTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
                                              requestHeaders:(NSDictionary *)requestHeaders
                                           requestParamsBody:(id)requestParams;
+
++ (NSDictionary *)defaultQueryParameters;
+
 @end

@@ -94,8 +94,15 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     MSALErrorInvalidRequest              = -42002,
     MSALErrorInvalidClient               = -42003,
-    MSALErrorInvalidGrant               = -42004,
-    MSALErrorInvalidScope               = -42005,
+    MSALErrorInvalidGrant                = -42004,
+    MSALErrorInvalidScope                = -42005,
+    
+    /*!
+     The server returned an unexpected http response. For instance, this code
+     is returned for 5xx server response when something has gone wrong on the server but the
+     server could not be more specific on what the exact problem is.
+     */
+    MSALErrorUnhandledResponse           = -42006,
 
     /*! 
         The passed in authority URL does not pass validation.
@@ -124,10 +131,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
-        MSAL received a valid token response, but it didn't contain an access token.
+        MSAL received a bad token response, it didn't contain an access token or id token.
         Check to make sure your application is consented to get all of the scopes you are asking for.
      */
-    MSALErrorNoAccessTokenInResponse = -42105,
+    MSALErrorBadTokenResponse = -42105,
 
     /*!
      MSAL requires a non-nil account for the acquire token silent call

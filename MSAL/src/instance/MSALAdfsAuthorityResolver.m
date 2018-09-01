@@ -30,9 +30,7 @@
 
 #import "MSALDrsDiscoveryResponse.h"
 #import "MSALWebFingerResponse.h"
-
-#import "MSALWebAuthRequest.h"
-#import "MSALHttpResponse.h"
+#import "MSIDAADAuthorityValidationRequest.h"
 
 // Trusted realm for webFinger
 #define TRUSTED_REALM       @"http://schemas.microsoft.com/rel/trusted-realm"
@@ -59,6 +57,8 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
                                         context:(id<MSALRequestContext>)context
                                 completionBlock:(OpenIDConfigEndpointCallback)completionBlock
 {
+    CHECK_ERROR_COMPLETION(completionBlock, context, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
+    
     if (!validate || [MSALAuthority isKnownHost:authority])
     {
         NSString *endpoint = [self defaultOpenIdConfigurationEndpointForAuthority:authority];
@@ -132,16 +132,27 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
                                completionBlock:(void (^)(MSALDrsDiscoveryResponse *response, NSError *error))completionBlock
 {
     CHECK_ERROR_COMPLETION(domain, context, MSALErrorInvalidParameter, @"Domain cannot be nil.");
+    CHECK_ERROR_COMPLETION(completionBlock, context, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
     
-    MSALWebAuthRequest *request =
-    [[MSALWebAuthRequest alloc] initWithURL:[MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:domain adfsType:type]
-                                    context:context];
-    
-    [request sendGet:^(MSALHttpResponse *response, NSError *error) {
+    NSURL *url = [MSALAdfsAuthorityResolver urlForDrsDiscoveryForDomain:domain adfsType:type];
+    MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
+                                                                                                context:context];
+    [request sendWithBlock:^(id response, NSError *error) {
+        
+        [request finishAndInvalidate];
+        
         CHECK_COMPLETION(!error);
         
+        if(response && ![response isKindOfClass:[NSDictionary class]])
+        {
+            NSError *localError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        NSDictionary *responseDic = (NSDictionary *)response;
         NSError *jsonError = nil;
-        MSALDrsDiscoveryResponse *drsResponse = [[MSALDrsDiscoveryResponse alloc] initWithData:response.body
+        MSALDrsDiscoveryResponse *drsResponse = [[MSALDrsDiscoveryResponse alloc] initWithJson:responseDic
                                                                                          error:&jsonError];
         if (jsonError)
         {
@@ -159,6 +170,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
 {
     NSString *domain = [self getUPNSuffix:upn];
     CHECK_ERROR_COMPLETION(domain, context, MSALErrorInvalidParameter, @"User principal name (UPN) is invalid.");
+    CHECK_ERROR_COMPLETION(completionBlock, context, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
     
     [self queryEnrollmentServerEndpointForDomain:domain
                                         adfsType:MSAL_ADFS_ON_PREMS
@@ -207,15 +219,25 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     CHECK_ERROR_COMPLETION(authenticationEndpoint, context, MSALErrorInvalidParameter, @"AuthenticationEndpoint cannot be nil.");
     CHECK_ERROR_COMPLETION(authority, context, MSALErrorInvalidParameter, @"authority cannot be nil.");
     
-    MSALWebAuthRequest *request =
-    [[MSALWebAuthRequest alloc] initWithURL:[MSALAdfsAuthorityResolver urlForWebFinger:authenticationEndpoint absoluteAuthority:authority.absoluteString]
-                                    context:context];
-    
-    [request sendGet:^(MSALHttpResponse *response, NSError *error) {
+    NSURL *webfingerUrl = [MSALAdfsAuthorityResolver urlForWebFinger:authenticationEndpoint absoluteAuthority:authority.absoluteString];
+    MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:webfingerUrl
+                                                                                                context:context];
+    [request sendWithBlock:^(id response, NSError *error) {
+        
+        [request finishAndInvalidate];
+        
         CHECK_COMPLETION(!error);
         
+        if(response && ![response isKindOfClass:[NSDictionary class]])
+        {
+            NSError *localError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        NSDictionary *responseDic = (NSDictionary *)response;
         NSError *jsonError = nil;
-        MSALWebFingerResponse *webFingerResponse = [[MSALWebFingerResponse alloc] initWithData:response.body error:&jsonError];
+        MSALWebFingerResponse *webFingerResponse = [[MSALWebFingerResponse alloc] initWithJson:responseDic error:&jsonError];
         
         if (jsonError)
         {
@@ -252,7 +274,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     for (MSALWebFingerLink *link in links)
     {
         if ([link.rel caseInsensitiveCompare:TRUSTED_REALM] == NSOrderedSame &&
-            [[NSURL URLWithString:link.href] msidIsEquivalentAuthority:authority])
+            [[NSURL URLWithString:link.href] msidIsEquivalentAuthorityHost:authority])
         {
             return YES;
         }
