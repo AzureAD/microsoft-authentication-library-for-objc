@@ -171,8 +171,6 @@ static MSALScopes *s_reservedScopes = nil;
     
     [authRequest sendWithBlock:^(id response, NSError *error) {
         
-        [authRequest finishAndInvalidate];
-        
         if (error)
         {
             if(completionBlock) completionBlock(nil, error);
@@ -192,14 +190,14 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!tokenResponse)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, localError);
             return;
         }
         
         localError = nil;
         if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, localError);
             return;
         }
         
@@ -221,7 +219,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!isSaved)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, localError);
             return;
         }
         
@@ -230,8 +228,8 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!accessToken || !idToken)
         {
-            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
-            completionBlock(nil, userMismatchError);
+            NSError *responseError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+            completionBlock(nil, responseError);
             return;
         }
         
