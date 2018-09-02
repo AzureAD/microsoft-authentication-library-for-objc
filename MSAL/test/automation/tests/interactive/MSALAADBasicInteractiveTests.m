@@ -227,6 +227,60 @@
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
+- (void)testInteractiveAADLogin_withNonConvergedApp_andInsufficientScopes_andForceLogin
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.scopes = @"user.read tasks.read address";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.account;
+
+    // Run interactive
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self acceptAuthSessionDialog];
+    [self aadEnterPassword];
+    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
+
+    // Verify error and granted/declined scopes contents
+    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    NSDictionary *resultContent = [self resultDictionary];
+    NSArray *declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
+    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+
+    NSArray *grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
+    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
+    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+
+    [self closeResultView];
+
+    // Now run silent with insufficient scopes
+    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = self.primaryAccount.homeAccountId;
+    config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+
+    // Verify error and granted/declined scopes contents
+    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    resultContent = [self resultDictionary];
+    declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
+    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+
+    grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
+    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
+    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+
+    [self closeResultView];
+
+    // Now run silent with correct scopes
+    request.cacheAuthority = request.authority;
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = @[@"user.read", @"tasks.read", @"openid", @"profile"];
+
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
 #pragma mark - Prompt behavior
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSelectAccount

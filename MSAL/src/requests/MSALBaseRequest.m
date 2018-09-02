@@ -199,7 +199,7 @@ static MSALScopes *s_reservedScopes = nil;
         NSError *verificationError = nil;
         if (![self verifyTokenResponse:tokenResponse error:&verificationError])
         {
-            completionBlock(nil, verificationError);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:verificationError]);
             return;
         }
         
@@ -215,6 +215,13 @@ static MSALScopes *s_reservedScopes = nil;
             return;
         }
 
+        NSError *scopesError = nil;
+        if (![self verifyScopesWithResponse:tokenResponse error:&scopesError])
+        {
+            completionBlock(nil, scopesError);
+            return;
+        }
+
         NSError *resultError = nil;
         MSALResult *result = [self resultFromTokenResponse:tokenResponse error:&resultError];
         completionBlock(result, resultError);
@@ -226,7 +233,7 @@ static MSALScopes *s_reservedScopes = nil;
 {
     NSError *msidError = nil;
 
-    if (![self.oauth2Factory verifyResponse:tokenResponse context:nil configuration:_parameters.msidConfiguration error:&msidError])
+    if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&msidError])
     {
         if (error) *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
         return NO;
@@ -259,6 +266,38 @@ static MSALScopes *s_reservedScopes = nil;
 
     MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
     return result;
+}
+
+- (BOOL)verifyScopesWithResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                           error:(NSError **)error
+{
+    /*
+        If server returns less scopes than developer requested,
+        we'd like to throw an error and specify which scopes were granted and which ones not
+     */
+
+    NSOrderedSet *grantedScopes = [tokenResponse.scope scopeSet];
+    MSIDConfiguration *configuration = _parameters.msidConfiguration;
+
+    if (![configuration.scopes isSubsetOfOrderedSet:grantedScopes])
+    {
+        if (error)
+        {
+            NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
+            additionalUserInfo[MSALGrantedScopesKey] = [grantedScopes array];
+
+            NSMutableOrderedSet *requestedScopeSet = [configuration.scopes mutableCopy];
+            [requestedScopeSet minusOrderedSet:grantedScopes];
+
+            additionalUserInfo[MSALDeclinedScopesKey] = [requestedScopeSet array];
+
+            *error = MSALCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, additionalUserInfo);
+        }
+
+        return NO;
+    }
+
+    return YES;
 }
 
 - (MSIDTokenRequest *)tokenRequest

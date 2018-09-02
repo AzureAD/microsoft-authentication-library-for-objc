@@ -56,6 +56,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInternal);
         STRING_CASE(MSALErrorUserNotFound);
         STRING_CASE(MSALErrorUnhandledResponse);
+        STRING_CASE(MSALErrorServerDeclinedScopes);
             
         default:
             return [NSString stringWithFormat:@"Unmapped Error %ld", (long)code];

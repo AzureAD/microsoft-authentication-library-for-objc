@@ -817,7 +817,7 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorServerInsufficientScopes);
+         XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
 
          NSArray *grantedScopesArr = @[@"fakescope1", @"fakescope2", @"additional.scope", @"additional.scope2"];
          XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);
@@ -899,7 +899,7 @@
                                  XCTAssertNotNil(error);
                                  XCTAssertNil(result);
                                  XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-                                 XCTAssertEqual(error.code, MSALErrorServerInsufficientScopes);
+                                 XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
 
                                  NSArray *grantedScopesArr = @[@"user.read", @"fakescope1", @"additional.scope", @"additional.scope2"];
                                  XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);

@@ -143,7 +143,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorUnhandledResponse              = -42006,
 
-    MSALErrorServerInsufficientScopes       = -42007,
+    MSALErrorServerDeclinedScopes           = -42007,
 
     /*! 
         The passed in authority URL does not pass validation.

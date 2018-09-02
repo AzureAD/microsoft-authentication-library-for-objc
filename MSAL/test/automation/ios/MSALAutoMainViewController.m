@@ -617,6 +617,8 @@
         {
             errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
         }
+
+        errorDictionary[@"user_info"] = error.userInfo;
     }
     else if ([error.domain isEqualToString:MSIDErrorDomain])
     {
