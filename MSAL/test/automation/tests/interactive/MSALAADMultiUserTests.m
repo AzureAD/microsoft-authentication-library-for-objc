@@ -147,14 +147,7 @@
     [signIn msidTap];
 
     // Select to enter different account
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", @"Use another account, Use another account"];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:@"Use another account"];
 
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];
