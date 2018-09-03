@@ -74,7 +74,7 @@
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@?%@", tenantDiscoveryEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode]
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@", tenantDiscoveryEndpoint]
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"
@@ -125,7 +125,7 @@
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@?%@", tenantDiscoveryEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode]
+    MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@", tenantDiscoveryEndpoint]
                                                            requestHeaders:reqHeaders
                                                         requestParamsBody:nil
                                                         responseURLString:@"https://someresponseurl.com"

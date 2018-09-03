@@ -145,7 +145,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
     
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
@@ -387,7 +387,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
@@ -531,7 +531,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
@@ -640,7 +640,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
    
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url

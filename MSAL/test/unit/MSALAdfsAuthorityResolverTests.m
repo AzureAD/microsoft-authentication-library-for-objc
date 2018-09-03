@@ -86,11 +86,9 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     NSDictionary *resultJson = customResponse? customResponse :
     @{ @"IdentityProviderService" : @{ @"PassiveAuthEndpoint" : @"https://fs.fabrikam.com/adfs/ls" }};
     
-    NSString *urlFormat = onPrems?
-    @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0&%@" :
-    @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0&%@";
-    
-    NSString *url = [NSString stringWithFormat:urlFormat, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = onPrems?
+    @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0" :
+    @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0";
     
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
@@ -110,7 +108,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    NSString *url = [NSString stringWithFormat:@"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://enterpriseregistration.contoso.com/enrollmentserver/contract?api-version=1.0";
     [MSIDTestURLSession addResponse:
      [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                               requestHeaders:reqHeaders
@@ -125,7 +123,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    NSString *url = [NSString stringWithFormat:@"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://enterpriseregistration.windows.net/contoso.com/enrollmentserver/contract?api-version=1.0";
     [MSIDTestURLSession addResponse:
      [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                               requestHeaders:reqHeaders
@@ -142,7 +140,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     NSDictionary *resultJson = customResponse? customResponse :
     @{ @"links" : @[@{ @"rel" : TRUSTED_REALM, @"href" : @"https://fs.fabrikam.com/adfs/"}]};
     
-    NSString *url = [NSString stringWithFormat:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders

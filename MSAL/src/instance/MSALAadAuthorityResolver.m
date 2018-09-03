@@ -77,8 +77,6 @@
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
         
-        [request finishAndInvalidate];
-
          if (error)
          {
              completionBlock(nil, error);
