@@ -170,7 +170,6 @@ static MSALScopes *s_reservedScopes = nil;
     MSIDTokenRequest *authRequest = [self tokenRequest];
     
     [authRequest sendWithBlock:^(id response, NSError *error) {
-        
         if (error)
         {
             if(completionBlock) completionBlock(nil, error);
