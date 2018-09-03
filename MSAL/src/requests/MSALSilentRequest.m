@@ -90,7 +90,7 @@
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [self stopTelemetryEvent:event error:error];
 
-            completionBlock(nil, error);
+            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
             return;
         }
         
@@ -166,7 +166,7 @@
                  error = nil;
              }
              
-             completionBlock(result, error);
+             completionBlock(result, [MSALErrorConverter MSALErrorFromMSIDError:error]);
          }];
     }];
 }
