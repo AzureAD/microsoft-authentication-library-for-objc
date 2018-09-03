@@ -85,7 +85,7 @@
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
+- (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
@@ -95,6 +95,8 @@
     request.testAccount = self.primaryAccount;
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
     request.webViewType = MSALWebviewTypeWKWebView;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -116,7 +118,7 @@
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
+- (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
@@ -127,6 +129,8 @@
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
     request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.account;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
@@ -136,7 +140,7 @@
     [self assertAccessTokenNotNil];
 }
 
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
+- (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
@@ -145,6 +149,8 @@
     request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
     request.testAccount = self.primaryAccount;
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     [self runSharedAADLoginWithTestRequest:request];
