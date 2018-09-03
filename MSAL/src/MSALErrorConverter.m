@@ -35,14 +35,13 @@ static NSDictionary *s_userInfoKeyMapping;
 
 @implementation MSALErrorConverter
 
++ (void)load
+{
+    MSIDErrorConverter.errorConverter = [MSALErrorConverter new];
+}
+
 + (void)initialize
 {
-    if (self == [MSALErrorConverter self])
-    {
-        MSIDErrorConverter.errorConverter = [MSALErrorConverter new];
-    }
-
-
     s_errorDomainMapping = @{
                              MSIDErrorDomain : MSALErrorDomain,
                              MSIDOAuthErrorDomain : MSALErrorDomain,
