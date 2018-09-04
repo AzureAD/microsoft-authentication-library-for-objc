@@ -30,7 +30,6 @@
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
-static NSDictionary *s_errorCodeMapping2;
 static NSDictionary *s_userInfoKeyMapping;
 
 @implementation MSALErrorConverter
@@ -113,7 +112,7 @@ static NSDictionary *s_userInfoKeyMapping;
     NSString *msalDomain = domain;
 
     // Map domain
-    if (msalDomain && s_errorDomainMapping[domain])
+    if (s_errorDomainMapping[domain])
     {
         msalDomain = s_errorDomainMapping[domain];
     }
