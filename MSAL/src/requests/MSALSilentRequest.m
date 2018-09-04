@@ -182,13 +182,13 @@
 
 - (BOOL)isServerUnavailable:(NSError *)error
 {
-    if (![error.domain isEqualToString:MSIDHttpErrorCodeDomain])
+    if (![error.domain isEqualToString:MSALErrorDomain])
     {
         return NO;
     }
     
-    NSInteger responseCode = [[error.userInfo objectForKey:MSIDHTTPResponseCodeKey] intValue];
-    return error.code == MSIDErrorServerUnhandledResponse && responseCode >= 500 && responseCode <= 599;
+    NSInteger responseCode = [[error.userInfo objectForKey:MSALHTTPResponseCodeKey] intValue];
+    return error.code == MSALErrorUnhandledResponse && responseCode >= 500 && responseCode <= 599;
 }
 
 @end
