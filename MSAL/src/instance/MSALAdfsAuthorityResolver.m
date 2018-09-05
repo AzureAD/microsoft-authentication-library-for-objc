@@ -138,9 +138,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
-        
-        [request finishAndInvalidate];
-        
+
         CHECK_COMPLETION(!error);
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
@@ -223,9 +221,7 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:webfingerUrl
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
-        
-        [request finishAndInvalidate];
-        
+                
         CHECK_COMPLETION(!error);
         
         if(response && ![response isKindOfClass:[NSDictionary class]])

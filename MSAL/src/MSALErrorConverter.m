@@ -62,6 +62,7 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
+                                   @(MSIDErrorServerUnhandledResponse): @(MSALErrorUnhandledResponse)
                                    },
                            MSIDOAuthErrorDomain:@{
                                    @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),

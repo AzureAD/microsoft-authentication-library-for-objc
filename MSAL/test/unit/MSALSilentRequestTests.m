@@ -275,7 +275,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
@@ -378,7 +378,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/token";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url UT_SLICE_PARAMS_QUERY
                            requestHeaders:reqHeaders
@@ -560,7 +560,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
@@ -717,7 +717,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
@@ -828,7 +828,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders

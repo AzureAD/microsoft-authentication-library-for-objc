@@ -50,7 +50,7 @@
        };
     
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration?%@", authority, self.defaultQueryParameters.msidURLFormEncode]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
                            requestHeaders:oidcReqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
@@ -69,22 +69,24 @@
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
     [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
-    
+
+    NSString *queryString = query ? [NSString stringWithFormat:@"?%@", query] : @"";
+
     NSDictionary *oidcJson =
-    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", responseAuthority, query],
-       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize?%@", responseAuthority, query],
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token%@", responseAuthority, queryString],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize%@", responseAuthority, queryString],
        @"issuer" : @"issuer"
        };
-    
+
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration?%@", authority, self.defaultQueryParameters.msidURLFormEncode]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
                            requestHeaders:oidcReqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
                          dictionaryAsJSON:oidcJson];
-    
+
     return oidcResponse;
 }
 
@@ -100,7 +102,7 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, self.defaultQueryParameters.msidURLFormEncode]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token", authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],
@@ -149,7 +151,6 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
-    [tokenQPs addEntriesFromDictionary:self.defaultQueryParameters];
     if (query)
     {
         [tokenQPs addEntriesFromDictionary:[NSDictionary msidURLFormDecode:query]];

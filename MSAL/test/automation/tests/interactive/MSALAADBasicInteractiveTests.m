@@ -247,14 +247,8 @@
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
+    [self selectAccountWithTitle:self.primaryAccount.account];
 
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 }
@@ -279,14 +273,7 @@
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:self.primaryAccount.account];
 
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
     [self waitForElement:permissionText];
@@ -501,14 +488,7 @@
     // 2. Now call acquire token with force consent
     [self acquireToken:config];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:self.primaryAccount.account];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
@@ -564,14 +544,7 @@
     // 3. Now call acquire token with force consent
     [self acquireToken:config];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:self.primaryAccount.account];
 
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
     [self waitForElement:permissionText];
@@ -604,14 +577,7 @@
     // 2. Now call acquire token with force consent
     [self acquireToken:config];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:self.primaryAccount.account];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
