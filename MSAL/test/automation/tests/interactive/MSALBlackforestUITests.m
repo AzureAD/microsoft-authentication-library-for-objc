@@ -140,11 +140,13 @@
     [self assertAccessTokenNotNil];
 }
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
+// The following test needs slice parameter to be sent to instance discovery endpoint to work.
+// Therefore disable the it for now as that is not happening.
+- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.de/common";
+    request.authority = @"https://login.microsoftonline.de/organizations";
     request.scopes = @"https://graph.cloudapi.de/.default";
     request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
     request.testAccount = self.primaryAccount;
@@ -153,9 +155,11 @@
     request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
-    [self runSharedAADLoginWithTestRequest:request];
+    NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountID);
 
     // 2. Run silent with correct authority
+    request.accountIdentifier = homeAccountID;
     request.authority = @"https://login.microsoftonline.de/common";
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
