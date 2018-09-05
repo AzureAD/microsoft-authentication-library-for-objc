@@ -873,4 +873,125 @@
      }];
 }
 
+- (void)testSilentRequest_whenResiliencyErrorReturned_shouldRetryRequestOnceAndSucceed
+{
+    NSError *error = nil;
+    NSUUID *correlationId = [NSUUID new];
+
+    MSALRequestParameters *parameters = [MSALRequestParameters new];
+    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
+    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
+    parameters.clientId = UNIT_TEST_CLIENT_ID;
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.correlationId = correlationId;
+    parameters.urlSession = [MSIDTestURLSession createMockSession];
+    parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    parameters.account = account;
+
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
+    //store at & rt in cache
+    NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
+                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
+    MSIDAADV2TokenResponse *msidResponse =
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
+                                                             @"access_token": @"access_token",
+                                                             @"refresh_token": @"fakeRefreshToken",
+                                                             @"authority" : @"https://login.microsoftonline.com/common",
+                                                             @"scope": @"fakescope1 fakescope2",
+                                                             @"client_id": UNIT_TEST_CLIENT_ID,
+                                                             @"id_token": rawIdToken,
+                                                             @"client_info": rawClientInfo,
+                                                             @"expires_on" : @"1"
+                                                             }
+                                                     error:nil];
+
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
+                                                              response:msidResponse
+                                                               context:nil
+                                                                 error:nil];
+    XCTAssertTrue(result);
+
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
+
+    // Create failing response first
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice";
+    MSIDTestURLResponse *failingResponse =
+    [MSIDTestURLResponse requestURLString:url
+                           requestHeaders:reqHeaders
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
+                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
+                                             @"grant_type" : @"refresh_token",
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
+                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+                             responseCode:500
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:nil];
+
+    [failingResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
+    [MSIDTestURLSession addResponse:failingResponse];
+
+    // Now create successful response
+    MSIDTestURLResponse *successfulResponse =
+    [MSIDTestURLResponse requestURLString:url
+                           requestHeaders:reqHeaders
+                        requestParamsBody:@{ @"client_id" : UNIT_TEST_CLIENT_ID,
+                                             @"scope" : @"fakescope1 fakescope2 openid profile offline_access",
+                                             @"grant_type" : @"refresh_token",
+                                             @"refresh_token" : @"fakeRefreshToken",
+                                             @"client_info" : @"1"}
+                        responseURLString:@"https://login.microsoftonline.com/common/oauth2/v2.0/token"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{@"access_token": @"I am an updated access token",
+                                                @"refresh_token" : @"i am a refresh token",
+                                                @"id_token_expires_in" : @"1200",
+                                                @"id_token": @"I'm an id token",
+                                                @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]
+                                             }];
+
+    [successfulResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
+    [MSIDTestURLSession addResponse:successfulResponse];
+
+    MSALSilentRequest *request =
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+
+    XCTAssertNotNil(request);
+    XCTAssertNil(error);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+
+    [request run:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"I am an updated access token");
+         XCTAssertNil(error);
+
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
+     {
+         XCTAssertNil(error);
+     }];
+}
+
 @end
