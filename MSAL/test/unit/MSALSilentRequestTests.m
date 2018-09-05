@@ -932,7 +932,7 @@
     [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     // Create failing response first
-    NSString *url = [NSString stringWithFormat:@"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice&%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token?slice=myslice";
     MSIDTestURLResponse *failingResponse =
     [MSIDTestURLResponse requestURLString:url
                            requestHeaders:reqHeaders
