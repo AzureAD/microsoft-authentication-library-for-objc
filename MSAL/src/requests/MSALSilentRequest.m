@@ -90,7 +90,7 @@
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [self stopTelemetryEvent:event error:error];
 
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+            completionBlock(nil, error);
             return;
         }
         
@@ -130,8 +130,7 @@
 
     if (msidError)
     {
-        NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
-        completionBlock(nil, msalError);
+        completionBlock(nil, msidError);
         return;
     }
     
@@ -166,7 +165,7 @@
                  error = nil;
              }
              
-             completionBlock(result, [MSALErrorConverter MSALErrorFromMSIDError:error]);
+             completionBlock(result, error);
          }];
     }];
 }
@@ -182,13 +181,13 @@
 
 - (BOOL)isServerUnavailable:(NSError *)error
 {
-    if (![error.domain isEqualToString:MSIDHttpErrorCodeDomain])
+    if (![error.domain isEqualToString:MSALErrorDomain])
     {
         return NO;
     }
     
-    NSInteger responseCode = [[error.userInfo objectForKey:MSIDHTTPResponseCodeKey] intValue];
-    return error.code == MSIDErrorServerUnhandledResponse && responseCode >= 500 && responseCode <= 599;
+    NSInteger responseCode = [[error.userInfo objectForKey:MSALHTTPResponseCodeKey] intValue];
+    return error.code == MSALErrorUnhandledResponse && responseCode >= 500 && responseCode <= 599;
 }
 
 @end

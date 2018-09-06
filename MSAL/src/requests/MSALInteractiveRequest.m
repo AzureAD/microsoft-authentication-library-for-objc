@@ -142,9 +142,8 @@
     {
         if (error)
         {
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
+            completionBlock(nil, error);
             return;
         }
 
@@ -168,9 +167,8 @@
             }
             
 
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:oauthResponse.oauthError];
+            completionBlock(nil, oauthResponse.oauthError);
             return;
         }
         
