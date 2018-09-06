@@ -38,6 +38,7 @@ extern NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
 @property (nonatomic, strong) NSString *uiBehavior;
 @property (nonatomic, strong) NSString *accountIdentifier;
 @property (nonatomic, strong) NSString *loginHint;
+@property (nonatomic, strong) NSString *claims;
 @property (nonatomic, strong) MSIDTestAccount *testAccount;
 @property (nonatomic) BOOL usePassedWebView;
 @property (nonatomic) MSALWebviewType webViewType;

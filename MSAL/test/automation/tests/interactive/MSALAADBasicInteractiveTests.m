@@ -583,4 +583,63 @@
     [self closeResultView];
 }
 
+- (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview
+{
+    NSArray *expectedResultScopes = @[@"user.read",
+                                      @"tasks.read",
+                                      @"openid",
+                                      @"profile"];
+    
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = expectedResultScopes;
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.webViewType = MSALWebviewTypeWKWebView;
+    
+    // 1. Run interactive without claims, which should succeed
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    
+    XCTAssertNotNil(homeAccountId);
+
+    request.accountIdentifier = homeAccountId;
+    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    
+    // 2. Run interactive with claims, which should prompt for Intune/Broker installation
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    [self aadEnterPassword];
+    
+    XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
+    [self waitForElement:registerButton];
+}
+
+- (void)testClaimsChallenge_withNonConvergedApp_withSystemWebview
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.scopes = @"https://graph.microsoft.com/.default";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.uiBehavior = @"force";
+    
+    // 1. Run interactive without claims, which should succeed
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    
+    XCTAssertNotNil(homeAccountId);
+    
+    request.accountIdentifier = homeAccountId;
+    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    
+    // 2. Run interactive with claims, which should prompt for Intune/Broker installation
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self acceptAuthSessionDialogIfNecessary:request];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    [self aadEnterPassword];
+    
+    XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
+    [self waitForElement:registerButton];
+}
+
 @end

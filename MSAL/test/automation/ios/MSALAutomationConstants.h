@@ -40,6 +40,7 @@ extern NSString *const MSAL_FORCE_REFRESH_PARAM;
 extern NSString *const MSAL_USER_ENVIRONMENT_PARAM;
 extern NSString *const MSAL_REDIRECT_URI_PARAM;
 extern NSString *const MSAL_LOGIN_HINT_PARAM;
+extern NSString *const MSAL_CLAIMS_PARAM;
 
 extern NSString *const MSAL_AUTOMATION_ERROR_PARAM;
 extern NSString *const MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM;

@@ -400,6 +400,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     if (request.authority) additionalConfig[@"authority"] = request.authority;
     if (request.scopes) additionalConfig[@"scopes"] = request.scopes;
     if (request.loginHint) additionalConfig[@"login_hint"] = request.loginHint;
+    if (request.claims) additionalConfig[@"claims"] = request.claims;
 
     if (request.usePassedWebView)
     {
