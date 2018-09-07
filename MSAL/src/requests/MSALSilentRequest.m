@@ -130,8 +130,7 @@
 
     if (msidError)
     {
-        NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
-        completionBlock(nil, msalError);
+        completionBlock(nil, msidError);
         return;
     }
     

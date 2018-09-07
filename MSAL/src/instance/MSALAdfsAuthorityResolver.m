@@ -31,7 +31,6 @@
 #import "MSALDrsDiscoveryResponse.h"
 #import "MSALWebFingerResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
-#import "MSALErrorConverter.h"
 
 // Trusted realm for webFinger
 #define TRUSTED_REALM       @"http://schemas.microsoft.com/rel/trusted-realm"
@@ -139,14 +138,8 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
-        
-        [request finishAndInvalidate];
-        
-        if (error)
-        {
-            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-            return;
-        }
+
+        CHECK_COMPLETION(!error);
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
@@ -228,14 +221,8 @@ static NSString *const s_kWebFingerError    = @"WebFinger request was invalid or
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:webfingerUrl
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
-        
-        [request finishAndInvalidate];
-        
-        if (error)
-        {
-            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-            return;
-        }
+                
+        CHECK_COMPLETION(!error);
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {

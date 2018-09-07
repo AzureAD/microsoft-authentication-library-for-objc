@@ -122,4 +122,17 @@
     return homeAccountId;
 }
 
+- (void)selectAccountWithTitle:(NSString *)accountTitle
+{
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", accountTitle];
+
+    XCUIElement *element = [[self.testApp.staticTexts containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
+}
+
 @end

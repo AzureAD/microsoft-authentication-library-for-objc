@@ -171,13 +171,20 @@
     {
         return nil;
     }
-    REQUIRED_PARAMETER(clientId, nil);
+
+    if ([NSString msidIsStringNilOrBlank:clientId])
+    {
+        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"clientId is a required parameter and must not be nil or empty.");
+        return nil;
+    }
+
     _clientId = clientId;
 
     if (authority)
     {
         _authority = [MSALAuthority checkAuthorityString:authority error:error];
-        CHECK_RETURN_NIL(_authority);
+
+        if (!_authority) return nil;
     }
     else
     {
@@ -185,8 +192,10 @@
         _authority = [MSALAuthority defaultAuthority];
     }
 
-    CHECK_RETURN_NIL([self verifyRedirectUri:redirectUri clientId:clientId error:error]);
-    
+    BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
+
+    if (!redirectUriValid) return nil;
+
 #if TARGET_OS_IPHONE
     // Optional Paramater
     _keychainGroup = keychainGroup;
@@ -242,7 +251,7 @@
 
     if (msidError)
     {
-        *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        *error = msidError;
         return nil;
     }
 
@@ -744,7 +753,7 @@
 
     if (msidError && error)
     {
-        *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        *error = msidError;
     }
 
     return result;

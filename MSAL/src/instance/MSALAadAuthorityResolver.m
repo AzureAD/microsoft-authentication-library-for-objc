@@ -28,7 +28,6 @@
 #import "MSALAadAuthorityResolver.h"
 #import "MSALInstanceDiscoveryResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
-#import "MSALErrorConverter.h"
 
 @implementation MSALAadAuthorityResolver
 
@@ -78,13 +77,11 @@
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
         
-        [request finishAndInvalidate];
-
-        if (error)
-        {
-            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-            return;
-        }
+         if (error)
+         {
+             completionBlock(nil, error);
+             return;
+         }
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
@@ -107,8 +104,7 @@
          
          if ([NSString msidIsStringNilOrBlank:tenantDiscoverEndpoint])
          {
-             NSError *tenantDiscoveryError;
-             CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
+             NSError *tenantDiscoveryError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInvalidResponse, @"tenant_discovery_endpoint is not found in the response.");
              completionBlock(nil, tenantDiscoveryError);
              return;
          }

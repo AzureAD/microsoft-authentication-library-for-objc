@@ -28,7 +28,6 @@
 #import "MSALAuthorityBaseResolver.h"
 #import "MSALTenantDiscoveryResponse.h"
 #import "MSIDAADAuthorityValidationRequest.h"
-#import "MSALErrorConverter.h"
 
 @implementation MSALAuthorityBaseResolver
 
@@ -43,14 +42,8 @@
     MSIDAADAuthorityValidationRequest *request = [[MSIDAADAuthorityValidationRequest alloc] initWithUrl:url
                                                                                                 context:context];
     [request sendWithBlock:^(id response, NSError *error) {
-        
-        [request finishAndInvalidate];
-        
-        if (error)
-        {
-            if(completionBlock) completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-            return;
-        }
+                
+        CHECK_COMPLETION(!error);
         
         if(response && ![response isKindOfClass:[NSDictionary class]])
         {
@@ -77,9 +70,7 @@
             [NSString msidIsStringNilOrBlank:tokenEndpoint] ||
             [NSString msidIsStringNilOrBlank:issuer])
         {
-            MSALLogError(context, MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil,  __FUNCTION__, __LINE__);
-            
-            NSError *discoveryError = MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE, nil, nil, nil, nil);
+            NSError *discoveryError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInvalidResponse, TENANT_DISCOVERY_INVALID_RESPONSE_MESSAGE);
             completionBlock(nil, discoveryError);
             return;
         }

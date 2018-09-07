@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSIDError.h"
+#import "MSIDErrorConverter.h"
 
-@interface MSALErrorConverter : NSObject
-
-+ (NSError *)MSALErrorFromMSIDError:(NSError *)msidError;
+@interface MSALErrorConverter : NSObject <MSIDErrorConverting>
 
 @end
