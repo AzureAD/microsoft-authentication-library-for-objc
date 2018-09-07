@@ -234,6 +234,7 @@
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+        NSString *claims = parameters[MSAL_CLAIMS_PARAM];
 
         MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
 
@@ -273,6 +274,7 @@
                                        account:account
                                     uiBehavior:uiBehavior
                           extraQueryParameters:extraQueryParameters
+                                        claims:claims
                                      authority:nil // Will use the authority passed in with the application object
                                  correlationId:correlationId
                                completionBlock:^(MSALResult *result, NSError *error)

@@ -38,6 +38,7 @@ NSString *const MSAL_FORCE_REFRESH_PARAM                        = @"force_refres
 NSString *const MSAL_USER_ENVIRONMENT_PARAM                     = @"user_environment";
 NSString *const MSAL_REDIRECT_URI_PARAM                         = @"redirect_uri";
 NSString *const MSAL_LOGIN_HINT_PARAM                           = @"login_hint";
+NSString *const MSAL_CLAIMS_PARAM                               = @"claims";
 
 NSString *const MSAL_AUTOMATION_ERROR_PARAM                     = @"error";
 NSString *const MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM            = @"expired_access_token_count";
