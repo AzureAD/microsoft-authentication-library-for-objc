@@ -79,6 +79,7 @@
     request.authority = @"https://login.microsoftonline.com/common";
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -139,6 +140,7 @@
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -159,6 +161,7 @@
     request.cacheAuthority = request.authority;
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     [self runSharedAADLoginWithTestRequest:request];
@@ -171,6 +174,8 @@
     request.scopes = @"https://graph.microsoft.com/.default";
     request.authority = @"https://login.microsoftonline.com/common";
     request.uiBehavior = @"force";
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
@@ -217,6 +222,7 @@
     request.cacheAuthority = request.authority;
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -238,6 +244,8 @@
     request.expectedResultScopes = @[@"user.read"];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    
     [self runSharedAADLoginWithTestRequest:request];
 
     // Now call acquire token with select account
@@ -261,6 +269,7 @@
     request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     [self runSharedAADLoginWithTestRequest:request];
@@ -296,6 +305,7 @@
     request.loginHint = self.primaryAccount.username;
     request.uiBehavior = @"consent";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Sign in interactively
     NSDictionary *config = [self configWithTestRequest:request];
@@ -393,6 +403,7 @@
     request.uiBehavior = @"force";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     [self runSharedAADLoginWithTestRequest:request];
 }
@@ -407,6 +418,7 @@
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
@@ -427,6 +439,7 @@
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     [self runSharedAADLoginWithTestRequest:request];
 }
@@ -443,6 +456,7 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Sign in interactively
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -477,6 +491,7 @@
     request.loginHint = self.primaryAccount.username;
     request.usePassedWebView = YES;
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -504,6 +519,7 @@
     request.usePassedWebView = YES;
     request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.windows.net/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -530,6 +546,7 @@
     request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
     request.webViewType = MSALWebviewTypeSafariViewController;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -567,6 +584,7 @@
     request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
     request.webViewType = MSALWebviewTypeSafariViewController;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     [self runSharedAADLoginWithTestRequest:request];
 
@@ -581,6 +599,67 @@
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
+}
+
+- (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview
+{
+    NSArray *expectedResultScopes = @[@"user.read",
+                                      @"tasks.read",
+                                      @"openid",
+                                      @"profile"];
+    
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = expectedResultScopes;
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.webViewType = MSALWebviewTypeWKWebView;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    
+    // 1. Run interactive without claims, which should succeed
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    
+    XCTAssertNotNil(homeAccountId);
+
+    request.accountIdentifier = homeAccountId;
+    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    
+    // 2. Run interactive with claims, which should prompt for Intune/Broker installation
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    [self aadEnterPassword];
+    
+    XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
+    [self waitForElement:registerButton];
+}
+
+- (void)testClaimsChallenge_withNonConvergedApp_withSystemWebview
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.scopes = @"https://graph.microsoft.com/.default";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.uiBehavior = @"force";
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    
+    // 1. Run interactive without claims, which should succeed
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    
+    XCTAssertNotNil(homeAccountId);
+    
+    request.accountIdentifier = homeAccountId;
+    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    
+    // 2. Run interactive with claims, which should prompt for Intune/Broker installation
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self acceptAuthSessionDialogIfNecessary:request];
+    [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
+    [self aadEnterPassword];
+    
+    XCUIElement *registerButton = self.testApp.buttons[@"Get the app"];
+    [self waitForElement:registerButton];
 }
 
 @end
