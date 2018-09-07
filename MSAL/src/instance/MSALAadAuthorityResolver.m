@@ -104,8 +104,7 @@
          
          if ([NSString msidIsStringNilOrBlank:tenantDiscoverEndpoint])
          {
-             NSError *tenantDiscoveryError;
-             CREATE_ERROR_INVALID_RESULT(context, tenant_discovery_endpoint, tenantDiscoveryError);
+             NSError *tenantDiscoveryError = CREATE_MSAL_LOG_ERROR(context, MSALErrorInvalidResponse, @"tenant_discovery_endpoint is not found in the response.");
              completionBlock(nil, tenantDiscoveryError);
              return;
          }

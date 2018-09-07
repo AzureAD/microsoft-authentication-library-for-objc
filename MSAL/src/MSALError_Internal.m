@@ -62,88 +62,62 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     }
 }
 
-MSALErrorCode MSALErrorCodeForOAuthError(NSString *oauthError, MSALErrorCode defaultCode)
+extern void MSALLogError(id<MSALRequestContext> ctx, NSError *error, const char *function, int line)
 {
-    if ([oauthError isEqualToString:@"invalid_request"])
-    {
-        return MSALErrorInvalidRequest;
-    }
-    if ([oauthError isEqualToString:@"invalid_client"])
-    {
-        return MSALErrorInvalidClient;
-    }
-    if ([oauthError isEqualToString:@"invalid_scope"])
-    {
-        return MSALErrorInvalidParameter;
-    }
-    
-    return defaultCode;
-}
+    NSString *codeString = nil;
 
-void MSALLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, const char *function, int line)
-{
-    NSString *codeString;
-    if ([domain isEqualToString:MSALErrorDomain])
+    if ([error.domain isEqualToString:MSALErrorDomain])
     {
-        codeString = MSALStringForErrorCode(code);
+        codeString = [NSString stringWithFormat:@"Error domain: \"%@\" Code: \"%@\"", error.domain, MSALStringForErrorCode(error.code)];
     }
     else
     {
-        codeString = domain;
+        codeString = [NSString stringWithFormat:@"Error domain: \"%@\" Code: \"%ld\"", error.domain, (long)error.code];
     }
-    
+
     NSMutableString *message = [codeString mutableCopy];
     NSMutableString *messagePII = [codeString mutableCopy];
-    if (oauthError)
+
+    if (error.userInfo[MSALOAuthErrorKey])
     {
-        [message appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\"}", oauthError, subError];
-        [messagePII appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\" Description:\"%@\"}", oauthError, subError, errorDescription];
+        [message appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\"}", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey]];
+        [messagePII appendFormat:@": {OAuth Error \"%@\" SubError: \"%@\" Description:\"%@\"}", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error.description];
     }
     else
     {
-        [messagePII appendFormat:@": %@", errorDescription];
+         [messagePII appendFormat:@": %@", error.description];
     }
-    
+
     [message appendFormat:@" (%s:%d)", function, line];
     [messagePII appendFormat:@" (%s:%d)", function, line];
     MSID_LOG_ERROR(ctx, @"%@", message);
     MSID_LOG_ERROR_PII(ctx, @"%@", messagePII);
 }
 
-NSError *MSALCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError* underlyingError, NSDictionary* additionalUserInfo)
-{
-    NSMutableDictionary* userInfo = [NSMutableDictionary new];
-    userInfo[MSALErrorDescriptionKey] = errorDescription;
-    userInfo[MSALOAuthErrorKey] = oauthError;
-    userInfo[MSALOAuthSubErrorKey] = subError;
-    userInfo[NSUnderlyingErrorKey]  = underlyingError;
-    
-    [userInfo addEntriesFromDictionary:additionalUserInfo];
-    
-    return [NSError errorWithDomain:domain code:code userInfo:[NSDictionary dictionaryWithDictionary:userInfo]];
-}
-
-NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
-    
-    MSALLogError(ctx, domain, code, description, oauthError, subError, function, line);
-    return MSALCreateError(domain, code, description, oauthError, subError, underlyingError, nil);
+
+    NSError *error = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    MSALLogError(ctx, error, function, line);
+    return error;
 }
 
-void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, const char *function, int line, NSString *format, ...)
+void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
+
+    NSError *msalError = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    MSALLogError(ctx, msalError, function, line);
     
-    MSALLogError(ctx, domain, code, description, oauthError, subError, function, line);
     if (error)
     {
-        *error = MSALCreateError(domain, code, description, oauthError, subError, underlyingError, nil);
+        *error = msalError;
     }
 }

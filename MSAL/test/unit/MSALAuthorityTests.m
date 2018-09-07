@@ -346,8 +346,9 @@
          (void)validate;
          (void)context;
          (void)completionBlock;
-         
-         completionBlock(nil, MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil, nil));
+
+         NSError *msidError = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil, nil, nil);
+         completionBlock(nil, msidError);
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
@@ -404,8 +405,9 @@
          (void)authority;
          (void)context;
          (void)completionBlock;
-         
-         completionBlock(nil, MSALCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil, nil));
+
+         NSError *msidError = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidResponse, @"Invalid response", nil, nil, nil, nil, nil);
+         completionBlock(nil, msidError);
      }];
     
     [MSALAuthority resolveEndpointsForAuthority:validAadAuthority
