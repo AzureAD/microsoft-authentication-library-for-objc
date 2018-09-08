@@ -153,13 +153,13 @@
     NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
     if (query)
     {
-        [tokenQPs addEntriesFromDictionary:[NSDictionary msidURLFormDecode:query]];
+        [tokenQPs addEntriesFromDictionary:[NSDictionary msidDictionaryFromWWWFormURLEncodedString:query]];
     }
     
     NSString *requestUrlStr = nil;
     if (tokenQPs.count > 0)
     {
-        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msidURLFormEncode]];
+        requestUrlStr = [NSString stringWithFormat:@"%@/v2.0/oauth/token?%@", authority, [tokenQPs msidWWWFormURLEncode]];
     }
     else
     {

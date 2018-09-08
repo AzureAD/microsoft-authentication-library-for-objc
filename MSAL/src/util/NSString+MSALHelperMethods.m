@@ -47,7 +47,7 @@
         return nil;
     }
     
-    return [NSString msidBase64UrlEncodeData:data];
+    return [NSString msidBase64UrlEncodedStringFromData:data];
 }
 
 @end

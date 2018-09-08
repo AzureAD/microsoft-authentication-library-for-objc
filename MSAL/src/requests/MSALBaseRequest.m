@@ -253,7 +253,7 @@ static MSALScopes *s_reservedScopes = nil;
         tokenEndpoint.host = _parameters.cloudAuthority.host;
     }
     
-    NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
+    NSMutableDictionary *endpointQPs = [[NSDictionary msidDictionaryFromWWWFormURLEncodedString:tokenEndpoint.percentEncodedQuery] mutableCopy];
     
     if (!endpointQPs)
     {
@@ -265,7 +265,7 @@ static MSALScopes *s_reservedScopes = nil;
         [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
     }
     
-    tokenEndpoint.query = [endpointQPs msidURLFormEncode];
+    tokenEndpoint.query = [endpointQPs msidWWWFormURLEncode];
     
     return tokenEndpoint.URL;
 }

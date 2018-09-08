@@ -48,6 +48,7 @@
 #import "NSString+MSIDExtensions.h"
 #import "MSAL_Internal.h"
 #import "MSALPassedInWebController.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -230,7 +231,7 @@
         
         MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
         
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+        NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_SCOPES_PARAM]];
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
@@ -335,7 +336,7 @@
             return;
         }
         
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+        NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_SCOPES_PARAM]];
         BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         

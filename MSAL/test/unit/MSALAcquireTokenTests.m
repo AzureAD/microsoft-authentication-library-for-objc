@@ -244,7 +244,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
@@ -329,7 +329,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
@@ -450,7 +450,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
