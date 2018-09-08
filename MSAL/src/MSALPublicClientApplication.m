@@ -608,6 +608,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
+    params.claims = [NSString msidIsStringNilOrBlank:claims] ? nil : claims;
     params.unvalidatedAuthority = authority.msidAuthority ?: _authority.msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
