@@ -34,16 +34,22 @@ static NSDictionary *s_userInfoKeyMapping;
 
 @implementation MSALErrorConverter
 
++ (void)load
+{
+    MSIDErrorConverter.errorConverter = [MSALErrorConverter new];
+}
+
 + (void)initialize
 {
     s_errorDomainMapping = @{
                              MSIDErrorDomain : MSALErrorDomain,
                              MSIDOAuthErrorDomain : MSALErrorDomain,
                              MSIDKeychainErrorDomain : NSOSStatusErrorDomain,
+                             MSIDHttpErrorCodeDomain : MSALErrorDomain
                              };
-    
+
     s_errorCodeMapping = @{
-                           MSIDErrorDomain:@{
+                           MSALErrorDomain:@{
                                    // General
                                    @(MSIDErrorInternal) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
@@ -61,8 +67,7 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
-                                   },
-                           MSIDOAuthErrorDomain:@{
+                                   // Oauth2 errors
                                    @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
@@ -72,62 +77,76 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
                                    @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
-                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect)
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
+                                   @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
     
     s_userInfoKeyMapping = @{
                              MSIDHTTPHeadersKey : MSALHTTPHeadersKey,
-                             MSIDHTTPResponseCodeKey : MSALHTTPResponseCodeKey
+                             MSIDHTTPResponseCodeKey : MSALHTTPResponseCodeKey,
+                             MSIDCorrelationIdKey : MSALCorrelationIDKey,
+                             MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
+                             MSIDOAuthErrorKey: MSALOAuthErrorKey,
+                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey
                              };
 }
 
-+ (NSError *)MSALErrorFromMSIDError:(NSError *)msidError
+#pragma mark - MSIDErrorConverting
+
+- (NSError *)errorWithDomain:(NSString *)domain
+                        code:(NSInteger)code
+            errorDescription:(NSString *)errorDescription
+                  oauthError:(NSString *)oauthError
+                    subError:(NSString *)subError
+             underlyingError:(NSError *)underlyingError
+               correlationId:(NSUUID *)correlationId
+                    userInfo:(NSDictionary *)userInfo
 {
-    if (!msidError)
+    if ([NSString msidIsStringNilOrBlank:domain])
     {
         return nil;
     }
-    
-    //Map domain
-    NSString *domain = msidError.domain;
-    if (domain && s_errorDomainMapping[domain])
+
+    NSString *msalDomain = domain;
+
+    // Map domain
+    if (s_errorDomainMapping[domain])
     {
-        domain = s_errorDomainMapping[domain];
+        msalDomain = s_errorDomainMapping[domain];
     }
-    
+
     // Map errorCode
-    // errorCode mapping is needed only if domain is in s_errorCodeMapping
-    NSInteger errorCode = msidError.code;
-    if (msidError.domain && msidError.code && s_errorCodeMapping[msidError.domain])
+    // errorCode mapping is needed only if domain is mapped
+    NSInteger msalErrorCode = code;
+    if (msalDomain && msalErrorCode && s_errorCodeMapping[msalDomain])
     {
-        NSNumber *mappedErrorCode = s_errorCodeMapping[msidError.domain][@(msidError.code)];
+        NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msalErrorCode)];
         if (mappedErrorCode)
         {
-            errorCode = [mappedErrorCode integerValue];
+            msalErrorCode = [mappedErrorCode integerValue];
         }
         else
         {
-            MSID_LOG_ERROR(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msidError.domain, (long)msidError.code);
+            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)msalErrorCode);
         }
     }
-    
-    NSMutableDictionary *userInfo = [NSMutableDictionary new];
-    
-    for (NSString *key in [msidError.userInfo allKeys])
+
+    NSMutableDictionary *msalUserInfo = [NSMutableDictionary new];
+
+    for (NSString *key in [userInfo allKeys])
     {
         NSString *mappedKey = s_userInfoKeyMapping[key] ? s_userInfoKeyMapping[key] : key;
-        userInfo[mappedKey] = msidError.userInfo[key];
+        msalUserInfo[mappedKey] = userInfo[key];
     }
-    
-    return MSALCreateError(domain,
-                           errorCode,
-                           msidError.userInfo[MSIDErrorDescriptionKey],
-                           msidError.userInfo[MSIDOAuthErrorKey],
-                           msidError.userInfo[MSIDOAuthSubErrorKey],
-                           msidError.userInfo[NSUnderlyingErrorKey],
-                           userInfo);
-    
+
+    msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
+    msalUserInfo[MSALOAuthErrorKey] = oauthError;
+    msalUserInfo[MSALOAuthSubErrorKey] = subError;
+    msalUserInfo[NSUnderlyingErrorKey]  = underlyingError;
+
+    return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
 }
 
 @end

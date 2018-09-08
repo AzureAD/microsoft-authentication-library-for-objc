@@ -27,7 +27,7 @@
 
 #define MSAL_VER_HIGH       0
 #define MSAL_VER_LOW        1
-#define MSAL_VER_PATCH      1
+#define MSAL_VER_PATCH      4
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -46,14 +46,7 @@
 // This is specially crafted so the name of the variable matches the full MSAL version
 #define MSAL_VERSION_VAR MSAL_VERSION_(MSAL_VER_HIGH, MSAL_VER_LOW, MSAL_VER_PATCH)
 
-
 // Utility macros for convience classes wrapped around JSON dictionaries
-#define DICTIONARY_READ_PROPERTY_IMPL(DICT, KEY, GETTER) \
-- (NSString *)GETTER { return [DICT objectForKey:KEY]; }
-
-#define DICTIONARY_WRITE_PROPERTY_IMPL(DICT, KEY, SETTER) \
-- (void)SETTER:(NSString *)value { [DICT setValue:[value copy] forKey:KEY]; }
-
 #define DICTIONARY_RW_PROPERTY_IMPL(DICT, KEY, GETTER, SETTER) \
     DICTIONARY_READ_PROPERTY_IMPL(DICT, KEY, GETTER) \
     DICTIONARY_WRITE_PROPERTY_IMPL(DICT, KEY, SETTER)
@@ -84,6 +77,7 @@
 // Internally scopes usually are passed around as an ordered set of strings
 typedef NSOrderedSet<NSString *> MSALScopes;
 
+#import "IdentityCore_Internal.h"
 #include "MSAL.h"
 #include "MSIDLogger+Internal.h"
 #include "MSALRequestParameters.h"

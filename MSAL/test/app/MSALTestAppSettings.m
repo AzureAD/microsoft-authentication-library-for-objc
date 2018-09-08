@@ -38,7 +38,11 @@ NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotificat
 
 static NSArray<MSALAuthority *> *s_authorities = nil;
 
+static NSArray<MSALAuthority *> *s_b2cAuthorities = nil;
+
 static NSArray<NSString *> *s_scopes_available = nil;
+
+static NSArray<NSString *> *s_authorityTypes = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -52,8 +56,10 @@ static NSArray<NSString *> *s_scopes_available = nil;
 + (void)initialize
 {
     NSMutableArray<MSALAuthority *> *authorities = [NSMutableArray new];
-    
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
+
+    __auto_type authorityFactory = [MSALAuthorityFactory new];
+
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers"];
@@ -62,7 +68,6 @@ static NSArray<NSString *> *s_scopes_available = nil;
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
             __auto_type authorityUrl = [[NSURL alloc] initWithString:authorityString];
-            __auto_type authorityFactory = [MSALAuthorityFactory new];
             __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
             
             [authorities addObject:authority];
@@ -71,8 +76,14 @@ static NSArray<NSString *> *s_scopes_available = nil;
     
     s_authorities = authorities;
     
-    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default"];
+    s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
 
+    __auto_type signinPolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy"] context:nil error:nil];
+    __auto_type signupPolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy"] context:nil error:nil];
+    __auto_type profilePolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy"] context:nil error:nil];
+
+    s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
+    s_authorityTypes = @[@"AAD",@"B2C"];
 }
 
 + (MSALTestAppSettings*)settings
@@ -89,9 +100,19 @@ static NSArray<NSString *> *s_scopes_available = nil;
     return s_settings;
 }
 
-+ (NSArray<MSALAuthority *> *)authorities
++ (NSArray<MSALAuthority *> *)aadAuthorities
 {
     return s_authorities;
+}
+
++ (NSArray<MSALAuthority *> *)b2cAuthorities
+{
+    return s_b2cAuthorities;
+}
+
++ (NSArray<NSString *> *)authorityTypes
+{
+    return s_authorityTypes;
 }
 
 - (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier

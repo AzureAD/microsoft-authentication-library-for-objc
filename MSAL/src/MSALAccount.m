@@ -95,7 +95,7 @@
 {
     return [self initWithUsername:account.username
                                   name:account.name
-                         homeAccountId:account.homeAccountId
+                         homeAccountId:account.accountIdentifier.homeAccountId
                         localAccountId:account.localAccountId
                            environment:account.authority.url.msidHostWithPortIfNecessary
                               tenantId:account.authority.url.msidTenant

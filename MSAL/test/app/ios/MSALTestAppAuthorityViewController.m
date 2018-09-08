@@ -38,8 +38,7 @@
 
 @implementation MSALTestAppAuthorityViewController
 {
-    NSMutableArray <MSALAuthority *> *_authorities;
-    NSMutableArray <MSALAuthority *> *_savedAuthorities;
+    NSString *_userDefaultsKey;
 }
 
 + (instancetype)sharedController
@@ -54,34 +53,46 @@
     return s_controller;
 }
 
-- (id)init
+- (instancetype)init
 {
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    __auto_type currentAuthority = MSALTestAppSettings.settings.authority;
-    _authorities = [[MSALTestAppSettings authorities] mutableCopy];
-    if (currentAuthority && ![_authorities containsObject:currentAuthority])
-    {
-        [_authorities addObject:currentAuthority];
-    }
+    return [self initWithAuthorities:[MSALTestAppSettings aadAuthorities]
+              keyForSavedAuthorities:@"saved_aadAuthorities"];
+}
 
-    _savedAuthorities = [[[NSUserDefaults standardUserDefaults] objectForKey:@"saved_authorities"] mutableCopy];
-
-    if (!_savedAuthorities)
+- (instancetype) initWithAuthorities:(NSArray *)aadAuthorities
+              keyForSavedAuthorities:(NSString *)key
+{
+    self = [super init];
+    if(self)
     {
-        _savedAuthorities = [NSMutableArray array];
+        _authorities = [aadAuthorities mutableCopy];
+        _userDefaultsKey = key;
+        _savedAuthorities = [[NSUserDefaults standardUserDefaults] objectForKey:key];
+        if (!_savedAuthorities)
+        {
+            _savedAuthorities = [NSMutableArray array];
+        }
+        
+        for(NSString* authority in _savedAuthorities)
+        {
+            if (![_authorities containsObject:authority])
+            {
+                [_authorities addObject:authority];
+            }
+        }
     }
-
-    [_authorities addObjectsFromArray:_savedAuthorities];
-    
     return self;
 }
 
 #pragma mark -
 #pragma mark Methods for subclasses to override
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    (void)tableView;
+    [self rowSelected:[indexPath indexAtPosition:1]];
+    [self.navigationController popToRootViewControllerAnimated:YES];
+}
 
 - (void)viewDidLoad
 {
@@ -96,31 +107,32 @@
     [controller addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"Authority";
     }];
-
+    
     [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
-        __auto_type authorityUrl = [[NSURL alloc] initWithString:controller.textFields[0].text];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
-        
+        NSString *authority = controller.textFields[0].text;
         [self saveAuthority:authority];
     }]];
-
+    
     [self presentViewController:controller animated:YES completion:nil];
-
+    
 }
 
-- (void)saveAuthority:(MSALAuthority *)authority
+- (void)saveAuthority:(NSString *)authority
 {
-    [_savedAuthorities addObject:authority];
-    [[NSUserDefaults standardUserDefaults] setObject:_savedAuthorities forKey:@"saved_authorities"];
-    [_authorities addObject:authority];
-    [super refresh];
-}
+    if (![_authorities containsObject:authority])
+    {
+        [_authorities addObject:authority];
+    }
+    
+    if (![_savedAuthorities containsObject:authority])
+    {
+        [_savedAuthorities addObject:authority];
+    }
 
-- (void)refresh
-{
+    [[NSUserDefaults standardUserDefaults] setObject:_savedAuthorities forKey:_userDefaultsKey];
+    
+    [self refresh];
 }
 
 - (NSInteger)numberOfRows
@@ -135,7 +147,7 @@
         return @"(default)";
     }
     
-    return _authorities[row - 1].msidAuthority.url.absoluteString;
+    return _authorities[row - 1];
 }
 
 - (void)rowSelected:(NSInteger)row

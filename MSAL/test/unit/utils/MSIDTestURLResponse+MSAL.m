@@ -31,6 +31,7 @@
 #import "MSALTestIdTokenUtil.h"
 #import "MSALTestConstants.h"
 #import "MSALAccountId.h"
+#import "MSIDConstants.h"
 #import "MSIDVersion.h"
 
 @implementation MSIDTestURLResponse (MSAL)
@@ -68,22 +69,24 @@
     [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [oidcReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
     [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
-    
+
+    NSString *queryString = query ? [NSString stringWithFormat:@"?%@", query] : @"";
+
     NSDictionary *oidcJson =
-    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/token?%@", responseAuthority, query],
-       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/authorize?%@", responseAuthority, query],
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token%@", responseAuthority, queryString],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize%@", responseAuthority, queryString],
        @"issuer" : @"issuer"
        };
-    
+
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration?x-client-Ver=%@", authority, [MSIDVersion sdkVersion]]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
                            requestHeaders:oidcReqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
                          dictionaryAsJSON:oidcJson];
-    
+
     return oidcResponse;
 }
 
@@ -99,7 +102,7 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token" UT_SLICE_PARAMS_QUERY, authority]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token", authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],
@@ -148,7 +151,6 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
-    [tokenQPs addEntriesFromDictionary:@{UT_SLICE_PARAMS_DICT}];
     if (query)
     {
         [tokenQPs addEntriesFromDictionary:[NSDictionary msidURLFormDecode:query]];
@@ -201,6 +203,11 @@
     response->_requestParamsBody = requestParams;
     
     return response;
+}
+
++ (NSDictionary *)defaultQueryParameters
+{
+    return @{MSID_VERSION_KEY:MSIDVersion.sdkVersion, UT_SLICE_PARAMS_DICT};
 }
 
 @end

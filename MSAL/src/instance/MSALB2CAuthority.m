@@ -53,7 +53,7 @@
     self = [self initWithURL:url context:context error:error];
     if (self)
     {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
         if (!self.msidAuthority) return nil;
     }
 

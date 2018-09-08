@@ -35,6 +35,13 @@
 #import "MSALStressTestHelper.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import <WebKit/WebKit.h>
+#import "MSALTestAppAuthorityTypeViewController.h"
+
+#define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
+#define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
+#define TEST_EMBEDDED_WEBVIEW_MSAL 0
+#define TEST_EMBEDDED_WEBVIEW_CUSTOM 1
 
 @interface MSALTestAppAcquireTokenViewController () <UITextFieldDelegate>
 
@@ -48,17 +55,23 @@
     UISegmentedControl *_validateAuthority;
     
     UITextField *_loginHintField;
+    UITextField* _extraQueryParamsField;
     UIButton *_userButton;
     UIButton *_scopesButton;
     
     UIButton *_acquireSilentButton;
     
     UISegmentedControl *_uiBehavior;
+    UISegmentedControl *_webviewSelection;
+    UISegmentedControl *_customWebViewSelection;
     
     UITextView *_resultView;
     
     NSLayoutConstraint *_bottomConstraint;
     NSLayoutConstraint *_bottomConstraint2;
+    
+    UIView* _authView;
+    WKWebView *_webView;
     
     BOOL _userIdEdited;
 }
@@ -152,7 +165,20 @@
     _uiBehavior.selectedSegmentIndex = 0;
     [layout addControl:_uiBehavior title:@"behavior"];
     
+    //_webviewSelection
+    _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[@"Embedded", @"System"]];
+    _webviewSelection.selectedSegmentIndex = 0;
+    [_webviewSelection addTarget:self action:@selector(webviewTypeChanged:) forControlEvents:UIControlEventValueChanged];
+    [layout addControl:_webviewSelection title:@"webview"];
     
+    _customWebViewSelection = [[UISegmentedControl alloc] initWithItems:@[@"MSAL", @"Passed In"]];
+    _customWebViewSelection.selectedSegmentIndex = 0;
+    [layout addControl:_customWebViewSelection title:@"embeddedWV"];
+    
+    _extraQueryParamsField = [[UITextField alloc] initWithFrame:CGRectMake(0, 0, 400, 20)];
+    _extraQueryParamsField.borderStyle = UITextBorderStyleRoundedRect;
+    _extraQueryParamsField.delegate = self;
+    [layout addControl:_extraQueryParamsField title:@"EQP"];
     
     UIButton *clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
@@ -191,6 +217,11 @@
     return scrollView;
 }
 
+- (void)webviewTypeChanged:(UISegmentedControl *)sender
+{
+    _customWebViewSelection.enabled = sender.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_TYPE_INDEX;
+}
+
 - (UIView *)createAcquireButtonsView
 {
     UIButton *acquireButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -223,6 +254,43 @@
     return acquireBlurView;
 }
 
+- (UIView *)createWebOverlay
+{
+    UIVisualEffect* blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    UIVisualEffectView* blurView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurView.translatesAutoresizingMaskIntoConstraints = NO;
+    blurView.layer.borderWidth = 1.0f;
+    blurView.layer.borderColor = [UIColor colorWithRed:0.9f green:0.9f blue:0.9f alpha:1.0f].CGColor;
+    blurView.layer.cornerRadius = 8.0f;
+    blurView.clipsToBounds = YES;
+    
+    UIView* contentView = blurView.contentView;
+    
+    _webView = [[WKWebView alloc] init];
+    _webView.translatesAutoresizingMaskIntoConstraints = NO;
+    [contentView addSubview:_webView];
+    
+    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [cancelButton setTitle:@"Cancel" forState:UIControlStateNormal];
+    [cancelButton addTarget:self action:@selector(cancelAuth:) forControlEvents:UIControlEventTouchUpInside];
+    [contentView addSubview:cancelButton];
+    
+    NSDictionary* views = @{ @"webView" : _webView, @"cancelButton" : cancelButton };
+    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-8-[webView]-[cancelButton]-8-|" options:0 metrics:nil views:views]];
+    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-8-[webView]-|" options:0 metrics:nil views:views]];
+    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:cancelButton
+                                                            attribute:NSLayoutAttributeCenterX
+                                                            relatedBy:NSLayoutRelationEqual
+                                                               toItem:contentView
+                                                            attribute:NSLayoutAttributeCenterX
+                                                           multiplier:1.0
+                                                             constant:0.0]];
+    
+    return blurView;
+}
+
+
 
 - (void)loadView
 {
@@ -235,10 +303,16 @@
     UIView *acquireBlurView = [self createAcquireButtonsView];
     [mainView addSubview:acquireBlurView];
     
+    _authView = [self createWebOverlay];
+    _authView.hidden = YES;
+    [mainView addSubview:_authView];
+    
     self.view = mainView;
     
-    NSDictionary *views = @{ @"settings" : settingsView, @"acquire" : acquireBlurView };
+    NSDictionary *views = @{ @"settings" : settingsView, @"acquire" : acquireBlurView, @"authView" : _authView };
     // Set up constraints for the web overlay
+    [mainView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-34-[authView]-10-|" options:0 metrics:nil views:views]];
+    [mainView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-10-[authView]-10-|" options:0 metrics:nil views:views]];
     
     // Set up constraints to make the settings scroll view take up the whole screen
     [mainView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[settings]|" options:0 metrics:nil views:views]];
@@ -362,8 +436,8 @@
 
 - (void)updateResultView:(MSALResult *)result
 {
-    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\t\nuser = %@\t\nscopes = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes];
+    NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
     
     [_resultView setText:resultText];
     
@@ -388,12 +462,21 @@
 {
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    __auto_type authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
-    //NSURL* redirectUri = [settings redirectUri];
+    MSALAuthority *authority = [settings authority];
+    NSString *clientId;
+    NSDictionary *extraQueryParameters = [NSDictionary msidURLFormDecode:_extraQueryParamsField.text];
     
+    if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
+    {
+        clientId = B2C_TEST_APP_CLIENT_ID;;
+    }
+    else
+    {
+        clientId = TEST_APP_CLIENT_ID;
+    }
+
     NSError *error = nil;
-    MSALPublicClientApplication *application = 
+    MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
     if (!application)
     {
@@ -433,16 +516,31 @@
                 [self updateResultViewError:error];
             }
             
+            [_webView loadHTMLString:@"<html><head></head></html>" baseURL:nil];
+            [_authView setHidden:YES];
+            
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
+    
+    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    application.customWebview = nil;
+    
+    if (application.webviewType == MSALWebviewTypeWKWebView &&
+        _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
+    {
+        application.customWebview = _webView;
+        
+        [_acquireSettingsView setHidden:YES];
+        [_authView setHidden:NO];
+    }
     
     if ([_loginHintField.text length])
     {
         [application acquireTokenForScopes:[settings.scopes allObjects]
                                  loginHint:_loginHintField.text
                                 uiBehavior:[self uiBehavior]
-                      extraQueryParameters:nil
+                      extraQueryParameters:extraQueryParameters
                            completionBlock:completionBlock];
     }
     else
@@ -450,7 +548,7 @@
         [application acquireTokenForScopes:[settings.scopes allObjects]
                                    account:settings.currentAccount
                                 uiBehavior:[self uiBehavior]
-                      extraQueryParameters:nil
+                      extraQueryParameters:extraQueryParameters
                            completionBlock:completionBlock];
     }
 }
@@ -571,7 +669,7 @@
 - (IBAction)selectAuthority:(id)sender
 {
     (void)sender;
-    [self.navigationController pushViewController:[MSALTestAppAuthorityViewController sharedController] animated:YES];
+    [self.navigationController pushViewController:[MSALTestAppAuthorityTypeViewController sharedController] animated:YES];
 }
 
 - (IBAction)selectUser:(id)sender

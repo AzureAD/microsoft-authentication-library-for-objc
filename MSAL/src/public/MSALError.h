@@ -51,6 +51,11 @@ extern NSString *MSALErrorDescriptionKey;
 extern NSString *MSALHTTPHeadersKey;
 
 /*!
+ Correlation ID used for the request
+ */
+extern NSString *MSALCorrelationIDKey;
+
+/*!
  Specifies http response code for error cases
  */
 extern NSString *MSALHTTPResponseCodeKey;
@@ -89,8 +94,15 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     
     MSALErrorInvalidRequest              = -42002,
     MSALErrorInvalidClient               = -42003,
-    MSALErrorInvalidGrant               = -42004,
-    MSALErrorInvalidScope               = -42005,
+    MSALErrorInvalidGrant                = -42004,
+    MSALErrorInvalidScope                = -42005,
+    
+    /*!
+     The server returned an unexpected http response. For instance, this code
+     is returned for 5xx server response when something has gone wrong on the server but the
+     server could not be more specific on what the exact problem is.
+     */
+    MSALErrorUnhandledResponse           = -42006,
 
     /*! 
         The passed in authority URL does not pass validation.
@@ -119,10 +131,10 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorAuthorizationFailed = -42104,
     
     /*!
-        MSAL received a valid token response, but it didn't contain an access token.
+        MSAL received a bad token response, it didn't contain an access token or id token.
         Check to make sure your application is consented to get all of the scopes you are asking for.
      */
-    MSALErrorNoAccessTokenInResponse = -42105,
+    MSALErrorBadTokenResponse = -42105,
 
     /*!
      MSAL requires a non-nil account for the acquire token silent call
@@ -171,6 +183,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorNoViewController = -42403,
     
     /*!
+        MSAL tried to open a URL from an extension, which is not allowed.
+     */
+    MSALErrorAttemptToOpenURLFromExtension = -42404,
+    
+    /*!
         An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
         in the userInfo dictionary for more detailed information about the specific
         error.
@@ -200,5 +217,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      Server tried to redirect to non http URL
      */
     MSALErrorNonHttpsRedirect = -42602,
+
+    /*!
+        The requested resource is protected by an Intune Conditional Access policy.
+        The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+        please see https://aka.ms/intuneMAMSDK for more information.
+     */
+    MSALErrorServerProtectionPoliciesRequired = -42603
 };
 

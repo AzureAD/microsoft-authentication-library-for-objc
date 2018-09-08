@@ -63,7 +63,7 @@
     NSDictionary* views = @{ @"label" : label, @"control" : control };
     NSArray* verticalConstraints1 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[label]|" options:0 metrics:NULL views:views];
     NSArray* verticalConstraints2 = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[control(29)]|" options:0 metrics:NULL views:views];
-    NSArray* horizontalConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[label(60)]-[control]|" options:NSLayoutFormatAlignAllCenterY metrics:NULL views:views];
+    NSArray* horizontalConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[label(100)]-[control]|" options:NSLayoutFormatAlignAllCenterY metrics:NULL views:views];
     
     [view addConstraints:verticalConstraints1];
     [view addConstraints:verticalConstraints2];

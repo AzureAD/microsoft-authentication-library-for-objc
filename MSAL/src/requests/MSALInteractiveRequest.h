@@ -34,16 +34,10 @@
     MSALUIBehavior _uiBehavior;
 }
 
-@property NSString *state;
-
-+ (MSALInteractiveRequest *)currentActiveRequest;
-
 - (id)initWithParameters:(MSALRequestParameters *)parameters
     extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                 behavior:(MSALUIBehavior)behavior
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                    error:(NSError * __autoreleasing *)error;
-
-- (NSURL *)authorizationUrlWithEndpoint:(NSURL *)authorizationEndpoint;
 
 @end

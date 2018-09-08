@@ -59,8 +59,7 @@
     
     if (error)
     {
-        *error = MSALCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil);
-        
+        *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
         MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
     }
     
@@ -92,7 +91,7 @@
     
     if (error)
     {
-        *error = MSALCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil);
+        *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
         
         MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
     }

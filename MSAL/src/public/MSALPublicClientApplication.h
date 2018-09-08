@@ -32,6 +32,7 @@
 @class MSALAccount;
 @class MSALTokenRequest;
 @class MSALAuthority;
+@class WKWebView;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -42,6 +43,9 @@
  */
 @property BOOL validateAuthority;
 
+/*! Enable to return access token with extended lifttime during server outage. */
+@property BOOL extendedLifetimeEnabled;
+
 /*! The authority the application will use to obtain tokens */
 @property (readonly) MSALAuthority *authority;
 
@@ -49,7 +53,7 @@
 @property (readonly) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly) NSURL *redirectUri;
+@property (readonly) NSString *redirectUri;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
@@ -61,13 +65,16 @@
     called MSAL. */
 @property NSString *component;
 
-#if TARGET_OS_IPHONE
-/*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
+/*! The webview selection to be used for authentication.
+ By default, it is going to use the following to authenticate.
+ - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+ - macOS:  WKWebView
  */
-@property (nonatomic) NSString *keychainGroup;
-#endif
+@property MSALWebviewType webviewType;
+
+/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
+    For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
+@property WKWebView *customWebview;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
@@ -96,6 +103,88 @@
                  error:(NSError * __autoreleasing *)error;
 
 /*!
+ Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri
+
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
+ @param  redirectUri    The redirect URI of the application
+ @param  error          The error that occurred creating the application object, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (id)initWithClientId:(NSString *)clientId
+             authority:(MSALAuthority *)authority
+           redirectUri:(NSString *)redirectUri
+                 error:(NSError * __autoreleasing *)error;
+
+
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
+ */
+@property (nonatomic, readonly) NSString *keychainGroup;
+
+/*!
+ Initialize a MSALPublicClientApplication with a given clientID and keychain group
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  error          The error that occurred creating the application object, if any (optional)
+ */
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+                 error:(NSError * __autoreleasing *)error;
+
+/*!
+ Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
+ @param  error          The error that occurred creating the application object, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(MSALAuthority *)authority
+                 error:(NSError * __autoreleasing *)error;
+
+/*!
+ Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
+
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
+ @param  redirectUri    The redirect URI of the application
+ @param  error          The error that occurred creating the application object, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (id)initWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(MSALAuthority *)authority
+           redirectUri:(NSString *)redirectUri
+                 error:(NSError * __autoreleasing *)error;
+#endif
+
+/*!
     Returns an array of accounts visible to this application
  
     @param  error   The error that occured trying to retrieve accounts, if any, if you're
@@ -105,7 +194,7 @@
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns account for for the home identifier and tenant given (received from an account object returned
+    Returns account for for the given home identifier (received from an account object returned
     in a previous acquireToken call)
 
     @param  error   The error that occured trying to get the accounts, if any, if you're
@@ -114,9 +203,20 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error;
 
+/*!
+    Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
+
+    @param  username    The displayable value in UserPrincipleName(UPN) format
+    @param  error       The error that occured trying to get the accounts, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error;
+
 
 #pragma SafariViewController Support
 
+#if TARGET_OS_IPHONE
 /*!
     Ask MSAL to handle a URL response.
     
@@ -126,6 +226,7 @@
              NO otherwise.
  */
 + (BOOL)handleMSALResponse:(NSURL *)response;
+#endif
 
 /*!
     Cancels any currently running interactive web authentication session, resulting
@@ -180,7 +281,7 @@
                             in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior      A specific UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
@@ -254,7 +355,7 @@
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow.
+                                    the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
@@ -295,6 +396,43 @@
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(MSALAuthority *)authority
+                correlationId:(NSUUID *)correlationId
+              completionBlock:(MSALCompletionBlock)completionBlock;
+
+/*!
+ Acquire a token interactively for an existing account. This is typically used after receiving
+ a MSALErrorInteractionRequired error.
+ 
+ @param  scopes                  Permissions you want included in the access token received
+                                 in the result in the completionBlock. Not all scopes are
+                                 gauranteed to be included in the access token returned.
+ @param  extraScopesToConsent    Permissions you want the account to consent to in the same
+                                 authentication flow, but won't be included in the returned
+                                 access token
+ @param  account                 An account object retrieved from the application object that the
+                                 interactive authentication flow will be locked down to.
+ @param  uiBehavior              A UI behavior for the interactive authentication flow
+ @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
+                                 the interactive authentication flow. This should not be url-encoded value.
+ @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
+ @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                 Azure AD it is of the form https://<instance/<tenant>, where
+                                 <instance> is the directory host
+                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 identifier within the directory itself (e.g. a domain associated
+                                 to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                 representing the TenantID property of the directory)
+ @param  correlationId           UUID to correlate this request with the server
+ @param  completionBlock         The completion block that will be called when the authentication
+                                 flow completes, or encounters an error.
+ */
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
+                      account:(MSALAccount *)account
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(NSString *)claims
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
