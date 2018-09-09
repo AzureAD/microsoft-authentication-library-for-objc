@@ -235,7 +235,7 @@ static MSALScopes *s_reservedScopes = nil;
 
     if (_parameters.cloudAuthority)
     {
-        tokenEndpoint.host = _parameters.cloudAuthority.url.msidHostWithPortIfNecessary;
+        tokenEndpoint.host = _parameters.cloudAuthority.environment;
     }
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];

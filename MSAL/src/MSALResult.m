@@ -86,7 +86,7 @@
                                                                  name:idTokenClaims.name
                                                         homeAccountId:accessToken.accountIdentifier.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
-                                                          environment:accessToken.authority.url.msidHostWithPortIfNecessary
+                                                          environment:accessToken.authority.environment
                                                              tenantId:idTokenClaims.tenantId
                                                            clientInfo:accessToken.clientInfo];
     

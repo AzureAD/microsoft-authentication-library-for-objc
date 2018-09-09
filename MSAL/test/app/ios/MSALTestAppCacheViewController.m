@@ -282,7 +282,7 @@
     if (!token)
     {
         MSIDAccount *account = _accounts[indexPath.section];
-        cell.textLabel.text = account.authority.url.msidHostWithPortIfNecessary;
+        cell.textLabel.text = account.authority.environment;
         cell.backgroundColor = [UIColor colorWithRed:0.27 green:0.43 blue:0.7 alpha:1.0];
         return cell;
     }

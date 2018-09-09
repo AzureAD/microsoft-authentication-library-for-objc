@@ -243,7 +243,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.url.msidHostWithPortIfNecessary;
+    __auto_type host = self.authority.msidAuthority.environment;
     __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:host
                                                                  clientId:self.clientId
                                                                  familyId:nil
@@ -727,7 +727,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.url.msidHostWithPortIfNecessary;
+    __auto_type host = self.authority.msidAuthority.environment;
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                             environment:host
                                                clientId:self.clientId

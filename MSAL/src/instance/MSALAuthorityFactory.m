@@ -39,31 +39,7 @@
                             context:(id<MSIDRequestContext>)context
                               error:(NSError **)error
 {
-    if ([MSIDB2CAuthority isAuthorityFormatValid:url context:context error:nil])
-    {
-        __auto_type b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:url context:context error:nil];
-        if (b2cAuthority) return b2cAuthority;
-    }
-    
-    if ([MSIDADFSAuthority isAuthorityFormatValid:url context:context error:nil])
-    {
-        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url context:context error:nil];
-        if (adfsAuthority) return adfsAuthority;
-    }
-    
-    if ([MSIDAADAuthority isAuthorityFormatValid:url context:context error:nil])
-    {
-        __auto_type aadAuthority = [[MSALAADAuthority alloc] initWithURL:url context:context error:nil];
-        if (aadAuthority) return aadAuthority;
-    }
-    
-    if (error)
-    {
-        *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
-        MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
-    }
-    
-    return nil;
+    return [self authorityFromUrl:url rawTenant:nil context:context error:error];
 }
 
 - (MSALAuthority *)authorityFromUrl:(NSURL *)url
@@ -77,7 +53,7 @@
         if (b2cAuthority) return b2cAuthority;
     }
     
-    if ([MSIDAADAuthority isAuthorityFormatValid:url context:context error:nil])
+    if ([MSIDADFSAuthority isAuthorityFormatValid:url context:context error:nil])
     {
         __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:nil];
         if (adfsAuthority) return adfsAuthority;
