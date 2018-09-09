@@ -150,7 +150,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
@@ -175,7 +175,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
@@ -258,7 +258,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
@@ -282,7 +282,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
@@ -839,7 +839,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -1118,7 +1118,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
          XCTAssertTrue(obj.forceRefresh);
          

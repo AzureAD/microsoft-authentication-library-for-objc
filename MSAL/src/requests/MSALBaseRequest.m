@@ -48,6 +48,7 @@
 #import "MSALAccountId.h"
 #import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -98,6 +99,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     _tokenCache = tokenCache;
     _oauth2Factory = [MSIDAADV2Oauth2Factory new];
+
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
     return self;
 }

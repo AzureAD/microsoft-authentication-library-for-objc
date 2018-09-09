@@ -43,8 +43,8 @@ extern NSString* MSALTestAppCacheChangeNotification;
 @property (nonatomic, readonly) NSSet<NSString *> *scopes;
 
 + (MSALTestAppSettings*)settings;
-+ (NSArray<MSALAuthority *> *)aadAuthorities;
-+ (NSArray<MSALAuthority *> *)b2cAuthorities;
++ (NSArray<NSString *> *)aadAuthorities;
++ (NSArray<NSString *> *)b2cAuthorities;
 + (NSArray<NSString *> *)authorityTypes;
 + (NSArray<NSString *> *)availableScopes;
 

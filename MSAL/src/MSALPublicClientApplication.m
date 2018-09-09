@@ -645,23 +645,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDAuthority *msidAuthority;
-    
-    if (!authority)
+    MSIDAuthority *msidAuthority = authority.msidAuthority;
+
+    if (!msidAuthority)
     {
         msidAuthority = self.authority.msidAuthority;
+    }
 
-        /*
-         In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-         unless they override the default authority in the public client application with a tenanted authority.
-         */
-        __auto_type authorityFactory = [MSIDAuthorityFactory new];
-        msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
-    }
-    else
-    {
-        msidAuthority = authority.msidAuthority;
-    }
+    /*
+     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+     if authority is a common, organizations or consumers authority.
+     */
+    __auto_type authorityFactory = [MSIDAuthorityFactory new];
+    msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
 
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];

@@ -29,6 +29,8 @@
 
 @interface MSALAuthority : NSObject
 
+@property (readonly, nonnull) NSURL *url;
+
 - (instancetype _Nullable )init NS_UNAVAILABLE;
 + (instancetype _Nullable )new NS_UNAVAILABLE;
 

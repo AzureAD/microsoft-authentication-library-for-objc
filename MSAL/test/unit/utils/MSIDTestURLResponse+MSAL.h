@@ -31,6 +31,8 @@
 
 @interface MSIDTestURLResponse (MSAL)
 
++ (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority;
+
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;
 
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority

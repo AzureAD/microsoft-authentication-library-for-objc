@@ -36,9 +36,9 @@
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
-static NSArray<MSALAuthority *> *s_authorities = nil;
+static NSArray<NSString *> *s_authorities = nil;
 
-static NSArray<MSALAuthority *> *s_b2cAuthorities = nil;
+static NSArray<NSString *> *s_b2cAuthorities = nil;
 
 static NSArray<NSString *> *s_scopes_available = nil;
 
@@ -55,10 +55,8 @@ static NSArray<NSString *> *s_authorityTypes = nil;
 
 + (void)initialize
 {
-    NSMutableArray<MSALAuthority *> *authorities = [NSMutableArray new];
+    NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-
-    __auto_type authorityFactory = [MSALAuthorityFactory new];
 
     for (NSString *host in trustedHosts)
     {
@@ -67,10 +65,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
         for (NSString *tenant in tenants)
         {
             __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
-            __auto_type authorityUrl = [[NSURL alloc] initWithString:authorityString];
-            __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
-            
-            [authorities addObject:authority];
+            [authorities addObject:authorityString];
         }
     }
     
@@ -78,9 +73,9 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
 
-    __auto_type signinPolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy"] context:nil error:nil];
-    __auto_type signupPolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy"] context:nil error:nil];
-    __auto_type profilePolicyAuthority = [authorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy"] context:nil error:nil];
+    __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
+    __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
+    __auto_type profilePolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy";
 
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
@@ -100,12 +95,12 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     return s_settings;
 }
 
-+ (NSArray<MSALAuthority *> *)aadAuthorities
++ (NSArray<NSString *> *)aadAuthorities
 {
     return s_authorities;
 }
 
-+ (NSArray<MSALAuthority *> *)b2cAuthorities
++ (NSArray<NSString *> *)b2cAuthorities
 {
     return s_b2cAuthorities;
 }

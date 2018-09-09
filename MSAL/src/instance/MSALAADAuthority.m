@@ -60,4 +60,9 @@
     return self;
 }
 
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
+
 @end

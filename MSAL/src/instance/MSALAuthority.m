@@ -47,4 +47,9 @@
     return [self initWithURL:url context:context error:error];
 }
 
+- (NSURL *)url
+{
+    return nil;
+}
+
 @end

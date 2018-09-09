@@ -162,26 +162,8 @@
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/authorize" msidUrl];
-
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/1234-5678-90abcdefg/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -253,6 +235,8 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
@@ -266,7 +250,7 @@
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
     
-    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
     [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
@@ -338,7 +322,9 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
+
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
     [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
@@ -351,7 +337,7 @@
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
     
-    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
     [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
@@ -457,6 +443,8 @@
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
     
     // Mock tenant discovery response
     MSIDTestURLResponse *oidcResponse =
@@ -472,7 +460,7 @@
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
     
-    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check if instance_aware parameter is in start url
     [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
@@ -606,9 +594,10 @@
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
-    [MSIDTestURLSession addResponse:oidcResponse];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];
@@ -678,9 +667,10 @@
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
-    [MSIDTestURLSession addResponse:oidcResponse];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];
@@ -749,9 +739,10 @@
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
-    [MSIDTestURLSession addResponse:oidcResponse];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];

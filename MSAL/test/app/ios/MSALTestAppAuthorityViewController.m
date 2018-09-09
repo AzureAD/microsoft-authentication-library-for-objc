@@ -59,7 +59,7 @@
               keyForSavedAuthorities:@"saved_aadAuthorities"];
 }
 
-- (instancetype) initWithAuthorities:(NSArray *)aadAuthorities
+- (instancetype)initWithAuthorities:(NSArray<NSString *> *)aadAuthorities
               keyForSavedAuthorities:(NSString *)key
 {
     self = [super init];
@@ -159,7 +159,9 @@
     }
     else
     {
-        settings.authority = _authorities[row - 1];
+        MSALAuthorityFactory *factory = [MSALAuthorityFactory new];
+        MSALAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:_authorities[row - 1]] context:nil error:nil];
+        settings.authority = authority;
     }
 }
 
@@ -170,7 +172,7 @@
     {
         return 0;
     }
-    return [_authorities indexOfObjectIdenticalTo:currentAuthority] + 1;
+    return [_authorities indexOfObject:currentAuthority.url.absoluteString] + 1;
 }
 
 + (NSString *)currentTitle

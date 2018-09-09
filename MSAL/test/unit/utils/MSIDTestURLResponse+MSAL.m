@@ -50,7 +50,7 @@
        };
     
     MSIDTestURLResponse *oidcResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration?x-client-Ver=%@", authority, [MSIDVersion sdkVersion]]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority]
                            requestHeaders:oidcReqHeaders
                         requestParamsBody:nil
                         responseURLString:@"https://someresponseurl.com"
@@ -59,6 +59,46 @@
                          dictionaryAsJSON:oidcJson];
     
     return oidcResponse;
+}
+
++ (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority
+{
+    NSURL *authorityURL = [NSURL URLWithString:authority];
+
+    NSString *requestUrl = [NSString stringWithFormat:@"https://%@/common/discovery/instance?api-version=1.1&authorization_endpoint=%@/oauth2/v2.0/authorize", authorityURL.msidHostWithPortIfNecessary, authority];
+
+    NSHTTPURLResponse *httpResponse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:requestUrl]
+                                                                  statusCode:200
+                                                                 HTTPVersion:@"1.1"
+                                                                headerFields:nil];
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:[NSURL URLWithString:requestUrl]
+                                                                  reponse:httpResponse];
+    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
+    headers[@"Accept"] = @"application/json";
+    headers[@"return-client-request-id"] = @"true";
+    headers[@"client-request-id"] = [MSIDTestRequireValueSentinel new];
+    discoveryResponse->_requestHeaders = headers;
+
+    NSString *tenantDiscoveryEndpoint = [NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority];
+
+    __auto_type responseJson = @{
+                                 @"tenant_discovery_endpoint" : tenantDiscoveryEndpoint,
+                                 @"metadata" : @[
+                                         @{
+                                             @"preferred_network" : @"login.microsoftonline.com",
+                                             @"preferred_cache" : @"login.windows.net",
+                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
+                                             },
+                                         @{
+                                             @"preferred_network": @"login.microsoftonline.de",
+                                             @"preferred_cache": @"login.microsoftonline.de",
+                                             @"aliases": @[@"login.microsoftonline.de"]
+                                         }
+                                         ]
+                                 };
+    [discoveryResponse setResponseJSON:responseJson];
+    return discoveryResponse;
 }
 
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
@@ -73,8 +113,8 @@
     NSString *queryString = query ? [NSString stringWithFormat:@"?%@", query] : @"";
 
     NSDictionary *oidcJson =
-    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/token%@", responseAuthority, queryString],
-       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/v2.0/oauth/authorize%@", responseAuthority, queryString],
+    @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/token%@", responseAuthority, queryString],
+       @"authorization_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/authorize%@", responseAuthority, queryString],
        @"issuer" : @"issuer"
        };
 
@@ -102,7 +142,7 @@
     [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
     
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/v2.0/oauth/token", authority]
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                              MSID_OAUTH2_SCOPE : [scopes msalToString],

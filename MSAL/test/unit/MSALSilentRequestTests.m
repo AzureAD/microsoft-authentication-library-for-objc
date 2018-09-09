@@ -131,27 +131,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -214,27 +196,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -337,27 +301,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -462,27 +408,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/1234-5678-90abcdefg/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/1234-5678-90abcdefg/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -554,27 +482,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -683,27 +593,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -751,27 +643,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -880,26 +754,8 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
@@ -1008,27 +864,9 @@
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
-    
-    __auto_type httpResponse = [NSHTTPURLResponse new];
-    __auto_type requestUrl = [@"https://login.microsoftonline.com/common/discovery/instance?x-client-Ver=0.1.1-dev&api-version=1.1&authorization_endpoint=https://login.microsoftonline.com/common/oauth2/v2.0/authorize" msidUrl];
-    
-    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:requestUrl
-                                                                  reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    discoveryResponse->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [discoveryResponse setResponseJSON:responseJson];
+
     NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
@@ -1101,6 +939,11 @@
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/common"];
+
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/common"];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
