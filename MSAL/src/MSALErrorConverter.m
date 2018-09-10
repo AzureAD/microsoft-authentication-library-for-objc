@@ -80,6 +80,9 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
+                                   },
+                           MSIDHttpErrorCodeDomain: @{
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
     
