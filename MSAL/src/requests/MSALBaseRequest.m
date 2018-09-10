@@ -148,6 +148,41 @@ static MSALScopes *s_reservedScopes = nil;
     [self acquireToken:completionBlock];
 }
 
+- (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
+{
+    NSString *upn = nil;
+    if (_parameters.account)
+    {
+        upn = _parameters.account.username;
+    }
+    else if (_parameters.loginHint)
+    {
+        upn = _parameters.loginHint;
+    }
+
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
+                                                         completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+          {
+              if (error)
+              {
+                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                  [self stopTelemetryEvent:event error:error];
+
+                  completionBlock(NO, error);
+                  return;
+              }
+
+              _authority = _parameters.unvalidatedAuthority;
+              completionBlock(YES, nil);
+          }];
+     }];
+}
+
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(completionBlock, _parameters, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");

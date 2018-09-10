@@ -73,36 +73,16 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    NSString *upn = nil;
-    if (_parameters.account)
-    {
-        upn = _parameters.account.username;
-    }
-    else if(_parameters.loginHint)
-    {
-        upn = _parameters.loginHint;
-    }
-    
-    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
-                                       userPrincipalName:upn
-                                                 context:_parameters
-                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
-     {
-         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
-          {
-              if (error)
-              {
-                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-                  [self stopTelemetryEvent:event error:error];
-                  
-                  completionBlock(nil, error);
-                  return;
-              }
-              
-              _authority = _parameters.unvalidatedAuthority;
-              [self acquireTokenImpl:completionBlock];
-          }];
-     }];
+    [super resolveEndpoints:^(BOOL resolved, NSError *error) {
+
+        if (!resolved)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+
+        [self acquireTokenImpl:completionBlock];
+    }];
 }
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock

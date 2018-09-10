@@ -34,6 +34,8 @@
 @class MSIDAADV2Oauth2Factory;
 @class MSIDTokenRequest;
 
+typedef void(^MSALAuthorityCompletion)(BOOL resolved, NSError * _Nullable error);
+
 @interface MSALBaseRequest : NSObject
 {
     @protected
@@ -60,6 +62,7 @@
 
 - (void)run:(nonnull MSALCompletionBlock)completionBlock;
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
+- (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
 - (nullable MSIDTokenRequest *)tokenRequest;
 - (nonnull NSURL *)tokenEndpoint;
