@@ -95,14 +95,17 @@ static NSMutableDictionary *s_resolvedUsersForAuthority;
 + (NSURL *)checkAuthorityString:(NSString *)authority
                           error:(NSError * __autoreleasing *)error
 {
-    REQUIRED_STRING_PARAMETER(authority, nil);
-    
+    if ([NSString msidIsStringNilOrBlank:authority])
+    {
+        REQUIRED_PARAMETER_ERROR(authority, nil);
+        return nil;
+    }
+
     NSURL *authorityUrl = [NSURL URLWithString:authority];
     NSArray *pathComponents = [authorityUrl pathComponents];
     CHECK_ERROR_RETURN_NIL(authorityUrl, nil, MSALErrorInvalidParameter, @"\"authority\" must be a valid URI");
     CHECK_ERROR_RETURN_NIL([authorityUrl.scheme isEqualToString:@"https"], nil, MSALErrorInvalidParameter, @"authority must use HTTPS");
     CHECK_ERROR_RETURN_NIL((pathComponents.count > 1), nil, MSALErrorInvalidParameter, @"authority must specify a tenant or common");
-    
     
     // B2C
     if ([pathComponents[1] caseInsensitiveCompare:@"tfp"] == NSOrderedSame)

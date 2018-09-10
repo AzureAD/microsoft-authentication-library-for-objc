@@ -1301,9 +1301,9 @@
          (void)environment;
          (void)account;
          (void)clientId;
-         
-         *error = MSALCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil);
-         
+
+         *error = MSIDCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil, nil);
+
          return NO;
      }];
     

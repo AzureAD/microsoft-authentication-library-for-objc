@@ -172,14 +172,8 @@
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
 
-    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
-    [self waitForElement:pickAccount];
-
-    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", self.primaryAccount.account];
-    XCUIElement *element = [[self.testApp.buttons containingPredicate:accountPredicate] elementBoundByIndex:0];
-    XCTAssertNotNil(element);
-
-    [element msidTap];
+    [self selectAccountWithTitle:self.primaryAccount.account];
+    
     // TODO: why am I asked to enter my password again in system webview?
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];

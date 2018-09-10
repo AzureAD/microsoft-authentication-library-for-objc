@@ -105,6 +105,7 @@
 {
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:request.expectedResultScopes];
+    [self assertAuthorityReturned:request.expectedResultAuthority];
 
     NSDictionary *resultDictionary = [self resultDictionary];
     NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
@@ -119,6 +120,19 @@
     }
 
     return homeAccountId;
+}
+
+- (void)selectAccountWithTitle:(NSString *)accountTitle
+{
+    XCUIElement *pickAccount = self.testApp.staticTexts[@"Pick an account"];
+    [self waitForElement:pickAccount];
+
+    NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", accountTitle];
+
+    XCUIElement *element = [[self.testApp.staticTexts containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCTAssertNotNil(element);
+
+    [element msidTap];
 }
 
 @end

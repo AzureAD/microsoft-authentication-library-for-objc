@@ -91,7 +91,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
@@ -170,7 +170,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse requestURLString:requestURLString
                                                            requestHeaders:reqHeaders
@@ -214,7 +214,7 @@
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     
-    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@&%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint, MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *requestURLString = [NSString stringWithFormat:@"%@?api-version=1.0&authorization_endpoint=%@", AAD_INSTANCE_DISCOVERY_ENDPOINT, authorizationEndpoint];
     
     MSIDTestURLResponse *response = [MSIDTestURLResponse request:[NSURL URLWithString:requestURLString]
                                                respondWithError:[NSError errorWithDomain:NSURLErrorDomain

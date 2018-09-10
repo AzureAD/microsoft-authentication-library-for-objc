@@ -135,6 +135,7 @@
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
     config.claims = _parameters.claims;
+    config.sliceParameters = _parameters.sliceParameters;
 
     _webviewConfig = config;
     
@@ -142,9 +143,8 @@
     {
         if (error)
         {
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
+            completionBlock(nil, error);
             return;
         }
 
@@ -168,9 +168,8 @@
             }
             
 
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:oauthResponse.oauthError];
+            completionBlock(nil, oauthResponse.oauthError);
             return;
         }
         
