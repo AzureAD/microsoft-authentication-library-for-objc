@@ -28,6 +28,7 @@
 #import <Foundation/Foundation.h>
 
 @class MSALAccount;
+@class MSALAuthority;
 
 @interface MSALResult : NSObject
 
@@ -39,6 +40,12 @@
     This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
  */
 @property (readonly) NSDate *expiresOn;
+
+/*!
+    Some access tokens have extended lifetime when server is in an unavailable state.
+    This property indicates whether the access token is returned in such a state.
+ */
+@property (readonly) BOOL extendedLifeTimeToken;
 
 /*!
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
@@ -64,5 +71,12 @@
     The scope values returned from the service.
  */
 @property (readonly) NSArray<NSString *> *scopes;
+
+/*!
+ Represents the authority used for getting the token from STS and caching it.
+ This authority should be used for subsequent silent requests.
+ It will be different from the authority provided by developer for sovereign cloud scenarios.
+ */
+@property (readonly) MSALAuthority *authority;
 
 @end

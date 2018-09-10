@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALSilentRequest.h"
+#import "MSALBaseRequest.h"
 #import "MSALResult+Internal.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
@@ -38,6 +39,8 @@
 #import "MSIDConfiguration.h"
 #import "MSALErrorConverter.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADRefreshTokenGrantRequest.h"
+#import "MSIDError.h"
 
 @interface MSALSilentRequest()
 
@@ -46,6 +49,9 @@
 @end
 
 @implementation MSALSilentRequest
+{
+    MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
+}
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
@@ -67,36 +73,16 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    NSString *upn = nil;
-    if (_parameters.account)
-    {
-        upn = _parameters.account.username;
-    }
-    else if(_parameters.loginHint)
-    {
-        upn = _parameters.loginHint;
-    }
-    
-    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
-                                       userPrincipalName:upn
-                                                 context:_parameters
-                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
-     {
-         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
-          {
-              if (error)
-              {
-                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-                  [self stopTelemetryEvent:event error:error];
-                  
-                  completionBlock(nil, error);
-                  return;
-              }
-              
-              _authority = _parameters.unvalidatedAuthority;
-              [self acquireTokenImpl:completionBlock];
-          }];
-     }];
+    [super resolveEndpoints:^(BOOL resolved, NSError *error) {
+
+        if (!resolved)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+
+        [self acquireTokenImpl:completionBlock];
+    }];
 }
 
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
@@ -129,7 +115,12 @@
                                                                  context:_parameters
                                                                    error:&error];
 
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
+            NSError *error = nil;
+
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                           idToken:idToken
+                                           isExtendedLifetimeToken:NO
+                                                             error:&error];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
@@ -137,6 +128,12 @@
 
             completionBlock(result, nil);
             return;
+        }
+        
+        // If the access token is good in terms of extended lifetime then store it for later use
+        if (accessToken && accessToken.isExtendedLifetimeValid)
+        {
+            _extendedLifetimeAccessToken = accessToken;
         }
 
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
@@ -152,8 +149,7 @@
 
     if (msidError)
     {
-        NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
-        completionBlock(nil, msalError);
+        completionBlock(nil, msidError);
         return;
     }
 
@@ -161,14 +157,48 @@
 
     MSID_LOG_INFO(_parameters, @"Refreshing access token");
     MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
-    
-    [super acquireToken:completionBlock];
+
+    [super acquireToken:^(MSALResult *result, NSError *error)
+    {
+         // Logic for returning extended lifetime token
+         if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
+         {
+             MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                            configuration:msidConfiguration
+                                                                  context:_parameters
+                                                                    error:&error];
+
+             NSError *resultError = nil;
+
+             result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken
+                                                idToken:idToken
+                                isExtendedLifetimeToken:YES
+                                                  error:&resultError];
+             error = resultError;
+         }
+
+         completionBlock(result, error);
+     }];
 }
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *,NSString *> *)parameters
+- (MSIDTokenRequest *)tokenRequest
 {
-    parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
-    parameters[MSID_OAUTH2_REFRESH_TOKEN] = [self.refreshToken refreshToken];
+    return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
+                                                            clientId:_parameters.clientId
+                                                               scope:[[self requestScopes:nil] msalToString]
+                                                        refreshToken:[self.refreshToken refreshToken]
+                                                             context:_parameters];
+}
+
+- (BOOL)isServerUnavailable:(NSError *)error
+{
+    if (![error.domain isEqualToString:MSALErrorDomain])
+    {
+        return NO;
+    }
+    
+    NSInteger responseCode = [[error.userInfo objectForKey:MSALHTTPResponseCodeKey] intValue];
+    return error.code == MSALErrorUnhandledResponse && responseCode >= 500 && responseCode <= 599;
 }
 
 @end

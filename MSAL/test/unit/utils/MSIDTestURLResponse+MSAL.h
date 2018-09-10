@@ -31,6 +31,8 @@
 
 @interface MSIDTestURLResponse (MSAL)
 
++ (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority;
+
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;
 
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
@@ -56,4 +58,7 @@
 + (MSIDTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
                                              requestHeaders:(NSDictionary *)requestHeaders
                                           requestParamsBody:(id)requestParams;
+
++ (NSDictionary *)defaultQueryParameters;
+
 @end

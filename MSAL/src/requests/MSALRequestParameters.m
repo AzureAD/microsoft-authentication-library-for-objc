@@ -47,13 +47,22 @@
 
 - (MSIDConfiguration *)msidConfiguration
 {
-   
-    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:self.unvalidatedAuthority
-                                                                 redirectUri:self.redirectUri.absoluteString
+    MSIDAuthority *authority = self.cloudAuthority ? self.cloudAuthority : self.unvalidatedAuthority;
+
+    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:authority
+                                                                 redirectUri:self.redirectUri
                                                                     clientId:self.clientId
                                                                       target:self.scopes.msidToString];
-    
+
     return config;
+}
+
+- (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName
+{
+    if ([NSString msidIsStringNilOrBlank:cloudHostName]) return;
+
+    NSURL *cloudAuthority = [self.unvalidatedAuthority.url msidAuthorityWithCloudInstanceHostname:cloudHostName];
+    _cloudAuthority = [[MSIDAuthorityFactory new] authorityFromUrl:cloudAuthority context:nil error:nil];
 }
 
 @end

@@ -45,19 +45,9 @@
     return self;
 }
 
-- (nullable instancetype)initWithURL:(nonnull NSURL *)url
-                           rawTenant:(NSString *)rawTenant
-                             context:(nullable id<MSIDRequestContext>)context
-                               error:(NSError **)error
+- (NSURL *)url
 {
-    self = [self initWithURL:url context:context error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
-        if (!self.msidAuthority) return nil;
-    }
-
-    return self;
+    return self.msidAuthority.url;
 }
 
 @end

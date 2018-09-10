@@ -46,8 +46,13 @@ typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
 #import <MSAL/MSALUIBehavior.h>
 #import <MSAL/MSALError.h>
 #import <MSAL/MSALLogger.h>
+#import <MSAL/MSALWebviewType.h>
 #import <MSAL/MSALPublicClientApplication.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALAccount.h>
 #import <MSAL/MSALAccountId.h>
 #import <MSAL/MSALTelemetry.h>
+#import <MSAL/MSALAuthority.h>
+#import <MSAL/MSALAADAuthority.h>
+#import <MSAL/MSALB2CAuthority.h>
+#import <MSAL/MSALADFSAuthority.h>

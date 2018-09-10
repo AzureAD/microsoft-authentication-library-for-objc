@@ -21,7 +21,7 @@ These libraries are suitable to use in a production environment. We provide the 
     if let application = try? MSALPublicClientApplication.init(clientId: <your-client-id-here>) {
         application.acquireToken(forScopes: kScopes) { (result, error) in
             if result != nil {
-                    // Set up your app for the user
+                    // Set up your app for the account
             } else {
                 print(error?.localizedDescription)
             }
@@ -43,9 +43,9 @@ These libraries are suitable to use in a production environment. We provide the 
     {
         if (!error)
         {
-            // You'll want to get the user identifier to retrieve and reuse the user
+            // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *userIdentifier = result.user.userIdentifier;
+            NSString *accountIdentifier = result.account.homeAccountId.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -154,9 +154,9 @@ If you find a security issue with our libraries or services please report it to 
     </array>
 ```
 
-Our library uses the SFSafariViewController for authentication. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session. 
+Our library uses the SFAuthenticationSession for authentication on iOS 11+ and SFSafariViewController on iOS 9 and 10. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session. 
 
-### Handling the redirect from the SFSafariViewController (Objective C)
+### Handling the redirect from the SFAuthenticationSession (Objective C)
 
 You will need to add the following to your `AppDelegate.m` file:
 
@@ -170,7 +170,7 @@ You will need to add the following to your `AppDelegate.m` file:
 }
 ```
 
-### Handling the redirect from the SFSafariViewController (Swift)
+### Handling the redirect from the SFAuthenticationSession (Swift)
 
 You will need to add the following to your `AppDelegate.swift` file:
 
@@ -207,9 +207,9 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
     {
         if (!error)
         {
-            // You'll want to get the user identifier to retrieve and reuse the user
+            // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *userIdentifier = result.user.userIdentifier;
+            NSString *accountIdentifier = result.account.homeAccountId.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -227,10 +227,10 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
                 
         if error == nil {
                         
-            // You'll want to get the user identifier to retrieve and reuse the user
+            // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
 
-            userIdentifier = result.user.userIdentifier
+            accountIdentifier = result.account.homeAccountId.identifier
             accessToken = result.accessToken
             
         } else {
@@ -242,15 +242,15 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 ### Silently Acquiring an Updated Token (Objective C)
 ```objective-c
     NSError *error = nil;
-    MSALUser *user = [application userForIdentifier:userIdentifier error:&error];
-    if (!user)
+    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    if (!account)
     {
         // handle error
         return;
     }
     
     [application acquireTokenSilentForScopes:@[@"scope1"]
-                                        user:user
+                                     account:account
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         if (!error)
@@ -273,7 +273,7 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 ### Silently Acquiring an Updated Token (Swift)
 ```swift
 
-    application.acquireTokenSilent(forScopes: kScopes, user: user) { (result, error) in
+    application.acquireTokenSilent(forScopes: kScopes, account: account) { (result, error) in
     
         if error == nil {
 
@@ -291,11 +291,11 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 ```
 
 ### Responding to an Interaction Required Error
-Occasionally user interaction will be required to get a new access token, when this occurs you will receive a `MSALErrorInteractionRequired` error when trying to silently acquire a new token. In those cases call `acquireToken:` with the same user and scopes as the failing `acquireTokenSilent:` call. It is recommending to display a status message to the user in an unobtrusive way first before using an interactive `acquireToken:` call.
+Occasionally user interaction will be required to get a new access token, when this occurs you will receive a `MSALErrorInteractionRequired` error when trying to silently acquire a new token. In those cases call `acquireToken:` with the same account and scopes as the failing `acquireTokenSilent:` call. It is recommending to display a status message to the user in an unobtrusive way first before using an interactive `acquireToken:` call.
 ```objective-c
     [application acquireTokenForScopes:@["scope1"]
-                                  user:user
-                             completionBlock:^(MSALResult *result, NSError *error) { }];
+                               account:account
+                       completionBlock:^(MSALResult *result, NSError *error) { }];
 ```
 
 

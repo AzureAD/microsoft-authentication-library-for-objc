@@ -35,14 +35,7 @@
                     context:(id<MSIDRequestContext>)context
                       error:(NSError **)error
 {
-    self = [super initWithURL:url context:context error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDAADAuthority alloc] initWithURL:url context:context error:error];
-        if (!self.msidAuthority) return nil;
-    }
-    
-    return self;
+    return [self initWithURL:url rawTenant:nil context:context error:error];
 }
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
@@ -50,7 +43,7 @@
                              context:(nullable id<MSIDRequestContext>)context
                                error:(NSError **)error
 {
-    self = [self initWithURL:url context:context error:error];
+    self = [super initWithURL:url context:context error:error];
     if (self)
     {
         self.msidAuthority = [[MSIDAADAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
@@ -58,6 +51,11 @@
     }
     
     return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
 }
 
 @end

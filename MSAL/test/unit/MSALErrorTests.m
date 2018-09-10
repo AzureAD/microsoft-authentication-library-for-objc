@@ -35,28 +35,32 @@
 
 @implementation MSALErrorTests
 
-- (void)testCreateError_withDomainCodeDescription_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
+- (void)testCreateAndLogError_withDomainCodeDescription_andOauthErrorAndSubCode_noAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
-    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, nil);
-    
+    NSError *error = MSALCreateAndLogError(nil, @"TestDomain", -1000, @"Oauth2Error", @"SubError", nil, nil, __FUNCTION__, __LINE__, @"Test description");
+
     XCTAssertEqualObjects(error.domain, @"TestDomain");
     XCTAssertEqual(error.code, -1000);
     XCTAssertNotNil(error.userInfo);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
+    XCTAssertEqualObjects(error.userInfo[MSALOAuthSubErrorKey], @"SubError");
+    XCTAssertEqualObjects(error.userInfo[MSALOAuthErrorKey], @"Oauth2Error");
 }
 
-- (void)testCreateError_withDomainCodeDescription_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
+- (void)testCreateError_withDomainCodeDescription_andOauthErrorAndSubCode_withAdditionalUserInfo_shouldReturnErrorWithCodeDomainUserInfo
 {
     NSDictionary *userInfo = @{MSALHTTPHeadersKey : @{@"Retry-After": @"120"}};
-    
-    NSError *error = MSALCreateError(@"TestDomain", -1000, @"Test description", nil, nil, nil, userInfo);
-    
+
+    NSError *error = MSALCreateAndLogError(nil, @"TestDomain", -1000, @"Oauth2Error", @"SubError", nil, userInfo, __FUNCTION__, __LINE__, @"Test description");
+
     XCTAssertEqualObjects(error.domain, @"TestDomain");
     XCTAssertEqual(error.code, -1000);
     XCTAssertNotNil(error.userInfo);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Test description");
     XCTAssertNotNil(error.userInfo[MSALHTTPHeadersKey]);
     XCTAssertEqualObjects(error.userInfo[MSALHTTPHeadersKey][@"Retry-After"], @"120");
+    XCTAssertEqualObjects(error.userInfo[MSALOAuthSubErrorKey], @"SubError");
+    XCTAssertEqualObjects(error.userInfo[MSALOAuthErrorKey], @"Oauth2Error");
 }
 
 @end

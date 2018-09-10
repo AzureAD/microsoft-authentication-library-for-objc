@@ -28,7 +28,13 @@
 #import "MSALTestAppSettingViewController.h"
 
 @interface MSALTestAppAuthorityViewController : MSALTestAppSettingViewController
+{
+    NSMutableArray<NSString *> *_authorities;
+    NSMutableArray<NSString *> *_savedAuthorities;
+}
 
 + (instancetype)sharedController;
+- (instancetype)initWithAuthorities:(NSArray<NSString *> *)aadAuthorities
+             keyForSavedAuthorities:(NSString *)userDefaultsKey;
 
 @end

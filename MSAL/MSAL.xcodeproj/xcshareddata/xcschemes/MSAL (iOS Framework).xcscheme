@@ -26,15 +26,15 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      codeCoverageEnabled = "YES">
+      codeCoverageEnabled = "YES"
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D65A6FC01E3FF47D00C69FBA"
-               BuildableName = "&quot;MSAL-iOS-Unit-Tests&quot;.xctest"
+               BuildableName = "&quot;MSAL-iOS-UI-Tests&quot;.xctest"
                BlueprintName = "MSAL iOS Unit Tests"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>

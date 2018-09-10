@@ -26,10 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseRequest.h"
-#import "MSALHttpResponse.h"
 #import "MSALResult+Internal.h"
 #import "MSALAccount.h"
-#import "MSALWebAuthRequest.h"
+#import "MSIDAADAuthorizationCodeGrantRequest.h"
+#import "MSIDAADRefreshTokenGrantRequest.h"
+#import "MSALInteractiveRequest.h"
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
@@ -47,6 +48,7 @@
 #import "MSALAccountId.h"
 #import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -97,6 +99,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     _tokenCache = tokenCache;
     _oauth2Factory = [MSIDAADV2Oauth2Factory new];
+
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
     return self;
 }
@@ -144,12 +148,135 @@ static MSALScopes *s_reservedScopes = nil;
     [self acquireToken:completionBlock];
 }
 
+- (void)resolveEndpoints:(MSALAuthorityCompletion)completionBlock
+{
+    NSString *upn = nil;
+    if (_parameters.account)
+    {
+        upn = _parameters.account.username;
+    }
+    else if (_parameters.loginHint)
+    {
+        upn = _parameters.loginHint;
+    }
+
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
+                                                         completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+          {
+              if (error)
+              {
+                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                  [self stopTelemetryEvent:event error:error];
+
+                  completionBlock(NO, error);
+                  return;
+              }
+
+              _authority = _parameters.unvalidatedAuthority;
+              completionBlock(YES, nil);
+          }];
+     }];
+}
+
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
-    NSMutableDictionary<NSString *, NSString *> *reqParameters = [NSMutableDictionary new];
+    CHECK_ERROR_COMPLETION(completionBlock, _parameters, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
+
+    MSIDTokenRequest *authRequest = [self tokenRequest];
     
-    // TODO: Remove once uid+utid work hits PROD
+    [authRequest sendWithBlock:^(id response, NSError *error) {
+        if (error)
+        {
+            if(completionBlock) completionBlock(nil, error);
+            return;
+        }
+        
+        if(response && ![response isKindOfClass:[NSDictionary class]])
+        {
+            NSError *localError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        NSDictionary *jsonDictionary = (NSDictionary *)response;
+        NSError *localError = nil;
+        MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&localError];
+        
+        if (!tokenResponse)
+        {
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        localError = nil;
+        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
+        {
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        if (_parameters.account.homeAccountId.identifier != nil &&
+            ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
+        {
+            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+            completionBlock(nil, userMismatchError);
+            return;
+        }
+        
+        MSIDConfiguration *configuration = _parameters.msidConfiguration;
+        
+        localError = nil;
+        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                           response:tokenResponse
+                                                            context:_parameters
+                                                              error:&localError];
+        
+        if (!isSaved)
+        {
+            completionBlock(nil, localError);
+            return;
+        }
+        
+        MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
+        MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
+        
+        if (!accessToken || !idToken)
+        {
+            NSError *responseError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+            completionBlock(nil, responseError);
+            return;
+        }
+
+        NSError *resultError = nil;
+        
+        MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                       idToken:idToken
+                                       isExtendedLifetimeToken:NO
+                                                         error:&resultError];
+        
+        completionBlock(result, resultError);
+    }];
+}
+
+- (MSIDTokenRequest *)tokenRequest
+{
+    // Implemented in subclasses
+    return nil;
+}
+
+- (NSURL *)tokenEndpoint
+{
     NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.metadata.tokenEndpoint resolvingAgainstBaseURL:NO];
+
+    if (_parameters.cloudAuthority)
+    {
+        tokenEndpoint.host = _parameters.cloudAuthority.environment;
+    }
     
     NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
     
@@ -164,89 +291,8 @@ static MSALScopes *s_reservedScopes = nil;
     }
     
     tokenEndpoint.query = [endpointQPs msidURLFormEncode];
-    
-    MSALWebAuthRequest *authRequest = [[MSALWebAuthRequest alloc] initWithURL:tokenEndpoint.URL
-                                                                      context:_parameters];
-    
-    reqParameters[MSID_OAUTH2_CLIENT_ID] = _parameters.clientId;
-    reqParameters[MSID_OAUTH2_SCOPE] = [[self requestScopes:nil] msalToString];
-    reqParameters[MSID_OAUTH2_CLIENT_INFO] = @"1";
-    
-    [self addAdditionalRequestParameters:reqParameters];
-    authRequest.bodyParameters = reqParameters;
-    
-    [authRequest sendPost:^(MSALHttpResponse *response, NSError *error)
-     {
-         MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-         NSDictionary *jsonDictionary;
-         
-         if (!error)
-         {
-             jsonDictionary = [response.body msidToJsonDictionary:&error];
-         }
-         
-         if (error)
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, error);
-             return;
-         }
-         
-         MSIDAADV2TokenResponse *tokenResponse = (MSIDAADV2TokenResponse *)[self.oauth2Factory tokenResponseFromJSON:jsonDictionary context:nil error:&error];
-         
-         if (!tokenResponse)
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-         
-         if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&error])
-         {
-             [self stopTelemetryEvent:event error:error];
-             
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-         
-         if (_parameters.account != nil &&
-             ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
-         {
-             NSError *userMismatchError = CREATE_MSID_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
-             completionBlock(nil, userMismatchError);
-             return;
-         }
-         
-         MSIDConfiguration *configuration = _parameters.msidConfiguration;
-         
-         BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
-                                                            response:tokenResponse
-                                                             context:_parameters
-                                                               error:&error];
-         
-         if (!isSaved)
-         {
-             completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:error]);
-             return;
-         }
-         
-         MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
-         MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
-         
-         MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken];
-         
-         [event setUser:result.account];
-         [self stopTelemetryEvent:event error:nil];
-         
-         completionBlock(result, nil);
-     }];
-}
 
-- (void)addAdditionalRequestParameters:(NSMutableDictionary<NSString *, NSString *> *)parameters
-{
-    (void)parameters;
+    return tokenEndpoint.URL;
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
@@ -256,7 +302,7 @@ static MSALScopes *s_reservedScopes = nil;
     
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
-    [event setAuthorityType:[_authority authorityType]];
+    [event setAuthorityType:[_authority telemetryAuthorityType]];
     [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
     [event setClientId:_parameters.clientId];
     
