@@ -26,21 +26,12 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@interface MSALAuthority : NSObject
-
-@property (readonly, nonnull) NSURL *url;
-
-- (instancetype _Nullable )init NS_UNAVAILABLE;
-+ (instancetype _Nullable )new NS_UNAVAILABLE;
+@interface MSALB2CAuthority : MSALAuthority
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                              context:(nullable id<MSIDRequestContext>)context
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
-
-- (nullable instancetype)initWithURL:(nonnull NSURL *)url
-                           rawTenant:(nullable NSString *)rawTenant
-                             context:(nullable id<MSIDRequestContext>)context
-                               error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

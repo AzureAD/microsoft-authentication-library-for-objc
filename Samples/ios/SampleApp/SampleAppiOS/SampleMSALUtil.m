@@ -180,10 +180,19 @@
     // for graph in this sample it's best to specify the account's home authority to remove any possibility of there
     // being any ambiquity in the cache lookup.
     NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentAccount.homeAccountId.tenantId];
+
+    NSError *authorityError = nil;
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:homeAuthority] error:&authorityError];
+
+    if (!authority)
+    {
+        acquireTokenBlock(nil, authorityError);
+        return;
+    }
     
     [application acquireTokenSilentForScopes:scopes
                                      account:currentAccount
-                                   authority:homeAuthority
+                                   authority:authority
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)

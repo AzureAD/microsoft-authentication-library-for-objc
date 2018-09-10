@@ -27,24 +27,33 @@
 
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
+#import "MSALAuthorityFactory.h"
 
 @implementation MSALAuthority
 
-- (instancetype)initWithURL:(NSURL *)url
-                    context:(id<MSIDRequestContext>)context
-                      error:(NSError **)error
+- (instancetype)initWithURL:(nonnull NSURL *)url
+                    context:(nullable id<MSIDRequestContext>)context
+                      error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    self = [super init];
-    
-    return self;
+    return [super init];
 }
 
-- (nullable instancetype)initWithURL:(nonnull NSURL *)url
-                           rawTenant:(nullable NSString *)rawTenant
-                             context:(nullable id<MSIDRequestContext>)context
-                               error:(NSError * _Nullable __autoreleasing * _Nullable)error
++ (MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
+                              error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    return [self initWithURL:url context:context error:error];
+    return [[MSALAuthorityFactory new] authorityFromUrl:url
+                                                context:nil
+                                                  error:error];
+}
+
++ (MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
+                          rawTenant:(nullable NSString *)rawTenant
+                              error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    return [[MSALAuthorityFactory new] authorityFromUrl:url
+                                              rawTenant:rawTenant
+                                                context:nil
+                                                  error:error];
 }
 
 - (NSURL *)url
