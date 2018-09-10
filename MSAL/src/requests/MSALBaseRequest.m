@@ -216,10 +216,15 @@ static MSALScopes *s_reservedScopes = nil;
             completionBlock(nil, responseError);
             return;
         }
+
+        NSError *resultError = nil;
         
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
+        MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                       idToken:idToken
+                                       isExtendedLifetimeToken:NO
+                                                         error:&resultError];
         
-        completionBlock(result, nil);
+        completionBlock(result, resultError);
     }];
 }
 

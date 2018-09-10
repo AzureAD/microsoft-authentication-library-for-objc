@@ -80,7 +80,7 @@
     [self closeResultView];
 
     // Now lookup access token without authority
-    mutableConfig[@"authority"] = request.authority;
+    mutableConfig[@"authority"] = nil;
 
     [self acquireTokenSilent:mutableConfig];
     [self runSharedResultAssertionWithTestRequest:request];

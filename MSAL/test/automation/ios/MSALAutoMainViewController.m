@@ -145,9 +145,16 @@
 - (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
-    __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
-    __auto_type authorityFactory = [MSALAuthorityFactory new];
-    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+
+    MSALAuthority *authority = nil;
+
+    if (parameters[MSAL_AUTHORITY_PARAM])
+    {
+        __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
+
+        authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    }
     
     NSError *error = nil;
     

@@ -148,7 +148,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
          
          [expectation fulfill];
      }];
@@ -221,7 +221,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.com/" DEFAULT_TEST_UTID);
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/" DEFAULT_TEST_UTID);
          XCTAssertEqual(result.extendedLifeTimeToken, NO);
 
          [expectation fulfill];
@@ -526,7 +526,7 @@
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
          
          // Expect authority to be cloud authority
-         XCTAssertEqualObjects(result.authority, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
          XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.de");
          
          [expectationInteractive fulfill];
@@ -549,7 +549,7 @@
          XCTAssertEqualObjects(rlt.accessToken, @"i am an updated access token!");
          
          // authority cloud authority as expected
-         XCTAssertEqualObjects(rlt.authority, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+         XCTAssertEqualObjects(rlt.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
          
          [expectationSilent fulfill];
      }];

@@ -135,7 +135,12 @@
                                                                  context:_parameters
                                                                    error:&error];
 
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
+            NSError *error = nil;
+
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                           idToken:idToken
+                                           isExtendedLifetimeToken:NO
+                                                             error:&error];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
@@ -183,8 +188,13 @@
                                                                   context:_parameters
                                                                     error:&error];
 
-             result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
-             error = nil;
+             NSError *resultError = nil;
+
+             result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken
+                                                idToken:idToken
+                                isExtendedLifetimeToken:YES
+                                                  error:&resultError];
+             error = resultError;
          }
 
          completionBlock(result, error);
