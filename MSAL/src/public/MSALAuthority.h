@@ -39,8 +39,4 @@
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-+ (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
-                                   rawTenant:(nullable NSString *)rawTenant
-                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
 @end

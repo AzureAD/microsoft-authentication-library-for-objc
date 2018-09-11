@@ -46,16 +46,6 @@
                                                   error:error];
 }
 
-+ (MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
-                          rawTenant:(nullable NSString *)rawTenant
-                              error:(NSError * _Nullable __autoreleasing * _Nullable)error
-{
-    return [[MSALAuthorityFactory new] authorityFromUrl:url
-                                              rawTenant:rawTenant
-                                                context:nil
-                                                  error:error];
-}
-
 - (NSURL *)url
 {
     return nil;
