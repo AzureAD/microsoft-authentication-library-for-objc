@@ -34,7 +34,7 @@ done
 # create the target tar/zip file
 cd ~/Desktop
 tar -cf ./$releaseFolder.tar ./$releaseFolder
-zip -r -X ./$releaseFolder.zip ./$releaseFolder
+zip -r -q -X ./$releaseFolder.zip ./$releaseFolder
 rm -R ./$releaseFolder
 
 echo "Release tar/zip have been created and put at ~/Desktop"
