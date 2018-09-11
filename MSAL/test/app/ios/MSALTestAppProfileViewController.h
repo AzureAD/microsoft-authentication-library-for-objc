@@ -25,27 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppSettingViewController.h"
 
-extern NSString* MSALTestAppCacheChangeNotification;
+@interface MSALTestAppProfileViewController : MSALTestAppSettingViewController
+{
+    NSDictionary *_profiles;
+}
 
-@interface MSALTestAppSettings : NSObject
-
-@property (nonatomic) id profile;
-@property (nonatomic) NSString *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings *)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-+ (NSDictionary *) profiles;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
++ (instancetype)sharedController;
 
 @end

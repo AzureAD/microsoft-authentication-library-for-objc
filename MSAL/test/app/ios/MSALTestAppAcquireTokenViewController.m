@@ -37,6 +37,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import <WebKit/WebKit.h>
 #import "MSALTestAppAuthorityTypeViewController.h"
+#import "MSALTestAppProfileViewController.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -51,6 +52,7 @@
 {
     UIView *_acquireSettingsView;
     
+    UIButton *_profileButton;
     UIButton *_authorityButton;
     UISegmentedControl *_validateAuthority;
     
@@ -142,9 +144,14 @@
     scrollView.userInteractionEnabled = YES;
     MSALTestAppAcquireLayoutBuilder *layout = [MSALTestAppAcquireLayoutBuilder new];
     
+    _profileButton = [self buttonWithTitle:[MSALTestAppProfileViewController currentTitle]
+                                      action:@selector(selectProfile:)];
+    [layout addControl:_profileButton title:@"profile"];
+    
     _authorityButton = [self buttonWithTitle:[MSALTestAppAuthorityViewController currentTitle]
                                       action:@selector(selectAuthority:)];
     [layout addControl:_authorityButton title:@"authority"];
+    
     _validateAuthority = [[UISegmentedControl alloc] initWithItems:@[@"Yes", @"No"]];
     [layout addControl:_validateAuthority title:@"valAuth"];
     
@@ -408,6 +415,8 @@
     self.navigationController.navigationBarHidden = YES;
     _validateAuthority.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
     
+    [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
+                      forState:UIControlStateNormal];
     [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
                       forState:UIControlStateNormal];
     [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
@@ -462,22 +471,16 @@
 {
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSDictionary *currentProfile = [settings profile];
     NSString *authority = [settings authority];
-    NSString *clientId;
+    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
     NSDictionary *extraQueryParameters = [NSDictionary msidURLFormDecode:_extraQueryParamsField.text];
     
-    if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
-    {
-        clientId = B2C_TEST_APP_CLIENT_ID;;
-    }
-    else
-    {
-        clientId = TEST_APP_CLIENT_ID;
-    }
-    
     NSError *error = nil;
+    
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
@@ -576,12 +579,14 @@
     }
     
     NSString *authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
+    NSDictionary *currentProfile = [settings profile];
+    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
     
     NSError *error = nil;
     
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+       [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
@@ -596,7 +601,7 @@
 
     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
                                      account:settings.currentAccount
-                                   authority:settings.authority
+                                   authority:nil
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)
@@ -670,6 +675,12 @@
 {
     (void)sender;
     [self.navigationController pushViewController:[MSALTestAppAuthorityTypeViewController sharedController] animated:YES];
+}
+
+- (IBAction)selectProfile:(id)sender
+{
+    (void)sender;
+    [self.navigationController pushViewController:[MSALTestAppProfileViewController sharedController] animated:YES];
 }
 
 - (IBAction)selectUser:(id)sender

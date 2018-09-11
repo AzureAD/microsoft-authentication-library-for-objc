@@ -120,54 +120,86 @@
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
 
+    [self tryRT:nil attemptFRT:YES completionBlock:completionBlock];
+}
+
+- (void)refreshAccessToken:(MSALCompletionBlock)completionBlock
+{
+    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
+        if (error)
+        {
+            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+            [self stopTelemetryEvent:event error:error];
+            
+            completionBlock(nil, error);
+            return;
+        }
+        
+        MSID_LOG_INFO(_parameters, @"Refreshing access token");
+        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
+        
+        _authority = authority;
+        
+        [super acquireToken:^(MSALResult *result, NSError *error)
+         {
+             if (error)
+             {
+                 completionBlock(nil,error);
+             }
+             else
+             {
+                 completionBlock(result,nil);
+             }
+         }];
+    }];
+}
+
+- (void)tryRT:(NSString*)familyId attemptFRT:(BOOL)attempFRT completionBlock:(MSALCompletionBlock)completionBlock
+{
+    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     NSError *msidError = nil;
-
     self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                           familyId:nil
-                                                      configuration:msidConfiguration
-                                                            context:_parameters
-                                                              error:&msidError];
-
+                                                                              familyId:familyId
+                                                                         configuration:msidConfiguration
+                                                                               context:_parameters
+                                                                                 error:&msidError];
+    
     if (msidError)
     {
         completionBlock(nil, msidError);
         return;
     }
     
-    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
-
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
+    if (!attempFRT)
+    {
+        CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
+    }
+    
+   if (self.refreshToken)
+   {
+       [self refreshAccessToken:^(MSALResult *result, NSError *error)
         {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-
-            completionBlock(nil, error);
-            return;
-        }
-
-        MSID_LOG_INFO(_parameters, @"Refreshing access token");
-        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
-
-        _authority = authority;
-
-        [super acquireToken:^(MSALResult *result, NSError *error)
-         {
-             // Logic for returning extended lifetime token
-             if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
-             {
-                 MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
-                                                                configuration:msidConfiguration
-                                                                      context:_parameters
-                                                                        error:&error];
-                 
-                 result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
-                 error = nil;
-             }
-             
-             completionBlock(result, error);
-         }];
-    }];
+            if (error)
+            {
+                if (attempFRT)
+                {
+                     [self tryRT:@"1" attemptFRT:NO completionBlock:completionBlock];
+                }
+                else
+                {
+                    completionBlock(nil,error);
+                }
+            }
+            else
+            {
+                completionBlock(result,nil);
+            }
+        }];
+   }
+    else
+    {
+        [self tryRT:@"1" attemptFRT:NO completionBlock:completionBlock];
+    }
 }
 
 - (MSIDTokenRequest *)tokenRequest

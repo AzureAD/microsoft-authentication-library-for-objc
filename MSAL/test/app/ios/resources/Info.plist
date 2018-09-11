@@ -25,6 +25,8 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>msald326c1ce-6cc6-4de2-bebc-4591e5e13ef0</string>
+				<string>ms-sharepoint-auth</string>
 				<string>msale3b9ad76-9763-4827-b088-80c7a7888f79</string>
 				<string>msal3c62ac97-29eb-4aed-a3c8-add0298508da</string>
 			</array>

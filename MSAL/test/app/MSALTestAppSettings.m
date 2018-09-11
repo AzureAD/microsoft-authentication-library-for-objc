@@ -21,6 +21,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if __has_include("MSALAdditionalTestAppSettings.h")
+#include "MSALAdditionalTestAppSettings.h"
+#else
+// If you put a header file at ~/aadoverrides/MSALAdditionalTestAppSettings.hwith
+// function named _addtionalProfiles() that returns an NSDictionary that will
+// be folded into the profiles list without you having to constantly alter your
+// github enlistment!
+static NSDictionary* _additionalProfiles()
+{
+    return @{
+      @"MSAL Test App" : @{@"clientId" : @"3c62ac97-29eb-4aed-a3c8-add0298508da",
+                           @"redirectUri" : @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"},
+      };
+}
+#endif
+
 #import "MSALTestAppSettings.h"
 #import "MSALAuthority.h"
 #import "MSALAccountId.h"
@@ -38,6 +54,8 @@ static NSArray<NSString *> *s_b2cAuthorities = nil;
 static NSArray<NSString *> *s_scopes_available = nil;
 
 static NSArray<NSString *> *s_authorityTypes = nil;
+
+static NSDictionary * s_profiles;
 
 @interface MSALTestAppSettings()
 {
@@ -68,6 +86,8 @@ static NSArray<NSString *> *s_authorityTypes = nil;
                          @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy"];
     
     s_authorityTypes = @[@"AAD",@"B2C"];
+    
+    s_profiles = _additionalProfiles();
 }
 
 + (MSALTestAppSettings*)settings
@@ -97,6 +117,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
 + (NSArray<NSString *> *)b2cAuthorities
 {
     return s_b2cAuthorities;
+}
+
++ (NSDictionary *)profiles
+{
+    return s_profiles;
 }
 
 - (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
@@ -129,6 +154,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
         return;
     }
     
+    _profile = [settings objectForKey:@"profile"];
     _authority = [settings objectForKey:@"authority"];
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
@@ -149,6 +175,12 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     [settings setValue:value forKey:key];
     [[NSUserDefaults standardUserDefaults] setObject:settings
                                               forKey:MSAL_APP_SETTINGS_KEY];
+}
+
+- (void)setProfile:(id)profile
+{
+    [self setValue:profile forKey:@"profile"];
+    _profile = profile;
 }
 
 - (void)setAuthority:(NSString *)authority
