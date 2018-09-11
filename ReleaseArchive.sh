@@ -2,17 +2,16 @@
 
 if [ -z "$1" ]
   then
-    echo -e "\n\rUsage: ReleaseArchive [release tag] [commit number] \n\rE.g. ReleaseArchive 0.1.6 a44af92b4b255981161eacc304417368 \n\ror \n\rReleaseArchive 0.1.6 (if release tag has been created in Github)\n\r"
+    echo -e "\n\rUsage: ReleaseArchive [release tag] \n\rE.g. ReleaseArchive 0.1.6\n\r"
     exit
 fi
 
 libraryName=microsoft-authentication-library-for-objc
 tag=$1
-if [ -z "$2" ]; then commit=tag; else commit=$2; fi
 releaseFolder=$libraryName-$tag
 
 # archive the main project without submodule and uncompress it
-git archive --prefix=$releaseFolder/ -o ~/Desktop/$mainProj.tar $commit
+git archive --prefix=$releaseFolder/ -o ~/Desktop/$mainProj.tar HEAD
 tar -xf ~/Desktop/$mainProj.tar -C ~/Desktop/
 rm ~/Desktop/$mainProj.tar
 
