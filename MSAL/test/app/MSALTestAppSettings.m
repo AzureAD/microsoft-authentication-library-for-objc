@@ -31,7 +31,7 @@
 static NSDictionary* _additionalProfiles()
 {
     return @{
-      @"MSAL Test App" : @{@"clientId" : @"3c62ac97-29eb-4aed-a3c8-add0298508da",
+      @"MSAL-TestApp" : @{@"clientId" : @"3c62ac97-29eb-4aed-a3c8-add0298508da",
                            @"redirectUri" : @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"},
       };
 }
@@ -132,8 +132,20 @@ static NSDictionary * s_profiles;
     }
     
     NSError *error = nil;
+    NSString *clientId;
+    if (_profile)
+    {
+        clientId = [_profile objectForKey:@"clientId"];
+    }
+    else
+    {
+        NSArray *profileValues = [s_profiles allValues];
+        NSDictionary *profile = [profileValues objectAtIndex:0];
+        clientId = [profile objectForKey:@"clientId"];
+    }
+    
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:TEST_APP_CLIENT_ID
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                 authority:_authority
                                                     error:&error];
     if (application == nil)
@@ -154,7 +166,7 @@ static NSDictionary * s_profiles;
         return;
     }
     
-    _profile = [settings objectForKey:@"profile"];
+    _profile = [settings objectForKey:@"profile"] ? [settings objectForKey:@"profile"] : [[s_profiles allValues] objectAtIndex:0];
     _authority = [settings objectForKey:@"authority"];
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];

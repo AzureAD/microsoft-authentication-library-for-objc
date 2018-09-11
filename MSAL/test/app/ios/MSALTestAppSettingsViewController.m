@@ -96,7 +96,9 @@ static NSArray* s_deviceRows = nil;
     _keychainId = teamId ? teamId : @"<No Team ID>";*/
     
     MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
-    clientIdRow.valueBlock = ^NSString *{ return TEST_APP_CLIENT_ID; };
+    NSDictionary *currentProfile = [[MSALTestAppSettings settings] profile];
+    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    clientIdRow.valueBlock = ^NSString *{ return clientId; };
     SETTING_ROW(authority);
     
     _profileRows = @[ authority, clientIdRow ];

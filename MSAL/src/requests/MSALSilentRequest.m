@@ -119,12 +119,27 @@
 
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
-
-    [self tryRT:nil attemptFRT:YES completionBlock:completionBlock];
+    
+    //try refresh token first
+    NSError *msidError = nil;
+    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+                                                           familyId:nil
+                                                      configuration:msidConfiguration
+                                                            context:_parameters
+                                                              error:&msidError];
+    
+    if (msidError)
+    {
+        completionBlock(nil, msidError);
+        return;
+    }
+    
+    [self tryRT:YES completionBlock:completionBlock];
 }
 
 - (void)refreshAccessToken:(MSALCompletionBlock)completionBlock
 {
+    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)
         {
@@ -142,48 +157,54 @@
         
         [super acquireToken:^(MSALResult *result, NSError *error)
          {
-             if (error)
+             if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
              {
-                 completionBlock(nil,error);
+                 MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                                configuration:msidConfiguration
+                                                                      context:_parameters
+                                                                        error:&error];
+                 
+                 result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
+                 error = nil;
              }
-             else
-             {
-                 completionBlock(result,nil);
-             }
+             
+             completionBlock(result, error);
          }];
     }];
 }
 
-- (void)tryRT:(NSString*)familyId attemptFRT:(BOOL)attempFRT completionBlock:(MSALCompletionBlock)completionBlock
+- (void)tryRT:(BOOL)tryFRT completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    NSError *msidError = nil;
-    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                                              familyId:familyId
-                                                                         configuration:msidConfiguration
-                                                                               context:_parameters
-                                                                                 error:&msidError];
-    
-    if (msidError)
-    {
-        completionBlock(nil, msidError);
-        return;
-    }
-    
-    if (!attempFRT)
-    {
-        CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
-    }
-    
+   MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
    if (self.refreshToken)
    {
        [self refreshAccessToken:^(MSALResult *result, NSError *error)
         {
             if (error)
             {
-                if (attempFRT)
+                if (tryFRT)
                 {
-                     [self tryRT:@"1" attemptFRT:NO completionBlock:completionBlock];
+                    NSError *msidError = nil;
+                    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+                                                                           familyId:@"1"
+                                                                      configuration:msidConfiguration
+                                                                            context:_parameters
+                                                                              error:&msidError];
+                    
+                    if (msidError)
+                    {
+                        completionBlock(nil, msidError);
+                        return;
+                    }
+                    
+                    if(self.refreshToken)
+                    {
+                        [self tryRT:NO completionBlock:completionBlock];
+                    }
+                    else
+                    {
+                        completionBlock(nil,error);
+                    }
                 }
                 else
                 {
@@ -198,7 +219,7 @@
    }
     else
     {
-        [self tryRT:@"1" attemptFRT:NO completionBlock:completionBlock];
+            CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
     }
 }
 

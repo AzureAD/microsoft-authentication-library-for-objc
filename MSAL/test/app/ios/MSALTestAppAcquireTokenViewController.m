@@ -640,7 +640,8 @@
     
     // Delete accounts.
     NSString *authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
+    NSDictionary *currentProfile = [settings profile];
+    NSString *clientId = [currentProfile objectForKey:@"clientId"];
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
@@ -763,7 +764,8 @@
     }
     
     NSString *authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
+    NSDictionary *currentProfile = [settings profile];
+    NSString *clientId = [currentProfile objectForKey:@"clientId"];
     
     NSError *error = nil;
     

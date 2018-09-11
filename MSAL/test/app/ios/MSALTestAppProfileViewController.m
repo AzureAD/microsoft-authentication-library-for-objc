@@ -85,7 +85,8 @@
 
 + (NSString *)currentTitle
 {
-    id currentProfile = MSALTestAppSettings.settings.profile;
+    NSDictionary* currentProfile = [[MSALTestAppSettings settings] profile];
+    
     if (currentProfile)
     {
         NSArray *profiles = [[MSALTestAppSettings profiles] allKeysForObject:currentProfile];
@@ -93,7 +94,7 @@
     }
     else
     {
-        return @"MSAL-TestApp";
+        return [[[MSALTestAppSettings profiles] allKeys] objectAtIndex:0];
     }
 }
 
