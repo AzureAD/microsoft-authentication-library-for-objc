@@ -27,31 +27,28 @@
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+@class MSIDDefaultTokenCacheAccessor;
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+@interface MSALAccountsRequest : NSObject
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
+- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                         authority:(MSALAuthority *)authority
+                          clientId:(NSString *)clientId;
 
-@class MSALResult;
-@class MSALAccount;
+- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> *accounts, NSError *error);
-typedef void (^MSALAccountCompletionBlock)(MSALAccount *account, NSError *error);
+- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
+                    completionBlock:(MSALAccountCompletionBlock)completionBlock;
 
-#import <MSAL/MSALUIBehavior.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALWebviewType.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
+- (void)loadAccountForUsername:(NSString *)username
+               completionBlock:(MSALAccountCompletionBlock)completionBlock;
+
+- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
+
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                   error:(NSError * __autoreleasing *)error;
+
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error;
+
+@end

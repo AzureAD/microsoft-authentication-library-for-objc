@@ -66,6 +66,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
+#import "MSALAccountsRequest.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -240,67 +241,61 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return self;
 }
 
+#pragma mark - Accounts
+
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
 {
-    NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.environment;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:host
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
-
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-
-    NSMutableSet *msalAccounts = [NSMutableSet new];
-
-    for (MSIDAccount *msidAccount in msidAccounts)
-    {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-
-        if (msalAccount)
-        {
-            [msalAccounts addObject:msalAccount];
-        }
-    }
-
-    return [msalAccounts allObjects];
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
+    return [request accounts:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
-
-    for (MSALAccount *account in accounts)
-    {
-        if ([account.homeAccountId.identifier isEqualToString:homeAccountId])
-        {
-            return account;
-        }
-    }
-
-    return nil;
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
+    return [request accountForHomeAccountId:homeAccountId error:error];
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
+    return [request accountForUsername:username error:error];
+}
 
-    for (MSALAccount *account in accounts)
-    {
-        if ([account.username isEqualToString:username])
-        {
-            return account;
-        }
-    }
+- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock
+{
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
 
-    return nil;
+    [request loadAccountsWithCompletionBlock:completionBlock];
+}
+
+- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
+                    completionBlock:(MSALAccountCompletionBlock)completionBlock
+{
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
+
+    [request loadAccountForHomeAccountId:homeAccountId completionBlock:completionBlock];
+}
+
+- (void)loadAccountForUsername:(NSString *)username
+               completionBlock:(MSALAccountCompletionBlock)completionBlock
+{
+    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+                                                                         authority:self.authority
+                                                                          clientId:self.clientId];
+
+    [request loadAccountForUsername:username completionBlock:completionBlock];
 }
 
 #pragma SafariViewController Support

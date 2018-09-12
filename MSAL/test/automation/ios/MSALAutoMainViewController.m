@@ -176,38 +176,44 @@
     return clientApplication;
 }
 
-- (MSALAccount *)accountWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
-                           application:(MSALPublicClientApplication *)application
+- (void)loadAccountWithParameters:(NSDictionary<NSString *, NSString *> *)parameters
+                      application:(MSALPublicClientApplication *)application
+                completionHandler:(MSALAccountCompletionBlock)completionBlock
 {
-    NSString *accountIdentifier = parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM];
-    MSALAccount *account = nil;
-    
-    NSError *error = nil;
-    
-    if (accountIdentifier)
+    if (parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM])
     {
-        account = [application accountForHomeAccountId:accountIdentifier error:&error];
+        [application loadAccountForHomeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]
+                                 completionBlock:^(MSALAccount *account, NSError *error) {
 
-        if (error)
-        {
-            [self displayResultJson:[self createJsonStringFromError:error]
-                               logs:_resultLogs];
-            return nil;
-        }
+                                     if (error)
+                                     {
+                                         [self displayResultJson:[self createJsonStringFromError:error]
+                                                            logs:_resultLogs];
+                                         return;
+                                     }
+                                     else if (completionBlock)
+                                     {
+                                         completionBlock(account, nil);
+                                     }
+        }];
     }
     else if (parameters[MSAL_LEGACY_USER_PARAM])
     {
-        account = [application accountForUsername:parameters[MSAL_LEGACY_USER_PARAM] error:&error];
+        [application loadAccountForUsername:parameters[MSAL_LEGACY_USER_PARAM]
+                            completionBlock:^(MSALAccount *account, NSError *error) {
 
-        if (error)
-        {
-            [self displayResultJson:[self createJsonStringFromError:error]
-                               logs:_resultLogs];
-            return nil;
-        }
+                                if (error)
+                                {
+                                    [self displayResultJson:[self createJsonStringFromError:error]
+                                                       logs:_resultLogs];
+                                    return;
+                                }
+                                else if (completionBlock)
+                                {
+                                    completionBlock(account, nil);
+                                }
+        }];
     }
-    
-    return account;
 }
 
 - (void)handleMSALResult:(MSALResult *)result error:(NSError *)error
@@ -241,77 +247,82 @@
         {
             return;
         }
-        
-        MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
-        
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
-        NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
-        NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
-        NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
-        NSString *claims = parameters[MSAL_CLAIMS_PARAM];
 
-        MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+        [self loadAccountWithParameters:parameters
+                            application:application
+                      completionHandler:^(MSALAccount *account, NSError *error) {
 
-        if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"force"])
-        {
-            uiBehavior = MSALForceLogin;
-        }
-        else if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"consent"])
-        {
-            uiBehavior = MSALForceConsent;
-        }
+                          NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+                          NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
+                          NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
+                          NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+                          NSString *claims = parameters[MSAL_CLAIMS_PARAM];
 
-        NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
-        if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
-        {
-            application.webviewType = MSALWebviewTypeWKWebView;
-        }
-        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
-        {
-            application.webviewType = MSALWebviewTypeDefault;
-        }
-        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI])
-        {
-            application.webviewType = MSALWebviewTypeSafariViewController;
-        }
-        else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_PASSED])
-        {
-            application.webviewType = MSALWebviewTypeWKWebView;
-            application.customWebview = self.passedInController.webView;
-            [self.presentedViewController presentViewController:self.passedInController animated:NO completion:nil];
-        }
+                          MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
 
-        if (account)
-        {
-            [application acquireTokenForScopes:[scopes array]
-                          extraScopesToConsent:extraScopes
-                                       account:account
-                                    uiBehavior:uiBehavior
-                          extraQueryParameters:extraQueryParameters
-                                        claims:claims
-                                     authority:nil // Will use the authority passed in with the application object
-                                 correlationId:correlationId
-                               completionBlock:^(MSALResult *result, NSError *error)
-             {
-                 [self handleMSALResult:result error:error];
-             }];
-        }
-        else
-        {
-            NSString *loginHint = parameters[MSAL_LOGIN_HINT_PARAM];
+                          if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"force"])
+                          {
+                              uiBehavior = MSALForceLogin;
+                          }
+                          else if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"consent"])
+                          {
+                              uiBehavior = MSALForceConsent;
+                          }
 
-            [application acquireTokenForScopes:[scopes array]
-                          extraScopesToConsent:extraScopes
-                                     loginHint:loginHint
-                                    uiBehavior:uiBehavior
-                          extraQueryParameters:extraQueryParameters
-                                     authority:nil
-                                 correlationId:correlationId
-                               completionBlock:^(MSALResult *result, NSError *error) {
+                          NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
+                          if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
+                          {
+                              application.webviewType = MSALWebviewTypeWKWebView;
+                          }
+                          else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
+                          {
+                              application.webviewType = MSALWebviewTypeDefault;
+                          }
+                          else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI])
+                          {
+                              application.webviewType = MSALWebviewTypeSafariViewController;
+                          }
+                          else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_PASSED])
+                          {
+                              application.webviewType = MSALWebviewTypeWKWebView;
+                              application.customWebview = self.passedInController.webView;
+                              [self.presentedViewController presentViewController:self.passedInController animated:NO completion:nil];
+                          }
 
+                          if (account)
+                          {
+                              [application acquireTokenForScopes:[scopes array]
+                                            extraScopesToConsent:extraScopes
+                                                         account:account
+                                                      uiBehavior:uiBehavior
+                                            extraQueryParameters:extraQueryParameters
+                                                          claims:claims
+                                                       authority:nil // Will use the authority passed in with the application object
+                                                   correlationId:correlationId
+                                                 completionBlock:^(MSALResult *result, NSError *error)
+                               {
                                    [self handleMSALResult:result error:error];
-            }];
-        }
+                               }];
+                          }
+                          else
+                          {
+                              NSString *loginHint = parameters[MSAL_LOGIN_HINT_PARAM];
+
+                              [application acquireTokenForScopes:[scopes array]
+                                            extraScopesToConsent:extraScopes
+                                                       loginHint:loginHint
+                                                      uiBehavior:uiBehavior
+                                            extraQueryParameters:extraQueryParameters
+                                                       authority:nil
+                                                   correlationId:correlationId
+                                                 completionBlock:^(MSALResult *result, NSError *error) {
+
+                                                     [self handleMSALResult:result error:error];
+                                                 }];
+                          }
+
+        }];
+
     };
     
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
@@ -336,32 +347,37 @@
             return;
         }
 
-        MSALAccount *account = [self accountWithParameters:parameters application:application];
+        [self loadAccountWithParameters:parameters
+                            application:application
+                      completionHandler:^(MSALAccount *account, NSError *error) {
 
-        if (!account)
-        {
-            // Acquiretoken silent requires having a user
-            [self dismissViewControllerAnimated:NO
-                                     completion:^{
-                                         [self displayResultJson:@"{\"error_code\":\"no_account\"}" logs:_resultLogs];
-                                     }];
+                          if (!account)
+                          {
+                              // Acquiretoken silent requires having a user
+                              [self dismissViewControllerAnimated:NO
+                                                       completion:^{
+                                                           [self displayResultJson:@"{\"error_code\":\"no_account\"}" logs:_resultLogs];
+                                                       }];
 
-            return;
-        }
-        
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
-        BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
-        NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
-        
-        [application acquireTokenSilentForScopes:[scopes array]
-                                         account:account
-                                       authority:nil
-                                    forceRefresh:forceRefresh
-                                   correlationId:correlationId
-                                 completionBlock:^(MSALResult *result, NSError *error)
-         {
-             [self handleMSALResult:result error:error];
-         }];
+                              return;
+                          }
+
+                          NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+                          BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
+                          NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+
+                          [application acquireTokenSilentForScopes:[scopes array]
+                                                           account:account
+                                                         authority:nil
+                                                      forceRefresh:forceRefresh
+                                                     correlationId:correlationId
+                                                   completionBlock:^(MSALResult *result, NSError *error)
+                           {
+                               [self handleMSALResult:result error:error];
+                           }];
+
+        }];
+
     };
     
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
@@ -550,21 +566,23 @@
             return;
         }
 
-        NSError *error = nil;
-        MSALAccount *account = [application accountForHomeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM] error:&error];
+        [application loadAccountForHomeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]
+                                 completionBlock:^(MSALAccount *account, NSError *error) {
 
-        if (error)
-        {
-            NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, MSAL_AUTOMATION_FAILURE_VALUE];
-            [self displayOperationResultString:resultString];
-            return;
-        }
+                                     if (error)
+                                     {
+                                         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, MSAL_AUTOMATION_FAILURE_VALUE];
+                                         [self displayOperationResultString:resultString];
+                                         return;
+                                     }
 
-        BOOL result = [application removeAccount:account error:&error];
+                                     BOOL result = [application removeAccount:account error:&error];
 
-        NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
+                                     NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
 
-        [self displayOperationResultString:resultString];
+                                     [self displayOperationResultString:resultString];
+
+                                 }];
     };
 
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
@@ -587,29 +605,29 @@
         {
             return;
         }
-        
-        NSError *error = nil;
-        NSArray *users = [application accounts:nil];
-        
-        if (error)
-        {
-            [self displayError:error];
-            return;
-        }
-        
-        NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
-        [resultDictionary setObject:@([users count]) forKey:MSAL_USER_COUNT_PARAM];
-        
-        NSMutableArray *items = [NSMutableArray array];
-        
-        for (MSALAccount *user in users)
-        {
-            [items addObject:[user itemAsDictionary]];
-        }
-        
-        [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
-        
-        [self displayOperationResultString:[self createJsonStringFromDictionary:resultDictionary]];
+
+        [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+
+            if (error)
+            {
+                [self displayError:error];
+                return;
+            }
+
+            NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
+            [resultDictionary setObject:@([accounts count]) forKey:MSAL_USER_COUNT_PARAM];
+
+            NSMutableArray *items = [NSMutableArray array];
+
+            for (MSALAccount *account in accounts)
+            {
+                [items addObject:[account itemAsDictionary]];
+            }
+
+            [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
+
+            [self displayOperationResultString:[self createJsonStringFromDictionary:resultDictionary]];
+        }];
     };
     
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];

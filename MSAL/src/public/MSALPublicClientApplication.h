@@ -185,33 +185,57 @@
 #endif
 
 /*!
-    Returns an array of accounts visible to this application
- 
-    @param  error   The error that occured trying to retrieve accounts, if any, if you're
+ Returns an array of accounts visible to this application
+
+ @param  error      The error that occured trying to retrieve accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
+- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error __attribute((deprecated("Use the loadAccountsWithCompletionBlock: method instead.")));
+
+/*!
+ Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
+
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                   error:(NSError * __autoreleasing *)error __attribute((deprecated("Use the loadAccountForHomeAccountId:completionBlock: method instead.")));
+
+/*!
+ Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
+
+ @param  username    The displayable value in UserPrincipleName(UPN) format
+ @param  error       The error that occured trying to get the accounts, if any, if you're
+                     not interested in the specific error pass in nil.
+ */
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error __attribute((deprecated("Use the loadAccountForUsername:completionBlock: method instead.")));
+
+/*!
+    Returns an array of accounts visible to this application
+ 
+    @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+ */
+- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
 /*!
     Returns account for for the given home identifier (received from an account object returned
     in a previous acquireToken call)
 
-    @param  error   The error that occured trying to get the accounts, if any, if you're
-                    not interested in the specific error pass in nil.
+    @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
+- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
+                    completionBlock:(MSALAccountCompletionBlock)completionBlock;
 
 /*!
     Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
 
-    @param  username    The displayable value in UserPrincipleName(UPN) format
-    @param  error       The error that occured trying to get the accounts, if any, if you're
-                        not interested in the specific error pass in nil.
+    @param  username             The displayable value in UserPrincipleName(UPN) format
+    @param  completionBlock      The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
+- (void)loadAccountForUsername:(NSString *)username
+               completionBlock:(MSALAccountCompletionBlock)completionBlock;
 
 
 #pragma SafariViewController Support

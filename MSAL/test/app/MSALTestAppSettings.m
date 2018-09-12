@@ -110,11 +110,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     return s_authorityTypes;
 }
 
-- (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
+- (void)loadAccountForAccountHomeIdentifier:(NSString *)accountIdentifier
 {
     if (!accountIdentifier)
     {
-        return nil;
+        return;
     }
     
     NSError *error = nil;
@@ -125,11 +125,14 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     if (application == nil)
     {
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
-        return nil;
+        return;
     }
 
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
-    return account;
+    [application loadAccountForHomeAccountId:accountIdentifier
+                             completionBlock:^(MSALAccount *account, NSError *error) {
+
+                                 _currentAccount = account;
+    }];
 }
 
 - (void)readFromDefaults
@@ -152,7 +155,8 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
     _validateAuthority = validate ? [validate boolValue] : YES;
-    _currentAccount = [self accountForAccountHomeIdentifier:[settings objectForKey:@"currentHomeAccountId"]];
+
+    [self loadAccountForAccountHomeIdentifier:[settings objectForKey:@"currentHomeAccountId"]];
 }
 
 - (void)setValue:(id)value
