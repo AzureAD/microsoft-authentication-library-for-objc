@@ -45,6 +45,7 @@
 - (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key;
 - (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
+- (void)assertAuthorityReturned:(NSString *)expectedAuthority;
 - (NSDictionary *)resultIDTokenClaims;
 - (void)assertRefreshTokenNotNil;
 

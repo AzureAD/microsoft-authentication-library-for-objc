@@ -25,44 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALADFSAuthority.h"
-#import "MSALAuthority_Internal.h"
-#import "MSIDADFSAuthority.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@implementation MSALADFSAuthority
-
-- (instancetype)initWithURL:(NSURL *)url
-                    context:(id<MSIDRequestContext>)context
-                      error:(NSError **)error
-{
-    self = [super initWithURL:url context:context error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
-        if (!self.msidAuthority) return nil;
-    }
-    
-    return self;
-}
+@interface MSALADFSAuthority : MSALAuthority
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
-                           rawTenant:(NSString *)rawTenant
                              context:(nullable id<MSIDRequestContext>)context
-                               error:(NSError **)error
-{
-    self = [self initWithURL:url context:context error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
-        if (!self.msidAuthority) return nil;
-    }
-    
-    return self;
-}
-
-- (NSURL *)url
-{
-    return self.msidAuthority.url;
-}
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

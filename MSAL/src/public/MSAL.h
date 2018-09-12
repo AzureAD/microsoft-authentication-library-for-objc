@@ -55,3 +55,7 @@ typedef void (^MSALAccountCompletionBlock)(MSALAccount *account, NSError *error)
 #import <MSAL/MSALAccount.h>
 #import <MSAL/MSALAccountId.h>
 #import <MSAL/MSALTelemetry.h>
+#import <MSAL/MSALAuthority.h>
+#import <MSAL/MSALAADAuthority.h>
+#import <MSAL/MSALB2CAuthority.h>
+#import <MSAL/MSALADFSAuthority.h>
