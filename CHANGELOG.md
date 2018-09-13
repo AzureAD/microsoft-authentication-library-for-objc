@@ -1,3 +1,9 @@
+## [0.1.4] - 2018-09-12
+### Added
+- Cache coexistence with older ADAL versions
+- Support for SFAuthenticationSession
+- Support for WKWebView
+
 ## [0.1.3] - 2018-04-23
 ### Added
 - CocoaPods podspec
