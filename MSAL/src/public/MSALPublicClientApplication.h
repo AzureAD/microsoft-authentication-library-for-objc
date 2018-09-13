@@ -185,13 +185,13 @@
 #endif
 
 /*!
- Returns an array of accounts visible to this application
+ Returns an array of all accounts visible to this application
 
  @param  error      The error that occured trying to retrieve accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error __attribute((deprecated("Use the loadAccountsWithCompletionBlock: method instead.")));
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
 /*!
  Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
