@@ -74,7 +74,7 @@
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorAccountRequired, @"user parameter cannot be nil");
-
+    
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     
     if (!_forceRefresh)
@@ -89,7 +89,7 @@
         {
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [self stopTelemetryEvent:event error:error];
-
+            
             completionBlock(nil, error);
             return;
         }
@@ -100,13 +100,13 @@
                                                            configuration:msidConfiguration
                                                                  context:_parameters
                                                                    error:&error];
-
+            
             MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
-
+            
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
             [self stopTelemetryEvent:event error:nil];
-
+            
             completionBlock(result, nil);
             return;
         }
@@ -116,18 +116,37 @@
         {
             _extendedLifetimeAccessToken = accessToken;
         }
-
+        
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
     
-    //try refresh token first
-    NSError *error = nil;
-    [self tryRT:YES familyId:nil error:error completionBlock:completionBlock];
-}
-
-- (void)refreshAccessToken:(MSALCompletionBlock)completionBlock
-{
-    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
+    NSError *msidError = nil;
+    
+    //try looking for FRT first
+    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+                                                           familyId:@"1"
+                                                      configuration:msidConfiguration
+                                                            context:_parameters
+                                                              error:&msidError];
+    
+    //If no FRT found, try cache look up for MRRT
+    if(!self.refreshToken)
+    {
+        self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+                                                               familyId:nil
+                                                          configuration:msidConfiguration
+                                                                context:_parameters
+                                                                  error:&msidError];
+    }
+    
+    if (msidError)
+    {
+        completionBlock(nil, msidError);
+        return;
+    }
+    
+    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
+    
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)
         {
@@ -145,6 +164,7 @@
         
         [super acquireToken:^(MSALResult *result, NSError *error)
          {
+             // Logic for returning extended lifetime token
              if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
              {
                  MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
@@ -155,52 +175,13 @@
                  result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
                  error = nil;
              }
-             
+             /*
+              If server returns specific error code and refresh token used is FRT
+              If(self.refreshToken.familyId)-> flag clientId.
+              */
              completionBlock(result, error);
          }];
     }];
-}
-
-- (void)tryRT:(BOOL)tryFRT familyId:(NSString *)familyId error:(NSError *)error completionBlock:(MSALCompletionBlock)completionBlock
-{
-    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    NSError *msidError = nil;
-    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                           familyId:familyId
-                                                      configuration:msidConfiguration
-                                                            context:_parameters
-                                                              error:&msidError];
-    
-    if (!self.refreshToken && error)
-    {
-        completionBlock(nil, error);
-        return;
-    }
-    
-    if (msidError)
-    {
-        completionBlock(nil, msidError);
-        return;
-    }
-    
-    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache");
-    
-    [self refreshAccessToken:^(MSALResult *result, NSError *error)
-     {
-         if (error)
-         {
-             if (tryFRT)
-             {
-                 [self tryRT:NO familyId:@"1" error:error completionBlock:completionBlock];
-                 return;
-             }
-             completionBlock(nil, error);
-         }
-         else
-         {
-             completionBlock(result,nil);
-         }
-     }];
 }
 
 - (MSIDTokenRequest *)tokenRequest
