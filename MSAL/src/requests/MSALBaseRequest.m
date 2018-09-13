@@ -34,7 +34,6 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
@@ -277,9 +276,9 @@ static MSALScopes *s_reservedScopes = nil;
     {
         tokenEndpoint.host = _parameters.cloudAuthority.environment;
     }
-    
-    NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
-    
+
+    NSMutableDictionary *endpointQPs = [[NSDictionary msidDictionaryFromWWWFormURLEncodedString:tokenEndpoint.percentEncodedQuery] mutableCopy];
+
     if (!endpointQPs)
     {
         endpointQPs = [NSMutableDictionary dictionary];
@@ -290,7 +289,7 @@ static MSALScopes *s_reservedScopes = nil;
         [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
     }
     
-    tokenEndpoint.query = [endpointQPs msidURLFormEncode];
+    tokenEndpoint.query = [endpointQPs msidWWWFormURLEncode];
 
     return tokenEndpoint.URL;
 }

@@ -191,7 +191,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     else
     {
         // TODO: Rationalize our default authority behavior (#93)
-        _authority = [[MSALAADAuthority alloc] initWithURL:[s_defaultAuthorityUrlString msidUrl] context:nil error:error];
+        NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
+        _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL context:nil error:error];
     }
 
     BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
