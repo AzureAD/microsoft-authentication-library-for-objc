@@ -28,6 +28,7 @@
 NSString *const MSAL_VALIDATE_AUTHORITY_PARAM                   = @"validate_authority";
 NSString *const MSAL_CLIENT_ID_PARAM                            = @"client_id";
 NSString *const MSAL_AUTHORITY_PARAM                            = @"authority";
+NSString *const MSAL_SILENT_AUTHORITY_PARAM                     = @"silent_authority";
 NSString *const MSAL_ACCOUNT_IDENTIFIER_PARAM                   = @"home_account_identifier";
 NSString *const MSAL_LEGACY_USER_PARAM                          = @"user_legacy_identifier";
 NSString *const MSAL_SCOPES_PARAM                               = @"scopes";

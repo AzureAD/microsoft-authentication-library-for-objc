@@ -461,6 +461,13 @@
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
     
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+
+    MSIDTestURLResponse *sovereignOidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.de/1234-5678-90abcdefg"
+                                      responseUrl:@"https://login.microsoftonline.de/1234-5678-90abcdefg"
+                                            query:nil];
+
+    [MSIDTestURLSession addResponse:sovereignOidcResponse];
     
     // Check if instance_aware parameter is in start url
     [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)

@@ -352,10 +352,18 @@
         NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
         BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+
+        MSALAuthority *silentAuthority = nil;
+
+        if (parameters[MSAL_SILENT_AUTHORITY_PARAM])
+        {
+            // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
+            silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:parameters[MSAL_SILENT_AUTHORITY_PARAM]] error:nil];
+        }
         
         [application acquireTokenSilentForScopes:[scopes array]
                                          account:account
-                                       authority:nil
+                                       authority:silentAuthority
                                     forceRefresh:forceRefresh
                                    correlationId:correlationId
                                  completionBlock:^(MSALResult *result, NSError *error)
