@@ -1158,57 +1158,22 @@
     
 }
 
-#pragma
-#pragma mark - remove user
-
 #if TARGET_OS_IPHONE
 
-- (void)testRemoveUser_whenUserExists_shouldRemoveUser
-{
-    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
-    NSError *error = nil;
-
-    NSString *clientId = UNIT_TEST_CLIENT_ID;
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                    error:nil];
-    application.tokenCache = self.tokenCacheAccessor;
-
-    // Make sure no users are showing up in the cache
-    XCTAssertEqual([application allAccounts:nil].count, 0);
-
-    [self msalStoreTokenResponseInCache];
-
-    // Make sure that the user is properly showing up in the cache
-    XCTAssertEqual([application allAccounts:nil].count, 1);
-
-    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse] configuration:[self msalDefaultConfiguration]];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
-
-    XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
-
-    XCTAssertTrue([application removeAccount:msalAccount error:&error]);
-    XCTAssertNil(error);
-
-    // Make sure the user is now gone
-    XCTAssertEqual([application allAccounts:nil].count, 0);
-}
+#pragma mark - allAccounts
 
 - (void)testAllAccounts_whenNoAccountsExist_shouldReturnEmptyArrayNoError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&error];
     XCTAssertNil(error);
     application.tokenCache = self.tokenCacheAccessor;
-
+    
     // Make sure no users are showing up in the cache
     NSArray *accounts = [application allAccounts:&error];
     XCTAssertNil(error);
@@ -1220,21 +1185,21 @@
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
+    
     [self msalStoreTokenResponseInCache];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                     error:nil];
     application.tokenCache = self.tokenCacheAccessor;
-
+    
     NSError *error = nil;
     NSArray *accounts = [application allAccounts:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(accounts);
     XCTAssertEqual([accounts count], 1);
-
+    
     MSALAccount *account = accounts[0];
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
@@ -1243,17 +1208,18 @@
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
+#pragma mark - loadAccountForHomeAccountId
+
 - (void)testAccountWithHomeAccountId_whenAccountExists_shouldReturnAccountNoError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
+    
     [self msalStoreTokenResponseInCache];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                    error:nil];
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
     application.tokenCache = self.tokenCacheAccessor;
     NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
     
@@ -1261,18 +1227,18 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
     [application loadAccountForHomeAccountId:homeAccountId completionBlock:^(MSALAccount *account, NSError *error)
-    {
-        XCTAssertNil(error);
-        XCTAssertNotNil(account);
-        
-        XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-        XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-        XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-        XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-        XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-        
-        [expectation fulfill];
-    }];
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(account);
+         
+         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+         
+         [expectation fulfill];
+     }];
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
@@ -1333,7 +1299,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     [self msalStoreTokenResponseInCache];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
@@ -1355,13 +1321,15 @@
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
+#pragma mark - loadAccountForUsername
+
 - (void)testAccountWithUsername_whenAccountExists_shouldReturnAccountNoError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-
+    
     [self msalStoreTokenResponseInCache];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
@@ -1442,7 +1410,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     [self msalStoreTokenResponseInCache];
-
+    
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
     application.tokenCache = self.tokenCacheAccessor;
@@ -1459,6 +1427,40 @@
      }];
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+#pragma
+#pragma mark - removeAccount
+
+- (void)testRemoveAccount_whenAccountExists_shouldRemoveAccount
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *error = nil;
+
+    NSString *clientId = UNIT_TEST_CLIENT_ID;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
+    application.tokenCache = self.tokenCacheAccessor;
+
+    // Make sure no users are showing up in the cache
+    XCTAssertEqual([application allAccounts:nil].count, 0);
+
+    [self msalStoreTokenResponseInCache];
+
+    // Make sure that the user is properly showing up in the cache
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse] configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+
+    XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
+
+    XCTAssertTrue([application removeAccount:msalAccount error:&error]);
+    XCTAssertNil(error);
+
+    // Make sure the user is now gone
+    XCTAssertEqual([application allAccounts:nil].count, 0);
 }
 
 #endif
