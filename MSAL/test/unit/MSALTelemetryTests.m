@@ -101,8 +101,10 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
+
     NSString *x = [@"id1234" dataUsingEncoding:NSUTF8StringEncoding].msidSHA256.msidHexString;
-    MSALAssertStringEquals([dictionary objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)], x);
+    MSALAssertStringEquals([dictionary objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)],  x);
+
 }
 
 #pragma mark - Private
