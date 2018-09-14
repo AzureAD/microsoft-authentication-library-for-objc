@@ -25,11 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALJsonObject.h"
-#import "MSALWebFingerLink.h"
+#import "NSString+MSALTestUtil.h"
+#import "MSALAuthorityFactory.h"
 
-@interface MSALWebFingerResponse : MSALJsonObject
+@implementation NSString (MSALTestUtil)
 
-@property(readonly) NSArray<MSALWebFingerLink *> *links;
+- (MSALAuthority *)msalAuthority
+{
+    __auto_type authorityFactory = [MSALAuthorityFactory new];
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:self];
+    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    
+    return authority;
+}
 
 @end

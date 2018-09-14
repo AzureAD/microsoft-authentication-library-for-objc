@@ -28,12 +28,10 @@
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
-@class MSALTenantDiscoveryResponse;
+@interface MSALB2CAuthority : MSALAuthority
 
-@interface MSALAuthorityBaseResolver : NSObject
-
-- (void)tenantDiscoveryEndpoint:(NSURL *)url
-                        context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback)completionBlock;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

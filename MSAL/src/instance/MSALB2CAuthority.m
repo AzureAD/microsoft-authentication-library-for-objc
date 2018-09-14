@@ -25,9 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthority.h"
-#import "MSALAadAuthorityResolver.h"
+#import "MSALB2CAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDB2CAuthority.h"
 
-@interface MSALB2CAuthorityResolver : MSALAadAuthorityResolver
+@implementation MSALB2CAuthority
+
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
+
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
 
 @end

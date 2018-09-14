@@ -25,9 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
-#import "MSALAuthorityBaseResolver.h"
 
-@interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+@interface MSALAADAuthority : MSALAuthority
+
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(nullable NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

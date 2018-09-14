@@ -48,7 +48,7 @@
     [self enterADFSPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
 
     if (closeResultView)
     {

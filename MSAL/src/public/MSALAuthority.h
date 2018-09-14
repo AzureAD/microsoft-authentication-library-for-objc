@@ -25,37 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALWebFingerResponse.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALWebFingerResponse()
-{
-    NSMutableArray<MSALWebFingerLink *> *_links;
-}
+@protocol MSIDRequestContext;
 
-@end
+@interface MSALAuthority : NSObject
 
+@property (readonly, nonnull) NSURL *url;
 
+- (instancetype _Nullable )init NS_UNAVAILABLE;
++ (instancetype _Nullable )new NS_UNAVAILABLE;
 
-@implementation MSALWebFingerResponse
-
-#define LinksKey @"links"
-
-- (NSArray *)links
-{
-    if (!_links)
-    {
-        _links = [NSMutableArray new];
-        NSArray *webfingerLinks = [_json objectForKey:LinksKey];
-        
-        for (id webfingerLink in webfingerLinks)
-        {
-            MSALWebFingerLink *link = [[MSALWebFingerLink alloc] initWithRel:webfingerLink[@"rel"]
-                                                                        href:webfingerLink[@"href"]];
-            [_links addObject:link];
-        }
-    }
-    
-    return _links;
-}
++ (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

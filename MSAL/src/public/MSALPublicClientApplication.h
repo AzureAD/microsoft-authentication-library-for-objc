@@ -31,6 +31,7 @@
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
+@class MSALAuthority;
 @class WKWebView;
 
 @interface MSALPublicClientApplication : NSObject
@@ -46,7 +47,7 @@
 @property BOOL extendedLifetimeEnabled;
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly) NSURL *authority;
+@property (readonly) MSALAuthority *authority;
 
 /*! The client ID of the application, this should come from the app developer portal. */
 @property (readonly) NSString *clientId;
@@ -88,8 +89,8 @@
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
-    @param  authority   A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
+    @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -98,15 +99,15 @@
                         not interested in the specific error pass in nil.
  */
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSString *)authority
+             authority:(MSALAuthority *)authority
                  error:(NSError * __autoreleasing *)error;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  authority      A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -116,7 +117,7 @@
                         not interested in the specific error pass in nil.
  */
 - (id)initWithClientId:(NSString *)clientId
-             authority:(NSString *)authority
+             authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error;
 
@@ -146,8 +147,8 @@
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
                         If you provide this key, you MUST add the capability to your Application Entilement.
- @param  authority      A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -157,7 +158,7 @@
  */
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
-             authority:(NSString *)authority
+             authority:(MSALAuthority *)authority
                  error:(NSError * __autoreleasing *)error;
 
 /*!
@@ -166,8 +167,8 @@
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
                         If you provide this key, you MUST add the capability to your Application Entilement.
- @param  authority      A URL indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -178,7 +179,7 @@
  */
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
-             authority:(NSString *)authority
+             authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error;
 #endif
@@ -304,9 +305,9 @@
                                     in the completion block is not guaranteed to match the loginHint.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should not be url-encoded value.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens. Azure AD
-                                    it is of the form https://<instance>/<tenant>, where <instance> is the
+                                    the interactive authentication flow.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
+                                    it is of the form https://<instance/<tenant>, where <instance> is the
                                     directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                                     identifier within the directory itself (e.g. a domain associated to the
                                     tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -320,7 +321,7 @@
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -378,9 +379,9 @@
                                     interactive authentication flow will be locked down to.
     @param  uiBehavior              A UI behavior for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
-                                    the interactive authentication flow. This should not be url-encoded value.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance>/<tenant>, where
+                                    the interactive authentication flow.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
                                     identifier within the directory itself (e.g. a domain associated
@@ -395,7 +396,7 @@
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(NSString *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -415,7 +416,7 @@
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                  the interactive authentication flow. This should not be url-encoded value.
  @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
- @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
+ @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
                                  Azure AD it is of the form https://<instance/<tenant>, where
                                  <instance> is the directory host
                                  (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -432,7 +433,7 @@
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(NSString *)claims
-                    authority:(NSString *)authority
+                    authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock;
 
@@ -462,8 +463,8 @@
                                     gauranteed to be included in the access token returned.
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance>/<tenant>, where
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
                                     identifier within the directory itself (e.g. a domain associated
@@ -474,7 +475,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSALAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock;
 
 /*!
@@ -484,8 +485,8 @@
                                     can differ from the ones in the original call
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  authority               A URL indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance>/<tenant>, where
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                    Azure AD it is of the form https://<instance/<tenant>, where
                                     <instance> is the directory host
                                     (e.g. https://login.microsoftonline.com) and <tenant> is a
                                     identifier within the directory itself (e.g. a domain associated
@@ -499,7 +500,7 @@
  */
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
-                          authority:(NSString *)authority
+                          authority:(MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock;

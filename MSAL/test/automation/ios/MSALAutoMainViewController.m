@@ -45,10 +45,14 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSALAuthorityFactory.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 #import "NSString+MSIDExtensions.h"
 #import "MSAL_Internal.h"
 #import "MSALPassedInWebController.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALAutoMainViewController ()
 {
@@ -142,12 +146,22 @@
 - (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
+
+    MSALAuthority *authority = nil;
+
+    if (parameters[MSAL_AUTHORITY_PARAM])
+    {
+        __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
+
+        authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    }
     
     NSError *error = nil;
     
     MSALPublicClientApplication *clientApplication =
     [[MSALPublicClientApplication alloc] initWithClientId:parameters[MSAL_CLIENT_ID_PARAM]
-                                                authority:parameters[MSAL_AUTHORITY_PARAM]
+                                                authority:authority
                                               redirectUri:parameters[MSAL_REDIRECT_URI_PARAM]
                                                     error:&error];
     
@@ -232,6 +246,7 @@
         MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
         
         NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_SCOPES_PARAM]];
+
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
@@ -335,14 +350,22 @@
 
             return;
         }
-        
+
         NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_SCOPES_PARAM]];
         BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+
+        MSALAuthority *silentAuthority = nil;
+
+        if (parameters[MSAL_SILENT_AUTHORITY_PARAM])
+        {
+            // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
+            silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:parameters[MSAL_SILENT_AUTHORITY_PARAM]] error:nil];
+        }
         
         [application acquireTokenSilentForScopes:[scopes array]
                                          account:account
-                                       authority:nil
+                                       authority:silentAuthority
                                     forceRefresh:forceRefresh
                                    correlationId:correlationId
                                  completionBlock:^(MSALResult *result, NSError *error)
@@ -365,8 +388,14 @@
             return;
         }
 
-        MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
+        __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+
+        MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil
+                                                                                  homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
+
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority.msidAuthority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];
@@ -393,9 +422,14 @@
         {
             return;
         }
+        
+        __auto_type authorityFactory = [MSIDAuthorityFactory new];
+        __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
-        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]]
+
+        MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];

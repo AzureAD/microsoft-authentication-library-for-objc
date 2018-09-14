@@ -158,8 +158,10 @@ extension SampleMSALUtil {
             // for graph in this sample it's best to specify the account's home authority to remove any possibility of there
             // being any ambiquity in the cache lookup.
             let homeAuthority = kAuthority + account.homeAccountId.tenantId
+
+            let msalAuthority = try MSALAuthority(url: URL(string: homeAuthority)!)
             
-            application.acquireTokenSilent(forScopes: scopes, account: account, authority: homeAuthority, completionBlock: {
+            application.acquireTokenSilent(forScopes: scopes, account: account, authority: msalAuthority, completionBlock: {
                 (result: MSALResult?, error: Error?) in
                 if let result = result {
                     completion(result.accessToken, nil)

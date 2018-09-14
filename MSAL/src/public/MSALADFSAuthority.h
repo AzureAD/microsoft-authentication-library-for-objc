@@ -25,11 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-#import "MSALInstanceDiscoveryResponse.h"
+@interface MSALADFSAuthority : MSALAuthority
 
-@implementation MSALInstanceDiscoveryResponse
-
-MSAL_JSON_ACCESSOR(@"tenant_discovery_endpoint", tenant_discovery_endpoint)
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

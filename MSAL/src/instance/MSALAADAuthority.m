@@ -25,29 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSAL_Internal.h"
+#import "MSALAADAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDAADAuthority.h"
 
-#define RANDOM_STRING_MAX_SIZE 1024
+@implementation MSALAADAuthority
 
-@implementation NSString (MSALHelperMethods)
-
-+ (NSString *)randomUrlSafeStringOfSize:(NSUInteger)size
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
 {
-    if (size > RANDOM_STRING_MAX_SIZE)
+    return [self initWithURL:url rawTenant:nil context:context error:error];
+}
+
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
     {
-        return nil;
+        self.msidAuthority = [[MSIDAADAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
+        if (!self.msidAuthority) return nil;
     }
     
-    NSMutableData *data = [NSMutableData dataWithLength:size];
-    int result = SecRandomCopyBytes(kSecRandomDefault, data.length, data.mutableBytes);
-    
-    if (result != 0)
-    {
-        return nil;
-    }
-    
-    return [NSString msidBase64UrlEncodedStringFromData:data];
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
 }
 
 @end

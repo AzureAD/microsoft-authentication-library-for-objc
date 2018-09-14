@@ -30,6 +30,7 @@
 #import "NSString+MSIDExtensions.h"
 #import "MSALAuthority.h"
 #import "NSURL+MSIDExtensions.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 @implementation MSALURLSessionDelegate
 
@@ -55,7 +56,9 @@ willPerformHTTPRedirection:(NSHTTPURLResponse *)response
     (void)response;
     (void)task;
     
-    MSID_LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
+    __auto_type isAADPublicCloud = [MSIDAADNetworkConfiguration.defaultConfiguration isAADPublicCloud:request.URL.absoluteString];
+    
+    MSID_LOG_INFO(self.context, @"Redirecting to %@", isAADPublicCloud ?
              [NSString stringWithFormat:@"%@://%@", request.URL.scheme, request.URL.host]
              : @"unknown host");
     MSID_LOG_INFO_PII(self.context, @"Redirecting to %@", request.URL.absoluteString);

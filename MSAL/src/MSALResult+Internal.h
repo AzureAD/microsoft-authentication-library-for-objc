@@ -40,10 +40,11 @@
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
-                            authority:(NSString *)authority;
+                            authority:(MSALAuthority *)authority;
 
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
                               idToken:(MSIDIdToken *)idToken
-              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken;
+              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
+                                error:(NSError **)error;
 
 @end

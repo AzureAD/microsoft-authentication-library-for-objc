@@ -462,7 +462,7 @@
 {
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSString *authority = [settings authority];
+    MSALAuthority *authority = [settings authority];
     NSString *clientId;
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
     
@@ -474,7 +474,7 @@
     {
         clientId = TEST_APP_CLIENT_ID;
     }
-    
+
     NSError *error = nil;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
@@ -575,7 +575,7 @@
         return;
     }
     
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;
@@ -634,7 +634,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;
@@ -751,7 +751,7 @@
         return;
     }
     
-    NSString *authority = [settings authority];
+    __auto_type authority = [settings authority];
     NSString *clientId = TEST_APP_CLIENT_ID;
     
     NSError *error = nil;

@@ -69,7 +69,7 @@
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:request.expectedResultScopes];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
     [self closeResultView];
     return homeAccountId;
 }

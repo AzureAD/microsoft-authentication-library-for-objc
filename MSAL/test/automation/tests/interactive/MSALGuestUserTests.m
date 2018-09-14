@@ -69,7 +69,7 @@
     // TODO: lab doesn't return correct home object ID at the moment, need to follow up on that!
     request.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
 
-    [self runSharedSilentAADLoginWithTestRequest:request];
+    [self runSharedSilentAADLoginWithTestRequest:request guestTenantScenario:YES];
 
     // 3. Run silent for the home tenant
     request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
@@ -111,7 +111,7 @@
     guestRequest.testAccount = [self.primaryAccount copy];
     guestRequest.accountIdentifier = homeAccountId;
     guestRequest.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
-    [self runSharedSilentAADLoginWithTestRequest:guestRequest];
+    [self runSharedSilentAADLoginWithTestRequest:guestRequest guestTenantScenario:YES];
 }
 
 // Test #347622
@@ -149,7 +149,7 @@
     guestRequest.cacheAuthority = guestRequest.authority;
     guestRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
     guestRequest.testAccount.targetTenantId = self.primaryAccount.targetTenantId;
-    [self runSharedSilentAADLoginWithTestRequest:guestRequest];
+    [self runSharedSilentAADLoginWithTestRequest:guestRequest guestTenantScenario:YES];
 
     // 3. Run silent for the home tenant
     homeRequest.accountIdentifier = homeAccountId;
