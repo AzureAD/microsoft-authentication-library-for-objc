@@ -27,6 +27,10 @@
 
 #import "MSALTestAppAuthorityViewController.h"
 #import "MSALTestAppSettings.h"
+#import "MSALAuthority.h"
+#import "MSIDAuthority.h"
+#import "MSALAuthorityFactory.h"
+#import "MSALAuthority_Internal.h"
 
 @interface MSALTestAppAuthorityViewController ()
 
@@ -55,7 +59,7 @@
               keyForSavedAuthorities:@"saved_aadAuthorities"];
 }
 
-- (instancetype) initWithAuthorities:(NSArray *)aadAuthorities
+- (instancetype)initWithAuthorities:(NSArray<NSString *> *)aadAuthorities
               keyForSavedAuthorities:(NSString *)key
 {
     self = [super init];
@@ -71,7 +75,7 @@
         
         for(NSString* authority in _savedAuthorities)
         {
-            if(![_authorities containsObject:authority])
+            if (![_authorities containsObject:authority])
             {
                 [_authorities addObject:authority];
             }
@@ -106,7 +110,6 @@
     
     [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
     [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        
         NSString *authority = controller.textFields[0].text;
         [self saveAuthority:authority];
     }]];
@@ -117,12 +120,12 @@
 
 - (void)saveAuthority:(NSString *)authority
 {
-    if(![_authorities containsObject:authority])
+    if (![_authorities containsObject:authority])
     {
         [_authorities addObject:authority];
     }
     
-    if(![_savedAuthorities containsObject:authority])
+    if (![_savedAuthorities containsObject:authority])
     {
         [_savedAuthorities addObject:authority];
     }
@@ -143,6 +146,7 @@
     {
         return @"(default)";
     }
+    
     return _authorities[row - 1];
 }
 
@@ -155,24 +159,26 @@
     }
     else
     {
-        settings.authority = _authorities[row - 1];
+        MSALAuthorityFactory *factory = [MSALAuthorityFactory new];
+        MSALAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:_authorities[row - 1]] context:nil error:nil];
+        settings.authority = authority;
     }
 }
 
 - (NSInteger)currentRow
 {
-    NSString *currentAuthority = MSALTestAppSettings.settings.authority;
+    __auto_type currentAuthority = MSALTestAppSettings.settings.authority;
     if (currentAuthority == nil)
     {
         return 0;
     }
-    return [_authorities indexOfObjectIdenticalTo:currentAuthority] + 1;
+    return [_authorities indexOfObject:currentAuthority.url.absoluteString] + 1;
 }
 
 + (NSString *)currentTitle
 {
-    NSString *currentAuthority = MSALTestAppSettings.settings.authority;
-    return currentAuthority ? currentAuthority : @"(default)";
+    __auto_type currentAuthority = MSALTestAppSettings.settings.authority;
+    return currentAuthority ? currentAuthority.msidAuthority.url.absoluteString : @"(default)";
 }
 
 

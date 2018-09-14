@@ -28,9 +28,10 @@
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
-#import "MSALAuthority.h"
 #import "MSIDConfiguration.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSALAuthority.h"
 
 @implementation MSALRequestParameters
 
@@ -44,41 +45,24 @@
     self.scopes = [[NSOrderedSet alloc] initWithArray:scopesLowercase copyItems:YES];
 }
 
-- (BOOL)setAuthorityFromString:(NSString *)authority
-                         error:(NSError * __autoreleasing *)error
+- (MSIDConfiguration *)msidConfiguration
 {
-    if (!authority)
-    {
-        return YES;
-    }
-    
-    NSURL *authorityUrl = [MSALAuthority checkAuthorityString:authority error:error];
-    if (!authorityUrl)
-    {
-        return NO;
-    }
-    
-    self.unvalidatedAuthority = authorityUrl;
-    
-    return YES;
+    MSIDAuthority *authority = self.cloudAuthority ? self.cloudAuthority : self.unvalidatedAuthority;
+
+    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:authority
+                                                                 redirectUri:self.redirectUri
+                                                                    clientId:self.clientId
+                                                                      target:self.scopes.msidToString];
+
+    return config;
 }
 
 - (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName
 {
     if ([NSString msidIsStringNilOrBlank:cloudHostName]) return;
-    
-    _cloudAuthority = [_unvalidatedAuthority msidAuthorityWithCloudInstanceHostname:cloudHostName];
-}
 
-- (MSIDConfiguration *)msidConfiguration
-{
-    NSURL *authority = self.cloudAuthority ? self.cloudAuthority : self.unvalidatedAuthority;
-    MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:authority
-                                                                 redirectUri:self.redirectUri
-                                                                    clientId:self.clientId
-                                                                      target:self.scopes.msidToString];
-    
-    return config;
+    NSURL *cloudAuthority = [self.unvalidatedAuthority.url msidAuthorityWithCloudInstanceHostname:cloudHostName];
+    _cloudAuthority = [[MSIDAuthorityFactory new] authorityFromUrl:cloudAuthority context:nil error:nil];
 }
 
 @end

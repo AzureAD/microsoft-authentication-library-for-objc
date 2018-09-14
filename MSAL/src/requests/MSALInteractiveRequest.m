@@ -27,7 +27,6 @@
 
 #import "MSALInteractiveRequest.h"
 
-#import "MSALAuthority.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDPkce.h"
@@ -37,6 +36,9 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSALAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAuthority.h"
 #import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
@@ -78,7 +80,7 @@
             return nil;
         }
     }
-    
+
     if (parameters.claims)
     {
         if (![self validateClaims:parameters error:error]) return nil;
@@ -103,26 +105,21 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
+    [super resolveEndpoints:^(BOOL resolved, NSError *error) {
+
+        if (!resolved)
         {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-            
             completionBlock(nil, error);
             return;
         }
-        
-        _authority = authority;
+
         [self acquireTokenImpl:completionBlock];
     }];
 }
 
-
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
-    
-    MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
+    MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.metadata.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
                                                                                               clientId:_parameters.clientId
                                                                                               resource:nil
@@ -135,6 +132,7 @@
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
     config.claims = _parameters.claims;
+    config.sliceParameters = _parameters.sliceParameters;
 
     _webviewConfig = config;
     
@@ -142,9 +140,8 @@
     {
         if (error)
         {
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:error];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:error];
+            completionBlock(nil, error);
             return;
         }
 
@@ -168,9 +165,8 @@
             }
             
 
-            NSError *msalError = [MSALErrorConverter MSALErrorFromMSIDError:oauthResponse.oauthError];
-            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:msalError];
-            completionBlock(nil, msalError);
+            [self stopTelemetryEvent:[self getTelemetryAPIEvent] error:oauthResponse.oauthError];
+            completionBlock(nil, oauthResponse.oauthError);
             return;
         }
         

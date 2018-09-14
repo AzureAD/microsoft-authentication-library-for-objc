@@ -25,9 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+#import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
-#import "MSALAuthorityBaseResolver.h"
+#import "MSALAuthority_Internal.h"
 
-@interface MSALAadAuthorityResolver : MSALAuthorityBaseResolver<MSALAuthorityResolver>
+@interface NSString (MSALTestUtil)
+
+- (MSALAuthority *)msalAuthority;
 
 @end

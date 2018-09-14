@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseRequest.h"
-#import "MSALAuthority.h"
 #import "MSALResult+Internal.h"
 #import "MSALAccount.h"
 #import "MSIDAADAuthorizationCodeGrantRequest.h"
@@ -35,7 +34,6 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
@@ -47,6 +45,9 @@
 #import "NSData+MSIDExtensions.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+#import "MSALAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -97,6 +98,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     _tokenCache = tokenCache;
     _oauth2Factory = [MSIDAADV2Oauth2Factory new];
+
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
     return self;
 }
@@ -151,28 +154,41 @@ static MSALScopes *s_reservedScopes = nil;
     {
         upn = _parameters.account.username;
     }
-    else if(_parameters.loginHint)
+    else if (_parameters.loginHint)
     {
         upn = _parameters.loginHint;
     }
-    
-    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority
-                              userPrincipalName:upn
-                                       validate:_parameters.validateAuthority
-                                        context:_parameters
-                                completionBlock:completionBlock];
+
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
+                                                         completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+          {
+              if (error)
+              {
+                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                  [self stopTelemetryEvent:event error:error];
+
+                  completionBlock(NO, error);
+                  return;
+              }
+
+              _authority = _parameters.unvalidatedAuthority;
+              completionBlock(YES, nil);
+          }];
+     }];
 }
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(completionBlock, _parameters, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
-    
+
     MSIDTokenRequest *authRequest = [self tokenRequest];
     
     [authRequest sendWithBlock:^(id response, NSError *error) {
-        
-        [authRequest finishAndInvalidate];
-        
         if (error)
         {
             if (completionBlock) completionBlock(nil, error);
@@ -192,14 +208,14 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!tokenResponse)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:localError]);
+            completionBlock(nil, localError);
             return;
         }
 
         NSError *verificationError = nil;
         if (![self verifyTokenResponse:tokenResponse error:&verificationError])
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:verificationError]);
+            completionBlock(nil, verificationError);
             return;
         }
         
@@ -211,7 +227,7 @@ static MSALScopes *s_reservedScopes = nil;
         
         if (!isSaved)
         {
-            completionBlock(nil, [MSALErrorConverter MSALErrorFromMSIDError:savingError]);
+            completionBlock(nil, savingError);
             return;
         }
 
@@ -223,6 +239,7 @@ static MSALScopes *s_reservedScopes = nil;
         }
 
         NSError *resultError = nil;
+
         MSALResult *result = [self resultFromTokenResponse:tokenResponse error:&resultError];
         completionBlock(result, resultError);
     }];
@@ -235,7 +252,7 @@ static MSALScopes *s_reservedScopes = nil;
 
     if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&msidError])
     {
-        if (error) *error = [MSALErrorConverter MSALErrorFromMSIDError:msidError];
+        if (error) *error = msidError;
         return NO;
     }
 
@@ -264,7 +281,7 @@ static MSALScopes *s_reservedScopes = nil;
         if (error) *error = resultError;
     }
 
-    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
+    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO error:error];
     return result;
 }
 
@@ -276,7 +293,7 @@ static MSALScopes *s_reservedScopes = nil;
         we'd like to throw an error and specify which scopes were granted and which ones not
      */
 
-    NSOrderedSet *grantedScopes = [tokenResponse.scope scopeSet];
+    NSOrderedSet *grantedScopes = [tokenResponse.scope msidScopeSet];
     MSIDConfiguration *configuration = _parameters.msidConfiguration;
 
     if (![configuration.scopes isSubsetOfOrderedSet:grantedScopes])
@@ -291,7 +308,7 @@ static MSALScopes *s_reservedScopes = nil;
 
             additionalUserInfo[MSALDeclinedScopesKey] = [requestedScopeSet array];
 
-            *error = MSALCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, additionalUserInfo);
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, nil, additionalUserInfo);
         }
 
         return NO;
@@ -308,15 +325,15 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (NSURL *)tokenEndpoint
 {
-    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
-    
+    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.metadata.tokenEndpoint resolvingAgainstBaseURL:NO];
+
     if (_parameters.cloudAuthority)
     {
-        tokenEndpoint.host = _parameters.cloudAuthority.host;
+        tokenEndpoint.host = _parameters.cloudAuthority.environment;
     }
-    
-    NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
-    
+
+    NSMutableDictionary *endpointQPs = [[NSDictionary msidDictionaryFromWWWFormURLEncodedString:tokenEndpoint.percentEncodedQuery] mutableCopy];
+
     if (!endpointQPs)
     {
         endpointQPs = [NSMutableDictionary dictionary];
@@ -327,8 +344,8 @@ static MSALScopes *s_reservedScopes = nil;
         [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
     }
     
-    tokenEndpoint.query = [endpointQPs msidURLFormEncode];
-    
+    tokenEndpoint.query = [endpointQPs msidWWWFormURLEncode];
+
     return tokenEndpoint.URL;
 }
 
@@ -339,8 +356,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
-    [event setAuthorityType:_authority.authorityType];
-    [event setAuthority:_parameters.unvalidatedAuthority.absoluteString];
+    [event setAuthorityType:[_authority telemetryAuthorityType]];
+    [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
     [event setClientId:_parameters.clientId];
     
     // Login hint is an optional parameter and might not be present

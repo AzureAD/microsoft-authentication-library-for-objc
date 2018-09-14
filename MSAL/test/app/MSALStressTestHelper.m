@@ -29,7 +29,6 @@
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppSettings.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSALAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDKeychainTokenCache.h"
