@@ -464,7 +464,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     MSALAuthority *authority = [settings authority];
     NSString *clientId;
-    NSDictionary *extraQueryParameters = [NSDictionary msidURLFormDecode:_extraQueryParamsField.text];
+    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
     
     if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
     {

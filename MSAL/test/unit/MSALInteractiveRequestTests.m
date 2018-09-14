@@ -27,7 +27,6 @@
 
 #import "MSALTestCase.h"
 
-#import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestBundle.h"
 #import "MSALTestIdTokenUtil.h"
@@ -476,15 +475,6 @@
                                                         tenantId:@"1234-5678-90abcdefg"
                                                       clientInfo:nil];
     parameters.account = account;
-
-    [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
-                           class:[NSString class]
-                           block:(id)^(id obj, NSUInteger size)
-     {
-         (void)obj;
-         (void)size;
-         return @"randomValue";
-     }];
 
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters

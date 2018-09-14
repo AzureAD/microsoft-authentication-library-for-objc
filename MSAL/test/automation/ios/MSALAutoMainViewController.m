@@ -244,7 +244,7 @@
         
         MSALAccount *account = [self accountWithParameters:parameters application:application]; // User is not required for acquiretoken
         
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] msidScopeSet];
         NSArray *extraScopes = (NSArray *)parameters[MSAL_EXTRA_SCOPES_PARAM];
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
@@ -349,13 +349,21 @@
             return;
         }
         
-        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] scopeSet];
+        NSOrderedSet *scopes = [parameters[MSAL_SCOPES_PARAM] msidScopeSet];
         BOOL forceRefresh = parameters[MSAL_FORCE_REFRESH_PARAM] ? [parameters[MSAL_FORCE_REFRESH_PARAM] boolValue] : NO;
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
+
+        MSALAuthority *silentAuthority = nil;
+
+        if (parameters[MSAL_SILENT_AUTHORITY_PARAM])
+        {
+            // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
+            silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:parameters[MSAL_SILENT_AUTHORITY_PARAM]] error:nil];
+        }
         
         [application acquireTokenSilentForScopes:[scopes array]
                                          account:account
-                                       authority:nil
+                                       authority:silentAuthority
                                     forceRefresh:forceRefresh
                                    correlationId:correlationId
                                  completionBlock:^(MSALResult *result, NSError *error)
@@ -379,7 +387,7 @@
         }
 
         __auto_type authorityFactory = [MSALAuthorityFactory new];
-        __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
+        __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil
@@ -414,7 +422,7 @@
         }
         
         __auto_type authorityFactory = [MSIDAuthorityFactory new];
-        __auto_type authorityUrl = [parameters[MSAL_AUTHORITY_PARAM] msidUrl];
+        __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];

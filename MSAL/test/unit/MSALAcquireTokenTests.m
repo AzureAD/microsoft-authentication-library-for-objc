@@ -259,7 +259,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
@@ -346,7 +346,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
@@ -461,6 +461,13 @@
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]];
     
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+
+    MSIDTestURLResponse *sovereignOidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.de/1234-5678-90abcdefg"
+                                      responseUrl:@"https://login.microsoftonline.de/1234-5678-90abcdefg"
+                                            query:nil];
+
+    [MSIDTestURLSession addResponse:sovereignOidcResponse];
     
     // Check if instance_aware parameter is in start url
     [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
@@ -469,7 +476,7 @@
      {
          NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
          XCTAssertNotNil(url);
-         NSDictionary *QPs = [NSDictionary msidURLFormDecode:url.query];
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
          
          NSMutableDictionary *expectedQPs =
          [@{
