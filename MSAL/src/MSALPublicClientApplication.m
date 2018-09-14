@@ -58,7 +58,6 @@
 #import "MSALAADAuthority.h"
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
-static NSString *s_defaultKeychainGroup;
 
 #import "MSIDAuthority.h"
 
@@ -83,12 +82,12 @@ static NSString *s_defaultKeychainGroup;
 
 @implementation MSALPublicClientApplication
 
-+ (void)initialize
+- (NSString *)defaultKeychainGroup
 {
 #if TARGET_OS_IPHONE
-    s_defaultKeychainGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
+    return MSIDKeychainTokenCache.defaultKeychainGroup;
 #else
-    s_defaultKeychainGroup = nil;
+    return nil;
 #endif
 }
 
@@ -120,7 +119,7 @@ static NSString *s_defaultKeychainGroup;
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:s_defaultKeychainGroup
+                    keychainGroup:self.defaultKeychainGroup
                         authority:nil
                       redirectUri:nil
                             error:error];
@@ -131,7 +130,7 @@ static NSString *s_defaultKeychainGroup;
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:s_defaultKeychainGroup
+                    keychainGroup:self.defaultKeychainGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
@@ -143,7 +142,7 @@ static NSString *s_defaultKeychainGroup;
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:s_defaultKeychainGroup
+                    keychainGroup:self.defaultKeychainGroup
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
