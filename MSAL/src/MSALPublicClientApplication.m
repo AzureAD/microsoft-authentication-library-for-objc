@@ -58,6 +58,7 @@
 #import "MSALAADAuthority.h"
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
+static NSString *s_defaultKeychainGroup;
 
 #import "MSIDAuthority.h"
 
@@ -70,6 +71,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @interface MSALPublicClientApplication()
 {
     WKWebView *_customWebview;
+    NSString *_defaultKeychainGroup;
 }
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
@@ -80,6 +82,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 @end
 
 @implementation MSALPublicClientApplication
+
++ (void)initialize
+{
+#if TARGET_OS_IPHONE
+    s_defaultKeychainGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
+#else
+    s_defaultKeychainGroup = nil;
+#endif
+}
 
 // Make sure scheme is registered in info.plist
 // If broker is enabled, make sure redirect uri has bundle id in it
@@ -109,7 +120,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:nil
+                    keychainGroup:s_defaultKeychainGroup
                         authority:nil
                       redirectUri:nil
                             error:error];
@@ -120,7 +131,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:nil
+                    keychainGroup:s_defaultKeychainGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
@@ -132,7 +143,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:nil
+                    keychainGroup:s_defaultKeychainGroup
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
@@ -204,16 +215,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     _keychainGroup = keychainGroup;
 
     MSIDKeychainTokenCache *dataSource;
-    if (_keychainGroup != nil)
+    if (_keychainGroup == nil)
     {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
+        _keychainGroup = [[NSBundle mainBundle] bundleIdentifier];
     }
-    else
-    {
-        _keychainGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
-        dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
-    }
-
+    
+    dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
+    
     MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:factory];
@@ -240,6 +248,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     return self;
 }
+
 
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
 {
