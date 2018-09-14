@@ -59,7 +59,7 @@
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property uint expirationBuffer;
+@property NSUInteger expirationBuffer;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints

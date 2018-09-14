@@ -56,7 +56,7 @@
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-        expirationBuffer:(uint)expirationBuffer
+        expirationBuffer:(NSUInteger)expirationBuffer
                    error:(NSError *__autoreleasing  _Nullable *)error;
 {
     if (!(self = [super initWithParameters:parameters
