@@ -25,20 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALDrsDiscoveryResponse.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@interface MSALDrsDiscoveryResponse()
+@interface MSALADFSAuthority : MSALAuthority
 
-@property (readonly) NSDictionary *identityProviderService;
-
-@end
-
-
-@implementation MSALDrsDiscoveryResponse
-
-#define IdentityProviderServiceKey  @"IdentityProviderService"
-#define PassiveAuthEndpointKey      @"PassiveAuthEndpoint"
-
-DICTIONARY_READ_PROPERTY_IMPL(_json[@"IdentityProviderService"], PassiveAuthEndpointKey, passiveAuthEndpoint)
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

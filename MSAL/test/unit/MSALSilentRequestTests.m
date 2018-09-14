@@ -28,7 +28,6 @@
 #import "MSALTestCase.h"
 
 #import "MSALBaseRequest+TestExtensions.h"
-#import "MSALTestAuthority.h"
 #import "MSALTestSwizzle.h"
 #import "MSALSilentRequest.h"
 
@@ -56,7 +55,12 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "NSString+MSALTestUtil.h"
+#import "NSString+MSIDTestUtil.h"
 #import "MSIDTestURLResponse+MSAL.h"
+#import "MSIDAADNetworkConfiguration.h"
+#import "MSIDTestURLResponse+MSAL.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 
@@ -70,30 +74,21 @@
 - (void)setUp
 {
     [super setUp];
-    
+
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
-    
+
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
     
-    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
-                           class:[MSALAuthority class]
-                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
-     
-     {
-         (void)obj;
-         (void)context;
-         (void)userPrincipalName;
-         (void)validate;
-         
-         completionBlock([MSALTestAuthority AADAuthority:unvalidatedAuthority], nil);
-     }];
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)tearDown
 {
     [super tearDown];
+    
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
 #pragma mark - Tests
@@ -102,18 +97,18 @@
 {
     NSError *error = nil;
     NSUUID *correlationId = [NSUUID new];
-    
+
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    
+
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
-    
+
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 }
@@ -125,7 +120,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -137,8 +132,12 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
     [request run:^(MSALResult *result, NSError *error)
     {
         XCTAssertNil(result);
@@ -149,10 +148,7 @@
         [expectation fulfill];
     }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void)testAtsATFound
@@ -162,7 +158,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -171,13 +167,13 @@
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.msidHostWithPortIfNecessary tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
+    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.environment tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
 
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
                                                                                                 @"access_token": @"access_token",
                                                                                                 @"authority" : @"https://login.microsoftonline.com/common",
@@ -188,7 +184,7 @@
                                                                                                 @"expires_on" : [NSString stringWithFormat:@"%qu", (uint64_t)[[NSDate dateWithTimeIntervalSinceNow:6000] timeIntervalSince1970]]
                                                                                                 }
                                                                                         error:nil];
-    
+
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:response
                                                                context:nil
@@ -201,6 +197,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -211,10 +212,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsAuthorityATExpired
@@ -224,7 +222,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -247,9 +245,9 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
                                                              @"access_token": @"access_token",
@@ -262,7 +260,7 @@
                                                              @"expires_on" : @"1"
                                                              }
                                                      error:nil];
-    
+
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
@@ -304,6 +302,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -314,10 +317,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsHomeAuthorityATExpired
@@ -327,7 +327,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -351,9 +351,9 @@
     //store at & rt in cache
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
                                                              @"access_token": @"access_token",
@@ -365,7 +365,7 @@
                                                              @"expires_on" : @"1"
                                                              }
                                                      error:nil];
-    
+
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
@@ -401,13 +401,18 @@
 
     [MSIDTestURLSession addResponse:response];
 
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/1234-5678-90abcdefg" authority];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
+
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
@@ -419,10 +424,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsAuthorityATExpiredAndRTNotFound
@@ -432,7 +434,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -451,12 +453,12 @@
 
     parameters.account = account;
 
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
+    NSDictionary *idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
-    
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
                                                              @"access_token": @"access_token",
@@ -468,7 +470,7 @@
                                                              @"expires_on" : @"1"
                                                              }
                                                      error:nil];
-    
+
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
@@ -481,6 +483,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -491,10 +498,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsAuthorityForceUpdate
@@ -504,7 +508,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -525,8 +529,8 @@
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     //store at & rt.
     MSIDAADV2TokenResponse *msidResponse =
@@ -541,14 +545,14 @@
                                                              @"expires_on" : @"1"
                                                              }
                                                      error:nil];
-    
+
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
-    
+
     // Delete AT.
     MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
     result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
@@ -590,6 +594,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -600,10 +609,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsAuthorityForceUpdateRTNotFound
@@ -613,7 +619,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -638,6 +644,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -648,10 +659,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testAtsAuthorityForceUpdateUserNotMatch
@@ -661,7 +669,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -683,8 +691,8 @@
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     //store at & rt.
     MSIDAADV2TokenResponse *msidResponse =
@@ -698,14 +706,14 @@
                                                              @"client_info": rawClientInfo,
                                                              }
                                                      error:nil];
-    
+
     MSIDAADOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
-    
+
     // Delete AT.
     MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
     result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
@@ -746,6 +754,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+    
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -758,10 +771,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testSilentRequest_whenForceUpdateAndNoATReturned_shouldReturnError
@@ -771,7 +781,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -793,8 +803,8 @@
     parameters.account = account;
 
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     //store at & rt.
     MSIDAADV2TokenResponse *msidResponse =
@@ -808,17 +818,17 @@
                                                              @"client_info": rawClientInfo,
                                                              }
                                                      error:nil];
-    
+
     MSIDAADOauth2Factory *factory = [MSIDAADOauth2Factory new];
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:parameters.msidConfiguration
                                                               response:msidResponse
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
-    
+
     // Delete AT.
     MSIDAccessToken *accessToken = [factory accessTokenFromResponse:msidResponse configuration:parameters.msidConfiguration];
-    
+
     result = [self.tokenCacheAccessor removeToken:accessToken context:nil error:nil];
     XCTAssertTrue(result);
 
@@ -855,6 +865,11 @@
     XCTAssertNotNil(request);
     XCTAssertNil(error);
 
+    NSString *authority = @"https://login.microsoftonline.com/common";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Expectation"];
 
     [request run:^(MSALResult *result, NSError *error)
@@ -867,10 +882,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectationsWithTimeout:5.0 handler:^(NSError * _Nullable error)
-     {
-         XCTAssertNil(error);
-     }];
+    [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testSilentRequest_whenResiliencyErrorReturned_shouldRetryRequestOnceAndSucceed
@@ -880,7 +892,10 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+
+    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
+    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    parameters.unvalidatedAuthority = authority;
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -903,8 +918,8 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
@@ -924,6 +939,11 @@
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/common"];
+
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/common"];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
@@ -1001,7 +1021,9 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
+    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
+    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    parameters.unvalidatedAuthority = authority;
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
@@ -1024,8 +1046,8 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     //store at & rt in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
@@ -1045,6 +1067,11 @@
                                                                context:nil
                                                                  error:nil];
     XCTAssertTrue(result);
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/common"];
+
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/common"];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
 
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];

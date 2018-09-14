@@ -38,7 +38,7 @@
              @"expires_on" : [NSString stringWithFormat:@"%f", self.expiresOn.timeIntervalSince1970],
              @"id_token" : self.idToken ? self.idToken : @"",
              @"user" : self.account ? [self.account itemAsDictionary] : @"",
-             @"authority" : self.authority ? self.authority : @""
+             @"authority" : self.authority ? self.authority.url.absoluteString : @""
              };
 }
 

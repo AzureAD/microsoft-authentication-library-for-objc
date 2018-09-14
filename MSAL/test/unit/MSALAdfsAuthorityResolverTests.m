@@ -161,7 +161,7 @@ typedef void (^MSALWebFingerCompletionBlock)(MSALWebFingerResponse *response, NS
     [reqHeaders setObject:UNIT_TEST_CORRELATION_ID forKey:@"client-request-id"];
     [reqHeaders setObject:@"application/json" forKey:@"Accept"];
     
-    NSString *url = [NSString stringWithFormat:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/?%@", MSIDTestURLResponse.defaultQueryParameters.msidURLFormEncode];
+    NSString *url = [NSString stringWithFormat:@"https://fs.fabrikam.com/.well-known/webfinger?resource=https://fs.fabrikam.com/adfs/?%@", MSIDTestURLResponse.defaultQueryParameters.msidWWWFormURLEncode];
     MSIDTestURLResponse *response =
     [MSIDTestURLResponse serverNotFoundResponseForURLString:url
                                              requestHeaders:reqHeaders

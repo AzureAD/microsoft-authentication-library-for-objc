@@ -29,12 +29,12 @@
 
 @interface MSALTestAppAuthorityViewController : MSALTestAppSettingViewController
 {
-    NSMutableArray *_authorities;
-    NSMutableArray *_savedAuthorities;
+    NSMutableArray<NSString *> *_authorities;
+    NSMutableArray<NSString *> *_savedAuthorities;
 }
 
 + (instancetype)sharedController;
-- (instancetype)initWithAuthorities:(NSArray *)aadAuthorities
+- (instancetype)initWithAuthorities:(NSArray<NSString *> *)aadAuthorities
              keyForSavedAuthorities:(NSString *)userDefaultsKey;
 
 @end

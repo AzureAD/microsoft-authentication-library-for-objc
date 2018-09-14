@@ -25,39 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestCase.h"
-#import "NSString+MSALHelperMethods.h"
+#import "MSALB2CAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDB2CAuthority.h"
 
-// From NSString+MSALHelperMethods.m
-#define RANDOM_STRING_MAX_SIZE 1024
+@implementation MSALB2CAuthority
 
-@interface MSALStringHelperMethodTests : MSALTestCase
-
-@end
-
-@implementation MSALStringHelperMethodTests
-
-- (void)testRandomUrlSafeStringOfSize_whenZeroSize_shouldReturnNilOrBlank
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
 {
-    // test with zero size
-    NSString *stringZero = [NSString randomUrlSafeStringOfSize:0];
-    XCTAssertTrue([NSString msidIsStringNilOrBlank:stringZero]);
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
+
+    return self;
 }
 
-- (void)testRandomUrlSafeStringOfSize_whenNormalSize_shouldReturnRandomString
+- (NSURL *)url
 {
-    // test with normal size
-    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:10]);
-    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:100]);
-    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:1000]);
-    XCTAssertNotNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE]);
+    return self.msidAuthority.url;
 }
-
-- (void)testRandomUrlSafeStringOfSize_whenTooBigSize_shouldReturnNilOrBlank
-{
-    // test with bigger then max
-    XCTAssertNil([NSString randomUrlSafeStringOfSize:RANDOM_STRING_MAX_SIZE + 1]);
-}
-
 
 @end
