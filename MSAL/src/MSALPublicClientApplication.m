@@ -237,6 +237,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
     
+    _expirationBuffer = 300;  //in seconds, ensures catching of clock differences between the server and the device
     
     return self;
 }
@@ -701,6 +702,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
                                                                   forceRefresh:forceRefresh
                                                                     tokenCache:self.tokenCache
+                                                              expirationBuffer:self.expirationBuffer
                                                                          error:&error];
     
     if (!request)

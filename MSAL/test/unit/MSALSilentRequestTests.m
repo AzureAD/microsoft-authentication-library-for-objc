@@ -107,7 +107,7 @@
     parameters.correlationId = correlationId;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -127,7 +127,7 @@
     parameters.correlationId = correlationId;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -192,7 +192,7 @@
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -297,7 +297,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -404,7 +404,7 @@
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/1234-5678-90abcdefg" authority];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -478,7 +478,7 @@
     XCTAssertTrue(result);
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -589,7 +589,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -639,7 +639,7 @@
     parameters.account = account;
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -749,7 +749,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -860,7 +860,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:YES tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -992,7 +992,7 @@
     [MSIDTestURLSession addResponse:successfulResponse];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);
@@ -1100,7 +1100,7 @@
     [MSIDTestURLSession addResponse:response];
 
     MSALSilentRequest *request =
-    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor error:&error];
+    [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
 
     XCTAssertNotNil(request);
     XCTAssertNil(error);

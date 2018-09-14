@@ -55,6 +55,12 @@
 /*! The redirect URI of the application */
 @property (readonly) NSString *redirectUri;
 
+/*! When checking an access token for expiration we check if time to expiration
+ is less than this value (in seconds) before making the request. The goal is to
+ refresh the token ahead of its expiration and also not to return a token that is
+ about to expire. */
+@property uint expirationBuffer;
+
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
     to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
