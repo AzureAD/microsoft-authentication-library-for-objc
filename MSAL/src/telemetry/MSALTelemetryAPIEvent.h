@@ -23,14 +23,12 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryApiId.h"
-#import "MSALAuthority.h"
 #import "MSIDTelemetryAPIEvent.h"
 
 @interface MSALTelemetryAPIEvent : MSIDTelemetryAPIEvent
 
 - (void)setUIBehavior:(MSALUIBehavior)uiBehavior;
 - (void)setUser:(MSALAccount *)user;
-- (void)setAuthorityType:(MSALAuthorityType)authorityType;
 - (void)setMSALApiId:(MSALTelemetryApiId)apiId;
 - (void)setErrorCode:(MSALErrorCode)errorCode;
 - (void)setLoginHint:(NSString *)loginHint;

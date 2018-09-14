@@ -30,6 +30,7 @@
 extern NSString *const MSAL_VALIDATE_AUTHORITY_PARAM;
 extern NSString *const MSAL_CLIENT_ID_PARAM;
 extern NSString *const MSAL_AUTHORITY_PARAM;
+extern NSString *const MSAL_SILENT_AUTHORITY_PARAM;
 extern NSString *const MSAL_ACCOUNT_IDENTIFIER_PARAM;
 extern NSString *const MSAL_LEGACY_USER_PARAM;
 extern NSString *const MSAL_SCOPES_PARAM;

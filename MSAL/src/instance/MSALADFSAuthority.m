@@ -25,12 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALJsonObject.h"
+#import "MSALADFSAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDADFSAuthority.h"
 
-@interface MSALTenantDiscoveryResponse : MSALJsonObject
+@implementation MSALADFSAuthority
 
-@property (readonly) NSString *authorization_endpoint;
-@property (readonly) NSString *token_endpoint;
-@property (readonly) NSString *issuer;
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
+    
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
 
 @end

@@ -30,8 +30,12 @@
 
 - (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request;
 - (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
+- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request
+                           guestTenantScenario:(BOOL)usesGuestTenant;
+
 - (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
-- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request;
+- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request
+                                  guestTenantScenario:(BOOL)usesGuestTenant;
 - (void)selectAccountWithTitle:(NSString *)accountTitle;
 
 @end

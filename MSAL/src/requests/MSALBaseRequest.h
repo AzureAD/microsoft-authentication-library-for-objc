@@ -27,7 +27,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryApiId.h"
-#import "MSALAuthority.h"
 
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;
@@ -35,11 +34,13 @@
 @class MSIDAADV2Oauth2Factory;
 @class MSIDTokenRequest;
 
+typedef void(^MSALAuthorityCompletion)(BOOL resolved, NSError * _Nullable error);
+
 @interface MSALBaseRequest : NSObject
 {
     @protected
     MSALRequestParameters *_parameters;
-    MSALAuthority *_authority;
+    MSIDAuthority *_authority;
     MSALTelemetryApiId _apiId;
     MSIDDefaultTokenCacheAccessor *_tokenCache;
 }
@@ -61,11 +62,10 @@
 
 - (void)run:(nonnull MSALCompletionBlock)completionBlock;
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock;
+- (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
 - (nullable MSIDTokenRequest *)tokenRequest;
 - (nonnull NSURL *)tokenEndpoint;
-
-- (void)resolveEndpoints:(nonnull MSALAuthorityCompletion)completionBlock;
 
 - (nonnull MSALTelemetryAPIEvent *)getTelemetryAPIEvent;
 
