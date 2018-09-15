@@ -82,9 +82,6 @@ extern NSString *MSALHTTPResponseCodeKey;
 /*!
  List of scopes that were requested from MSAL, but not granted in the response.
 
- Apps normally request certain permissions that their app needs to function.
- However, sometimes STS grants only a subset of those permissions.
-
  This can happen in multiple cases:
 
     * Requested scope is not supported

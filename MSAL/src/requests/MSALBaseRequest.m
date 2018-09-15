@@ -303,10 +303,10 @@ static MSALScopes *s_reservedScopes = nil;
             NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
             additionalUserInfo[MSALGrantedScopesKey] = [grantedScopes array];
 
-            NSMutableOrderedSet *requestedScopeSet = [configuration.scopes mutableCopy];
-            [requestedScopeSet minusOrderedSet:grantedScopes];
+            NSMutableOrderedSet *declinedScopeSet = [configuration.scopes mutableCopy];
+            [declinedScopeSet minusOrderedSet:grantedScopes];
 
-            additionalUserInfo[MSALDeclinedScopesKey] = [requestedScopeSet array];
+            additionalUserInfo[MSALDeclinedScopesKey] = [declinedScopeSet array];
 
             *error = MSIDCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, nil, additionalUserInfo);
         }
