@@ -56,7 +56,6 @@
         self.tokenCache = tokenCache;
         self.authority = authority;
         self.clientId = clientId;
-        MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     }
 
     return self;
@@ -80,46 +79,6 @@
                                          NSError *accountsError = nil;
                                          NSArray *accounts = [self accounts:&accountsError];
                                          completionBlock(accounts, accountsError);
-                                     }];
-}
-
-- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
-                    completionBlock:(MSALAccountCompletionBlock)completionBlock
-{
-    [self.authority.msidAuthority resolveAndValidate:NO
-                                   userPrincipalName:nil
-                                             context:nil
-                                     completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
-
-                                         if (error)
-                                         {
-                                             completionBlock(nil, error);
-                                             return;
-                                         }
-
-                                         NSError *accountError = nil;
-                                         MSALAccount *account = [self accountForHomeAccountId:homeAccountId error:&accountError];
-                                         completionBlock(account, accountError);
-                                     }];
-}
-
-- (void)loadAccountForUsername:(NSString *)username
-               completionBlock:(MSALAccountCompletionBlock)completionBlock
-{
-    [self.authority.msidAuthority resolveAndValidate:NO
-                                   userPrincipalName:nil
-                                             context:nil
-                                     completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
-
-                                         if (error)
-                                         {
-                                             completionBlock(nil, error);
-                                             return;
-                                         }
-
-                                         NSError *accountError = nil;
-                                         MSALAccount *account = [self accountForUsername:username error:&accountError];
-                                         completionBlock(account, accountError);
                                      }];
 }
 

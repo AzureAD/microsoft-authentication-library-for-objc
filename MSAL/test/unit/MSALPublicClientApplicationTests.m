@@ -1104,71 +1104,16 @@
     application.tokenCache = self.tokenCacheAccessor;
     NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
     
-    [self msalAddDiscoveryResponse];
+    NSError *error;
+    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForHomeAccountId:homeAccountId completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(account);
-         
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
-}
-
-- (void)testAccountWithHomeAccountId_whenAccountExistsAndAliasAuthority_shouldReturnAccountNoError
-{
-    [self msalStoreTokenResponseInCache];
-    
-    NSString *clientId = UNIT_TEST_CLIENT_ID;
-    __auto_type authority = [@"https://login.windows.net/common" msalAuthority];
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:nil];
-    application.tokenCache = self.tokenCacheAccessor;
-    
-    __auto_type httpResponse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL new] statusCode:200 HTTPVersion:nil headerFields:nil];
-    __auto_type requestUrl = [@"https://login.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows.net%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize" msidUrl];
-    MSIDTestURLResponse *response = [MSIDTestURLResponse request:requestUrl
-                                                         reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    response->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [response setResponseJSON:responseJson];
-    [MSIDTestURLSession addResponse:response];
-    
-    NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForHomeAccountId:homeAccountId completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(account);
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
 - (void)testAccountWithHomeAccountId_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
@@ -1180,18 +1125,11 @@
     application.tokenCache = self.tokenCacheAccessor;
     NSString *homeAccountId = @"other_uid.other_utid";
     
-    [self msalAddDiscoveryResponse];
+    NSError *error;
+    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForHomeAccountId:homeAccountId completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNil(account);
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
+    XCTAssertNil(error);
+    XCTAssertNil(account);
 }
 
 #pragma mark - loadAccountForUsername
@@ -1204,69 +1142,16 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
     application.tokenCache = self.tokenCacheAccessor;
     
-    [self msalAddDiscoveryResponse];
+    NSError *error;
+    __auto_type account = [application accountForUsername:@"fakeuser@contoso.com" error:&error];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForUsername:@"fakeuser@contoso.com" completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(account);
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
-}
-
-- (void)testAccountWithUsername_whenAccountExistsAndAliasAuthority_shouldReturnAccountNoError
-{
-    [self msalStoreTokenResponseInCache];
-    
-    NSString *clientId = UNIT_TEST_CLIENT_ID;
-    __auto_type authority = [@"https://login.windows.net/common" msalAuthority];
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:nil];
-    application.tokenCache = self.tokenCacheAccessor;
-    
-    __auto_type httpResponse = [[NSHTTPURLResponse alloc] initWithURL:[NSURL new] statusCode:200 HTTPVersion:nil headerFields:nil];
-    __auto_type requestUrl = [@"https://login.windows.net/common/discovery/instance?api-version=1.1&authorization_endpoint=https%3A%2F%2Flogin.windows.net%2Fcommon%2Foauth2%2Fv2.0%2Fauthorize" msidUrl];
-    MSIDTestURLResponse *response = [MSIDTestURLResponse request:requestUrl
-                                                         reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    response->_requestHeaders = headers;
-    __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
-                                 @"metadata" : @[
-                                         @{
-                                             @"preferred_network" : @"login.microsoftonline.com",
-                                             @"preferred_cache" : @"login.windows.net",
-                                             @"aliases" : @[@"login.microsoftonline.com", @"login.windows.net"]
-                                             }
-                                         ]
-                                 };
-    [response setResponseJSON:responseJson];
-    [MSIDTestURLSession addResponse:response];
-    
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForUsername:@"fakeuser@contoso.com" completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(account);
-         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
+    XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
 - (void)testAccountWithUsername_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
@@ -1277,18 +1162,11 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
     application.tokenCache = self.tokenCacheAccessor;
     
-    [self msalAddDiscoveryResponse];
+    NSError *error;
+    __auto_type account = [application accountForUsername:@"nonexisting@contoso.com" error:&error];
     
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Load account."];
-    [application loadAccountForUsername:@"nonexisting@contoso.com" completionBlock:^(MSALAccount *account, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNil(account);
-         
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectationsWithTimeout:1 handler:nil];
+    XCTAssertNil(error);
+    XCTAssertNil(account);
 }
 
 #pragma mark - removeAccount
@@ -1302,8 +1180,6 @@
     XCTAssertEqual([application allAccounts:nil].count, 0);
     
     [self msalStoreTokenResponseInCache];
-    
-    [self msalAddDiscoveryResponse];
     
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application allAccounts:nil].count, 1);
@@ -1328,8 +1204,6 @@
 
 - (void)testRemove_whenUserDontExist_shouldReturnTrueWithNoError
 {
-    [self msalAddDiscoveryResponse];
-    
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
@@ -1349,8 +1223,6 @@
 
 - (void)testRemoveUser_whenKeychainError_shouldReturnNoWithError
 {
-    [self msalAddDiscoveryResponse];
-    
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     
     MSALAccount *account = [MSALAccount new];

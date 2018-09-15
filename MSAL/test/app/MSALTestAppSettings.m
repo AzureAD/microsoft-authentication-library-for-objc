@@ -57,7 +57,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-
+    
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers"];
@@ -72,11 +72,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     s_authorities = authorities;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
-
+    
     __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
     __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
     __auto_type profilePolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy";
-
+    
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
 }
@@ -110,11 +110,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     return s_authorityTypes;
 }
 
-- (void)loadAccountForAccountHomeIdentifier:(NSString *)accountIdentifier
+- (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
 {
     if (!accountIdentifier)
     {
-        return;
+        return nil;
     }
     
     NSError *error = nil;
@@ -125,14 +125,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     if (application == nil)
     {
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
-        return;
+        return nil;
     }
-
-    [application loadAccountForHomeAccountId:accountIdentifier
-                             completionBlock:^(MSALAccount *account, NSError *error) {
-
-                                 _currentAccount = account;
-    }];
+    
+    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    return account;
 }
 
 - (void)readFromDefaults
@@ -155,8 +152,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
     _validateAuthority = validate ? [validate boolValue] : YES;
-
-    [self loadAccountForAccountHomeIdentifier:[settings objectForKey:@"currentHomeAccountId"]];
+    _currentAccount = [self accountForAccountHomeIdentifier:[settings objectForKey:@"currentHomeAccountId"]];
 }
 
 - (void)setValue:(id)value

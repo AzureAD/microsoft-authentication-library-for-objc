@@ -67,6 +67,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
 #import "MSALAccountsRequest.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -237,6 +238,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
     
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
     return self;
 }
@@ -276,26 +278,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                           clientId:self.clientId];
 
     [request loadAccountsWithCompletionBlock:completionBlock];
-}
-
-- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
-                    completionBlock:(MSALAccountCompletionBlock)completionBlock
-{
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:self.authority
-                                                                          clientId:self.clientId];
-
-    [request loadAccountForHomeAccountId:homeAccountId completionBlock:completionBlock];
-}
-
-- (void)loadAccountForUsername:(NSString *)username
-               completionBlock:(MSALAccountCompletionBlock)completionBlock
-{
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:self.authority
-                                                                          clientId:self.clientId];
-
-    [request loadAccountForUsername:username completionBlock:completionBlock];
 }
 
 #pragma SafariViewController Support

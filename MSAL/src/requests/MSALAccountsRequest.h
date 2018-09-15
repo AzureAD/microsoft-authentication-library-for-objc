@@ -37,11 +37,6 @@
 
 - (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
-- (void)loadAccountForHomeAccountId:(NSString *)homeAccountId
-                    completionBlock:(MSALAccountCompletionBlock)completionBlock;
-
-- (void)loadAccountForUsername:(NSString *)username
-               completionBlock:(MSALAccountCompletionBlock)completionBlock;
 
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
