@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccountsRequest.h"
+#import "MSALAccountsProvider.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
@@ -33,7 +33,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
 
-@interface MSALAccountsRequest()
+@interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nullable, nonatomic) MSALAuthority *authority;
@@ -41,7 +41,7 @@
 
 @end
 
-@implementation MSALAccountsRequest
+@implementation MSALAccountsProvider
 
 #pragma mark - Init
 
@@ -53,9 +53,9 @@
 
     if (self)
     {
-        self.tokenCache = tokenCache;
-        self.authority = authority;
-        self.clientId = clientId;
+        _tokenCache = tokenCache;
+        _authority = authority;
+        _clientId = clientId;
     }
 
     return self;

@@ -66,7 +66,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
-#import "MSALAccountsRequest.h"
+#import "MSALAccountsProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
 
 @interface MSALPublicClientApplication()
@@ -256,7 +256,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:nil
                                                                           clientId:self.clientId];
     return [request accounts:error];
@@ -265,7 +265,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:self.authority
                                                                           clientId:self.clientId];
     return [request accountForHomeAccountId:homeAccountId error:error];
@@ -274,7 +274,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:self.authority
                                                                           clientId:self.clientId];
     return [request accountForUsername:username error:error];
@@ -282,7 +282,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock
 {
-    MSALAccountsRequest *request = [[MSALAccountsRequest alloc] initWithTokenCache:self.tokenCache
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:self.authority
                                                                           clientId:self.clientId];
 

@@ -29,14 +29,13 @@
 
 @class MSIDDefaultTokenCacheAccessor;
 
-@interface MSALAccountsRequest : NSObject
+@interface MSALAccountsProvider : NSObject
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                          authority:(MSALAuthority *)authority
                           clientId:(NSString *)clientId;
 
 - (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
 
 - (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
 
