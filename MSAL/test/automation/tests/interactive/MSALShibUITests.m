@@ -66,7 +66,7 @@
     [self acceptMSSTSConsentIfNecessary:@"Accept"
                         embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
     [self closeResultView];
     return homeAccountId;
 }

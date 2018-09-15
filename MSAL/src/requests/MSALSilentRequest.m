@@ -56,6 +56,7 @@
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+        expirationBuffer:(NSUInteger)expirationBuffer
                    error:(NSError *__autoreleasing  _Nullable *)error;
 {
     if (!(self = [super initWithParameters:parameters
@@ -67,16 +68,30 @@
     
     _forceRefresh = forceRefresh;
     _refreshToken = nil;
-    
+    _expirationBuffer = expirationBuffer;
     return self;
 }
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
+    [super resolveEndpoints:^(BOOL resolved, NSError *error) {
+
+        if (!resolved)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+
+        [self acquireTokenImpl:completionBlock];
+    }];
+}
+
+- (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
+{
     CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorAccountRequired, @"user parameter cannot be nil");
 
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    
+
     if (!_forceRefresh)
     {
         NSError *error = nil;
@@ -84,7 +99,7 @@
                                                                    configuration:msidConfiguration
                                                                          context:_parameters
                                                                            error:&error];
-        
+
         if (!accessToken && error)
         {
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
@@ -93,15 +108,20 @@
             completionBlock(nil, error);
             return;
         }
-        
-        if (accessToken && !accessToken.isExpired)
+
+        if (accessToken && ![accessToken isExpiredWithExpiryBuffer:_expirationBuffer])
         {
             MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
                                                            configuration:msidConfiguration
                                                                  context:_parameters
                                                                    error:&error];
 
-            MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
+            NSError *error = nil;
+
+            MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                           idToken:idToken
+                                           isExtendedLifetimeToken:NO
+                                                             error:&error];
 
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
@@ -133,41 +153,33 @@
         completionBlock(nil, msidError);
         return;
     }
-    
+
     CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
 
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
-        {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
+    MSID_LOG_INFO(_parameters, @"Refreshing access token");
+    MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
 
-            completionBlock(nil, error);
-            return;
-        }
-
-        MSID_LOG_INFO(_parameters, @"Refreshing access token");
-        MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
-
-        _authority = authority;
-
-        [super acquireToken:^(MSALResult *result, NSError *error)
+    [super acquireToken:^(MSALResult *result, NSError *error)
+    {
+         // Logic for returning extended lifetime token
+         if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
          {
-             // Logic for returning extended lifetime token
-             if (_parameters.extendedLifetimeEnabled && _extendedLifetimeAccessToken && [self isServerUnavailable:error])
-             {
-                 MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
-                                                                configuration:msidConfiguration
-                                                                      context:_parameters
-                                                                        error:&error];
-                 
-                 result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
-                 error = nil;
-             }
-             
-             completionBlock(result, error);
-         }];
-    }];
+             MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
+                                                            configuration:msidConfiguration
+                                                                  context:_parameters
+                                                                    error:&error];
+
+             NSError *resultError = nil;
+
+             result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken
+                                                idToken:idToken
+                                isExtendedLifetimeToken:YES
+                                                  error:&resultError];
+             error = resultError;
+         }
+
+         completionBlock(result, error);
+     }];
 }
 
 - (MSIDTokenRequest *)tokenRequest

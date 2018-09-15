@@ -28,6 +28,7 @@
 #import <Foundation/Foundation.h>
 
 @class MSALAccount;
+@class MSALAuthority;
 
 @interface MSALResult : NSObject
 
@@ -76,6 +77,6 @@
  This authority should be used for subsequent silent requests.
  It will be different from the authority provided by developer for sovereign cloud scenarios.
  */
-@property (readonly) NSString *authority;
+@property (readonly) MSALAuthority *authority;
 
 @end

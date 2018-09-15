@@ -46,7 +46,12 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSALAccountId.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADAuthority.h"
+#import "NSString+MSALTestUtil.h"
+#import "MSALAADAuthority.h"
+#import "MSALAuthority_Internal.h"
 #import "MSIDMacTokenCache.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -135,15 +140,17 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                authority:authority
                                                     error:&error];
 
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
@@ -157,16 +164,18 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                authority:authority
                                               redirectUri:@"mycustom.redirect://bundle_id"
                                                     error:&error];
 
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
@@ -200,9 +209,11 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                authority:authority
                                               redirectUri:@"mycustom.wrong.redirect://bundle_id"
                                                     error:&error];
 
@@ -236,16 +247,18 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                             keychainGroup:@"com.contoso.msalcache"
-                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                authority:authority
                                                     error:&error];
 
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
@@ -257,21 +270,87 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                             keychainGroup:@"com.contoso.msalcache"
-                                                authority:@"https://login.microsoftonline.com/contoso.com"
+                                                authority:authority
                                               redirectUri:@"mycustom.redirect://bundle_id"
                                                     error:&error];
 
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"]);
+    XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
 
+- (void)testInitWithClientId_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+- (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupWithBundleId
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:nil
+                                                authority:authority
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:nil];
+    
+    XCTAssertEqualObjects(application.keychainGroup, [[NSBundle mainBundle] bundleIdentifier]);
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:@"com.contoso.msalcache"
+                                                authority:authority
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:nil];
+    
+    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+}
 #endif
 
 #pragma 
@@ -284,9 +363,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.sliceParameters = @{ @"slice" : @"myslice" };
     
@@ -304,7 +386,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquire);
-         XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/common"]);
+         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/common" msalAuthority].msidAuthority);
          XCTAssertEqualObjects(params.scopes, [NSOrderedSet orderedSetWithObject:@"fakescope"]);
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -340,9 +422,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -363,7 +448,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHint);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -391,9 +476,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -414,7 +502,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -446,9 +534,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -471,7 +562,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -483,12 +574,15 @@
          completionBlock(nil, nil);
      }];
     
+    authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/contoso.com"];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                       extraScopesToConsent:@[@"fakescope3"]
                              loginHint:@"fakeuser@contoso.com"
                             uiBehavior:MSALForceConsent
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                             authority:@"https://login.microsoftonline.com/contoso.com"
+                             authority:authority
                          correlationId:correlationId
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -507,9 +601,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -537,7 +634,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -567,9 +664,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -597,7 +697,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -628,9 +728,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -661,7 +764,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertEqual(params.apiId, MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId);
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/contoso.com");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.scopes, ([NSOrderedSet orderedSetWithObjects:@"fakescope1", @"fakescope2", nil]));
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
@@ -674,12 +777,15 @@
          completionBlock(nil, nil);
      }];
     
+    authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/contoso.com"];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                       extraScopesToConsent:@[@"fakescope3"]
                                     account:account
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                             authority:@"https://login.microsoftonline.com/contoso.com"
+                             authority:authority
                          correlationId:correlationId
                        completionBlock:^(MSALResult *result, NSError *error)
     {
@@ -699,9 +805,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -727,7 +836,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority, [NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]);
+         XCTAssertEqualObjects(params.unvalidatedAuthority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" msalAuthority].msidAuthority);
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -763,9 +872,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -791,7 +903,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -803,6 +915,9 @@
          completionBlock(nil, nil);
      }];
     
+    authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoft.com/common"];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
@@ -813,7 +928,7 @@
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
-                                   authority:@"https://login.microsoft.com/common"
+                                   authority:authority
                              completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
@@ -828,10 +943,13 @@
 
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -857,7 +975,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
 
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
 
          XCTAssertFalse(obj.forceRefresh);
 
@@ -893,10 +1011,13 @@
 
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/custom_guest_tenant"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/custom_guest_tenant"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -922,7 +1043,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
 
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
 
          XCTAssertFalse(obj.forceRefresh);
 
@@ -958,10 +1079,13 @@
 
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/custom_guest_tenant"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
 
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/custom_guest_tenant"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -987,7 +1111,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
 
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
 
          XCTAssertFalse(obj.forceRefresh);
 
@@ -1025,9 +1149,12 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"];
+    __auto_type authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                authority:@"https://login.microsoftonline.com/common"
+                                                authority:authority
                                                     error:&error];
     application.component = @"unittests";
     application.sliceParameters = @{ @"slice" : @"myslice" };
@@ -1055,7 +1182,7 @@
          XCTAssertEqualObjects(params.account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
-         XCTAssertEqualObjects(params.unvalidatedAuthority.absoluteString, @"https://login.microsoft.com/common");
+         XCTAssertEqualObjects(params.unvalidatedAuthority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
          XCTAssertTrue(obj.forceRefresh);
          
@@ -1076,9 +1203,12 @@
                                                         tenantId:@"1234-5678-90abcdefg"
                                                       clientInfo:nil];
     
+    authorityUrl = [[NSURL alloc] initWithString:@"https://login.microsoft.com/common"];
+    authority = [[MSALAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
-                                   authority:@"https://login.microsoft.com/common"
+                                   authority:authority
                                 forceRefresh:YES
                                correlationId:correlationId
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1111,12 +1241,13 @@
     XCTAssertEqual([application accounts:nil].count, 0);
 
     [self msalStoreTokenResponseInCache];
-    
-    MSIDAccount *account = [[MSIDAADOauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse] configuration:[self msalDefaultConfiguration]];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
 
     // Make sure that the user is properly showing up in the cache
     XCTAssertEqual([application accounts:nil].count, 1);
+
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse] configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+
     XCTAssertEqualObjects([application accounts:nil][0], msalAccount);
 
     XCTAssertTrue([application removeAccount:msalAccount error:&error]);
@@ -1335,8 +1466,8 @@
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
-                            [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
-    NSString *rawClientInfo = [NSString msidBase64UrlEncodeData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
+                            [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
+    NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
     MSIDAADV2TokenResponse *msidResponse =
     [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
@@ -1356,7 +1487,10 @@
 
 - (MSIDConfiguration *)msalDefaultConfiguration
 {
-    return [[MSIDConfiguration alloc] initWithAuthority:[[NSURL alloc] initWithString:@"https://login.microsoftonline.com/common"]
+    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
+    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+
+    return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
                                                clientId:UNIT_TEST_CLIENT_ID
                                                  target:@"fakescope1 fakescope2"];

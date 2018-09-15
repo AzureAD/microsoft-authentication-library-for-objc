@@ -30,11 +30,12 @@
 #import "MSIDAccount.h"
 #import "MSALAccount+Internal.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAccount.h"
 #import "MSALAccountId+Internal.h"
+#import "MSIDAuthority.h"
 
 @interface MSALAccount ()
 
@@ -96,8 +97,8 @@
                                   name:account.name
                          homeAccountId:account.accountIdentifier.homeAccountId
                         localAccountId:account.localAccountId
-                           environment:account.authority.msidHostWithPortIfNecessary
-                              tenantId:account.authority.msidTenant
+                           environment:account.authority.environment
+                              tenantId:account.authority.url.msidTenant
                             clientInfo:account.clientInfo];
 }
 

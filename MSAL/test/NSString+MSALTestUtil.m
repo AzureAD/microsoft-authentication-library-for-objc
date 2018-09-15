@@ -25,11 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+#import "NSString+MSALTestUtil.h"
+#import "MSALAuthorityFactory.h"
 
-#import "MSALInstanceDiscoveryResponse.h"
+@implementation NSString (MSALTestUtil)
 
-@implementation MSALInstanceDiscoveryResponse
-
-MSAL_JSON_ACCESSOR(@"tenant_discovery_endpoint", tenant_discovery_endpoint)
+- (MSALAuthority *)msalAuthority
+{
+    __auto_type authorityFactory = [MSALAuthorityFactory new];
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:self];
+    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    
+    return authority;
+}
 
 @end

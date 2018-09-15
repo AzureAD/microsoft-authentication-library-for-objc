@@ -39,6 +39,9 @@
 #import "MSALFakeViewController.h"
 #endif
 
+#import "MSIDAuthority.h"
+#import "MSIDAadAuthorityCache.h"
+
 @implementation MSALTestCase
 
 - (void)setUp
@@ -54,6 +57,9 @@
     [SFSafariViewController reset];
     [MSALFakeViewController reset];
 #endif
+    
+    [MSIDAuthority.openIdConfigurationCache removeAllObjects];
+    [[MSIDAadAuthorityCache sharedInstance] removeAllObjects];
 }
 
 - (void)tearDown

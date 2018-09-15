@@ -30,6 +30,7 @@
 @interface MSALSilentRequest : MSALBaseRequest
 {
     BOOL _forceRefresh;
+    NSUInteger _expirationBuffer;
 }
 
 @property NSString *state;
@@ -37,6 +38,7 @@
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+        expirationBuffer:(NSUInteger)expirationBuffer
                    error:(NSError *__autoreleasing *)error;
 
 @end

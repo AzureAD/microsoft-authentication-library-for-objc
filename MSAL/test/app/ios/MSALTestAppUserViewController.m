@@ -29,6 +29,7 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
+#import "MSIDAuthorityFactory.h"
 
 @interface MSALTestAppUserViewController ()
 
@@ -64,8 +65,8 @@
 {
     _users = nil;
     
-    NSError *error = nil;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSError *error = nil;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:TEST_APP_CLIENT_ID
                                                 authority:settings.authority

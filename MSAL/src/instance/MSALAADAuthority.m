@@ -25,15 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALAuthority.h"
+#import "MSALAADAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDAADAuthority.h"
 
-@class MSALTenantDiscoveryResponse;
+@implementation MSALAADAuthority
 
-@interface MSALAuthorityBaseResolver : NSObject
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
+{
+    return [self initWithURL:url rawTenant:nil context:context error:error];
+}
 
-- (void)tenantDiscoveryEndpoint:(NSURL *)url
-                        context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback)completionBlock;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDAADAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
+    
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
 
 @end

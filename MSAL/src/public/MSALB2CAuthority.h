@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTenantDiscoveryResponse.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@implementation MSALTenantDiscoveryResponse
+@interface MSALB2CAuthority : MSALAuthority
 
-MSAL_JSON_ACCESSOR(@"issuer", issuer)
-MSAL_JSON_ACCESSOR(@"authorization_endpoint", authorization_endpoint)
-MSAL_JSON_ACCESSOR(@"token_endpoint", token_endpoint)
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end
