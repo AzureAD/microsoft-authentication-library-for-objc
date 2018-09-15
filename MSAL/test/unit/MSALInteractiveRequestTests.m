@@ -27,7 +27,6 @@
 
 #import "MSALTestCase.h"
 
-#import "NSString+MSALHelperMethods.h"
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestBundle.h"
 #import "MSALTestIdTokenUtil.h"
@@ -181,7 +180,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2 openid profile offline_access"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -408,7 +409,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -477,15 +480,6 @@
                                                       clientInfo:nil];
     parameters.account = account;
 
-    [MSALTestSwizzle classMethod:@selector(randomUrlSafeStringOfSize:)
-                           class:[NSString class]
-                           block:(id)^(id obj, NSUInteger size)
-     {
-         (void)obj;
-         (void)size;
-         return @"randomValue";
-     }];
-
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
                                       extraScopesToConsent:@[@"fakescope3"]
@@ -537,7 +531,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
