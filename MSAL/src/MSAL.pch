@@ -47,7 +47,7 @@
 #import "MSIDLogger+Internal.h"
 #import "NSString+MSIDExtensions.h"
 #import "NSDictionary+MSIDExtensions.h"
-#import "NSOrderedSet+MSALExtensions.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDOAuth2Constants.h"
 
 

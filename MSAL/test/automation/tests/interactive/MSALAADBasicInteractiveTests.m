@@ -174,6 +174,7 @@
     request.scopes = @"https://graph.microsoft.com/.default";
     request.authority = @"https://login.microsoftonline.com/common";
     request.uiBehavior = @"force";
+    request.loginHint = self.primaryAccount.username;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
@@ -182,7 +183,6 @@
 
     [self acceptAuthSessionDialog];
 
-    [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
     [self assertErrorCode:@"MSALErrorInvalidRequest"];

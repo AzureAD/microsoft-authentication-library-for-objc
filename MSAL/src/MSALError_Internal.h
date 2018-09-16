@@ -30,10 +30,10 @@
 
 extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 
-extern void MSALLogError(id<MSALRequestContext> ctx, NSError *error, const char *function, int line);
+extern void MSALLogError(id<MSIDRequestContext> ctx, NSError *error, const char *function, int line);
 
-extern NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(10, 11);
-extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(11, 12);
+extern NSError *MSALCreateAndLogError(id<MSIDRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(10, 11);
+extern void MSALFillAndLogError(NSError * __autoreleasing *, id<MSIDRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...) NS_FORMAT_FUNCTION(11, 12);
 
 // Convenience macro for checking and filling an optional NSError** parameter
 #define MSAL_ERROR_PARAM(_CTX, _CODE, _DESC, ...) MSALFillAndLogError(error, _CTX, MSALErrorDomain, _CODE, nil, nil, nil, nil, __FUNCTION__, __LINE__, _DESC, ##__VA_ARGS__)

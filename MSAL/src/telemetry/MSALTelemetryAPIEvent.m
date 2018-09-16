@@ -23,7 +23,6 @@
 
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "NSOrderedSet+MSALExtensions.h"
 #import "NSURL+MSIDExtensions.h"
 
 @implementation MSALTelemetryAPIEvent

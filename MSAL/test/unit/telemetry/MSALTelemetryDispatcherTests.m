@@ -33,7 +33,7 @@
 #import "MSIDTelemetryHttpEvent.h"
 #import "MSIDTelemetryEventStrings.h"
 
-@interface MSALTestRequestContext : NSObject<MSALRequestContext>
+@interface MSALTestRequestContext : NSObject<MSIDRequestContext>
 {
     NSString *_requestId;
     NSUUID *_correlationId;
@@ -136,7 +136,7 @@
     
     NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
-    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+    id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // API event
@@ -214,7 +214,7 @@
     
     NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
-    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+    id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // HTTP event
@@ -249,7 +249,7 @@
     
     NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
-    id<MSALRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
+    id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
     
     // HTTP event
