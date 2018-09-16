@@ -44,7 +44,6 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
 typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> *accounts, NSError *error);
-typedef void (^MSALAccountCompletionBlock)(MSALAccount *account, NSError *error);
 
 #import <MSAL/MSALUIBehavior.h>
 #import <MSAL/MSALError.h>
