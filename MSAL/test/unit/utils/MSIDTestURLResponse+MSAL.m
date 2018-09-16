@@ -167,6 +167,41 @@
     return tokenResponse;
 }
 
++ (MSIDTestURLResponse *)errorRtResponseForScopes:(MSALScopes *)scopes
+                                        authority:(NSString *)authority
+                                         tenantId:(NSString *)tid
+                                          account:(MSALAccount *)account
+                                        errorCode:(NSString *)errorCode
+                                 errorDescription:(NSString *)errorDescription
+                                         subError:(NSString *)subError
+{
+    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
+    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
+                           requestHeaders:tokenReqHeaders
+                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                                             @"client_info" : @"1",
+                                             @"grant_type" : @"refresh_token" }
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:400
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"error": errorCode,
+                                             @"error_description": errorDescription,
+                                             @"suberror": subError
+                                             } ];
+
+    [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
+
+    return tokenResponse;
+}
+
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query

@@ -44,6 +44,14 @@
                                     tenantId:(NSString *)tid
                                         user:(MSALAccount *)user;
 
++ (MSIDTestURLResponse *)errorRtResponseForScopes:(MSALScopes *)scopes
+                                        authority:(NSString *)authority
+                                         tenantId:(NSString *)tid
+                                          account:(MSALAccount *)account
+                                        errorCode:(NSString *)errorCode
+                                 errorDescription:(NSString *)errorDescription
+                                         subError:(NSString *)subError;
+
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
