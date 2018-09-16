@@ -63,7 +63,7 @@
 
 #pragma mark - Accounts
 
-- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     [self.authority.msidAuthority resolveAndValidate:NO
                                    userPrincipalName:nil
@@ -77,14 +77,14 @@
                                          }
 
                                          NSError *accountsError = nil;
-                                         NSArray *accounts = [self accounts:&accountsError];
+                                         NSArray *accounts = [self allAccounts:&accountsError];
                                          completionBlock(accounts, accountsError);
                                      }];
 }
 
 #pragma mark - Accounts sync
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
     __auto_type host = self.authority.msidAuthority.environment;
@@ -118,7 +118,7 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
+    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
 
     for (MSALAccount *account in accounts)
     {
@@ -134,7 +134,7 @@
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
+    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
 
     for (MSALAccount *account in accounts)
     {

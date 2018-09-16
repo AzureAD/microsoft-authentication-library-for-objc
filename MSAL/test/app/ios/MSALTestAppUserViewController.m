@@ -78,7 +78,7 @@
         return;
     }
 
-    [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
 
         _accounts = accounts;
         [super refresh];

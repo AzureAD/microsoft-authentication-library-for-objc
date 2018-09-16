@@ -1187,9 +1187,9 @@
     XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
-#pragma mark - loadAccountsWithCompletionBlock
+#pragma mark - allAccountsFilteredByAuthority
 
-- (void)testLoadAccountsWithCompletionBlock_when2AccountExists_shouldReturnAccountsFilteredByAuthority
+- (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
@@ -1199,7 +1199,7 @@
     application.tokenCache = self.tokenCacheAccessor;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Process Metadata."];
-    [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error)
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error)
     {
         XCTAssertNil(error);
         XCTAssertNotNil(accounts);
@@ -1218,7 +1218,7 @@
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
-- (void)testLoadAccountsWithCompletionBlock_whenAccountWithAliasAuthorityExists_shouldReturnThatAccount
+- (void)testAllAccountsFilteredByAuthority_whenAccountWithAliasAuthorityExists_shouldReturnThatAccount
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.windows.net/common"];
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://example.com/common"];
@@ -1228,7 +1228,7 @@
     application.tokenCache = self.tokenCacheAccessor;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Process Metadata."];
-    [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error)
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(accounts);

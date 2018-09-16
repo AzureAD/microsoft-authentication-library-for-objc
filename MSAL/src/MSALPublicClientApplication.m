@@ -259,7 +259,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:nil
                                                                           clientId:self.clientId];
-    return [request accounts:error];
+    return [request allAccounts:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
@@ -280,13 +280,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return [request accountForUsername:username error:error];
 }
 
-- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                          authority:self.authority
                                                                           clientId:self.clientId];
 
-    [request loadAccountsWithCompletionBlock:completionBlock];
+    [request allAccountsFilteredByAuthority:completionBlock];
 }
 
 #pragma SafariViewController Support

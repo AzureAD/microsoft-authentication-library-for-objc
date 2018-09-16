@@ -35,9 +35,9 @@
                          authority:(MSALAuthority *)authority
                           clientId:(NSString *)clientId;
 
-- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock;
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error;

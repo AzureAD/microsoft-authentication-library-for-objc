@@ -223,8 +223,7 @@
  
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-// TODO: rename to allAccountsFilteredByAuthority?
-- (void)loadAccountsWithCompletionBlock:(MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock;
 
 #pragma SafariViewController Support
 

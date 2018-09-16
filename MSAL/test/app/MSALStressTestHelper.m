@@ -61,7 +61,7 @@ static BOOL s_runningTest = NO;
                                useMultipleUsers:(BOOL)multipleUsers
                                     application:(MSALPublicClientApplication *)application
 {
-    [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
 
         [self testAcquireTokenSilentWithExpiringTokenImpl:expireToken
                                          useMultipleUsers:multipleUsers
@@ -125,7 +125,7 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-                [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+                [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
 
                     if (![accounts count])
                     {

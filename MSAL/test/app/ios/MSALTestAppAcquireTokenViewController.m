@@ -764,7 +764,7 @@
         return;
     }
 
-    [application loadAccountsWithCompletionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
 
         NSUInteger existingUserCount = [accounts count];
         NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
