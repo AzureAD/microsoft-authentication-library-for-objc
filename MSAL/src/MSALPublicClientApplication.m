@@ -257,7 +257,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:nil
                                                                           clientId:self.clientId];
     return [request allAccounts:error];
 }
@@ -266,7 +265,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                    error:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:self.authority
                                                                           clientId:self.clientId];
     return [request accountForHomeAccountId:homeAccountId error:error];
 }
@@ -275,7 +273,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                               error:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:self.authority
                                                                           clientId:self.clientId];
     return [request accountForUsername:username error:error];
 }
@@ -283,10 +280,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                         authority:self.authority
                                                                           clientId:self.clientId];
 
-    [request allAccountsFilteredByAuthority:completionBlock];
+    [request allAccountsFilteredByAuthority:self.authority completionBlock:completionBlock];
 }
 
 #pragma SafariViewController Support

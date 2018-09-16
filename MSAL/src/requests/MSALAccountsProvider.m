@@ -36,7 +36,6 @@
 @interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
-@property (nullable, nonatomic) MSALAuthority *authority;
 @property (nullable, nonatomic) NSString *clientId;
 
 @end
@@ -46,7 +45,6 @@
 #pragma mark - Init
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                         authority:(MSALAuthority *)authority
                           clientId:(NSString *)clientId
 {
     self = [super init];
@@ -54,7 +52,6 @@
     if (self)
     {
         _tokenCache = tokenCache;
-        _authority = authority;
         _clientId = clientId;
     }
 
@@ -63,56 +60,31 @@
 
 #pragma mark - Accounts
 
-- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
+- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
+                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 {
-    [self.authority.msidAuthority resolveAndValidate:NO
-                                   userPrincipalName:nil
-                                             context:nil
-                                     completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
-
-                                         if (error)
-                                         {
-                                             completionBlock(nil, error);
-                                             return;
-                                         }
-
-                                         NSError *accountsError = nil;
-                                         NSArray *accounts = [self allAccounts:&accountsError];
-                                         completionBlock(accounts, accountsError);
-                                     }];
+    [authority.msidAuthority resolveAndValidate:NO
+                              userPrincipalName:nil
+                                        context:nil
+                                completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
+                                    
+                                    if (error)
+                                    {
+                                        completionBlock(nil, error);
+                                        return;
+                                    }
+                                    
+                                    NSError *accountsError = nil;
+                                    NSArray *accounts = [self allAccountsForEnvironment:authority.msidAuthority.environment error:&accountsError];
+                                    completionBlock(accounts, accountsError);
+                                }];
 }
 
 #pragma mark - Accounts sync
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.environment;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:host
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
-
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-
-    NSMutableSet *msalAccounts = [NSMutableSet new];
-
-    for (MSIDAccount *msidAccount in msidAccounts)
-    {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-
-        if (msalAccount)
-        {
-            [msalAccounts addObject:msalAccount];
-        }
-    }
-
-    return [msalAccounts allObjects];
+    return [self allAccountsForEnvironment:nil error:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
@@ -145,6 +117,39 @@
     }
 
     return nil;
+}
+
+#pragma mark - Private
+
+- (NSArray <MSALAccount *> *)allAccountsForEnvironment:(NSString *)environment
+                                                 error:(NSError * __autoreleasing *)error
+{
+    NSError *msidError = nil;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:environment
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+    
+    if (msidError)
+    {
+        *error = msidError;
+        return nil;
+    }
+    
+    NSMutableSet *msalAccounts = [NSMutableSet new];
+    
+    for (MSIDAccount *msidAccount in msidAccounts)
+    {
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        
+        if (msalAccount)
+        {
+            [msalAccounts addObject:msalAccount];
+        }
+    }
+    
+    return [msalAccounts allObjects];
 }
 
 @end

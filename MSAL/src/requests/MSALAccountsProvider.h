@@ -32,10 +32,10 @@
 @interface MSALAccountsProvider : NSObject
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                         authority:(MSALAuthority *)authority
                           clientId:(NSString *)clientId;
 
-- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
+                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
