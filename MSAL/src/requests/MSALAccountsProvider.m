@@ -90,14 +90,24 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
-
-    for (MSALAccount *account in accounts)
+    NSError *msidError = nil;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+    
+    if (msidError)
     {
-        if ([account.homeAccountId.identifier isEqualToString:homeAccountId])
-        {
-            return account;
-        }
+        *error = msidError;
+        return nil;
+    }
+    
+    for (MSIDAccount *msidAccount in msidAccounts)
+    {
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        
+        if ([msalAccount.homeAccountId.identifier isEqualToString:homeAccountId]) return msalAccount;
     }
 
     return nil;
@@ -106,16 +116,26 @@
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
-
-    for (MSALAccount *account in accounts)
+    NSError *msidError = nil;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+    
+    if (msidError)
     {
-        if ([account.username isEqualToString:username])
-        {
-            return account;
-        }
+        *error = msidError;
+        return nil;
     }
-
+    
+    for (MSIDAccount *msidAccount in msidAccounts)
+    {
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        
+        if ([msalAccount.username isEqualToString:username]) return msalAccount;
+    }
+    
     return nil;
 }
 
