@@ -186,7 +186,7 @@
 {
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
-                                                               scope:[[self requestScopes:nil] msalToString]
+                                                               scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[self.refreshToken refreshToken]
                                                              context:_parameters];
 }
