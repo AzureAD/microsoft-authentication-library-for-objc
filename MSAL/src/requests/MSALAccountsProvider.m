@@ -136,7 +136,7 @@
     {
         if ([msidAccount.username isEqualToString:username])
         {
-            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];;
+            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
         }
     }
     
