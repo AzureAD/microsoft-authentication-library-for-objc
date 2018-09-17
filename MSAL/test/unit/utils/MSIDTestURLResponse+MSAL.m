@@ -33,6 +33,7 @@
 #import "MSALAccountId.h"
 #import "MSIDConstants.h"
 #import "MSIDVersion.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @implementation MSIDTestURLResponse (MSAL)
 
@@ -145,7 +146,7 @@
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
                                              MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
                                              @"client_info" : @"1",
                                              @"grant_type" : @"refresh_token" }
@@ -210,7 +211,7 @@
     [MSIDTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
                                              @"client_info" : @"1",
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],
@@ -224,7 +225,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [clientInfo msidBase64UrlJson] } ];
+                                             @"client_info" : [clientInfo msidBase64UrlJson],
+                                             @"scope": [scopes msidToString]
+                                             } ];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     

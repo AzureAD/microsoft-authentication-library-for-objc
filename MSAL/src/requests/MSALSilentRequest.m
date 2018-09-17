@@ -56,6 +56,7 @@
 - (id)initWithParameters:(MSALRequestParameters *)parameters
             forceRefresh:(BOOL)forceRefresh
               tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+        expirationBuffer:(NSUInteger)expirationBuffer
                    error:(NSError *__autoreleasing  _Nullable *)error;
 {
     if (!(self = [super initWithParameters:parameters
@@ -67,7 +68,7 @@
     
     _forceRefresh = forceRefresh;
     _refreshToken = nil;
-    
+    _expirationBuffer = expirationBuffer;
     return self;
 }
 
@@ -108,7 +109,7 @@
             return;
         }
 
-        if (accessToken && !accessToken.isExpired)
+        if (accessToken && ![accessToken isExpiredWithExpiryBuffer:_expirationBuffer])
         {
             MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:_parameters.account.lookupAccountIdentifier
                                                            configuration:msidConfiguration
@@ -185,7 +186,7 @@
 {
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
-                                                               scope:[[self requestScopes:nil] msalToString]
+                                                               scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[self.refreshToken refreshToken]
                                                              context:_parameters];
 }

@@ -191,11 +191,11 @@ static MSALScopes *s_reservedScopes = nil;
     [authRequest sendWithBlock:^(id response, NSError *error) {
         if (error)
         {
-            if(completionBlock) completionBlock(nil, error);
+            if (completionBlock) completionBlock(nil, error);
             return;
         }
         
-        if(response && ![response isKindOfClass:[NSDictionary class]])
+        if (response && ![response isKindOfClass:[NSDictionary class]])
         {
             NSError *localError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
@@ -211,55 +211,110 @@ static MSALScopes *s_reservedScopes = nil;
             completionBlock(nil, localError);
             return;
         }
-        
-        localError = nil;
-        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
+
+        NSError *verificationError = nil;
+        if (![self verifyTokenResponse:tokenResponse error:&verificationError])
         {
-            completionBlock(nil, localError);
+            completionBlock(nil, verificationError);
             return;
         }
         
-        if (_parameters.account.homeAccountId.identifier != nil &&
-            ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
-        {
-            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
-            completionBlock(nil, userMismatchError);
-            return;
-        }
-        
-        MSIDConfiguration *configuration = _parameters.msidConfiguration;
-        
-        localError = nil;
-        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+        NSError *savingError = nil;
+        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:_parameters.msidConfiguration
                                                            response:tokenResponse
                                                             context:_parameters
-                                                              error:&localError];
+                                                              error:&savingError];
         
         if (!isSaved)
         {
-            completionBlock(nil, localError);
+            completionBlock(nil, savingError);
             return;
         }
-        
-        MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
-        MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
-        
-        if (!accessToken || !idToken)
+
+        NSError *scopesError = nil;
+        if (![self verifyScopesWithResponse:tokenResponse error:&scopesError])
         {
-            NSError *responseError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
-            completionBlock(nil, responseError);
+            completionBlock(nil, scopesError);
             return;
         }
 
         NSError *resultError = nil;
-        
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken
-                                                       idToken:idToken
-                                       isExtendedLifetimeToken:NO
-                                                         error:&resultError];
-        
+
+        MSALResult *result = [self resultFromTokenResponse:tokenResponse error:&resultError];
         completionBlock(result, resultError);
     }];
+}
+
+- (BOOL)verifyTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                      error:(NSError **)error
+{
+    NSError *msidError = nil;
+
+    if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&msidError])
+    {
+        if (error) *error = msidError;
+        return NO;
+    }
+
+    if (_parameters.account.homeAccountId.identifier != nil &&
+        ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
+    {
+        NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+        if (error) *error = userMismatchError;
+
+        return NO;
+    }
+
+    return YES;
+}
+
+- (MSALResult *)resultFromTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                                  error:(NSError **)error
+{
+    MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+    MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+
+    if (!accessToken || !idToken)
+    {
+        NSError *resultError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+
+        if (error) *error = resultError;
+    }
+
+    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO error:error];
+    return result;
+}
+
+- (BOOL)verifyScopesWithResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                           error:(NSError **)error
+{
+    /*
+        If server returns less scopes than developer requested,
+        we'd like to throw an error and specify which scopes were granted and which ones not
+     */
+
+    NSOrderedSet *grantedScopes = [tokenResponse.scope msidScopeSet];
+    MSIDConfiguration *configuration = _parameters.msidConfiguration;
+
+    if (![configuration.scopes isSubsetOfOrderedSet:grantedScopes])
+    {
+        if (error)
+        {
+            NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
+            additionalUserInfo[MSALGrantedScopesKey] = [grantedScopes array];
+
+            NSMutableOrderedSet *declinedScopeSet = [configuration.scopes mutableCopy];
+            [declinedScopeSet minusOrderedSet:grantedScopes];
+
+            additionalUserInfo[MSALDeclinedScopesKey] = [declinedScopeSet array];
+
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, nil, additionalUserInfo);
+        }
+
+        return NO;
+    }
+
+    return YES;
 }
 
 - (MSIDTokenRequest *)tokenRequest

@@ -119,7 +119,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -180,7 +179,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2 openid profile offline_access"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -221,7 +222,6 @@
 //    __block NSUUID *correlationId = [NSUUID new];
 //    
 //    MSALRequestParameters *parameters = [MSALRequestParameters new];
-//    parameters.urlSession = [MSIDTestURLSession createMockSession];
 //    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
 //    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
 //    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -259,7 +259,7 @@
 //    
 //    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
 //                           class:[MSALAuthority class]
-//                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
+//                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSIDRequestContext> context, MSALAuthorityCompletion completionBlock)
 //     
 //     {
 //         (void)obj;
@@ -338,7 +338,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -407,7 +406,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -458,7 +459,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -527,7 +527,9 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson]}];
+                                             @"client_info" : [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson],
+                                             @"scope": @"fakescope1 fakescope2"
+                                             }];
 
     [response->_requestHeaders removeObjectForKey:@"Content-Length"];
 
@@ -558,7 +560,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;

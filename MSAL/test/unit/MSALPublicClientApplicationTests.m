@@ -30,7 +30,6 @@
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
-#import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
 #import "MSIDClientInfo.h"
@@ -287,6 +286,70 @@
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
 
+- (void)testInitWithClientId_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+- (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
+    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+}
+
+
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupWithBundleId
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:nil
+                                                authority:authority
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:nil];
+    
+    XCTAssertEqualObjects(application.keychainGroup, [[NSBundle mainBundle] bundleIdentifier]);
+}
+
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
+{
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
+    
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                            keychainGroup:@"com.contoso.msalcache"
+                                                authority:authority
+                                              redirectUri:@"mycustom.redirect://bundle_id"
+                                                    error:nil];
+    
+    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+}
 #endif
 
 #pragma 

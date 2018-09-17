@@ -52,20 +52,20 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDClientInfo.h"
 #import "MSIDTestIdTokenUtil.h"
-#import "MSALIdToken.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
+#import "MSALTestIdTokenUtil.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSALTestUtil.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSALB2CAuthority.h"
-
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebviewFactory.h"
+#import "NSOrderedSet+MSIDExtensions.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -208,6 +208,7 @@
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
     json[@"access_token"] = @"i am an updated access token!";
+    json[@"scope"] = [expectedScopes msidToString];
     [tokenResponse setResponseJSON:json];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
 
@@ -780,6 +781,208 @@
      }];
     
     [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenInteractive_whenInsufficientScopesReturned_shouldReturnNilResultAndError
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
+    [MSIDTestURLSession addResponse:discoveryResponse];
+
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+
+    [MSIDTestURLSession addResponse:oidcResponse];
+    [self addTestTokenResponseWithResponseScopes:@"fakescope1 fakescope2 additional.scope additional.scope2"
+                               requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                                     MSID_OAUTH2_SCOPE : @"fakescope3 fakescope4 fakescope1 openid profile offline_access",
+                                                     @"client_info" : @"1",
+                                                     @"grant_type" : @"authorization_code",
+                                                     @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],
+                                                     MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
+                                                     MSID_OAUTH2_CODE : @"i am an auth code" }
+                                       authority:DEFAULT_TEST_AUTHORITY];
+
+    // Check if instance_aware parameter is in start url
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+
+         completionHandler(oauthResponse, nil);
+     }];
+
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
+    __block MSALResult *result = nil;
+
+    application.webviewType = MSALWebviewTypeWKWebView;
+    [application acquireTokenForScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
+                  extraScopesToConsent:nil
+                               account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:nil
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *rlt, NSError *error)
+     {
+         result = rlt;
+
+         XCTAssertNotNil(error);
+         XCTAssertNil(result);
+         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+         XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
+
+         NSArray *grantedScopesArr = @[@"fakescope1", @"fakescope2", @"additional.scope", @"additional.scope2"];
+         XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);
+
+         NSArray *declinedScopesArr = @[@"fakescope3", @"fakescope4"];
+         XCTAssertEqualObjects(error.userInfo[MSALDeclinedScopesKey], declinedScopesArr);
+
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenSilent_whenInsufficientScopesReturned_shouldReturnNilResultAndError
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    // Seed a cache object with a user and an AT
+    NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                          RT:@"i am a refresh token!"
+                                                                      scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read user.scope2"]]
+                                                                     idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                         uid:DEFAULT_TEST_UID
+                                                                        utid:DEFAULT_TEST_UTID
+                                                                    familyId:nil].jsonDictionary.mutableCopy;
+    MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
+
+    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+    [MSIDTestURLSession addResponse:discoveryResponse];
+
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
+                                      responseUrl:@"https://login.microsoftonline.com/1234-5678-90abcdefg"
+                                            query:nil];
+
+    // Mock token response
+    [MSIDTestURLSession addResponse:oidcResponse];
+    [self addTestTokenResponseWithResponseScopes:@"user.read fakescope1 additional.scope additional.scope2"
+                               requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                                     MSID_OAUTH2_SCOPE : @"user.read fakescope1 fakescope2 fakescope3 openid profile offline_access",
+                                                     @"client_info" : @"1",
+                                                     @"grant_type" : @"refresh_token",
+                                                     MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!" }
+                                       authority:@"https://login.microsoftonline.com/1234-5678-90abcdefg"];
+
+    // Call Acquire token silent call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilent"];
+
+    application.webviewType = MSALWebviewTypeWKWebView;
+    [application acquireTokenSilentForScopes:@[@"user.read", @"fakescope1", @"fakescope2", @"fakescope3"]
+                                     account:account
+                                   authority:[@"https://login.microsoftonline.com/common" msalAuthority]
+                             completionBlock:^(MSALResult *result, NSError *error) {
+
+                                 XCTAssertNotNil(error);
+                                 XCTAssertNil(result);
+                                 XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+                                 XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
+
+                                 NSArray *grantedScopesArr = @[@"user.read", @"fakescope1", @"additional.scope", @"additional.scope2"];
+                                 XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);
+
+                                 NSArray *declinedScopesArr = @[@"fakescope2", @"fakescope3"];
+                                 XCTAssertEqualObjects(error.userInfo[MSALDeclinedScopesKey], declinedScopesArr);
+
+                                 [expectation fulfill];
+
+    }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+#pragma mark - Helpers
+
+- (void)addTestTokenResponseWithResponseScopes:(NSString *)responseScopes
+                             requestParamsBody:(NSDictionary *)requestParamsBody
+                                     authority:(NSString *)authority
+{
+    NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]};
+
+    // Moke token request
+    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
+    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
+    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
+
+    NSString *url = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
+
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse requestURLString:url
+                           requestHeaders:reqHeaders
+                        requestParamsBody:requestParamsBody
+                        responseURLString:@"https://someresponseurl.com"
+                             responseCode:200
+                         httpHeaderFields:nil
+                         dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
+                                             @"expires_in" : @"600",
+                                             @"refresh_token" : @"i am a refresh token",
+                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token_expires_in" : @"1200",
+                                             @"client_info" : [clientInfo msidBase64UrlJson],
+                                             MSID_OAUTH2_SCOPE: responseScopes
+                                             }];
+
+    [MSIDTestURLSession addResponse:tokenResponse];
 }
 
 @end
