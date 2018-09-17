@@ -76,7 +76,7 @@
     request.accountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"no_account"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self closeResultView];
 
     // 4. Run silent with correct authority
@@ -111,7 +111,7 @@
     request.accountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"no_account"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self closeResultView];
 
     // 4. Run silent with correct authority
