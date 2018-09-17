@@ -655,7 +655,15 @@
             errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
         }
 
-        errorDictionary[@"user_info"] = error.userInfo;
+        if (error.userInfo[NSUnderlyingErrorKey])
+        {
+            errorDictionary[@"underlying_error"] = [error.userInfo[NSUnderlyingErrorKey] description];
+        }
+
+        NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
+        [userInfo removeObjectForKey:NSUnderlyingErrorKey];
+
+        errorDictionary[@"user_info"] = userInfo;
     }
     else if ([error.domain isEqualToString:MSIDErrorDomain])
     {

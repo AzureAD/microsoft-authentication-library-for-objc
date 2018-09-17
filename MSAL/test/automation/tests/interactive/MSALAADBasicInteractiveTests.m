@@ -108,7 +108,7 @@
     request.scopes = @"Calendars.Read";
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInvalidGrant"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self assertErrorSubcode:@"consent_required"];
     [self closeResultView];
 
@@ -126,7 +126,7 @@
 
     // 7. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInvalidGrant"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
