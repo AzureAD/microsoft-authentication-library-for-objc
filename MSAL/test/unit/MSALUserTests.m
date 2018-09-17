@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
-#import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"

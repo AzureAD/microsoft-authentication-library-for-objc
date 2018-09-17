@@ -52,7 +52,6 @@
 #import "MSALAccount+Internal.h"
 #import "MSIDClientInfo.h"
 #import "MSIDTestIdTokenUtil.h"
-#import "MSALIdToken.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"

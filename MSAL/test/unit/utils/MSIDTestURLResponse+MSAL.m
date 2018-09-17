@@ -146,7 +146,7 @@
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
                                              MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
                                              @"client_info" : @"1",
                                              @"grant_type" : @"refresh_token" }
@@ -211,7 +211,7 @@
     [MSIDTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
                         requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msalToString],
+                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
                                              @"client_info" : @"1",
                                              @"grant_type" : @"authorization_code",
                                              @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],

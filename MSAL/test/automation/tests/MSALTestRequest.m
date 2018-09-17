@@ -33,8 +33,8 @@ NSString *const MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI = @"x-msauth-msalau
 
     if (request)
     {
-        request.clientId = @"3c62ac97-29eb-4aed-a3c8-add0298508da";
-        request.redirectUri = @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth";
+        request.clientId = @"b6c69a37-df96-4db0-9088-2ab96e1d8215";
+        request.redirectUri = @"msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth";
         request.validateAuthority = YES;
         request.webViewType = MSALWebviewTypeDefault;
     }

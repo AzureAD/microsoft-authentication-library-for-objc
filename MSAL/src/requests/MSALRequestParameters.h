@@ -28,7 +28,6 @@
 #import <Foundation/Foundation.h>
 #import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
-#import "MSALRequestContext.h"
 #import "MSIDRequestContext.h"
 
 @class MSALAccount;
@@ -37,7 +36,7 @@
 @class MSIDOauth2Factory;
 @class WKWebView;
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+@interface MSALRequestParameters : NSObject <MSIDRequestContext>
 
 @property (nonatomic) MSIDAuthority *unvalidatedAuthority;
 @property (nonatomic) MSIDAuthority *cloudAuthority;
@@ -58,11 +57,10 @@
 
 @property WKWebView *customWebview;
 
-#pragma mark MSALRequestContext properties
+#pragma mark MSIDRequestContext properties
 @property NSUUID *correlationId;
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
 
 @property (readonly) MSIDConfiguration *msidConfiguration;
 @property MSIDOauth2Factory *msidOAuthFactory;

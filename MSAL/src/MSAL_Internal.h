@@ -82,4 +82,4 @@ typedef NSOrderedSet<NSString *> MSALScopes;
 #include "MSIDLogger+Internal.h"
 #include "MSALRequestParameters.h"
 #include "MSALError_Internal.h"
-#import  "MSALRequestContext.h"
+#import  "MSIDRequestContext.h"
