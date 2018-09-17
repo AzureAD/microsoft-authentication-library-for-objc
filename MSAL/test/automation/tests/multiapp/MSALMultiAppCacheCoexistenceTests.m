@@ -90,11 +90,11 @@ static BOOL msalAppInstalled = NO;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-- (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
+- (void)testCoexistenceWithOtherMSAL_startSigninInCurrentMSAL_withAADAccount_andUseDifferentAuthorities
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.authority = @"https://login.windows.net/organizations";
+    request.authority = @"https://login.microsoftonline.com/organizations";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
     request.scopes = @"user.read";
@@ -107,6 +107,7 @@ static BOOL msalAppInstalled = NO;
     // 2.Switch to other MSAL app and acquire token silently with common authority
     self.testApp = [self otherMSALApp];
     request.accountIdentifier = homeAccountId;
+    request.authority = @"https://login.windows.net/organizations";
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
@@ -134,7 +135,7 @@ static BOOL msalAppInstalled = NO;
     [self.testApp activate];
 
     request.accountIdentifier = homeAccountId;
-    request.authority = @"https://login.windows.net/organizations";
+    request.authority = @"https://login.microsoftonline.com/organizations";
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
