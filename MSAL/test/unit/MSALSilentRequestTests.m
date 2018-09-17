@@ -31,7 +31,6 @@
 #import "MSALTestSwizzle.h"
 #import "MSALSilentRequest.h"
 
-#import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 
 #import "MSIDTestURLSession+MSAL.h"
@@ -227,7 +226,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
@@ -334,7 +332,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
@@ -440,7 +437,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
@@ -549,7 +545,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
@@ -623,7 +618,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
@@ -735,7 +729,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
@@ -785,7 +778,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
@@ -898,7 +890,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
@@ -1012,7 +1003,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
@@ -1141,7 +1131,6 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
     MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];

@@ -63,7 +63,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
     }
 }
 
-extern void MSALLogError(id<MSALRequestContext> ctx, NSError *error, const char *function, int line)
+extern void MSALLogError(id<MSIDRequestContext> ctx, NSError *error, const char *function, int line)
 {
     NSString *codeString = nil;
 
@@ -95,7 +95,7 @@ extern void MSALLogError(id<MSALRequestContext> ctx, NSError *error, const char 
     MSID_LOG_ERROR_PII(ctx, @"%@", messagePII);
 }
 
-NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
+NSError *MSALCreateAndLogError(id<MSIDRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -107,7 +107,7 @@ NSError *MSALCreateAndLogError(id<MSALRequestContext> ctx, NSString *domain, NSI
     return error;
 }
 
-void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSALRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
+void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSIDRequestContext> ctx, NSString *domain, NSInteger code, NSString *oauthError, NSString *subError, NSError *underlyingError, NSDictionary *additionalUserInfo, const char *function, int line, NSString *format, ...)
 {
     va_list args;
     va_start(args, format);
