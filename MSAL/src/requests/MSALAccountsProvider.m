@@ -32,6 +32,8 @@
 #import "MSIDAuthority.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSIDAccount.h"
+#import "MSIDAccountIdentifier.h"
 
 @interface MSALAccountsProvider()
 
@@ -105,9 +107,10 @@
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-        
-        if ([msalAccount.homeAccountId.identifier isEqualToString:homeAccountId]) return msalAccount;
+        if ([msidAccount.accountIdentifier.homeAccountId isEqualToString:homeAccountId])
+        {
+            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        }
     }
 
     return nil;
@@ -131,9 +134,10 @@
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-        
-        if ([msalAccount.username isEqualToString:username]) return msalAccount;
+        if ([msidAccount.username isEqualToString:username])
+        {
+            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];;
+        }
     }
     
     return nil;
