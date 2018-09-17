@@ -156,6 +156,78 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenSilent_whenNoATForScopeInCache_andInvalidRT_shouldReturnInteractionRequired
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+
+    // Seed a cache object with a user and existing AT that does not match the scope we will ask for
+    MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                                 RT:@"i am a refresh token!"
+                                                                             scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                            idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                                uid:DEFAULT_TEST_UID
+                                                                               utid:DEFAULT_TEST_UTID
+                                                                           familyId:nil];
+
+    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                      clientInfo:clientInfo];
+
+    // Add AT & RT.
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                    error:&error];
+    XCTAssertNotNil(application);
+    application.tokenCache = self.tokenCache;
+
+    // Set up the network responses for OIDC discovery and the RT response
+    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
+
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client"];
+    [MSIDTestURLSession addResponses:@[tokenResponse]];
+
+    // Acquire a token silently for a scope that does not exist in cache
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    [application acquireTokenSilentForScopes:@[@"mail.read"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         // Ensure we get back the proper access token
+         XCTAssertNotNil(error);
+         XCTAssertNil(result);
+         XCTAssertEqual(error.code, MSALErrorInteractionRequired);
+         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"User interaction is required");
+         XCTAssertEqualObjects(error.userInfo[MSALOAuthErrorKey], @"invalid_grant");
+         XCTAssertEqualObjects(error.userInfo[MSALOAuthSubErrorKey], @"unauthorized_client");
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectations:@[expectation] timeout:5];
+}
+
 - (void)testAcquireTokenSilent_whenNoATForScopeInCache_shouldUseRTAndReturnNewAT
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -228,7 +300,7 @@
          [expectation fulfill];
      }];
 
-    [self waitForExpectations:@[expectation] timeout:111];
+    [self waitForExpectations:@[expectation] timeout:5];
 }
 
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedViaOverloadedAcquireToken_shouldSendClaims
