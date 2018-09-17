@@ -96,12 +96,12 @@
     }];
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
-
+    
     MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
     self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
     self.accountCredentialCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
-
+    
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     self.passedInController = (MSALPassedInWebController *) [sb instantiateViewControllerWithIdentifier:@"passed_in_controller"];
     [self.passedInController loadViewIfNeeded];
@@ -146,14 +146,14 @@
 - (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
 {
     BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
-
+    
     MSALAuthority *authority = nil;
-
+    
     if (parameters[MSAL_AUTHORITY_PARAM])
     {
         __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
         __auto_type authorityFactory = [MSALAuthorityFactory new];
-
+        
         authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
     
@@ -188,7 +188,7 @@
     if (accountIdentifier)
     {
         account = [application accountForHomeAccountId:accountIdentifier error:&error];
-
+        
         if (error)
         {
             [self displayResultJson:[self createJsonStringFromError:error]
@@ -199,7 +199,7 @@
     else if (parameters[MSAL_LEGACY_USER_PARAM])
     {
         account = [application accountForUsername:parameters[MSAL_LEGACY_USER_PARAM] error:&error];
-
+        
         if (error)
         {
             [self displayResultJson:[self createJsonStringFromError:error]
@@ -251,9 +251,9 @@
         NSDictionary *extraQueryParameters = (NSDictionary *)parameters[MSAL_EXTRA_QP_PARAM];
         NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
         NSString *claims = parameters[MSAL_CLAIMS_PARAM];
-
+        
         MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
-
+        
         if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"force"])
         {
             uiBehavior = MSALForceLogin;
@@ -262,7 +262,7 @@
         {
             uiBehavior = MSALForceConsent;
         }
-
+        
         NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
         if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
         {
@@ -282,7 +282,7 @@
             application.customWebview = self.passedInController.webView;
             [self.presentedViewController presentViewController:self.passedInController animated:NO completion:nil];
         }
-
+        
         if (account)
         {
             [application acquireTokenForScopes:[scopes array]
@@ -301,7 +301,7 @@
         else
         {
             NSString *loginHint = parameters[MSAL_LOGIN_HINT_PARAM];
-
+            
             [application acquireTokenForScopes:[scopes array]
                           extraScopesToConsent:extraScopes
                                      loginHint:loginHint
@@ -310,9 +310,9 @@
                                      authority:nil
                                  correlationId:correlationId
                                completionBlock:^(MSALResult *result, NSError *error) {
-
+                                   
                                    [self handleMSALResult:result error:error];
-            }];
+                               }];
         }
     };
     
@@ -337,9 +337,9 @@
         {
             return;
         }
-
+        
         MSALAccount *account = [self accountWithParameters:parameters application:application];
-
+        
         if (!account)
         {
             // Acquiretoken silent requires having a user
@@ -347,7 +347,7 @@
                                      completion:^{
                                          [self displayResultJson:@"{\"error_code\":\"no_account\"}" logs:_resultLogs];
                                      }];
-
+            
             return;
         }
 
@@ -387,28 +387,28 @@
         {
             return;
         }
-
+        
         __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
-
+        
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil
                                                                                   homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
-
+        
         MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority.msidAuthority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];
-
+        
         __auto_type accessToken = [self.defaultAccessor getAccessTokenForAccount:account configuration:configuration context:nil error:nil];
         accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-
+        
         BOOL result = [self.accountCredentialCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
-
+        
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_EXPIRED_ACCESSTOKEN_COUNT_PARAM, accessToken && result ? @"1" : @"0"];
         [self displayOperationResultString:resultString];
     };
-
+    
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
@@ -426,28 +426,28 @@
         __auto_type authorityFactory = [MSIDAuthorityFactory new];
         __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
         __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
-
+        
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
-
+        
         MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                             redirectUri:nil
                                                                                clientId:parameters[MSAL_CLIENT_ID_PARAM]
                                                                                  target:parameters[MSAL_SCOPES_PARAM]];
-
+        
         __auto_type refreshToken = [self.defaultAccessor getRefreshTokenWithAccount:account
                                                                            familyId:nil
                                                                       configuration:configuration
                                                                             context:nil
                                                                               error:nil];
-
+        
         refreshToken.refreshToken = @"bad-refresh-token";
-
+        
         BOOL result = [self.accountCredentialCache saveCredential:refreshToken.tokenCacheItem context:nil error:nil];
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_INVALIDATED_REFRESH_TOKEN_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
-
+        
         [self displayOperationResultString:resultString];
     };
-
+    
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
@@ -458,7 +458,7 @@
                                 (__bridge id)kSecClassCertificate,
                                 (__bridge id)kSecClassKey,
                                 (__bridge id)kSecClassIdentity];
-
+    
     for (NSString *itemClass in secItemClasses)
     {
         NSDictionary *clearQuery = @{(id)kSecClass : (id)itemClass};
@@ -476,7 +476,7 @@
         [cookieStore deleteCookie:cookie];
         count++;
     }
-
+    
     // Clear WKWebView cookies
     NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
     [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
@@ -484,7 +484,7 @@
                                            completionHandler:^{
                                                NSLog(@"Completed!");
                                            }];
-
+    
     NSString *resultJson = [NSString stringWithFormat:@"{\"cleared_items_count\":\"%lu\"}", (unsigned long)count];
     [self displayResultJson:resultJson logs:_resultLogs];
 }
@@ -492,15 +492,15 @@
 - (IBAction)openURLInSafari:(id)sender
 {
     void (^completionBlock)(NSDictionary<NSString *, NSString *> * parameters) = ^void(NSDictionary<NSString *, NSString *> * parameters) {
-
+        
         [self dismissViewControllerAnimated:NO
                                  completion:^{
                                      [self displayResultJson:@"{\"success\":\"1\"}" logs:_resultLogs];
                                  }];
-
+        
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:parameters[@"safari_url"]]];
     };
-
+    
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
@@ -550,33 +550,33 @@
         {
             return;
         }
-
+        
         MSALPublicClientApplication *application = [self applicationWithParameters:parameters];
-
+        
         if (!application)
         {
             NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, MSAL_AUTOMATION_FAILURE_VALUE];
             [self displayOperationResultString:resultString];
             return;
         }
-
+        
         NSError *error = nil;
         MSALAccount *account = [application accountForHomeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM] error:&error];
-
+        
         if (error)
         {
             NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, MSAL_AUTOMATION_FAILURE_VALUE];
             [self displayOperationResultString:resultString];
             return;
         }
-
+        
         BOOL result = [application removeAccount:account error:&error];
-
+        
         NSString *resultString = [NSString stringWithFormat:@"{\"%@\":\"%@\"}", MSAL_SIGNOUT_RESULT_PARAM, result ? MSAL_AUTOMATION_SUCCESS_VALUE : MSAL_AUTOMATION_FAILURE_VALUE];
-
+        
         [self displayOperationResultString:resultString];
     };
-
+    
     [self performSegueWithIdentifier:SHOW_REQUEST_SEGUE sender:@{COMPLETION_BLOCK_PARAM : completionBlock}];
 }
 
@@ -599,7 +599,7 @@
         }
         
         NSError *error = nil;
-        NSArray *users = [application accounts:nil];
+        NSArray *accounts = [application allAccounts:nil];
         
         if (error)
         {
@@ -608,16 +608,16 @@
         }
         
         NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
-        [resultDictionary setObject:@([users count]) forKey:MSAL_USER_COUNT_PARAM];
+        [resultDictionary setObject:@([accounts count]) forKey:MSAL_ACCOUNT_COUNT_PARAM];
         
         NSMutableArray *items = [NSMutableArray array];
         
-        for (MSALAccount *user in users)
+        for (MSALAccount *account in accounts)
         {
-            [items addObject:[user itemAsDictionary]];
+            [items addObject:[account itemAsDictionary]];
         }
         
-        [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
+        [resultDictionary setObject:items forKey:MSAL_ACCOUNTS_PARAM];
         
         [self displayOperationResultString:[self createJsonStringFromDictionary:resultDictionary]];
     };
@@ -641,15 +641,15 @@
 - (NSString *)createJsonStringFromError:(NSError *)error
 {
     NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-
+    
     NSMutableDictionary *errorDictionary = [NSMutableDictionary new];
     errorDictionary[@"error_title"] = errorString;
-
+    
     if ([error.domain isEqualToString:MSALErrorDomain])
     {
         errorDictionary[@"error_code"] = MSALStringForErrorCode(error.code);
         errorDictionary[@"error_description"] = error.userInfo[MSALErrorDescriptionKey];
-
+        
         if (error.userInfo[MSALOAuthSubErrorKey])
         {
             errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
@@ -669,7 +669,7 @@
     {
         @throw @"MSID errors should never be seen in MSAL";
     }
-
+    
     return [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:errorDictionary options:0 error:nil] encoding:NSUTF8StringEncoding];
 }
 

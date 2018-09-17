@@ -64,6 +64,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebviewSession.h"
+#import "MSALAccountsProvider.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -242,73 +244,43 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
     
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     _expirationBuffer = 300;  //in seconds, ensures catching of clock differences between the server and the device
     
     return self;
 }
 
+#pragma mark - Accounts
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.environment;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:host
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
-
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-
-    NSMutableSet *msalAccounts = [NSMutableSet new];
-
-    for (MSIDAccount *msidAccount in msidAccounts)
-    {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-
-        if (msalAccount)
-        {
-            [msalAccounts addObject:msalAccount];
-        }
-    }
-
-    return [msalAccounts allObjects];
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                          clientId:self.clientId];
+    return [request allAccounts:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
-
-    for (MSALAccount *account in accounts)
-    {
-        if ([account.homeAccountId.identifier isEqualToString:homeAccountId])
-        {
-            return account;
-        }
-    }
-
-    return nil;
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                          clientId:self.clientId];
+    return [request accountForHomeAccountId:homeAccountId error:error];
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self accounts:error];
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                          clientId:self.clientId];
+    return [request accountForUsername:username error:error];
+}
 
-    for (MSALAccount *account in accounts)
-    {
-        if ([account.username isEqualToString:username])
-        {
-            return account;
-        }
-    }
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
+{
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                          clientId:self.clientId];
 
-    return nil;
+    [request allAccountsFilteredByAuthority:self.authority completionBlock:completionBlock];
 }
 
 #pragma SafariViewController Support

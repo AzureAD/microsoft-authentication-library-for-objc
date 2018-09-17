@@ -57,7 +57,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
     NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
-
+    
     for (NSString *host in trustedHosts)
     {
         __auto_type tenants = @[@"common", @"organizations", @"consumers"];
@@ -72,11 +72,11 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     s_authorities = authorities;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
-
+    
     __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
     __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
     __auto_type profilePolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy";
-
+    
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
 }
@@ -127,7 +127,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
         return nil;
     }
-
+    
     MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
     return account;
 }

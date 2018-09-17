@@ -191,34 +191,39 @@
 #endif
 
 /*!
-    Returns an array of accounts visible to this application
- 
-    @param  error   The error that occured trying to retrieve accounts, if any, if you're
+ Returns an array of all accounts visible to this application.
+
+ @param  error      The error that occured trying to retrieve accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 
-- (NSArray <MSALAccount *> *)accounts:(NSError * __autoreleasing *)error;
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns account for for the given home identifier (received from an account object returned
-    in a previous acquireToken call)
+ Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
 
-    @param  error   The error that occured trying to get the accounts, if any, if you're
+ @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error;
 
 /*!
-    Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
+ Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
 
-    @param  username    The displayable value in UserPrincipleName(UPN) format
-    @param  error       The error that occured trying to get the accounts, if any, if you're
-                        not interested in the specific error pass in nil.
+ @param  username    The displayable value in UserPrincipleName(UPN) format
+ @param  error       The error that occured trying to get the accounts, if any, if you're
+                     not interested in the specific error pass in nil.
  */
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error;
 
+/*!
+    Returns an array of accounts visible to this application and filtered by authority.
+ 
+    @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+ */
+- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock;
 
 #pragma SafariViewController Support
 
