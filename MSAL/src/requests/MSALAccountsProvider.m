@@ -32,6 +32,8 @@
 #import "MSIDAuthority.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSIDAccount.h"
+#import "MSIDAccountIdentifier.h"
 
 @interface MSALAccountsProvider()
 
@@ -90,13 +92,24 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
-
-    for (MSALAccount *account in accounts)
+    NSError *msidError = nil;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+    
+    if (msidError)
     {
-        if ([account.homeAccountId.identifier isEqualToString:homeAccountId])
+        *error = msidError;
+        return nil;
+    }
+    
+    for (MSIDAccount *msidAccount in msidAccounts)
+    {
+        if ([msidAccount.accountIdentifier.homeAccountId isEqualToString:homeAccountId])
         {
-            return account;
+            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
         }
     }
 
@@ -106,16 +119,27 @@
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSArray<MSALAccount *> *accounts = [self allAccounts:error];
-
-    for (MSALAccount *account in accounts)
+    NSError *msidError = nil;
+    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
+                                                                 clientId:self.clientId
+                                                                 familyId:nil
+                                                                  context:nil
+                                                                    error:&msidError];
+    
+    if (msidError)
     {
-        if ([account.username isEqualToString:username])
+        *error = msidError;
+        return nil;
+    }
+    
+    for (MSIDAccount *msidAccount in msidAccounts)
+    {
+        if ([msidAccount.username isEqualToString:username])
         {
-            return account;
+            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
         }
     }
-
+    
     return nil;
 }
 

@@ -251,7 +251,7 @@
 {
     return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                                  clientId:_parameters.clientId
-                                                                    scope:[[self requestScopes:nil] msalToString]
+                                                                    scope:[[self requestScopes:nil] msidToString]
                                                               redirectUri:_parameters.redirectUri
                                                                      code:_code
                                                              codeVerifier:_webviewConfig.pkce.codeVerifier

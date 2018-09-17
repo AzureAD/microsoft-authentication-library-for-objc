@@ -191,7 +191,21 @@ static MSALScopes *s_reservedScopes = nil;
     [authRequest sendWithBlock:^(id response, NSError *error) {
         if (error)
         {
-            if (completionBlock) completionBlock(nil, error);
+            if (!completionBlock)
+            {
+                return;
+            }
+
+            if ([self isErrorRecoverableByUserInteraction:error])
+            {
+                NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
+
+                completionBlock(nil, interactionError);
+
+                return;
+            }
+
+            completionBlock(nil, error);
             return;
         }
         
@@ -252,7 +266,18 @@ static MSALScopes *s_reservedScopes = nil;
 
     if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&msidError])
     {
-        if (error) *error = msidError;
+        if (!error)
+        {
+            return NO;
+        }
+
+        if ([self isErrorRecoverableByUserInteraction:msidError])
+        {
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", msidError.userInfo[MSALOAuthErrorKey], msidError.userInfo[MSALOAuthSubErrorKey], msidError, nil, nil);
+            return NO;
+        }
+
+        *error = msidError;
         return NO;
     }
 
@@ -266,6 +291,21 @@ static MSALScopes *s_reservedScopes = nil;
     }
 
     return YES;
+}
+
+/*
+    Particular Oauth errors might be recoverable by interactive login.
+    For those errors we'll return MSALErrorInteractionRequired error.
+ */
+- (BOOL)isErrorRecoverableByUserInteraction:(NSError *)msidError
+{
+    if (msidError.code == MSALErrorInvalidGrant
+        || msidError.code == MSALErrorInvalidRequest)
+    {
+        return YES;
+    }
+
+    return NO;
 }
 
 - (MSALResult *)resultFromTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse

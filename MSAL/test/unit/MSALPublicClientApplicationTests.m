@@ -30,7 +30,6 @@
 #import "MSALBaseRequest+TestExtensions.h"
 #import "MSALTestSwizzle.h"
 #import "MSALTestBundle.h"
-#import "MSALIdToken.h"
 #import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
 #import "MSIDClientInfo.h"

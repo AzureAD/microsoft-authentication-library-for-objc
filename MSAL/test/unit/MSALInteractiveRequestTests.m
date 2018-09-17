@@ -119,7 +119,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -223,7 +222,6 @@
 //    __block NSUUID *correlationId = [NSUUID new];
 //    
 //    MSALRequestParameters *parameters = [MSALRequestParameters new];
-//    parameters.urlSession = [MSIDTestURLSession createMockSession];
 //    parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
 //    parameters.unvalidatedAuthority = [NSURL URLWithString:@"https://login.microsoftonline.com/common"];
 //    parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -261,7 +259,7 @@
 //    
 //    [MSALTestSwizzle classMethod:@selector(resolveEndpointsForAuthority:userPrincipalName:validate:context:completionBlock:)
 //                           class:[MSALAuthority class]
-//                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSALRequestContext> context, MSALAuthorityCompletion completionBlock)
+//                           block:(id)^(id obj, NSURL *unvalidatedAuthority, NSString *userPrincipalName, BOOL validate, id<MSIDRequestContext> context, MSALAuthorityCompletion completionBlock)
 //     
 //     {
 //         (void)obj;
@@ -340,7 +338,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -462,7 +459,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
@@ -564,7 +560,6 @@
     __block NSUUID *correlationId = [NSUUID new];
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
-    parameters.urlSession = [MSIDTestURLSession createMockSession];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
     parameters.unvalidatedAuthority = [@"https://login.microsoftonline.com/common" authority];
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;

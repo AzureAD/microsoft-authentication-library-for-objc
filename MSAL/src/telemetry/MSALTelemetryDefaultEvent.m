@@ -26,7 +26,7 @@
 @implementation MSALTelemetryDefaultEvent
 
 - (id)initWithName:(NSString *)eventName
-           context:(id<MSALRequestContext>)context
+           context:(id<MSIDRequestContext>)context
 {
     if (!(self = [super initWithName:eventName context:context]))
     {

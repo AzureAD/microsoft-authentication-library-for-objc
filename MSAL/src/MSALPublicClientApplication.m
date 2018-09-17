@@ -32,7 +32,6 @@
 #import "MSALSilentRequest.h"
 #import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
-#import "MSALURLSession.h"
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
@@ -46,7 +45,6 @@
 #import "NSURL+MSIDExtensions.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDRefreshToken.h"
-#import "MSALIdToken.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
@@ -520,7 +518,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 + (void)logOperation:(NSString *)operation
               result:(MSALResult *)result
                error:(NSError *)error
-             context:(id<MSALRequestContext>)ctx
+             context:(id<MSIDRequestContext>)ctx
 {
     if (error)
     {
@@ -594,7 +592,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.unvalidatedAuthority = authority.msidAuthority ?: _authority.msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.urlSession = [MSALURLSession createMSALSession:params];
     params.webviewType = _webviewType;
     params.customWebview = _customWebview;
 
@@ -608,13 +605,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                  error:&error];
     if (!request)
     {
-        [params.urlSession invalidateAndCancel];
         block(nil, error);
         return;
     }
     
     [request run:^(MSALResult *result, NSError *error) {
-        [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
 }
@@ -676,7 +671,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.unvalidatedAuthority = msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
-    params.urlSession = [MSALURLSession createMSALSession:params];
 
     NSError *error = nil;
     MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
@@ -687,13 +681,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     if (!request)
     {
-        [params.urlSession invalidateAndCancel];
         block(nil, error);
         return;
     }
     
     [request run:^(MSALResult *result, NSError *error) {
-        [params.urlSession invalidateAndCancel];
         block(result, error);
     }];
 }
