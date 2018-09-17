@@ -109,6 +109,14 @@
     request.testAccount = self.primaryAccount;
 
     [self runSharedSilentAADLoginWithTestRequest:request];
+
+    // 5. Make sure there're 2 accounts in cache
+    NSDictionary *configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    NSDictionary *result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 2);
+    [self closeResultView];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
