@@ -68,6 +68,7 @@
 		963377C0211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 963377BD211E14C600943EE0 /* MSALWebviewType_Internal.h */; };
 		963377C1211E14C600943EE0 /* MSALWebviewType.m in Sources */ = {isa = PBXBuildFile; fileRef = 963377BE211E14C600943EE0 /* MSALWebviewType.m */; };
 		963377C2211E14C600943EE0 /* MSALWebviewType.m in Sources */ = {isa = PBXBuildFile; fileRef = 963377BE211E14C600943EE0 /* MSALWebviewType.m */; };
+		963C89AB214BA1760051AFEE /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 963D08D41E78D06E0025C726 /* MSALAutoSettings.m */; };
 		965B86141E5ED5F1004AEB59 /* MSALSilentRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */; };
 		965B86161E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
@@ -513,6 +514,7 @@
 		962E37EC1E72139100DE71FE /* MSALAutoMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAutoMainViewController.m; sourceTree = "<group>"; };
 		963377BD211E14C600943EE0 /* MSALWebviewType_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALWebviewType_Internal.h; sourceTree = "<group>"; };
 		963377BE211E14C600943EE0 /* MSALWebviewType.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALWebviewType.m; sourceTree = "<group>"; };
+		963C89A6214BA1760051AFEE /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/AuthenticationServices.framework; sourceTree = DEVELOPER_DIR; };
 		963D08D31E78D06E0025C726 /* MSALAutoSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAutoSettings.h; sourceTree = "<group>"; };
 		963D08D41E78D06E0025C726 /* MSALAutoSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAutoSettings.m; sourceTree = "<group>"; };
 		965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALSilentRequest.h; sourceTree = "<group>"; };
@@ -782,6 +784,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				963C89AB214BA1760051AFEE /* AuthenticationServices.framework in Frameworks */,
 				96902DF320E1577500200E6F /* WebKit.framework in Frameworks */,
 				B2C17B071FC8DAC50070A514 /* libIdentityCore.a in Frameworks */,
 				D6A206341FC5109B00755A51 /* SafariServices.framework in Frameworks */,
@@ -1363,6 +1366,7 @@
 		D6A2062E1FC5106F00755A51 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				963C89A6214BA1760051AFEE /* AuthenticationServices.framework */,
 				B29E2AC421238E0000B170ED /* SafariServices.framework */,
 				B2BB739B2112C7F9000EA4C5 /* Security.framework */,
 				96902DFC20E1590200200E6F /* SecurityInterface.framework */,
