@@ -1235,7 +1235,7 @@
          
          MSALAccount *account = accounts[0];
          XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
-         XCTAssertEqualObjects(account.environment, @"login.windows.net");
+         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
          XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
          XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
          XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");

@@ -599,7 +599,7 @@
         }
         
         NSError *error = nil;
-        NSArray *users = [application allAccounts:nil];
+        NSArray *accounts = [application allAccounts:nil];
         
         if (error)
         {
@@ -608,16 +608,16 @@
         }
         
         NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
-        [resultDictionary setObject:@([users count]) forKey:MSAL_USER_COUNT_PARAM];
+        [resultDictionary setObject:@([accounts count]) forKey:MSAL_ACCOUNT_COUNT_PARAM];
         
         NSMutableArray *items = [NSMutableArray array];
         
-        for (MSALAccount *user in users)
+        for (MSALAccount *account in accounts)
         {
-            [items addObject:[user itemAsDictionary]];
+            [items addObject:[account itemAsDictionary]];
         }
         
-        [resultDictionary setObject:items forKey:MSAL_USERS_PARAM];
+        [resultDictionary setObject:items forKey:MSAL_ACCOUNTS_PARAM];
         
         [self displayOperationResultString:[self createJsonStringFromDictionary:resultDictionary]];
     };

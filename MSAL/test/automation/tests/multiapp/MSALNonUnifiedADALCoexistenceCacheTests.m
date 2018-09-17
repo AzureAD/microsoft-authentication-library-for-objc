@@ -74,15 +74,39 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
 
-    request.authority = @"https://login.windows.net/organizations";
+    request.authority = @"https://login.microsoftonline.com/organizations";
     request.additionalParameters = @{@"user_legacy_identifier": self.primaryAccount.account};
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
     request.scopes = @"https://graph.windows.net/.default";
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
 
+    // 3. Check accounts are correctly returned
+    NSDictionary *configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    NSDictionary *result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    NSArray *accounts = result[@"accounts"];
+    NSDictionary *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    [self closeResultView];
+
+    // 4. Run silent tests
     [self runSharedSilentAADLoginWithTestRequest:request];
 
-    // 3. Switch back to ADAL and make sure ADAL still works
+    // 5. Check accounts are correctly updated
+    configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    accounts = result[@"accounts"];
+    firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    XCTAssertEqualObjects(firstAccount[@"home_account_id"], self.primaryAccount.homeAccountId);
+    [self closeResultView];
+
+    // 6. Switch back to ADAL and make sure ADAL still works
     request.authority = @"https://login.windows.net/common";
     request.additionalParameters = @{@"user_identifier": self.primaryAccount.account};
     config = [self configWithTestRequest:request];
@@ -100,7 +124,42 @@ static BOOL adalAppInstalled = NO;
     [self closeResultView];
 }
 
-// TODO: authority migration
+- (void)testCoexistenceWithNonUnifiedADAL_startSigninInOlderADAL_andDoAuthorityMigration_andDoTokenRefresh
+{
+    // 1. Install previous ADAL version and signin
+    self.testApp = [self olderADALApp];
+
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.validateAuthority = YES;
+    request.additionalParameters = @{@"prompt_behavior": @"always"};
+    request.authority = @"https://login.windows.net/common";
+
+    NSDictionary *config = [self configWithTestRequest:request];
+
+    [self acquireToken:config];
+    [self aadEnterEmail];
+    [self aadEnterPassword];
+
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+
+    // 2. Switch to MSAL and acquire token silently with organizations authority
+    self.testApp = [XCUIApplication new];
+    [self.testApp activate];
+
+    // 2. Switch to MSAL and acquire token silently with organizations authority
+    self.testApp = [XCUIApplication new];
+    [self.testApp activate];
+
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.additionalParameters = @{@"user_legacy_identifier": self.primaryAccount.account};
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
+    request.scopes = @"https://graph.windows.net/.default";
+    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
 // TODO: FOCI for MSAL
 
 - (XCUIApplication *)olderADALApp
