@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,23 +17,37 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
+#import "MSALB2CAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDB2CAuthority.h"
 
-#import "NSMutableDictionary+MSALExtension.h"
+@implementation MSALB2CAuthority
 
-@implementation NSMutableDictionary (MSALExtension)
-
-- (void)msalSetObjectIfNotNil:(id)dictObject forKey:(id<NSCopying>)dictKey
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
 {
-    if (dictObject)
+    self = [super initWithURL:url context:context error:error];
+    if (self)
     {
-        [self setObject:dictObject forKey:dictKey];
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
     }
+
+    return self;
+}
+
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
 }
 
 @end

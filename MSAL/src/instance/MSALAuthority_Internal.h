@@ -25,27 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "NSOrderedSet+MSALExtensions.h"
+@interface MSALAuthority()
 
-@implementation NSOrderedSet (MSALExtensions)
+@property (nullable, nonatomic) MSIDAuthority *msidAuthority;
 
-- (NSString *)msalToString
-{
-    NSInteger cSet = self.count;
-    if (cSet == 0)
-    {
-        return @"";
-    }
-    
-    NSMutableString *queryString = [[self objectAtIndex:0] mutableCopy];
-    
-    for (NSInteger i = 1; i < cSet; i++)
-    {
-        [queryString appendString:@" "];
-        [queryString appendString:[self objectAtIndex:i]];
-    }
-    
-    return queryString;
-}
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

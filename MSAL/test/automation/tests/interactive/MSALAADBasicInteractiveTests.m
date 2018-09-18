@@ -108,7 +108,7 @@
     request.scopes = @"Calendars.Read";
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInvalidGrant"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self assertErrorSubcode:@"consent_required"];
     [self closeResultView];
 
@@ -126,7 +126,50 @@
 
     // 7. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInvalidGrant"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+}
+
+- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andDifferentAuthorityAliases
+{
+    NSArray *expectedResultScopes = @[@"user.read",
+                                      @"tasks.read",
+                                      @"openid",
+                                      @"profile"];
+
+    NSString *cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
+
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = expectedResultScopes;
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+
+    // 1. Run interactive
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+
+    XCTAssertNotNil(homeAccountId);
+
+    [self.testApp terminate];
+    [self.testApp launch];
+
+    NSDictionary *configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    NSDictionary *result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    NSArray *accounts = result[@"accounts"];
+    NSDictionary *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"home_account_id"], homeAccountId);
+    [self closeResultView];
+
+    // Run silent with a different authority
+    request.cacheAuthority = cacheAuthority;
+    request.accountIdentifier = homeAccountId;
+    request.authority = @"https://login.windows.net/common";
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.windows.net/", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
@@ -174,6 +217,7 @@
     request.scopes = @"https://graph.microsoft.com/.default";
     request.authority = @"https://login.microsoftonline.com/common";
     request.uiBehavior = @"force";
+    request.loginHint = self.primaryAccount.username;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
@@ -182,7 +226,6 @@
 
     [self acceptAuthSessionDialog];
 
-    [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
     [self assertErrorCode:@"MSALErrorInvalidRequest"];
@@ -230,6 +273,60 @@
 
     // 2. Run silent
     request.accountIdentifier = homeAccountId;
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
+- (void)testInteractiveAADLogin_withNonConvergedApp_andInsufficientScopes_andForceLogin
+{
+    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    request.scopes = @"user.read tasks.read address";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.account;
+
+    // Run interactive
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+    [self acceptAuthSessionDialog];
+    [self aadEnterPassword];
+    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
+
+    // Verify error and granted/declined scopes contents
+    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    NSDictionary *resultContent = [self resultDictionary];
+    NSArray *declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
+    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+
+    NSArray *grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
+    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
+    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+
+    [self closeResultView];
+
+    // Now run silent with insufficient scopes
+    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.accountIdentifier = self.primaryAccount.homeAccountId;
+    config = [self configWithTestRequest:request];
+    [self acquireTokenSilent:config];
+
+    // Verify error and granted/declined scopes contents
+    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    resultContent = [self resultDictionary];
+    declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
+    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+
+    grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
+    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
+    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+
+    [self closeResultView];
+
+    // Now run silent with correct scopes
+    request.cacheAuthority = request.authority;
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = @[@"user.read", @"tasks.read", @"openid", @"profile"];
+
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 

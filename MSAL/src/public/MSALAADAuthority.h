@@ -25,42 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALURLSessionDelegate.h"
-#import "MSIDLogger+Internal.h"
-#import "NSString+MSIDExtensions.h"
+#import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
-#import "NSURL+MSIDExtensions.h"
 
-@implementation MSALURLSessionDelegate
+@interface MSALAADAuthority : MSALAuthority
 
-- (id)initWithContext:(id<MSALRequestContext>)context
-{
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    
-    _context = context;
-    
-    return self;
-}
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-- (void)URLSession:(NSURLSession *)session
-              task:(NSURLSessionTask *)task
-willPerformHTTPRedirection:(NSHTTPURLResponse *)response
-        newRequest:(NSURLRequest *)request
- completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler
-{
-    (void)session;
-    (void)response;
-    (void)task;
-    
-    MSID_LOG_INFO(self.context, @"Redirecting to %@", [MSALAuthority isKnownHost:request.URL] ?
-             [NSString stringWithFormat:@"%@://%@", request.URL.scheme, request.URL.host]
-             : @"unknown host");
-    MSID_LOG_INFO_PII(self.context, @"Redirecting to %@", request.URL.absoluteString);
-    
-    completionHandler(request);
-}
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                           rawTenant:(nullable NSString *)rawTenant
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

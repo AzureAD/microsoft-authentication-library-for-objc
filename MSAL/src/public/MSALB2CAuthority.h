@@ -25,10 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSIDRequestContext.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@protocol MSALRequestContext <MSIDRequestContext>
+@interface MSALB2CAuthority : MSALAuthority
 
-- (NSURLSession *)urlSession;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

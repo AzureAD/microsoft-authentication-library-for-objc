@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,16 +17,26 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#pragma once
+#import "NSString+MSALTestUtil.h"
+#import "MSALAuthorityFactory.h"
 
-@interface NSMutableDictionary (MSALExtension)
+@implementation NSString (MSALTestUtil)
 
-- (void)msalSetObjectIfNotNil:(id)dictObject forKey:(id<NSCopying>)dictKey;
+- (MSALAuthority *)msalAuthority
+{
+    __auto_type authorityFactory = [MSALAuthorityFactory new];
+    __auto_type authorityUrl = [[NSURL alloc] initWithString:self];
+    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    
+    return authority;
+}
 
 @end

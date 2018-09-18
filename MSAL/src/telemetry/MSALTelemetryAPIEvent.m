@@ -23,7 +23,6 @@
 
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "NSOrderedSet+MSALExtensions.h"
 #import "NSURL+MSIDExtensions.h"
 
 @implementation MSALTelemetryAPIEvent
@@ -36,29 +35,6 @@
 - (void)setLoginHint:(NSString *)loginHint
 {
     [self setProperty:MSID_TELEMETRY_KEY_LOGIN_HINT value:loginHint];
-}
-
-- (void)setAuthorityType:(MSALAuthorityType)authorityType
-{
-    NSString *authorityTypeString;
-    
-    // set authority type
-    switch (authorityType) {
-        case AADAuthority:
-            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_AAD;
-            
-            break;
-            
-        case ADFSAuthority:
-            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_ADFS;
-            break;
-            
-        case B2CAuthority:
-            authorityTypeString = MSID_TELEMETRY_VALUE_AUTHORITY_B2C;
-            break;
-    }
-    
-    [super setAuthorityType:authorityTypeString];
 }
 
 - (void)setMSALApiId:(MSALTelemetryApiId)apiId

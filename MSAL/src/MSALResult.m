@@ -30,11 +30,13 @@
 #import "NSString+MSIDExtensions.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSIDClientInfo.h"
-#import "MSALIdToken.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSALAuthority.h"
+#import "MSIDAuthority.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSALAuthorityFactory.h"
 
 @implementation MSALResult
 
@@ -50,7 +52,7 @@
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
-                            authority:(NSString *)authority
+                            authority:(MSALAuthority *)authority
 {
     MSALResult *result = [MSALResult new];
     
@@ -70,33 +72,49 @@
 + (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
                               idToken:(MSIDIdToken *)idToken
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
+                                error:(NSError **)error
 {
-    NSError *error = nil;
-    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&error];
+    NSError *idTokenError = nil;
+    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&idTokenError];
 
     if (error)
     {
         MSID_LOG_WARN(nil, @"Invalid ID token");
-        MSID_LOG_WARN_PII(nil, @"Invalid ID token, error %@", error);
+        MSID_LOG_WARN_PII(nil, @"Invalid ID token, error %@", idTokenError);
     }
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
                                                                  name:idTokenClaims.name
                                                         homeAccountId:accessToken.accountIdentifier.homeAccountId
                                                        localAccountId:idTokenClaims.objectId
-                                                          environment:accessToken.authority.msidHostWithPortIfNecessary
+                                                          environment:accessToken.authority.environment
                                                              tenantId:idTokenClaims.tenantId
                                                            clientInfo:accessToken.clientInfo];
+
+    NSError *authorityError = nil;
+    MSALAuthority *authority = [[MSALAuthorityFactory new] authorityFromUrl:accessToken.authority.url
+                                                                    context:nil
+                                                                      error:&authorityError];
+
+    if (!authority)
+    {
+        MSID_LOG_WARN(nil, @"Invalid authority");
+        MSID_LOG_WARN_PII(nil, @"Invalid authority, error %@", authorityError);
+
+        if (error) *error = authorityError;
+
+        return nil;
+    }
     
     return [self resultWithAccessToken:accessToken.accessToken
                              expiresOn:accessToken.expiresOn
                isExtendedLifetimeToken:isExtendedLifetimeToken
-                              tenantId:accessToken.authority.msidTenant
+                              tenantId:accessToken.authority.url.msidTenant
                                account:account
                                idToken:idToken.rawIdToken
                               uniqueId:idTokenClaims.uniqueId
                                 scopes:[accessToken.scopes array]
-                             authority:accessToken.authority.absoluteString];
+                             authority:authority];
 }
 
 @end

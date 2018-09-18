@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseRequest.h"
-#import "MSALAuthority.h"
 #import "MSALResult+Internal.h"
 #import "MSALAccount.h"
 #import "MSIDAADAuthorizationCodeGrantRequest.h"
@@ -35,7 +34,6 @@
 #import "MSALTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "NSString+MSALHelperMethods.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDClientInfo.h"
 #import "NSURL+MSIDExtensions.h"
@@ -47,6 +45,9 @@
 #import "NSData+MSIDExtensions.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccountId.h"
+#import "MSALAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -97,6 +98,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     _tokenCache = tokenCache;
     _oauth2Factory = [MSIDAADV2Oauth2Factory new];
+
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
     return self;
 }
@@ -151,32 +154,62 @@ static MSALScopes *s_reservedScopes = nil;
     {
         upn = _parameters.account.username;
     }
-    else if(_parameters.loginHint)
+    else if (_parameters.loginHint)
     {
         upn = _parameters.loginHint;
     }
-    
-    [MSALAuthority resolveEndpointsForAuthority:_parameters.unvalidatedAuthority
-                              userPrincipalName:upn
-                                       validate:_parameters.validateAuthority
-                                        context:_parameters
-                                completionBlock:completionBlock];
+
+    [_parameters.unvalidatedAuthority resolveAndValidate:_parameters.validateAuthority
+                                       userPrincipalName:upn
+                                                 context:_parameters
+                                         completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
+     {
+         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
+                                                         completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+          {
+              if (error)
+              {
+                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                  [self stopTelemetryEvent:event error:error];
+
+                  completionBlock(NO, error);
+                  return;
+              }
+
+              _authority = _parameters.unvalidatedAuthority;
+              completionBlock(YES, nil);
+          }];
+     }];
 }
 
 - (void)acquireToken:(nonnull MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(completionBlock, _parameters, MSALErrorInvalidParameter, @"completionBlock cannot be nil.");
-    
+
     MSIDTokenRequest *authRequest = [self tokenRequest];
     
     [authRequest sendWithBlock:^(id response, NSError *error) {
         if (error)
         {
-            if(completionBlock) completionBlock(nil, error);
+            if (!completionBlock)
+            {
+                return;
+            }
+
+            if ([self isErrorRecoverableByUserInteraction:error])
+            {
+                NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
+
+                completionBlock(nil, interactionError);
+
+                return;
+            }
+
+            completionBlock(nil, error);
             return;
         }
         
-        if(response && ![response isKindOfClass:[NSDictionary class]])
+        if (response && ![response isKindOfClass:[NSDictionary class]])
         {
             NSError *localError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorInternal, @"response is not of the expected type: NSDictionary.");
             completionBlock(nil, localError);
@@ -192,50 +225,136 @@ static MSALScopes *s_reservedScopes = nil;
             completionBlock(nil, localError);
             return;
         }
-        
-        localError = nil;
-        if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&localError])
+
+        NSError *verificationError = nil;
+        if (![self verifyTokenResponse:tokenResponse error:&verificationError])
         {
-            completionBlock(nil, localError);
+            completionBlock(nil, verificationError);
             return;
         }
         
-        if (_parameters.account.homeAccountId.identifier != nil &&
-            ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
-        {
-            NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
-            completionBlock(nil, userMismatchError);
-            return;
-        }
-        
-        MSIDConfiguration *configuration = _parameters.msidConfiguration;
-        
-        localError = nil;
-        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:configuration
+        NSError *savingError = nil;
+        BOOL isSaved = [self.tokenCache saveTokensWithConfiguration:_parameters.msidConfiguration
                                                            response:tokenResponse
                                                             context:_parameters
-                                                              error:&localError];
+                                                              error:&savingError];
         
         if (!isSaved)
         {
-            completionBlock(nil, localError);
+            completionBlock(nil, savingError);
             return;
         }
-        
-        MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:configuration];
-        MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:configuration];
-        
-        if (!accessToken || !idToken)
+
+        NSError *scopesError = nil;
+        if (![self verifyScopesWithResponse:tokenResponse error:&scopesError])
         {
-            NSError *responseError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
-            completionBlock(nil, responseError);
+            completionBlock(nil, scopesError);
             return;
         }
-        
-        MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO];
-        
-        completionBlock(result, nil);
+
+        NSError *resultError = nil;
+
+        MSALResult *result = [self resultFromTokenResponse:tokenResponse error:&resultError];
+        completionBlock(result, resultError);
     }];
+}
+
+- (BOOL)verifyTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                      error:(NSError **)error
+{
+    NSError *msidError = nil;
+
+    if (![self.oauth2Factory verifyResponse:tokenResponse context:nil error:&msidError])
+    {
+        if (!error)
+        {
+            return NO;
+        }
+
+        if ([self isErrorRecoverableByUserInteraction:msidError])
+        {
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", msidError.userInfo[MSALOAuthErrorKey], msidError.userInfo[MSALOAuthSubErrorKey], msidError, nil, nil);
+            return NO;
+        }
+
+        *error = msidError;
+        return NO;
+    }
+
+    if (_parameters.account.homeAccountId.identifier != nil &&
+        ![_parameters.account.homeAccountId.identifier isEqualToString:tokenResponse.clientInfo.accountIdentifier])
+    {
+        NSError *userMismatchError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorMismatchedUser, @"Different user was returned from the server");
+        if (error) *error = userMismatchError;
+
+        return NO;
+    }
+
+    return YES;
+}
+
+/*
+    Particular Oauth errors might be recoverable by interactive login.
+    For those errors we'll return MSALErrorInteractionRequired error.
+ */
+- (BOOL)isErrorRecoverableByUserInteraction:(NSError *)msidError
+{
+    if (msidError.code == MSALErrorInvalidGrant
+        || msidError.code == MSALErrorInvalidRequest)
+    {
+        return YES;
+    }
+
+    return NO;
+}
+
+- (MSALResult *)resultFromTokenResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                                  error:(NSError **)error
+{
+    MSIDAccessToken *accessToken = [self.oauth2Factory accessTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+    MSIDIdToken *idToken = [self.oauth2Factory idTokenFromResponse:tokenResponse configuration:_parameters.msidConfiguration];
+
+    if (!accessToken || !idToken)
+    {
+        NSError *resultError = CREATE_MSAL_LOG_ERROR(_parameters, MSALErrorBadTokenResponse, @"Bad token response returned from the server");
+
+        if (error) *error = resultError;
+    }
+
+    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO error:error];
+    return result;
+}
+
+- (BOOL)verifyScopesWithResponse:(MSIDAADV2TokenResponse *)tokenResponse
+                           error:(NSError **)error
+{
+    /*
+        If server returns less scopes than developer requested,
+        we'd like to throw an error and specify which scopes were granted and which ones not
+     */
+
+    NSOrderedSet *grantedScopes = [tokenResponse.scope msidScopeSet];
+    MSIDConfiguration *configuration = _parameters.msidConfiguration;
+
+    if (![configuration.scopes isSubsetOfOrderedSet:grantedScopes])
+    {
+        if (error)
+        {
+            NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
+            additionalUserInfo[MSALGrantedScopesKey] = [grantedScopes array];
+
+            NSMutableOrderedSet *declinedScopeSet = [configuration.scopes mutableCopy];
+            [declinedScopeSet minusOrderedSet:grantedScopes];
+
+            additionalUserInfo[MSALDeclinedScopesKey] = [declinedScopeSet array];
+
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorServerDeclinedScopes, @"Server returned less scopes than requested", nil, nil, nil, nil, additionalUserInfo);
+        }
+
+        return NO;
+    }
+
+    return YES;
 }
 
 - (MSIDTokenRequest *)tokenRequest
@@ -246,15 +365,15 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (NSURL *)tokenEndpoint
 {
-    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.tokenEndpoint resolvingAgainstBaseURL:NO];
-    
+    NSURLComponents *tokenEndpoint = [NSURLComponents componentsWithURL:_authority.metadata.tokenEndpoint resolvingAgainstBaseURL:NO];
+
     if (_parameters.cloudAuthority)
     {
-        tokenEndpoint.host = _parameters.cloudAuthority.host;
+        tokenEndpoint.host = _parameters.cloudAuthority.environment;
     }
-    
-    NSMutableDictionary *endpointQPs = [[NSDictionary msidURLFormDecode:tokenEndpoint.percentEncodedQuery] mutableCopy];
-    
+
+    NSMutableDictionary *endpointQPs = [[NSDictionary msidDictionaryFromWWWFormURLEncodedString:tokenEndpoint.percentEncodedQuery] mutableCopy];
+
     if (!endpointQPs)
     {
         endpointQPs = [NSMutableDictionary dictionary];
@@ -265,8 +384,8 @@ static MSALScopes *s_reservedScopes = nil;
         [endpointQPs addEntriesFromDictionary:_parameters.sliceParameters];
     }
     
-    tokenEndpoint.query = [endpointQPs msidURLFormEncode];
-    
+    tokenEndpoint.query = [endpointQPs msidWWWFormURLEncode];
+
     return tokenEndpoint.URL;
 }
 
@@ -277,8 +396,8 @@ static MSALScopes *s_reservedScopes = nil;
     
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
-    [event setAuthorityType:_authority.authorityType];
-    [event setAuthority:_parameters.unvalidatedAuthority.absoluteString];
+    [event setAuthorityType:[_authority telemetryAuthorityType]];
+    [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
     [event setClientId:_parameters.clientId];
     
     // Login hint is an optional parameter and might not be present

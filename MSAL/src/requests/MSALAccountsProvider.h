@@ -27,15 +27,22 @@
 
 #import <Foundation/Foundation.h>
 
-// Use this as a NSURLSession delegate for logging the redirect.
-// Intended usage would be to use it per acquire-token-call basis
-// and no singleton.
+@class MSIDDefaultTokenCacheAccessor;
 
-// TODO: Add checking or append custom headers if needed for redirects
-@interface MSALURLSessionDelegate : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
+@interface MSALAccountsProvider : NSObject
 
-- (id)initWithContext:(id<MSALRequestContext>)context;
+- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                          clientId:(NSString *)clientId;
 
-@property (readonly) id<MSALRequestContext> context;
+- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
+                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
+
+- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
+
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                   error:(NSError * __autoreleasing *)error;
+
+- (MSALAccount *)accountForUsername:(NSString *)username
+                              error:(NSError * __autoreleasing *)error;
 
 @end

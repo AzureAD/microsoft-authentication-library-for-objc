@@ -26,14 +26,16 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALAuthority.h"
 
-@class MSALTenantDiscoveryResponse;
+@interface MSALAuthorityFactory : NSObject
 
-@interface MSALAuthorityBaseResolver : NSObject
+- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
+                                     context:(nullable id<MSIDRequestContext>)context
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-- (void)tenantDiscoveryEndpoint:(NSURL *)url
-                        context:(id<MSALRequestContext>)context
-                completionBlock:(TenantDiscoveryCallback)completionBlock;
+- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
+                                   rawTenant:(nullable NSString *)rawTenant
+                                     context:(nullable id<MSIDRequestContext>)context
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

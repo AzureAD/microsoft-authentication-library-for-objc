@@ -472,11 +472,10 @@
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [settings profile];
-    NSString *authority = [settings authority];
     NSString *clientId = [currentProfile objectForKey:@"clientId"];
     NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
-    NSDictionary *extraQueryParameters = [NSDictionary msidURLFormDecode:_extraQueryParamsField.text];
-    
+    MSALAuthority *authority = [settings authority];
+    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
     NSError *error = nil;
     
     MSALPublicClientApplication *application =
@@ -578,11 +577,10 @@
         return;
     }
     
-    NSString *authority = [settings authority];
     NSDictionary *currentProfile = [settings profile];
     NSString *clientId = [currentProfile objectForKey:@"clientId"];
     NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
-    
+    __auto_type authority = [settings authority];
     NSError *error = nil;
     
     MSALPublicClientApplication *application =
@@ -639,10 +637,9 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSString *authority = [settings authority];
     NSDictionary *currentProfile = [settings profile];
     NSString *clientId = [currentProfile objectForKey:@"clientId"];
-    
+    __auto_type authority = [settings authority];
     NSError *error = nil;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
@@ -763,10 +760,9 @@
         return;
     }
     
-    NSString *authority = [settings authority];
     NSDictionary *currentProfile = [settings profile];
     NSString *clientId = [currentProfile objectForKey:@"clientId"];
-    
+    __auto_type authority = [settings authority];
     NSError *error = nil;
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
@@ -776,27 +772,31 @@
         _resultView.text = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         return;
     }
-    
-    NSUInteger existingUserCount = [[application accounts:nil] count];
-    NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
-    
-    if (existingUserCount != requiredUserCount)
-    {
-        _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
-        return;
-    }
-    
-    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-    [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
-    
-    if ([MSALStressTestHelper runStressTestWithType:type application:application])
-    {
-        _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
-    }
-    else
-    {
-        _resultView.text = @"Cannot start test, because other test is currently running!";
-    }
+
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+
+        NSUInteger existingUserCount = [accounts count];
+        NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
+
+        if (existingUserCount != requiredUserCount)
+        {
+            _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
+            return;
+        }
+
+        [[MSALTestAppTelemetryViewController sharedController] stopTracking];
+        [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
+
+        if ([MSALStressTestHelper runStressTestWithType:type application:application])
+        {
+            _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
+        }
+        else
+        {
+            _resultView.text = @"Cannot start test, because other test is currently running!";
+        }
+
+    }];
 }
 
 - (void)stopStressTest

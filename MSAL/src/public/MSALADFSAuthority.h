@@ -25,22 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALCryptoHelper.h"
-#import <CommonCrypto/CommonDigest.h>
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
 
-@implementation MSALCryptoHelper
+@interface MSALADFSAuthority : MSALAuthority
 
-+ (NSData *)msalSHA256fromString:(NSString *)string;
-{
-    NSData *inputData = [string dataUsingEncoding:NSASCIIStringEncoding];
-    NSMutableData *outData = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-    
-    // input length shouldn't be this big
-    THROW_ON_CONDITION_ARGUMENT(inputData.length > UINT32_MAX, string(length too big));
-    
-    CC_SHA256(inputData.bytes, (uint32_t)inputData.length, outData.mutableBytes);
-    
-    return outData;
-}
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

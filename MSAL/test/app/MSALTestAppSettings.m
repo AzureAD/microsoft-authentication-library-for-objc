@@ -38,8 +38,13 @@ static NSDictionary* _additionalProfiles()
 #endif
 
 #import "MSALTestAppSettings.h"
-#import "MSALAuthority.h"
+#import "MSIDAuthority.h"
 #import "MSALAccountId.h"
+#import "MSALAuthorityFactory.h"
+#import "MSIDAuthority.h"
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDAADNetworkConfiguration.h"
 
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
@@ -69,22 +74,28 @@ static NSDictionary * s_profiles;
 + (void)initialize
 {
     NSMutableArray<NSString *> *authorities = [NSMutableArray new];
-    NSSet<NSString *> *trustedHosts = [MSALAuthority trustedHosts];
+    NSSet<NSString *> *trustedHosts = [MSIDAADNetworkConfiguration.defaultConfiguration trustedHosts];
+    
     for (NSString *host in trustedHosts)
     {
-        [authorities addObject:[NSString stringWithFormat:@"https://%@/common", host]];
-        [authorities addObject:[NSString stringWithFormat:@"https://%@/organizations", host]];
-        [authorities addObject:[NSString stringWithFormat:@"https://%@/consumers", host]];
+        __auto_type tenants = @[@"common", @"organizations", @"consumers"];
+        
+        for (NSString *tenant in tenants)
+        {
+            __auto_type authorityString = [NSString stringWithFormat:@"https://%@/%@", host, tenant];
+            [authorities addObject:authorityString];
+        }
     }
     
     s_authorities = authorities;
     
     s_scopes_available = @[MSAL_APP_SCOPE_USER_READ, @"Tasks.Read", @"https://graph.microsoft.com/.default",@"https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read"];
     
-    s_b2cAuthorities = @[@"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy",
-                         @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy",
-                         @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy"];
+    __auto_type signinPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignInPolicy";
+    __auto_type signupPolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SignUpPolicy";
+    __auto_type profilePolicyAuthority = @"https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_EditProfilePolicy";
     
+    s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
     
     s_profiles = _additionalProfiles();
@@ -104,11 +115,6 @@ static NSDictionary * s_profiles;
     return s_settings;
 }
 
-+ (NSArray<NSString *> *)authorityTypes
-{
-    return s_authorityTypes;
-}
-
 + (NSArray<NSString *> *)aadAuthorities
 {
     return s_authorities;
@@ -122,6 +128,10 @@ static NSDictionary * s_profiles;
 + (NSDictionary *)profiles
 {
     return s_profiles;
+}
++ (NSArray<NSString *> *)authorityTypes
+{
+    return s_authorityTypes;
 }
 
 - (MSALAccount *)accountForAccountHomeIdentifier:(NSString *)accountIdentifier
@@ -146,14 +156,14 @@ static NSDictionary * s_profiles;
     
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                authority:_authority
+                                                authority:self.authority
                                                     error:&error];
     if (application == nil)
     {
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
         return nil;
     }
-
+    
     MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
     return account;
 }
@@ -167,7 +177,15 @@ static NSDictionary * s_profiles;
     }
     
     _profile = [settings objectForKey:@"profile"] ? [settings objectForKey:@"profile"] : [[s_profiles allValues] objectAtIndex:0];
-    _authority = [settings objectForKey:@"authority"];
+    NSString *authorityString = [settings objectForKey:@"authority"];
+    if (authorityString)
+    {
+        NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
+        __auto_type authorityFactory = [MSALAuthorityFactory new];
+        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        _authority = authority;
+    }
+    
     _loginHint = [settings objectForKey:@"loginHint"];
     NSNumber* validate = [settings objectForKey:@"validateAuthority"];
     _validateAuthority = validate ? [validate boolValue] : YES;
@@ -195,9 +213,9 @@ static NSDictionary * s_profiles;
     _profile = profile;
 }
 
-- (void)setAuthority:(NSString *)authority
+- (void)setAuthority:(MSALAuthority *)authority
 {
-    [self setValue:authority forKey:@"authority"];
+    [self setValue:authority.msidAuthority.url.absoluteString forKey:@"authority"];
     _authority = authority;
 }
 

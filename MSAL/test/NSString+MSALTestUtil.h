@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTenantDiscoveryResponse.h"
+#import <Foundation/Foundation.h>
+#import "MSALAuthority.h"
+#import "MSALAuthority_Internal.h"
 
-@implementation MSALTenantDiscoveryResponse
+@interface NSString (MSALTestUtil)
 
-MSAL_JSON_ACCESSOR(@"issuer", issuer)
-MSAL_JSON_ACCESSOR(@"authorization_endpoint", authorization_endpoint)
-MSAL_JSON_ACCESSOR(@"token_endpoint", token_endpoint)
+- (MSALAuthority *)msalAuthority;
 
 @end

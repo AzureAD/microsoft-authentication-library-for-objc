@@ -27,7 +27,6 @@
 
 #import "MSALInteractiveRequest.h"
 
-#import "MSALAuthority.h"
 #import "MSALUIBehavior_Internal.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDPkce.h"
@@ -37,6 +36,9 @@
 #import "MSIDDeviceId.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSALAuthority.h"
+#import "MSIDOpenIdProviderMetadata.h"
+#import "MSIDAuthority.h"
 #import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
@@ -78,7 +80,7 @@
             return nil;
         }
     }
-    
+
     if (parameters.claims)
     {
         if (![self validateClaims:parameters error:error]) return nil;
@@ -103,26 +105,21 @@
 
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
-    [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
-        if (error)
+    [super resolveEndpoints:^(BOOL resolved, NSError *error) {
+
+        if (!resolved)
         {
-            MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-            [self stopTelemetryEvent:event error:error];
-            
             completionBlock(nil, error);
             return;
         }
-        
-        _authority = authority;
+
         [self acquireTokenImpl:completionBlock];
     }];
 }
 
-
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
-    
-    MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.authorizationEndpoint
+    MSIDWebviewConfiguration *config = [[MSIDWebviewConfiguration alloc] initWithAuthorizationEndpoint:_authority.metadata.authorizationEndpoint
                                                                                            redirectUri:_parameters.redirectUri
                                                                                               clientId:_parameters.clientId
                                                                                               resource:nil
@@ -254,7 +251,7 @@
 {
     return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                                  clientId:_parameters.clientId
-                                                                    scope:[[self requestScopes:nil] msalToString]
+                                                                    scope:[[self requestScopes:nil] msidToString]
                                                               redirectUri:_parameters.redirectUri
                                                                      code:_code
                                                              codeVerifier:_webviewConfig.pkce.codeVerifier

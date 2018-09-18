@@ -28,20 +28,19 @@
 #import <Foundation/Foundation.h>
 #import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
-#import "MSALRequestContext.h"
 #import "MSIDRequestContext.h"
 
-@class MSALAuthority;
 @class MSALAccount;
 @class MSIDConfiguration;
+@class MSIDAuthority;
 @class MSIDOauth2Factory;
 @class WKWebView;
 
-@interface MSALRequestParameters : NSObject <MSALRequestContext>
+@interface MSALRequestParameters : NSObject <MSIDRequestContext>
 
-@property (nonatomic) NSURL *unvalidatedAuthority;
+@property (nonatomic) MSIDAuthority *unvalidatedAuthority;
+@property (nonatomic) MSIDAuthority *cloudAuthority;
 @property BOOL validateAuthority;
-@property NSURL *cloudAuthority;
 @property BOOL extendedLifetimeEnabled;
 @property MSALScopes *scopes;
 @property NSString *redirectUri;
@@ -58,18 +57,15 @@
 
 @property WKWebView *customWebview;
 
-#pragma mark MSALRequestContext properties
+#pragma mark MSIDRequestContext properties
 @property NSUUID *correlationId;
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
-@property NSURLSession *urlSession;
 
 @property (readonly) MSIDConfiguration *msidConfiguration;
 @property MSIDOauth2Factory *msidOAuthFactory;
 
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
-- (BOOL)setAuthorityFromString:(NSString *)authority
-                         error:(NSError * __autoreleasing *)error;
 - (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
 @end

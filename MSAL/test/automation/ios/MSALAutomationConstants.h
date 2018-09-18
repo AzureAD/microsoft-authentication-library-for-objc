@@ -30,6 +30,7 @@
 extern NSString *const MSAL_VALIDATE_AUTHORITY_PARAM;
 extern NSString *const MSAL_CLIENT_ID_PARAM;
 extern NSString *const MSAL_AUTHORITY_PARAM;
+extern NSString *const MSAL_SILENT_AUTHORITY_PARAM;
 extern NSString *const MSAL_ACCOUNT_IDENTIFIER_PARAM;
 extern NSString *const MSAL_LEGACY_USER_PARAM;
 extern NSString *const MSAL_SCOPES_PARAM;
@@ -51,8 +52,8 @@ extern NSString *const MSAL_ACCESS_TOKENS_PARAM;
 extern NSString *const MSAL_REFRESH_TOKENS_PARAM;
 extern NSString *const MSAL_ID_TOKENS_PARAM;
 extern NSString *const MSAL_SIGNOUT_RESULT_PARAM;
-extern NSString *const MSAL_USER_COUNT_PARAM;
-extern NSString *const MSAL_USERS_PARAM;
+extern NSString *const MSAL_ACCOUNT_COUNT_PARAM;
+extern NSString *const MSAL_ACCOUNTS_PARAM;
 extern NSString *const MSAL_SLICE_PARAMS;
 extern NSString *const MSAL_UI_BEHAVIOR;
 

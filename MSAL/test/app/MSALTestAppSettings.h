@@ -27,18 +27,20 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALAuthority;
+
 extern NSString* MSALTestAppCacheChangeNotification;
 
 @interface MSALTestAppSettings : NSObject
 
 @property (nonatomic) NSDictionary* profile;
-@property (nonatomic) NSString *authority;
+@property (nonatomic) MSALAuthority *authority;
 @property (nonatomic) MSALAccount *currentAccount;
 @property (nonatomic) NSString *loginHint;
 @property (nonatomic) BOOL validateAuthority;
 @property (nonatomic, readonly) NSSet<NSString *> *scopes;
 
-+ (MSALTestAppSettings *)settings;
++ (MSALTestAppSettings*)settings;
 + (NSArray<NSString *> *)aadAuthorities;
 + (NSArray<NSString *> *)b2cAuthorities;
 + (NSArray<NSString *> *)authorityTypes;

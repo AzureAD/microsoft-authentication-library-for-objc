@@ -25,14 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOAuth2Response.h"
+#import "MSALADFSAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSIDADFSAuthority.h"
 
-@implementation MSALOAuth2Response
+@implementation MSALADFSAuthority
 
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ERROR, error)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_ERROR_DESCRIPTION, errorDescription)
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_SUB_ERROR, subError);
-MSAL_JSON_ACCESSOR(MSID_OAUTH2_CORRELATION_ID_RESPONSE, correlationId)
+- (instancetype)initWithURL:(NSURL *)url
+                    context:(id<MSIDRequestContext>)context
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url context:context error:error];
+    if (self)
+    {
+        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
+        if (!self.msidAuthority) return nil;
+    }
+    
+    return self;
+}
 
+- (NSURL *)url
+{
+    return self.msidAuthority.url;
+}
 
 @end
