@@ -32,12 +32,25 @@
 @interface MSALAuthority : NSObject
 
 NS_ASSUME_NONNULL_BEGIN
-@property (readonly) NSURL *url;
 
-- (instancetype _Null_unspecified )init NS_UNAVAILABLE;
-+ (instancetype _Null_unspecified )new NS_UNAVAILABLE;
+@property (readonly, nonnull) NSURL *url;
 
-+ (nullable MSALAuthority *)authorityWithURL:(NSURL *)url
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+
++ (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 NS_ASSUME_NONNULL_END
+/*
+ ncetype _Nullable)initWithConfiguration:(nonnull NSURLSessionConfiguration *)configuration
+ delegate:(nullable MSIDURLSessionDelegate *)delegate NS_DESIGNATED_INITIALIZER;
+ 
+ @property (class, nonnull) MSIDURLSessionManager *defaultManager;
+ @property (nonatomic, readonly, nonnull) NSURLSessionConfiguration *configuration;
+ @property (nonatomic, readonly, nonnull) NSURLSession *session;
+ 
+ - (instancetype _Nullable )init NS_UNAVAILABLE;
+ + (instancetype _Nullable )new NS_UNAVAILABLE;
+ */
+
 @end

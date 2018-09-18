@@ -186,7 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				96672DB71EC7913D00878AC5 /* MSAL.framework */,
-				96672DB91EC7913D00878AC5 /* "MSAL-iOS-UI-Tests".xctest */,
+				96672DB91EC7913D00878AC5 /* "MSAL-iOS-Unit-Tests".xctest */,
 				96672DBB1EC7913D00878AC5 /* MSAL.framework */,
 				96672DBD1EC7913D00878AC5 /* "MSAL-Mac-Unit-Tests".xctest */,
 				96672DBF1EC7913D00878AC5 /* MSAL Test App.app */,
