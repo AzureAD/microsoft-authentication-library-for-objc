@@ -1029,7 +1029,7 @@
 {
     NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]};
 
-    // Moke token request
+    // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
     [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
