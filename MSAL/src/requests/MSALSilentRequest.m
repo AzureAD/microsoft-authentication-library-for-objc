@@ -120,24 +120,25 @@
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
     
-    NSError *msidError = nil;
-    
-    //try looking for FRT first
+    [self tryRT:@"1" completionBlock:completionBlock];
+}
+
+- (MSIDRefreshToken *)getRefreshToken:(NSString *)familyId error:(NSError **)error
+{
+    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                           familyId:@"1"
+                                                           familyId:familyId
                                                       configuration:msidConfiguration
                                                             context:_parameters
-                                                              error:&msidError];
-    
-    //If no FRT found, try cache look up for MRRT
-    if(!self.refreshToken)
-    {
-        self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                               familyId:nil
-                                                          configuration:msidConfiguration
-                                                                context:_parameters
-                                                                  error:&msidError];
-    }
+                                                              error:error];
+    return self.refreshToken;
+}
+
+- (void)tryRT:(NSString *)familyID completionBlock:(MSALCompletionBlock)completionBlock
+{
+    //try looking for FRT first
+    NSError *msidError = nil;
+    [self getRefreshToken:familyID error:&msidError];
     
     if (msidError)
     {
@@ -145,7 +146,53 @@
         return;
     }
     
-    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
+    //if FRT not found, try looking for MRRT
+    if (!self.refreshToken)
+    {
+        msidError = nil;
+        [self getRefreshToken:nil error:&msidError];
+        if (msidError)
+        {
+            completionBlock(nil, msidError);
+            return;
+        }
+    }
+    
+    [self refreshAccessToken:^(MSALResult *result, NSError *error)
+     {
+         if (error)
+         {
+             if (error.code == MSALErrorInvalidGrant && self.refreshToken.familyId)
+             {
+                 NSError *msidError = nil;
+                 //Try if we have a MRRT
+                 [self getRefreshToken:nil error:&msidError];
+                 
+                 if (msidError)
+                 {
+                     completionBlock(nil, msidError);
+                     return;
+                 }
+                 
+                 [self refreshAccessToken:completionBlock];
+             }
+             else
+             {
+                 completionBlock(nil,error);
+             }
+         }
+         else
+         {
+             completionBlock(result,nil);
+         }
+     }];
+    
+}
+
+- (void)refreshAccessToken:(MSALCompletionBlock)completionBlock
+{
+    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache");
+    MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     
     [super resolveEndpoints:^(MSALAuthority *authority, NSError *error) {
         if (error)
@@ -175,10 +222,7 @@
                  result = [MSALResult resultWithAccessToken:_extendedLifetimeAccessToken idToken:idToken isExtendedLifetimeToken:YES];
                  error = nil;
              }
-             /*
-              If server returns specific error code and refresh token used is FRT
-              If(self.refreshToken.familyId)-> flag clientId.
-              */
+             
              completionBlock(result, error);
          }];
     }];
