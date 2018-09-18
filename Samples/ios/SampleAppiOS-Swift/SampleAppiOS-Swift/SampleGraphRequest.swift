@@ -95,7 +95,7 @@ class SampleGraphRequest: GraphRequesting {
                     
                     completion(nil, NSError(domain: self.kSampleGraphErrorDomain as String,
                                             code: (response as? HTTPURLResponse)!.statusCode,
-                                            userInfo: resultJson["error"] as! [String : Any]))
+                                            userInfo: resultJson["error"] as? [String : Any]))
                     return
                 }
                 catch let error {

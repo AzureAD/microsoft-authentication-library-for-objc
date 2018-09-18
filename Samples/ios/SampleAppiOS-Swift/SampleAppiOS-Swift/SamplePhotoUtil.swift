@@ -118,7 +118,7 @@ fileprivate extension SamplePhotoUtil {
         
         do {
             if (FileManager.default.fileExists(atPath: imageDirectory) == false) {
-                try FileManager.default.createDirectory(atPath: imageDirectory, withIntermediateDirectories: true, attributes: [:])
+                try FileManager.default.createDirectory(atPath: imageDirectory, withIntermediateDirectories: true, attributes: convertToOptionalFileAttributeKeyDictionary([:]))
             }
             
             guard let imagePath = cachedImagePath() else {
@@ -234,4 +234,10 @@ fileprivate extension SamplePhotoUtil {
     
     
     
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalFileAttributeKeyDictionary(_ input: [String: Any]?) -> [FileAttributeKey: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (FileAttributeKey(rawValue: key), value)})
 }

@@ -31,12 +31,13 @@
 
 @interface MSALAuthority : NSObject
 
-@property (readonly, nonnull) NSURL *url;
+NS_ASSUME_NONNULL_BEGIN
+@property (readonly) NSURL *url;
 
-- (instancetype _Nullable )init NS_UNAVAILABLE;
-+ (instancetype _Nullable )new NS_UNAVAILABLE;
+- (instancetype _Null_unspecified )init NS_UNAVAILABLE;
++ (instancetype _Null_unspecified )new NS_UNAVAILABLE;
 
-+ (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
++ (nullable MSALAuthority *)authorityWithURL:(NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
+NS_ASSUME_NONNULL_END
 @end
