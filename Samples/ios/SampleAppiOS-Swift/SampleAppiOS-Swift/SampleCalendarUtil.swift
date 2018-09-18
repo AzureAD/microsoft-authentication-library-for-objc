@@ -72,7 +72,7 @@ class SampleCalendarUtil  {
         SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(forScopes: [GraphScopes.CalendarsRead.rawValue]) {
             (token: String?, error: Error?) in
             
-            guard let accessToken = token else {
+            guard let accessToken = token, error == nil else {
                 DispatchQueue.main.async {
                     completion(nil, error)
                 }

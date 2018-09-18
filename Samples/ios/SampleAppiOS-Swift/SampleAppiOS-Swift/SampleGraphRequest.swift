@@ -80,12 +80,12 @@ class SampleGraphRequest: GraphRequesting {
         let task = session.dataTask(with: urlRequest as URLRequest) {
             (data: Data?, response: URLResponse?, error: Error?) in
 
-            if let error = error {
+            guard let httpResponse = response as? HTTPURLResponse, error == nil else {
                 completion(nil, error)
                 return
             }
-
-            if let response = response as? HTTPURLResponse, 200 == response.statusCode {
+            
+            if httpResponse.statusCode == 200 {
                 completion(data, nil)
                 return
             }

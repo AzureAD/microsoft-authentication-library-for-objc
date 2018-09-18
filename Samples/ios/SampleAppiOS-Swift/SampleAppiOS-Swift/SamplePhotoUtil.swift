@@ -163,7 +163,7 @@ fileprivate extension SamplePhotoUtil {
         SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(forScopes: scopesRequired) {
             (token, error) in
             
-            guard let accessToken = token else {
+            guard let accessToken = token, error == nil else {
                 completion(nil, error)
                 return
             }
