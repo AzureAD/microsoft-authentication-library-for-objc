@@ -38,13 +38,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // The MSAL Logger should be set as early as possible in the app launch sequence, before any MSAL
         // requests are made.
-        SampleMSALUtil.shared.setup()
+        SampleMSALAuthentication.shared.setup()
         
         self.window = UIWindow(frame: UIScreen.main.bounds)
         
         let initialViewController: UIViewController
         do {
-            try SampleMSALUtil.shared.currentAccount()
+            try SampleMSALAuthentication.shared.currentAccount()
             initialViewController = mainVC()
             
         } catch {

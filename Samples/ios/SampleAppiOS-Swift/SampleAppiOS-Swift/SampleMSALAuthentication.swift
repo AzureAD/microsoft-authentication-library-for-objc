@@ -28,15 +28,15 @@
 import MSAL
 
 // MARK: Setup and initialization
-class SampleMSALUtil {
+class SampleMSALAuthentication {
     
-    let kClientId = "11744750-bfe5-4818-a1c0-655455f68fa7"
+    let kClientId = "b6c69a37-df96-4db0-9088-2ab96e1d8215"
     let kCurrentAccountIdentifier = "MSALCurrentAccountIdentifier"
     
     let kAuthority = "https://login.microsoftonline.com/"
     
     // Singleton instance
-    static let shared = SampleMSALUtil()
+    static let shared = SampleMSALAuthentication()
     
     // Setup
     func setup() {
@@ -56,7 +56,7 @@ class SampleMSALUtil {
 }
 
 // MARK: Create MSALPublicClientApplication
-fileprivate extension SampleMSALUtil {
+fileprivate extension SampleMSALAuthentication {
     func createClientApplication() throws -> MSALPublicClientApplication {
         // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
         // go to the Microsoft App Portal (TODO: Name? Link?) to register your own applications with their own client
@@ -70,7 +70,7 @@ fileprivate extension SampleMSALUtil {
 }
 
 // MARK: Current Account
-extension SampleMSALUtil {
+extension SampleMSALAuthentication {
     var currentAccountIdentifier: String? {
         get {
             return UserDefaults.standard.string(forKey: kCurrentAccountIdentifier)
@@ -117,7 +117,7 @@ extension SampleMSALUtil {
 }
 
 // MARK: Sign in an account
-extension SampleMSALUtil {
+extension SampleMSALAuthentication {
     
     func signInAccount(completion: @escaping (MSALAccount?, _ accessToken: String?, Error?) -> Void) {
         do {
@@ -145,7 +145,7 @@ extension SampleMSALUtil {
 }
 
 // MARK: Acquire Token
-extension SampleMSALUtil {
+extension SampleMSALAuthentication {
     
     func acquireTokenSilentForCurrentAccount(forScopes scopes:[String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
         do {
@@ -224,7 +224,7 @@ extension SampleMSALUtil {
 }
 
 // MARK: Sign out and clean up
-extension SampleMSALUtil {
+extension SampleMSALAuthentication {
     
     func signOut() throws {
 

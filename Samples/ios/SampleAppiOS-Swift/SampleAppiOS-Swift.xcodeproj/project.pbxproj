@@ -17,7 +17,7 @@
 		96672D9F1EC7912C00878AC5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96672D9D1EC7912C00878AC5 /* Main.storyboard */; };
 		96672DA11EC7912C00878AC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96672DA01EC7912C00878AC5 /* Assets.xcassets */; };
 		96672DA41EC7912C00878AC5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96672DA21EC7912C00878AC5 /* LaunchScreen.storyboard */; };
-		96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */; };
+		96672DCC1EC7923000878AC5 /* SampleMSALAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */; };
 		96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */; };
 		96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */; };
 		96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */; };
@@ -130,7 +130,7 @@
 		96672DA31EC7912C00878AC5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		96672DA51EC7912C00878AC5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
-		96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleMSALUtil.swift; sourceTree = "<group>"; };
+		96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleMSALAuthentication.swift; sourceTree = "<group>"; };
 		96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleCalendarUtil.swift; sourceTree = "<group>"; };
 		96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SamplePhotoUtil.swift; sourceTree = "<group>"; };
 		96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphRequest.swift; sourceTree = "<group>"; };
@@ -202,7 +202,7 @@
 		96672DC61EC7919500878AC5 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
-				96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */,
+				96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */,
 			);
 			name = Authentication;
 			sourceTree = "<group>";
@@ -410,7 +410,7 @@
 				96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */,
 				96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */,
 				96DFD2B21ECD25A6007ED2A1 /* SampleGraphScopes.swift in Sources */,
-				96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */,
+				96672DCC1EC7923000878AC5 /* SampleMSALAuthentication.swift in Sources */,
 				96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */,
 				9622AAC71ECA75FC0052B975 /* SampleLoginViewController.swift in Sources */,
 				9622AAC51ECA3D900052B975 /* SampleAppErrors.swift in Sources */,
