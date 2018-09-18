@@ -75,31 +75,44 @@ extension SampleMSALUtil {
         get {
             return UserDefaults.standard.string(forKey: kCurrentAccountIdentifier)
         }
+        set (accountIdentifier) {
+            // The identifier in the MSALAccount is the key to retrieve this user from
+            // the cache in the future. Save this piece of information in a place you can
+            // easily retrieve in your app. In this case we're going to store it in
+            // NSUserDefaults.
+            UserDefaults.standard.set(accountIdentifier, forKey: self.kCurrentAccountIdentifier)
+        }
     }
     
     @discardableResult func currentAccount() throws -> MSALAccount {
         // We retrieve our current account by checking for the accountIdentifier that we stored in NSUserDefaults when
         // we first signed in the account.
-        if let _ = currentAccountIdentifier {
-            let clientApplication = try createClientApplication()
-            do {
-                return try clientApplication.account(forHomeAccountId: currentAccountIdentifier)
-            } catch let error as NSError {
-                
-                // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
-                // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
-                // image from another device. In this case it is best to detect that case and clean up local state.
-                if (error.domain == MSALErrorDomain && error.code == MSALErrorCode.userNotFound.rawValue) {
-                    cleanupLocalState()
-                }
-                
-                throw SampleAppError.UserNotFound(error)
-            }
-        }
-        else {
+        guard let accountIdentifier = currentAccountIdentifier else {
             // If we did not find an identifier then throw an error indicating there is no currently signed in account.
             throw SampleAppError.NoUserSignedIn
         }
+        
+        let clientApplication = try createClientApplication()
+        
+        do {
+            return try clientApplication.account(forHomeAccountId: accountIdentifier)
+        } catch let error as NSError {
+            
+            // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
+            // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
+            // image from another device. In this case it is best to detect that case and clean up local state.
+            if (error.domain == MSALErrorDomain && error.code == MSALErrorCode.userNotFound.rawValue) {
+                cleanupLocalState()
+            }
+            
+            throw SampleAppError.UserNotFound(error)
+        }
+    }
+    
+    func clearCurrentAccount() {
+        // Leave around the account identifier as the last piece of state to clean up as you will probably need
+        // it to clean up user-specific state
+        UserDefaults.standard.removeObject(forKey: kCurrentAccountIdentifier)
     }
 }
 
@@ -108,39 +121,25 @@ extension SampleMSALUtil {
     
     func signInAccount(completion: @escaping (MSALAccount?, _ accessToken: String?, Error?) -> Void) {
         do {
-            let application = try createClientApplication()
+            let clientApplication = try createClientApplication()
             
-            // When signing in an account for the first time we acquire a token without providing
-            // an account object. If you've previously asked the account for an email address,
-            // or phone number you can provide that as a "login hint."
-            
-            // Request as many scopes as possible up front that you know your application will
-            // want to use so the service can request consent for them up front and minimize
-            // how much users are interrupted for interactive auth.
-            application.acquireToken(forScopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue], completionBlock: {
+            clientApplication.acquireToken(forScopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue]) {
                 (result: MSALResult?, error: Error?) in
                 
-                if let error = error {
+                guard let acquireTokenResult = result, error == nil else {
                     completion(nil, nil, error)
                     return
                 }
                 
-                let acquireTokenResult = result!
-                
                 // In the initial acquire token call we'll want to look at the account object
                 // that comes back in the result.
-                let signedInAccount: MSALAccount = acquireTokenResult.account
-                
-                // The identifier in the MSALAccount is the key to retrieve this user from
-                // the cache in the future. Save this piece of information in a place you can
-                // easily retrieve in your app. In this case we're going to store it in
-                // NSUserDefaults.
-                UserDefaults.standard.set(signedInAccount.homeAccountId.identifier, forKey: self.kCurrentAccountIdentifier)
+                let signedInAccount = acquireTokenResult.account
+                self.currentAccountIdentifier = signedInAccount?.homeAccountId.identifier
                 
                 completion(signedInAccount, acquireTokenResult.accessToken, nil)
-            })
-        } catch let error {
-            completion(nil, nil, error)
+            }
+        } catch let createApplicationError {
+            completion(nil, nil, createApplicationError)
         }
     }
 }
@@ -163,12 +162,12 @@ extension SampleMSALUtil {
             
             application.acquireTokenSilent(forScopes: scopes, account: account, authority: msalAuthority, completionBlock: {
                 (result: MSALResult?, error: Error?) in
-                if let result = result {
-                    completion(result.accessToken, nil)
-                }
-                else {
+                guard let acquireTokenResult = result, error == nil else {
                     completion(nil, error)
+                    return
                 }
+      
+                completion(acquireTokenResult.accessToken, nil)
             })
         } catch let error {
             completion(nil, error)
@@ -182,12 +181,13 @@ extension SampleMSALUtil {
             
             application.acquireToken(forScopes: scopes, account: account, uiBehavior: .MSALUIBehaviorDefault, extraQueryParameters: [:], completionBlock: {
                 (result: MSALResult?, error: Error?) in
-                if let result = result {
-                    completion(result.accessToken, nil)
-                }
-                else {
+                
+                guard let acquireTokenResult = result, error == nil else {
                     completion(nil, error)
+                    return
                 }
+                
+                completion(acquireTokenResult.accessToken, nil)
             })
         } catch let error {
             completion(nil, error)
@@ -195,7 +195,8 @@ extension SampleMSALUtil {
     }
     
     func acquireTokenForCurrentAccount(forScopes scopes: [String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
-        acquireTokenSilentForCurrentAccount(forScopes: scopes) { (token: String?, error: Error?) in
+        acquireTokenSilentForCurrentAccount(forScopes: scopes) {
+            (token: String?, error: Error?) in
             if let token = token {
                 completion(token, nil)
                 return
@@ -227,13 +228,9 @@ extension SampleMSALUtil {
     
     func signOut() throws {
 
-        var accountToDelete: MSALAccount?
-        
-        do {
-            accountToDelete = try currentAccount()
-        } catch { }
-        
         cleanupLocalState()
+        
+        let accountToDelete = try? currentAccount()
         
         // Signing out an account requires removing this from MSAL and cleaning up any extra state that the application
         // might be maintaining outside of MSAL for the account.
@@ -250,13 +247,11 @@ extension SampleMSALUtil {
         }
     }
     
-    func cleanupLocalState() {
+    fileprivate func cleanupLocalState() {
         
         SampleCalendarUtil.shared.clearCache()
         SamplePhotoUtil.shared.clearPhotoCache()
         
-        // Leave around the account identifier as the last piece of state to clean up as you will probably need
-        // it to clean up user-specific state
-        UserDefaults.standard.removeObject(forKey: kCurrentAccountIdentifier)
+        self.clearCurrentAccount()
     }
 }
