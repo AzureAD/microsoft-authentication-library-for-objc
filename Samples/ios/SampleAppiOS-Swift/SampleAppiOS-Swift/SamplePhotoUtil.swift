@@ -76,7 +76,7 @@ class SamplePhotoUtil {
         UserDefaults.standard.removeObject(forKey: kLastPhotoCheckKey)
         currentUserPhoto = nil
         
-        if let _ = SampleMSALUtil.shared.currentAccountIdentifier {
+        if let _ = SampleMSALAuthentication.shared.currentAccountIdentifier {
             
             guard let imagePath = cachedImagePath() else {
                 print("User is not signed in. There is nothing to delete")
@@ -103,7 +103,7 @@ fileprivate extension SamplePhotoUtil {
     }
     
     func cachedImagePath() -> String? {
-        if let currentUserIdentifier = SampleMSALUtil.shared.currentAccountIdentifier {
+        if let currentUserIdentifier = SampleMSALAuthentication.shared.currentAccountIdentifier {
             return cachedImageDirectory() + "/" + currentUserIdentifier
         }
         return nil
@@ -118,7 +118,7 @@ fileprivate extension SamplePhotoUtil {
         
         do {
             if (FileManager.default.fileExists(atPath: imageDirectory) == false) {
-                try FileManager.default.createDirectory(atPath: imageDirectory, withIntermediateDirectories: true, attributes: [:])
+                try FileManager.default.createDirectory(atPath: imageDirectory, withIntermediateDirectories: true, attributes: convertToOptionalFileAttributeKeyDictionary([:]))
             }
             
             guard let imagePath = cachedImagePath() else {
@@ -160,10 +160,10 @@ fileprivate extension SamplePhotoUtil {
         // not be blocked on not having consent for edge features.
         let scopesRequired = [GraphScopes.UserRead.rawValue];
         
-        SampleMSALUtil.shared.acquireTokenForCurrentAccount(forScopes: scopesRequired) {
+        SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(forScopes: scopesRequired) {
             (token, error) in
             
-            guard let accessToken = token else {
+            guard let accessToken = token, error == nil else {
                 completion(nil, error)
                 return
             }
@@ -234,4 +234,10 @@ fileprivate extension SamplePhotoUtil {
     
     
     
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalFileAttributeKeyDictionary(_ input: [String: Any]?) -> [FileAttributeKey: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (FileAttributeKey(rawValue: key), value)})
 }
