@@ -83,7 +83,30 @@ static BOOL adalAppInstalled = NO;
     request.scopes = @"https://graph.windows.net/.default";
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
 
+    // 3. Check accounts are correctly returned
+    NSDictionary *configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    NSDictionary *result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    NSArray *accounts = result[@"accounts"];
+    NSDictionary *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    [self closeResultView];
+
+    // 4. Run silent tests
     [self runSharedSilentAADLoginWithTestRequest:request];
+
+    // 5. Check accounts are correctly updated
+    configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    accounts = result[@"accounts"];
+    firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    [self closeResultView];
 }
 
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
@@ -194,7 +217,6 @@ static BOOL adalAppInstalled = NO;
     return [self openAppWithAppId:@"adal_unified"];
 }
 
-// TODO: authority migration
 // TODO: FOCI for MSAL
 
 @end

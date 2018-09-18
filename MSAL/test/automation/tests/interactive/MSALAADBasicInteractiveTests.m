@@ -129,6 +129,49 @@
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
 }
 
+- (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andDifferentAuthorityAliases
+{
+    NSArray *expectedResultScopes = @[@"user.read",
+                                      @"tasks.read",
+                                      @"openid",
+                                      @"profile"];
+
+    NSString *cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
+
+    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
+    request.scopes = @"user.read tasks.read";
+    request.expectedResultScopes = expectedResultScopes;
+    request.authority = @"https://login.microsoftonline.com/common";
+    request.uiBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+
+    // 1. Run interactive
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+
+    XCTAssertNotNil(homeAccountId);
+
+    [self.testApp terminate];
+    [self.testApp launch];
+
+    NSDictionary *configuration = [self configWithTestRequest:request];
+    [self readAccounts:configuration];
+
+    NSDictionary *result = [self resultDictionary];
+    XCTAssertEqual([result[@"account_count"] integerValue], 1);
+    NSArray *accounts = result[@"accounts"];
+    NSDictionary *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount[@"home_account_id"], homeAccountId);
+    [self closeResultView];
+
+    // Run silent with a different authority
+    request.cacheAuthority = cacheAuthority;
+    request.accountIdentifier = homeAccountId;
+    request.authority = @"https://login.windows.net/common";
+    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.windows.net/", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
+}
+
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
 {
     MSALTestRequest *request = [MSALTestRequest convergedAppRequest];

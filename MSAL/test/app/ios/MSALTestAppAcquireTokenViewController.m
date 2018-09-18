@@ -763,27 +763,31 @@
         _resultView.text = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         return;
     }
-    
-    NSUInteger existingUserCount = [[application accounts:nil] count];
-    NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
-    
-    if (existingUserCount != requiredUserCount)
-    {
-        _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
-        return;
-    }
-    
-    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-    [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
-    
-    if ([MSALStressTestHelper runStressTestWithType:type application:application])
-    {
-        _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
-    }
-    else
-    {
-        _resultView.text = @"Cannot start test, because other test is currently running!";
-    }
+
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+
+        NSUInteger existingUserCount = [accounts count];
+        NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
+
+        if (existingUserCount != requiredUserCount)
+        {
+            _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
+            return;
+        }
+
+        [[MSALTestAppTelemetryViewController sharedController] stopTracking];
+        [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
+
+        if ([MSALStressTestHelper runStressTestWithType:type application:application])
+        {
+            _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
+        }
+        else
+        {
+            _resultView.text = @"Cannot start test, because other test is currently running!";
+        }
+
+    }];
 }
 
 - (void)stopStressTest

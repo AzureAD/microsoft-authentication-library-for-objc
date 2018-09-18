@@ -37,7 +37,7 @@
 
 @implementation MSALTestAppUserViewController
 {
-    NSArray<MSALAccount *> *_users;
+    NSArray<MSALAccount *> *_accounts;
 }
 
 + (instancetype)sharedController
@@ -63,7 +63,7 @@
 
 - (void)refresh
 {
-    _users = nil;
+    _accounts = nil;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSError *error = nil;
@@ -77,15 +77,17 @@
         MSID_LOG_ERROR(nil, @"Failed to create public client application: %@", error);
         return;
     }
-    
-    _users = [application accounts:nil];
-    
-    [super refresh];
+
+    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+
+        _accounts = accounts;
+        [super refresh];
+    }];
 }
 
 - (NSInteger)numberOfRows
 {
-    return _users.count + 1;
+    return _accounts.count + 1;
 }
 
 - (NSString *)labelForRow:(NSInteger)row
@@ -94,7 +96,7 @@
     {
         return @"(nil)";
     }
-    return _users[row - 1].username;
+    return _accounts[row - 1].username;
 }
 
 - (NSString *)subLabelForRow:(NSInteger)row
@@ -103,7 +105,7 @@
     {
         return @"";
     }
-    return _users[row - 1].environment;
+    return _accounts[row - 1].environment;
 }
 
 - (void)rowSelected:(NSInteger)row
@@ -115,7 +117,7 @@
     }
     else
     {
-        settings.currentAccount = _users[row - 1];
+        settings.currentAccount = _accounts[row - 1];
     }
 }
 
@@ -129,9 +131,9 @@
     
     NSString *currentAccountId = currentAccount.homeAccountId.identifier;
     
-    for (NSInteger i = 0; i < _users.count; i++)
+    for (NSInteger i = 0; i < _accounts.count; i++)
     {
-        if ([currentAccountId isEqualToString:_users[i].homeAccountId.identifier])
+        if ([currentAccountId isEqualToString:_accounts[i].homeAccountId.identifier])
         {
             return i + 1;
         }

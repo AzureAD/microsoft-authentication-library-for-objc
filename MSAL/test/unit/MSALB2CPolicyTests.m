@@ -201,7 +201,7 @@
     // and that second call doesn't overwrite first one, since policies are different
     XCTAssertEqual(ats.count, 2);
     XCTAssertEqual(rts.count, 2);
-    XCTAssertEqual([[application accounts:nil] count], 2);
+    XCTAssertEqual([[application allAccounts:nil] count], 2);
 }
 
 @end
