@@ -63,7 +63,6 @@
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
     request.webViewType = MSALWebviewTypeWKWebView;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
-    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -98,7 +97,6 @@
     request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
     request.webViewType = MSALWebviewTypeWKWebView;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
-    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -132,7 +130,6 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.account;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
-    request.sliceParameters = @{@"dc" : @"BLACKFOREST-FRA1-Test"};
 
     // 1. Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
