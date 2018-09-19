@@ -1058,14 +1058,15 @@
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
-    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
-    [MSIDTestURLSession addResponse:oidcResponse];
-    
-    // Set up two 504 network responses
+    // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
-    [MSIDTestURLSession addResponse:tokenResponse];
+    
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                error:&error];
@@ -1089,11 +1090,10 @@
     NSError *removeRTError = nil;
     //remove RT from cache
     BOOL removeRTResult = [self.tokenCache validateAndRemoveRefreshToken:refreshToken context:nil error:&removeRTError];
-    XCTAssertNil(error);
+    XCTAssertNil(removeRTError);
     XCTAssertTrue(removeRTResult);
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1102,8 +1102,6 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqual(result.extendedLifeTimeToken, NO);
-         
          [expectation fulfill];
      }];
     

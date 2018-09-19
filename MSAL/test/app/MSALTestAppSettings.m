@@ -31,8 +31,8 @@
 static NSDictionary* _additionalProfiles()
 {
     return @{
-      @"MSAL-TestApp" : @{@"clientId" : @"3c62ac97-29eb-4aed-a3c8-add0298508da",
-                           @"redirectUri" : @"msal3c62ac97-29eb-4aed-a3c8-add0298508da://auth"},
+      @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
+                           @"redirectUri" : @"msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth"},
       };
 }
 #endif
@@ -173,10 +173,11 @@ static NSDictionary * s_profiles;
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {
+        _profile = [[s_profiles allValues] objectAtIndex:0];
         return;
     }
     
-    _profile = [settings objectForKey:@"profile"] ? [settings objectForKey:@"profile"] : [[s_profiles allValues] objectAtIndex:0];
+    _profile = [settings objectForKey:@"profile"];
     NSString *authorityString = [settings objectForKey:@"authority"];
     if (authorityString)
     {

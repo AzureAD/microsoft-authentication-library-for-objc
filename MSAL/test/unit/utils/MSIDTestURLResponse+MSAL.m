@@ -160,7 +160,9 @@
                                                                               preferredUsername:user.username
                                                                                        tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson] } ];
+                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson],
+                                             @"scope": [scopes msidToString]
+                                             } ];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     
