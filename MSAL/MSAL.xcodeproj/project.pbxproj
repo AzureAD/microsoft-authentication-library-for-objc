@@ -105,6 +105,8 @@
 		B221CEDE20C0AC60002F5E94 /* MSALAccountId.m in Sources */ = {isa = PBXBuildFile; fileRef = B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */; };
 		B221CEEB20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
 		B221CEEC20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
+		B2341A2A21507CA1008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
+		B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
 		B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */; };
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
@@ -747,6 +749,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */,
 				B29E2ADC21238F8200B170ED /* SafariServices.framework in Frameworks */,
 				B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */,
 				B29E2ADA21238F7900B170ED /* libIdentityCore.a in Frameworks */,
@@ -758,6 +761,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2341A2A21507CA1008E93FC /* AuthenticationServices.framework in Frameworks */,
 				B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */,
 				B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */,
 				B29E2AC221238DCD00B170ED /* libIdentityCore.a in Frameworks */,
@@ -2617,6 +2621,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
@@ -2631,6 +2636,7 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
