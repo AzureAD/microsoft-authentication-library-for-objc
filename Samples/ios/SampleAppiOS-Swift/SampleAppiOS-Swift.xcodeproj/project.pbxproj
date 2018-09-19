@@ -17,7 +17,7 @@
 		96672D9F1EC7912C00878AC5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96672D9D1EC7912C00878AC5 /* Main.storyboard */; };
 		96672DA11EC7912C00878AC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96672DA01EC7912C00878AC5 /* Assets.xcassets */; };
 		96672DA41EC7912C00878AC5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 96672DA21EC7912C00878AC5 /* LaunchScreen.storyboard */; };
-		96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */; };
+		96672DCC1EC7923000878AC5 /* SampleMSALAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */; };
 		96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */; };
 		96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */; };
 		96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */; };
@@ -31,6 +31,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = D65A6F421E3FD30A00C69FBA;
 			remoteInfo = "MSAL (iOS Framework)";
+		};
+		96595136215180A8009F86DF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B2BB73702112C32C000EA4C5;
+			remoteInfo = InteractiveiOSTests;
+		};
+		96595138215180A8009F86DF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B29E2ACE21238F5200B170ED;
+			remoteInfo = MultiAppiOSTests;
 		};
 		96672DB61EC7913D00878AC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -116,7 +130,7 @@
 		96672DA31EC7912C00878AC5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		96672DA51EC7912C00878AC5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		96672DAB1EC7913D00878AC5 /* MSAL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MSAL.xcodeproj; path = ../../../MSAL/MSAL.xcodeproj; sourceTree = "<group>"; };
-		96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleMSALUtil.swift; sourceTree = "<group>"; };
+		96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleMSALAuthentication.swift; sourceTree = "<group>"; };
 		96672DCD1EC7923D00878AC5 /* SampleCalendarUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleCalendarUtil.swift; sourceTree = "<group>"; };
 		96672DCF1EC7924700878AC5 /* SamplePhotoUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SamplePhotoUtil.swift; sourceTree = "<group>"; };
 		96672DD11EC7925C00878AC5 /* SampleGraphRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleGraphRequest.swift; sourceTree = "<group>"; };
@@ -179,6 +193,8 @@
 				96672DC11EC7913D00878AC5 /* MSAL Test App.app */,
 				96672DC31EC7913D00878AC5 /* MSAL Test Automation (iOS).app */,
 				96672DC51EC7913D00878AC5 /* unit-test-host.app */,
+				96595137215180A8009F86DF /* InteractiveiOSTests.xctest */,
+				96595139215180A8009F86DF /* MultiAppiOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -186,7 +202,7 @@
 		96672DC61EC7919500878AC5 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
-				96672DCB1EC7923000878AC5 /* SampleMSALUtil.swift */,
+				96672DCB1EC7923000878AC5 /* SampleMSALAuthentication.swift */,
 			);
 			name = Authentication;
 			sourceTree = "<group>";
@@ -265,6 +281,7 @@
 					96672D951EC7912C00878AC5 = {
 						CreatedOnToolsVersion = 8.3.1;
 						DevelopmentTeam = UBF8T346G9;
+						LastSwiftMigration = 1000;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -299,6 +316,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		96595137215180A8009F86DF /* InteractiveiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = InteractiveiOSTests.xctest;
+			remoteRef = 96595136215180A8009F86DF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		96595139215180A8009F86DF /* MultiAppiOSTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MultiAppiOSTests.xctest;
+			remoteRef = 96595138215180A8009F86DF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		96672DB71EC7913D00878AC5 /* MSAL.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -306,10 +337,10 @@
 			remoteRef = 96672DB61EC7913D00878AC5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		96672DB91EC7913D00878AC5 /* "MSAL-iOS-Unit-Tests".xctest */ = {
+		96672DB91EC7913D00878AC5 /* "MSAL-iOS-UI-Tests".xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = "\"MSAL-iOS-Unit-Tests\".xctest";
+			path = "\"MSAL-iOS-UI-Tests\".xctest";
 			remoteRef = 96672DB81EC7913D00878AC5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -379,7 +410,7 @@
 				96672DD21EC7925C00878AC5 /* SampleGraphRequest.swift in Sources */,
 				96672DCE1EC7923D00878AC5 /* SampleCalendarUtil.swift in Sources */,
 				96DFD2B21ECD25A6007ED2A1 /* SampleGraphScopes.swift in Sources */,
-				96672DCC1EC7923000878AC5 /* SampleMSALUtil.swift in Sources */,
+				96672DCC1EC7923000878AC5 /* SampleMSALAuthentication.swift in Sources */,
 				96672DD01EC7924700878AC5 /* SamplePhotoUtil.swift in Sources */,
 				9622AAC71ECA75FC0052B975 /* SampleLoginViewController.swift in Sources */,
 				9622AAC51ECA3D900052B975 /* SampleAppErrors.swift in Sources */,
@@ -523,7 +554,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -537,7 +569,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.SampleAppiOS-Swift";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};
