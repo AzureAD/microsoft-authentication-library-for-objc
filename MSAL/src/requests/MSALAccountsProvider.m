@@ -34,6 +34,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDAccount.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSIDConfiguration.h"
 
 @interface MSALAccountsProvider()
 
@@ -77,7 +78,7 @@
                                     }
                                     
                                     NSError *accountsError = nil;
-                                    NSArray *accounts = [self allAccountsForEnvironment:authority.msidAuthority.environment error:&accountsError];
+                                    NSArray *accounts = [self allAccountsForAuthority:authority.msidAuthority error:&accountsError];
                                     completionBlock(accounts, accountsError);
                                 }];
 }
@@ -86,18 +87,23 @@
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    return [self allAccountsForEnvironment:nil error:error];
+    return [self allAccountsForAuthority:nil error:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil
+                                                                        redirectUri:nil
+                                                                           clientId:self.clientId
+                                                                             target:nil];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
+                                                                   familyId:nil
+                                                                    context:nil
+                                                                      error:&msidError];
     
     if (msidError)
     {
@@ -120,11 +126,16 @@
                               error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil
+                                                                        redirectUri:nil
+                                                                           clientId:self.clientId
+                                                                             target:nil];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
+                                                                   familyId:nil
+                                                                    context:nil
+                                                                      error:&msidError];
     
     if (msidError)
     {
@@ -145,15 +156,20 @@
 
 #pragma mark - Private
 
-- (NSArray <MSALAccount *> *)allAccountsForEnvironment:(NSString *)environment
-                                                 error:(NSError * __autoreleasing *)error
+- (NSArray <MSALAccount *> *)allAccountsForAuthority:(MSIDAuthority *)authority
+                                               error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:environment
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
+                                                                        redirectUri:nil
+                                                                           clientId:self.clientId
+                                                                             target:nil];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
+                                                                   familyId:nil
+                                                                    context:nil
+                                                                      error:&msidError];
     
     if (msidError)
     {
