@@ -69,7 +69,7 @@ class SampleMainViewController: UIViewController {
         loadEvents()
         
         do {
-            let account = try SampleMSALUtil.shared.currentAccount()
+            let account = try SampleMSALAuthentication.shared.currentAccount()
             nameLabel.text = "Welcome, \(account.username!)"
         } catch let error {
             print("Loading current account name error: \(error)")
@@ -80,7 +80,7 @@ class SampleMainViewController: UIViewController {
     
     @IBAction func signOut(_ sender: Any) {
         do {
-            try SampleMSALUtil.shared.signOut()
+            try SampleMSALAuthentication.shared.signOut()
         } catch let error {
             print("Sign out error: \(error)")
         }

@@ -1,3 +1,10 @@
+## [0.2.0] - 2018-09-18
+### Added
+- Support for different authority aliases 
+- Support for sovereign clouds
+- Support for claims challenge
+- Better resiliency in case of server outages
+
 ## [0.1.4] - 2018-09-12
 ### Added
 - Cache coexistence with older ADAL versions
