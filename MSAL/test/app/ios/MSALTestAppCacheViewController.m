@@ -201,7 +201,7 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        _accounts = [self.defaultAccessor allAccountsForConfiguration:nil familyId:nil context:nil error:nil];
+        _accounts = [self.defaultAccessor allAccountsForAuthority:nil clientId:nil familyId:nil context:nil error:nil];
         _tokensPerAccount = [NSMutableDictionary dictionary];
 
         for (MSIDAccount *account in _accounts)

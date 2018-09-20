@@ -95,15 +95,11 @@
 {
     NSError *msidError = nil;
 
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil
-                                                                        redirectUri:nil
-                                                                           clientId:self.clientId
-                                                                             target:nil];
-
-    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
-                                                                   familyId:nil
-                                                                    context:nil
-                                                                      error:&msidError];
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {
@@ -127,15 +123,11 @@
 {
     NSError *msidError = nil;
 
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil
-                                                                        redirectUri:nil
-                                                                           clientId:self.clientId
-                                                                             target:nil];
-
-    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
-                                                                   familyId:nil
-                                                                    context:nil
-                                                                      error:&msidError];
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {
@@ -161,15 +153,11 @@
 {
     NSError *msidError = nil;
 
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
-                                                                        redirectUri:nil
-                                                                           clientId:self.clientId
-                                                                             target:nil];
-
-    __auto_type msidAccounts = [self.tokenCache allAccountsForConfiguration:configuration
-                                                                   familyId:nil
-                                                                    context:nil
-                                                                      error:&msidError];
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:authority
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {

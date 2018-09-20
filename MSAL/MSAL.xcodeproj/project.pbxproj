@@ -1740,7 +1740,6 @@
 					};
 					D61A64321E5A29580086D120 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -2622,10 +2621,10 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
@@ -2637,9 +2636,9 @@
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = UBF8T346G9;
+				DEVELOPMENT_TEAM = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
 				PROVISIONING_PROFILE = "";
 			};
 			name = Release;

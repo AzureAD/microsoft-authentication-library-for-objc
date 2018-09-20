@@ -66,6 +66,8 @@
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebviewFactory.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAadAuthorityCache.h"
+#import "MSIDAadAuthorityCacheRecord.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -140,6 +142,18 @@
 
     application.webviewType = MSALWebviewTypeWKWebView;
 
+    // Add authorities to cache
+    MSIDAadAuthorityCacheRecord *record = [MSIDAadAuthorityCacheRecord new];
+    record.networkHost = @"login.microsoftonline.com";
+    record.cacheHost = @"login.windows.net";
+    record.aliases = @[@"login.microsoftonline.com", @"login.windows.net", @"login.microsoft.com"];
+    record.validated = YES;
+
+    MSIDAadAuthorityCache *cache = [MSIDAadAuthorityCache sharedInstance];
+    [cache setObject:record forKey:@"login.microsoftonline.com"];
+    [cache setObject:record forKey:@"login.windows.net"];
+    [cache setObject:record forKey:@"login.microsoft.com"];
+
     __block MSALAccount *resultAccount = nil;
 
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
@@ -157,6 +171,9 @@
      }];
 
     [self waitForExpectations:@[interactiveExpectation] timeout:1];
+
+    // Now remove aliases, simulating app restart
+    [[MSIDAadAuthorityCache sharedInstance] removeAllObjects];
 
     // Now test that we're able to retrieve cache successfully back
     XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
