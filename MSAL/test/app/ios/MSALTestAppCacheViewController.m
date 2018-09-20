@@ -143,7 +143,7 @@
     MSIDAccount *account = [self accounts][indexPath.section];
 
     [self.defaultAccessor clearCacheForAccount:account.accountIdentifier
-                                   environment:nil
+                                     authority:nil
                                       clientId:nil
                                        context:nil
                                          error:nil];
@@ -201,7 +201,7 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        [self setAccounts:[self.defaultAccessor allAccountsForEnvironment:nil clientId:nil familyId:nil context:nil error:nil]];
+        [self setAccounts:[self.defaultAccessor allAccountsForAuthority:nil clientId:nil familyId:nil context:nil error:nil]];
         _tokensPerAccount = [NSMutableDictionary dictionary];
 
         for (MSIDAccount *account in [self accounts])

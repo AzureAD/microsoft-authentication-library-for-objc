@@ -261,6 +261,12 @@
     profileRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.tenantName];
     profileRequest.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:profileRequest];
+
+    // 7. Restart the test app and make sure we're still able to retrieve the token
+    [self.testApp terminate];
+    [self.testApp launch];
+
+    [self runSharedSilentAADLoginWithTestRequest:profileRequest];
 }
 
 // TODO: B2C ignores login_hint?

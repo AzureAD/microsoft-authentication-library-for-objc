@@ -458,22 +458,25 @@
     @throw @"Do not recognize prompt behavior";
 }
 
+- (NSString *)currentClientId
+{
+    if ([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
+    {
+        return B2C_TEST_APP_CLIENT_ID;
+    }
+    else
+    {
+        return TEST_APP_CLIENT_ID;
+    }
+}
+
 - (void)acquireTokenInteractive:(id)sender
 {
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     MSALAuthority *authority = [settings authority];
-    NSString *clientId;
+    NSString *clientId = [self currentClientId];
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
-    
-    if([[MSALTestAppAuthorityViewController currentTitle] containsString:@"/tfp/"])
-    {
-        clientId = B2C_TEST_APP_CLIENT_ID;;
-    }
-    else
-    {
-        clientId = TEST_APP_CLIENT_ID;
-    }
 
     NSError *error = nil;
     MSALPublicClientApplication *application =
@@ -576,7 +579,7 @@
     }
     
     __auto_type authority = [settings authority];
-    NSString *clientId = TEST_APP_CLIENT_ID;
+    NSString *clientId = [self currentClientId];
     
     NSError *error = nil;
     
