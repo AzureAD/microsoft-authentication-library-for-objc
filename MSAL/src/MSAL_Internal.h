@@ -37,8 +37,8 @@
 // Framework versions only support high and low for the double value, sadly.
 #define MSAL_VERSION_NUMBER INT_CONCAT(MSAL_VER_HIGH, MSAL_VER_LOW)
 
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH) "-dev"
-#define MSAL_VERSION_NSSTRING   @"" STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH) "-dev"
+#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+#define MSAL_VERSION_NSSTRING   @"" STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
 
 #define MSAL_VERSION_HELPER(high, low, patch) msalVersion_ ## high ## _ ## low ## _ ## patch
 #define MSAL_VERSION_(high, low, patch) MSAL_VERSION_HELPER(high, low, patch)
