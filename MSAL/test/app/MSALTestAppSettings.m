@@ -108,6 +108,7 @@ static NSDictionary * s_profiles;
     
     dispatch_once(&s_settingsOnce,^{
         s_settings = [MSALTestAppSettings new];
+        s_settings->_profile = [[s_profiles allValues] objectAtIndex:0];
         [s_settings readFromDefaults];
         s_settings->_scopes = [NSMutableSet new];
     });
@@ -142,18 +143,7 @@ static NSDictionary * s_profiles;
     }
     
     NSError *error = nil;
-    NSString *clientId;
-    if (_profile)
-    {
-        clientId = [_profile objectForKey:@"clientId"];
-    }
-    else
-    {
-        NSArray *profileValues = [s_profiles allValues];
-        NSDictionary *profile = [profileValues objectAtIndex:0];
-        clientId = [profile objectForKey:@"clientId"];
-    }
-    
+    NSString *clientId = [_profile objectForKey:@"clientId"];
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                 authority:self.authority
@@ -173,11 +163,15 @@ static NSDictionary * s_profiles;
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {
-        _profile = [[s_profiles allValues] objectAtIndex:0];
         return;
     }
     
-    _profile = [settings objectForKey:@"profile"];
+    NSDictionary *profile = [settings objectForKey:@"profile"];
+    if(profile)
+    {
+        _profile = profile;
+    }
+    
     NSString *authorityString = [settings objectForKey:@"authority"];
     if (authorityString)
     {

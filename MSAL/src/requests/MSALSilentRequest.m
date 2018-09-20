@@ -45,6 +45,8 @@
 @interface MSALSilentRequest()
 
 @property (nonatomic) MSIDRefreshToken *refreshToken;
+@property (nonatomic) MSIDRefreshToken *familyRefreshToken;
+@property (nonatomic) NSString *familyId;
 
 @end
 
@@ -145,20 +147,20 @@
 
 - (MSIDRefreshToken *)getRefreshToken:(NSString *)familyId error:(NSError **)error
 {
+    self.familyId = familyId;
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    self.refreshToken = [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
+    return [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
                                                            familyId:familyId
                                                       configuration:msidConfiguration
                                                             context:_parameters
                                                               error:error];
-    return self.refreshToken;
 }
 
 - (void)tryRT:(NSString *)familyID completionBlock:(MSALCompletionBlock)completionBlock
 {
     //try looking for FRT first
     NSError *msidError = nil;
-    [self getRefreshToken:familyID error:&msidError];
+    self.familyRefreshToken = [self getRefreshToken:familyID error:&msidError];
     
     if (msidError)
     {
@@ -167,10 +169,10 @@
     }
     
     //if FRT not found, try looking for MRRT
-    if (!self.refreshToken)
+    if (!self.familyRefreshToken)
     {
         msidError = nil;
-        [self getRefreshToken:nil error:&msidError];
+        self.refreshToken = [self getRefreshToken:nil error:&msidError];
         if (msidError)
         {
             completionBlock(nil, msidError);
@@ -178,15 +180,17 @@
         }
     }
     
-    [self refreshAccessToken:^(MSALResult *result, NSError *error)
+    MSIDRefreshToken *currentRefreshToken = self.familyRefreshToken ? self.familyRefreshToken : self.refreshToken;
+    
+    [self refreshAccessToken:currentRefreshToken completionBlock:^(MSALResult *result, NSError *error)
      {
          if (error)
          {
              //If server returns invalid_grant and refresh token uses is FRT, try MRRT
-             if (error.code == MSALErrorInvalidGrant && self.refreshToken.familyId)
+             if([self isErrorRecoverableByUserInteraction:error])
              {
                  NSError *msidError = nil;
-                 [self getRefreshToken:nil error:&msidError];
+                 self.refreshToken = [self getRefreshToken:nil error:&msidError];
                  
                  if (msidError)
                  {
@@ -194,23 +198,30 @@
                      return;
                  }
                  
-                 [self refreshAccessToken:completionBlock];
+                 if(self.refreshToken.familyId && ![[self.refreshToken refreshToken] isEqualToString:[self.familyRefreshToken refreshToken]])
+                 {
+                     [self refreshAccessToken:self.refreshToken completionBlock:completionBlock];
+                     return;
+                 }
+                 
+                 NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
+                 
+                 completionBlock(nil, interactionError);
+                 return;
              }
-             else
-             {
-                 completionBlock(nil,error);
-             }
+             
+             completionBlock(nil, error);
          }
          else
          {
-             completionBlock(result,nil);
+             completionBlock(result, nil);
          }
      }];
 }
 
-- (void)refreshAccessToken:(MSALCompletionBlock)completionBlock
+- (void)refreshAccessToken:(MSIDRefreshToken *)refreshToken completionBlock:(MSALCompletionBlock)completionBlock
 {
-    CHECK_ERROR_COMPLETION(self.refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
+    CHECK_ERROR_COMPLETION(refreshToken, _parameters, MSALErrorInteractionRequired, @"No token matching arguments found in the cache")
     MSID_LOG_INFO(_parameters, @"Refreshing access token");
     MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
@@ -240,10 +251,11 @@
 
 - (MSIDTokenRequest *)tokenRequest
 {
+    MSIDRefreshToken *refreshToken = [self.familyId isEqualToString:@"1"] ? self.familyRefreshToken : self.refreshToken;
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
                                                                scope:[[self requestScopes:nil] msidToString]
-                                                        refreshToken:[self.refreshToken refreshToken]
+                                                        refreshToken:[refreshToken refreshToken]
                                                              context:_parameters];
 }
 
@@ -256,6 +268,17 @@
     
     NSInteger responseCode = [[error.userInfo objectForKey:MSALHTTPResponseCodeKey] intValue];
     return error.code == MSALErrorUnhandledResponse && responseCode >= 500 && responseCode <= 599;
+}
+
+- (BOOL)isErrorRecoverableByUserInteraction:(NSError *)msidError
+{
+    if (msidError.code == MSALErrorInvalidGrant
+        || msidError.code == MSALErrorInvalidRequest)
+    {
+        return YES;
+    }
+    
+    return NO;
 }
 
 @end
