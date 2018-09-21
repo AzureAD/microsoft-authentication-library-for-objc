@@ -219,18 +219,14 @@
     request.uiBehavior = @"force";
     request.loginHint = self.primaryAccount.username;
     request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireToken:config];
+    // 1. Run Interactive
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
 
-    [self acceptAuthSessionDialog];
-
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
-    [self assertErrorCode:@"MSALErrorInvalidRequest"];
-    [self assertErrorDescription:@"Please use the /organizations or tenant-specific endpoint."];
-    [self closeResultView];
+    // 2. Run silent
+    request.accountIdentifier = homeAccountId;
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
