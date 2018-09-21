@@ -115,9 +115,10 @@ static NSDictionary *s_userInfoKeyMapping;
     NSString *msalDomain = domain;
 
     // Map domain
-    if (s_errorDomainMapping[domain])
+    NSString *newDomain = s_errorDomainMapping[domain];
+    if (newDomain)
     {
-        msalDomain = s_errorDomainMapping[domain];
+        msalDomain = newDomain;
     }
 
     // Map errorCode
@@ -126,7 +127,7 @@ static NSDictionary *s_userInfoKeyMapping;
     if (msalDomain && msalErrorCode && s_errorCodeMapping[msalDomain])
     {
         NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msalErrorCode)];
-        if (mappedErrorCode)
+        if (mappedErrorCode != nil)
         {
             msalErrorCode = [mappedErrorCode integerValue];
         }
