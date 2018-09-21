@@ -41,16 +41,5 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 NS_ASSUME_NONNULL_END
-/*
- ncetype _Nullable)initWithConfiguration:(nonnull NSURLSessionConfiguration *)configuration
- delegate:(nullable MSIDURLSessionDelegate *)delegate NS_DESIGNATED_INITIALIZER;
- 
- @property (class, nonnull) MSIDURLSessionManager *defaultManager;
- @property (nonatomic, readonly, nonnull) NSURLSessionConfiguration *configuration;
- @property (nonatomic, readonly, nonnull) NSURLSession *session;
- 
- - (instancetype _Nullable )init NS_UNAVAILABLE;
- + (instancetype _Nullable )new NS_UNAVAILABLE;
- */
 
 @end
