@@ -18,18 +18,24 @@ These libraries are suitable to use in a production environment. We provide the 
 ## Example in Swift
 
 ```swift
-    if let application = try? MSALPublicClientApplication.init(clientId: <your-client-id-here>) {
-        application.acquireToken(forScopes: kScopes) { (result, error) in
-            if result != nil {
-                    // Set up your app for the account
-            } else {
-                print(error?.localizedDescription)
+    if let application = try? MSALPublicClientApplication(clientId: "<your-client-id-here>") {
+            application.acquireToken(forScopes: kScopes) { (result, error) in
+
+                guard let authResult = result, error == nil else {
+                    print(error!.localizedDescription)
+                    return
+                }
+
+                // Get access token from result
+                let accessToken = authResult.accessToken
+
+                // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+                let accountIdentifier = authResult.account.homeAccountId.identifier
             }
         }
-    }
-    else {
+        else {
             print("Unable to create application.")
-        } 
+        }
 ```
 
 ## Example in Objective C
@@ -60,7 +66,7 @@ These libraries are suitable to use in a production environment. We provide the 
 
 ### Using Carthage
 
-We use [Carthage](https://github.com/Carthage/Carthage) for package management during the preview period of MSAL. This package manager integrates very nicely with XCode while maintaining our ability to make changes to the library. The sample is set up to use Carthage.
+We use [Carthage](https://github.com/Carthage/Carthage) for package management during the preview period of MSAL. This package manager integrates nicely with XCode while maintaining our ability to make changes to the library. The sample is set up to use Carthage.
 
 ##### If you're building for iOS, tvOS, or watchOS
 
@@ -69,6 +75,11 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 
 ```
 github "AzureAD/microsoft-authentication-library-for-objc" "master"
+```
+Note: this will point Carthage to the master branch, so you'll always get the latest official release. If you'd like to use a particular version you can use following definition:
+
+```
+github "AzureAD/microsoft-authentication-library-for-objc" == <latest_released_version>
 ```
 
 1. Run `carthage update`. This will fetch dependencies into a `Carthage/Checkouts` folder, then build the MSAL library.
@@ -103,6 +114,24 @@ If your project is managed in a git repository you can include MSAL as a git sub
 * `git add msal`
 * `git commit -m "Use MSAL git submodule at <latest_release_tag>"`
 * `git push`
+
+### Using CocoaPods
+
+You can use CocoaPods to remain up to date with MSAL within a specific major version. Include the following line in your podfile:
+
+```
+pod 'MSAL', '~> 0.2'
+```
+
+Note: if you're checking out a particular branch or tag of MSAL, you might need to add the :submodules => true flag to your podfile, so that CocoaPods finds MSAL dependencies
+
+```
+pod 'MSAL', :git => 'https://github.com/AzureAD/microsoft-authentication-library-for-objc', :branch => 'master', :submodules => true
+```
+
+You then you can run either `pod install` (if it's a new PodFile) or `pod update` (if it's an existing PodFile) to get the latest version of ADAL. Subsequent calls to `pod update` will update to the latest released version of MSAL as well.
+
+See [CocoaPods](https://cocoapods.org) for more information on setting up a PodFile
 
 ## Community Help and Support
 
@@ -154,9 +183,15 @@ If you find a security issue with our libraries or services please report it to 
     </array>
 ```
 
-Our library uses the SFAuthenticationSession for authentication on iOS 11+ and SFSafariViewController on iOS 9 and 10. The authorization response URL is returned to the app via the iOS openURL app delegate method, so you need to pipe this through to the current authorization session. 
+See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
-### Handling the redirect from the SFAuthenticationSession (Objective C)
+Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values for other iOS versions and other developer options in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
+
+### iOS 10 support
+
+If you choose to use SFSafariViewController (default on iOS 10) for MSAL authentication, the authorization response URL will be returned to the app via the iOS openURL app delegate method. So you need to pipe this through to the current authorization session. 
+
+#### Objective-C
 
 You will need to add the following to your `AppDelegate.m` file:
 
@@ -170,7 +205,7 @@ You will need to add the following to your `AppDelegate.m` file:
 }
 ```
 
-### Handling the redirect from the SFAuthenticationSession (Swift)
+#### Swift
 
 You will need to add the following to your `AppDelegate.swift` file:
 
@@ -178,8 +213,6 @@ You will need to add the following to your `AppDelegate.swift` file:
 func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         
         MSALPublicClientApplication.handleMSALResponse(url)
-        
-        
         return true
     }
 ```
@@ -196,7 +229,7 @@ Use the client ID from yout app listing when initializing your MSALPublicClientA
 ### Creating an Application Object (Swift)
 
 ```swift
-let application = try MSALPublicClientApplication.init(clientId: kClientID, authority: kAuthority)
+let application = try MSALPublicClientApplication(clientId: kClientID)
 
 ```
                                                     
@@ -224,19 +257,18 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 
 ```swift
     application.acquireToken(forScopes: kScopes) { (result, error) in
-                
-        if error == nil {
-                        
-            // You'll want to get the account identifier to retrieve and reuse the account
-            // for later acquireToken calls
 
-            accountIdentifier = result.account.homeAccountId.identifier
-            accessToken = result.accessToken
-            
-        } else {
-                // Check error
-        }
-    }
+                guard let authResult = result, error == nil else {
+                    print(error!.localizedDescription)
+                    return
+                }
+
+                // Get access token from result
+                let accessToken = authResult.accessToken
+
+                // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+                let accountIdentifier = authResult.account.homeAccountId.identifier
+            }
 ```
 
 ### Silently Acquiring an Updated Token (Objective C)
@@ -273,20 +305,26 @@ let application = try MSALPublicClientApplication.init(clientId: kClientID, auth
 ### Silently Acquiring an Updated Token (Swift)
 ```swift
 
-    application.acquireTokenSilent(forScopes: kScopes, account: account) { (result, error) in
-    
-        if error == nil {
+    let account = try application.account(forHomeAccountId: accountIdentifier)
 
-          accessToken = result!.accessToken
-                        
-        } else {
-                        
-            if (error! as NSError).code == MSALErrorCode.interactionRequired.rawValue {
+        application.acquireTokenSilent(forScopes: kScopes, account: account) { (result, error) in
 
-               // Interactive auth will be required
+            guard let authResult = result, error == nil else {
+
+                let nsError = error! as NSError
+
+                if (nsError.domain == MSALErrorDomain &&
+                    nsError.code == MSALErrorCode.interactionRequired.rawValue) {
+
+                    // Interactive auth will be required
+                    return
+                }
+                return
             }
+
+            // Get access token from result
+            let accessToken = authResult.accessToken
         }
-    }
 
 ```
 
@@ -298,6 +336,9 @@ Occasionally user interaction will be required to get a new access token, when t
                        completionBlock:^(MSALResult *result, NSError *error) { }];
 ```
 
+### Additional guidance
 
+Our [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki) is intended to document common patterns, error handling and debugging, functionality (e.g. logging, telemetry), and active bugs.
+You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki)
 
 Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
