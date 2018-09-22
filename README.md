@@ -76,7 +76,7 @@ We use [Carthage](https://github.com/Carthage/Carthage) for package management d
 ```
 github "AzureAD/microsoft-authentication-library-for-objc" "master"
 ```
-Note: this will point Carthage to the master branch, so you'll always get the latest official release. If you'd like to use a particular version you can use following definition:
+Note: this will point Carthage to the master branch, so you'll always get the latest official release. If you would like to use a particular version, you can do the following:
 
 ```
 github "AzureAD/microsoft-authentication-library-for-objc" == <latest_released_version>
@@ -117,13 +117,13 @@ If your project is managed in a git repository you can include MSAL as a git sub
 
 ### Using CocoaPods
 
-You can use CocoaPods to remain up to date with MSAL within a specific major version. Include the following line in your podfile:
+You can use CocoaPods to remain up to date with MSAL with our latest major version 0.2. Include the following line in your podfile:
 
 ```
 pod 'MSAL', '~> 0.2'
 ```
 
-Note: if you're checking out a particular branch or tag of MSAL, you might need to add the :submodules => true flag to your podfile, so that CocoaPods finds MSAL dependencies
+Note: if you're checking out a particular branch or tag of MSAL, you will need to add the :submodules => true flag to your podfile, so that CocoaPods finds MSAL dependencies
 
 ```
 pod 'MSAL', :git => 'https://github.com/AzureAD/microsoft-authentication-library-for-objc', :branch => 'master', :submodules => true
@@ -185,11 +185,11 @@ If you find a security issue with our libraries or services please report it to 
 
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
-Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values for other iOS versions and other developer options in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
+Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
 
 ### iOS 10 support
 
-If you choose to use SFSafariViewController (default on iOS 10) for MSAL authentication, the authorization response URL will be returned to the app via the iOS openURL app delegate method. So you need to pipe this through to the current authorization session. 
+If you choose to use SFSafariViewController (default on iOS 10) for MSAL authentication, the authorization response URL will be returned to the app via the iOS openURL app delegate method. So you need to pass this through to the current authorization session. 
 
 #### Objective-C
 
