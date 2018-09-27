@@ -4,3 +4,5 @@ GCC_PREFIX_HEADER = src/MSAL.pch
 IDCORE_PATH = IdentityCore/IdentityCore
 USER_HEADER_SEARCH_PATHS = $(inherited) $IDCORE_PATH/src/**
 
+OTHER_CFLAGS=$(inherited) -fstack-protector-strong
+
