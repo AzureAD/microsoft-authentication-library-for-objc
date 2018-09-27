@@ -191,6 +191,10 @@ Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by 
 
 If you choose to use SFSafariViewController (default on iOS 10) for MSAL authentication, the authorization response URL will be returned to the app via the iOS openURL app delegate method. So you need to pass this through to the current authorization session. 
 
+### iOS 12 support
+
+Note: WKWebView drops network connection if device got locked on iOS 12. It is expected behavior and we can't manage it.
+
 #### Objective-C
 
 You will need to add the following to your `AppDelegate.m` file:
