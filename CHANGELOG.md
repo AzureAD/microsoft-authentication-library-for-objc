@@ -1,7 +1,7 @@
 ## [0.2.1] - 2018-09-27
 ### Added
 - Fix clang analyzer issues.
-- WKWebView drops network connection if device got locked on iOS 12. It is expected behavior and we can't manage it.
+- WKWebView drops network connection if device got locked on iOS 12. It is by design and not configurable.
 
 ## [0.2.0] - 2018-09-18
 ### Added

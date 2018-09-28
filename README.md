@@ -193,7 +193,7 @@ If you choose to use SFSafariViewController (default on iOS 10) for MSAL authent
 
 ### iOS 12 support
 
-Note: WKWebView drops network connection if device got locked on iOS 12. It is expected behavior and we can't manage it.
+Note: WKWebView drops network connection if device got locked on iOS 12. It is by design and not configurable.
 
 #### Objective-C
 
