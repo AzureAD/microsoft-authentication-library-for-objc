@@ -25,36 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTestAppSettingViewController.h"
 
-#define TEST_APP_CLIENT_ID @"b6c69a37-df96-4db0-9088-2ab96e1d8215"
-#define B2C_TEST_APP_CLIENT_ID @"e3b9ad76-9763-4827-b088-80c7a7888f79"
+@interface MSALTestAppProfileViewController : MSALTestAppSettingViewController
+{
+    NSDictionary *_profiles;
+}
 
-@class MSALAuthority;
-
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-#define MSAL_APP_CLIENT_ID @"clientId"
-#define MSAL_APP_PROFILE @"profile"
-#define MSAL_APP_REDIRECT_URI @"redirectUri"
-
-@property (nonatomic) NSDictionary *profile;
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-+ (NSDictionary *)profiles;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
++ (instancetype)sharedController;
 
 @end

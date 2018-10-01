@@ -66,9 +66,11 @@
     _accounts = nil;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSDictionary *currentProfile = [settings profile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:TEST_APP_CLIENT_ID
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                 authority:settings.authority
                                                     error:&error];
     
