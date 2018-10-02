@@ -30,9 +30,27 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
 
+#if __has_include("MSALAdditionalTestAppSettings.h")
+#include "MSALAdditionalTestAppSettings.h"
+#else
+// If you put a header file at ~/aadoverrides/ADAdditionalTestAppSettings.h with
+// function named _addtionalProfiles() that returns an NSDictionary that will
+// be folded into the profiles list without you having to constantly alter your
+// github enlistment!
+static NSDictionary* _additionalProfiles()
+{
+    return @{
+             @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
+                            @"redirectUri" :@"msalb6c69a37df96-4db0-9088-2ab96e1d8215://auth"},
+             };
+}
+#endif
+
+static NSDictionary* s_additionalProfiles = nil;
+
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
-#define MSAL_APP_SCOPE_USER_READ        @"User.Read"
+#define MSAL_APP_SCOPE_USER_READ @"User.Read"
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
@@ -43,6 +61,8 @@ static NSArray<NSString *> *s_b2cAuthorities = nil;
 static NSArray<NSString *> *s_scopes_available = nil;
 
 static NSArray<NSString *> *s_authorityTypes = nil;
+
+static NSDictionary *s_profiles = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -79,6 +99,7 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
+    s_profiles = _additionalProfiles();
 }
 
 + (MSALTestAppSettings*)settings
@@ -88,11 +109,17 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     
     dispatch_once(&s_settingsOnce,^{
         s_settings = [MSALTestAppSettings new];
+        s_settings->_profile = [[s_profiles allValues] objectAtIndex:0];
         [s_settings readFromDefaults];
         s_settings->_scopes = [NSMutableSet new];
     });
     
     return s_settings;
+}
+
++ (NSDictionary *)profiles
+{
+    return s_profiles;
 }
 
 + (NSArray<NSString *> *)aadAuthorities
@@ -118,8 +145,9 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     }
     
     NSError *error = nil;
+    NSString *clientId = [_profile objectForKey:MSAL_APP_CLIENT_ID];
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:TEST_APP_CLIENT_ID
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                 authority:self.authority
                                                     error:&error];
     if (application == nil)
@@ -138,6 +166,12 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     if (!settings)
     {
         return;
+    }
+    
+    NSDictionary *profile = [settings objectForKey:MSAL_APP_PROFILE];
+    if (profile)
+    {
+        _profile = profile;
     }
     
     NSString *authorityString = [settings objectForKey:@"authority"];
@@ -227,5 +261,10 @@ static NSArray<NSString *> *s_authorityTypes = nil;
     return YES;
 }
 
+- (void)setProfile:(id)profile
+{
+    [self setValue:profile forKey:MSAL_APP_PROFILE];
+    _profile = profile;
+}
 
 @end
