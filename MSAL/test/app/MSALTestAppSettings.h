@@ -27,9 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-#define TEST_APP_CLIENT_ID @"b6c69a37-df96-4db0-9088-2ab96e1d8215"
-#define B2C_TEST_APP_CLIENT_ID @"e3b9ad76-9763-4827-b088-80c7a7888f79"
-
 @class MSALAuthority;
 
 extern NSString* MSALTestAppCacheChangeNotification;

@@ -46,8 +46,6 @@ static NSDictionary* _additionalProfiles()
 }
 #endif
 
-static NSDictionary* s_additionalProfiles = nil;
-
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
 #define MSAL_APP_SCOPE_USER_READ @"User.Read"
