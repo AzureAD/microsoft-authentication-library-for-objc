@@ -96,7 +96,7 @@ static NSArray* s_deviceRows = nil;
     
     MSALTestAppSettingsRow* clientIdRow = [MSALTestAppSettingsRow rowWithTitle:@"clientId"];
     NSDictionary *currentProfile = [[MSALTestAppSettings settings] profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     clientIdRow.valueBlock = ^NSString *{ return clientId; };
     MSALTestAppSettingsRow* authorityRow = [MSALTestAppSettingsRow rowWithTitle:@"authority"];
     authorityRow.valueBlock = ^NSString *{ return MSALTestAppSettings.settings.authority.msidAuthority.url.absoluteString; };

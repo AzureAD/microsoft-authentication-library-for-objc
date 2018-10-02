@@ -44,7 +44,7 @@ class SampleLoginViewController: UIViewController {
     
     @IBAction func signIn(_ sender: Any) {
         
-        SampleMSALUtil.shared.signInAccount {
+        SampleMSALAuthentication.shared.signInAccount {
             (account, token, error) in
             
             if let error = error {

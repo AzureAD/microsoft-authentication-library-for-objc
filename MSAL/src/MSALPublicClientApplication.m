@@ -702,9 +702,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     NSError *msidError = nil;
-    __auto_type host = self.authority.msidAuthority.environment;
+
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
-                                            environment:host
+                                              authority:self.authority.msidAuthority
                                                clientId:self.clientId
                                                 context:nil
                                                   error:&msidError];

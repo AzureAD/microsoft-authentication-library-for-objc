@@ -53,12 +53,12 @@
 @property (nonatomic) MSIDAccountCredentialCache *tokenCache;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultAccessor;
 @property (nonatomic) MSIDLegacyTokenCacheAccessor *legacyAccessor;
+@property (strong) NSArray *accounts;
 
 @end
 
 @implementation MSALTestAppCacheViewController
 {
-    NSArray *_accounts;
     NSMutableDictionary<NSString *, NSMutableArray *> *_tokensPerAccount;
     UITableView *_cacheTableView;
 }
@@ -140,10 +140,9 @@
 
 - (void)deleteAllAtPath:(NSIndexPath *)indexPath
 {
-    MSIDAccount *account = _accounts[indexPath.section];
-    
+    MSIDAccount *account = [self accounts][indexPath.section];
     [self.defaultAccessor clearCacheForAccount:account.accountIdentifier
-                                   environment:nil
+                                     authority:nil
                                       clientId:nil
                                        context:nil
                                          error:nil];
@@ -200,11 +199,10 @@
     [self.refreshControl beginRefreshing];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
-        _accounts = [self.defaultAccessor allAccountsForEnvironment:nil clientId:nil familyId:nil context:nil error:nil];
+        [self setAccounts:[self.defaultAccessor allAccountsForAuthority:nil clientId:nil familyId:nil context:nil error:nil]];
         _tokensPerAccount = [NSMutableDictionary dictionary];
-        
-        for (MSIDAccount *account in _accounts)
+
+        for (MSIDAccount *account in [self accounts])
         {
             _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
         }
@@ -235,18 +233,18 @@
 
 - (NSInteger)numberOfSectionsInTableView:(__unused UITableView *)tableView
 {
-    return [_accounts count];
+    return [[self accounts] count];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    MSIDAccount *account = _accounts[section];
+    MSIDAccount *account = [self accounts][section];
     return [_tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] count] + 1;
 }
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    MSIDAccount *account = _accounts[section];
+    MSIDAccount *account = [self accounts][section];
     NSString *title = [NSString stringWithFormat:@"%@ (%@)", account.username, [self rowIdentifier:account.accountIdentifier]];
     return title;
 }
@@ -255,7 +253,7 @@
 {
     if (indexPath.row >= 1)
     {
-        MSIDAccount *account = _accounts[indexPath.section];
+        MSIDAccount *account = [self accounts][indexPath.section];
         return _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]][indexPath.row - 1];
     }
     
@@ -281,7 +279,7 @@
     
     if (!token)
     {
-        MSIDAccount *account = _accounts[indexPath.section];
+        MSIDAccount *account = [self accounts][indexPath.section];
         cell.textLabel.text = account.authority.environment;
         cell.backgroundColor = [UIColor colorWithRed:0.27 green:0.43 blue:0.7 alpha:1.0];
         return cell;

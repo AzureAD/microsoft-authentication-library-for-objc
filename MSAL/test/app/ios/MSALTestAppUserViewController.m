@@ -67,7 +67,7 @@
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [settings profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSError *error = nil;
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId

@@ -34,6 +34,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDAccount.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSIDConfiguration.h"
 
 @interface MSALAccountsProvider()
 
@@ -77,7 +78,7 @@
                                     }
                                     
                                     NSError *accountsError = nil;
-                                    NSArray *accounts = [self allAccountsForEnvironment:authority.msidAuthority.environment error:&accountsError];
+                                    NSArray *accounts = [self allAccountsForAuthority:authority.msidAuthority error:&accountsError];
                                     completionBlock(accounts, accountsError);
                                 }];
 }
@@ -86,18 +87,19 @@
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    return [self allAccountsForEnvironment:nil error:error];
+    return [self allAccountsForAuthority:nil error:error];
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {
@@ -120,11 +122,12 @@
                               error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:nil
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {
@@ -145,15 +148,16 @@
 
 #pragma mark - Private
 
-- (NSArray <MSALAccount *> *)allAccountsForEnvironment:(NSString *)environment
-                                                 error:(NSError * __autoreleasing *)error
+- (NSArray <MSALAccount *> *)allAccountsForAuthority:(MSIDAuthority *)authority
+                                               error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-    __auto_type msidAccounts = [self.tokenCache allAccountsForEnvironment:environment
-                                                                 clientId:self.clientId
-                                                                 familyId:nil
-                                                                  context:nil
-                                                                    error:&msidError];
+
+    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:authority
+                                                               clientId:self.clientId
+                                                               familyId:nil
+                                                                context:nil
+                                                                  error:&msidError];
     
     if (msidError)
     {

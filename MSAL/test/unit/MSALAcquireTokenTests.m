@@ -66,6 +66,8 @@
 #import "MSIDWebAADAuthResponse.h"
 #import "MSIDWebviewFactory.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSIDAadAuthorityCache.h"
+#import "MSIDAadAuthorityCacheRecord.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -99,6 +101,96 @@
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
+- (void)testAcquireTokenInteractive_whenB2CAuthority_shouldCacheTokens
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:authority.msidAuthority.url.absoluteString
+                                      responseUrl:@"https://login.microsoftonline.com/contosob2c"
+                                            query:nil];
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:@"https://login.microsoftonline.com/contosob2c"
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]];
+
+    [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
+
+    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+
+         completionHandler(oauthResponse, nil);
+     }];
+
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                authority:authority
+                                                    error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+
+    application.webviewType = MSALWebviewTypeWKWebView;
+
+    // Add authorities to cache
+    MSIDAadAuthorityCacheRecord *record = [MSIDAadAuthorityCacheRecord new];
+    record.networkHost = @"login.microsoftonline.com";
+    record.cacheHost = @"login.windows.net";
+    record.aliases = @[@"login.microsoftonline.com", @"login.windows.net", @"login.microsoft.com"];
+    record.validated = YES;
+
+    MSIDAadAuthorityCache *cache = [MSIDAadAuthorityCache sharedInstance];
+    [cache setObject:record forKey:@"login.microsoftonline.com"];
+    [cache setObject:record forKey:@"login.windows.net"];
+    [cache setObject:record forKey:@"login.microsoft.com"];
+
+    __block MSALAccount *resultAccount = nil;
+
+    XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
+    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+
+         resultAccount = result.account;
+         XCTAssertNotNil(resultAccount);
+         [interactiveExpectation fulfill];
+     }];
+
+    [self waitForExpectations:@[interactiveExpectation] timeout:1];
+
+    // Now remove aliases, simulating app restart
+    [[MSIDAadAuthorityCache sharedInstance] removeAllObjects];
+
+    // Now test that we're able to retrieve cache successfully back
+    XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+
+    [application acquireTokenSilentForScopes:@[@"fakeb2cscopes"]
+                                     account:resultAccount
+                             completionBlock:^(MSALResult *result, NSError *error) {
+
+                                 XCTAssertNil(error);
+                                 XCTAssertNotNil(result);
+                                 XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+                                 [silentExpectation fulfill];
+    }];
+
+    [self waitForExpectations:@[silentExpectation] timeout:1];
+}
 
 - (void)testAcquireTokenInteractive_whenB2CAuthorityWithQP_shouldRetainQP
 {

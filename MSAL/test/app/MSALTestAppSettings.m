@@ -21,22 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#if __has_include("MSALAdditionalTestAppSettings.h")
-#include "MSALAdditionalTestAppSettings.h"
-#else
-// If you put a header file at ~/aadoverrides/MSALAdditionalTestAppSettings.hwith
-// function named _addtionalProfiles() that returns an NSDictionary that will
-// be folded into the profiles list without you having to constantly alter your
-// github enlistment!
-static NSDictionary* _additionalProfiles()
-{
-    return @{
-      @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
-                           @"redirectUri" : @"msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth"},
-      };
-}
-#endif
-
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
 #import "MSALAccountId.h"
@@ -46,9 +30,27 @@ static NSDictionary* _additionalProfiles()
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
 
+#if __has_include("MSALAdditionalTestAppSettings.h")
+#include "MSALAdditionalTestAppSettings.h"
+#else
+// If you put a header file at ~/aadoverrides/ADAdditionalTestAppSettings.h with
+// function named _addtionalProfiles() that returns an NSDictionary that will
+// be folded into the profiles list without you having to constantly alter your
+// github enlistment!
+static NSDictionary* _additionalProfiles()
+{
+    return @{
+             @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
+                            @"redirectUri" :@"msalb6c69a37df96-4db0-9088-2ab96e1d8215://auth"},
+             };
+}
+#endif
+
+static NSDictionary* s_additionalProfiles = nil;
+
 #define MSAL_APP_SETTINGS_KEY @"MSALSettings"
 
-#define MSAL_APP_SCOPE_USER_READ        @"User.Read"
+#define MSAL_APP_SCOPE_USER_READ @"User.Read"
 
 NSString* MSALTestAppCacheChangeNotification = @"MSALTestAppCacheChangeNotification";
 
@@ -60,7 +62,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 static NSArray<NSString *> *s_authorityTypes = nil;
 
-static NSDictionary * s_profiles;
+static NSDictionary *s_profiles = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -97,7 +99,6 @@ static NSDictionary * s_profiles;
     
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
-    
     s_profiles = _additionalProfiles();
 }
 
@@ -116,6 +117,11 @@ static NSDictionary * s_profiles;
     return s_settings;
 }
 
++ (NSDictionary *)profiles
+{
+    return s_profiles;
+}
+
 + (NSArray<NSString *> *)aadAuthorities
 {
     return s_authorities;
@@ -126,10 +132,6 @@ static NSDictionary * s_profiles;
     return s_b2cAuthorities;
 }
 
-+ (NSDictionary *)profiles
-{
-    return s_profiles;
-}
 + (NSArray<NSString *> *)authorityTypes
 {
     return s_authorityTypes;
@@ -143,7 +145,7 @@ static NSDictionary * s_profiles;
     }
     
     NSError *error = nil;
-    NSString *clientId = [_profile objectForKey:@"clientId"];
+    NSString *clientId = [_profile objectForKey:MSAL_APP_CLIENT_ID];
     MSALPublicClientApplication *application =
     [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                 authority:self.authority
@@ -166,8 +168,8 @@ static NSDictionary * s_profiles;
         return;
     }
     
-    NSDictionary *profile = [settings objectForKey:@"profile"];
-    if(profile)
+    NSDictionary *profile = [settings objectForKey:MSAL_APP_PROFILE];
+    if (profile)
     {
         _profile = profile;
     }
@@ -200,12 +202,6 @@ static NSDictionary * s_profiles;
     [settings setValue:value forKey:key];
     [[NSUserDefaults standardUserDefaults] setObject:settings
                                               forKey:MSAL_APP_SETTINGS_KEY];
-}
-
-- (void)setProfile:(id)profile
-{
-    [self setValue:profile forKey:@"profile"];
-    _profile = profile;
 }
 
 - (void)setAuthority:(MSALAuthority *)authority
@@ -265,5 +261,10 @@ static NSDictionary * s_profiles;
     return YES;
 }
 
+- (void)setProfile:(id)profile
+{
+    [self setValue:profile forKey:MSAL_APP_PROFILE];
+    _profile = profile;
+}
 
 @end

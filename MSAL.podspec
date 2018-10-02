@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "MSAL"
-  s.version      = "0.1.4"
+  s.version      = "0.2.0"
   s.summary      = "Microsoft Authentication Library (MSAL) Preview for iOS"
 
   s.description  = <<-DESC
@@ -14,8 +14,8 @@ Pod::Spec.new do |s|
   s.authors      = { "Microsoft" => "nugetaad@microsoft.com" }
   s.social_media_url   = "https://twitter.com/azuread"
   s.platform     = :ios, :osx
-  s.ios.deployment_target = "9.3"
-  s.osx.deployment_target = "10.10"
+  s.ios.deployment_target = "10.0"
+  s.osx.deployment_target = "10.11"
   s.source       = { 
     :git => "https://github.com/AzureAD/microsoft-authentication-library-for-objc.git",
     :tag => s.version.to_s,

@@ -145,7 +145,7 @@
     MSALTestAppAcquireLayoutBuilder *layout = [MSALTestAppAcquireLayoutBuilder new];
     
     _profileButton = [self buttonWithTitle:[MSALTestAppProfileViewController currentTitle]
-                                      action:@selector(selectProfile:)];
+                                    action:@selector(selectProfile:)];
     [layout addControl:_profileButton title:@"profile"];
     
     _authorityButton = [self buttonWithTitle:[MSALTestAppAuthorityViewController currentTitle]
@@ -190,20 +190,24 @@
     UIButton *clearCache = [UIButton buttonWithType:UIButtonTypeSystem];
     [clearCache setTitle:@"Clear Cache" forState:UIControlStateNormal];
     [clearCache addTarget:self action:@selector(clearCache:) forControlEvents:UIControlEventTouchUpInside];
-
-    [layout addCenteredView:clearCache key:@"clearCache"];
     
     UIButton *telemetryButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [telemetryButton setTitle:@"Show telemetry" forState:UIControlStateNormal];
     [telemetryButton addTarget:self action:@selector(showTelemetry:) forControlEvents:UIControlEventTouchUpInside];
     
-    [layout addCenteredView:telemetryButton key:@"telemetry"];
-    
     UIButton *stressTestButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [stressTestButton setTitle:@"Stress test" forState:UIControlStateNormal];
     [stressTestButton addTarget:self action:@selector(runStressTest:) forControlEvents:UIControlEventTouchUpInside];
     
-    [layout addCenteredView:stressTestButton key:@"stressTest"];
+    UIStackView *stackView = [[UIStackView alloc] init];
+    stackView.axis = UILayoutConstraintAxisHorizontal;
+    stackView.alignment = UIStackViewAlignmentFill;
+    stackView.distribution = UIStackViewDistributionFill;
+    
+    [stackView addArrangedSubview:clearCache];
+    [stackView addArrangedSubview:telemetryButton];
+    [stackView addArrangedSubview:stressTestButton];
+    [layout addView:stackView key:@"stackview"];
     
     _resultView = [[UITextView alloc] init];
     _resultView.layer.borderWidth = 1.0f;
@@ -416,7 +420,7 @@
     _validateAuthority.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
     
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
-                      forState:UIControlStateNormal];
+                    forState:UIControlStateNormal];
     [_authorityButton setTitle:[MSALTestAppAuthorityViewController currentTitle]
                       forState:UIControlStateNormal];
     [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
@@ -472,10 +476,11 @@
     (void)sender;
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [settings profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
-    NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
+
     NSError *error = nil;
     
     MSALPublicClientApplication *application =
@@ -578,13 +583,14 @@
     }
     
     NSDictionary *currentProfile = [settings profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
-    NSString *redirectUri = [currentProfile objectForKey:@"redirectUri"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
+    
     NSError *error = nil;
     
     MSALPublicClientApplication *application =
-       [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
@@ -638,11 +644,13 @@
     
     // Delete accounts.
     NSDictionary *currentProfile = [settings profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
@@ -761,11 +769,13 @@
     }
     
     NSDictionary *currentProfile = [settings profile];
-    NSString *clientId = [currentProfile objectForKey:@"clientId"];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
+    
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
     
     if (!application)
     {
