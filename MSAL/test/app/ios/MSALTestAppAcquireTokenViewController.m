@@ -605,7 +605,7 @@
 
     [application acquireTokenSilentForScopes:[settings.scopes allObjects]
                                      account:settings.currentAccount
-                                   authority:nil
+                                   authority:settings.authority
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)

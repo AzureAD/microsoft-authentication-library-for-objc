@@ -141,6 +141,7 @@
 - (void)deleteAllAtPath:(NSIndexPath *)indexPath
 {
     MSIDAccount *account = [self accounts][indexPath.section];
+    
     [self.defaultAccessor clearCacheForAccount:account.accountIdentifier
                                      authority:nil
                                       clientId:nil
@@ -199,9 +200,10 @@
     [self.refreshControl beginRefreshing];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
         [self setAccounts:[self.defaultAccessor allAccountsForAuthority:nil clientId:nil familyId:nil context:nil error:nil]];
         _tokensPerAccount = [NSMutableDictionary dictionary];
-
+        
         for (MSIDAccount *account in [self accounts])
         {
             _tokensPerAccount[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
