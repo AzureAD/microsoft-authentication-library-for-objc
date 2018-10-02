@@ -41,7 +41,7 @@ static NSDictionary* _additionalProfiles()
 {
     return @{
              @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
-                            @"redirectUri" :@"msalb6c69a37df96-4db0-9088-2ab96e1d8215:auth"},
+                            @"redirectUri" :@"msalb6c69a37df96-4db0-9088-2ab96e1d8215://auth"},
              };
 }
 #endif
