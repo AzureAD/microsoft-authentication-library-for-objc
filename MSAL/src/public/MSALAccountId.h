@@ -28,16 +28,16 @@
 /*!
  Account identifier in the directory
  */
-@property (nonatomic, readonly) NSString *identifier;
+@property (nonatomic, readonly, nonnull) NSString *identifier;
 
 /*!
  Object id of the account in the directory
  */
-@property (nonatomic, readonly) NSString *objectId;
+@property (nonatomic, readonly, nullable) NSString *objectId;
 
 /*!
  An identifier for the tenant that the account was acquired from
  */
-@property (nonatomic, readonly) NSString *tenantId;
+@property (nonatomic, readonly, nullable) NSString *tenantId;
 
 @end

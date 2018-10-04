@@ -50,14 +50,14 @@ typedef NS_ENUM(NSInteger, MSALLogLevel)
                             logger.
 
  */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL containsPII);
+typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
 
 
 @interface MSALLogger : NSObject
 
-- (instancetype)init NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
 
-+ (MSALLogger *)sharedLogger;
++ (nonnull MSALLogger *)sharedLogger;
 
 /*!
     The minimum log level for messages to be passed onto the log callback.
@@ -75,6 +75,6 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString *message, BOOL cont
     NOTE: Once this is set this can not be unset, and it should be set early in
           the program's execution.
  */
-- (void)setCallback:(MSALLogCallback)callback;
+- (void)setCallback:(nonnull MSALLogCallback)callback;
 
 @end

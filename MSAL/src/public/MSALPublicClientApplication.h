@@ -47,13 +47,13 @@
 @property BOOL extendedLifetimeEnabled;
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly) MSALAuthority *authority;
+@property (readonly, nonnull) MSALAuthority *authority;
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property (readonly) NSString *clientId;
+@property (readonly, nonnull) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly) NSString *redirectUri;
+@property (readonly, nonnull) NSString *redirectUri;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
@@ -65,11 +65,11 @@
     Used to specify query parameters that must be passed to both the authorize and token endpoints
     to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
-@property NSDictionary<NSString *, NSString *> *sliceParameters;
+@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters;
 
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
-@property NSString *component;
+@property (nullable) NSString *component;
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.
@@ -80,7 +80,7 @@
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
-@property WKWebView *customWebview;
+@property (nullable) WKWebView *customWebview;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
@@ -88,8 +88,8 @@
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  error       The error that occurred creating the application object, if any (optional)
  */
-- (id)initWithClientId:(NSString *)clientId
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
@@ -104,9 +104,9 @@
     @param  error       The error that occurred creating the application object, if any, if you're
                         not interested in the specific error pass in nil.
  */
-- (id)initWithClientId:(NSString *)clientId
-             authority:(MSALAuthority *)authority
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                                authority:(nullable MSALAuthority *)authority
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri
@@ -122,10 +122,10 @@
  @param  error          The error that occurred creating the application object, if any, if you're
                         not interested in the specific error pass in nil.
  */
-- (id)initWithClientId:(NSString *)clientId
-             authority:(MSALAuthority *)authority
-           redirectUri:(NSString *)redirectUri
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                                authority:(nullable MSALAuthority *)authority
+                              redirectUri:(nullable NSString *)redirectUri
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 
 #if TARGET_OS_IPHONE
@@ -133,7 +133,7 @@
  The keychain sharing group to use for the token cache.
  If it is nil, default MSAL group will be used.
  */
-@property (nonatomic, readonly) NSString *keychainGroup;
+@property (nonatomic, readonly, nullable) NSString *keychainGroup;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID and keychain group
@@ -143,9 +143,9 @@
                         If you provide this key, you MUST add the capability to your Application Entilement.
  @param  error          The error that occurred creating the application object, if any (optional)
  */
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                            keychainGroup:(nullable NSString *)keychainGroup
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
@@ -162,10 +162,10 @@
  @param  error          The error that occurred creating the application object, if any, if you're
                         not interested in the specific error pass in nil.
  */
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-             authority:(MSALAuthority *)authority
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                            keychainGroup:(nullable NSString *)keychainGroup
+                                authority:(nullable MSALAuthority *)authority
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
@@ -183,11 +183,11 @@
  @param  error          The error that occurred creating the application object, if any, if you're
                         not interested in the specific error pass in nil.
  */
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-             authority:(MSALAuthority *)authority
-           redirectUri:(NSString *)redirectUri
-                 error:(NSError * __autoreleasing *)error;
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                            keychainGroup:(nullable NSString *)keychainGroup
+                                authority:(nullable MSALAuthority *)authority
+                              redirectUri:(nullable NSString *)redirectUri
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 #endif
 
 /*!
@@ -197,7 +197,7 @@
                     not interested in the specific error pass in nil.
  */
 
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
+- (nullable NSArray <MSALAccount *> *)allAccounts:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
@@ -205,8 +205,8 @@
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
+- (nullable MSALAccount *)accountForHomeAccountId:(nonnull NSString *)homeAccountId
+                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
  Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
@@ -215,15 +215,15 @@
  @param  error       The error that occured trying to get the accounts, if any, if you're
                      not interested in the specific error pass in nil.
  */
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
+- (nullable MSALAccount *)accountForUsername:(nonnull NSString *)username
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
     Returns an array of accounts visible to this application and filtered by authority.
  
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-- (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
 #pragma SafariViewController Support
 
@@ -236,7 +236,7 @@
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(NSURL *)response;
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response;
 #endif
 
 /*!
@@ -258,8 +258,8 @@
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-              completionBlock:(MSALCompletionBlock)completionBlock;
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 #pragma mark -
 #pragma mark acquireToken using Login Hint
@@ -277,9 +277,9 @@
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                    loginHint:(NSString *)loginHint
-              completionBlock:(MSALCompletionBlock)completionBlock;
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+                    loginHint:(nullable NSString *)loginHint
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -296,11 +296,11 @@
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                    loginHint:(NSString *)loginHint
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+                    loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(MSALCompletionBlock)completionBlock;
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -327,14 +327,14 @@
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                    loginHint:(NSString *)loginHint
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                    loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSALAuthority *)authority
-                correlationId:(NSUUID *)correlationId
-              completionBlock:(MSALCompletionBlock)completionBlock;
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 #pragma mark -
 #pragma mark acquireToken using Account
@@ -351,9 +351,9 @@
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                      account:(MSALAccount *)account
-              completionBlock:(MSALCompletionBlock)completionBlock;
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+                      account:(nonnull MSALAccount *)account
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -370,11 +370,11 @@
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-                      account:(MSALAccount *)account
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+                      account:(nonnull MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(MSALCompletionBlock)completionBlock;
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -402,14 +402,14 @@
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                      account:(MSALAccount *)account
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                      account:(nonnull MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                    authority:(MSALAuthority *)authority
-                correlationId:(NSUUID *)correlationId
-              completionBlock:(MSALCompletionBlock)completionBlock;
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
  Acquire a token interactively for an existing account. This is typically used after receiving
@@ -438,15 +438,15 @@
  @param  completionBlock         The completion block that will be called when the authentication
                                  flow completes, or encounters an error.
  */
-- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
-         extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
-                      account:(MSALAccount *)account
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                      account:(nonnull MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
-         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
-                    authority:(MSALAuthority *)authority
-                correlationId:(NSUUID *)correlationId
-              completionBlock:(MSALCompletionBlock)completionBlock;
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(nullable NSString *)claims
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 #pragma mark -
 #pragma mark acquireTokenSilent
@@ -462,9 +462,9 @@
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
-- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                            account:(MSALAccount *)account
-                    completionBlock:(MSALCompletionBlock)completionBlock;
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -484,10 +484,10 @@
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
-- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                            account:(MSALAccount *)account
-                          authority:(MSALAuthority *)authority
-                    completionBlock:(MSALCompletionBlock)completionBlock;
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -509,12 +509,12 @@
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
  */
-- (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
-                            account:(MSALAccount *)account
-                          authority:(MSALAuthority *)authority
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
-                      correlationId:(NSUUID *)correlationId
-                    completionBlock:(MSALCompletionBlock)completionBlock;
+                      correlationId:(nullable NSUUID *)correlationId
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 #pragma mark -
 #pragma mark remove account from cache
@@ -525,8 +525,8 @@
  
     @param  account    The account to remove from the cache
  */
-- (BOOL)removeAccount:(MSALAccount *)account
-                error:(NSError * __autoreleasing *)error;
+- (BOOL)removeAccount:(nonnull MSALAccount *)account
+                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 
 @end
