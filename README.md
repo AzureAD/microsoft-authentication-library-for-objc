@@ -30,7 +30,7 @@ These libraries are suitable to use in a production environment. We provide the 
                 let accessToken = authResult.accessToken
 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId.identifier
+                let accountIdentifier = authResult.account.homeAccountId?.identifier
             }
         }
         else {
@@ -271,7 +271,7 @@ let application = try MSALPublicClientApplication(clientId: kClientID)
                 let accessToken = authResult.accessToken
 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId.identifier
+                let accountIdentifier = authResult.account.homeAccountId?.identifier
             }
 ```
 
