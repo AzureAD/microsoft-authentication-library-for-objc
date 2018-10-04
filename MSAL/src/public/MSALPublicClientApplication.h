@@ -352,7 +352,7 @@
                             flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
-                      account:(nonnull MSALAccount *)account
+                      account:(nullable MSALAccount *)account
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
@@ -371,7 +371,7 @@
                                     flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
-                      account:(nonnull MSALAccount *)account
+                      account:(nullable MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
@@ -404,7 +404,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
-                      account:(nonnull MSALAccount *)account
+                      account:(nullable MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
@@ -440,7 +440,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
-                      account:(nonnull MSALAccount *)account
+                      account:(nullable MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(nullable NSString *)claims
