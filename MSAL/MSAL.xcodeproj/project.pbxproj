@@ -22,6 +22,60 @@
 		2342584C20649A9800621AFE /* MSALAccount+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2342584A20649A9800621AFE /* MSALAccount+Internal.h */; };
 		2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
 		2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = 2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */; };
+		2398E1932167FD71001964C0 /* MSAReadCredentialsResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E0F12167FD70001964C0 /* MSAReadCredentialsResponse.h */; };
+		2398E19A2167FD71001964C0 /* MSAAuthenticationEventSink.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E0F82167FD70001964C0 /* MSAAuthenticationEventSink.h */; };
+		2398E19E2167FD71001964C0 /* MSATracer.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E0FC2167FD70001964C0 /* MSATracer.h */; };
+		2398E1A02167FD71001964C0 /* MSAClientCertificate.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E0FE2167FD70001964C0 /* MSAClientCertificate.h */; };
+		2398E1A22167FD71001964C0 /* MSAHttpClientEventSink.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1002167FD70001964C0 /* MSAHttpClientEventSink.h */; };
+		2398E1A42167FD71001964C0 /* MSAWindowsCertificateStoreType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1022167FD70001964C0 /* MSAWindowsCertificateStoreType.h */; };
+		2398E1A52167FD71001964C0 /* MSAThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1032167FD70001964C0 /* MSAThread.h */; };
+		2398E1B12167FD71001964C0 /* MSASystemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E10F2167FD70001964C0 /* MSASystemInfo.h */; };
+		2398E1B22167FD71001964C0 /* MSAAuthorizationType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1102167FD70001964C0 /* MSAAuthorizationType.h */; };
+		2398E1B32167FD71001964C0 /* MSANavigateAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1112167FD70001964C0 /* MSANavigateAction.h */; };
+		2398E1B72167FD71001964C0 /* MSASystemUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1152167FD70001964C0 /* MSASystemUtils.h */; };
+		2398E1B92167FD71001964C0 /* MSAHttpClientFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1172167FD70001964C0 /* MSAHttpClientFactory.h */; };
+		2398E1BA2167FD71001964C0 /* MSAReadAccountResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1182167FD70001964C0 /* MSAReadAccountResponse.h */; };
+		2398E1BC2167FD71001964C0 /* MSAThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E11A2167FD70001964C0 /* MSAThreadManager.h */; };
+		2398E1BD2167FD71001964C0 /* MSAStorageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E11B2167FD70001964C0 /* MSAStorageManager.h */; };
+		2398E1C02167FD71001964C0 /* MSAEmbeddedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E11E2167FD70001964C0 /* MSAEmbeddedBrowser.h */; };
+		2398E1C12167FD71001964C0 /* MSAHttpRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E11F2167FD70001964C0 /* MSAHttpRequest.h */; };
+		2398E1C22167FD71001964C0 /* MSAPcaConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1202167FD70001964C0 /* MSAPcaConfiguration.h */; };
+		2398E1C32167FD71001964C0 /* MSAEmbeddedBrowserResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1212167FD70001964C0 /* MSAEmbeddedBrowserResult.h */; };
+		2398E1C62167FD71001964C0 /* MSASovereignCloud.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1242167FD70001964C0 /* MSASovereignCloud.h */; };
+		2398E1CB2167FD71001964C0 /* MSAUri.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1292167FD70001964C0 /* MSAUri.h */; };
+		2398E1D22167FD71001964C0 /* MSACertificateErrorCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1302167FD70001964C0 /* MSACertificateErrorCodes.h */; };
+		2398E1D72167FD71001964C0 /* MSACredentialOwner.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1352167FD70001964C0 /* MSACredentialOwner.h */; };
+		2398E1DA2167FD71001964C0 /* MSAEmbeddedBrowserFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1382167FD70001964C0 /* MSAEmbeddedBrowserFactory.h */; };
+		2398E1DC2167FD71001964C0 /* MSAWindowRect.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E13A2167FD70001964C0 /* MSAWindowRect.h */; };
+		2398E1E02167FD71001964C0 /* MSAHttpManagerResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E13E2167FD70001964C0 /* MSAHttpManagerResponse.h */; };
+		2398E1EE2167FD71001964C0 /* MSAHttpClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E14C2167FD71001964C0 /* MSAHttpClient.h */; };
+		2398E1EF2167FD71001964C0 /* MSAAuthorityType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E14D2167FD71001964C0 /* MSAAuthorityType.h */; };
+		2398E1F02167FD71001964C0 /* MSAStorageJsonValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E14E2167FD71001964C0 /* MSAStorageJsonValues.h */; };
+		2398E1F12167FD71001964C0 /* MSAStorageErrorCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E14F2167FD71001964C0 /* MSAStorageErrorCodes.h */; };
+		2398E1F32167FD71001964C0 /* MSAPublicClientApplication.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1512167FD71001964C0 /* MSAPublicClientApplication.h */; };
+		2398E1F42167FD71001964C0 /* MSALogging.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1522167FD71001964C0 /* MSALogging.h */; };
+		2398E1F72167FD71001964C0 /* MSAGuestAccountInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1552167FD71001964C0 /* MSAGuestAccountInfo.h */; };
+		2398E1F82167FD71001964C0 /* MSAEmbeddedBrowserEventSink.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1562167FD71001964C0 /* MSAEmbeddedBrowserEventSink.h */; };
+		2398E1F92167FD71001964C0 /* MSAAuthParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1572167FD71001964C0 /* MSAAuthParameters.h */; };
+		2398E1FA2167FD71001964C0 /* MSAOperationStatus.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1582167FD71001964C0 /* MSAOperationStatus.h */; };
+		2398E1FD2167FD71001964C0 /* MSAStorageJsonKeys.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E15B2167FD71001964C0 /* MSAStorageJsonKeys.h */; };
+		2398E2032167FD71001964C0 /* MSAPublicClientApplicationFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1612167FD71001964C0 /* MSAPublicClientApplicationFactory.h */; };
+		2398E2072167FD71001964C0 /* MSAHttpManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1652167FD71001964C0 /* MSAHttpManager.h */; };
+		2398E2082167FD71001964C0 /* MSAStatusType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1662167FD71001964C0 /* MSAStatusType.h */; };
+		2398E20B2167FD71001964C0 /* MSAErrorCodes.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1692167FD71001964C0 /* MSAErrorCodes.h */; };
+		2398E20C2167FD71001964C0 /* MSACredential.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E16A2167FD71001964C0 /* MSACredential.h */; };
+		2398E20E2167FD71001964C0 /* MSAAuthenticationResult.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E16C2167FD71001964C0 /* MSAAuthenticationResult.h */; };
+		2398E2102167FD71001964C0 /* MSAReadAccountsResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E16E2167FD71001964C0 /* MSAReadAccountsResponse.h */; };
+		2398E2112167FD71001964C0 /* MSAAsyncTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E16F2167FD71001964C0 /* MSAAsyncTask.h */; };
+		2398E2152167FD71001964C0 /* MSALabsApi.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1732167FD71001964C0 /* MSALabsApi.h */; };
+		2398E2182167FD71001964C0 /* MSACredentialType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1762167FD71001964C0 /* MSACredentialType.h */; };
+		2398E21A2167FD71001964C0 /* MSAHttpResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1782167FD71001964C0 /* MSAHttpResponse.h */; };
+		2398E21B2167FD71001964C0 /* MSALogLevel.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1792167FD71001964C0 /* MSALogLevel.h */; };
+		2398E21C2167FD71001964C0 /* MSACertificateLocation.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E17A2167FD71001964C0 /* MSACertificateLocation.h */; };
+		2398E21F2167FD71001964C0 /* MSACertificateLocationType.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E17D2167FD71001964C0 /* MSACertificateLocationType.h */; };
+		2398E2222167FD71001964C0 /* MSALoadClientCertificateResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1802167FD71001964C0 /* MSALoadClientCertificateResponse.h */; };
+		2398E22A2167FD71001964C0 /* MSAAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E1882167FD71001964C0 /* MSAAccount.h */; };
+		2398E22E2167FD71001964C0 /* MSAStorageUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 2398E18C2167FD71001964C0 /* MSAStorageUtils.h */; };
 		23A169B22072DD1200B051F3 /* MSALInteractiveRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D68A15831E51A82100D923AD /* MSALInteractiveRequestTests.m */; };
 		23A169B32072E2ED00B051F3 /* MSALSilentRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */; };
 		23A169B420732F3A00B051F3 /* MSALB2CPolicyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */; };
@@ -481,6 +535,60 @@
 		2342584A20649A9800621AFE /* MSALAccount+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccount+Internal.h"; sourceTree = "<group>"; };
 		2364C7461FB3E52E00835428 /* XCTestCase+HelperMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "XCTestCase+HelperMethods.h"; sourceTree = "<group>"; };
 		2364C7471FB3E52E00835428 /* XCTestCase+HelperMethods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "XCTestCase+HelperMethods.m"; sourceTree = "<group>"; };
+		2398E0F12167FD70001964C0 /* MSAReadCredentialsResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAReadCredentialsResponse.h; sourceTree = "<group>"; };
+		2398E0F82167FD70001964C0 /* MSAAuthenticationEventSink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAuthenticationEventSink.h; sourceTree = "<group>"; };
+		2398E0FC2167FD70001964C0 /* MSATracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSATracer.h; sourceTree = "<group>"; };
+		2398E0FE2167FD70001964C0 /* MSAClientCertificate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAClientCertificate.h; sourceTree = "<group>"; };
+		2398E1002167FD70001964C0 /* MSAHttpClientEventSink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpClientEventSink.h; sourceTree = "<group>"; };
+		2398E1022167FD70001964C0 /* MSAWindowsCertificateStoreType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAWindowsCertificateStoreType.h; sourceTree = "<group>"; };
+		2398E1032167FD70001964C0 /* MSAThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAThread.h; sourceTree = "<group>"; };
+		2398E10F2167FD70001964C0 /* MSASystemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSASystemInfo.h; sourceTree = "<group>"; };
+		2398E1102167FD70001964C0 /* MSAAuthorizationType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAuthorizationType.h; sourceTree = "<group>"; };
+		2398E1112167FD70001964C0 /* MSANavigateAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSANavigateAction.h; sourceTree = "<group>"; };
+		2398E1152167FD70001964C0 /* MSASystemUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSASystemUtils.h; sourceTree = "<group>"; };
+		2398E1172167FD70001964C0 /* MSAHttpClientFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpClientFactory.h; sourceTree = "<group>"; };
+		2398E1182167FD70001964C0 /* MSAReadAccountResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAReadAccountResponse.h; sourceTree = "<group>"; };
+		2398E11A2167FD70001964C0 /* MSAThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAThreadManager.h; sourceTree = "<group>"; };
+		2398E11B2167FD70001964C0 /* MSAStorageManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStorageManager.h; sourceTree = "<group>"; };
+		2398E11E2167FD70001964C0 /* MSAEmbeddedBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAEmbeddedBrowser.h; sourceTree = "<group>"; };
+		2398E11F2167FD70001964C0 /* MSAHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpRequest.h; sourceTree = "<group>"; };
+		2398E1202167FD70001964C0 /* MSAPcaConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAPcaConfiguration.h; sourceTree = "<group>"; };
+		2398E1212167FD70001964C0 /* MSAEmbeddedBrowserResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAEmbeddedBrowserResult.h; sourceTree = "<group>"; };
+		2398E1242167FD70001964C0 /* MSASovereignCloud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSASovereignCloud.h; sourceTree = "<group>"; };
+		2398E1292167FD70001964C0 /* MSAUri.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAUri.h; sourceTree = "<group>"; };
+		2398E1302167FD70001964C0 /* MSACertificateErrorCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACertificateErrorCodes.h; sourceTree = "<group>"; };
+		2398E1352167FD70001964C0 /* MSACredentialOwner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACredentialOwner.h; sourceTree = "<group>"; };
+		2398E1382167FD70001964C0 /* MSAEmbeddedBrowserFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAEmbeddedBrowserFactory.h; sourceTree = "<group>"; };
+		2398E13A2167FD70001964C0 /* MSAWindowRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAWindowRect.h; sourceTree = "<group>"; };
+		2398E13E2167FD70001964C0 /* MSAHttpManagerResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpManagerResponse.h; sourceTree = "<group>"; };
+		2398E14C2167FD71001964C0 /* MSAHttpClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpClient.h; sourceTree = "<group>"; };
+		2398E14D2167FD71001964C0 /* MSAAuthorityType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAuthorityType.h; sourceTree = "<group>"; };
+		2398E14E2167FD71001964C0 /* MSAStorageJsonValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStorageJsonValues.h; sourceTree = "<group>"; };
+		2398E14F2167FD71001964C0 /* MSAStorageErrorCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStorageErrorCodes.h; sourceTree = "<group>"; };
+		2398E1512167FD71001964C0 /* MSAPublicClientApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAPublicClientApplication.h; sourceTree = "<group>"; };
+		2398E1522167FD71001964C0 /* MSALogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALogging.h; sourceTree = "<group>"; };
+		2398E1552167FD71001964C0 /* MSAGuestAccountInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAGuestAccountInfo.h; sourceTree = "<group>"; };
+		2398E1562167FD71001964C0 /* MSAEmbeddedBrowserEventSink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAEmbeddedBrowserEventSink.h; sourceTree = "<group>"; };
+		2398E1572167FD71001964C0 /* MSAAuthParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAuthParameters.h; sourceTree = "<group>"; };
+		2398E1582167FD71001964C0 /* MSAOperationStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAOperationStatus.h; sourceTree = "<group>"; };
+		2398E15B2167FD71001964C0 /* MSAStorageJsonKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStorageJsonKeys.h; sourceTree = "<group>"; };
+		2398E1612167FD71001964C0 /* MSAPublicClientApplicationFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAPublicClientApplicationFactory.h; sourceTree = "<group>"; };
+		2398E1652167FD71001964C0 /* MSAHttpManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpManager.h; sourceTree = "<group>"; };
+		2398E1662167FD71001964C0 /* MSAStatusType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStatusType.h; sourceTree = "<group>"; };
+		2398E1692167FD71001964C0 /* MSAErrorCodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAErrorCodes.h; sourceTree = "<group>"; };
+		2398E16A2167FD71001964C0 /* MSACredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACredential.h; sourceTree = "<group>"; };
+		2398E16C2167FD71001964C0 /* MSAAuthenticationResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAuthenticationResult.h; sourceTree = "<group>"; };
+		2398E16E2167FD71001964C0 /* MSAReadAccountsResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAReadAccountsResponse.h; sourceTree = "<group>"; };
+		2398E16F2167FD71001964C0 /* MSAAsyncTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAsyncTask.h; sourceTree = "<group>"; };
+		2398E1732167FD71001964C0 /* MSALabsApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALabsApi.h; sourceTree = "<group>"; };
+		2398E1762167FD71001964C0 /* MSACredentialType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACredentialType.h; sourceTree = "<group>"; };
+		2398E1782167FD71001964C0 /* MSAHttpResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAHttpResponse.h; sourceTree = "<group>"; };
+		2398E1792167FD71001964C0 /* MSALogLevel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALogLevel.h; sourceTree = "<group>"; };
+		2398E17A2167FD71001964C0 /* MSACertificateLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACertificateLocation.h; sourceTree = "<group>"; };
+		2398E17D2167FD71001964C0 /* MSACertificateLocationType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSACertificateLocationType.h; sourceTree = "<group>"; };
+		2398E1802167FD71001964C0 /* MSALoadClientCertificateResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALoadClientCertificateResponse.h; sourceTree = "<group>"; };
+		2398E1882167FD71001964C0 /* MSAAccount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAAccount.h; sourceTree = "<group>"; };
+		2398E18C2167FD71001964C0 /* MSAStorageUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAStorageUtils.h; sourceTree = "<group>"; };
 		23A68A7220F5386A0071E435 /* MSALAADAuthority.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAADAuthority.h; sourceTree = "<group>"; };
 		23A68A7320F5386A0071E435 /* MSALAADAuthority.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAADAuthority.m; sourceTree = "<group>"; };
 		23A68A7820F538B90071E435 /* MSALB2CAuthority.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALB2CAuthority.h; sourceTree = "<group>"; };
@@ -854,6 +962,75 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2398E0EE2167FD70001964C0 /* cpp_integration */ = {
+			isa = PBXGroup;
+			children = (
+				2398E0EF2167FD70001964C0 /* djinni_interfaces */,
+			);
+			path = cpp_integration;
+			sourceTree = "<group>";
+		};
+		2398E0EF2167FD70001964C0 /* djinni_interfaces */ = {
+			isa = PBXGroup;
+			children = (
+				2398E0F12167FD70001964C0 /* MSAReadCredentialsResponse.h */,
+				2398E0F82167FD70001964C0 /* MSAAuthenticationEventSink.h */,
+				2398E0FC2167FD70001964C0 /* MSATracer.h */,
+				2398E0FE2167FD70001964C0 /* MSAClientCertificate.h */,
+				2398E1002167FD70001964C0 /* MSAHttpClientEventSink.h */,
+				2398E1022167FD70001964C0 /* MSAWindowsCertificateStoreType.h */,
+				2398E1032167FD70001964C0 /* MSAThread.h */,
+				2398E10F2167FD70001964C0 /* MSASystemInfo.h */,
+				2398E1102167FD70001964C0 /* MSAAuthorizationType.h */,
+				2398E1112167FD70001964C0 /* MSANavigateAction.h */,
+				2398E1152167FD70001964C0 /* MSASystemUtils.h */,
+				2398E1172167FD70001964C0 /* MSAHttpClientFactory.h */,
+				2398E1182167FD70001964C0 /* MSAReadAccountResponse.h */,
+				2398E11A2167FD70001964C0 /* MSAThreadManager.h */,
+				2398E11B2167FD70001964C0 /* MSAStorageManager.h */,
+				2398E11E2167FD70001964C0 /* MSAEmbeddedBrowser.h */,
+				2398E11F2167FD70001964C0 /* MSAHttpRequest.h */,
+				2398E1202167FD70001964C0 /* MSAPcaConfiguration.h */,
+				2398E1212167FD70001964C0 /* MSAEmbeddedBrowserResult.h */,
+				2398E1242167FD70001964C0 /* MSASovereignCloud.h */,
+				2398E1292167FD70001964C0 /* MSAUri.h */,
+				2398E1302167FD70001964C0 /* MSACertificateErrorCodes.h */,
+				2398E1352167FD70001964C0 /* MSACredentialOwner.h */,
+				2398E1382167FD70001964C0 /* MSAEmbeddedBrowserFactory.h */,
+				2398E13A2167FD70001964C0 /* MSAWindowRect.h */,
+				2398E13E2167FD70001964C0 /* MSAHttpManagerResponse.h */,
+				2398E14C2167FD71001964C0 /* MSAHttpClient.h */,
+				2398E14D2167FD71001964C0 /* MSAAuthorityType.h */,
+				2398E14E2167FD71001964C0 /* MSAStorageJsonValues.h */,
+				2398E14F2167FD71001964C0 /* MSAStorageErrorCodes.h */,
+				2398E1512167FD71001964C0 /* MSAPublicClientApplication.h */,
+				2398E1522167FD71001964C0 /* MSALogging.h */,
+				2398E1552167FD71001964C0 /* MSAGuestAccountInfo.h */,
+				2398E1562167FD71001964C0 /* MSAEmbeddedBrowserEventSink.h */,
+				2398E1572167FD71001964C0 /* MSAAuthParameters.h */,
+				2398E1582167FD71001964C0 /* MSAOperationStatus.h */,
+				2398E15B2167FD71001964C0 /* MSAStorageJsonKeys.h */,
+				2398E1612167FD71001964C0 /* MSAPublicClientApplicationFactory.h */,
+				2398E1652167FD71001964C0 /* MSAHttpManager.h */,
+				2398E1662167FD71001964C0 /* MSAStatusType.h */,
+				2398E1692167FD71001964C0 /* MSAErrorCodes.h */,
+				2398E16A2167FD71001964C0 /* MSACredential.h */,
+				2398E16C2167FD71001964C0 /* MSAAuthenticationResult.h */,
+				2398E16E2167FD71001964C0 /* MSAReadAccountsResponse.h */,
+				2398E16F2167FD71001964C0 /* MSAAsyncTask.h */,
+				2398E1732167FD71001964C0 /* MSALabsApi.h */,
+				2398E1762167FD71001964C0 /* MSACredentialType.h */,
+				2398E1782167FD71001964C0 /* MSAHttpResponse.h */,
+				2398E1792167FD71001964C0 /* MSALogLevel.h */,
+				2398E17A2167FD71001964C0 /* MSACertificateLocation.h */,
+				2398E17D2167FD71001964C0 /* MSACertificateLocationType.h */,
+				2398E1802167FD71001964C0 /* MSALoadClientCertificateResponse.h */,
+				2398E1882167FD71001964C0 /* MSAAccount.h */,
+				2398E18C2167FD71001964C0 /* MSAStorageUtils.h */,
+			);
+			path = djinni_interfaces;
+			sourceTree = "<group>";
+		};
 		94E876C91E492D2800FB96ED /* instance */ = {
 			isa = PBXGroup;
 			children = (
@@ -1404,6 +1581,7 @@
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
+				2398E0EE2167FD70001964C0 /* cpp_integration */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
 				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
 				D65A6F671E3FF3D900C69FBA /* src */,
@@ -1462,24 +1640,78 @@
 			buildActionMask = 2147483647;
 			files = (
 				D65A6FB51E3FF41D00C69FBA /* MSALResult.h in Headers */,
+				2398E21A2167FD71001964C0 /* MSAHttpResponse.h in Headers */,
 				94E876E01E495F2800FB96ED /* MSALUIBehavior.h in Headers */,
+				2398E2222167FD71001964C0 /* MSALoadClientCertificateResponse.h in Headers */,
+				2398E1F32167FD71001964C0 /* MSAPublicClientApplication.h in Headers */,
+				2398E1C02167FD71001964C0 /* MSAEmbeddedBrowser.h in Headers */,
 				23A68A7A20F538B90071E435 /* MSALB2CAuthority.h in Headers */,
+				2398E2112167FD71001964C0 /* MSAAsyncTask.h in Headers */,
+				2398E1BD2167FD71001964C0 /* MSAStorageManager.h in Headers */,
 				23A68A7420F5386A0071E435 /* MSALAADAuthority.h in Headers */,
 				D65A6FB61E3FF41D00C69FBA /* MSALAccount.h in Headers */,
+				2398E1DC2167FD71001964C0 /* MSAWindowRect.h in Headers */,
 				96D9A5441E4AB1DC00674A85 /* MSALTelemetry.h in Headers */,
 				B2B5F08B1FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h in Headers */,
+				2398E1BA2167FD71001964C0 /* MSAReadAccountResponse.h in Headers */,
+				2398E1F02167FD71001964C0 /* MSAStorageJsonValues.h in Headers */,
+				2398E1F72167FD71001964C0 /* MSAGuestAccountInfo.h in Headers */,
+				2398E2072167FD71001964C0 /* MSAHttpManager.h in Headers */,
+				2398E1EF2167FD71001964C0 /* MSAAuthorityType.h in Headers */,
+				2398E2102167FD71001964C0 /* MSAReadAccountsResponse.h in Headers */,
+				2398E22E2167FD71001964C0 /* MSAStorageUtils.h in Headers */,
+				2398E20E2167FD71001964C0 /* MSAAuthenticationResult.h in Headers */,
+				2398E1D72167FD71001964C0 /* MSACredentialOwner.h in Headers */,
+				2398E1F82167FD71001964C0 /* MSAEmbeddedBrowserEventSink.h in Headers */,
+				2398E2032167FD71001964C0 /* MSAPublicClientApplicationFactory.h in Headers */,
+				2398E1C62167FD71001964C0 /* MSASovereignCloud.h in Headers */,
+				2398E1B22167FD71001964C0 /* MSAAuthorizationType.h in Headers */,
+				2398E1E02167FD71001964C0 /* MSAHttpManagerResponse.h in Headers */,
+				2398E1FD2167FD71001964C0 /* MSAStorageJsonKeys.h in Headers */,
+				2398E1B72167FD71001964C0 /* MSASystemUtils.h in Headers */,
 				23A68A8020F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
+				2398E1EE2167FD71001964C0 /* MSAHttpClient.h in Headers */,
 				23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */,
+				2398E1A52167FD71001964C0 /* MSAThread.h in Headers */,
+				2398E1A22167FD71001964C0 /* MSAHttpClientEventSink.h in Headers */,
+				2398E1C32167FD71001964C0 /* MSAEmbeddedBrowserResult.h in Headers */,
+				2398E20C2167FD71001964C0 /* MSACredential.h in Headers */,
 				D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */,
 				9682624C20E304F30080694D /* MSALWebviewType.h in Headers */,
 				D65A6FB41E3FF41D00C69FBA /* MSALPublicClientApplication.h in Headers */,
+				2398E1BC2167FD71001964C0 /* MSAThreadManager.h in Headers */,
 				B2A3C29621460D290082525C /* MSALAuthority.h in Headers */,
+				2398E2152167FD71001964C0 /* MSALabsApi.h in Headers */,
+				2398E1A02167FD71001964C0 /* MSAClientCertificate.h in Headers */,
+				2398E1D22167FD71001964C0 /* MSACertificateErrorCodes.h in Headers */,
+				2398E1F42167FD71001964C0 /* MSALogging.h in Headers */,
+				2398E1F92167FD71001964C0 /* MSAAuthParameters.h in Headers */,
+				2398E20B2167FD71001964C0 /* MSAErrorCodes.h in Headers */,
 				B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
 				B221CEEB20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */,
+				2398E1DA2167FD71001964C0 /* MSAEmbeddedBrowserFactory.h in Headers */,
+				2398E2082167FD71001964C0 /* MSAStatusType.h in Headers */,
+				2398E1FA2167FD71001964C0 /* MSAOperationStatus.h in Headers */,
+				2398E1B92167FD71001964C0 /* MSAHttpClientFactory.h in Headers */,
+				2398E1F12167FD71001964C0 /* MSAStorageErrorCodes.h in Headers */,
 				23A68A8D20F57A440071E435 /* MSALAuthorityFactory.h in Headers */,
 				B2A3C2892145FD0F0082525C /* MSALAccountsProvider.h in Headers */,
+				2398E21F2167FD71001964C0 /* MSACertificateLocationType.h in Headers */,
+				2398E1B32167FD71001964C0 /* MSANavigateAction.h in Headers */,
+				2398E1CB2167FD71001964C0 /* MSAUri.h in Headers */,
+				2398E21C2167FD71001964C0 /* MSACertificateLocation.h in Headers */,
+				2398E1932167FD71001964C0 /* MSAReadCredentialsResponse.h in Headers */,
+				2398E21B2167FD71001964C0 /* MSALogLevel.h in Headers */,
+				2398E19A2167FD71001964C0 /* MSAAuthenticationEventSink.h in Headers */,
+				2398E2182167FD71001964C0 /* MSACredentialType.h in Headers */,
 				2342584B20649A9800621AFE /* MSALAccount+Internal.h in Headers */,
 				D65A6FB11E3FF41D00C69FBA /* MSAL.h in Headers */,
+				2398E1C12167FD71001964C0 /* MSAHttpRequest.h in Headers */,
+				2398E19E2167FD71001964C0 /* MSATracer.h in Headers */,
+				2398E1B12167FD71001964C0 /* MSASystemInfo.h in Headers */,
+				2398E1A42167FD71001964C0 /* MSAWindowsCertificateStoreType.h in Headers */,
+				2398E1C22167FD71001964C0 /* MSAPcaConfiguration.h in Headers */,
+				2398E22A2167FD71001964C0 /* MSAAccount.h in Headers */,
 				963377BF211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
 				B221CEDB20C0AC60002F5E94 /* MSALAccountId.h in Headers */,
 				D65A6FB31E3FF41D00C69FBA /* MSALLogger.h in Headers */,
