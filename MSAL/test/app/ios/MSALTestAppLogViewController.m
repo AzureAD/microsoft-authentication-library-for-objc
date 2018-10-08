@@ -58,6 +58,8 @@ static NSAttributedString* s_attrNewLine = nil;
     _logStorage = [NSTextStorage new];
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
+
+    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
     
     [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
     [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
@@ -67,6 +69,8 @@ static NSAttributedString* s_attrNewLine = nil;
         {
             return;
         }
+
+
         
         NSLog(@"%@", message);
         
