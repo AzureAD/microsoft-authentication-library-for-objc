@@ -165,8 +165,7 @@
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:parameters.unvalidatedAuthority.environment tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031" clientInfo:clientInfo];
+    parameters.account = [[MSALAccount alloc] initWithUsername:@"fakeuser@contoso.com" name:@"Name" homeAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031" localAccountId:@"29f3807a-4fb0-42f2-a44a-236aa0cb3f97" environment:@"login.microsoftonline.com" tenantId:@"0287f963-2d72-4363-9e3a-5705c5b0f031"];
 
     //store an access token in cache
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
@@ -228,15 +227,13 @@
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -334,15 +331,13 @@
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    
+
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     parameters.account = account;
     
@@ -440,15 +435,13 @@
     parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -547,14 +540,13 @@
     parameters.correlationId = correlationId;
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -619,15 +611,13 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -729,16 +719,13 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -780,15 +767,13 @@
     parameters.correlationId = correlationId;
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -893,15 +878,13 @@
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -1005,15 +988,13 @@
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 
@@ -1133,15 +1114,13 @@
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     parameters.account = account;
 

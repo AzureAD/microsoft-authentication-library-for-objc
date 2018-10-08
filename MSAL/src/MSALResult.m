@@ -84,12 +84,11 @@
     }
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
-                                                                 name:idTokenClaims.name
-                                                        homeAccountId:accessToken.accountIdentifier.homeAccountId
-                                                       localAccountId:idTokenClaims.objectId
-                                                          environment:accessToken.authority.environment
-                                                             tenantId:idTokenClaims.tenantId
-                                                           clientInfo:accessToken.clientInfo];
+                                                            name:idTokenClaims.name
+                                                   homeAccountId:accessToken.accountIdentifier.homeAccountId
+                                                  localAccountId:idTokenClaims.objectId
+                                                     environment:accessToken.authority.environment
+                                                        tenantId:idTokenClaims.tenantId];
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [[MSALAuthorityFactory new] authorityFromUrl:accessToken.authority.url
