@@ -110,8 +110,10 @@
 - (void)testInitWithClientId_whenClientIdIsNil_shouldReturnError
 {
     NSError *error = nil;
+
+    NSString *clientId = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:nil
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                                               error:&error];
     
     XCTAssertNil(application);
