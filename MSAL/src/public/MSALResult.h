@@ -33,13 +33,13 @@
 @interface MSALResult : NSObject
 
 /*! The Access Token requested. */
-@property (readonly) NSString *accessToken;
+@property (readonly, nonnull) NSString *accessToken;
 
 /*!
     The time that the access token returned in the Token property ceases to be valid.
     This value is calculated based on current UTC time measured locally and the value expiresIn returned from the service
  */
-@property (readonly) NSDate *expiresOn;
+@property (readonly, nonnull) NSDate *expiresOn;
 
 /*!
     Some access tokens have extended lifetime when server is in an unavailable state.
@@ -50,33 +50,33 @@
 /*!
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
  */
-@property (readonly) NSString *tenantId;
+@property (readonly, nullable) NSString *tenantId;
 
 /*!
     The account object that holds account information.
  */
-@property (readonly) MSALAccount *account;
+@property (readonly, nonnull) MSALAccount *account;
 
 /*!
     The raw id token if it's returned by the service or nil if no id token is returned.
 */
-@property (readonly) NSString *idToken;
+@property (readonly, nullable) NSString *idToken;
 
 /*!
     The unique id of the user.
  */
-@property (readonly) NSString *uniqueId;
+@property (readonly, nullable) NSString *uniqueId;
 
 /*!
     The scope values returned from the service.
  */
-@property (readonly) NSArray<NSString *> *scopes;
+@property (readonly, nonnull) NSArray<NSString *> *scopes;
 
 /*!
  Represents the authority used for getting the token from STS and caching it.
  This authority should be used for subsequent silent requests.
  It will be different from the authority provided by developer for sovereign cloud scenarios.
  */
-@property (readonly) MSALAuthority *authority;
+@property (readonly, nonnull) MSALAuthority *authority;
 
 @end
