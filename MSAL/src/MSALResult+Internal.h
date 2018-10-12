@@ -29,6 +29,7 @@
 
 @class MSIDAccessToken;
 @class MSIDIdToken;
+@class MSIDClientInfo;
 
 @interface MSALResult (Internal)
 
