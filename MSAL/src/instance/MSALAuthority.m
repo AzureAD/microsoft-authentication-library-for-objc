@@ -46,9 +46,4 @@
                                                   error:error];
 }
 
-- (NSURL *)url
-{
-    return nil;
-}
-
 @end

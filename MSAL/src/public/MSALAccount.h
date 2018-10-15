@@ -34,17 +34,17 @@
 /*!
  The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
  */
-@property (readonly) NSString *username;
+@property (readonly, nullable) NSString *username;
 
 /*!
  Unique identifier of the account in the home directory.
  */
-@property (readonly) MSALAccountId *homeAccountId;
+@property (readonly, nullable) MSALAccountId *homeAccountId;
 
 /*!
  Host part of the authority string used for authentication.
  */
-@property (readonly) NSString *environment;
+@property (readonly, nonnull) NSString *environment;
 
 @end
 

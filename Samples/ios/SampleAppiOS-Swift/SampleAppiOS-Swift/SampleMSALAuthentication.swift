@@ -134,7 +134,7 @@ extension SampleMSALAuthentication {
                 // In the initial acquire token call we'll want to look at the account object
                 // that comes back in the result.
                 let signedInAccount = acquireTokenResult.account
-                self.currentAccountIdentifier = signedInAccount?.homeAccountId.identifier
+                self.currentAccountIdentifier = signedInAccount.homeAccountId?.identifier
                 
                 completion(signedInAccount, acquireTokenResult.accessToken, nil)
             }
@@ -154,13 +154,10 @@ extension SampleMSALAuthentication {
             
             // Depending on how this account has been used with this application before it is possible for there to be multiple
             // tokens of varying authorities for this account in the cache. Because we are trying to get a token specifically
-            // for graph in this sample it's best to specify the account's home authority to remove any possibility of there
-            // being any ambiquity in the cache lookup.
-            let homeAuthority = kAuthority + account.homeAccountId.tenantId
-
-            let msalAuthority = try MSALAuthority(url: URL(string: homeAuthority)!)
+            // for graph in this sample, we would like to get an access token for the account's home authority.
+            // acquireTokenSilent call without any authority will use account's home authority by default.
             
-            application.acquireTokenSilent(forScopes: scopes, account: account, authority: msalAuthority, completionBlock: {
+            application.acquireTokenSilent(forScopes: scopes, account: account, completionBlock: {
                 (result: MSALResult?, error: Error?) in
                 guard let acquireTokenResult = result, error == nil else {
                     completion(nil, error)

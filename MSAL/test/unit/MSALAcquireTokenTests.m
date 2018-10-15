@@ -163,7 +163,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
 
          resultAccount = result.account;
          XCTAssertNotNil(resultAccount);
@@ -185,7 +185,7 @@
                                  XCTAssertNil(error);
                                  XCTAssertNotNil(result);
                                  XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+                                 XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
                                  [silentExpectation fulfill];
     }];
 
@@ -240,7 +240,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy");
+         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy");
          
          [expectation fulfill];
      }];
@@ -268,16 +268,12 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
 
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
@@ -340,16 +336,12 @@
                                                                                utid:DEFAULT_TEST_UTID
                                                                            familyId:nil];
 
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
@@ -745,16 +737,13 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-    
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -818,16 +807,12 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-    
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -890,16 +875,12 @@
                                                                         utid:DEFAULT_TEST_UTID
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-    
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1041,16 +1022,12 @@
                                                                         utid:DEFAULT_TEST_UTID
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-
-    NSDictionary* clientInfoClaims = @{ @"uid" : DEFAULT_TEST_UID, @"utid" : DEFAULT_TEST_UTID};
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:clientInfo];
+                                                        tenantId:@"1234-5678-90abcdefg"];
 
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;

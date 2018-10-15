@@ -105,7 +105,7 @@
     [self closeResultView];
 
     // 5. Run silent with not consented scopes
-    request.scopes = @"Calendars.Read";
+    request.scopes = @"Contacts.Read";
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];

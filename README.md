@@ -30,7 +30,7 @@ These libraries are suitable to use in a production environment. We provide the 
                 let accessToken = authResult.accessToken
 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId.identifier
+                let accountIdentifier = authResult.account.homeAccountId?.identifier
             }
         }
         else {
@@ -191,6 +191,10 @@ Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by 
 
 If you choose to use SFSafariViewController (default on iOS 10) for MSAL authentication, the authorization response URL will be returned to the app via the iOS openURL app delegate method. So you need to pass this through to the current authorization session. 
 
+### iOS 12 support
+
+Note: WKWebView drops network connection if device got locked on iOS 12. It is by design and not configurable.
+
 #### Objective-C
 
 You will need to add the following to your `AppDelegate.m` file:
@@ -267,7 +271,7 @@ let application = try MSALPublicClientApplication(clientId: kClientID)
                 let accessToken = authResult.accessToken
 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId.identifier
+                let accountIdentifier = authResult.account.homeAccountId?.identifier
             }
 ```
 
