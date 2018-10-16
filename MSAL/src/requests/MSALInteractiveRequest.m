@@ -113,7 +113,21 @@
             return;
         }
 
-        [self acquireTokenImpl:completionBlock];
+        [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
+                                                        completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
+         {
+             if (error)
+             {
+                 MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+                 [self stopTelemetryEvent:event error:error];
+
+                 completionBlock(nil, error);
+                 return;
+             }
+
+             _authority = _parameters.unvalidatedAuthority;
+             [self acquireTokenImpl:completionBlock];
+         }];
     }];
 }
 

@@ -67,8 +67,7 @@
          homeAccountId:(NSString *)homeAccountId
         localAccountId:(NSString *)localAccountId
            environment:(NSString *)environment
-              tenantId:(NSString *)tenantId
-            clientInfo:(MSIDClientInfo *)clientInfo;
+              tenantId:(NSString *)tenantId;
 
 /*!
  Initialize an MSALAccount with MSIDAccount

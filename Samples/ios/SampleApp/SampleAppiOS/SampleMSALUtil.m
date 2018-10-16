@@ -33,7 +33,7 @@
 #import "SamplePhotoUtil.h"
 
 #define CURRENT_ACCOUNT_KEY @"MSALCurrentAccountIdentifier"
-#define CLIENT_ID @"11744750-bfe5-4818-a1c0-655455f68fa7"
+#define CLIENT_ID @"b6c69a37-df96-4db0-9088-2ab96e1d8215"
 
 @implementation SampleMSALUtil
 
@@ -174,27 +174,13 @@
         acquireTokenBlock(nil, error);
         return;
     }
-    
+
     // Depending on how this account has been used with this application before it is possible for there to be multiple
     // tokens of varying authorities for this account in the cache. Because we are trying to get a token specifically
-    // for graph in this sample it's best to specify the account's home authority to remove any possibility of there
-    // being any ambiquity in the cache lookup.
-    NSString *homeAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", currentAccount.homeAccountId.tenantId];
-
-    NSError *authorityError = nil;
-    MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:homeAuthority] error:&authorityError];
-
-    if (!authority)
-    {
-        acquireTokenBlock(nil, authorityError);
-        return;
-    }
-    
+    // for graph in this sample, we would like to get an access token for the account's home authority.
+    // acquireTokenSilent call without any authority will use account's home authority by default.
     [application acquireTokenSilentForScopes:scopes
                                      account:currentAccount
-                                   authority:authority
-                                forceRefresh:NO
-                               correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
     {
         acquireTokenBlock(result.accessToken, error);

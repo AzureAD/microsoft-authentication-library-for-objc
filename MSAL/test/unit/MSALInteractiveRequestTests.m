@@ -351,8 +351,7 @@
                                                         homeAccountId:@"1.1234-5678-90abcdefg"
                                                        localAccountId:@"1"
                                                           environment:@"login.microsoftonline.com"
-                                                             tenantId:@"1234-5678-90abcdefg"
-                                                           clientInfo:nil];
+                                                             tenantId:@"1234-5678-90abcdefg"];
     parameters.account = account;
 
     __block MSALInteractiveRequest *request =
@@ -472,8 +471,7 @@
                                                    homeAccountId:@"2.1234-5678-90abcdefg"
                                                   localAccountId:@"2"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     parameters.account = account;
 
     __block MSALInteractiveRequest *request =

@@ -84,8 +84,7 @@
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
                                                           environment:@"login.microsoftonline.com"
-                                                             tenantId:@"3"
-                                                           clientInfo:nil];
+                                                             tenantId:@"3"];
     XCTAssertNotNil(account);
 
     MSALAccount *account2 = [account copy];
@@ -102,18 +101,12 @@
 
 - (void)testEquals_whenEqual_shouldReturnTrue
 {
-    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
-                                        @"utid" : @"utid"
-                                        };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                                  name:@"name"
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
                                                           environment:@"login.microsoftonline.com"
-                                                             tenantId:@"3"
-                                                           clientInfo:clientInfo];
+                                                             tenantId:@"3"];
     
     XCTAssertNotNil(account);
     MSALAccount *account2 = [account copy];
