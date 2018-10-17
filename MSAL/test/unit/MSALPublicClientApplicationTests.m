@@ -110,8 +110,10 @@
 - (void)testInitWithClientId_whenClientIdIsNil_shouldReturnError
 {
     NSError *error = nil;
+
+    NSString *clientId = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:nil
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                                               error:&error];
     
     XCTAssertNil(application);
@@ -568,8 +570,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -624,8 +625,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -684,8 +684,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     [MSALTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
@@ -782,8 +781,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -845,8 +843,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -908,8 +905,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"
-                                                      clientInfo:nil];
+                                                        tenantId:@"custom_guest_tenant"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -970,8 +966,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"
-                                                      clientInfo:nil];
+                                                        tenantId:@"custom_guest_tenant"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1032,8 +1027,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"
-                                                      clientInfo:nil];
+                                                        tenantId:@"custom_guest_tenant"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1098,8 +1092,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     authority = [@"https://login.microsoft.com/common" msalAuthority];
     
@@ -1364,8 +1357,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"
-                                                      clientInfo:nil];
+                                                        tenantId:@"1234-5678-90abcdefg"];
     
     NSError *error;
     BOOL result = [application removeAccount:account error:&error];

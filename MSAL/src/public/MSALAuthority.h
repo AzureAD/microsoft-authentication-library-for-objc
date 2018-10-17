@@ -35,8 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (readonly, nonnull) NSURL *url;
 
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;

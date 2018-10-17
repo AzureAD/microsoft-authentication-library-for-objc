@@ -164,21 +164,16 @@ static MSALScopes *s_reservedScopes = nil;
                                                  context:_parameters
                                          completionBlock:^(NSURL *openIdConfigurationEndpoint, BOOL validated, NSError *error)
      {
-         [_parameters.unvalidatedAuthority loadOpenIdMetadataWithContext:_parameters
-                                                         completionBlock:^(MSIDOpenIdProviderMetadata *metadata, NSError *error)
-          {
-              if (error)
-              {
-                  MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
-                  [self stopTelemetryEvent:event error:error];
+         if (error)
+         {
+             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
+             [self stopTelemetryEvent:event error:error];
 
-                  completionBlock(NO, error);
-                  return;
-              }
+             completionBlock(NO, error);
+             return;
+         }
 
-              _authority = _parameters.unvalidatedAuthority;
-              completionBlock(YES, nil);
-          }];
+         completionBlock(YES, nil);
      }];
 }
 
@@ -312,7 +307,10 @@ static MSALScopes *s_reservedScopes = nil;
         if (error) *error = resultError;
     }
 
-    MSALResult *result = [MSALResult resultWithAccessToken:accessToken idToken:idToken isExtendedLifetimeToken:NO error:error];
+    MSALResult *result = [MSALResult resultWithAccessToken:accessToken
+                                                   idToken:idToken
+                                   isExtendedLifetimeToken:NO
+                                                     error:error];
     return result;
 }
 

@@ -53,7 +53,6 @@
         localAccountId:(NSString *)localAccountId
            environment:(NSString *)environment
               tenantId:(NSString *)tenantId
-            clientInfo:(MSIDClientInfo *)clientInfo
 {
     self = [super init];
 
@@ -63,18 +62,15 @@
         _name = name;
         _environment = environment;
 
-        NSString *uid = clientInfo.uid;
-        NSString *utid = clientInfo.utid;
+        NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
 
-        if (!uid && !utid)
+        NSString *uid = nil;
+        NSString *utid = nil;
+
+        if ([accountIdComponents count] == 2)
         {
-            NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
-
-            if ([accountIdComponents count] == 2)
-            {
-                uid = accountIdComponents[0];
-                utid = accountIdComponents[1];
-            }
+            uid = accountIdComponents[0];
+            utid = accountIdComponents[1];
         }
 
         _homeAccountId = [[MSALAccountId alloc] initWithHomeAccountIdentifier:homeAccountId
@@ -94,12 +90,11 @@
 - (id)initWithMSIDAccount:(MSIDAccount *)account
 {
     return [self initWithUsername:account.username
-                                  name:account.name
-                         homeAccountId:account.accountIdentifier.homeAccountId
-                        localAccountId:account.localAccountId
-                           environment:account.authority.environment
-                              tenantId:account.authority.url.msidTenant
-                            clientInfo:account.clientInfo];
+                             name:account.name
+                    homeAccountId:account.accountIdentifier.homeAccountId
+                   localAccountId:account.localAccountId
+                      environment:account.authority.environment
+                         tenantId:account.authority.url.msidTenant];
 }
 
 #pragma mark - NSCopying
