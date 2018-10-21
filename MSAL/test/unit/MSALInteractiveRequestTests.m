@@ -153,12 +153,9 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
-    
+
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
     MSIDTestURLResponse *response =
@@ -379,11 +376,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
@@ -499,11 +493,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
@@ -592,11 +583,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
    
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
