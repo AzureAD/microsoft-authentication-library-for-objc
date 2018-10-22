@@ -68,11 +68,15 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [settings profile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    MSALAuthority *authority = [settings authority];
     NSError *error = nil;
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                authority:settings.authority
-                                                    error:&error];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
+    
     
     if (!application)
     {

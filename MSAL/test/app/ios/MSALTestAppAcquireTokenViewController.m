@@ -482,9 +482,10 @@
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
 
     NSError *error = nil;
-    
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
@@ -589,8 +590,10 @@
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
@@ -649,8 +652,10 @@
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
@@ -775,7 +780,10 @@
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId authority:authority redirectUri:redirectUri error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
     
     if (!application)
     {
