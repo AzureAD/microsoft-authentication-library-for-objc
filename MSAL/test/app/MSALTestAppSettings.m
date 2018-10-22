@@ -142,12 +142,15 @@ static NSDictionary *s_profiles = nil;
         return nil;
     }
     
+    NSDictionary *currentProfile = _profile;
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    
     NSError *error = nil;
-    NSString *clientId = [_profile objectForKey:MSAL_APP_CLIENT_ID];
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                authority:self.authority
-                                                    error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:_authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
     if (application == nil)
     {
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
