@@ -41,6 +41,7 @@
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDAADRefreshTokenGrantRequest.h"
 #import "MSIDError.h"
+#import "MSIDAppMetadataCacheItem.h"
 
 @interface MSALSilentRequest()
 
@@ -143,7 +144,11 @@
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
     
-    [self tryRT:@"1" completionBlock:completionBlock];
+    NSError *error = nil;
+    MSIDAppMetadataCacheItem *appMetadata = [self.tokenCache getAppAppMetadataForConfiguration:msidConfiguration
+                                                                                       context:_parameters
+                                                                                         error:&error];
+    [self tryRT:appMetadata completionBlock:completionBlock];
 }
 
 - (MSIDRefreshToken *)getRefreshToken:(NSString *)familyId error:(NSError **)error
@@ -157,22 +162,24 @@
                                                               error:error];
 }
 
-- (void)tryRT:(NSString *)familyID completionBlock:(MSALCompletionBlock)completionBlock
+- (void)tryRT:(MSIDAppMetadataCacheItem *)appMetadata completionBlock:(MSALCompletionBlock)completionBlock
 {
-    //try looking for FRT first
-    NSError *msidError = nil;
-    self.familyRefreshToken = [self getRefreshToken:familyID error:&msidError];
-    
-    if (msidError)
+    //try looking for App Metadata first
+    if (appMetadata && appMetadata.familyId)
     {
-        completionBlock(nil, msidError);
-        return;
+        //Try looking for FRT
+        NSError *msidError = nil;
+        self.familyRefreshToken = [self getRefreshToken:appMetadata.familyId error:&msidError];
+        if (msidError)
+        {
+            completionBlock(nil, msidError);
+            return;
+        }
     }
-    
-    //if FRT not found, try looking for MRRT
-    if (!self.familyRefreshToken)
+    else
     {
-        msidError = nil;
+        // Try looking for app specific MRRT
+        NSError *msidError = nil;
         self.refreshToken = [self getRefreshToken:nil error:&msidError];
         if (msidError)
         {
@@ -187,22 +194,33 @@
      {
          if (error)
          {
-             //If server returns invalid_grant and refresh token uses is FRT, try MRRT
+             //If server returns invalid_grant and refresh token used is FRT, try MRRT
              if([self isErrorRecoverableByUserInteraction:error])
              {
-                 NSError *msidError = nil;
-                 self.refreshToken = [self getRefreshToken:nil error:&msidError];
-                 
-                 if (msidError)
+                 NSString *subError = error.userInfo[MSALOAuthSubErrorKey]; // Get sub error
+                 if (subError && [subError isEqualToString:@"client_mismatch"])
                  {
-                     completionBlock(nil, msidError);
+                     //Todo update app metadata to set familyID to nil
                      return;
                  }
                  
-                 if(self.refreshToken.familyId && ![[self.refreshToken refreshToken] isEqualToString:[self.familyRefreshToken refreshToken]])
+                 //If refreshToken used is FRT
+                 if(currentRefreshToken.familyId)
                  {
-                     [self refreshAccessToken:self.refreshToken completionBlock:completionBlock];
-                     return;
+                     //Search for MRRT
+                     NSError *msidError = nil;
+                     self.refreshToken = [self getRefreshToken:nil error:&msidError];
+                     if (msidError)
+                     {
+                         completionBlock(nil, msidError);
+                         return;
+                     }
+                     
+                     if (self.refreshToken && ![[currentRefreshToken refreshToken] isEqualToString:[self.refreshToken refreshToken]])
+                     {
+                         [self refreshAccessToken:self.refreshToken completionBlock:completionBlock];
+                         return;
+                     }
                  }
                  
                  NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
