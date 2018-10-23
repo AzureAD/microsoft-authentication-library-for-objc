@@ -43,6 +43,8 @@
 #import "MSIDError.h"
 #import "MSIDAppMetadataCacheItem.h"
 
+#define MSAL_SERVER_ERROR_CLIENT_MISMATCH    @"client_mismatch"
+
 @interface MSALSilentRequest()
 
 @property (nonatomic) MSIDRefreshToken *refreshToken;
@@ -194,21 +196,26 @@
      {
          if (error)
          {
-             //If server returns invalid_grant and refresh token used is FRT, try MRRT
              if([self isErrorRecoverableByUserInteraction:error])
              {
-                 NSString *subError = error.userInfo[MSALOAuthSubErrorKey]; // Get sub error
-                 if (subError && [subError isEqualToString:@"client_mismatch"])
-                 {
-                     //Todo update app metadata to set familyID to nil
-                     return;
-                 }
-                 
-                 //If refreshToken used is FRT
+                //If server returns invalid_grant and refresh token used is FRT, try MRRT
                  if(currentRefreshToken.familyId)
                  {
-                     //Search for MRRT
+                     //udpate app metadata  by resetting familyId if server returns client_mismatch
                      NSError *msidError = nil;
+                     [self updateAppMetadata:appMetadata
+                                 serverError:error
+                                  cacheError:&msidError
+                             completionBlock:completionBlock];
+                     
+                     if (msidError)
+                     {
+                         completionBlock(nil, msidError);
+                         return;
+                     }
+                     
+                     //Search for MRRT
+                     msidError = nil;
                      self.refreshToken = [self getRefreshToken:nil error:&msidError];
                      if (msidError)
                      {
@@ -216,6 +223,7 @@
                          return;
                      }
                      
+                     //Make network call only if content of MRRT and FRT is different
                      if (self.refreshToken && ![[currentRefreshToken refreshToken] isEqualToString:[self.refreshToken refreshToken]])
                      {
                          [self refreshAccessToken:self.refreshToken completionBlock:completionBlock];
@@ -313,15 +321,20 @@
     return error.code == MSALErrorUnhandledResponse && responseCode >= 500 && responseCode <= 599;
 }
 
-- (BOOL)isErrorRecoverableByUserInteraction:(NSError *)msidError
+- (void)updateAppMetadata:(MSIDAppMetadataCacheItem *)appMetadata
+              serverError:(NSError *)serverError
+               cacheError:(NSError **)cacheError
+          completionBlock:(MSALCompletionBlock)completionBlock
 {
-    if (msidError.code == MSALErrorInvalidGrant
-        || msidError.code == MSALErrorInvalidRequest)
+    NSString *subError = serverError.userInfo[MSALOAuthSubErrorKey];
+    if (subError && [subError isEqualToString:MSAL_SERVER_ERROR_CLIENT_MISMATCH])
     {
-        return YES;
+        if (appMetadata && appMetadata.familyId)
+        {
+            appMetadata.familyId = nil;
+            [self.tokenCache saveAppMetadata:appMetadata context:_parameters error:cacheError];
+        }
     }
-    
-    return NO;
 }
 
 @end
