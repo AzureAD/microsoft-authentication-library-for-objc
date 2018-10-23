@@ -104,6 +104,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
@@ -124,6 +125,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     MSALSilentRequest *request =
     [[MSALSilentRequest alloc] initWithParameters:parameters forceRefresh:NO tokenCache:self.tokenCacheAccessor expirationBuffer:300 error:&error];
@@ -162,6 +164,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
 
@@ -226,6 +229,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
@@ -330,6 +334,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
@@ -433,6 +438,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ UT_SLICE_PARAMS_DICT };
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
@@ -538,6 +544,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
@@ -610,6 +617,8 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
+
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
@@ -719,6 +728,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -765,6 +775,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
@@ -875,6 +886,7 @@
     parameters.clientId = UNIT_TEST_CLIENT_ID;
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
@@ -987,6 +999,8 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
+
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
@@ -1113,6 +1127,8 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.sliceParameters = @{ @"slice" : @"myslice" };
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
+    
     NSDictionary* clientInfoClaims = @{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"};
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"

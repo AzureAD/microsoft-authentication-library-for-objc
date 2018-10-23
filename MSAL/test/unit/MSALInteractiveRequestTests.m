@@ -100,12 +100,13 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      extraScopesToConsent:@[@"fakescope3"]
+                                  extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:nil
+                                            tokenCache:[MSIDDefaultTokenCacheAccessor new]
                                                  error:&error];
 
     XCTAssertNotNil(request);
@@ -127,6 +128,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -345,6 +347,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                                  name:@"user@contoso.com"
@@ -465,6 +468,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                             name:@"user@contoso.com"
@@ -566,6 +570,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters

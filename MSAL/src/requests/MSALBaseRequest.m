@@ -54,7 +54,7 @@ static MSALScopes *s_reservedScopes = nil;
 @interface MSALBaseRequest()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
-@property (nullable, nonatomic) MSIDAADV2Oauth2Factory *oauth2Factory;
+@property (nullable, nonatomic) MSIDOauth2Factory *oauth2Factory;
 
 @end
 
@@ -97,7 +97,20 @@ static MSALScopes *s_reservedScopes = nil;
     }
     
     _tokenCache = tokenCache;
-    _oauth2Factory = [MSIDAADV2Oauth2Factory new];
+
+    if (!_tokenCache)
+    {
+        REQUIRED_PARAMETER_ERROR(tokenCache, _parameters);
+        return nil;
+    }
+
+    _oauth2Factory = _parameters.msidOAuthFactory;
+
+    if (!_oauth2Factory)
+    {
+        REQUIRED_PARAMETER_ERROR(_parameters.msidOAuthFactory, _parameters);
+        return nil;
+    }
 
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
