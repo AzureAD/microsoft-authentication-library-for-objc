@@ -146,10 +146,16 @@
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
     
-    NSError *error = nil;
+    NSError *msidError = nil;
     MSIDAppMetadataCacheItem *appMetadata = [self.tokenCache getAppAppMetadataForConfiguration:msidConfiguration
-                                                                                       context:_parameters
-                                                                                         error:&error];
+                                                                                       context:nil
+                                                                                         error:&msidError];
+    if (msidError)
+    {
+        completionBlock(nil, msidError);
+        return;
+    }
+    
     [self tryRT:appMetadata completionBlock:completionBlock];
 }
 
@@ -332,7 +338,7 @@
         if (appMetadata && appMetadata.familyId)
         {
             appMetadata.familyId = nil;
-            [self.tokenCache saveAppMetadata:appMetadata context:_parameters error:cacheError];
+            [self.tokenCache updateAppMetadata:appMetadata context:_parameters error:cacheError];
         }
     }
 }
