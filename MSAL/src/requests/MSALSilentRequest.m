@@ -56,6 +56,7 @@
 @implementation MSALSilentRequest
 {
     MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
+    BOOL _attemptedFRT;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -74,6 +75,8 @@
     _forceRefresh = forceRefresh;
     _refreshToken = nil;
     _expirationBuffer = expirationBuffer;
+    _familyRefreshToken = nil;
+    _familyId = nil;
     return self;
 }
 
@@ -155,8 +158,16 @@
         completionBlock(nil, msidError);
         return;
     }
-    
-    [self tryRT:appMetadata completionBlock:completionBlock];
+    //On first network try, app metadata will be nil but on every subsequent attempt, it should reflect if clientId is part of family
+    NSString *familyId = appMetadata ? appMetadata.familyId : @"1";
+    if (![NSString msidIsStringNilOrBlank:familyId])
+    {
+        [self tryFRT:familyId appMetadata:appMetadata completionBlock:completionBlock];
+    }
+    else
+    {
+        [self tryMRRT:completionBlock];
+    }
 }
 
 - (MSIDRefreshToken *)getRefreshToken:(NSString *)familyId error:(NSError **)error
@@ -170,23 +181,80 @@
                                                               error:error];
 }
 
-- (void)tryRT:(MSIDAppMetadataCacheItem *)appMetadata completionBlock:(MSALCompletionBlock)completionBlock
+- (void)tryFRT:(NSString *)familyId appMetadata:(MSIDAppMetadataCacheItem *)appMetadata completionBlock:(MSALCompletionBlock)completionBlock
 {
-    //try looking for App Metadata first
-    if (appMetadata && appMetadata.familyId)
+    NSError *msidError = nil;
+    self.familyRefreshToken = [self getRefreshToken:familyId error:&msidError];
+    if (msidError)
     {
-        //Try looking for FRT
-        NSError *msidError = nil;
-        self.familyRefreshToken = [self getRefreshToken:appMetadata.familyId error:&msidError];
-        if (msidError)
-        {
-            completionBlock(nil, msidError);
-            return;
-        }
+        completionBlock(nil, msidError);
+        return;
     }
-    else
+    
+    //If no FRT found, try looking for app specific RT
+    if (!self.familyRefreshToken)
     {
-        // Try looking for app specific MRRT
+        [self tryMRRT:completionBlock];
+        return;
+    }
+    
+    [self refreshAccessToken:self.familyRefreshToken completionBlock:^(MSALResult *result, NSError *error)
+     {
+         if (error)
+         {
+             if([self isErrorRecoverableByUserInteraction:error])
+             {
+                 //Udpate app metadata  by resetting familyId if server returns client_mismatch
+                 NSError *msidError = nil;
+                 [self updateAppMetadata:appMetadata
+                             serverError:error
+                              cacheError:&msidError
+                         completionBlock:completionBlock];
+                 
+                 if (msidError)
+                 {
+                     completionBlock(nil, msidError);
+                     return;
+                 }
+                 
+                 msidError = nil;
+                 
+                 //If server returns invalid grant on FRT, look for app specific RT
+                 self.refreshToken = [self getRefreshToken:nil error:&msidError];
+                 if (msidError)
+                 {
+                     completionBlock(nil, msidError);
+                     return;
+                 }
+                 
+                 // Check to see if the content of mrt and frt is not the same before initiating a network request
+                 if (self.refreshToken && ![[self.familyRefreshToken refreshToken] isEqualToString:[self.refreshToken refreshToken]])
+                 {
+                     [self tryMRRT:completionBlock];
+                     return;
+                 }
+                 
+                 NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
+                 
+                 completionBlock(nil, interactionError);
+             }
+             else
+             {
+                 completionBlock(nil, error);
+             }
+         }
+         else
+         {
+             completionBlock(result, nil);
+         }
+     }];
+}
+
+- (void)tryMRRT:(MSALCompletionBlock)completionBlock
+{
+    //Check if app specific RT already exists
+    if (!self.refreshToken)
+    {
         NSError *msidError = nil;
         self.refreshToken = [self getRefreshToken:nil error:&msidError];
         if (msidError)
@@ -196,54 +264,22 @@
         }
     }
     
-    MSIDRefreshToken *currentRefreshToken = self.familyRefreshToken ? self.familyRefreshToken : self.refreshToken;
-    
-    [self refreshAccessToken:currentRefreshToken completionBlock:^(MSALResult *result, NSError *error)
+    [self refreshAccessToken:self.refreshToken completionBlock:^(MSALResult *result, NSError *error)
      {
          if (error)
          {
+             //Check if server returns invalid_grant or invalid_request
              if([self isErrorRecoverableByUserInteraction:error])
              {
-                //If server returns invalid_grant and refresh token used is FRT, try MRRT
-                 if(currentRefreshToken.familyId)
-                 {
-                     //udpate app metadata  by resetting familyId if server returns client_mismatch
-                     NSError *msidError = nil;
-                     [self updateAppMetadata:appMetadata
-                                 serverError:error
-                                  cacheError:&msidError
-                             completionBlock:completionBlock];
-                     
-                     if (msidError)
-                     {
-                         completionBlock(nil, msidError);
-                         return;
-                     }
-                     
-                     //Search for MRRT
-                     msidError = nil;
-                     self.refreshToken = [self getRefreshToken:nil error:&msidError];
-                     if (msidError)
-                     {
-                         completionBlock(nil, msidError);
-                         return;
-                     }
-                     
-                     //Make network call only if content of MRRT and FRT is different
-                     if (self.refreshToken && ![[currentRefreshToken refreshToken] isEqualToString:[self.refreshToken refreshToken]])
-                     {
-                         [self refreshAccessToken:self.refreshToken completionBlock:completionBlock];
-                         return;
-                     }
-                 }
-                 
                  NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
                  
                  completionBlock(nil, interactionError);
                  return;
              }
-             
-             completionBlock(nil, error);
+             else
+             {
+                 completionBlock(nil, error);
+             }
          }
          else
          {
@@ -259,7 +295,7 @@
     MSID_LOG_INFO_PII(_parameters, @"Refreshing access token");
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
 
-    [self acquireTokenWithRefreshToken:self.refreshToken
+    [self acquireTokenWithRefreshToken:refreshToken
                          configuration:msidConfiguration
                        completionBlock:completionBlock];
 }
