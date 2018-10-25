@@ -56,7 +56,6 @@
 @implementation MSALSilentRequest
 {
     MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
-    BOOL _attemptedFRT;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -83,13 +82,13 @@
 - (void)acquireToken:(MSALCompletionBlock)completionBlock
 {
     [super resolveEndpoints:^(BOOL resolved, NSError *error) {
-        
+
         if (!resolved)
         {
             completionBlock(nil, error);
             return;
         }
-
+        
         _authority = _parameters.unvalidatedAuthority;
         [self acquireTokenImpl:completionBlock];
     }];
@@ -98,9 +97,9 @@
 - (void)acquireTokenImpl:(MSALCompletionBlock)completionBlock
 {
     CHECK_ERROR_COMPLETION(_parameters.account, _parameters, MSALErrorAccountRequired, @"user parameter cannot be nil");
-    
+
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
-    
+
     if (!_forceRefresh)
     {
         NSError *error = nil;
@@ -108,12 +107,12 @@
                                                                    configuration:msidConfiguration
                                                                          context:_parameters
                                                                            error:&error];
-        
+
         if (!accessToken && error)
         {
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [self stopTelemetryEvent:event error:error];
-            
+
             completionBlock(nil, error);
             return;
         }
@@ -124,31 +123,31 @@
                                                            configuration:msidConfiguration
                                                                  context:_parameters
                                                                    error:&error];
-            
+
             NSError *error = nil;
-            
+
             MSALResult *result = [MSALResult resultWithAccessToken:accessToken
                                                            idToken:idToken
                                            isExtendedLifetimeToken:NO
                                                              error:&error];
-            
+
             MSALTelemetryAPIEvent *event = [self getTelemetryAPIEvent];
             [event setUser:result.account];
             [self stopTelemetryEvent:event error:nil];
-            
+
             completionBlock(result, nil);
             return;
         }
-        
+
         // If the access token is good in terms of extended lifetime then store it for later use
         if (accessToken && accessToken.isExtendedLifetimeValid)
         {
             _extendedLifetimeAccessToken = accessToken;
         }
-        
+
         _parameters.unvalidatedAuthority = msidConfiguration.authority;
     }
-    
+
     NSError *msidError = nil;
     MSIDAppMetadataCacheItem *appMetadata = [self.tokenCache getAppAppMetadataForConfiguration:msidConfiguration
                                                                                        context:nil
@@ -175,10 +174,10 @@
     self.familyId = familyId;
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     return [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
-                                                           familyId:familyId
-                                                      configuration:msidConfiguration
-                                                            context:_parameters
-                                                              error:error];
+                                              familyId:familyId
+                                         configuration:msidConfiguration
+                                               context:_parameters
+                                                 error:error];
 }
 
 - (void)tryFRT:(NSString *)familyId appMetadata:(MSIDAppMetadataCacheItem *)appMetadata completionBlock:(MSALCompletionBlock)completionBlock
@@ -190,14 +189,14 @@
         completionBlock(nil, msidError);
         return;
     }
-    
+
     //If no FRT found, try looking for app specific RT
     if (!self.familyRefreshToken)
     {
         [self tryMRRT:completionBlock];
         return;
     }
-    
+
     [self refreshAccessToken:self.familyRefreshToken completionBlock:^(MSALResult *result, NSError *error)
      {
          if (error)
@@ -226,14 +225,14 @@
                      completionBlock(nil, msidError);
                      return;
                  }
-                 
+
                  // Check to see if the content of mrt and frt is not the same before initiating a network request
                  if (self.refreshToken && ![[self.familyRefreshToken refreshToken] isEqualToString:[self.refreshToken refreshToken]])
                  {
                      [self tryMRRT:completionBlock];
                      return;
                  }
-                 
+
                  NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
                  
                  completionBlock(nil, interactionError);

@@ -151,7 +151,6 @@
     _authorityButton = [self buttonWithTitle:[MSALTestAppAuthorityViewController currentTitle]
                                       action:@selector(selectAuthority:)];
     [layout addControl:_authorityButton title:@"authority"];
-    
     _validateAuthority = [[UISegmentedControl alloc] initWithItems:@[@"Yes", @"No"]];
     [layout addControl:_validateAuthority title:@"valAuth"];
     
@@ -482,6 +481,7 @@
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:_extraQueryParamsField.text];
 
     NSError *error = nil;
+    
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
                                                                                            authority:authority
                                                                                          redirectUri:redirectUri
