@@ -292,9 +292,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 }
 #endif
 
-+ (void)cancelCurrentWebAuthSession
++ (BOOL)cancelCurrentWebAuthSession
 {
-    [MSIDWebviewAuthorization cancelCurrentSession];
+    if ([MSIDWebviewAuthorization currentSession])
+    {
+        [MSIDWebviewAuthorization cancelCurrentSession];
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark -
