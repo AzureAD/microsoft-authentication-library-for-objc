@@ -53,6 +53,7 @@
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
+#import "MSALResult.h"
 
 @interface MSALInteractiveRequestTests : MSALTestCase
 
