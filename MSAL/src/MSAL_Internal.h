@@ -63,10 +63,6 @@
     } \
 }
 
-// Checks a selector NSString argument to a method for being null or empty. Throws NSException with name
-// NSInvalidArgumentException if the argument is invalid:
-#define THROW_ON_NIL_EMPTY_ARGUMENT(ARG) THROW_ON_CONDITION_ARGUMENT([NSString adIsStringNilOrBlank:ARG], ARG);
-
 //Checks a selector argument for being null. Throws NSException with name NSInvalidArgumentException if
 //the argument is invalid
 #define THROW_ON_NIL_ARGUMENT(ARG) THROW_ON_CONDITION_ARGUMENT(!(ARG), ARG);

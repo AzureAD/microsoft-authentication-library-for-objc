@@ -73,8 +73,4 @@ typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
     MSALUIBehaviorDefault = MSALSelectAccount,
 };
 
-
-
-
-
 #endif /* MSALConstants_h */
