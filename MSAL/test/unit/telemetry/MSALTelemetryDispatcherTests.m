@@ -73,6 +73,12 @@
     return nil;
 }
 
+- (NSDictionary *)appRequestMetadata
+{
+    return nil;
+}
+
+
 - (NSURLSession *)urlSession
 {
     return nil;

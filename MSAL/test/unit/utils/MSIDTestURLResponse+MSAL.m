@@ -37,12 +37,28 @@
 
 @implementation MSIDTestURLResponse (MSAL)
 
++ (NSDictionary *)msalDefaultRequestHeaders
+{
+    static NSDictionary *s_msalHeaders = nil;
+    static dispatch_once_t headersOnce;
+
+    dispatch_once(&headersOnce, ^{
+        NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
+        headers[@"return-client-request-id"] = @"true";
+        headers[@"client-request-id"] = [MSIDTestRequireValueSentinel sentinel];
+        headers[@"Accept"] = @"application/json";
+        headers[@"x-app-name"] = @"UnitTestHost";
+        headers[@"x-app-ver"] = @"1.0";
+
+        s_msalHeaders = [headers copy];
+    });
+
+    return s_msalHeaders;
+}
+
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [oidcReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
-    [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    NSDictionary *oidcReqHeaders = [self msalDefaultRequestHeaders];
     
     NSDictionary *oidcJson =
     @{ @"token_endpoint" : [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority],
@@ -75,11 +91,8 @@
 
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse request:[NSURL URLWithString:requestUrl]
                                                                   reponse:httpResponse];
-    NSMutableDictionary *headers = [[MSIDDeviceId deviceId] mutableCopy];
-    headers[@"Accept"] = @"application/json";
-    headers[@"return-client-request-id"] = @"true";
-    headers[@"client-request-id"] = [MSIDTestRequireValueSentinel new];
-    discoveryResponse->_requestHeaders = headers;
+    NSDictionary *headers = [self msalDefaultRequestHeaders];
+    discoveryResponse->_requestHeaders = [headers mutableCopy];
 
     NSString *tenantDiscoveryEndpoint = [NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority];
 
@@ -106,10 +119,7 @@
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query
 {
-    NSMutableDictionary *oidcReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [oidcReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [oidcReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
-    [oidcReqHeaders setObject:@"application/json" forKey:@"Accept"];
+    NSDictionary *oidcReqHeaders = [self msalDefaultRequestHeaders];
 
     NSString *queryString = query ? [NSString stringWithFormat:@"?%@", query] : @"";
 
@@ -136,11 +146,7 @@
                                     tenantId:(NSString *)tid
                                         user:(MSALAccount *)user
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
-    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
     
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
@@ -175,11 +181,7 @@
                                  errorDescription:(NSString *)errorDescription
                                          subError:(NSString *)subError
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
-    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
 
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
@@ -220,11 +222,7 @@
                                    scopes:(MSALScopes *)scopes
                                clientInfo:(NSDictionary *)clientInfo
 {
-    NSMutableDictionary *tokenReqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [tokenReqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [tokenReqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
-    [tokenReqHeaders setObject:@"true" forKey:@"return-client-request-id"];
-    [tokenReqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
+    NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
     
     NSMutableDictionary *tokenQPs = [NSMutableDictionary new];
     if (query)
