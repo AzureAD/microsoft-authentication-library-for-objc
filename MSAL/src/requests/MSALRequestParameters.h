@@ -61,6 +61,7 @@
 @property NSUUID *correlationId;
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
+@property NSDictionary *appRequestMetadata;
 
 @property (readonly) MSIDConfiguration *msidConfiguration;
 @property MSIDOauth2Factory *msidOAuthFactory;
