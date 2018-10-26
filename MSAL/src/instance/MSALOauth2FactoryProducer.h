@@ -26,47 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
-#import "MSALTelemetryApiId.h"
-#import "MSIDRequestContext.h"
 
-@class MSALAccount;
-@class MSIDConfiguration;
-@class MSIDAuthority;
 @class MSIDOauth2Factory;
-@class WKWebView;
 
-@interface MSALRequestParameters : NSObject <MSIDRequestContext>
+@interface MSALOauth2FactoryProducer : NSObject
 
-@property (nonatomic) MSIDAuthority *unvalidatedAuthority;
-@property (nonatomic) MSIDAuthority *cloudAuthority;
-@property BOOL validateAuthority;
-@property BOOL extendedLifetimeEnabled;
-@property MSALScopes *scopes;
-@property NSString *redirectUri;
-@property NSString *loginHint;
-@property NSString *clientId;
-@property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *claims;
-@property NSString *prompt;
-@property MSALAccount *account;
-@property MSALTelemetryApiId apiId;
-@property NSDictionary<NSString *, NSString *> *sliceParameters;
++ (nullable MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(nonnull NSURL *)authority
+                                                      context:(nullable id<MSIDRequestContext>)context
+                                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-@property MSALWebviewType webviewType;
-
-@property WKWebView *customWebview;
-
-#pragma mark MSIDRequestContext properties
-@property NSUUID *correlationId;
-@property NSString *logComponent;
-@property NSString *telemetryRequestId;
-@property NSDictionary *appRequestMetadata;
-
-@property (readonly) MSIDConfiguration *msidConfiguration;
-@property MSIDOauth2Factory *msidOAuthFactory;
-
-#pragma mark Methods
-- (void)setScopesFromArray:(NSArray<NSString *> *)array;
-- (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
 @end

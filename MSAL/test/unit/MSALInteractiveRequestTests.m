@@ -100,12 +100,13 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
-                                      extraScopesToConsent:@[@"fakescope3"]
+                                  extraScopesToConsent:@[@"fakescope3"]
                                               behavior:MSALForceConsent
-                                            tokenCache:nil
+                                            tokenCache:[MSIDDefaultTokenCacheAccessor new]
                                                  error:&error];
 
     XCTAssertNotNil(request);
@@ -127,6 +128,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -153,12 +155,9 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
-    
+
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
     MSIDTestURLResponse *response =
@@ -345,6 +344,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                                  name:@"user@contoso.com"
@@ -379,11 +379,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
@@ -465,6 +462,7 @@
     parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"User"
                                                             name:@"user@contoso.com"
@@ -499,11 +497,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
 
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
@@ -566,6 +561,7 @@
     parameters.loginHint = @"fakeuser@contoso.com";
     parameters.correlationId = correlationId;
     parameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
 
     __block MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:parameters
@@ -592,11 +588,8 @@
          completionHandler(oauthResponse, nil);
      }];
 
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:correlationId.UUIDString forKey:@"client-request-id"];
    
     NSString *url = @"https://login.microsoftonline.com/common/oauth2/v2.0/token";
 
