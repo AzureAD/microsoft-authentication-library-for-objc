@@ -52,8 +52,6 @@
 		94E876CE1E492D6000FB96ED /* MSALAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 94E876CB1E492D6000FB96ED /* MSALAuthority.m */; };
 		94E876D11E49369500FB96ED /* MSALBaseRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 94E876CF1E49369500FB96ED /* MSALBaseRequest.h */; };
 		94E876DB1E493DC600FB96ED /* MSALInteractiveRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 94E876D91E493DC600FB96ED /* MSALInteractiveRequest.h */; };
-		94E876DF1E495F2700FB96ED /* MSALUIBehavior.h in Headers */ = {isa = PBXBuildFile; fileRef = 94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		94E876E01E495F2800FB96ED /* MSALUIBehavior.h in Headers */ = {isa = PBXBuildFile; fileRef = 94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96090D9020E58DE600E42B37 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		962302591E7215170022A778 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 962302581E7215170022A778 /* Launch Screen.storyboard */; };
 		9628594A1E73506A008F1AE1 /* OpenIdConfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 962859441E734ECA008F1AE1 /* OpenIdConfiguration.json */; };
@@ -73,7 +71,8 @@
 		963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 963D08D41E78D06E0025C726 /* MSALAutoSettings.m */; };
 		965B86141E5ED5F1004AEB59 /* MSALSilentRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */; };
 		965B86161E5ED5F1004AEB59 /* MSALSilentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */; };
-		9682624C20E304F30080694D /* MSALWebviewType.h in Headers */ = {isa = PBXBuildFile; fileRef = 9682624620E304180080694D /* MSALWebviewType.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9682A62F218290FE00E37E63 /* MSALConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 9682A62A218290F700E37E63 /* MSALConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9682A630218290FE00E37E63 /* MSALConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 9682A62A218290F700E37E63 /* MSALConstants.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96902DF320E1577500200E6F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		96902DF420E1578700200E6F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		96902DF620E1579000200E6F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DF520E1579000200E6F /* WebKit.framework */; };
@@ -505,7 +504,6 @@
 		94E876D01E49369500FB96ED /* MSALBaseRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALBaseRequest.m; sourceTree = "<group>"; };
 		94E876D91E493DC600FB96ED /* MSALInteractiveRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALInteractiveRequest.h; sourceTree = "<group>"; };
 		94E876DA1E493DC600FB96ED /* MSALInteractiveRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALInteractiveRequest.m; sourceTree = "<group>"; };
-		94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALUIBehavior.h; sourceTree = "<group>"; };
 		9612C6141EB28F9D00816915 /* MSALTestConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestConstants.h; sourceTree = "<group>"; };
 		962302581E7215170022A778 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		9623025E1E7217740022A778 /* MSALAutomation.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MSALAutomation.entitlements; sourceTree = "<group>"; };
@@ -529,7 +527,7 @@
 		965B86121E5ED5F1004AEB59 /* MSALSilentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALSilentRequest.h; sourceTree = "<group>"; };
 		965B86131E5ED5F1004AEB59 /* MSALSilentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALSilentRequest.m; sourceTree = "<group>"; };
 		965BEF7B1E5FE73C00A61587 /* MSALSilentRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALSilentRequestTests.m; sourceTree = "<group>"; };
-		9682624620E304180080694D /* MSALWebviewType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALWebviewType.h; sourceTree = "<group>"; };
+		9682A62A218290F700E37E63 /* MSALConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALConstants.h; sourceTree = "<group>"; };
 		96902DEC20E1574F00200E6F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
 		96902DF520E1579000200E6F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		96902DFA20E158E700200E6F /* GSS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GSS.framework; path = System/Library/Frameworks/GSS.framework; sourceTree = SDKROOT; };
@@ -1167,15 +1165,14 @@
 			isa = PBXGroup;
 			children = (
 				D65A6F811E3FF3D900C69FBA /* MSAL.h */,
+				9682A62A218290F700E37E63 /* MSALConstants.h */,
 				D65A6F821E3FF3D900C69FBA /* MSALError.h */,
 				D65A6F831E3FF3D900C69FBA /* MSALLogger.h */,
 				D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */,
 				D65A6F851E3FF3D900C69FBA /* MSALResult.h */,
 				D65A6F861E3FF3D900C69FBA /* MSALAccount.h */,
-				94E876DE1E495EE600FB96ED /* MSALUIBehavior.h */,
 				96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */,
 				B221CED920C0AC60002F5E94 /* MSALAccountId.h */,
-				9682624620E304180080694D /* MSALWebviewType.h */,
 				94E876CA1E492D6000FB96ED /* MSALAuthority.h */,
 				23A68A7220F5386A0071E435 /* MSALAADAuthority.h */,
 				23A68A7820F538B90071E435 /* MSALB2CAuthority.h */,
@@ -1462,7 +1459,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D65A6FB51E3FF41D00C69FBA /* MSALResult.h in Headers */,
-				94E876E01E495F2800FB96ED /* MSALUIBehavior.h in Headers */,
 				23A68A7A20F538B90071E435 /* MSALB2CAuthority.h in Headers */,
 				23A68A7420F5386A0071E435 /* MSALAADAuthority.h in Headers */,
 				D65A6FB61E3FF41D00C69FBA /* MSALAccount.h in Headers */,
@@ -1470,8 +1466,8 @@
 				B2B5F08B1FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h in Headers */,
 				23A68A8020F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
 				23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */,
+				9682A62F218290FE00E37E63 /* MSALConstants.h in Headers */,
 				D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */,
-				9682624C20E304F30080694D /* MSALWebviewType.h in Headers */,
 				D65A6FB41E3FF41D00C69FBA /* MSALPublicClientApplication.h in Headers */,
 				B2A3C29621460D290082525C /* MSALAuthority.h in Headers */,
 				B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
@@ -1494,6 +1490,7 @@
 				B2A3C28A2145FD0F0082525C /* MSALAccountsProvider.h in Headers */,
 				2342584C20649A9800621AFE /* MSALAccount+Internal.h in Headers */,
 				23A68A7520F5386A0071E435 /* MSALAADAuthority.h in Headers */,
+				9682A630218290FE00E37E63 /* MSALConstants.h in Headers */,
 				94E876C61E492BC300FB96ED /* MSALRequestParameters.h in Headers */,
 				D65A6FAD1E3FF3D900C69FBA /* MSALAccount.h in Headers */,
 				D62746D31E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h in Headers */,
@@ -1501,7 +1498,6 @@
 				B2B5F08C1FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h in Headers */,
 				D673F0791E4A633B0018BA91 /* MSALError_Internal.h in Headers */,
 				B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
-				94E876DF1E495F2700FB96ED /* MSALUIBehavior.h in Headers */,
 				D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */,
 				96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */,
 				B221CEEC20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */,
@@ -2671,6 +2667,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
@@ -2684,6 +2681,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";

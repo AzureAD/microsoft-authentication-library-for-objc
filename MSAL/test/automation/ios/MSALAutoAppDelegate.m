@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAutoAppDelegate.h"
+#import "MSALPublicClientApplication.h"
 
 @implementation MSALAutoAppDelegate
 

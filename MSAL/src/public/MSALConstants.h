@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,14 +17,22 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#ifndef MSALWebviewType_h
-#define MSALWebviewType_h
+#ifndef MSALConstants_h
+#define MSALConstants_h
+
+@class MSALResult;
+@class MSALAccount;
+
+typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
@@ -45,4 +55,26 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
 };
 
 
-#endif /* MSALWebviewType_h */
+typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+    /*!
+     If no user is specified the authentication webview will present a list of users currently
+     signed in for the user to select among.
+     */
+    MSALSelectAccount,
+    
+    /*!
+     Require the user to authenticate in the webview
+     */
+    MSALForceLogin,
+    /*!
+     Require the user to consent to the current set of scopes for the request.
+     */
+    MSALForceConsent,
+    MSALUIBehaviorDefault = MSALSelectAccount,
+};
+
+
+
+
+
+#endif /* MSALConstants_h */

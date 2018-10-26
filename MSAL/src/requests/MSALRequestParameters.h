@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDRequestContext.h"
+#import "MSALConstants.h"
 
 @class MSALAccount;
 @class MSIDConfiguration;
