@@ -122,7 +122,7 @@
 
     request.accountIdentifier = homeAccountId;
     // B2C currently doesn't return "tid" claim in the id_token, so MSAL will use tenantId from the provided authority
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.tenantName];
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
     // 4. Run silent login
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -192,7 +192,7 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.tenantName];
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
     // 4. Run silent login
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -251,14 +251,14 @@
     // 5. Get token silently for the first request
     request.accountIdentifier = homeAccountId;
     // B2C currently doesn't return "tid" claim in the id_token, so MSAL will use tenantId from the provided authority
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.tenantName];
+    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 6. Get token silently for the second request
     profileRequest.accountIdentifier = profileHomeAccountId;
     // B2C currently doesn't return "tid" claim in the id_token, so MSAL will use tenantId from the provided authority
-    profileRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.tenantName];
+    profileRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
     profileRequest.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:profileRequest];
 
