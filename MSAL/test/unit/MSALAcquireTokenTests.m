@@ -68,6 +68,8 @@
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAadAuthorityCache.h"
 #import "MSIDAadAuthorityCacheRecord.h"
+#import "MSIDAppMetadataCacheItem.h"
+#import "MSIDRefreshToken.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -1090,7 +1092,7 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-- (void)testAcquireTokenSilent_whenATExpiredAndFamilyRefreshTokenInCache_shouldRefreshAccessTokenUsingFamilyRefreshToken
+- (void)testAcquireTokenSilent_whenATExpiredAndFRTInCache_shouldRefreshAccessTokenUsingFRT
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -1138,26 +1140,7 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    
-    NSArray *allTokens = [application.tokenCache allTokensWithContext:nil error:nil];
-    
-    NSMutableArray *results = [NSMutableArray array];
-    
-    for (MSIDBaseToken *token in allTokens)
-    {
-        if (token.credentialType == MSIDRefreshTokenType)
-        {
-            [results addObject:token];
-        }
-    }
-    //Check if both RT and FRT are in cache
-    XCTAssertEqual([results count], 2);
-    MSIDRefreshToken *refreshToken = results[1];
-    NSError *removeRTError = nil;
-    //remove RT from cache
-    BOOL removeRTResult = [self.tokenCache validateAndRemoveRefreshToken:refreshToken context:nil error:&removeRTError];
-    XCTAssertNil(removeRTError);
-    XCTAssertTrue(removeRTResult);
+    [self removeRefreshTokenFromCache];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1174,6 +1157,174 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenSilent_whenATExpiredAndNoAppMetadataInCacheAndFRTInCache_shouldRefreshAccessTokenUsingFRT
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    // Seed a cache object with a user and an AT
+    NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                          RT:@"i am a refresh token!"
+                                                                      scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                     idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                         uid:DEFAULT_TEST_UID
+                                                                        utid:DEFAULT_TEST_UTID
+                                                                    familyId:@"1"].jsonDictionary.mutableCopy;
+    [json setObject:@"-3600" forKey:MSID_OAUTH2_EXPIRES_IN];
+    MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"];
+    
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+    
+    // Set up the network responses for OIDC discovery
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
+    // Set up a 200 network responses
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
+                                                                        authority:authority
+                                                                         tenantId:nil
+                                                                             user:account];
+    [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
+    
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    application.tokenCache = self.tokenCache;
+    [self removeRefreshTokenFromCache];
+    
+    NSArray<MSIDAppMetadataCacheItem *> *metadataEntries = [self.tokenCache getAppMetadataEntries:configuration
+                                                                                          context:nil
+                                                                                            error:nil];
+    
+    XCTAssertEqual([metadataEntries count], 1);
+    NSError *removeAppMTError = nil;
+    BOOL removeAppMetadataResult = [self.tokenCache removeAppMetadata:metadataEntries[0]
+                                                              context:nil
+                                                                error:&removeAppMTError];
+    XCTAssertNil(removeAppMTError);
+    XCTAssertTrue(removeAppMetadataResult);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    [application acquireTokenSilentForScopes:@[@"user.read"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         // Ensure we get back access token with extendedLifetimeToken being NO
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenSilent_whenFRTUsedAndServerReturnsClientMismatch_shouldUpdateAppMetadata
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
+    
+    // Seed a cache object with a user and existing AT that does not match the scope we will ask for
+    MSIDAADV2TokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                                 RT:@"i am a refresh token!"
+                                                                             scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                            idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                                uid:DEFAULT_TEST_UID
+                                                                               utid:DEFAULT_TEST_UTID
+                                                                           familyId:@"1"];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"];
+    
+    // Add AT, RT & FRT
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application =
+    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                    error:&error];
+    XCTAssertNotNil(application);
+    application.tokenCache = self.tokenCache;
+    
+    [self removeRefreshTokenFromCache];
+    NSArray<MSIDAppMetadataCacheItem *> *metadataEntries = [self.tokenCache getAppMetadataEntries:configuration
+                                                                                          context:nil
+                                                                                            error:nil];
+    
+    XCTAssertEqual([metadataEntries count], 1);
+    MSIDAppMetadataCacheItem *appMetadata = metadataEntries[0];
+    XCTAssertEqualObjects(appMetadata.familyId, @"1");
+    
+    // Set up the network responses for OIDC discovery and the RT response
+    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
+    
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes
+                                                                             authority:authority
+                                                                              tenantId:nil account:account
+                                                                             errorCode:@"invalid_grant"
+                                                                      errorDescription:@"Refresh token revoked"
+                                                                              subError:@"client_mismatch"];
+    [MSIDTestURLSession addResponses:@[tokenResponse]];
+    
+    // Acquire a token silently for a scope that does not exist in cache
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    [application acquireTokenSilentForScopes:@[@"mail.read"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         // Ensure we get back the proper access token
+         NSArray<MSIDAppMetadataCacheItem *> *metadataEntries = [self.tokenCache getAppMetadataEntries:configuration
+                                                                                               context:nil
+                                                                                                 error:nil];
+         
+         XCTAssertEqual([metadataEntries count], 1);
+         MSIDAppMetadataCacheItem *appMetadata = metadataEntries[0];
+         XCTAssertNil(appMetadata.familyId);
+         XCTAssertNotNil(error);
+         XCTAssertNil(result);
+         XCTAssertEqual(error.code, MSALErrorInteractionRequired);
+         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"User interaction is required");
+         XCTAssertEqualObjects(error.userInfo[MSALOAuthErrorKey], @"invalid_grant");
+         XCTAssertEqualObjects(error.userInfo[MSALOAuthSubErrorKey], @"client_mismatch");
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectation] timeout:5];
+}
 #pragma mark - Helpers
 
 - (void)addTestTokenResponseWithResponseScopes:(NSString *)responseScopes
@@ -1210,4 +1361,28 @@
     [MSIDTestURLSession addResponse:tokenResponse];
 }
 
+- (void)removeRefreshTokenFromCache
+{
+    NSArray *allTokens = [self.tokenCache allTokensWithContext:nil error:nil];
+    NSMutableArray *results = [NSMutableArray array];
+    for (MSIDBaseToken *token in allTokens)
+    {
+        if (token.credentialType == MSIDRefreshTokenType)
+        {
+            MSIDRefreshToken *refreshToken = (MSIDRefreshToken *)token;
+            if ([NSString msidIsStringNilOrBlank:refreshToken.familyId])
+            {
+                [results addObject:token];
+            }
+        }
+    }
+    
+    XCTAssertEqual([results count], 1);
+    MSIDRefreshToken *refreshToken = results[0];
+    NSError *removeRTError = nil;
+    //remove RT from cache
+    BOOL removeRTResult = [self.tokenCache validateAndRemoveRefreshToken:refreshToken context:nil error:&removeRTError];
+    XCTAssertNil(removeRTError);
+    XCTAssertTrue(removeRTResult);
+}
 @end
