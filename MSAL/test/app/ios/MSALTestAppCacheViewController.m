@@ -67,7 +67,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     NSMutableDictionary<NSString *, NSMutableArray *> *_tokensPerAccount;
     NSMutableDictionary *_cacheSections;
-    NSMutableArray *_cacheSectionTitles;
+    NSArray *_cacheSectionTitles;
     UITableView *_cacheTableView;
 }
 
@@ -93,20 +93,21 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return self;
 }
 
-- (void)deleteAppMetadataAtPath:(NSIndexPath *)indexPath
+- (void)deleteAppMetadata:(MSIDAppMetadataCacheItem *)appMetadata
 {
-    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataEntries][indexPath.row];
-    [self.defaultAccessor removeAppMetadata:appMetadata context:nil error:nil];
-    [self loadCache];
+    if (appMetadata)
+    {
+        [self.defaultAccessor removeAppMetadata:appMetadata context:nil error:nil];
+        [self loadCache];
+    }
 }
 
-- (void)deleteTokenAtPath:(NSIndexPath *)indexPath
+- (void)deleteToken:(MSIDBaseToken *)token
 {
-    MSIDBaseToken *token = [self tokenForPath:indexPath];
-
     if (token)
     {
-        switch (token.credentialType) {
+        switch (token.credentialType)
+        {
             case MSIDRefreshTokenType:
             {
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
@@ -140,27 +141,25 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 [self.defaultAccessor removeToken:token context:nil error:nil];
                 break;
         }
+        
+        [self loadCache];
     }
-
-    [self loadCache];
 }
 
-- (void)expireTokenAtPath:(NSIndexPath*)indexPath
+- (void)expireAccessToken:(MSIDAccessToken *)accessToken
 {
-    MSIDAccessToken *accessToken = (MSIDAccessToken *) [self tokenForPath:indexPath];
-    accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
-    [_tokenCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
-    [self loadCache];
-}
-
-- (void)deleteAllAtPath:(NSIndexPath *)indexPath
-{
-    NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
-    NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
-    id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
-    if ([cacheEntry isKindOfClass:[MSIDAccount class]])
+    if (accessToken)
     {
-        MSIDAccount *account = (MSIDAccount *)cacheEntry;
+        accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
+        [_tokenCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
+        [self loadCache];
+    }
+}
+
+- (void)deleteAllEntriesForAccount:(MSIDAccount *)account
+{
+    if (account)
+    {
         [self.defaultAccessor clearCacheForAccount:account.accountIdentifier
                                          authority:nil
                                           clientId:nil
@@ -175,25 +174,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 }
 
-- (void)invalidateTokenAtPath:(NSIndexPath *)indexPath
+- (void)invalidateRefreshToken:(MSIDRefreshToken *)refreshToken
 {
-    MSIDRefreshToken *refreshToken = (MSIDRefreshToken *) [self tokenForPath:indexPath];
-    refreshToken.refreshToken = BAD_REFRESH_TOKEN;
-    [_tokenCache saveCredential:refreshToken.tokenCacheItem context:nil error:nil];
-    [self loadCache];
-}
-
-- (MSIDBaseToken *)tokenForPath:(NSIndexPath *)indexPath
-{
-    NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
-    NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
-    id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
-    if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
+    if (refreshToken)
     {
-        return (MSIDBaseToken *)cacheEntry;
+        refreshToken.refreshToken = BAD_REFRESH_TOKEN;
+        [_tokenCache saveCredential:refreshToken.tokenCacheItem context:nil error:nil];
+        [self loadCache];
     }
-    
-    return nil;
 }
 
 - (void)viewDidLoad
@@ -240,7 +228,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                 context:nil
                                                                   error:nil]];
         
-        [self setAppMetadataEntries:[self.defaultAccessor appMetadataEntries:nil context:nil error:nil]];
+        [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
         
         _cacheSections = [NSMutableDictionary dictionary];
         if ([[self appMetadataEntries] count])
@@ -264,7 +252,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             [tokens addObject:token];
         }
         
-        _cacheSectionTitles = (NSMutableArray *)[_cacheSections allKeys];
+        _cacheSectionTitles = [_cacheSections allKeys];
         
         dispatch_async(dispatch_get_main_queue(), ^{
             [_cacheTableView reloadData];
@@ -295,8 +283,22 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UILabel *label = [[UILabel alloc] init];
+    NSArray *sectionObjects = [_cacheSections objectForKey:[_cacheSectionTitles objectAtIndex:section]];
+    if ([sectionObjects count])
+    {
+        id cacheEntry = [sectionObjects objectAtIndex:0];
+        if ([cacheEntry isKindOfClass:[MSIDAccount class]])
+        {
+            MSIDAccount *account = (MSIDAccount *)cacheEntry;
+            label.text = account.username;
+        }
+        else
+        {
+            label.text = [_cacheSectionTitles objectAtIndex:section];
+        }
+    }
+    
     label.textAlignment = NSTextAlignmentCenter;
-    label.text = [_cacheSectionTitles objectAtIndex:section];
     label.backgroundColor = [UIColor colorWithRed:0.27 green:0.43 blue:0.7 alpha:1.0];
     return label;
 }
@@ -314,7 +316,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     if (!cell)
     {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cacheCell"];
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"cacheCell"];
     }
 
     cell.backgroundColor = [UIColor whiteColor];
@@ -324,12 +326,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
     id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
     
-    if([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
+    if ([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
     {
         MSIDAppMetadataCacheItem *appMetadata = [self appMetadataEntries][indexPath.row];
-        cell.textLabel.text = appMetadata.clientId;
+        cell.textLabel.text = [NSString stringWithFormat:@"[ClientId] %@", appMetadata.clientId];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"[Environment] %@, FamilyId %@", appMetadata.environment, appMetadata.familyId];
+
     }
-    else if([cacheEntry isKindOfClass:[MSIDBaseToken class]])
+    else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
     {
         MSIDBaseToken *token = (MSIDBaseToken *)cacheEntry;
         switch (token.credentialType) {
@@ -340,15 +344,18 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {
                     cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.url.msidTenant, refreshToken.clientId];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
                 }
                 else
                 {
                     cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.url.msidTenant, refreshToken.familyId];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
                 }
                 
                 if ([refreshToken.refreshToken isEqualToString:BAD_REFRESH_TOKEN])
                 {
                     cell.textLabel.textColor = [UIColor orangeColor];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
                 }
                 break;
             }
@@ -356,7 +363,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
                 cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.authority.url.msidTenant];
-                
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", accessToken.clientId];
                 if (accessToken.isExpired)
                 {
                     cell.textLabel.textColor = [UIColor redColor];
@@ -366,21 +373,24 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             case MSIDIDTokenType:
             {
                 cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.authority.url.msidTenant];
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
                 break;
             }
             case MSIDLegacySingleResourceTokenType:
             {
                 cell.textLabel.text = @"Legacy single resource token";
+                cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
                 break;
             }
             default:
                 break;
         }
     }
-    else
+    else if([cacheEntry isKindOfClass:[MSIDAccount class]])
     {
         MSIDAccount *account = (MSIDAccount *)cacheEntry;
-        cell.textLabel.text = account.authority.environment;
+        cell.textLabel.text = [NSString stringWithFormat:@"[AC] %@", account.authority.environment];
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"[Account Identifier] %@", [self rowIdentifier:account.accountIdentifier]];
     }
     
     return cell;
@@ -394,19 +404,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
     id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
-    if([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
+    if ([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
     {
+        MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)cacheEntry;
         UITableViewRowAction *deleteTokenAction =
         [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                            title:@"Delete"
                                          handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
          {
-             [self deleteAppMetadataAtPath:indexPath];
+             [self deleteAppMetadata:appMetadata];
          }];
         
         return @[deleteTokenAction];
     }
-    else if([cacheEntry isKindOfClass:[MSIDBaseToken class]])
+    else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
     {
         MSIDBaseToken *token = (MSIDBaseToken *)cacheEntry;
         UITableViewRowAction *deleteTokenAction =
@@ -414,7 +425,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                            title:@"Delete"
                                          handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
          {
-             [self deleteTokenAtPath:indexPath];
+             [self deleteToken:token];
          }];
         
         UITableViewRowAction* invalidateAction =
@@ -422,7 +433,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                            title:@"Invalidate"
                                          handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
          {
-             [self invalidateTokenAtPath:indexPath];
+             [self invalidateRefreshToken:(MSIDRefreshToken *)token];
          }];
         
         [invalidateAction setBackgroundColor:[UIColor orangeColor]];
@@ -432,7 +443,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                            title:@"Expire"
                                          handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
          {
-             [self expireTokenAtPath:indexPath];
+             [self expireAccessToken:(MSIDAccessToken *)token];
          }];
         [expireTokenAction setBackgroundColor:[UIColor orangeColor]];
         
@@ -459,13 +470,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 return nil;
         }
     }
-    else if([cacheEntry isKindOfClass:[MSIDAccount class]])
+    else if ([cacheEntry isKindOfClass:[MSIDAccount class]])
     {
+        MSIDAccount *account = (MSIDAccount *)cacheEntry;
         return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                                     title:@"Delete All"
                                                   handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
                   {
-                      [self deleteAllAtPath:indexPath];
+                      [self deleteAllEntriesForAccount:account];
                   }]];
     }
     
