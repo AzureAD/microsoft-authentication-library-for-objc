@@ -363,7 +363,7 @@
     NSString *subError = serverError.userInfo[MSALOAuthSubErrorKey];
     if (subError && [subError isEqualToString:MSIDServerErrorClientMismatch])
     {
-        if (appMetadata && appMetadata.familyId)
+        if (appMetadata && ![NSString msidIsStringNilOrBlank:appMetadata.familyId])
         {
             appMetadata.familyId = nil;
             [self.tokenCache updateAppMetadata:appMetadata context:_parameters error:cacheError];
