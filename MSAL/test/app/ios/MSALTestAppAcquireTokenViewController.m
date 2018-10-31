@@ -38,6 +38,9 @@
 #import <WebKit/WebKit.h>
 #import "MSALTestAppAuthorityTypeViewController.h"
 #import "MSALTestAppProfileViewController.h"
+#import "MSALResult.h"
+#import "MSALLogger.h"
+#import "MSALConstants.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1

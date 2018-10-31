@@ -66,6 +66,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #import "MSIDWebviewSession.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSALResult.h"
 
 @interface MSALPublicClientApplication()
 {

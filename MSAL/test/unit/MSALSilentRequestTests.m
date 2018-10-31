@@ -60,6 +60,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDAuthorityFactory.h"
+#import "MSALResult.h"
 
 @interface MSALSilentRequestTests : MSALTestCase
 

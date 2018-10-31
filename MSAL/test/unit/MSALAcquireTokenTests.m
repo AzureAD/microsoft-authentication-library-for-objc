@@ -69,6 +69,8 @@
 #import "MSIDAadAuthorityCache.h"
 #import "MSIDAadAuthorityCacheRecord.h"
 
+#import "MSALResult.h"
+
 @interface MSALAcquireTokenTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;

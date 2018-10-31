@@ -29,12 +29,8 @@
 
 @interface MSALAccountId ()
 
-- (instancetype)initWithHomeAccountIdentifier:(NSString *)identifier
-                                          uid:(NSString *)uid
-                                         utid:(NSString *)utid;
-
-- (instancetype)initWithLocalAccountIdentifier:(NSString *)identifier
-                                      objectId:(NSString *)objectId
-                                      tenantId:(NSString *)tenantId;
+- (instancetype)initWithAccountIdentifier:(NSString *)identifier
+                                 objectId:(NSString *)objectId
+                                 tenantId:(NSString *)tenantId;
 
 @end

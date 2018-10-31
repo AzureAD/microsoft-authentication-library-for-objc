@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRequestParameters.h"
-#import "MSALUIBehavior.h"
 #import "MSALError_Internal.h"
 #import "MSIDConfiguration.h"
 #import "NSOrderedSet+MSIDExtensions.h"
