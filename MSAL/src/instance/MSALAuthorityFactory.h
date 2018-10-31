@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALAuthority;
+
 @interface MSALAuthorityFactory : NSObject
 
 - (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url

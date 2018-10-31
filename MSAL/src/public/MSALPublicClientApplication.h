@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <MSAL/MSAL.h>
 
 @class MSALResult;
 @class MSALAccount;
@@ -244,7 +243,7 @@
     in the SafariViewController being dismissed and the acquireToken request ending
     in a cancelation error.
  */
-+ (void)cancelCurrentWebAuthSession;
++ (BOOL)cancelCurrentWebAuthSession;
 
 #pragma mark -
 #pragma mark acquireToken

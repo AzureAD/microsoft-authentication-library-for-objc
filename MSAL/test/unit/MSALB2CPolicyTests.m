@@ -49,6 +49,9 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 
+#import "MSALResult.h"
+#import "MSALAccount.h"
+
 @interface MSALB2CPolicyTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;

@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALTelemetryApiId.h"
+#import "MSALPublicClientApplication.h"
 
 @class MSALTokenCacheItem;
 @class MSALTelemetryAPIEvent;

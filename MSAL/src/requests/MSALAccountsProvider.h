@@ -28,6 +28,7 @@
 #import <Foundation/Foundation.h>
 
 @class MSIDDefaultTokenCacheAccessor;
+@class MSALAuthority;
 
 @interface MSALAccountsProvider : NSObject
 

@@ -31,25 +31,10 @@
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
-#define INT_CONCAT_HELPER(x,y) x ## . ## y
-#define INT_CONCAT(x,y) INT_CONCAT_HELPER(x,y)
 
 // Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_NUMBER INT_CONCAT(MSAL_VER_HIGH, MSAL_VER_LOW)
-
 #define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
-#define MSAL_VERSION_NSSTRING   @"" STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
 
-#define MSAL_VERSION_HELPER(high, low, patch) msalVersion_ ## high ## _ ## low ## _ ## patch
-#define MSAL_VERSION_(high, low, patch) MSAL_VERSION_HELPER(high, low, patch)
-
-// This is specially crafted so the name of the variable matches the full MSAL version
-#define MSAL_VERSION_VAR MSAL_VERSION_(MSAL_VER_HIGH, MSAL_VER_LOW, MSAL_VER_PATCH)
-
-// Utility macros for convience classes wrapped around JSON dictionaries
-#define DICTIONARY_RW_PROPERTY_IMPL(DICT, KEY, GETTER, SETTER) \
-    DICTIONARY_READ_PROPERTY_IMPL(DICT, KEY, GETTER) \
-    DICTIONARY_WRITE_PROPERTY_IMPL(DICT, KEY, SETTER)
 
 //General macro for throwing exception named NSInvalidArgumentException
 #define THROW_ON_CONDITION_ARGUMENT(CONDITION, ARG) \
@@ -63,10 +48,6 @@
     } \
 }
 
-// Checks a selector NSString argument to a method for being null or empty. Throws NSException with name
-// NSInvalidArgumentException if the argument is invalid:
-#define THROW_ON_NIL_EMPTY_ARGUMENT(ARG) THROW_ON_CONDITION_ARGUMENT([NSString adIsStringNilOrBlank:ARG], ARG);
-
 //Checks a selector argument for being null. Throws NSException with name NSInvalidArgumentException if
 //the argument is invalid
 #define THROW_ON_NIL_ARGUMENT(ARG) THROW_ON_CONDITION_ARGUMENT(!(ARG), ARG);
@@ -78,8 +59,8 @@
 typedef NSOrderedSet<NSString *> MSALScopes;
 
 #import "IdentityCore_Internal.h"
-#include "MSAL.h"
 #include "MSIDLogger+Internal.h"
 #include "MSALRequestParameters.h"
 #include "MSALError_Internal.h"
 #import  "MSIDRequestContext.h"
+#import "MSALConstants.h"

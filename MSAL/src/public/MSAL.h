@@ -39,16 +39,9 @@ FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 //! Project version string for MSAL.
 FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
-@class MSALResult;
-@class MSALAccount;
-
-typedef void (^MSALCompletionBlock)(MSALResult *result, NSError *error);
-typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> *accounts, NSError *error);
-
-#import <MSAL/MSALUIBehavior.h>
+#import <MSAL/MSALConstants.h>
 #import <MSAL/MSALError.h>
 #import <MSAL/MSALLogger.h>
-#import <MSAL/MSALWebviewType.h>
 #import <MSAL/MSALPublicClientApplication.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALAccount.h>

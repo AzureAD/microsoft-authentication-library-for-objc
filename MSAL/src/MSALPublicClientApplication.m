@@ -66,6 +66,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #import "MSIDWebviewSession.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSALResult.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -292,9 +293,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 }
 #endif
 
-+ (void)cancelCurrentWebAuthSession
++ (BOOL)cancelCurrentWebAuthSession
 {
-    [MSIDWebviewAuthorization cancelCurrentSession];
+    if ([MSIDWebviewAuthorization currentSession])
+    {
+        [MSIDWebviewAuthorization cancelCurrentSession];
+        return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark -
