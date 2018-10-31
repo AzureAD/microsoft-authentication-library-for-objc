@@ -54,7 +54,7 @@
     request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive in the guest tenant
-    NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request closeResultView:NO];
+    NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:request closeResultView:NO];
     NSString *resultTenantId = [self resultDictionary][@"tenantId"];
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
@@ -86,7 +86,7 @@
     homeRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
 
     // 1. Run interactive in the home tenant
-    NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:homeRequest closeResultView:NO];
+    NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:NO];
     NSString *resultTenantId = [self resultDictionary][@"tenantId"];
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.homeTenantId);
     XCTAssertNotNil(homeAccountId);
@@ -124,7 +124,7 @@
     guestRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive in the guest tenant
-    NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:guestRequest closeResultView:NO];
+    NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:guestRequest closeResultView:NO];
     NSString *resultTenantId = [self resultDictionary][@"tenantId"];
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
@@ -142,7 +142,7 @@
     // TODO: lab doesn't return correct home object ID at the moment, need to follow up on that!
     homeRequest.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
     homeRequest.testAccount.targetTenantId = self.primaryAccount.homeTenantId;
-    [self runSharedADFSInteractiveLoginWithRequest:homeRequest closeResultView:YES];
+    [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:YES];
 
     // 3. Run silent for the guest tenant
     guestRequest.accountIdentifier = homeAccountId;
@@ -157,6 +157,50 @@
     homeRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
     homeRequest.testAccount.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedSilentAADLoginWithTestRequest:homeRequest];
+}
+
+- (NSString *)runSharedGuestInteractiveLoginWithRequest:(MSALTestRequest *)request
+                                        closeResultView:(BOOL)closeResultView
+{
+    // 1. Do interactive login
+    NSDictionary *config = [self configWithTestRequest:request];
+    [self acquireToken:config];
+
+    [self acceptAuthSessionDialogIfNecessary:request];
+
+    if (!request.loginHint)
+    {
+        [self aadEnterEmail];
+    }
+
+    [self enterGuestUsername];
+    [self enterGuestPassword];
+    [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
+
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+
+    if (closeResultView)
+    {
+        [self closeResultView];
+    }
+
+    return homeAccountId;
+}
+
+- (void)enterGuestUsername
+{
+    XCUIElement *passwordTextField = [self.testApp.textFields elementBoundByIndex:0];
+    [self waitForElement:passwordTextField];
+    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
+    [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.username]];
+}
+
+- (void)enterGuestPassword
+{
+    XCUIElement *passwordTextField = [self.testApp.secureTextFields elementBoundByIndex:0];
+    [self waitForElement:passwordTextField];
+    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
+    [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
 
 @end

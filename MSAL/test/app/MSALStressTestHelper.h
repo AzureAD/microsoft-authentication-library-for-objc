@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALPublicClientApplication.h"
 
 typedef enum {
                 /*

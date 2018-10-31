@@ -35,6 +35,8 @@
 #import "MSIDAccessToken.h"
 #import "MSIDAccount.h"
 #import "MSIDAccountCredentialCache.h"
+#import "MSALPublicClientApplication.h"
+#import "MSALResult.h"
 
 @implementation MSALStressTestHelper
 

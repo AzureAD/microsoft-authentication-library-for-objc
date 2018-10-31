@@ -69,6 +69,8 @@
 #import "MSIDAadAuthorityCache.h"
 #import "MSIDAadAuthorityCacheRecord.h"
 
+#import "MSALResult.h"
+
 @interface MSALAcquireTokenTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
@@ -1099,11 +1101,8 @@
     NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]};
 
     // Token request response.
-    NSMutableDictionary *reqHeaders = [[MSIDDeviceId deviceId] mutableCopy];
-    [reqHeaders setObject:@"true" forKey:@"return-client-request-id"];
+    NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
     [reqHeaders setObject:@"application/x-www-form-urlencoded" forKey:@"Content-Type"];
-    [reqHeaders setObject:@"application/json" forKey:@"Accept"];
-    [reqHeaders setObject:[MSIDTestRequireValueSentinel new] forKey:@"client-request-id"];
 
     NSString *url = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
 

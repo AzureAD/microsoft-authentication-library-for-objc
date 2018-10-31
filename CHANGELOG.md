@@ -1,7 +1,9 @@
-## [0.2.1] - 2018-09-27
+## [0.2.1] - 2018-10-29
 ### Added
 - Fix clang analyzer issues.
 - WKWebView drops network connection if device got locked on iOS 12. It is by design and not configurable.
+- Improved schema compatibility with other MSAL/ADAL SDKs
+- Optimize silent requests
 
 ## [0.2.0] - 2018-09-18
 ### Added
