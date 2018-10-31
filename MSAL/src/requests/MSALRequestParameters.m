@@ -31,8 +31,39 @@
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDAuthorityFactory.h"
 #import "MSALAuthority.h"
+#import "MSIDConstants.h"
 
 @implementation MSALRequestParameters
+
+- (instancetype)init
+{
+    self = [super init];
+
+    if (self)
+    {
+        [self initDefaultAppMetadata];
+    }
+
+    return self;
+}
+
+- (void)initDefaultAppMetadata
+{
+    NSDictionary *metadata = [[NSBundle mainBundle] infoDictionary];
+
+    NSString *appName = metadata[@"CFBundleDisplayName"];
+
+    if (!appName)
+    {
+        appName = metadata[@"CFBundleName"];
+    }
+
+    NSString *appVer = metadata[@"CFBundleShortVersionString"];
+
+    _appRequestMetadata = @{MSID_VERSION_KEY: @MSAL_VERSION_STRING,
+                            MSID_APP_NAME_KEY: appName ? appName : @"",
+                            MSID_APP_VER_KEY: appVer ? appVer : @""};
+}
 
 - (void)setScopesFromArray:(NSArray<NSString *> *)scopes
 {
