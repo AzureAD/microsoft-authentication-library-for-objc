@@ -66,6 +66,11 @@
         return YES;
     }
     
+    if (![object isKindOfClass:MSALAccountId.class])
+    {
+        return NO;
+    }
+    
     return [self isEqualToItem:object];
 }
 
