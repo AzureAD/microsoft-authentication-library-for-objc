@@ -94,7 +94,8 @@
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
-                               clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
+                               clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}
+                                   claims:nil];
 
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 }

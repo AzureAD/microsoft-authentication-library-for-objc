@@ -48,6 +48,8 @@
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
 @property NSString *claims;
+@property (readonly) NSDictionary *decodedClaims;
+@property NSArray<NSString *> *clientCapabilities;
 @property NSString *prompt;
 @property MSALAccount *account;
 @property MSALTelemetryApiId apiId;
@@ -61,6 +63,7 @@
 @property NSUUID *correlationId;
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
+@property NSDictionary *appRequestMetadata;
 
 @property (readonly) MSIDConfiguration *msidConfiguration;
 @property MSIDOauth2Factory *msidOAuthFactory;
@@ -68,4 +71,6 @@
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
 - (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
+- (void)setClaims:(NSString *)claims NS_UNAVAILABLE;
+- (BOOL)setClaims:(NSString *)claims error:(NSError **)error;
 @end

@@ -65,4 +65,26 @@
     _cloudAuthority = [[MSIDAuthorityFactory new] authorityFromUrl:cloudAuthority context:nil error:nil];
 }
 
+- (BOOL)setClaims:(NSString *)claims error:(NSError **)error
+{
+    claims = claims.msidTrimmedString;
+    
+    if ([NSString msidIsStringNilOrBlank:claims]) return YES;
+    
+    NSDictionary *decodedDictionary = claims.msidJson;
+    if (!decodedDictionary)
+    {
+        if (error)
+        {
+            MSAL_ERROR_PARAM(self, MSALErrorInvalidParameter, @"Claims is not proper JSON. Please make sure it is correct JSON claims parameter.");
+        }
+        return NO;
+    }
+    
+    _claims = claims;
+    _decodedClaims = decodedDictionary;
+    
+    return YES;
+}
+
 @end

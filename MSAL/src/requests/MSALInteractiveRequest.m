@@ -145,9 +145,11 @@
     config.uid = _parameters.account.homeAccountId.objectId;
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
-    config.claims = _parameters.claims;
     config.sliceParameters = _parameters.sliceParameters;
-
+    //TODO: move Olga's util to 0.3.0
+    NSString *claims = [self msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
+                                                 developerClaims:_parameters.decodedClaims];
+    if (![NSString msidIsStringNilOrBlank:claims]) config.claims = claims;
     _webviewConfig = config;
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
@@ -268,6 +270,7 @@
                                                                     scope:[[self requestScopes:nil] msidToString]
                                                               redirectUri:_parameters.redirectUri
                                                                      code:_code
+                                                                   claims:[self claims]
                                                              codeVerifier:_webviewConfig.pkce.codeVerifier
                                                                   context:_parameters];
 }

@@ -78,6 +78,11 @@
     return nil;
 }
 
+- (NSDictionary *)appRequestMetadata
+{
+    return nil;
+}
+
 @end
 
 @interface MSALTelemetryDispatcherTests : MSALTestCase
