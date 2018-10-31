@@ -29,6 +29,8 @@
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSALPublicClientApplication.h"
+#import "MSALAccount.h"
 
 #if __has_include("MSALAdditionalTestAppSettings.h")
 #include "MSALAdditionalTestAppSettings.h"

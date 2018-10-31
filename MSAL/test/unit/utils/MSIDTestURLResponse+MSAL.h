@@ -31,6 +31,8 @@
 
 @interface MSIDTestURLResponse (MSAL)
 
++ (NSDictionary *)msalDefaultRequestHeaders;
+
 + (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority;
 
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;

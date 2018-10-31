@@ -25,29 +25,52 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#ifndef MSALConstants_h
+#define MSALConstants_h
 
+@class MSALResult;
+@class MSALAccount;
+
+typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+
+typedef NS_ENUM(NSInteger, MSALWebviewType)
+{
 #if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
+    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
+    // or SFAuthenticationSession).
+    // For older versions, with AuthenticationSession not being available, uses
+    // SafariViewController.
+    MSALWebviewTypeDefault,
+    
+    // Use SFAuthenticationSession/ASWebAuthenticationSession
+    MSALWebviewTypeAuthenticationSession,
+    
+    // Use SFSafariViewController for all versions.
+    MSALWebviewTypeSafariViewController,
+    
 #endif
+    // Use WKWebView
+    MSALWebviewTypeWKWebView,
+};
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
+typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+    /*!
+     If no user is specified the authentication webview will present a list of users currently
+     signed in for the user to select among.
+     */
+    MSALSelectAccount,
+    
+    /*!
+     Require the user to authenticate in the webview
+     */
+    MSALForceLogin,
+    /*!
+     Require the user to consent to the current set of scopes for the request.
+     */
+    MSALForceConsent,
+    MSALUIBehaviorDefault = MSALSelectAccount,
+};
 
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
+#endif /* MSALConstants_h */

@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,34 +17,22 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#ifndef MSALWebviewType_h
-#define MSALWebviewType_h
+#import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger, MSALWebviewType)
-{
-#if TARGET_OS_IPHONE
-    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
-    // or SFAuthenticationSession).
-    // For older versions, with AuthenticationSession not being available, uses
-    // SafariViewController.
-    MSALWebviewTypeDefault,
-    
-    // Use SFAuthenticationSession/ASWebAuthenticationSession
-    MSALWebviewTypeAuthenticationSession,
-    
-    // Use SFSafariViewController for all versions.
-    MSALWebviewTypeSafariViewController,
-    
-#endif
-    // Use WKWebView
-    MSALWebviewTypeWKWebView,
-};
+@class MSIDOauth2Factory;
 
+@interface MSALOauth2FactoryProducer : NSObject
 
-#endif /* MSALWebviewType_h */
++ (nullable MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(nonnull NSURL *)authority
+                                                      context:(nullable id<MSIDRequestContext>)context
+                                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+@end
