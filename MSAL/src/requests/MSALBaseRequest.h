@@ -49,7 +49,7 @@ typedef void(^MSALAuthorityCompletion)(BOOL resolved, NSError * _Nullable error)
 @property (nullable) MSALTokenCacheItem *accessTokenItem;
 @property (nonnull, readonly) MSALRequestParameters *parameters;
 @property (nullable, nonatomic, readonly) MSIDDefaultTokenCacheAccessor *tokenCache;
-@property (nullable, nonatomic, readonly) MSIDAADV2Oauth2Factory *oauth2Factory;
+@property (nullable, nonatomic, readonly) MSIDOauth2Factory *oauth2Factory;
 
 /* Returns the complete set of scopes to be sent out with a token request */
 - (nonnull MSALScopes *)requestScopes:(nullable MSALScopes *)extraScopes;

@@ -54,6 +54,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDAuthorityFactory.h"
 #import "MSALAADAuthority.h"
+#import "MSALOauth2FactoryProducer.h"
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
@@ -72,6 +73,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     WKWebView *_customWebview;
     NSString *_defaultKeychainGroup;
+    MSIDOauth2Factory *_oauth2Factory;
 }
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
@@ -206,6 +208,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL context:nil error:error];
     }
 
+    _oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_authority.url context:nil error:error];
+
+    if (!_oauth2Factory)
+    {
+        MSID_LOG_ERROR(nil, @"Couldn't create Oauth2 factory");
+        return nil;
+    }
+
     BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
 
     if (!redirectUriValid) return nil;
@@ -221,11 +231,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
     
     dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
-    
-    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:factory];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:factory];
+
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:_oauth2Factory];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor] factory:_oauth2Factory];
     
     self.tokenCache = defaultAccessor;
     
@@ -234,7 +242,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #else
     __auto_type dataSource = MSIDMacTokenCache.defaultCache;
 
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:_oauth2Factory];
     self.tokenCache = defaultAccessor;
     _webviewType = MSALWebviewTypeWKWebView;
     
@@ -557,7 +565,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSALRequestParameters *params = [MSALRequestParameters new];
 
-    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
+    params.msidOAuthFactory = _oauth2Factory;
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.logComponent = _component;
     params.apiId = apiId;
@@ -644,7 +652,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
 
     MSALRequestParameters* params = [MSALRequestParameters new];
-    params.msidOAuthFactory = [MSIDAADV2Oauth2Factory new];
+    params.msidOAuthFactory = _oauth2Factory;
     params.correlationId = correlationId ? correlationId : [NSUUID new];
     params.account = account;
     params.apiId = apiId;
