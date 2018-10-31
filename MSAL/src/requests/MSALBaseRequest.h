@@ -72,7 +72,4 @@ typedef void(^MSALAuthorityCompletion)(BOOL resolved, NSError * _Nullable error)
 
 - (void)stopTelemetryEvent:(nonnull MSALTelemetryAPIEvent *)event error:(nullable NSError *)error;
 
-- (nullable NSString *)msidClaimsParameterFromCapabilities:(nullable NSArray<NSString *> *)capabilities
-                                  developerClaims:(nullable NSDictionary *)developerClaims;
-
 @end

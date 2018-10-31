@@ -48,6 +48,7 @@
 #import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSIDClientCapabilitiesUtil.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -389,9 +390,8 @@ static MSALScopes *s_reservedScopes = nil;
 
 - (NSString *)claims
 {
-    //TODO: move Olga's util to 0.3.0
-    return [self msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
-                                     developerClaims:_parameters.decodedClaims];
+    return [MSIDClientCapabilitiesUtil msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
+                                                           developerClaims:_parameters.decodedClaims];
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
@@ -425,52 +425,5 @@ static MSALScopes *s_reservedScopes = nil;
     [[MSIDTelemetry sharedInstance] stopEvent:_parameters.telemetryRequestId event:event];
     [[MSIDTelemetry sharedInstance] flush:_parameters.telemetryRequestId];
 }
-
-- (NSString *)msidClaimsParameterFromCapabilities:(NSArray<NSString *> *)capabilities
-                                  developerClaims:(NSDictionary *)developerClaims
-{
-    if (![capabilities count])
-    {
-        return [self jsonFromCapabilities:developerClaims];
-    }
-    NSMutableDictionary *claims = [NSMutableDictionary new];
-    if (developerClaims)
-    {
-        [claims addEntriesFromDictionary:developerClaims];
-    }
-    NSDictionary *additionalClaims = @{kCapabilitiesClaims: @{kValuesClaim : capabilities}};
-    NSDictionary *accessTokenClaims = claims[kAccessTokenClaims];
-    if ([accessTokenClaims count])
-    {
-        NSMutableDictionary *mutableAccessTokenClaims = [accessTokenClaims mutableCopy];
-        [mutableAccessTokenClaims addEntriesFromDictionary:additionalClaims];
-        claims[kAccessTokenClaims] = mutableAccessTokenClaims;
-    }
-    else
-    {
-        claims[kAccessTokenClaims] = additionalClaims;
-    }
-    return [self jsonFromCapabilities:claims];
-}
-
-- (NSString *)jsonFromCapabilities:(NSDictionary *)capabilities
-{
-    if (!capabilities)
-    {
-        return nil;
-    }
-    NSError *error = nil;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:capabilities options:0 error:&error];
-    if (!jsonData)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to convert capabilities into JSON");
-        MSID_LOG_ERROR_PII(nil, @"Failed to convert capabilities into JSON with error %@", error.description);
-        return nil;
-    }
-    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-}
-static NSString *kAccessTokenClaims = @"access_token";
-static NSString *kCapabilitiesClaims = @"xms_cc";
-static NSString *kValuesClaim = @"values";
 
 @end

@@ -45,6 +45,7 @@
 #import "MSIDWebMSAuthResponse.h"
 #import "MSIDWebOpenBrowserResponse.h"
 #import "MSALErrorConverter.h"
+#import "MSIDClientCapabilitiesUtil.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDAppExtensionUtil.h"
@@ -146,9 +147,8 @@
     config.utid = _parameters.account.homeAccountId.tenantId;
     config.extraQueryParameters = _parameters.extraQueryParameters;
     config.sliceParameters = _parameters.sliceParameters;
-    //TODO: move Olga's util to 0.3.0
-    NSString *claims = [self msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
-                                                 developerClaims:_parameters.decodedClaims];
+    NSString *claims = [MSIDClientCapabilitiesUtil msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
+                                                                       developerClaims:_parameters.decodedClaims];
     if (![NSString msidIsStringNilOrBlank:claims]) config.claims = claims;
     _webviewConfig = config;
     
