@@ -25,25 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALUIBEHAVIOR_H
-#define MSALUIBEHAVIOR_H
+#import "MSALOauth2FactoryProducer.h"
+#import "MSIDOauth2Factory.h"
+#import "MSIDB2CAuthority.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDB2COauth2Factory.h"
 
-typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
-    /*!
-        If no user is specified the authentication webview will present a list of users currently
-        signed in for the user to select among.
-     */
-    MSALSelectAccount,
-    
-    /*!
-        Require the user to authenticate in the webview
-     */
-    MSALForceLogin,
-    /*!
-        Require the user to consent to the current set of scopes for the request.
-     */
-    MSALForceConsent,
-    MSALUIBehaviorDefault = MSALSelectAccount,
-};
+@implementation MSALOauth2FactoryProducer
 
-#endif // MSALUIBEHAVIOR_H
++ (MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(NSURL *)authority
+                                             context:(id<MSIDRequestContext>)context
+                                               error:(NSError **)error
+{
+    if (!authority)
+    {
+        if (error)
+        {
+            *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
+            MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
+        }
+
+        return nil;
+    }
+
+    if ([MSIDB2CAuthority isAuthorityFormatValid:authority context:context error:nil])
+    {
+        return [MSIDB2COauth2Factory new];
+    }
+
+    // Create AAD v2 factory for everything else, but in future we might want to further separate this out
+    // (e.g. ADFS, Google, Oauth2 etc...)
+    return [MSIDAADV2Oauth2Factory new];
+}
+
+@end

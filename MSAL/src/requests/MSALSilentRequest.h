@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSAL.h"
 #import "MSALBaseRequest.h"
 @interface MSALSilentRequest : MSALBaseRequest
 {

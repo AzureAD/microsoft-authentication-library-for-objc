@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALUIBehavior.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDRequestContext.h"
+#import "MSALConstants.h"
 
 @class MSALAccount;
 @class MSIDConfiguration;
@@ -61,6 +61,7 @@
 @property NSUUID *correlationId;
 @property NSString *logComponent;
 @property NSString *telemetryRequestId;
+@property NSDictionary *appRequestMetadata;
 
 @property (readonly) MSIDConfiguration *msidConfiguration;
 @property MSIDOauth2Factory *msidOAuthFactory;
