@@ -25,25 +25,9 @@
 
 @implementation MSALAccountId
 
-- (instancetype)initWithHomeAccountIdentifier:(NSString *)identifier
-                                          uid:(NSString *)uid
-                                         utid:(NSString *)utid
-{
-    self = [super init];
-
-    if (self)
-    {
-        _identifier = identifier;
-        _objectId = uid;
-        _tenantId = utid;
-    }
-
-    return self;
-}
-
-- (instancetype)initWithLocalAccountIdentifier:(NSString *)identifier
-                                      objectId:(NSString *)objectId
-                                      tenantId:(NSString *)tenantId
+- (instancetype)initWithAccountIdentifier:(NSString *)identifier
+                                 objectId:(NSString *)objectId
+                                 tenantId:(NSString *)tenantId
 {
     self = [super init];
 
@@ -73,6 +57,31 @@
     hash = hash * 31 + self.objectId.hash;
     hash = hash * 31 + self.tenantId.hash;
     return hash;
+}
+
+- (BOOL)isEqual:(id)object
+{
+    if (self == object)
+    {
+        return YES;
+    }
+    
+    if (![object isKindOfClass:MSALAccountId.class])
+    {
+        return NO;
+    }
+    
+    return [self isEqualToItem:object];
+}
+
+- (BOOL)isEqualToItem:(MSALAccountId *)accountId
+{
+    BOOL result = YES;
+    result &= (!self.identifier && !accountId.identifier) || [self.identifier isEqualToString:accountId.identifier];
+    result &= (!self.objectId && !accountId.objectId) || [self.objectId isEqualToString:accountId.objectId];
+    result &= (!self.tenantId && !accountId.tenantId) || [self.tenantId isEqualToString:accountId.tenantId];
+    
+    return result;
 }
 
 @end
