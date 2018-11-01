@@ -47,7 +47,6 @@
 @property NSString *loginHint;
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *claims;
 @property (readonly) NSDictionary *decodedClaims;
 @property NSArray<NSString *> *clientCapabilities;
 @property NSString *prompt;
@@ -71,6 +70,6 @@
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
 - (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
-- (void)setClaims:(NSString *)claims NS_UNAVAILABLE;
+- (NSString *)claims;
 - (BOOL)setClaims:(NSString *)claims error:(NSError **)error;
 @end

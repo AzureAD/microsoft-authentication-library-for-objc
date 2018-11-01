@@ -34,6 +34,9 @@
 #import "MSIDConstants.h"
 
 @implementation MSALRequestParameters
+{
+    NSString *_claims;
+}
 
 - (instancetype)init
 {
@@ -115,6 +118,11 @@
     _decodedClaims = decodedDictionary;
     
     return YES;
+}
+
+- (NSString *)claims
+{
+    return _claims;
 }
 
 @end

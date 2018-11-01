@@ -602,8 +602,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                         uiBehavior:%@\n"
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
-              "                                      correlationId:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
+              "                                      correlationId:%@\n"
+              "                                       capabilities:%@\n"
+              "                                             claims:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -612,8 +614,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                         uiBehavior:%@\n"
                   "                               extraQueryParameters:%@\n"
                   "                                          authority:%@\n"
-                  "                                      correlationId:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+                  "                                      correlationId:%@\n"
+                  "                                       capabilities:%@\n"
+                  "                                             claims:%@]",
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
@@ -694,17 +698,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                  account:%@\n"
+              "                                                authority:%@\n"
               "                                             forceRefresh:%@\n"
-              "                                            correlationId:%@\n]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(account), forceRefresh ? @"Yes" : @"No", correlationId);
+              "                                            correlationId:%@\n"
+              "                                             capabilities:%@\n"
+              "                                                   claims:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
     
     
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                  account:%@\n"
+                  "                                                authority:%@\n"
                   "                                             forceRefresh:%@\n"
-                  "                                            correlationId:%@\n]",
-                 scopes, account, forceRefresh ? @"Yes" : @"No", correlationId);
+                  "                                            correlationId:%@\n"
+                  "                                             capabilities:%@\n"
+                  "                                                   claims:%@]",
+                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {

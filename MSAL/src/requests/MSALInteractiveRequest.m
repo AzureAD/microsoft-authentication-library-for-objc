@@ -149,7 +149,10 @@
     config.sliceParameters = _parameters.sliceParameters;
     NSString *claims = [MSIDClientCapabilitiesUtil msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
                                                                        developerClaims:_parameters.decodedClaims];
-    if (![NSString msidIsStringNilOrBlank:claims]) config.claims = claims;
+    if (![NSString msidIsStringNilOrBlank:claims])
+    {
+        config.claims = claims;
+    }
     _webviewConfig = config;
     
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
