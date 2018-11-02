@@ -61,6 +61,11 @@
 @property NSUInteger expirationBuffer;
 
 /*!
+ List of additional ESTS features that client handles.
+ */
+@property (nullable) NSArray<NSString *> *clientCapabilities;
+
+/*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
     to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
@@ -511,6 +516,36 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(nullable NSUUID *)correlationId
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+/*!
+ Acquire a token silently for an existing account.
+ 
+ @param  scopes                  Scopes to request from the server, the scopes that come back
+                                 can differ from the ones in the original call
+ @param  account                 An account object retrieved from the application object that the
+                                 interactive authentication flow will be locked down to.
+ @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                 Azure AD it is of the form https://<instance/<tenant>, where
+                                 <instance> is the directory host
+                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 identifier within the directory itself (e.g. a domain associated
+                                 to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                 representing the TenantID property of the directory)
+ @param  claims                  The claims parameter that needs to be sent to token endpoint. When claims
+                                 is passed, access token will be skipped and refresh token will be tried.
+ @param  forceRefresh            Ignore any existing access token in the cache and force MSAL to
+                                 get a new access token from the service.
+ @param  correlationId           UUID to correlate this request with the server
+ @param  completionBlock         The completion block that will be called when the authentication
+                                 flow completes, or encounters an error.
+ */
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                             claims:(nullable NSString *)claims
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock;

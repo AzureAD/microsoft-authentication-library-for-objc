@@ -67,6 +67,7 @@ typedef void(^MSALAuthorityCompletion)(BOOL resolved, NSError * _Nullable error)
 
 - (nullable MSIDTokenRequest *)tokenRequest;
 - (nonnull NSURL *)tokenEndpoint;
+- (nullable NSString *)claims;
 
 - (nonnull MSALTelemetryAPIEvent *)getTelemetryAPIEvent;
 
