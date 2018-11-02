@@ -94,7 +94,7 @@
 
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
 
-    if (!_forceRefresh)
+    if (!_forceRefresh && !_parameters.claims)
     {
         NSError *error = nil;
         MSIDAccessToken *accessToken = [self.tokenCache getAccessTokenForAccount:_parameters.account.lookupAccountIdentifier
@@ -342,6 +342,7 @@
                                                             clientId:_parameters.clientId
                                                                scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[refreshToken refreshToken]
+                                                              claims:[self claims]
                                                              context:_parameters];
 }
 

@@ -48,6 +48,7 @@
 #import "MSALAuthority.h"
 #import "MSIDOpenIdProviderMetadata.h"
 #import "MSIDAADNetworkConfiguration.h"
+#import "MSIDClientCapabilitiesUtil.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -389,6 +390,12 @@ static MSALScopes *s_reservedScopes = nil;
     tokenEndpoint.query = [endpointQPs msidWWWFormURLEncode];
 
     return tokenEndpoint.URL;
+}
+
+- (NSString *)claims
+{
+    return [MSIDClientCapabilitiesUtil msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
+                                                           developerClaims:_parameters.decodedClaims];
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent

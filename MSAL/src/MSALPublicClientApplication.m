@@ -490,6 +490,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:nil
+                               claims:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
@@ -504,6 +505,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
+                               claims:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAndAuthority
@@ -520,12 +522,30 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
+                               claims:nil
                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
                       completionBlock:completionBlock];
 }
 
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                             claims:(nullable NSString *)claims
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(nullable NSUUID *)correlationId
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:scopes
+                              account:account
+                            authority:authority
+                               claims:claims
+                         forceRefresh:forceRefresh
+                        correlationId:correlationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
+                      completionBlock:completionBlock];
+}
 
 #pragma mark -
 #pragma mark - private methods
@@ -572,6 +592,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.account = account;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
+    params.clientCapabilities = _clientCapabilities;
     
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
@@ -581,8 +602,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                         uiBehavior:%@\n"
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
-              "                                      correlationId:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId);
+              "                                      correlationId:%@\n"
+              "                                       capabilities:%@\n"
+              "                                             claims:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -591,8 +614,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                         uiBehavior:%@\n"
                   "                               extraQueryParameters:%@\n"
                   "                                          authority:%@\n"
-                  "                                      correlationId:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId);
+                  "                                      correlationId:%@\n"
+                  "                                       capabilities:%@\n"
+                  "                                             claims:%@]",
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
@@ -600,18 +625,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         completionBlock(result, error);
     };
     
+    NSError *error = nil;
     [params setScopesFromArray:scopes];
     params.loginHint = loginHint;
     params.extraQueryParameters = extraQueryParameters;
-    params.claims = [NSString msidIsStringNilOrBlank:claims] ? nil : claims;
     params.unvalidatedAuthority = authority.msidAuthority ?: _authority.msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
     params.webviewType = _webviewType;
     params.customWebview = _customWebview;
+    [params setClaims:claims error:&error];
+    if (error)
+    {
+        block(nil, error);
+        return;
+    }
 
-    NSError *error = nil;
-
+    error = nil;
     MSALInteractiveRequest *request =
     [[MSALInteractiveRequest alloc] initWithParameters:params
                                       extraScopesToConsent:extraScopesToConsent
@@ -632,6 +662,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
                           authority:(MSALAuthority *)authority
+                             claims:(NSString *)claims
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
@@ -651,6 +682,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     __auto_type authorityFactory = [MSIDAuthorityFactory new];
     msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
 
+    NSError *error = nil;
     MSALRequestParameters* params = [MSALRequestParameters new];
     params.msidOAuthFactory = _oauth2Factory;
     params.correlationId = correlationId ? correlationId : [NSUUID new];
@@ -658,6 +690,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.apiId = apiId;
     params.validateAuthority = _validateAuthority;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
+    params.clientCapabilities = _clientCapabilities;
     params.sliceParameters = _sliceParameters;
     
     [params setScopesFromArray:scopes];
@@ -665,17 +698,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                  account:%@\n"
+              "                                                authority:%@\n"
               "                                             forceRefresh:%@\n"
-              "                                            correlationId:%@\n]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(account), forceRefresh ? @"Yes" : @"No", correlationId);
+              "                                            correlationId:%@\n"
+              "                                             capabilities:%@\n"
+              "                                                   claims:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
     
     
     MSID_LOG_INFO_PII(params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                  account:%@\n"
+                  "                                                authority:%@\n"
                   "                                             forceRefresh:%@\n"
-                  "                                            correlationId:%@\n]",
-                 scopes, account, forceRefresh ? @"Yes" : @"No", correlationId);
+                  "                                            correlationId:%@\n"
+                  "                                             capabilities:%@\n"
+                  "                                                   claims:%@]",
+                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
@@ -686,8 +725,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.unvalidatedAuthority = msidAuthority;
     params.redirectUri = _redirectUri;
     params.clientId = _clientId;
+    [params setClaims:claims error:&error];
+    if (error)
+    {
+        block(nil, error);
+        return;
+    }
 
-    NSError *error = nil;
+    error = nil;
     MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
                                                                   forceRefresh:forceRefresh
                                                                     tokenCache:self.tokenCache
