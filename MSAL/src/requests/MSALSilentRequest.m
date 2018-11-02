@@ -196,7 +196,7 @@
      {
          if (error)
          {
-             if([self isErrorRecoverableByUserInteraction:error])
+             if ([self isErrorRecoverableByUserInteraction:error])
              {
                  //Udpate app metadata  by resetting familyId if server returns client_mismatch
                  NSError *msidError = nil;
@@ -261,7 +261,7 @@
          if (error)
          {
              //Check if server returns invalid_grant or invalid_request
-             if([self isErrorRecoverableByUserInteraction:error])
+             if ([self isErrorRecoverableByUserInteraction:error])
              {
                  NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
                  
@@ -360,9 +360,11 @@
                cacheError:(NSError **)cacheError
           completionBlock:(MSALCompletionBlock)completionBlock
 {
+    //When FRT is used by client which is not part of family, the server returns "client_mismatch" as sub-error
     NSString *subError = serverError.userInfo[MSALOAuthSubErrorKey];
     if (subError && [subError isEqualToString:MSIDServerErrorClientMismatch])
     {
+        //reset family id if set in app's metadata
         if (appMetadata && ![NSString msidIsStringNilOrBlank:appMetadata.familyId])
         {
             appMetadata.familyId = nil;

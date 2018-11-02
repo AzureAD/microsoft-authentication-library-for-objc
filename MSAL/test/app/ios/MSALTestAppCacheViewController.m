@@ -97,7 +97,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     if (appMetadata)
     {
-        [self.defaultAccessor removeAppMetadata:appMetadata context:nil error:nil];
+        [_tokenCache removeAppMetadata:appMetadata context:nil error:nil];
         [self loadCache];
     }
 }

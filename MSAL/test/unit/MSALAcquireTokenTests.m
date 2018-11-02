@@ -70,12 +70,14 @@
 #import "MSIDAadAuthorityCacheRecord.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDRefreshToken.h"
+#import "MSIDAccountCredentialCache.h"
 
 #import "MSALResult.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nonatomic) MSIDAccountCredentialCache *cache;
 
 @end
 
@@ -92,6 +94,8 @@
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
     self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.cache = [[MSIDAccountCredentialCache alloc] initWithDataSource:dataSource];
+    [self.cache clearWithContext:nil error:nil];
 
     [self.tokenCache clearWithContext:nil error:nil];
 
@@ -1119,6 +1123,7 @@
                                                         tenantId:@"1234-5678-90abcdefg"];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
@@ -1218,7 +1223,7 @@
     
     XCTAssertEqual([metadataEntries count], 1);
     NSError *removeAppMTError = nil;
-    BOOL removeAppMetadataResult = [self.tokenCache removeAppMetadata:metadataEntries[0]
+    BOOL removeAppMetadataResult = [self.cache removeAppMetadata:metadataEntries[0]
                                                               context:nil
                                                                 error:&removeAppMTError];
     XCTAssertNil(removeAppMTError);
