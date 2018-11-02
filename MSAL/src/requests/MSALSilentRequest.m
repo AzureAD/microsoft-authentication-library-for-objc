@@ -53,7 +53,6 @@
     MSIDAccessToken *_extendedLifetimeAccessToken; //store valid AT in terms of ext_expires_in (if find any)
     MSIDRefreshToken *_refreshToken;
     MSIDRefreshToken *_familyRefreshToken;
-    NSString *_familyId;
 }
 
 - (id)initWithParameters:(MSALRequestParameters *)parameters
@@ -144,19 +143,21 @@
     }
 
     NSError *msidError = nil;
-    MSIDAppMetadataCacheItem *appMetadata = [self.tokenCache getAppAppMetadataForConfiguration:msidConfiguration
-                                                                                       context:_parameters
-                                                                                         error:&msidError];
+    NSArray<MSIDAppMetadataCacheItem *> *appMetadataEntries = [self.tokenCache getAppMetadataEntries:_parameters.msidConfiguration
+                                                                                             context:_parameters
+                                                                                               error:&msidError];
+    
     if (msidError)
     {
         completionBlock(nil, msidError);
         return;
     }
+    
     //On first network try, app metadata will be nil but on every subsequent attempt, it should reflect if clientId is part of family
-    NSString *familyId = appMetadata ? appMetadata.familyId : @"1";
+    NSString *familyId = appMetadataEntries.firstObject ? appMetadataEntries.firstObject.familyId : @"1";
     if (![NSString msidIsStringNilOrBlank:familyId])
     {
-        [self tryFRT:familyId appMetadata:appMetadata completionBlock:completionBlock];
+        [self tryFRT:familyId appMetadata:appMetadataEntries.firstObject completionBlock:completionBlock];
     }
     else
     {
@@ -166,7 +167,6 @@
 
 - (MSIDRefreshToken *)getRefreshToken:(NSString *)familyId error:(NSError **)error
 {
-    _familyId = familyId;
     MSIDConfiguration *msidConfiguration = _parameters.msidConfiguration;
     return [self.tokenCache getRefreshTokenWithAccount:_parameters.account.lookupAccountIdentifier
                                               familyId:familyId
@@ -213,6 +213,7 @@
                  
                  //If server returns invalid grant on FRT, look for app specific RT
                  _refreshToken = [self getRefreshToken:nil error:&msidError];
+                 _familyRefreshToken = nil;
                  if (msidError)
                  {
                      completionBlock(nil, msidError);
@@ -220,7 +221,7 @@
                  }
 
                  // Check to see if the content of mrt and frt is not the same before initiating a network request
-                 if (_refreshToken && ![[_familyRefreshToken refreshToken] isEqualToString:[_refreshToken refreshToken]])
+                 if (_refreshToken)
                  {
                      [self tryMRRT:completionBlock];
                      return;
@@ -336,7 +337,7 @@
 
 - (MSIDTokenRequest *)tokenRequest
 {
-    MSIDRefreshToken *refreshToken = [_familyId isEqualToString:@"1"] ? _familyRefreshToken : _refreshToken;
+    MSIDRefreshToken *refreshToken = _familyRefreshToken ? _familyRefreshToken : _refreshToken;
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
                                                                scope:[[self requestScopes:nil] msidToString]
