@@ -47,7 +47,8 @@
 @property NSString *loginHint;
 @property NSString *clientId;
 @property NSDictionary<NSString *, NSString *> *extraQueryParameters;
-@property NSString *claims;
+@property (readonly) NSDictionary *decodedClaims;
+@property NSArray<NSString *> *clientCapabilities;
 @property NSString *prompt;
 @property MSALAccount *account;
 @property MSALTelemetryApiId apiId;
@@ -69,4 +70,6 @@
 #pragma mark Methods
 - (void)setScopesFromArray:(NSArray<NSString *> *)array;
 - (void)setCloudAuthorityWithCloudHostName:(NSString *)cloudHostName;
+- (NSString *)claims;
+- (BOOL)setClaims:(NSString *)claims error:(NSError **)error;
 @end

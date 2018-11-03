@@ -44,7 +44,8 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
-                                        user:(MSALAccount *)user;
+                                        user:(MSALAccount *)user
+                                      claims:(NSString *)decodedClaims;
 
 + (MSIDTestURLResponse *)errorRtResponseForScopes:(MSALScopes *)scopes
                                         authority:(NSString *)authority
@@ -52,18 +53,21 @@
                                           account:(MSALAccount *)account
                                         errorCode:(NSString *)errorCode
                                  errorDescription:(NSString *)errorDescription
-                                         subError:(NSString *)subError;
-
-+ (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
-                                authority:(NSString *)authority
-                                    query:(NSString *)query
-                                   scopes:(MSALScopes *)scopes;
+                                         subError:(NSString *)subError
+                                           claims:(NSString *)claims;
 
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
                                    scopes:(MSALScopes *)scopes
-                               clientInfo:(NSDictionary *)clientInfo;
+                                   claims:(NSString *)claims;
+
++ (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
+                                authority:(NSString *)authority
+                                    query:(NSString *)query
+                                   scopes:(MSALScopes *)scopes
+                               clientInfo:(NSDictionary *)clientInfo
+                                   claims:(NSString *)claims;
 
 + (MSIDTestURLResponse *)serverNotFoundResponseForURLString:(NSString *)requestUrlString
                                              requestHeaders:(NSDictionary *)requestHeaders
