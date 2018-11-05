@@ -205,15 +205,6 @@ static MSALScopes *s_reservedScopes = nil;
                 return;
             }
 
-            if ([self isErrorRecoverableByUserInteraction:error])
-            {
-                NSError *interactionError = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"User interaction is required", error.userInfo[MSALOAuthErrorKey], error.userInfo[MSALOAuthSubErrorKey], error, nil, nil);
-
-                completionBlock(nil, interactionError);
-
-                return;
-            }
-
             completionBlock(nil, error);
             return;
         }
