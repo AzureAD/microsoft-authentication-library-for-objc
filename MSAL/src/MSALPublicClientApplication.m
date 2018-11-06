@@ -37,7 +37,7 @@
 #import "MSALTelemetry.h"
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
-#import "MSIDClientTLSHandler.h"
+#import "MSIDCertAuthHandler+iOS.h"
 #endif
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
@@ -303,7 +303,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         return YES;
     }
     
-    return [MSIDClientTLSHandler completeCertAuthChallenge:response];
+    return [MSIDCertAuthHandler completeCertAuthChallenge:response];
 }
 #endif
 
