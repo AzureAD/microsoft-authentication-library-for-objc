@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSALAuthority.h"
+
 @interface MSALAuthority()
 
 @property (nullable, nonatomic) MSIDAuthority *msidAuthority;

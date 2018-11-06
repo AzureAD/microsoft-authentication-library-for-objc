@@ -15,6 +15,8 @@
 		1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A81E5AABC50086D120 /* MSALTestAppSettingsViewController.m */; };
 		1E665DB92162A83E0049A59A /* MSALTestAppProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E665DB82162A83E0049A59A /* MSALTestAppProfileViewController.m */; };
 		1EB7ABD621262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */; };
+		1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
+		1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -1483,8 +1485,8 @@
 				23A68A8020F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
 				23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */,
 				9682A62F218290FE00E37E63 /* MSALConstants.h in Headers */,
+				1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */,
 				D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */,
-				9682624C20E304F30080694D /* MSALWebviewType.h in Headers */,
 				B28BDA8E217E9EAB003E5670 /* MSALOauth2FactoryProducer.h in Headers */,
 				D65A6FB41E3FF41D00C69FBA /* MSALPublicClientApplication.h in Headers */,
 				B2A3C29621460D290082525C /* MSALAuthority.h in Headers */,
@@ -1517,7 +1519,6 @@
 				D673F0791E4A633B0018BA91 /* MSALError_Internal.h in Headers */,
 				B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
 				B28BDA8F217E9EAB003E5670 /* MSALOauth2FactoryProducer.h in Headers */,
-				94E876DF1E495F2700FB96ED /* MSALUIBehavior.h in Headers */,
 				D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */,
 				96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */,
 				B221CEEC20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */,
@@ -1529,6 +1530,7 @@
 				D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */,
 				23A68A8E20F57A440071E435 /* MSALAuthorityFactory.h in Headers */,
 				B2A3C29721460D290082525C /* MSALAuthority.h in Headers */,
+				1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */,
 				963377C0211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
 				965B86141E5ED5F1004AEB59 /* MSALSilentRequest.h in Headers */,
 				94E876D11E49369500FB96ED /* MSALBaseRequest.h in Headers */,
