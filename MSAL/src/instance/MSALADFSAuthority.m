@@ -28,6 +28,7 @@
 #import "MSALADFSAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDADFSAuthority.h"
+#import "MSIDAuthority+Internal.h"
 
 @implementation MSALADFSAuthority
 

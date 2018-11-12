@@ -1470,8 +1470,7 @@
 
 - (MSIDConfiguration *)msalDefaultConfiguration
 {
-    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
-    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
     
     return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
@@ -1481,8 +1480,7 @@
 
 - (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString
 {
-    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
-    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:authorityString] context:nil error:nil];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:authorityString] context:nil error:nil];
     
     return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
