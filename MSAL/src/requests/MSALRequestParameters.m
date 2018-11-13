@@ -95,7 +95,7 @@
     if ([NSString msidIsStringNilOrBlank:cloudHostName]) return;
 
     NSURL *cloudAuthority = [self.unvalidatedAuthority.url msidAuthorityWithCloudInstanceHostname:cloudHostName];
-    _cloudAuthority = [[MSIDAuthorityFactory new] authorityFromUrl:cloudAuthority context:nil error:nil];
+    _cloudAuthority = [MSIDAuthorityFactory authorityFromUrl:cloudAuthority context:nil error:nil];
 }
 
 - (BOOL)setClaims:(NSString *)claims error:(NSError **)error

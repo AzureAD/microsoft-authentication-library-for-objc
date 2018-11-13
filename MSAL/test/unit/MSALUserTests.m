@@ -33,6 +33,7 @@
 #import "MSALAccountId.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSIDAuthority+Internal.h"
 
 @interface MSALUserTests : MSALTestCase
 

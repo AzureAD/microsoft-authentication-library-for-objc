@@ -685,8 +685,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
      */
-    __auto_type authorityFactory = [MSIDAuthorityFactory new];
-    msidAuthority = [authorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
+    msidAuthority = [MSIDAuthorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
 
     NSError *error = nil;
     MSALRequestParameters* params = [MSALRequestParameters new];
