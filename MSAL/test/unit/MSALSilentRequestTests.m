@@ -980,8 +980,7 @@
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
 
-    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
-    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
     parameters.unvalidatedAuthority = authority;
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;
@@ -1106,8 +1105,7 @@
 
     MSALRequestParameters *parameters = [MSALRequestParameters new];
     parameters.scopes = [NSOrderedSet orderedSetWithArray:@[@"fakescope1", @"fakescope2"]];
-    MSIDAuthorityFactory *factory = [MSIDAuthorityFactory new];
-    MSIDAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
     parameters.unvalidatedAuthority = authority;
     parameters.redirectUri = UNIT_TEST_DEFAULT_REDIRECT_URI;
     parameters.clientId = UNIT_TEST_CLIENT_ID;

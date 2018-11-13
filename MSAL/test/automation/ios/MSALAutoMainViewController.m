@@ -423,9 +423,8 @@
             return;
         }
         
-        __auto_type authorityFactory = [MSIDAuthorityFactory new];
         __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
         
