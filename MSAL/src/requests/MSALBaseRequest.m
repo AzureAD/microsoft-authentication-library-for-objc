@@ -49,6 +49,8 @@
 #import "MSIDOpenIdProviderMetadata.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDClientCapabilitiesUtil.h"
+#import "MSIDADFSAuthority.h"
+#import "MSIDIntuneEnrollmentIdsCache.h"
 
 static MSALScopes *s_reservedScopes = nil;
 
@@ -396,6 +398,19 @@ static MSALScopes *s_reservedScopes = nil;
 {
     return [MSIDClientCapabilitiesUtil msidClaimsParameterFromCapabilities:_parameters.clientCapabilities
                                                            developerClaims:_parameters.decodedClaims];
+}
+
+- (NSString *)enrollmentId
+{
+    NSString* enrollmentId = nil;
+    NSString* homeAccountId = _parameters.account.homeAccountId.identifier;
+    if (homeAccountId != nil
+        && ![MSIDADFSAuthority isAuthorityFormatValid:[self tokenEndpoint] context:nil error:nil])
+    {
+        enrollmentId = [[MSIDIntuneEnrollmentIdsCache sharedCache] enrollmentIdForHomeAccountId:homeAccountId context:nil error:nil];
+    }
+    
+    return enrollmentId;
 }
 
 - (MSALTelemetryAPIEvent *)getTelemetryAPIEvent
