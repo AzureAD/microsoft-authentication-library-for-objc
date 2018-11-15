@@ -153,4 +153,14 @@ static NSDictionary *s_userInfoKeyMapping;
     return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
 }
 
+- (NSString *)oauthErrorKey
+{
+    return MSALOAuthErrorKey;
+}
+
+- (NSString *)subErrorKey
+{
+    return MSALOAuthSubErrorKey;
+}
+
 @end
