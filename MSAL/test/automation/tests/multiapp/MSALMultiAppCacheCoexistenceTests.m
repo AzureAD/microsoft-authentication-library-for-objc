@@ -144,4 +144,39 @@ static BOOL msalAppInstalled = NO;
     return [self openAppWithAppId:@"msal_unified"];
 }
 
+- (void)testCoexistenceWithOtherMSAL_startSigninInCurrentMSAL_withAADAccount_OtherMSALUsesFRTToRefreshAccessToken
+{
+    MSALTestRequest *request = [MSALTestRequest fociRequestWithOnedriveApp];
+    request.uiBehavior = @"force";
+    request.authority = @"https://login.microsoftonline.com/organizations";
+    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
+    request.scopes = @"https://graph.windows.net/.default";
+    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+    
+    // 1. Sign into the MSAL test app
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    XCTAssertNotNil(homeAccountId);
+    
+    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
+    configurationRequest.appVersion = MSIDAppVersionV1;
+    configurationRequest.accountFeatures = @[@"FOCI"];
+    [self loadTestConfiguration:configurationRequest];
+    
+    // 2.Switch to other MSAL app and acquire token silently using FRT
+    MSALTestRequest *secondAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
+    secondAppRequest.clientId = self.testConfiguration.clientId;
+    secondAppRequest.redirectUri = self.testConfiguration.redirectUri;
+    self.testApp = [self otherMSALApp];
+    [self.testApp launch];
+    XCTAssertTrue([self.testApp waitForState:XCUIApplicationStateRunningForeground timeout:60]);
+    secondAppRequest.accountIdentifier = homeAccountId;
+    secondAppRequest.authority = @"https://login.windows.net/organizations";
+    NSDictionary *config = [self configWithTestRequest:secondAppRequest];
+    //It should refresh access token using family refresh token saved by onedrive app
+    [self acquireTokenSilent:config];
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+}
 @end
