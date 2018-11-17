@@ -270,6 +270,7 @@
 {
     return [[MSIDAADAuthorizationCodeGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                                  clientId:_parameters.clientId
+                                                             enrollmentId:nil
                                                                     scope:[[self requestScopes:nil] msidToString]
                                                               redirectUri:_parameters.redirectUri
                                                                      code:_code
