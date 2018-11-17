@@ -158,6 +158,7 @@ static BOOL msalAppInstalled = NO;
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
     
+    //This configuration matches the request in the aadtests/json to mock server response for returning a foci app
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.appVersion = MSIDAppVersionV1;
@@ -165,15 +166,16 @@ static BOOL msalAppInstalled = NO;
     [self loadTestConfiguration:configurationRequest];
     
     // 2.Switch to other MSAL app and acquire token silently using FRT
-    MSALTestRequest *secondAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
-    secondAppRequest.clientId = self.testConfiguration.clientId;
-    secondAppRequest.redirectUri = self.testConfiguration.redirectUri;
     self.testApp = [self otherMSALApp];
     [self.testApp launch];
     XCTAssertTrue([self.testApp waitForState:XCUIApplicationStateRunningForeground timeout:60]);
+    MSALTestRequest *secondAppRequest = [MSALTestRequest new];
+    secondAppRequest.clientId = self.testConfiguration.clientId;
+    secondAppRequest.redirectUri = self.testConfiguration.redirectUri;
     secondAppRequest.accountIdentifier = homeAccountId;
     secondAppRequest.authority = @"https://login.windows.net/organizations";
     NSDictionary *config = [self configWithTestRequest:secondAppRequest];
+    
     //It should refresh access token using family refresh token saved by onedrive app
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
