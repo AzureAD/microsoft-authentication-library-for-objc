@@ -341,7 +341,7 @@
     MSIDRefreshToken *refreshToken = _familyRefreshToken ? _familyRefreshToken : _refreshToken;
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
-                                                        enrollmentId:[_authority enrollmentIdForHomeAccountId:_parameters.account.homeAccountId.identifier]
+                                                        enrollmentId:[_authority enrollmentIdForHomeAccountId:_parameters.account.homeAccountId.identifier legacyUserId:_parameters.account.username]
                                                                scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[refreshToken refreshToken]
                                                               claims:[self claims]
