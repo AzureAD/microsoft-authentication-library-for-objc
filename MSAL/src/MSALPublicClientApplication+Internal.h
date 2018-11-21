@@ -36,6 +36,7 @@
 
 @property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
 
++ (nonnull NSOrderedSet *)defaultOIDCScopes;
 + (nullable NSDictionary<NSString *, NSString *> *)defaultSliceParameters;
 
 @end
