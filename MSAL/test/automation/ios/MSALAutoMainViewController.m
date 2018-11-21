@@ -152,9 +152,8 @@
     if (parameters[MSAL_AUTHORITY_PARAM])
     {
         __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
-        
-        authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+
+        authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
     
     NSError *error = nil;
@@ -388,9 +387,8 @@
             return;
         }
         
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil
                                                                                   homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];

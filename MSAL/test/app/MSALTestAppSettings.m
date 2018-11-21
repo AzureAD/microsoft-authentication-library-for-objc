@@ -181,8 +181,7 @@ static NSDictionary *s_profiles = nil;
     if (authorityString)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         _authority = authority;
     }
     

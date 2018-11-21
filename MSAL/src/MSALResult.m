@@ -91,9 +91,9 @@
                                                         tenantId:idTokenClaims.tenantId];
 
     NSError *authorityError = nil;
-    MSALAuthority *authority = [[MSALAuthorityFactory new] authorityFromUrl:accessToken.authority.url
-                                                                    context:nil
-                                                                      error:&authorityError];
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:accessToken.authority.url
+                                                              context:nil
+                                                                error:&authorityError];
 
     if (!authority)
     {
