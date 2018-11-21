@@ -476,13 +476,18 @@
         count++;
     }
     
-    // Clear WKWebView cookies
-    NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
-    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
-                                               modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
-                                           completionHandler:^{
-                                               NSLog(@"Completed!");
-                                           }];
+    WKWebsiteDataStore *dateStore = [WKWebsiteDataStore defaultDataStore];
+    [dateStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes]
+                     completionHandler:^(NSArray<WKWebsiteDataRecord *> * __nonnull records) {
+                         for (WKWebsiteDataRecord *record  in records)
+                         {
+                             [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:record.dataTypes
+                                                                       forDataRecords:@[record]
+                                                                    completionHandler:^{
+                                                                        NSLog(@"Completed!");
+                                                                    }];
+                         }
+                     }];
     
     NSString *resultJson = [NSString stringWithFormat:@"{\"cleared_items_count\":\"%lu\"}", (unsigned long)count];
     [self displayResultJson:resultJson logs:_resultLogs];

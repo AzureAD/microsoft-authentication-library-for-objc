@@ -201,14 +201,24 @@
     [stressTestButton setTitle:@"Stress test" forState:UIControlStateNormal];
     [stressTestButton addTarget:self action:@selector(runStressTest:) forControlEvents:UIControlEventTouchUpInside];
     
+    UIButton *clearCookies = [UIButton buttonWithType:UIButtonTypeSystem];
+    [clearCookies setTitle:@"Clear Cookies" forState:UIControlStateNormal];
+    [clearCookies addTarget:self action:@selector(clearCookies:) forControlEvents:UIControlEventTouchUpInside];
+    
     UIStackView *stackView = [[UIStackView alloc] init];
     stackView.axis = UILayoutConstraintAxisHorizontal;
-    stackView.alignment = UIStackViewAlignmentFill;
-    stackView.distribution = UIStackViewDistributionFill;
+    stackView.spacing = 5;
+    //stackView.alignment = UIStackViewAlignmentFill;
+    //stackView.distribution = UIStackViewDistributionFill;
+    stackView.distribution = UIStackViewDistributionEqualSpacing;
+    stackView.alignment = UIStackViewAlignmentCenter;
+    
+    
     
     [stackView addArrangedSubview:clearCache];
     [stackView addArrangedSubview:telemetryButton];
     [stackView addArrangedSubview:stressTestButton];
+    [stackView addArrangedSubview:clearCookies];
     [layout addView:stackView key:@"stackview"];
     
     _resultView = [[UITextView alloc] init];
@@ -677,6 +687,35 @@
     {
         _resultView.text = [NSString stringWithFormat:@"Failed to clear cache, error = %@", error];
     }
+}
+
+- (IBAction)clearCookies:(id)sender
+{
+    NSHTTPCookieStorage *cookieStore = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+   __block int count = 0;
+    for (NSHTTPCookie *cookie in cookieStore.cookies)
+    {
+        [cookieStore deleteCookie:cookie];
+        count++;
+    }
+    
+    _resultView.text = [NSString stringWithFormat:@"Cleared %lu app cookies.\n", (unsigned long)count];
+    
+    // Clear WKWebView cookies
+    WKWebsiteDataStore *dataStore = [WKWebsiteDataStore defaultDataStore];
+    [dataStore fetchDataRecordsOfTypes:[WKWebsiteDataStore allWebsiteDataTypes]
+                     completionHandler:^(NSArray<WKWebsiteDataRecord *> * __nonnull records) {
+                         for (WKWebsiteDataRecord *record  in records)
+                         {
+                             [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:record.dataTypes
+                                                                       forDataRecords:@[record]
+                                                                    completionHandler:^{
+                                                                        NSLog(@"Completed!");
+                                                                    }];
+                         }
+                         
+                         _resultView.text = [_resultView.text stringByAppendingString:[NSString stringWithFormat:@"Cleared webview cookies"]];
+                     }];
 }
 
 - (IBAction)showTelemetry:(id)sender
