@@ -28,9 +28,6 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALError.h"
 #import "MSALError_Internal.h"
-#import "MSALInteractiveRequest.h"
-#import "MSALSilentRequest.h"
-#import "MSALRequestParameters.h"
 #import "MSALUIBehavior_Internal.h"
 
 #import "MSALTelemetryApiId.h"
