@@ -69,6 +69,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #import "MSALAccountsProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALResult.h"
+#import "MSIDRequestControllerFactory.h"
+#import "MSIDRequestParameters.h"
+#import "MSIDInteractiveRequestParameters.h"
+#import "MSIDTelemetry+Internal.h"
+#import "MSIDDefaultTokenRequestProvider.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -589,15 +594,33 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSALRequestParameters *params = [MSALRequestParameters new];
-
-    params.msidOAuthFactory = _oauth2Factory;
-    params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.logComponent = _component;
-    params.apiId = apiId;
-    params.account = account;
+    MSIDInteractiveRequestParameters *params = [MSIDInteractiveRequestParameters new];
+    params.requestType = MSIDInteractiveRequestBrokeredType; // TODO: allow disabling broker
+    params.uiBehaviorType = MSIDUIBehaviorPromptAlwaysType;
+    params.loginHint = loginHint;
+    params.useEmbeddedWebView = NO; // TODO: setup this correctly
+    params.useSafariViewController = NO; // TODO: setup this correctly
+    params.customWebview = _customWebview;
+    params.parentViewController = nil; // TODO: no way to set this now
+    params.extraScopesToConsent = [extraScopesToConsent componentsJoinedByString:@" "];
+    params.promptType = MSALParameterStringForBehavior(uiBehavior);
+    params.extraQueryParameters = extraQueryParameters;
+    params.telemetryWebviewType = nil; // TODO: setup this correctly
+    params.supportedBrokerProtocolScheme = @"msauth2"; // TODO: put it into constants
+    params.authority = authority.msidAuthority ?: _authority.msidAuthority;
+    params.redirectUri = _redirectUri;
+    params.clientId = _clientId;
+    params.target = [scopes componentsJoinedByString:@" "];
+    params.oidcScope = @"openid offline_access profile";
+    params.accountIdentifier = account.lookupAccountIdentifier;
     params.validateAuthority = _validateAuthority;
     params.sliceParameters = _sliceParameters;
+    params.tokenExpirationBuffer = _expirationBuffer;
+    params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
+    params.correlationId = correlationId ? correlationId : [NSUUID new];
+    params.logComponent = @"MSAL";
+    params.telemetryRequestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    params.telemetryApiId = [NSString stringWithFormat:@"%ld", (long)apiId];
     params.clientCapabilities = _clientCapabilities;
     
     MSID_LOG_INFO(params,
@@ -631,37 +654,30 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         completionBlock(result, error);
     };
     
-    NSError *error = nil;
-    [params setScopesFromArray:scopes];
-    params.loginHint = loginHint;
-    params.extraQueryParameters = extraQueryParameters;
-    params.unvalidatedAuthority = authority.msidAuthority ?: _authority.msidAuthority;
-    params.redirectUri = _redirectUri;
-    params.clientId = _clientId;
-    params.webviewType = _webviewType;
-    params.customWebview = _customWebview;
-    [params setClaims:claims error:&error];
-    if (error)
+    NSError *claimsError = nil;
+
+    if (![params setClaimsFromJSON:claims error:&claimsError])
     {
-        block(nil, error);
+        block(nil, claimsError);
         return;
     }
 
-    error = nil;
-    MSALInteractiveRequest *request =
-    [[MSALInteractiveRequest alloc] initWithParameters:params
-                                      extraScopesToConsent:extraScopesToConsent
-                                              behavior:uiBehavior
-                                            tokenCache:self.tokenCache
-                                                 error:&error];
-    if (!request)
+    NSError *requestError = nil;
+
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:_oauth2Factory defaultAccessor:_tokenCache];
+
+    id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:params tokenRequestProvider:tokenRequestProvider error:&requestError];
+
+    if (!controller)
     {
-        block(nil, error);
+        block(nil, requestError);
         return;
     }
-    
-    [request run:^(MSALResult *result, NSError *error) {
-        block(result, error);
+
+    [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
+
+        // TODO: create MSALResult from MSIDTokenResult
+        // TODO: call completion block
     }];
 }
 
@@ -687,18 +703,22 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
      */
     msidAuthority = [MSIDAuthorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
 
-    NSError *error = nil;
-    MSALRequestParameters* params = [MSALRequestParameters new];
-    params.msidOAuthFactory = _oauth2Factory;
+    MSIDRequestParameters *params = [MSIDRequestParameters new];
+    params.authority = msidAuthority;
     params.correlationId = correlationId ? correlationId : [NSUUID new];
-    params.account = account;
-    params.apiId = apiId;
+    params.accountIdentifier = account.lookupAccountIdentifier;
+    params.telemetryApiId = [NSString stringWithFormat:@"%ld", (long)apiId];
     params.validateAuthority = _validateAuthority;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
     params.sliceParameters = _sliceParameters;
-    
-    [params setScopesFromArray:scopes];
+    params.target = [scopes componentsJoinedByString:@" "];
+    params.redirectUri = _redirectUri;
+    params.clientId = _clientId;
+    params.oidcScope = @"openid offline_access profile";
+    params.tokenExpirationBuffer = _expirationBuffer;
+    params.logComponent = @"MSAL";
+    params.telemetryRequestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
     MSID_LOG_INFO(params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -727,31 +747,29 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         completionBlock(result, error);
     };
 
-    params.unvalidatedAuthority = msidAuthority;
-    params.redirectUri = _redirectUri;
-    params.clientId = _clientId;
-    [params setClaims:claims error:&error];
-    if (error)
+    NSError *claimsError = nil;
+
+    if (![params setClaimsFromJSON:claims error:&claimsError])
     {
-        block(nil, error);
+        block(nil, claimsError);
+    }
+
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:_oauth2Factory defaultAccessor:_tokenCache];
+
+    NSError *requestError = nil;
+
+    id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:params forceRefresh:forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+
+    if (!requestController)
+    {
+        block(nil, requestError);
         return;
     }
 
-    error = nil;
-    MSALSilentRequest *request = [[MSALSilentRequest alloc] initWithParameters:params
-                                                                  forceRefresh:forceRefresh
-                                                                    tokenCache:self.tokenCache
-                                                              expirationBuffer:self.expirationBuffer
-                                                                         error:&error];
-    
-    if (!request)
-    {
-        block(nil, error);
-        return;
-    }
-    
-    [request run:^(MSALResult *result, NSError *error) {
-        block(result, error);
+    [requestController acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
+
+        // TODO: create MSALResult from MSIDTokenResult
+        // TODO: call completion block
     }];
 }
 

@@ -402,12 +402,13 @@ static MSALScopes *s_reservedScopes = nil;
 {
     MSALTelemetryAPIEvent *event = [[MSALTelemetryAPIEvent alloc] initWithName:MSID_TELEMETRY_EVENT_API_EVENT
                                                                        context:_parameters];
-    
+
+    /*
     [event setMSALApiId:_apiId];
     [event setCorrelationId:_parameters.correlationId];
     [event setAuthorityType:[_authority telemetryAuthorityType]];
     [event setAuthority:_parameters.unvalidatedAuthority.url.absoluteString];
-    [event setClientId:_parameters.clientId];
+    [event setClientId:_parameters.clientId];*/
     
     // Login hint is an optional parameter and might not be present
     if (_parameters.loginHint)
