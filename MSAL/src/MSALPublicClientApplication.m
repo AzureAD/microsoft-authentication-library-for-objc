@@ -65,7 +65,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #import "MSIDWebviewSession.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
-#import "MSALResult.h"
+#import "MSALResult+Internal.h"
 #import "MSIDRequestControllerFactory.h"
 #import "MSIDRequestParameters.h"
 #import "MSIDInteractiveRequestParameters.h"
@@ -673,8 +673,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
 
-        // TODO: create MSALResult from MSIDTokenResult
-        // TODO: call completion block
+        if (error)
+        {
+            block(nil, error);
+            return;
+        }
+
+        NSError *resultError = nil;
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        block(msalResult, resultError);
     }];
 }
 
@@ -765,8 +772,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     [requestController acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
 
-        // TODO: create MSALResult from MSIDTokenResult
-        // TODO: call completion block
+        if (error)
+        {
+            block(nil, error);
+            return;
+        }
+
+        NSError *resultError = nil;
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        block(msalResult, resultError);
     }];
 }
 

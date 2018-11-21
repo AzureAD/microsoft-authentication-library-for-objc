@@ -37,6 +37,8 @@
 #import "MSIDAuthority.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSALAuthorityFactory.h"
+#import "MSIDTokenResult.h"
+#import "MSIDAccount.h"
 
 @implementation MSALResult
 
@@ -69,29 +71,21 @@
     return result;
 }
 
-+ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
-                              idToken:(MSIDIdToken *)idToken
-              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
++ (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                 error:(NSError **)error
 {
-    NSError *idTokenError = nil;
-    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&idTokenError];
+    MSIDAccount *resultAccount = tokenResult.account;
+    NSString *tenantId = [resultAccount.authority.url msidTenant];
 
-    if (error)
-    {
-        MSID_LOG_WARN(nil, @"Invalid ID token");
-        MSID_LOG_WARN_PII(nil, @"Invalid ID token, error %@", idTokenError);
-    }
-
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
-                                                            name:idTokenClaims.name
-                                                   homeAccountId:accessToken.accountIdentifier.homeAccountId
-                                                  localAccountId:idTokenClaims.objectId
-                                                     environment:accessToken.authority.environment
-                                                        tenantId:idTokenClaims.tenantId];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
+                                                            name:resultAccount.name
+                                                   homeAccountId:resultAccount.accountIdentifier.homeAccountId
+                                                  localAccountId:resultAccount.localAccountId
+                                                     environment:resultAccount.authority.environment
+                                                        tenantId:tenantId];
 
     NSError *authorityError = nil;
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:accessToken.authority.url
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:resultAccount.authority.url
                                                               context:nil
                                                                 error:&authorityError];
 
@@ -104,15 +98,15 @@
 
         return nil;
     }
-    
-    return [self resultWithAccessToken:accessToken.accessToken
-                             expiresOn:accessToken.expiresOn
-               isExtendedLifetimeToken:isExtendedLifetimeToken
-                              tenantId:accessToken.authority.url.msidTenant
+
+    return [self resultWithAccessToken:tokenResult.accessToken.accessToken
+                             expiresOn:tokenResult.accessToken.expiresOn
+               isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
+                              tenantId:tenantId
                                account:account
-                               idToken:idToken.rawIdToken
-                              uniqueId:idTokenClaims.uniqueId
-                                scopes:[accessToken.scopes array]
+                               idToken:tokenResult.rawIdToken
+                              uniqueId:resultAccount.localAccountId
+                                scopes:[tokenResult.accessToken.scopes array]
                              authority:authority];
 }
 
