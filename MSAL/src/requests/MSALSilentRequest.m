@@ -343,7 +343,7 @@
                                                             clientId:_parameters.clientId
                                                         enrollmentId:[_authority enrollmentIdForHomeAccountId:_parameters.account.homeAccountId.identifier
                                                                                                  legacyUserId:_parameters.account.username
-                                                                                                      context:nil
+                                                                                                      context:_parameters
                                                                                                         error:nil]
                                                                scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[refreshToken refreshToken]
