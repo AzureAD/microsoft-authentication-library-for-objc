@@ -241,8 +241,6 @@
 		D69ADB361E516F9B00952049 /* MSALTestBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB2A1E516F9B00952049 /* MSALTestBundle.m */; };
 		D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB2C1E516F9B00952049 /* MSALTestCase.m */; };
 		D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB2C1E516F9B00952049 /* MSALTestCase.m */; };
-		D69ADB3B1E516F9B00952049 /* MSALTestSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB301E516F9B00952049 /* MSALTestSwizzle.m */; };
-		D69ADB3C1E516F9B00952049 /* MSALTestSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB301E516F9B00952049 /* MSALTestSwizzle.m */; };
 		D69ADB3D1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB321E516F9B00952049 /* MSIDTestURLSession+MSAL.m */; };
 		D69ADB3E1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB321E516F9B00952049 /* MSIDTestURLSession+MSAL.m */; };
 		D69ADB3F1E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = D69ADB341E516F9B00952049 /* MSALTestURLSessionDataTask.m */; };
@@ -691,8 +689,6 @@
 		D69ADB2A1E516F9B00952049 /* MSALTestBundle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestBundle.m; sourceTree = "<group>"; };
 		D69ADB2B1E516F9B00952049 /* MSALTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestCase.h; sourceTree = "<group>"; };
 		D69ADB2C1E516F9B00952049 /* MSALTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestCase.m; sourceTree = "<group>"; };
-		D69ADB2F1E516F9B00952049 /* MSALTestSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestSwizzle.h; sourceTree = "<group>"; };
-		D69ADB301E516F9B00952049 /* MSALTestSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestSwizzle.m; sourceTree = "<group>"; };
 		D69ADB311E516F9B00952049 /* MSIDTestURLSession+MSAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTestURLSession+MSAL.h"; sourceTree = "<group>"; };
 		D69ADB321E516F9B00952049 /* MSIDTestURLSession+MSAL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTestURLSession+MSAL.m"; sourceTree = "<group>"; };
 		D69ADB331E516F9B00952049 /* MSALTestURLSessionDataTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestURLSessionDataTask.h; sourceTree = "<group>"; };
@@ -1312,8 +1308,6 @@
 				D69ADB2A1E516F9B00952049 /* MSALTestBundle.m */,
 				D69ADB2B1E516F9B00952049 /* MSALTestCase.h */,
 				D69ADB2C1E516F9B00952049 /* MSALTestCase.m */,
-				D69ADB2F1E516F9B00952049 /* MSALTestSwizzle.h */,
-				D69ADB301E516F9B00952049 /* MSALTestSwizzle.m */,
 				D69ADB311E516F9B00952049 /* MSIDTestURLSession+MSAL.h */,
 				D69ADB321E516F9B00952049 /* MSIDTestURLSession+MSAL.m */,
 				D69ADB331E516F9B00952049 /* MSALTestURLSessionDataTask.h */,
@@ -2136,7 +2130,6 @@
 				B21E07C0210E56DD007E3A3C /* MSALRedirectUriVerifierTests.m in Sources */,
 				D6B88AE81E9EC5F200A2374B /* MSALTestIdTokenUtil.m in Sources */,
 				D61F5BC31E59193500912CB8 /* MSALFakeViewController.m in Sources */,
-				D69ADB3B1E516F9B00952049 /* MSALTestSwizzle.m in Sources */,
 				04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				E02396FD1E7B0E20004D6278 /* MSALTelemetryDispatcherTests.m in Sources */,
 				23A169B420732F3A00B051F3 /* MSALB2CPolicyTests.m in Sources */,
@@ -2159,7 +2152,6 @@
 				D69ADB401E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */,
 				D62746DA1E9B5F1E00EFCE99 /* MSALUserTests.m in Sources */,
 				B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */,
-				D69ADB3C1E516F9B00952049 /* MSALTestSwizzle.m in Sources */,
 				D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				D69ADB3E1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,

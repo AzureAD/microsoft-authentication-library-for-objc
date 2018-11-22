@@ -29,7 +29,7 @@
 
 #import "MSALTestBundle.h"
 #import "MSALTestConstants.h"
-#import "MSALTestSwizzle.h"
+#import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
 #import "NSURL+MSIDExtensions.h"
 #import "MSALTestIdTokenUtil.h"
@@ -118,7 +118,7 @@
     __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
 
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {

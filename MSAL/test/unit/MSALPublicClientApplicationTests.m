@@ -27,7 +27,7 @@
 
 #import "MSALTestCase.h"
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALTestSwizzle.h"
+#import "MSIDTestSwizzle.h"
 #import "MSALTestBundle.h"
 #import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
@@ -357,7 +357,7 @@
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -407,7 +407,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -455,7 +455,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -508,7 +508,7 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -572,7 +572,7 @@
                                                      environment:@"login.microsoftonline.com"
                                                         tenantId:@"1234-5678-90abcdefg"];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -627,7 +627,7 @@
                                                      environment:@"login.microsoftonline.com"
                                                         tenantId:@"1234-5678-90abcdefg"];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -686,7 +686,7 @@
                                                      environment:@"login.microsoftonline.com"
                                                         tenantId:@"1234-5678-90abcdefg"];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALInteractiveRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -746,7 +746,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -806,7 +806,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -870,7 +870,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -931,7 +931,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -992,7 +992,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -1056,7 +1056,7 @@
     
     __block NSUUID *correlationId = [NSUUID new];
     
-    [MSALTestSwizzle instanceMethod:@selector(run:)
+    [MSIDTestSwizzle instanceMethod:@selector(run:)
                               class:[MSALBaseRequest class]
                               block:(id)^(MSALSilentRequest *obj, MSALCompletionBlock completionBlock)
      {
@@ -1372,7 +1372,7 @@
     
     MSALAccount *account = [MSALAccount new];
     
-    [MSALTestSwizzle instanceMethod:@selector(clearCacheForAccount:authority:clientId:context:error:)
+    [MSIDTestSwizzle instanceMethod:@selector(clearCacheForAccount:authority:clientId:context:error:)
                               class:[MSIDDefaultTokenCacheAccessor class]
                               block:(id)^(id obj, id account, MSIDAuthority *authority, NSString *clientId, id<MSIDRequestContext> ctx, NSError **error)
      {
