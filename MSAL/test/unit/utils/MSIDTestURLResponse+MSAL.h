@@ -33,10 +33,6 @@
 
 + (NSDictionary *)msalDefaultRequestHeaders;
 
-+ (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority;
-
-+ (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;
-
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query;

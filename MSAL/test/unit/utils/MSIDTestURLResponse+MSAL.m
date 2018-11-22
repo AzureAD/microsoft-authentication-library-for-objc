@@ -48,7 +48,7 @@
         headers[@"return-client-request-id"] = @"true";
         headers[@"client-request-id"] = [MSIDTestRequireValueSentinel sentinel];
         headers[@"Accept"] = @"application/json";
-        headers[@"x-app-name"] = @"UnitTestHost";
+        headers[@"x-app-name"] = @"MSIDTestsHostApp";
         headers[@"x-app-ver"] = @"1.0";
 
         s_msalHeaders = [headers copy];

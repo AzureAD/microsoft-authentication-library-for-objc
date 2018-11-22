@@ -590,6 +590,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     NSError *error = nil;
 
+    MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
+
+    if (_brokerAvailability == MSALBrokeredAvailabilityNone)
+    {
+        interactiveRequestType = MSIDInteractiveRequestLocalType;
+    }
+
     MSIDInteractiveRequestParameters *params = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
                                                                                                redirectUri:_redirectUri
                                                                                                   clientId:_clientId
@@ -599,9 +606,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                                              correlationId:correlationId
                                                                                             telemetryApiId:requestTelemetryId
                                                                                    supportedBrokerProtocol:MSID_BROKER_V3_SCHEME
-                                                // TODO: allow disabling broker, and automatically determine if broker needs to be disabled
-                                                // Also add broker configuration to public client application
-                                                                                               requestType:MSIDInteractiveRequestBrokeredType
+                                                                                               requestType:interactiveRequestType
                                                                                                      error:&error];
 
     if (!params)
@@ -839,8 +844,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 + (NSOrderedSet *)defaultOIDCScopes
 {
     return [NSOrderedSet orderedSetWithObjects:MSID_OAUTH2_SCOPE_OPENID_VALUE,
-                                               MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE,
-                                               MSID_OAUTH2_SCOPE_PROFILE_VALUE, nil];
+                                               MSID_OAUTH2_SCOPE_PROFILE_VALUE,
+                                               MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
 }
 
 + (NSDictionary *)defaultSliceParameters

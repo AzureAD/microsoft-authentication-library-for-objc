@@ -82,6 +82,12 @@
  */
 @property MSALWebviewType webviewType;
 
+/*!
+ Setting to define MSAL behavior regarding broker.
+ Broker is enabled by default.
+ */
+@property MSALBrokeredAvailability brokerAvailability;
+
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property (nullable) WKWebView *customWebview;

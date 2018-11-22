@@ -132,15 +132,16 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
     MSALErrorInvalidClient                  = -42003,
     MSALErrorInvalidGrant                   = -42004,
     MSALErrorInvalidScope                   = -42005,
+    MSALErrorUnauthorizedClient             = -42006,
     
     /*!
      The server returned an unexpected http response. For instance, this code
      is returned for 5xx server response when something has gone wrong on the server but the
      server could not be more specific on what the exact problem is.
      */
-    MSALErrorUnhandledResponse              = -42006,
+    MSALErrorUnhandledResponse              = -42007,
 
-    MSALErrorServerDeclinedScopes           = -42007,
+    MSALErrorServerDeclinedScopes           = -42008,
 
     /*! 
         The passed in authority URL does not pass validation.
@@ -224,6 +225,11 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         MSAL tried to open a URL from an extension, which is not allowed.
      */
     MSALErrorAttemptToOpenURLFromExtension = -42404,
+
+    /*!
+     MSAL tried to show UI in the extension, which is not allowed.
+     */
+    MSALErrorUINotSupportedInExtension = -42405,
     
     /*!
         An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
@@ -261,6 +267,61 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
         The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
         please see https://aka.ms/intuneMAMSDK for more information.
      */
-    MSALErrorServerProtectionPoliciesRequired = -42603
+    MSALErrorServerProtectionPoliciesRequired = -42603,
+
+    /*!
+     User returned manually to the application without completion authentication inside the broker
+     */
+    MSALErrorBrokerResponseNotReceived      =  -42700,
+
+    /*!
+     MSAL cannot read broker resume state. It might be that application removed it, or NSUserDefaults is corrupted.
+     */
+    MSALErrorBrokerNoResumeStateFound       =  -42701,
+
+    /*!
+     MSAL cannot read broker resume state. It is corrupted.
+     */
+    MSALErrorBrokerBadResumeStateFound      =  -42702,
+
+    /*!
+     MSAL cannot read broker resume state. It is saved for a different redirect uri. The app should check its registered schemes.
+     */
+    MSALErrorBrokerMismatchedResumeState    =  -42703,
+
+    /*!
+     Invalid broker response.
+     */
+    MSALErrorBrokerResponseHashMissing      =  -42704,
+
+    /*!
+     Corrupted broker response.
+     */
+    MSALErrorBrokerCorruptedResponse        =  -42705,
+
+    /*!
+     Decryption of broker response failed.
+     */
+    MSALErrorBrokerResponseDecryptionFailed =  -42706,
+
+    /*!
+     Unexpected broker response hash.
+     */
+    MSALErrorBrokerResponseHashMismatch     =  -42707,
+
+    /*!
+     Failed to create broker key.
+     */
+    MSALErrorBrokerKeyFailedToCreate        =  -42708,
+
+    /*!
+     Couldn't read broker key. Maybe broker key got wiped from the keychain.
+     */
+    MSALErrorBrokerKeyNotFound              =  -42709,
+
+    /*!
+     Broker returned unreadable result
+     */
+    MSALErrorBrokerUnknown                  =  -42710
 };
 

@@ -72,6 +72,7 @@
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
+#import "MSIDTestURLResponse+Util.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -365,6 +366,7 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
@@ -462,6 +464,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -549,6 +553,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -583,6 +589,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -676,6 +684,8 @@
     XCTAssertNil(error);
     
     [application setClientCapabilities:@[@"llt"]];
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -768,6 +778,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application setClientCapabilities:@[@"llt"]];
     
@@ -804,6 +816,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application setClientCapabilities:@[@"llt"]];
     
@@ -905,6 +919,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
@@ -1210,6 +1226,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
