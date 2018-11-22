@@ -302,7 +302,7 @@
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
     
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
@@ -1767,7 +1767,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"unauthorized_client"
-                                                                                claims:claims];
+                                                                                claims:claims
+                                                                          refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently
@@ -2015,7 +2016,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"client_mismatch"
-                                                                                claims:nil];
+                                                                                claims:nil
+                                                                          refreshToken:nil];
     
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
@@ -2077,6 +2079,15 @@
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
+
+    MSIDRefreshToken *frt = [self.tokenCache getRefreshTokenWithAccount:account.lookupAccountIdentifier
+                                                               familyId:@"1"
+                                                          configuration:configuration
+                                                                context:nil
+                                                                  error:nil];
+    // Update FRT entry so that MRRT and FRT are not the same, otherwise it will skip MRRT
+    frt.refreshToken = @"updated frt token";
+    [self.accountCache saveCredential:frt.tokenCacheItem context:nil error:nil];
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
@@ -2099,7 +2110,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"client_mismatch"
-                                                                                claims:nil];
+                                                                                claims:nil
+                                                                          refreshToken:@"updated frt token"];
     
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, errorResponse, tokenResponse]];
     
@@ -2120,7 +2132,7 @@
          [expectation fulfill];
      }];
     
-    [self waitForExpectations:@[expectation] timeout:1];
+    [self waitForExpectations:@[expectation] timeout:100];
 }
 
 - (void)testAcquireTokenSilent_whenNoFRTInCache_ShouldUseMRRTToRefreshAccessToken

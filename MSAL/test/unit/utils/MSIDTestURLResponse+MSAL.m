@@ -188,12 +188,13 @@
                                  errorDescription:(NSString *)errorDescription
                                          subError:(NSString *)subError
                                            claims:(NSString *)claims
+                                     refreshToken:(NSString *)refreshToken
 {
     NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
 
     NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                            MSID_OAUTH2_SCOPE : [scopes msidToString],
-                                           MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                                           MSID_OAUTH2_REFRESH_TOKEN : refreshToken ? refreshToken : @"i am a refresh token!",
                                            @"client_info" : @"1",
                                            @"grant_type" : @"refresh_token" } mutableCopy];
     if (claims) [requestBody setValue:claims forKey:@"claims"];
