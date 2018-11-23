@@ -74,18 +74,25 @@
 + (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                 error:(NSError **)error
 {
+    if (!tokenResult)
+    {
+        MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil token result provided", nil);
+        return nil;
+    }
+
     MSIDAccount *resultAccount = tokenResult.account;
-    NSString *tenantId = [resultAccount.authority.url msidTenant];
+    NSString *tenantId = [tokenResult.authority.url msidTenant];
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
                                                             name:resultAccount.name
                                                    homeAccountId:resultAccount.accountIdentifier.homeAccountId
                                                   localAccountId:resultAccount.localAccountId
-                                                     environment:resultAccount.authority.environment
+                                                     environment:tokenResult.authority.environment
                                                         tenantId:tenantId];
 
     NSError *authorityError = nil;
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:resultAccount.authority.url
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
+                                                            rawTenant:tenantId
                                                               context:nil
                                                                 error:&authorityError];
 

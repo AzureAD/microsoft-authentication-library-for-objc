@@ -32,7 +32,7 @@
 #import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
@@ -96,7 +96,7 @@
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
-                               clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}
+                               clientInfo:@{ @"uid" : uid, @"utid" : [MSIDTestIdTokenUtil defaultTenantId]}
                                    claims:nil];
 
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
@@ -149,7 +149,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
 
-         NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+         NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
          XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
          [expectation fulfill];
      }];
@@ -176,7 +176,7 @@
                            XCTAssertNil(error);
                            XCTAssertNotNil(result);
 
-                           NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+                           NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
                            [expectation fulfill];
     }];

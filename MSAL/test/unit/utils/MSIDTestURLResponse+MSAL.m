@@ -28,7 +28,7 @@
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDDeviceId.h"
 #import "NSDictionary+MSIDTestUtil.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSALTestConstants.h"
 #import "MSALAccountId.h"
 #import "MSIDConstants.h"
@@ -167,7 +167,7 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
+                                             @"id_token" : [MSIDTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.username
                                                                                        tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
@@ -226,7 +226,7 @@
                         authority:authority
                             query:query
                            scopes:scopes
-                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]} // Use default client info here
+                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSIDTestIdTokenUtil defaultTenantId]} // Use default client info here
                            claims:claims];
 }
 
@@ -267,7 +267,7 @@
     NSMutableDictionary *responseBody = [@{ @"access_token" : @"i am an updated access token!",
                                             @"expires_in" : @"600",
                                             @"refresh_token" : @"i am a refresh token",
-                                            @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                            @"id_token" : [MSIDTestIdTokenUtil defaultV2IdToken],
                                             @"id_token_expires_in" : @"1200",
                                             @"scope": [scopes msidToString]
                                             } mutableCopy];

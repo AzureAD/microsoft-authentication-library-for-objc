@@ -55,7 +55,7 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
@@ -2211,7 +2211,7 @@
                              requestParamsBody:(NSDictionary *)requestParamsBody
                                      authority:(NSString *)authority
 {
-    NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]};
+    NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSIDTestIdTokenUtil defaultTenantId]};
     
     // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
@@ -2229,7 +2229,7 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token" : [MSIDTestIdTokenUtil defaultV2IdToken],
                                              @"id_token_expires_in" : @"1200",
                                              @"client_info" : [clientInfo msidBase64UrlJson],
                                              MSID_OAUTH2_SCOPE: responseScopes

@@ -584,7 +584,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSIDAuthority *requestAuthority = authority.msidAuthority ?: _authority.msidAuthority;
     NSOrderedSet *requestScopes = [[NSOrderedSet alloc] initWithArray:scopes copyItems:YES];
-    NSOrderedSet *requestExtraScopes = [[NSOrderedSet alloc] initWithArray:extraScopesToConsent copyItems:YES];
+    NSOrderedSet *requestExtraScopes = extraScopesToConsent ? [[NSOrderedSet alloc] initWithArray:extraScopesToConsent copyItems:YES] : nil;
     NSOrderedSet *requestOIDCScopes = [self.class defaultOIDCScopes];
     NSString *requestTelemetryId = [NSString stringWithFormat:@"%ld", (long)apiId];
 
