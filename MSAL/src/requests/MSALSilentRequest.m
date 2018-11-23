@@ -43,6 +43,7 @@
 #import "MSIDError.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDConstants.h"
+#import "MSALAccountId.h"
 
 @interface MSALSilentRequest()
 
@@ -340,7 +341,10 @@
     MSIDRefreshToken *refreshToken = _familyRefreshToken ? _familyRefreshToken : _refreshToken;
     return [[MSIDAADRefreshTokenGrantRequest alloc] initWithEndpoint:[self tokenEndpoint]
                                                             clientId:_parameters.clientId
-                                                        enrollmentId:nil
+                                                        enrollmentId:[_authority enrollmentIdForHomeAccountId:_parameters.account.homeAccountId.identifier
+                                                                                                 legacyUserId:_parameters.account.username
+                                                                                                      context:_parameters
+                                                                                                        error:nil]
                                                                scope:[[self requestScopes:nil] msidToString]
                                                         refreshToken:[refreshToken refreshToken]
                                                               claims:[self claims]
