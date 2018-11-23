@@ -211,7 +211,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
-
     if (!redirectUriValid) return nil;
 
 #if TARGET_OS_IPHONE
