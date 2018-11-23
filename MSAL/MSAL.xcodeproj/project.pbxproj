@@ -782,12 +782,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6A206381FC510B500755A51 /* Security.framework in Frameworks */,
 				96902DFD20E1590200200E6F /* SecurityInterface.framework in Frameworks */,
 				96902DFB20E158E700200E6F /* GSS.framework in Frameworks */,
 				96902DF620E1579000200E6F /* WebKit.framework in Frameworks */,
 				B2C17B081FC8DACC0070A514 /* libIdentityCore.a in Frameworks */,
 				D6A2063C1FC510FB00755A51 /* IOKit.framework in Frameworks */,
-				D6A206381FC510B500755A51 /* Security.framework in Frameworks */,
 				D6A206361FC510AF00755A51 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
