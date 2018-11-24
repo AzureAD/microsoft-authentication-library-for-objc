@@ -2034,7 +2034,7 @@
          
          XCTAssertEqual([metadataEntries count], 1);
          MSIDAppMetadataCacheItem *appMetadata = metadataEntries[0];
-         XCTAssertNil(appMetadata.familyId);
+         XCTAssertEqualObjects(appMetadata.familyId,@"");
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqual(error.code, MSALErrorInteractionRequired);
