@@ -374,7 +374,7 @@
         //reset family id if set in app's metadata
         if (appMetadata && ![NSString msidIsStringNilOrBlank:appMetadata.familyId])
         {
-            appMetadata.familyId = nil;
+            appMetadata.familyId = @"";
             [self.tokenCache updateAppMetadata:appMetadata context:_parameters error:cacheError];
         }
     }
