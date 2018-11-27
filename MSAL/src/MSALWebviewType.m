@@ -42,7 +42,7 @@ extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
     @throw @"Unrecognized MSALWebviewType";
 }
 
-extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type)
+extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type, NSError **error)
 {
     switch (type) {
 #if TARGET_OS_IPHONE
@@ -57,6 +57,9 @@ extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type)
             return MSIDWebviewTypeWKWebView;
 
         default:
-            break;
+        {
+            MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Unexpected webview type detected", nil);
+            return -1;
+        }
     }
 }

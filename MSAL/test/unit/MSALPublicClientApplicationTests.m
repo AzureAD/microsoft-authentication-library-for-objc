@@ -97,7 +97,7 @@
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
     
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -1425,6 +1425,7 @@
     NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);

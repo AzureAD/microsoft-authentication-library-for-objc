@@ -36,3 +36,5 @@ NSString *MSALHTTPResponseCodeKey = @"MSALHTTPResponseCodeKey";
 NSString *MSALCorrelationIDKey = @"MSALCorrelationIDKey";
 NSString *MSALDeclinedScopesKey = @"MSALDeclinedScopesKey";
 NSString *MSALGrantedScopesKey = @"MSALGrantedScopesKey";
+NSString *MSALDisplayableUserIdKey = @"MSALDisplayableUserIdKey";
+NSString *MSALBrokerVersionKey = @"MSALBrokerVersionKey";

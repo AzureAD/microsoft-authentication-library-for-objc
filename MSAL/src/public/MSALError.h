@@ -91,10 +91,20 @@ extern NSString *MSALHTTPResponseCodeKey;
  */
 extern NSString *MSALDeclinedScopesKey;
 
+/*
+ Displayable user id for the particular error if available
+ */
+extern NSString *MSALDisplayableUserIdKey;
+
 /*!
  List of granted scopes in case some scopes weren't granted (see MSALDeclinedScopesKey for more info)
  */
 extern NSString *MSALGrantedScopesKey;
+
+/*!
+ Broker version that was used for the authentication
+ */
+extern NSString *MSALBrokerVersionKey;
 
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {

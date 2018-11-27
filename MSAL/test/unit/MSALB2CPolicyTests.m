@@ -65,7 +65,7 @@
 
     [MSIDKeychainTokenCache reset];
 
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];

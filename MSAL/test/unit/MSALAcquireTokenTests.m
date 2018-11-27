@@ -93,7 +93,7 @@
 #else
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
-    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.accountCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
@@ -288,6 +288,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -356,6 +357,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1001,6 +1003,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1070,6 +1073,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1138,6 +1142,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1287,6 +1292,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1363,6 +1369,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1443,6 +1450,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1509,6 +1517,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1577,6 +1586,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1658,6 +1668,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1740,6 +1751,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1831,6 +1843,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1900,6 +1913,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1987,6 +2001,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -2076,6 +2091,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -2164,6 +2180,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);

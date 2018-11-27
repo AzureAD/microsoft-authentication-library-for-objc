@@ -117,8 +117,8 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
                              MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
                              MSIDGrantedScopesKey: MSALGrantedScopesKey,
-                             MSIDUserDisplayableIdkey: @(1),
-                             MSIDBrokerVersionKey: @(1)
+                             MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
+                             MSIDBrokerVersionKey: MSALBrokerVersionKey
                              };
 }
 

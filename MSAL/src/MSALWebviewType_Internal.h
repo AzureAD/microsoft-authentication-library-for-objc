@@ -30,6 +30,6 @@
 #import "MSIDConstants.h"
 
 extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type);
-extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type);
+extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type, NSError **error);
 
 #endif /* MSALWebviewType_Internal_h */
