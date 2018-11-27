@@ -716,7 +716,7 @@
     XCTAssertNotNil(homeAccountId);
 
     request.accountIdentifier = homeAccountId;
-    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    request.claims = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
     
     // 2. Run interactive with claims, which should prompt for Intune/Broker installation
     NSDictionary *config = [self configWithTestRequest:request];
@@ -742,7 +742,7 @@
     XCTAssertNotNil(homeAccountId);
     
     request.accountIdentifier = homeAccountId;
-    request.claims = @"%7B%22access_token%22%3A%7B%22deviceid%22%3A%7B%22essential%22%3Atrue%7D%7D%7D";
+    request.claims = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
     
     // 2. Run interactive with claims, which should prompt for Intune/Broker installation
     NSDictionary *config = [self configWithTestRequest:request];

@@ -658,7 +658,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:error context:params];
-        completionBlock(result, error);
+
+        if ([NSThread isMainThread])
+        {
+            completionBlock(result, error);
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                completionBlock(result, error);
+            });
+        }
     };
     
     NSError *claimsError = nil;
