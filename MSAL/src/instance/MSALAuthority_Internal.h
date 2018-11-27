@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAuthority.h"
+#import "MSIDAuthority.h"
 
 @interface MSALAuthority()
 

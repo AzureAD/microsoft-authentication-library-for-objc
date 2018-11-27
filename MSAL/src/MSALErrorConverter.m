@@ -55,11 +55,17 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
                                    @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal),
+                                   @(MSIDErrorMissingAccountParameter): @(MSALErrorAccountRequired),
+                                   @(MSIDErrorInteractionRequired): @(MSALErrorInteractionRequired),
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
+                                   @(MSIDErrorMismatchedAccount): @(MSALErrorMismatchedUser),
+
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
+                                   @(MSIDErrorAuthorityValidationWebFinger): @(MSALErrorFailedAuthorityValidation),
                                    // Interactive flow
                                    @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
@@ -67,8 +73,23 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
+                                   @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALErrorAttemptToOpenURLFromExtension),
+                                   @(MSIDErrorUINotSupportedInExtension): @(MSALErrorUINotSupportedInExtension),
+
+                                   // Broker errors
+                                   @(MSIDErrorBrokerResponseNotReceived): @(MSALErrorBrokerResponseNotReceived),
+                                   @(MSIDErrorBrokerNoResumeStateFound): @(MSALErrorBrokerNoResumeStateFound),
+                                   @(MSIDErrorBrokerBadResumeStateFound): @(MSALErrorBrokerBadResumeStateFound),
+                                   @(MSIDErrorBrokerMismatchedResumeState): @(MSALErrorBrokerMismatchedResumeState),
+                                   @(MSIDErrorBrokerResponseHashMissing): @(MSALErrorBrokerResponseHashMissing),
+                                   @(MSIDErrorBrokerCorruptedResponse): @(MSALErrorBrokerCorruptedResponse),
+                                   @(MSIDErrorBrokerResponseDecryptionFailed): @(MSALErrorBrokerResponseDecryptionFailed),
+                                   @(MSIDErrorBrokerResponseHashMismatch): @(MSALErrorBrokerResponseHashMismatch),
+                                   @(MSIDErrorBrokerKeyFailedToCreate): @(MSALErrorBrokerKeyFailedToCreate),
+                                   @(MSIDErrorBrokerKeyNotFound): @(MSALErrorBrokerKeyNotFound),
+                                   @(MSIDErrorBrokerUnknown): @(MSALErrorBrokerUnknown),
+
                                    // Oauth2 errors
-                                   @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorRefreshTokenRejected),
@@ -76,8 +97,9 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
                                    @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
                                    @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
+                                   @(MSIDErrorServerUnauthorizedClient): @(MSALErrorUnauthorizedClient),
+                                   @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
-                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    },
@@ -92,7 +114,11 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDCorrelationIdKey : MSALCorrelationIDKey,
                              MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
                              MSIDOAuthErrorKey: MSALOAuthErrorKey,
-                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey
+                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
+                             MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
+                             MSIDGrantedScopesKey: MSALGrantedScopesKey,
+                             MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
+                             MSIDBrokerVersionKey: MSALBrokerVersionKey
                              };
 }
 

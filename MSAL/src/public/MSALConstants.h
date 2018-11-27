@@ -54,6 +54,16 @@ typedef NS_ENUM(NSInteger, MSALWebviewType)
     MSALWebviewTypeWKWebView,
 };
 
+typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
+{
+#if TARGET_OS_IPHONE
+    // Use broker when possible
+    MSALBrokeredAvailabilityAuto,
+#endif
+    // Disallow using broker
+    MSALBrokeredAvailabilityNone
+};
+
 
 typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
     /*!

@@ -159,8 +159,7 @@
     }
     else
     {
-        MSALAuthorityFactory *factory = [MSALAuthorityFactory new];
-        MSALAuthority *authority = [factory authorityFromUrl:[NSURL URLWithString:_authorities[row - 1]] context:nil error:nil];
+        MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:[NSURL URLWithString:_authorities[row - 1]] context:nil error:nil];
         settings.authority = authority;
     }
 }

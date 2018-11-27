@@ -33,10 +33,6 @@
 
 + (NSDictionary *)msalDefaultRequestHeaders;
 
-+ (MSIDTestURLResponse *)discoveryResponseForAuthority:(NSString *)authority;
-
-+ (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority;
-
 + (MSIDTestURLResponse *)oidcResponseForAuthority:(NSString *)authority
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query;
@@ -54,7 +50,8 @@
                                         errorCode:(NSString *)errorCode
                                  errorDescription:(NSString *)errorDescription
                                          subError:(NSString *)subError
-                                           claims:(NSString *)claims;
+                                           claims:(NSString *)claims
+                                     refreshToken:(NSString *)refreshToken;
 
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority

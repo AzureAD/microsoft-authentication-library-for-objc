@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
-#import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryHttpEvent.h"
