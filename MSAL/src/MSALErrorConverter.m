@@ -27,6 +27,7 @@
 
 #import "MSALErrorConverter.h"
 #import "MSALError_Internal.h"
+#import "MSALResult+Internal.h"
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
@@ -176,6 +177,24 @@ static NSDictionary *s_userInfoKeyMapping;
     msalUserInfo[MSALOAuthErrorKey] = oauthError;
     msalUserInfo[MSALOAuthSubErrorKey] = subError;
     msalUserInfo[NSUnderlyingErrorKey]  = underlyingError;
+
+    if (userInfo[MSIDInvalidTokenResultKey])
+    {
+        NSError *resultError = nil;
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+
+        if (!msalResult)
+        {
+            MSID_LOG_WARN(nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %ld, %@", (long)resultError.code, resultError.domain);
+            MSID_LOG_WARN_PII(nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", resultError);
+        }
+        else
+        {
+            msalUserInfo[MSALInvalidResultKey] = msalResult;
+        }
+
+        [msalUserInfo removeObjectForKey:MSIDInvalidTokenResultKey];
+    }
 
     return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
 }

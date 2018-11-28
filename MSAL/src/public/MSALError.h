@@ -102,6 +102,12 @@ extern NSString *MSALDisplayableUserIdKey;
 extern NSString *MSALGrantedScopesKey;
 
 /*!
+ If server returned tokens successfully, but response data doesn't pass validation,
+ MSAL will return an error and original result in the error userInfo
+ */
+extern NSString *MSALInvalidResultKey;
+
+/*!
  Broker version that was used for the authentication
  */
 extern NSString *MSALBrokerVersionKey;

@@ -28,6 +28,15 @@
 #import <XCTest/XCTest.h>
 #include "MSALErrorConverter.h"
 #include "MSIDError.h"
+#import "MSIDTokenResult.h"
+#import "MSIDTestURLResponse+Util.h"
+#import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDConfiguration.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSIDTokenResponse.h"
+#import "MSIDAccessToken.h"
+#import "MSIDRefreshToken.h"
+#import "MSALResult.h"
 
 @interface MSALErrorConverterTests : XCTestCase
 
@@ -110,6 +119,8 @@
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
 
+
+
     MSALErrorConverter *converter = [MSALErrorConverter new];
     NSError *msalError = [converter errorWithDomain:MSIDOAuthErrorDomain
                                                code:errorCode
@@ -120,7 +131,9 @@
                                       correlationId:correlationId
                                            userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                       MSIDHTTPResponseCodeKey : httpResponseCode,
-                                                      @"additional_user_info": @"unmapped_userinfo"}];
+                                                      @"additional_user_info": @"unmapped_userinfo",
+                                                      MSIDInvalidTokenResultKey : [self testTokenResult]
+                                                      }];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     NSInteger expectedErrorCode = MSALErrorInteractionRequired;
@@ -139,6 +152,41 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
     XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
     XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
+    XCTAssertNil(msalError.userInfo[MSIDInvalidTokenResultKey]);
+    XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
+    MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
+    XCTAssertEqualObjects(result.accessToken, @"access-token");
+}
+
+- (MSIDTokenResult *)testTokenResult
+{
+    NSDictionary *testResponse = [MSIDTestURLResponse tokenResponseWithAT:@"access-token"
+                                                               responseRT:@"refresh-token"
+                                                               responseID:nil
+                                                            responseScope:nil
+                                                       responseClientInfo:nil
+                                                                expiresIn:nil
+                                                                     foci:nil
+                                                             extExpiresIn:nil];
+
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDConfiguration *conf = [[MSIDConfiguration alloc] initWithAuthority:authority redirectUri:nil clientId:@"myclient" target:@"test.scope"];
+
+    MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    MSIDTokenResponse *response = [factory tokenResponseFromJSON:testResponse context:nil error:nil];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:response configuration:conf];
+    MSIDRefreshToken *refreshToken = [factory refreshTokenFromResponse:response configuration:conf];
+    MSIDAccount *account = [factory accountFromResponse:response configuration:conf];
+
+    MSIDTokenResult *result = [[MSIDTokenResult alloc] initWithAccessToken:accessToken
+                                                              refreshToken:refreshToken
+                                                                   idToken:response.idToken
+                                                                   account:account
+                                                                 authority:accessToken.authority
+                                                             correlationId:[NSUUID UUID]
+                                                             tokenResponse:response];
+
+    return result;
 }
 
 /*!
