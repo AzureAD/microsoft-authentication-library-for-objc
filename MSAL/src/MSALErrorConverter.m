@@ -115,7 +115,8 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
                              MSIDGrantedScopesKey: MSALGrantedScopesKey,
                              MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
-                             MSIDBrokerVersionKey: MSALBrokerVersionKey
+                             MSIDBrokerVersionKey: MSALBrokerVersionKey,
+                             MSIDHomeAccountIdkey: MSALHomeAccountIdKey
                              };
 }
 
