@@ -78,7 +78,7 @@
     (void)app;
     (void)options;
     
-    [MSALPublicClientApplication handleMSALResponse:url];
+    [MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]];
    
     return YES;
 }

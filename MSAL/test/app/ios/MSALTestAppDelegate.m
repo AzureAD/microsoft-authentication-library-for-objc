@@ -131,7 +131,7 @@
     (void)options;
     NSLog(@"OpenURL Method! - MSALWebviewTypeSafariViewController");
     
-    return [MSALPublicClientApplication handleMSALResponse:url];
+    return [MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]];
 }
 
 @end

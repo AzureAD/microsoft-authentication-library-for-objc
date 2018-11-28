@@ -60,6 +60,9 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
 #import "MSIDAuthorityFactory.h"
+#import "MSIDBrokerInteractiveController.h"
+#import "MSIDDefaultBrokerResponseHandler.h"
+#import "MSIDDefaultTokenResponseValidator.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -281,13 +284,43 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
 {
+    return [self handleMSALResponse:response sourceApplication:@""];
+}
+
++ (BOOL)handleMSALResponse:(NSURL *)response
+         sourceApplication:(NSString *)sourceApplication
+{
     if ([MSIDWebviewAuthorization handleURLResponseForSystemWebviewController:response])
     {
         return YES;
     }
-    
-    return [MSIDCertAuthHandler completeCertAuthChallenge:response];
+
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
+    {
+        return YES;
+    }
+
+    if ([NSString msidIsStringNilOrBlank:sourceApplication])
+    {
+        MSID_LOG_WARN(nil, @"Application doesn't integrate with broker correctly");
+        // TODO: add a link to Wiki describing why broker is necessary
+        return NO;
+    }
+
+    // Only AAD is supported in broker at this time. If we need to support something else, we need to change this to dynamically read authority from response and create factory
+    MSIDDefaultBrokerResponseHandler *brokerResponseHandler = [[MSIDDefaultBrokerResponseHandler alloc] initWithOauthFactory:[MSIDAADV2Oauth2Factory new]
+                                                                                                      tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
+
+    if ([MSIDBrokerInteractiveController completeAcquireToken:response
+                                            sourceApplication:sourceApplication
+                                        brokerResponseHandler:brokerResponseHandler])
+    {
+        return YES;
+    }
+
+    return NO;
 }
+
 #endif
 
 + (BOOL)cancelCurrentWebAuthSession
