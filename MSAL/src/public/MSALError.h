@@ -329,9 +329,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorBrokerKeyNotFound              =  -42709,
 
+    // Workplace join is required to proceed
+    MSALErrorWorkplaceJoinRequired          =  -42710,
+
     /*!
      Broker returned unreadable result
      */
-    MSALErrorBrokerUnknown                  =  -42710
+    MSALErrorBrokerUnknown                  =  -42711
 };
 

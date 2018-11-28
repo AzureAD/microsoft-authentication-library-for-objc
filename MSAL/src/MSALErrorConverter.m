@@ -87,6 +87,7 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorBrokerResponseHashMismatch): @(MSALErrorBrokerResponseHashMismatch),
                                    @(MSIDErrorBrokerKeyFailedToCreate): @(MSALErrorBrokerKeyFailedToCreate),
                                    @(MSIDErrorBrokerKeyNotFound): @(MSALErrorBrokerKeyNotFound),
+                                   @(MSIDErrorWorkplaceJoinRequired): @(MSALErrorWorkplaceJoinRequired),
                                    @(MSIDErrorBrokerUnknown): @(MSALErrorBrokerUnknown),
 
                                    // Oauth2 errors
