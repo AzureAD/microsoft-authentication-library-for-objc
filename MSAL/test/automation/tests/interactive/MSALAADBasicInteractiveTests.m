@@ -393,8 +393,8 @@
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
     request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+    request.scopes = @"user.read";
+    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
     request.loginHint = self.primaryAccount.username;
     request.uiBehavior = @"consent";
     request.testAccount = self.primaryAccount;
