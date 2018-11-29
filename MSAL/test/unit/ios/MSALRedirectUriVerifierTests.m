@@ -29,6 +29,7 @@
 #import "MSALTestCase.h"
 #import "MSALTestBundle.h"
 #import "MSALRedirectUriVerifier.h"
+#import "MSALRedirectUri.h"
 
 @interface MSALRedirectUriVerifierTests : MSALTestCase
 
@@ -36,93 +37,127 @@
 
 @implementation MSALRedirectUriVerifierTests
 
-- (void)setUp
+- (void)testMSALRedirectUri_whenCustomRedirectUri_andNotBrokerCapable_shouldReturnUriBrokerCapableNo
 {
-    [super setUp];
-    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msalclient"]}];
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myapp"]}];
     [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
     [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
-}
 
-- (void)testGenerateRedirectUri_whenNilInputClientId_shouldReturnNilAndFillError
-{
-    NSError *outError = nil;
-    NSURL *result = [MSALRedirectUriVerifier generateRedirectUri:@"" clientId:nil brokerEnabled:NO error:&outError];
-    XCTAssertNil(result);
-    XCTAssertNotNil(outError);
-}
+    NSString *redirectUri = @"myapp://authtest";
+    NSString *clientId = @"msalclient";
 
-- (void)testGenerateRedirectUri_whenNonNilInputRedirectUri_shouldReturnRedirectUriNilError
-{
-    NSError *outError = nil;
-    NSURL *result = [MSALRedirectUriVerifier generateRedirectUri:@"https://localhost" clientId:@"client" brokerEnabled:NO error:&outError];
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+
     XCTAssertNotNil(result);
-    XCTAssertEqualObjects(result, [NSURL URLWithString:@"https://localhost"]);
-    XCTAssertNil(outError);
+    XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
+    XCTAssertFalse(result.brokerCapable);
+    XCTAssertNil(error);
 }
 
-- (void)testGenerateRedirectUri_whenNilInputRedirectUri_brokerEnabledNO_shouldGenerateNonBrokerUrl
+- (void)testMSALRedirectUri_whenCustomRedirectUri_andBrokerCapable_shouldReturnUriBrokerCapableYes
 {
-    NSError *outError = nil;
-    NSURL *result = [MSALRedirectUriVerifier generateRedirectUri:nil clientId:@"client" brokerEnabled:NO error:&outError];
-    XCTAssertEqualObjects(result, [NSURL URLWithString:@"msalclient://auth"]);
-    XCTAssertNil(outError);
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauthtest.bundle.identifier"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+
+    NSString *redirectUri = @"msauthtest.bundle.identifier://auth";
+    NSString *clientId = @"msalclient";
+
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+
+    XCTAssertNotNil(result);
+    XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
+    XCTAssertTrue(result.brokerCapable);
+    XCTAssertNil(error);
 }
 
-- (void)testGenerateRedirectUri_whenNilInputRedirectUri_brokerEnabledYES_shouldGenerateBrokerRedirectUri
+- (void)testMSALRedirectUri_whenCustomRedirectUri_andLegacyBrokerCapable_shouldReturnUriBrokerCapableYes
 {
-    NSError *outError = nil;
-    NSURL *result = [MSALRedirectUriVerifier generateRedirectUri:nil clientId:@"client" brokerEnabled:YES error:&outError];
-    XCTAssertEqualObjects(result, [NSURL URLWithString:@"msalclient://test.bundle.identifier"]);
-    XCTAssertNil(outError);
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myscheme"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+
+    NSString *redirectUri = @"myscheme://test.bundle.identifier";
+    NSString *clientId = @"msalclient";
+
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+
+    XCTAssertNotNil(result);
+    XCTAssertEqualObjects(result.url.absoluteString, redirectUri);
+    XCTAssertTrue(result.brokerCapable);
+    XCTAssertNil(error);
 }
 
-- (void)testVerifyRedirectUri_whenSchemeIsRegistered_brokerEnabledNO_shouldReturnYESNilError
+- (void)testMSALRedirectUri_whenCustomRedirectUri_andNotRegistered_shouldReturnNilAndFillError
 {
-    NSURL *inputURL = [NSURL URLWithString:@"msalclient://auth"];
-    NSError *outError = nil;
-    BOOL result = [MSALRedirectUriVerifier verifyRedirectUri:inputURL brokerEnabled:NO error:&outError];
-    XCTAssertTrue(result);
-    XCTAssertNil(outError);
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myscheme"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+
+    NSString *redirectUri = @"notregistered://test.bundle.identifier";
+    NSString *clientId = @"msalclient";
+
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri clientId:clientId error:&error];
+
+    XCTAssertNil(result);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
 }
 
-- (void)testVerifyRedirectUri_whenSchemeIsHttpsScheme_brokerEnabledNO_shouldReturnYESNilError
+- (void)testMSALRedirectUri_whenDefaultRedirectUri_andBrokerCapableUrlRegistered_shouldReturnUriAndBrokerCapableYes
 {
-    NSURL *inputURL = [NSURL URLWithString:@"https://auth"];
-    NSError *outError = nil;
-    BOOL result = [MSALRedirectUriVerifier verifyRedirectUri:inputURL brokerEnabled:NO error:&outError];
-    XCTAssertTrue(result);
-    XCTAssertNil(outError);
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauthtest.bundle.identifier"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+
+    NSString *clientId = @"msalclient";
+
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+
+    XCTAssertNotNil(result);
+    XCTAssertEqualObjects(result.url.absoluteString, @"msauthtest.bundle.identifier://auth");
+    XCTAssertTrue(result.brokerCapable);
+    XCTAssertNil(error);
 }
 
-
-- (void)testVerifyRedirectUri_whenSchemeIsNotRegistered_brokerEnabledNO_shouldReturnNOAndFillError
+- (void)testMSALRedirectUri_whenDefaultRedirectUri_andDefaultUrlRegistered_shouldReturnUriAndBrokerCapableNo
 {
-    NSURL *inputURL = [NSURL URLWithString:@"msalclient2://auth"];
-    NSError *outError = nil;
-    BOOL result = [MSALRedirectUriVerifier verifyRedirectUri:inputURL brokerEnabled:NO error:&outError];
-    XCTAssertFalse(result);
-    XCTAssertNotNil(outError);
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msalmsalclient"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+
+    NSString *clientId = @"msalclient";
+
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+
+    XCTAssertNotNil(result);
+    XCTAssertEqualObjects(result.url.absoluteString, @"msalmsalclient://auth");
+    XCTAssertFalse(result.brokerCapable);
+    XCTAssertNil(error);
 }
 
-
-- (void)testVerifyRedirectUri_whenSchemeIsRegistered_brokerEnabledYES_andInvalidHost_shouldReturnNOAndFillError
+- (void)testMSALRedirectUri_whenNoRedirectUriRegistered_shouldReturnNilAndFillError
 {
-    NSURL *inputURL = [NSURL URLWithString:@"msalclient://auth"];
-    NSError *outError = nil;
-    BOOL result = [MSALRedirectUriVerifier verifyRedirectUri:inputURL brokerEnabled:YES error:&outError];
-    XCTAssertFalse(result);
-    XCTAssertNotNil(outError);
-}
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myscheme"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
 
-- (void)testVerifyRedirectUri_whenSchemeIsRegistered_brokerEnabledYES_andValidHost_shouldReturnYESNilError
-{
-    NSURL *inputURL = [NSURL URLWithString:@"msalclient://test.bundle.identifier"];
-    NSError *outError = nil;
-    BOOL result = [MSALRedirectUriVerifier verifyRedirectUri:inputURL brokerEnabled:YES error:&outError];
-    XCTAssertTrue(result);
-    XCTAssertNil(outError);
-}
+    NSString *clientId = @"msalclient";
 
+    NSError *error = nil;
+    MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
+
+    XCTAssertNil(result);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauthtest.bundle.identifier\""]);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauthtest.bundle.identifier://auth\""]);
+}
 
 @end

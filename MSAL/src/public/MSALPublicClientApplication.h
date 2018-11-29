@@ -32,6 +32,7 @@
 @class MSALTokenRequest;
 @class MSALAuthority;
 @class WKWebView;
+@class MSALRedirectUri;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -52,7 +53,7 @@
 @property (readonly, nonnull) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) NSString *redirectUri;
+@property (readonly, nonnull) MSALRedirectUri *redirectUri;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to

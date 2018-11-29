@@ -61,6 +61,7 @@
 #import "MSIDInteractiveRequestParameters.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDSilentController.h"
+#import "MSALRedirectUri.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -139,7 +140,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
 #endif
@@ -162,7 +163,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
 #endif
@@ -184,7 +185,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, @"mycustom.redirect://bundle_id");
 #if TARGET_OS_IPHONE
     XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
 #endif
@@ -236,7 +237,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
 
@@ -254,7 +255,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
 
@@ -275,7 +276,7 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
     XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, @"mycustom.redirect://bundle_id");
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
 }
 

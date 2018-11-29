@@ -27,15 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALRedirectUri;
+
 @interface MSALRedirectUriVerifier : NSObject
 
-+ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
-            brokerEnabled:(BOOL)brokerEnabled
-                    error:(NSError * __autoreleasing *)error;
++ (NSURL *)defaultBrokerCapableRedirectUri;
++ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId;
 
-+ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
-                      clientId:(NSString *)clientId
-                 brokerEnabled:(BOOL)brokerEnabled
-                         error:(NSError * __autoreleasing *)error;
++ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
+                                         clientId:(NSString *)clientId
+                                            error:(NSError * __autoreleasing *)error;
 
 @end

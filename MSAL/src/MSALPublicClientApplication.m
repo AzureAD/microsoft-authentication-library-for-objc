@@ -63,6 +63,7 @@
 #import "MSIDBrokerInteractiveController.h"
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
+#import "MSALRedirectUri.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -88,30 +89,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #else
     return nil;
 #endif
-}
-
-// Make sure scheme is registered in info.plist
-// If broker is enabled, make sure redirect uri has bundle id in it
-// If no redirect uri is provided, generate a default one, which is compatible with broker if broker is enabled
-- (BOOL)verifyRedirectUri:(NSString *)redirectUriString
-                 clientId:(NSString *)clientId
-                    error:(NSError * __autoreleasing *)error
-{
-    NSURL *generatedRedirectUri = [MSALRedirectUriVerifier generateRedirectUri:redirectUriString
-                                                                      clientId:clientId
-                                                                 brokerEnabled:NO
-                                                                         error:error];
-
-    if (!generatedRedirectUri)
-    {
-        return NO;
-    }
-
-    _redirectUri = generatedRedirectUri.absoluteString;
-
-    return [MSALRedirectUriVerifier verifyRedirectUri:generatedRedirectUri
-                                        brokerEnabled:NO
-                                                error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -204,8 +181,16 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL context:nil error:error];
     }
 
-    BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
-    if (!redirectUriValid) return nil;
+    MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
+                                                                                    clientId:clientId
+                                                                                       error:error];
+
+    if (!msalRedirectUri)
+    {
+        return nil;
+    }
+
+    _redirectUri = msalRedirectUri;
 
 #if TARGET_OS_IPHONE
     // Optional Paramater
@@ -619,9 +604,22 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
+    else if (!_redirectUri.brokerCapable)
+    {
+        interactiveRequestType = MSIDInteractiveRequestLocalType;
+
+#if DEBUG && TARGET_OS_IPHONE
+        // Unless broker is explicitly disabled, show the warning in debug mode to configure broker correctly
+        NSURL *redirectUri = [MSALRedirectUriVerifier defaultBrokerCapableRedirectUri];
+        NSString *brokerWarning = [NSString stringWithFormat:@"The configured redirect URI for this application doesn't support brokered authentication. This means that your users might experience worse SSO rate or not be able to complete certain conditional access policies. To resolve it, register %@ scheme in your Info.plist and add \"msauthv2\" under LSApplicationQueriesSchemes. Go to \"aka.ms/msalbroker\" to check possible steps to resolve this warning", redirectUri.scheme];
+
+        MSID_LOG_WARN(nil, @"%@", brokerWarning);
+        NSLog(@"%@", brokerWarning);
+#endif
+    }
 
     MSIDInteractiveRequestParameters *params = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
-                                                                                               redirectUri:_redirectUri
+                                                                                               redirectUri:_redirectUri.url.absoluteString
                                                                                                   clientId:_clientId
                                                                                                     scopes:requestScopes
                                                                                                 oidcScopes:requestOIDCScopes
@@ -776,7 +774,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSError *error = nil;
 
     MSIDRequestParameters *params = [[MSIDRequestParameters alloc] initWithAuthority:msidAuthority
-                                                                         redirectUri:_redirectUri
+                                                                         redirectUri:_redirectUri.url.absoluteString
                                                                             clientId:_clientId
                                                                               scopes:requestScopes
                                                                           oidcScopes:requestOIDCScopes

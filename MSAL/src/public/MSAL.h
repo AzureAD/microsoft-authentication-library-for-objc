@@ -40,6 +40,7 @@ FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
 #import <MSAL/MSALConstants.h>
+#import <MSAL/MSALRedirectUri.h>
 #import <MSAL/MSALError.h>
 #import <MSAL/MSALLogger.h>
 #import <MSAL/MSALPublicClientApplication.h>
