@@ -253,8 +253,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                           clientId:self.clientId];
+    
+    NSArray *accounts = [request allAccounts:error];
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:*error];
-    return [request allAccounts:error];
+    
+    return accounts;
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
