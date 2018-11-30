@@ -60,6 +60,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
 #import "MSIDAuthorityFactory.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -202,8 +203,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     BOOL redirectUriValid = [self verifyRedirectUri:redirectUri clientId:clientId error:error];
-    if (!redirectUriValid) return nil;
-
+    if (!redirectUriValid)
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:*error];
+        return nil;
+    }
 #if TARGET_OS_IPHONE
     // Optional Paramater
     _keychainGroup = keychainGroup;
@@ -249,6 +253,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                           clientId:self.clientId];
+    if (error) *error = [MSALErrorConverter msalErrorFromMsidError:*error];
     return [request allAccounts:error];
 }
 
@@ -257,7 +262,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                           clientId:self.clientId];
-    return [request accountForHomeAccountId:homeAccountId error:error];
+    NSError *msidError = nil;
+    MSALAccount *account = [request accountForHomeAccountId:homeAccountId error:&msidError];
+    
+    if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    return account;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
@@ -265,7 +275,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                           clientId:self.clientId];
-    return [request accountForUsername:username error:error];
+    NSError *msidError = nil;
+    MSALAccount *account = [request accountForUsername:username error:&msidError];
+    
+    if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    return account;
 }
 
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
@@ -273,7 +288,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                           clientId:self.clientId];
 
-    [request allAccountsFilteredByAuthority:self.authority completionBlock:completionBlock];
+    [request allAccountsFilteredByAuthority:self.authority completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+        completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:error]);
+    }];
 }
 
 #pragma SafariViewController Support
@@ -601,7 +618,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     if (!params)
     {
-        completionBlock(nil, error);
+        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:error]);
         return;
     }
 
@@ -622,7 +639,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     if (webviewError)
     {
-        completionBlock(nil, webviewError);
+        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:webviewError]);
         return;
     }
 
@@ -661,7 +678,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
         if ([NSThread isMainThread])
         {
-            completionBlock(result, error);
+            completionBlock(result, [MSALErrorConverter msalErrorFromMsidError:error]);
         }
         else
         {
@@ -753,7 +770,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     if (!params)
     {
-        completionBlock(nil, error);
+        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:error]);
         return;
     }
 
@@ -789,7 +806,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSALCompletionBlock block = ^(MSALResult *result, NSError *error)
     {
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:error context:params];
-        completionBlock(result, error);
+        completionBlock(result, [MSALErrorConverter msalErrorFromMsidError:error]);
     };
 
     NSError *claimsError = nil;
@@ -855,7 +872,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     if (msidError && error)
     {
-        *error = msidError;
+        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     }
 
     return result;
