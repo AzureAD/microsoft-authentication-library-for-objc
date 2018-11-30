@@ -127,7 +127,7 @@ static NSDictionary *s_userInfoKeyMapping;
 
 + (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError
 {
-    if (!msidError) return MSIDErrorInternal;
+    if (!msidError) return MSALErrorInternal;
     
     NSString *msalDomain = [self msalErrorDomainFromMsidError:msidError];
     if (!msalDomain) return msidError.code;
