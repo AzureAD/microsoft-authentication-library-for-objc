@@ -37,9 +37,11 @@
 {
 #if AD_BROKER
     // Allow the broker app to use a special redirect URI when acquiring tokens
-    if ([url isEqualToString:MSID_AUTHENTICATOR_REDIRECT_URI])
+    if ([customRedirectUri isEqualToString:MSID_AUTHENTICATOR_REDIRECT_URI])
     {
-        return YES;
+        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
+                                              brokerCapable:YES];
+
     }
 #endif
 
