@@ -26,63 +26,113 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRedirectUriVerifier.h"
+#import "MSALRedirectUri+Internal.h"
+#import "MSIDConstants.h"
 
 @implementation MSALRedirectUriVerifier
 
-+ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
-            brokerEnabled:(BOOL)brokerEnabled
-                    error:(NSError **)error
++ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
+                                         clientId:(NSString *)clientId
+                                            error:(NSError * __autoreleasing *)error
 {
-    NSString *scheme = redirectUri.scheme;
-
-    if (![self verifySchemeIsRegistered:scheme error:error])
+#if AD_BROKER
+    // Allow the broker app to use a special redirect URI when acquiring tokens
+    if ([customRedirectUri isEqualToString:MSID_AUTHENTICATOR_REDIRECT_URI])
     {
-        return NO;
+        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
+                                              brokerCapable:YES];
+
     }
+#endif
 
-    if (brokerEnabled)
+    // If developer provides their own redirect uri, verify it
+    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
     {
-        NSString *host = [redirectUri host];
-        NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        NSURL *redirectURI = [NSURL URLWithString:customRedirectUri];
 
-        if (![host isEqualToString:bundleIdentifier])
+        if (![self verifySchemeIsRegistered:redirectURI error:error])
         {
-            MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"Your MSALPublicClientApplication is configured to allow brokered authentication but your redirect URI is not setup properly. Make sure your redirect URI is in the form of <app-scheme>://<bundle-id> (e.g. \"x-msauth-testapp://com.microsoft.msal.testapp\") and that the \"app-scheme\" you choose is registered in your application's info.plist.");
-
-            return NO;
+            return nil;
         }
+
+        BOOL brokerCapable = [self redirectUriIsBrokerCapable:redirectURI];
+
+        MSALRedirectUri *redirectUri = [[MSALRedirectUri alloc] initWithRedirectUri:redirectURI
+                                                                      brokerCapable:brokerCapable];
+
+        return redirectUri;
     }
 
-    return YES;
+    // First try to check for broker capable redirect URI
+    NSURL *defaultRedirectUri = [self defaultBrokerCapableRedirectUri];
+
+    NSError *redirectError = nil;
+    if ([self verifySchemeIsRegistered:defaultRedirectUri error:&redirectError])
+    {
+        return [[MSALRedirectUri alloc] initWithRedirectUri:defaultRedirectUri brokerCapable:YES];
+    }
+
+    // Now check the uri that is not broker capable for backward compat
+    defaultRedirectUri = [self defaultNonBrokerRedirectUri:clientId];
+
+    if ([self verifySchemeIsRegistered:defaultRedirectUri error:nil])
+    {
+        return [[MSALRedirectUri alloc] initWithRedirectUri:defaultRedirectUri brokerCapable:NO];
+    }
+
+    if (error)
+    {
+        *error = redirectError;
+    }
+
+    return nil;
 }
 
-+ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
-                      clientId:(NSString *)clientId
-                 brokerEnabled:(BOOL)brokerEnabled
-                         error:(NSError **)error
++ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
 {
-    if (![NSString msidIsStringNilOrBlank:inputRedirectUri])
-    {
-        return [NSURL URLWithString:inputRedirectUri];
-    }
-
     if ([NSString msidIsStringNilOrBlank:clientId])
     {
-        MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"The client ID provided is empty or nil.");
         return nil;
     }
 
-    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    NSString *hostComponent = brokerEnabled ? [[NSBundle mainBundle] bundleIdentifier] : @"auth";
-    NSString *redirectUriString = [NSString stringWithFormat:@"%@://%@", scheme, hostComponent];
-    return [NSURL URLWithString:redirectUriString];
+    NSString *redirectUri = [NSString stringWithFormat:@"msal%@://auth", clientId];
+    return [NSURL URLWithString:redirectUri];
+}
+
++ (NSURL *)defaultBrokerCapableRedirectUri
+{
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *redirectUri = [NSString stringWithFormat:@"msauth%@://auth", bundleID];
+    return [NSURL URLWithString:redirectUri];
+}
+
++ (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
+{
+    NSURL *defaultRedirectUri = [self defaultBrokerCapableRedirectUri];
+
+    // Check default MSAL format
+    if ([defaultRedirectUri isEqual:redirectUri])
+    {
+        return YES;
+    }
+
+    // Check default ADAL format
+    if ([redirectUri.host isEqualToString:[[NSBundle mainBundle] bundleIdentifier]]
+        && redirectUri.scheme.length > 0)
+    {
+        return YES;
+    }
+
+    return NO;
 }
 
 #pragma mark - Helpers
 
-+ (BOOL)verifySchemeIsRegistered:(NSString *)scheme
++ (BOOL)verifySchemeIsRegistered:(NSURL *)redirectUri
                            error:(NSError * __autoreleasing *)error
 {
+    NSString *scheme = redirectUri.scheme;
+
     if ([scheme isEqualToString:@"https"])
     {
         // HTTPS schemes don't need to be registered in the Info.plist file
@@ -100,7 +150,7 @@
         }
     }
 
-    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme \"%@\" is not registered in the app's info.plist file. Please add \"%@\" into Info.plist under CFBundleURLSchemes without any whitespaces.", scheme, scheme);
+    MSAL_ERROR_PARAM(nil, MSALErrorRedirectSchemeNotRegistered, @"The required app scheme \"%@\" is not registered in the app's info.plist file. Please add \"%@\" into Info.plist under CFBundleURLSchemes without any whitespaces and make sure that redirectURi \"%@\" is register in the portal for your app.", scheme, scheme, redirectUri.absoluteString);
 
     return NO;
 }

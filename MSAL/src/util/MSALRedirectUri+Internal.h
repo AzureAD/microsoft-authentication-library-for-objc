@@ -25,35 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRedirectUriVerifier.h"
-#import "MSALRedirectUri+Internal.h"
+#ifndef MSALRedirectUri_Internal_h
+#define MSALRedirectUri_Internal_h
 
-@implementation MSALRedirectUriVerifier
+#import "MSALRedirectUri.h"
 
-+ (NSURL *)defaultBrokerCapableRedirectUri
-{
-    return nil;
-}
+@interface MSALRedirectUri()
 
-+ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
-{
-    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
-    return [NSURL URLWithString:redirectUriString];
-}
-
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error
-{
-    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
-    {
-        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
-                                              brokerCapable:NO];
-    }
-
-    return [[MSALRedirectUri alloc] initWithRedirectUri:[self defaultNonBrokerRedirectUri:clientId]
-                                          brokerCapable:NO];
-}
+- (nullable instancetype)initWithRedirectUri:(nonnull NSURL *)redirectUri
+                               brokerCapable:(BOOL)brokerCapable;
 
 @end
+
+#endif /* MSALRedirectUri_Internal_h */

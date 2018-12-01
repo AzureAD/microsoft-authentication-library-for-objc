@@ -658,6 +658,7 @@
 
         NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
         [userInfo removeObjectForKey:NSUnderlyingErrorKey];
+        [userInfo removeObjectForKey:MSALInvalidResultKey];
 
         errorDictionary[@"user_info"] = userInfo;
     }
