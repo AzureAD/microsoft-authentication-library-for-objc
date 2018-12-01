@@ -716,7 +716,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         else
         {
             dispatch_async(dispatch_get_main_queue(), ^{
-                completionBlock(result, error);
+                completionBlock(result, [MSALErrorConverter msalErrorFromMsidError:error]);
             });
         }
     };
