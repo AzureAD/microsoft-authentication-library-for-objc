@@ -102,6 +102,12 @@ extern NSString *MSALDisplayableUserIdKey;
 extern NSString *MSALGrantedScopesKey;
 
 /*!
+ If server returned tokens successfully, but response data doesn't pass validation,
+ MSAL will return an error and original result in the error userInfo
+ */
+extern NSString *MSALInvalidResultKey;
+
+/*!
  Broker version that was used for the authentication
  */
 extern NSString *MSALBrokerVersionKey;
@@ -329,9 +335,12 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorBrokerKeyNotFound              =  -42709,
 
+    // Workplace join is required to proceed
+    MSALErrorWorkplaceJoinRequired          =  -42710,
+
     /*!
      Broker returned unreadable result
      */
-    MSALErrorBrokerUnknown                  =  -42710
+    MSALErrorBrokerUnknown                  =  -42711
 };
 

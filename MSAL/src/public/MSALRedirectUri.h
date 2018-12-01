@@ -25,35 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALRedirectUriVerifier.h"
-#import "MSALRedirectUri+Internal.h"
+#import <Foundation/Foundation.h>
 
-@implementation MSALRedirectUriVerifier
+NS_ASSUME_NONNULL_BEGIN
 
-+ (NSURL *)defaultBrokerCapableRedirectUri
-{
-    return nil;
-}
+@interface MSALRedirectUri : NSObject
 
-+ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
-{
-    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
-    return [NSURL URLWithString:redirectUriString];
-}
+/* Redirect URI that will be used for network requests */
+@property (nonatomic, readonly) NSURL *url;
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error
-{
-    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
-    {
-        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
-                                              brokerCapable:NO];
-    }
-
-    return [[MSALRedirectUri alloc] initWithRedirectUri:[self defaultNonBrokerRedirectUri:clientId]
-                                          brokerCapable:NO];
-}
+/* Indicates if redirect URI can be used with broker
+   Broker redirect URIs need to follow particular format, e.g. msauth<bundleId>://auth */
+@property (nonatomic, readonly) BOOL brokerCapable;
 
 @end
+
+NS_ASSUME_NONNULL_END
