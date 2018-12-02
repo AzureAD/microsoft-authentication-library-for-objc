@@ -27,11 +27,11 @@
 
 #import "MSALTestCase.h"
 #import "MSALTelemetryTestDispatcher.h"
-#import "MSALTelemetryAPIEvent.h"
 #import "MSALTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryHttpEvent.h"
 #import "MSIDTelemetryEventStrings.h"
+#import "MSIDTelemetryAPIEvent.h"
 
 @interface MSALTestRequestContext : NSObject<MSIDRequestContext>
 {
@@ -146,7 +146,7 @@
     
     // API event
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
-    MSALTelemetryAPIEvent *apiEvent = [[MSALTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:ctx];
+    MSIDTelemetryAPIEvent *apiEvent = [[MSIDTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:ctx];
     [apiEvent setProperty:@"api_property" value:@"api_value"];
     [apiEvent setCorrelationId:correlationId];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:apiEvent];

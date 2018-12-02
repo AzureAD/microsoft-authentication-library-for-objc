@@ -30,8 +30,12 @@
 @class MSIDAccessToken;
 @class MSIDIdToken;
 @class MSIDClientInfo;
+@class MSIDTokenResult;
 
 @interface MSALResult (Internal)
+
++ (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error;
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken
                             expiresOn:(NSDate *)expiresOn
@@ -42,10 +46,5 @@
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority;
-
-+ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
-                              idToken:(MSIDIdToken *)idToken
-              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
-                                error:(NSError **)error;
 
 @end

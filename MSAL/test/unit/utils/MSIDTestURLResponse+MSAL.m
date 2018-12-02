@@ -28,7 +28,7 @@
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDDeviceId.h"
 #import "NSDictionary+MSIDTestUtil.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSALTestConstants.h"
 #import "MSALAccountId.h"
 #import "MSIDConstants.h"
@@ -48,7 +48,7 @@
         headers[@"return-client-request-id"] = @"true";
         headers[@"client-request-id"] = [MSIDTestRequireValueSentinel sentinel];
         headers[@"Accept"] = @"application/json";
-        headers[@"x-app-name"] = @"UnitTestHost";
+        headers[@"x-app-name"] = @"MSIDTestsHostApp";
         headers[@"x-app-ver"] = @"1.0";
 
         s_msalHeaders = [headers copy];
@@ -167,7 +167,7 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
+                                             @"id_token" : [MSIDTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.username
                                                                                        tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
@@ -188,12 +188,13 @@
                                  errorDescription:(NSString *)errorDescription
                                          subError:(NSString *)subError
                                            claims:(NSString *)claims
+                                     refreshToken:(NSString *)refreshToken
 {
     NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
 
     NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
                                            MSID_OAUTH2_SCOPE : [scopes msidToString],
-                                           MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                                           MSID_OAUTH2_REFRESH_TOKEN : refreshToken ? refreshToken : @"i am a refresh token!",
                                            @"client_info" : @"1",
                                            @"grant_type" : @"refresh_token" } mutableCopy];
     if (claims) [requestBody setValue:claims forKey:@"claims"];
@@ -225,7 +226,7 @@
                         authority:authority
                             query:query
                            scopes:scopes
-                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]} // Use default client info here
+                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSIDTestIdTokenUtil defaultTenantId]} // Use default client info here
                            claims:claims];
 }
 
@@ -266,7 +267,7 @@
     NSMutableDictionary *responseBody = [@{ @"access_token" : @"i am an updated access token!",
                                             @"expires_in" : @"600",
                                             @"refresh_token" : @"i am a refresh token",
-                                            @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                            @"id_token" : [MSIDTestIdTokenUtil defaultV2IdToken],
                                             @"id_token_expires_in" : @"1200",
                                             @"scope": [scopes msidToString]
                                             } mutableCopy];

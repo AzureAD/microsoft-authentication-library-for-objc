@@ -43,7 +43,7 @@ static NSDictionary* _additionalProfiles()
 {
     return @{
              @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
-                            @"redirectUri" :@"msalb6c69a37df96-4db0-9088-2ab96e1d8215://auth"},
+                            @"redirectUri" :@"msalb6c69a37-df96-4db0-9088-2ab96e1d8215://auth"},
              };
 }
 #endif
@@ -181,8 +181,7 @@ static NSDictionary *s_profiles = nil;
     if (authorityString)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         _authority = authority;
     }
     

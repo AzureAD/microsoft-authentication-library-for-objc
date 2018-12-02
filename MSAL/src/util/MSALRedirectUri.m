@@ -25,30 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALRedirectUri.h"
 
-@interface MSALTestSwizzle : NSObject
+@implementation MSALRedirectUri
 
-+ (void)reset;
+- (instancetype)initWithRedirectUri:(NSURL *)redirectUri
+                      brokerCapable:(BOOL)brokerCapable
+{
+    self = [super init];
 
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                               impl:(IMP)impl;
+    if (self)
+    {
+        _url = redirectUri;
+        _brokerCapable = brokerCapable;
+    }
 
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                            impl:(IMP)impl;
-
-+ (MSALTestSwizzle *)instanceMethod:(SEL)sel
-                              class:(Class)cls
-                              block:(id)block;
-
-+ (MSALTestSwizzle *)classMethod:(SEL)sel
-                           class:(Class)cls
-                           block:(id)impl;
-- (IMP)originalIMP;
-- (SEL)sel;
-
-- (void)makePermanent;
+    return self;
+}
 
 @end

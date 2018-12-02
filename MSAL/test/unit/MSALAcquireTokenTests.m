@@ -29,7 +29,7 @@
 
 #import "MSALTestBundle.h"
 #import "MSALTestConstants.h"
-#import "MSALTestSwizzle.h"
+#import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
 
 #import "NSURL+MSIDExtensions.h"
@@ -55,7 +55,7 @@
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDMacTokenCache.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
@@ -72,6 +72,7 @@
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
+#import "MSIDTestURLResponse+Util.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -92,7 +93,7 @@
 #else
     dataSource = MSIDMacTokenCache.defaultCache;
 #endif
-    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.tokenCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.accountCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
@@ -126,7 +127,7 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -218,7 +219,7 @@
     
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
     
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -287,6 +288,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -301,7 +303,7 @@
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
     
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
@@ -355,6 +357,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -365,6 +368,7 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
@@ -420,7 +424,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -462,6 +466,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -508,7 +514,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -549,6 +555,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -583,6 +591,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -632,7 +642,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -676,6 +686,8 @@
     XCTAssertNil(error);
     
     [application setClientCapabilities:@[@"llt"]];
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -726,7 +738,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
     
     // Check claims is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -768,6 +780,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application setClientCapabilities:@[@"llt"]];
     
@@ -804,6 +818,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application setClientCapabilities:@[@"llt"]];
     
@@ -863,7 +879,7 @@
     [MSIDTestURLSession addResponse:sovereignOidcResponse];
     
     // Check if instance_aware parameter is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -905,6 +921,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
@@ -985,6 +1003,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1054,6 +1073,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1122,6 +1142,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1191,7 +1212,7 @@
                                        authority:DEFAULT_TEST_AUTHORITY];
     
     // Check if instance_aware parameter is in start url
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
@@ -1210,6 +1231,8 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
@@ -1269,6 +1292,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1345,6 +1369,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1425,6 +1450,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1491,6 +1517,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1559,6 +1586,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1640,6 +1668,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1722,6 +1751,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL tokenSetSuccessful = [self.tokenCache saveTokensWithConfiguration:configuration
                                                                   response:response
+                                                                   factory:[MSIDAADV2Oauth2Factory new]
                                                                    context:nil
                                                                      error:nil];
     XCTAssertTrue(tokenSetSuccessful);
@@ -1749,7 +1779,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"unauthorized_client"
-                                                                                claims:claims];
+                                                                                claims:claims
+                                                                          refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently
@@ -1812,6 +1843,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1881,6 +1913,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1968,6 +2001,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -1997,7 +2031,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"client_mismatch"
-                                                                                claims:nil];
+                                                                                claims:nil
+                                                                          refreshToken:nil];
     
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
@@ -2014,7 +2049,7 @@
          
          XCTAssertEqual([metadataEntries count], 1);
          MSIDAppMetadataCacheItem *appMetadata = metadataEntries[0];
-         XCTAssertNil(appMetadata.familyId);
+         XCTAssertEqualObjects(appMetadata.familyId,@"");
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqual(error.code, MSALErrorInteractionRequired);
@@ -2056,9 +2091,19 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
+
+    MSIDRefreshToken *frt = [self.tokenCache getRefreshTokenWithAccount:account.lookupAccountIdentifier
+                                                               familyId:@"1"
+                                                          configuration:configuration
+                                                                context:nil
+                                                                  error:nil];
+    // Update FRT entry so that MRRT and FRT are not the same, otherwise it will skip MRRT
+    frt.refreshToken = @"updated frt token";
+    [self.accountCache saveCredential:frt.tokenCacheItem context:nil error:nil];
     
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
@@ -2081,7 +2126,8 @@
                                                                              errorCode:@"invalid_grant"
                                                                       errorDescription:@"Refresh token revoked"
                                                                               subError:@"client_mismatch"
-                                                                                claims:nil];
+                                                                                claims:nil
+                                                                          refreshToken:@"updated frt token"];
     
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, errorResponse, tokenResponse]];
     
@@ -2102,7 +2148,7 @@
          [expectation fulfill];
      }];
     
-    [self waitForExpectations:@[expectation] timeout:1];
+    [self waitForExpectations:@[expectation] timeout:100];
 }
 
 - (void)testAcquireTokenSilent_whenNoFRTInCache_ShouldUseMRRTToRefreshAccessToken
@@ -2134,6 +2180,7 @@
     configuration.clientId = UNIT_TEST_CLIENT_ID;
     BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
                                                       response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
                                                        context:nil
                                                          error:nil];
     XCTAssertTrue(result);
@@ -2181,7 +2228,7 @@
                              requestParamsBody:(NSDictionary *)requestParamsBody
                                      authority:(NSString *)authority
 {
-    NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]};
+    NSDictionary *clientInfo = @{ @"uid" : @"1", @"utid" : [MSIDTestIdTokenUtil defaultTenantId]};
     
     // Token request response.
     NSMutableDictionary *reqHeaders = [[MSIDTestURLResponse msalDefaultRequestHeaders] mutableCopy];
@@ -2199,7 +2246,7 @@
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
+                                             @"id_token" : [MSIDTestIdTokenUtil defaultV2IdToken],
                                              @"id_token_expires_in" : @"1200",
                                              @"client_info" : [clientInfo msidBase64UrlJson],
                                              MSID_OAUTH2_SCOPE: responseScopes

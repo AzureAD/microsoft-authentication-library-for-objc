@@ -25,19 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseRequest.h"
-@interface MSALSilentRequest : MSALBaseRequest
-{
-    BOOL _forceRefresh;
-    NSUInteger _expirationBuffer;
-}
+#import <Foundation/Foundation.h>
 
-@property NSString *state;
+NS_ASSUME_NONNULL_BEGIN
 
-- (id)initWithParameters:(MSALRequestParameters *)parameters
-            forceRefresh:(BOOL)forceRefresh
-              tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-        expirationBuffer:(NSUInteger)expirationBuffer
-                   error:(NSError *__autoreleasing *)error;
+@interface MSALRedirectUri : NSObject
+
+/* Redirect URI that will be used for network requests */
+@property (nonatomic, readonly) NSURL *url;
+
+/* Indicates if redirect URI can be used with broker
+   Broker redirect URIs need to follow particular format, e.g. msauth<bundleId>://auth */
+@property (nonatomic, readonly) BOOL brokerCapable;
 
 @end
+
+NS_ASSUME_NONNULL_END

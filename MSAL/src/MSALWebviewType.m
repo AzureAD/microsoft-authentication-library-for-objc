@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALWebviewType_Internal.h"
 
 extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
 {
@@ -39,4 +40,26 @@ extern NSString *MSALStringForMSALWebviewType(MSALWebviewType type)
     }
     
     @throw @"Unrecognized MSALWebviewType";
+}
+
+extern MSIDWebviewType MSIDWebviewTypeFromMSALType(MSALWebviewType type, NSError **error)
+{
+    switch (type) {
+#if TARGET_OS_IPHONE
+        case MSALWebviewTypeDefault:
+            return MSIDWebviewTypeDefault;
+        case MSALWebviewTypeAuthenticationSession:
+            return MSIDWebviewTypeAuthenticationSession;
+        case MSALWebviewTypeSafariViewController:
+            return MSIDWebviewTypeSafariViewController;
+#endif
+        case MSALWebviewTypeWKWebView:
+            return MSIDWebviewTypeWKWebView;
+
+        default:
+        {
+            MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Unexpected webview type detected", nil);
+            return -1;
+        }
+    }
 }

@@ -25,46 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALBaseRequest+TestExtensions.h"
+#ifndef MSALRedirectUri_Internal_h
+#define MSALRedirectUri_Internal_h
 
-@implementation MSALBaseRequest (TestExtensions)
+#import "MSALRedirectUri.h"
 
-- (MSIDAuthority *)authority
-{
-    return _authority;
-}
+@interface MSALRedirectUri()
 
-- (void)setAuthority:(MSIDAuthority *)authority
-{
-    _authority = authority;
-}
-
-- (MSALRequestParameters *)parameters
-{
-    return _parameters;
-}
+- (nullable instancetype)initWithRedirectUri:(nonnull NSURL *)redirectUri
+                               brokerCapable:(BOOL)brokerCapable;
 
 @end
 
-@implementation MSALInteractiveRequest (TestExtensions)
-
-- (MSALScopes *)extraScopesToConsent
-{
-    return _extraScopesToConsent;
-}
-
-- (MSALUIBehavior)uiBehavior
-{
-    return _uiBehavior;
-}
-
-@end
-
-@implementation MSALSilentRequest (TestExtensions)
-
-- (BOOL)forceRefresh
-{
-    return _forceRefresh;
-}
-
-@end
+#endif /* MSALRedirectUri_Internal_h */

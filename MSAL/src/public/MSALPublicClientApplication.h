@@ -32,6 +32,7 @@
 @class MSALTokenRequest;
 @class MSALAuthority;
 @class WKWebView;
+@class MSALRedirectUri;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -52,7 +53,7 @@
 @property (readonly, nonnull) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) NSString *redirectUri;
+@property (readonly, nonnull) MSALRedirectUri *redirectUri;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
@@ -81,6 +82,12 @@
  - macOS:  WKWebView
  */
 @property MSALWebviewType webviewType;
+
+/*!
+ Setting to define MSAL behavior regarding broker.
+ Broker is enabled by default.
+ */
+@property MSALBrokeredAvailability brokerAvailability;
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
@@ -240,7 +247,18 @@
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(nonnull NSURL *)response;
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response __attribute((deprecated("Use the handleMSALResponse:sourceApplication: method instead.")));
+
+/*!
+ Ask MSAL to handle a URL response.
+
+ @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sesssions
+ @param   sourceApplication     The application that opened your app with that URL. Can be retrieved from options by UIApplicationOpenURLOptionsSourceApplicationKey key.
+                                See more info here: https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623112-application?language=objc
+                                Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.
+ @return  YES if URL is a response to a MSAL web or brokered session and handled, NO otherwise.
+ */
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response sourceApplication:(nonnull NSString *)sourceApplication;
 #endif
 
 /*!

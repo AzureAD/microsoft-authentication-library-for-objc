@@ -97,9 +97,8 @@
     
     [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
     
-    MSIDOauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
-    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:factory];
-    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor] factory:factory];
+    self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+    self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
     self.accountCredentialCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
     
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -152,9 +151,8 @@
     if (parameters[MSAL_AUTHORITY_PARAM])
     {
         __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
-        
-        authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+
+        authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
     
     NSError *error = nil;
@@ -388,9 +386,8 @@
             return;
         }
         
-        __auto_type authorityFactory = [MSALAuthorityFactory new];
         __auto_type authorityUrl = [NSURL URLWithString:parameters[MSAL_AUTHORITY_PARAM]];
-        __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
         
         MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil
                                                                                   homeAccountId:parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM]];
@@ -661,6 +658,7 @@
 
         NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
         [userInfo removeObjectForKey:NSUnderlyingErrorKey];
+        [userInfo removeObjectForKey:MSALInvalidResultKey];
 
         errorDictionary[@"user_info"] = userInfo;
     }
