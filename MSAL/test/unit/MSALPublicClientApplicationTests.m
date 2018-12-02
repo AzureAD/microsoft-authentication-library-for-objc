@@ -435,7 +435,7 @@
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraScopesToConsent);
-         XCTAssertEqual(params.promptType, MSIDPromptTypeSelectAccount);
+         XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          
@@ -611,7 +611,7 @@
          XCTAssertNil(params.extraQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
-         XCTAssertEqual(params.promptType, MSIDPromptTypeSelectAccount);
+         XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
 
          XCTAssertEqualObjects(params.accountIdentifier, account.lookupAccountIdentifier);
          
@@ -671,7 +671,7 @@
          XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
-         XCTAssertEqual(params.promptType, MSIDPromptTypeSelectAccount);
+         XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
          XCTAssertEqualObjects(params.accountIdentifier, account.lookupAccountIdentifier);
          
          completionBlock(nil, nil);
@@ -735,7 +735,7 @@
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.accountIdentifier, account.lookupAccountIdentifier);
          XCTAssertEqualObjects(params.extraScopesToConsent, @"fakescope3");
-         XCTAssertEqual(params.promptType, MSIDPromptTypeSelectAccount);
+         XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
          
          completionBlock(nil, nil);
      }];
