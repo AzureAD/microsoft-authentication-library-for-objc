@@ -638,7 +638,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     // Configure optional parameters
     params.loginHint = loginHint;
-    params.promptType = MSALParameterStringForBehavior(uiBehavior);
+    params.promptType = MSIDPromptTypeForBehavior(uiBehavior);
     params.extraQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     params.validateAuthority = _validateAuthority;
