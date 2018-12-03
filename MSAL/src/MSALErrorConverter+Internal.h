@@ -25,13 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSIDError.h"
+#import "MSALErrorConverter.h"
 
-@interface MSALErrorConverter : NSObject
+@interface MSALErrorConverter (Internal)
 
-+ (NSErrorDomain)msalErrorDomainFromMsidError:(NSError *)msidError;
-+ (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError;
-
-+ (NSError *)msalErrorFromMsidError:(NSError *)msidError;
++ (NSError *)errorWithDomain:(NSString *)domain
+                        code:(NSInteger)code
+            errorDescription:(NSString *)errorDescription
+                  oauthError:(NSString *)oauthError
+                    subError:(NSString *)subError
+             underlyingError:(NSError *)underlyingError
+               correlationId:(NSUUID *)correlationId
+                    userInfo:(NSDictionary *)userInfo;
 
 @end

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALError_Internal.h"
+#import "MSALErrorConverter.h"
 
 NSString *MSALStringForErrorCode(MSALErrorCode code)
 {
@@ -102,7 +103,7 @@ NSError *MSALCreateAndLogError(id<MSIDRequestContext> ctx, NSString *domain, NSI
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
 
-    NSError *error = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    NSError *error = [MSALErrorConverter msalErrorFromMsidError:MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo)];
     MSALLogError(ctx, error, function, line);
     return error;
 }
@@ -114,7 +115,7 @@ void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSIDRequestContex
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
 
-    NSError *msalError = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo)];
     MSALLogError(ctx, msalError, function, line);
     
     if (error)
