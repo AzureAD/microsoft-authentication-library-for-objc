@@ -57,11 +57,11 @@
 
 - (void)testMSALRedirectUri_whenCustomRedirectUri_andBrokerCapable_shouldReturnUriBrokerCapableYes
 {
-    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauthtest.bundle.identifier"]}];
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauth.test.bundle.identifier"]}];
     [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
     [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
 
-    NSString *redirectUri = @"msauthtest.bundle.identifier://auth";
+    NSString *redirectUri = @"msauth.test.bundle.identifier://auth";
     NSString *clientId = @"msalclient";
 
     NSError *error = nil;
@@ -110,7 +110,7 @@
 
 - (void)testMSALRedirectUri_whenDefaultRedirectUri_andBrokerCapableUrlRegistered_shouldReturnUriAndBrokerCapableYes
 {
-    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauthtest.bundle.identifier"]}];
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauth.test.bundle.identifier"]}];
     [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
     [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
 
@@ -120,7 +120,7 @@
     MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
 
     XCTAssertNotNil(result);
-    XCTAssertEqualObjects(result.url.absoluteString, @"msauthtest.bundle.identifier://auth");
+    XCTAssertEqualObjects(result.url.absoluteString, @"msauth.test.bundle.identifier://auth");
     XCTAssertTrue(result.brokerCapable);
     XCTAssertNil(error);
 }
@@ -156,8 +156,8 @@
     XCTAssertNil(result);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
-    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauthtest.bundle.identifier\""]);
-    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauthtest.bundle.identifier://auth\""]);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier\""]);
+    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier://auth\""]);
 }
 
 @end
