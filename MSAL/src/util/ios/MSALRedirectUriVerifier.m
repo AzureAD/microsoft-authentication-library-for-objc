@@ -102,7 +102,7 @@
 + (NSURL *)defaultBrokerCapableRedirectUri
 {
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *redirectUri = [NSString stringWithFormat:@"msauth%@://auth", bundleID];
+    NSString *redirectUri = [NSString stringWithFormat:@"msauth.%@://auth", bundleID];
     return [NSURL URLWithString:redirectUri];
 }
 
