@@ -748,7 +748,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         return;
     }
 
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory defaultAccessor:_tokenCache];
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+                                                                                                          defaultAccessor:_tokenCache
+                                                                                                   tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
 
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:params tokenRequestProvider:tokenRequestProvider error:&requestError];
 
@@ -869,7 +871,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         return;
     }
 
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory defaultAccessor:_tokenCache];
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+                                                                                                          defaultAccessor:_tokenCache
+                                                                                                   tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
 
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:params forceRefresh:forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
 
