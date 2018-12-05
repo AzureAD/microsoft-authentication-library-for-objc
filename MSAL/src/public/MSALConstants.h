@@ -71,7 +71,7 @@ typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
      signed in for the user to select among.
      */
     MSALSelectAccount,
-    
+
     /*!
      Require the user to authenticate in the webview
      */
@@ -80,6 +80,12 @@ typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
      Require the user to consent to the current set of scopes for the request.
      */
     MSALForceConsent,
+    /*!
+     The SSO experience will be determined by the presence of cookies in the webview and account type.
+     User won't be prompted unless necessary.
+     If multiple users are signed in, select account experience will be presented.
+     */
+    MSALPromptIfNecessary,
     MSALUIBehaviorDefault = MSALSelectAccount,
 };
 
