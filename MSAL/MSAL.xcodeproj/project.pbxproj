@@ -517,6 +517,7 @@
 		96902DF520E1579000200E6F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		96902DFA20E158E700200E6F /* GSS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GSS.framework; path = System/Library/Frameworks/GSS.framework; sourceTree = SDKROOT; };
 		96902DFC20E1590200200E6F /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = System/Library/Frameworks/SecurityInterface.framework; sourceTree = SDKROOT; };
+		969DDBC921B0B047000B4C73 /* MSALErrorConverter+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALErrorConverter+Internal.h"; sourceTree = "<group>"; };
 		96CFA0081E6E3454003BFCDC /* MSALTestAppScopesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppScopesViewController.h; sourceTree = "<group>"; };
 		96CFA0091E6E3454003BFCDC /* MSALTestAppScopesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppScopesViewController.m; sourceTree = "<group>"; };
 		96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetry.h; sourceTree = "<group>"; };
@@ -1122,6 +1123,7 @@
 				D673F0771E4A633B0018BA91 /* MSALError_Internal.h */,
 				D673F0781E4A633B0018BA91 /* MSALError_Internal.m */,
 				D65A6F741E3FF3D900C69FBA /* MSALError.m */,
+				969DDBC921B0B047000B4C73 /* MSALErrorConverter+Internal.h */,
 				04D32CAC1FD61585000B123E /* MSALErrorConverter.h */,
 				04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */,
 				D65A6F771E3FF3D900C69FBA /* MSALLogger.m */,
