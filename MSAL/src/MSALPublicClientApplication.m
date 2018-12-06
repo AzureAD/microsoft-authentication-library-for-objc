@@ -879,14 +879,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSError *msidError = nil;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
-                                              authority:self.authority.msidAuthority
+                                              authority:nil
                                                clientId:self.clientId
+                                               familyId:nil
                                                 context:nil
                                                   error:&msidError];
-
     if (msidError && error)
     {
-        *error = msidError;
+        *error = msidError; // TODO: convert error!
     }
 
     return result;

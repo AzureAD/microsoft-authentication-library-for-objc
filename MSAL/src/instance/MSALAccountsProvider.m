@@ -95,24 +95,24 @@
 {
     NSError *msidError = nil;
 
-    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
-                                                               clientId:self.clientId
-                                                               familyId:nil
-                                                                context:nil
-                                                                  error:&msidError];
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:homeAccountId];
+    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
+                                                          clientId:self.clientId
+                                                          familyId:@"1" // TODO
+                                                 accountIdentifier:accountIdentifier
+                                                           context:nil
+                                                             error:&msidError];
     
     if (msidError)
     {
         *error = msidError;
         return nil;
     }
-    
-    for (MSIDAccount *msidAccount in msidAccounts)
+
+    if ([msidAccounts count])
     {
-        if ([msidAccount.accountIdentifier.homeAccountId isEqualToString:homeAccountId])
-        {
-            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-        }
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
+        return msalAccount;
     }
 
     return nil;
@@ -123,11 +123,14 @@
 {
     NSError *msidError = nil;
 
-    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:nil
-                                                               clientId:self.clientId
-                                                               familyId:nil
-                                                                context:nil
-                                                                  error:&msidError];
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:nil];
+
+    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
+                                                          clientId:self.clientId
+                                                          familyId:@"1"
+                                                 accountIdentifier:accountIdentifier
+                                                           context:nil
+                                                             error:&msidError];
     
     if (msidError)
     {
@@ -135,12 +138,10 @@
         return nil;
     }
     
-    for (MSIDAccount *msidAccount in msidAccounts)
+    if ([msidAccounts count])
     {
-        if ([msidAccount.username isEqualToString:username])
-        {
-            return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-        }
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
+        return msalAccount;
     }
     
     return nil;
@@ -153,11 +154,12 @@
 {
     NSError *msidError = nil;
 
-    __auto_type msidAccounts = [self.tokenCache allAccountsForAuthority:authority
-                                                               clientId:self.clientId
-                                                               familyId:nil
-                                                                context:nil
-                                                                  error:&msidError];
+    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:authority
+                                                          clientId:self.clientId
+                                                          familyId:@"1"
+                                                 accountIdentifier:nil
+                                                           context:nil
+                                                             error:&msidError];
     
     if (msidError)
     {
