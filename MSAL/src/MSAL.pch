@@ -51,4 +51,8 @@
 #import "MSIDOAuth2Constants.h"
 
 
+#if __has_include("../../../aad_overrides.h")
+#include "../../../aad_overrides.h"
+#endif
+
 #endif /* MSAL_pch */
