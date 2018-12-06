@@ -663,8 +663,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     // Configure optional parameters
+    BOOL accountHintPresent = (![NSString msidIsStringNilOrBlank:loginHint] || account);
+
+    // Select account experience is undefined if user identity is passed (login_hint or account)
+    // Therefore, if there's user identity, we don't pass select account prompt type
+    if (accountHintPresent && uiBehavior == MSALSelectAccount)
+    {
+        params.promptType = MSIDPromptTypePromptIfNecessary;
+    }
+    else
+    {
+        params.promptType = MSIDPromptTypeForBehavior(uiBehavior);
+    }
+
     params.loginHint = loginHint;
-    params.promptType = MSALParameterStringForBehavior(uiBehavior);
     params.extraQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     params.validateAuthority = _validateAuthority;
