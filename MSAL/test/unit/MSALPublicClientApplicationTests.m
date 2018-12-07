@@ -1277,6 +1277,39 @@
     XCTAssertEqual([allAccounts count], 0);
 }
 
+- (void)testAllAccount_whenAccountExistsForOtherClient_andNotFociClient_shouldReturnNoAccountNoError
+{
+    //store at & rt in cache with foci flag
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:nil];
+    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+
+    NSString *clientId = @"myclient";
+
+    // Retrieve cache for a different clientId
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *appError = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
+    XCTAssertNil(appError);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSArray *allAccounts = [application allAccounts:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(allAccounts);
+    XCTAssertEqual([allAccounts count], 0);
+}
+
 #pragma mark - allAccountsFilteredByAuthority
 
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
