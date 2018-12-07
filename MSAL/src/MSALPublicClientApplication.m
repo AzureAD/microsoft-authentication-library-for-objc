@@ -930,28 +930,29 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                familyId:nil
                                                 context:nil
                                                   error:&msidError];
-    if (msidError && error)
+    if (!result)
     {
-        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
     }
 
-    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil redirectUri:nil clientId:self.clientId target:nil];
-
     NSError *metadataError = nil;
-    NSArray *metadataItems = [self.tokenCache getAppMetadataEntries:configuration context:nil error:&metadataError];
+    // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
+    // Therefore, we update app metadata to not have family id for this app after signout
 
-    for (MSIDAppMetadataCacheItem *appmetadata in metadataItems)
+    NSURL *authorityURL = [NSURL msidURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
+
+    BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
+                                                                clientId:self.clientId
+                                                               authority:authority
+                                                                 context:nil
+                                                                   error:&metadataError];
+
+    if (!metadataResult)
     {
-        // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
-        // Therefore, we update app metadata to not have family id for this app after signout
-        appmetadata.familyId = @"";
-        BOOL updateResult = [self.tokenCache updateAppMetadata:appmetadata context:nil error:&metadataError];
-
-        if (!updateResult)
-        {
-            if (error) *error = [MSALErrorConverter msalErrorFromMsidError:metadataError];
-            return NO;
-        }
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
     }
 
     return result;

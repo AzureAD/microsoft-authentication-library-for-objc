@@ -1215,12 +1215,7 @@
 
     NSString *clientId = @"myclient";
 
-    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
-    appMetadata.clientId = clientId;
-    appMetadata.environment = @"login.microsoftonline.com";
-    appMetadata.familyId = @"1";
-
-    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+    [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
@@ -1255,12 +1250,7 @@
 
     NSString *clientId = @"myclient";
 
-    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
-    appMetadata.clientId = clientId;
-    appMetadata.environment = @"login.microsoftonline.com";
-    appMetadata.familyId = @"";
-
-    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+    [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
@@ -1432,7 +1422,7 @@
     appMetadata.environment = @"login.microsoftonline.com";
     appMetadata.familyId = @"1";
 
-    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+    [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
@@ -1571,13 +1561,7 @@
 
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"myclient" error:nil];
     application.tokenCache = self.tokenCacheAccessor;
-
-    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
-    appMetadata.clientId = @"myclient";
-    appMetadata.environment = @"login.microsoftonline.com";
-    appMetadata.familyId = @"1";
-
-    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+    [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:@"myclient" authority:configuration.authority context:nil error:nil];
 
     MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:authorityUrl] context:nil error:nil];
 
