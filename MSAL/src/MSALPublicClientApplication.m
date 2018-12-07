@@ -65,6 +65,8 @@
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
 #import "MSALRedirectUri.h"
+#import "MSIDConfiguration.h"
+#import "MSIDAppMetadataCacheItem.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -931,6 +933,25 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     if (msidError && error)
     {
         *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    }
+
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil redirectUri:nil clientId:self.clientId target:nil];
+
+    NSError *metadataError = nil;
+    NSArray *metadataItems = [self.tokenCache getAppMetadataEntries:configuration context:nil error:&metadataError];
+
+    for (MSIDAppMetadataCacheItem *appmetadata in metadataItems)
+    {
+        // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
+        // Therefore, we update app metadata to not have family id for this app after signout
+        appmetadata.familyId = @"";
+        BOOL updateResult = [self.tokenCache updateAppMetadata:appmetadata context:nil error:&metadataError];
+
+        if (!updateResult)
+        {
+            if (error) *error = [MSALErrorConverter msalErrorFromMsidError:metadataError];
+            return NO;
+        }
     }
 
     return result;
