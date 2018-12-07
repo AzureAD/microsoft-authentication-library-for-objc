@@ -35,6 +35,8 @@
 #import "MSIDAccount.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDConfiguration.h"
+#import "MSIDAppMetadataCacheItem.h"
+#import "MSIDConstants.h"
 
 @interface MSALAccountsProvider()
 
@@ -95,10 +97,13 @@
 {
     NSError *msidError = nil;
 
+    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
+
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:homeAccountId];
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
                                                           clientId:self.clientId
-                                                          familyId:@"1" // TODO
+                                                          familyId:familyId
                                                  accountIdentifier:accountIdentifier
                                                            context:nil
                                                              error:&msidError];
@@ -123,11 +128,14 @@
 {
     NSError *msidError = nil;
 
+    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
+
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:nil];
 
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
                                                           clientId:self.clientId
-                                                          familyId:@"1"
+                                                          familyId:familyId
                                                  accountIdentifier:accountIdentifier
                                                            context:nil
                                                              error:&msidError];
@@ -154,9 +162,12 @@
 {
     NSError *msidError = nil;
 
+    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
+
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:authority
                                                           clientId:self.clientId
-                                                          familyId:@"1"
+                                                          familyId:familyId
                                                  accountIdentifier:nil
                                                            context:nil
                                                              error:&msidError];
@@ -180,6 +191,27 @@
     }
     
     return [msalAccounts allObjects];
+}
+
+- (MSIDAppMetadataCacheItem *)appmetadataItem
+{
+    MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil redirectUri:nil clientId:self.clientId target:nil];
+
+    NSError *error = nil;
+    NSArray *appMetadataItems = [self.tokenCache getAppMetadataEntries:configuration context:nil error:&error];
+
+    if (error)
+    {
+        MSID_LOG_WARN(nil, @"Failed to retrieve app metadata items with error code %ld, %@", (long)error.code, error.domain);
+        return nil;
+    }
+
+    if ([appMetadataItems count])
+    {
+        return appMetadataItems[0];
+    }
+
+    return nil;
 }
 
 @end

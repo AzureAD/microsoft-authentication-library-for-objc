@@ -1389,9 +1389,9 @@
     
     MSALAccount *account = [MSALAccount new];
     
-    [MSIDTestSwizzle instanceMethod:@selector(clearCacheForAccount:authority:clientId:context:error:)
+    [MSIDTestSwizzle instanceMethod:@selector(clearCacheForAccount:authority:clientId:familyId:context:error:)
                               class:[MSIDDefaultTokenCacheAccessor class]
-                              block:(id)^(id obj, id account, MSIDAuthority *authority, NSString *clientId, id<MSIDRequestContext> ctx, NSError **error)
+                              block:(id)^(id obj, id account, MSIDAuthority *authority, NSString *clientId, NSString *familyId, id<MSIDRequestContext> ctx, NSError **error)
      {
          (void)authority;
          (void)account;
