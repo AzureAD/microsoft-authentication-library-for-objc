@@ -62,6 +62,7 @@
 #import "MSALTelemetryApiId.h"
 #import "MSIDSilentController.h"
 #import "MSALRedirectUri.h"
+#import "MSIDAppMetadataCacheItem.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -1196,6 +1197,86 @@
     XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
 }
 
+- (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
+{
+    //store at & rt in cache with foci flag
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
+    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+
+    NSString *clientId = @"myclient";
+
+    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
+    appMetadata.clientId = clientId;
+    appMetadata.environment = @"login.microsoftonline.com";
+    appMetadata.familyId = @"1";
+
+    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+
+    // Retrieve cache for a different clientId
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *appError = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
+    XCTAssertNil(appError);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSArray *allAccounts = [application allAccounts:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(allAccounts);
+    XCTAssertEqual([allAccounts count], 1);
+}
+
+- (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithNoFamilyIdInCache_shouldReturnNoAccountNoError
+{
+    //store at & rt in cache with foci flag
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
+    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+
+    NSString *clientId = @"myclient";
+
+    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
+    appMetadata.clientId = clientId;
+    appMetadata.environment = @"login.microsoftonline.com";
+    appMetadata.familyId = @"";
+
+    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+
+    // Retrieve cache for a different clientId
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *appError = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
+    XCTAssertNil(appError);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSArray *allAccounts = [application allAccounts:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(allAccounts);
+    XCTAssertEqual([allAccounts count], 0);
+}
+
 #pragma mark - allAccountsFilteredByAuthority
 
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
@@ -1295,6 +1376,46 @@
     XCTAssertNil(account);
 }
 
+- (void)testAccountWithHomeAccountId_whenFociTokenExistsForOtherClient_andAppMetadataInCache_shouldReturnAccountNoError
+{
+    //store at & rt in cache with foci flag
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
+    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+
+    NSString *clientId = @"myclient";
+
+    MSIDAppMetadataCacheItem *appMetadata = [MSIDAppMetadataCacheItem new];
+    appMetadata.clientId = clientId;
+    appMetadata.environment = @"login.microsoftonline.com";
+    appMetadata.familyId = @"1";
+
+    [self.tokenCacheAccessor updateAppMetadata:appMetadata context:nil error:nil];
+
+    // Retrieve cache for a different clientId
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSError *appError = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
+    XCTAssertNil(appError);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
+    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
+}
+
 #pragma mark - loadAccountForUsername
 
 - (void)testAccountWithUsername_whenAccountExists_shouldReturnAccountNoError
@@ -1330,6 +1451,37 @@
     
     XCTAssertNil(error);
     XCTAssertNil(account);
+}
+
+- (void)testAccountWithUsername_whenFociTokenExistsForOtherClient_andNoAppMetadataInCache_shouldReturnAccountNoError
+{
+    //store at & rt in cache with foci flag
+    MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
+    MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
+
+    NSError *error = nil;
+    BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
+                                                              response:msidResponse
+                                                               factory:[MSIDAADV2Oauth2Factory new]
+                                                               context:nil
+                                                                 error:&error];
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+
+    // Retrieve cache for a different clientId
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    NSString *clientId = @"myclient";
+    NSError *appError = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&appError];
+    XCTAssertNil(appError);
+    application.tokenCache = self.tokenCacheAccessor;
+
+    __auto_type account = [application accountForUsername:@"fakeuser@contoso.com" error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertNotNil(account);
 }
 
 #pragma mark - removeAccount
@@ -1463,6 +1615,11 @@
 
 - (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString
 {
+    return [self msalDefaultTokenResponseWithAuthority:authorityString familyId:nil];
+}
+
+- (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString familyId:(NSString *)familyId
+{
     NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
     
@@ -1470,17 +1627,24 @@
                             [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
     NSString *rawClientInfo = [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:clientInfoClaims options:0 error:nil]];
 
+    NSMutableDictionary *responseDict = [@{
+                                          @"access_token": @"access_token",
+                                          @"refresh_token": @"fakeRefreshToken",
+                                          @"authority" : authorityString,
+                                          @"scope": @"fakescope1 fakescope2",
+                                          @"client_id": UNIT_TEST_CLIENT_ID,
+                                          @"id_token": rawIdToken,
+                                          @"client_info": rawClientInfo,
+                                          @"expires_on" : @"1"
+                                          } mutableCopy];
+
+    if (familyId)
+    {
+        responseDict[@"foci"] = familyId;
+    }
+
     MSIDAADV2TokenResponse *msidResponse =
-    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:@{
-                                                             @"access_token": @"access_token",
-                                                             @"refresh_token": @"fakeRefreshToken",
-                                                             @"authority" : authorityString,
-                                                             @"scope": @"fakescope1 fakescope2",
-                                                             @"client_id": UNIT_TEST_CLIENT_ID,
-                                                             @"id_token": rawIdToken,
-                                                             @"client_info": rawClientInfo,
-                                                             @"expires_on" : @"1"
-                                                             }
+    [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:responseDict
                                                      error:nil];
     
     return msidResponse;
