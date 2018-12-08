@@ -50,7 +50,9 @@
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDOAuth2Constants.h"
 
-
+// Broker SDK relies on having ADAL_BROKER defined to 1.
+// This is defined in the ADAuthenticationBroker/Frameworks/aad_overrides.h file.
+// Without this, the build for Broker will not include this definition.
 #if __has_include("../../../aad_overrides.h")
 #include "../../../aad_overrides.h"
 #endif
