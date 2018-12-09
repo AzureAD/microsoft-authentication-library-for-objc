@@ -2188,7 +2188,7 @@
     // Set up the network responses for OIDC discovery
     NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
-    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
+    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USER.read", @"openid", @"profile", @"offline_access"]];
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
@@ -2208,7 +2208,7 @@
     XCTAssertNotNil(application);
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
+    [application acquireTokenSilentForScopes:@[@"USER.read"]
                                      account:account
                              completionBlock:^(MSALResult *result, NSError *error)
      {
