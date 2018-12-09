@@ -1116,6 +1116,139 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenSilent_whenATAvailable_andMixedCaseInputScope_shouldReturnToken
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    // Seed a cache object with a user and an AT
+    NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                          RT:@"i am a refresh token!"
+                                                                      scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                     idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                         uid:DEFAULT_TEST_UID
+                                                                        utid:DEFAULT_TEST_UTID
+                                                                    familyId:nil].jsonDictionary.mutableCopy;
+    MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"];
+
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    [MSIDTestURLSession addResponse:discoveryResponse];
+
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    application.tokenCache = self.tokenCache;
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    [application acquireTokenSilentForScopes:@[@"USeR.reAD"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         // Ensure we get back access token with extendedLifetimeToken being NO
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, DEFAULT_TEST_ACCESS_TOKEN);
+         XCTAssertEqual(result.extendedLifeTimeToken, NO);
+
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenSilent_whenATAvailableAndExpired_andMixedCaseInputScope_shouldReturnToken
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+
+    // Seed a cache object with a user and an AT
+    NSMutableDictionary *json = [MSIDTestTokenResponse v2TokenResponseWithAT:DEFAULT_TEST_ACCESS_TOKEN
+                                                                          RT:@"i am a refresh token!"
+                                                                      scopes:[[NSOrderedSet alloc] initWithArray:@[@"user.read"]]
+                                                                     idToken:[MSIDTestIdTokenUtil defaultV2IdToken]
+                                                                         uid:DEFAULT_TEST_UID
+                                                                        utid:DEFAULT_TEST_UTID
+                                                                    familyId:nil].jsonDictionary.mutableCopy;
+    [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];//expire the AT
+
+    MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+                                                            name:@"user@contoso.com"
+                                                   homeAccountId:@"1.1234-5678-90abcdefg"
+                                                  localAccountId:@"1"
+                                                     environment:@"login.microsoftonline.com"
+                                                        tenantId:@"1234-5678-90abcdefg"];
+
+    MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
+    configuration.clientId = UNIT_TEST_CLIENT_ID;
+    BOOL result = [self.tokenCache saveTokensWithConfiguration:configuration
+                                                      response:response
+                                                       factory:[MSIDAADV2Oauth2Factory new]
+                                                       context:nil
+                                                         error:nil];
+    XCTAssertTrue(result);
+
+    // Set up the network responses for OIDC discovery
+    NSString *authority = @"https://login.microsoftonline.com/1234-5678-90abcdefg";
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
+    NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"USeR.reAD", @"openid", @"profile", @"offline_access"]];
+    // Set up a 200 network responses
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
+                                                                        authority:authority
+                                                                         tenantId:nil
+                                                                             user:account
+                                                                           claims:nil];
+
+    [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
+
+    MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
+
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    application.tokenCache = self.tokenCache;
+
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
+    [application acquireTokenSilentForScopes:@[@"USeR.reAD"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         // Ensure we get back access token with extendedLifetimeToken being NO
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         NSArray *expectedScopes = @[@"USeR.reAD", @"openid", @"profile", @"offline_access"];
+         XCTAssertEqualObjects(result.scopes, expectedScopes);
+         XCTAssertEqual(result.extendedLifeTimeToken, NO);
+
+         [expectation fulfill];
+     }];
+
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 - (void)testAcquireTokenSilent_whenATAvailableAndExtendedLifetimeTokenEnabled_shouldReturnTokenWithExtendedFlagBeingNo
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
