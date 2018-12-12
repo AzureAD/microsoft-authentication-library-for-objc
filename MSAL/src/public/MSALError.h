@@ -112,6 +112,11 @@ extern NSString *MSALInvalidResultKey;
  */
 extern NSString *MSALBrokerVersionKey;
 
+/*
+ Home account id for the particular error if available
+ */
+extern NSString *MSALHomeAccountIdKey;
+
 typedef NS_ENUM(NSInteger, MSALErrorCode)
 {
     /*!
