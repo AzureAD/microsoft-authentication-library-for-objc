@@ -93,7 +93,7 @@
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error
+                                   error:(NSError * __autoreleasing *)error 
 {
     NSError *msidError = nil;
 
