@@ -26,11 +26,25 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDAutomationTestAction.h"
+
+@class MSALPublicClientApplication;
+@class MSIDAutomationTestResult;
+@class MSALAccount;
+@class MSALResult;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAcquireTokenSilentAction : NSObject <MSIDAutomationTestAction>
+@interface MSALAutomationBaseAction : NSObject
+
+- (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
+                                                     error:(NSError **)error;
+
+- (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error;
+- (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error;
+
+- (MSALAccount *)accountWithParameters:(NSDictionary *)parameters
+                           application:(MSALPublicClientApplication *)application
+                                 error:(NSError **)error;
 
 @end
 

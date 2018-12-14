@@ -114,8 +114,9 @@
 		B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */; };
 		B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
 		B25A438F21C35A46000B3DD4 /* MainAutomation.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */; };
-		B25A439321C35A7B000B3DD4 /* MSALAcquireTokenAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */; };
-		B25A439621C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */; };
+		B25A439321C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */; };
+		B25A439621C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439521C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m */; };
+		B25A439921C35ED9000B3DD4 /* MSALAutomationBaseAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439821C35ED9000B3DD4 /* MSALAutomationBaseAction.m */; };
 		B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */; };
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
@@ -552,10 +553,12 @@
 		B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccountId+Internal.h"; sourceTree = "<group>"; };
 		B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2FactoryProducerTests.m; sourceTree = "<group>"; };
 		B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = MainAutomation.storyboard; path = IdentityCore/IdentityCore/tests/automation/ui_common/ios/MainAutomation.storyboard; sourceTree = SOURCE_ROOT; };
-		B25A439121C35A7B000B3DD4 /* MSALAcquireTokenAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenAction.h; sourceTree = "<group>"; };
-		B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenAction.m; sourceTree = "<group>"; };
-		B25A439421C35A90000B3DD4 /* MSALAcquireTokenSilentAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenSilentAction.h; sourceTree = "<group>"; };
-		B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenSilentAction.m; sourceTree = "<group>"; };
+		B25A439121C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationAcquireTokenAction.h; sourceTree = "<group>"; };
+		B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationAcquireTokenAction.m; sourceTree = "<group>"; };
+		B25A439421C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationAcquireTokenSilentAction.h; sourceTree = "<group>"; };
+		B25A439521C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationAcquireTokenSilentAction.m; sourceTree = "<group>"; };
+		B25A439721C35ED9000B3DD4 /* MSALAutomationBaseAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationBaseAction.h; sourceTree = "<group>"; };
+		B25A439821C35ED9000B3DD4 /* MSALAutomationBaseAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationBaseAction.m; sourceTree = "<group>"; };
 		B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALB2CPolicyTests.m; sourceTree = "<group>"; };
 		B25F1BB91EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTokenCacheItem+Automation.h"; sourceTree = "<group>"; };
 		B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTokenCacheItem+Automation.m"; sourceTree = "<group>"; };
@@ -940,10 +943,12 @@
 		B25A439021C35A67000B3DD4 /* actions */ = {
 			isa = PBXGroup;
 			children = (
-				B25A439121C35A7B000B3DD4 /* MSALAcquireTokenAction.h */,
-				B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */,
-				B25A439421C35A90000B3DD4 /* MSALAcquireTokenSilentAction.h */,
-				B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */,
+				B25A439721C35ED9000B3DD4 /* MSALAutomationBaseAction.h */,
+				B25A439821C35ED9000B3DD4 /* MSALAutomationBaseAction.m */,
+				B25A439121C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.h */,
+				B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */,
+				B25A439421C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.h */,
+				B25A439521C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m */,
 			);
 			path = actions;
 			sourceTree = "<group>";
@@ -1991,7 +1996,8 @@
 			files = (
 				B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */,
 				96EA2EF11E721A5200EE2FC6 /* MSALAutoRequestViewController.m in Sources */,
-				B25A439321C35A7B000B3DD4 /* MSALAcquireTokenAction.m in Sources */,
+				B25A439921C35ED9000B3DD4 /* MSALAutomationBaseAction.m in Sources */,
+				B25A439321C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m in Sources */,
 				962E37ED1E72139100DE71FE /* MSALAutoMainViewController.m in Sources */,
 				963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */,
 				96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */,
@@ -1999,7 +2005,7 @@
 				B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */,
 				962E37E91E7211D200DE71FE /* MSALAutoAppDelegate.m in Sources */,
 				B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */,
-				B25A439621C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m in Sources */,
+				B25A439621C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m in Sources */,
 				B25F1BC71EC3E4F700474D1B /* MSALAutomationConstants.m in Sources */,
 				B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */,
 				B2F4573F211D38CC00818910 /* MSALPassedInWebController.m in Sources */,

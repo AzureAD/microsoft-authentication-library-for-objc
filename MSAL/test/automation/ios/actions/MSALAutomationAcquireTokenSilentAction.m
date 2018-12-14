@@ -25,14 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAcquireTokenAction.h"
-#import "MSIDAutomation.h"
+#import "MSALAutomationAcquireTokenSilentAction.h"
 
-@implementation MSALAcquireTokenAction
+@implementation MSALAutomationAcquireTokenSilentAction
 
 - (NSString *)actionIdentifier
 {
-    return @"acquire_token";
+    return @"acquire_token_silent";
 }
 
 - (BOOL)needsRequestParameters
@@ -44,7 +43,6 @@
                 containerController:(MSIDAutoViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
-    completionBlock(nil);
 }
 
 @end

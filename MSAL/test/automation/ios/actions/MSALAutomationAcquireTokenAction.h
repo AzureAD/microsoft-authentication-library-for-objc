@@ -25,24 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAcquireTokenSilentAction.h"
+#import <Foundation/Foundation.h>
+#import "MSIDAutomationTestAction.h"
+#import "MSALAutomationBaseAction.h"
 
-@implementation MSALAcquireTokenSilentAction
+NS_ASSUME_NONNULL_BEGIN
 
-- (NSString *)actionIdentifier
-{
-    return @"acquire_token_silent";
-}
-
-- (BOOL)needsRequestParameters
-{
-    return YES;
-}
-
-- (void)performActionWithParameters:(NSDictionary *)parameters
-                containerController:(MSIDAutoViewController *)containerController
-                    completionBlock:(MSIDAutoCompletionBlock)completionBlock
-{
-}
+@interface MSALAutomationAcquireTokenAction : MSALAutomationBaseAction <MSIDAutomationTestAction>
 
 @end
+
+NS_ASSUME_NONNULL_END
