@@ -27,6 +27,7 @@
 
 #pragma once
 
+// TODO: define common automation constants between ADAL, MSAL and broker
 extern NSString *const MSAL_VALIDATE_AUTHORITY_PARAM;
 extern NSString *const MSAL_CLIENT_ID_PARAM;
 extern NSString *const MSAL_AUTHORITY_PARAM;
