@@ -111,6 +111,11 @@
 		B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
 		B256121B217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
+		B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */; };
+		B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
+		B25A438F21C35A46000B3DD4 /* MainAutomation.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */; };
+		B25A439321C35A7B000B3DD4 /* MSALAcquireTokenAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */; };
+		B25A439621C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */; };
 		B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */; };
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
@@ -546,6 +551,11 @@
 		B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountId.m; sourceTree = "<group>"; };
 		B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccountId+Internal.h"; sourceTree = "<group>"; };
 		B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2FactoryProducerTests.m; sourceTree = "<group>"; };
+		B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = MainAutomation.storyboard; path = IdentityCore/IdentityCore/tests/automation/ui_common/ios/MainAutomation.storyboard; sourceTree = SOURCE_ROOT; };
+		B25A439121C35A7B000B3DD4 /* MSALAcquireTokenAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenAction.h; sourceTree = "<group>"; };
+		B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenAction.m; sourceTree = "<group>"; };
+		B25A439421C35A90000B3DD4 /* MSALAcquireTokenSilentAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenSilentAction.h; sourceTree = "<group>"; };
+		B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAcquireTokenSilentAction.m; sourceTree = "<group>"; };
 		B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALB2CPolicyTests.m; sourceTree = "<group>"; };
 		B25F1BB91EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTokenCacheItem+Automation.h"; sourceTree = "<group>"; };
 		B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTokenCacheItem+Automation.m"; sourceTree = "<group>"; };
@@ -720,6 +730,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */,
 				B2F45738211D376F00818910 /* WebKit.framework in Frameworks */,
 				B2BB739D2112C82E000EA4C5 /* Security.framework in Frameworks */,
 				B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */,
@@ -864,10 +875,12 @@
 		962E37BF1E720E4F00DE71FE /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				B25A439021C35A67000B3DD4 /* actions */,
 				B25F1BB81EC3DB1600474D1B /* util */,
 				9623025E1E7217740022A778 /* MSALAutomation.entitlements */,
 				962302581E7215170022A778 /* Launch Screen.storyboard */,
 				962E37E41E720EE000DE71FE /* Main.storyboard */,
+				B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */,
 				962E37C01E720E4F00DE71FE /* main.m */,
 				96EA2EEA1E7219FE00EE2FC6 /* MSALAutomation.h */,
 				B25F1BC51EC3E4F700474D1B /* MSALAutomationConstants.h */,
@@ -922,6 +935,17 @@
 			children = (
 			);
 			path = mac;
+			sourceTree = "<group>";
+		};
+		B25A439021C35A67000B3DD4 /* actions */ = {
+			isa = PBXGroup;
+			children = (
+				B25A439121C35A7B000B3DD4 /* MSALAcquireTokenAction.h */,
+				B25A439221C35A7B000B3DD4 /* MSALAcquireTokenAction.m */,
+				B25A439421C35A90000B3DD4 /* MSALAcquireTokenSilentAction.h */,
+				B25A439521C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m */,
+			);
+			path = actions;
 			sourceTree = "<group>";
 		};
 		B25F1BB81EC3DB1600474D1B /* util */ = {
@@ -1853,6 +1877,7 @@
 			files = (
 				962302591E7215170022A778 /* Launch Screen.storyboard in Resources */,
 				962E37E01E720E4F00DE71FE /* Images.xcassets in Resources */,
+				B25A438F21C35A46000B3DD4 /* MainAutomation.storyboard in Resources */,
 				962E37EA1E7212B100DE71FE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1966,6 +1991,7 @@
 			files = (
 				B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */,
 				96EA2EF11E721A5200EE2FC6 /* MSALAutoRequestViewController.m in Sources */,
+				B25A439321C35A7B000B3DD4 /* MSALAcquireTokenAction.m in Sources */,
 				962E37ED1E72139100DE71FE /* MSALAutoMainViewController.m in Sources */,
 				963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */,
 				96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */,
@@ -1973,7 +1999,9 @@
 				B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */,
 				962E37E91E7211D200DE71FE /* MSALAutoAppDelegate.m in Sources */,
 				B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */,
+				B25A439621C35A90000B3DD4 /* MSALAcquireTokenSilentAction.m in Sources */,
 				B25F1BC71EC3E4F700474D1B /* MSALAutomationConstants.m in Sources */,
+				B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */,
 				B2F4573F211D38CC00818910 /* MSALPassedInWebController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2288,6 +2316,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2297,6 +2326,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -2304,6 +2334,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 962E37A51E720B7E00DE71FE /* msal__automation_app__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_ENTITLEMENTS = test/automation/ios/MSALAutomation.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2312,6 +2343,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALAutomationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -2319,6 +2351,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -2384,6 +2417,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -2447,6 +2481,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -2513,6 +2548,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -2667,6 +2703,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
@@ -2681,6 +2718,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE91E40002800C69FBA /* msal__unit_test__ios.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
