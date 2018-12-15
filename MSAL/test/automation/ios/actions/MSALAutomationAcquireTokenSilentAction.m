@@ -30,8 +30,14 @@
 #import "MSALAuthority.h"
 #import "MSALPublicClientApplication.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationAcquireTokenSilentAction new]];
+}
 
 - (NSString *)actionIdentifier
 {

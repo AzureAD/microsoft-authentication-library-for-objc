@@ -37,8 +37,14 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationExpireATAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationExpireATAction new]];
+}
 
 - (NSString *)actionIdentifier
 {

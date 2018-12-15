@@ -33,8 +33,14 @@
 #import "MSIDAutomationMainViewController.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationAcquireTokenAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationAcquireTokenAction new]];
+}
 
 - (NSString *)actionIdentifier
 {

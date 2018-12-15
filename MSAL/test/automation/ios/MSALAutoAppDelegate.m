@@ -27,9 +27,6 @@
 
 #import "MSALAutoAppDelegate.h"
 #import "MSALPublicClientApplication.h"
-#import "MSIDAutomationActionManager.h"
-#import "MSALAutomationAcquireTokenAction.h"
-#import "MSALAutomationAcquireTokenSilentAction.h"
 
 @implementation MSALAutoAppDelegate
 
@@ -37,14 +34,6 @@
 {
     (void)application;
     (void)launchOptions;
-
-    // TODO: move this setup somewhere else
-    NSDictionary *actions = @{@"acquire_token": [MSALAutomationAcquireTokenAction new],
-                              @"acquire_token_silent": [MSALAutomationAcquireTokenSilentAction new]
-                              };
-
-    [[MSIDAutomationActionManager sharedInstance] configureActions:actions];
-    
     return YES;
 }
 							

@@ -31,8 +31,14 @@
 #import "MSIDAutomationTestRequest.h"
 #import "MSALUser+Automation.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationReadAccountsAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationReadAccountsAction new]];
+}
 
 - (NSString *)actionIdentifier
 {

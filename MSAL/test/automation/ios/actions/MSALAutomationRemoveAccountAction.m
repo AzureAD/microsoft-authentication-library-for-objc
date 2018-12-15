@@ -30,8 +30,14 @@
 #import "MSIDAutomationTestResult.h"
 #import <MSAL/MSAL.h>
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationRemoveAccountAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationRemoveAccountAction new]];
+}
 
 - (NSString *)actionIdentifier
 {

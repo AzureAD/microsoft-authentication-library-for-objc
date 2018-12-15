@@ -37,8 +37,14 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDAutomationActionManager.h"
 
 @implementation MSALAutomationInvalidateRTAction
+
++ (void)load
+{
+    [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationInvalidateRTAction new]];
+}
 
 - (NSString *)actionIdentifier
 {
