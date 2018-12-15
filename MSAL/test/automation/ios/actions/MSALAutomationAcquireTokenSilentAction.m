@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAutomationAcquireTokenSilentAction.h"
+#import "MSIDAutomationTestRequest.h"
+#import "MSALAuthority.h"
+#import "MSALPublicClientApplication.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 
@@ -43,6 +46,48 @@
                 containerController:(MSIDAutoViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
+    NSError *applicationError = nil;
+    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:nil];
+
+    if (!application)
+    {
+        MSIDAutomationTestResult *result = [self testResultWithMSALError:applicationError];
+        completionBlock(result);
+        return;
+    }
+
+    NSError *accountError = nil;
+    MSALAccount *account = [self accountWithParameters:testRequest application:application error:&accountError];
+
+    if (!account)
+    {
+        MSIDAutomationTestResult *result = [self testResultWithMSALError:accountError];
+        completionBlock(result);
+        return;
+    }
+
+    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
+    BOOL forceRefresh = testRequest.forceRefresh;
+    NSUUID *correlationId = [NSUUID new];
+
+    MSALAuthority *silentAuthority = nil;
+
+    if (testRequest.acquireTokenAuthority)
+    {
+        // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
+        silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:testRequest.acquireTokenAuthority] error:nil];
+    }
+
+    [application acquireTokenSilentForScopes:[scopes array]
+                                     account:account
+                                   authority:silentAuthority
+                                forceRefresh:forceRefresh
+                               correlationId:correlationId
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+         completionBlock(testResult);
+     }];
 }
 
 @end
