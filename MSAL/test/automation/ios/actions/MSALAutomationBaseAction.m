@@ -29,47 +29,48 @@
 #import <MSAL/MSAL.h>
 #import "MSALAutomationConstants.h"
 #import "MSALAuthorityFactory.h"
+#import "MSIDAutomationTestRequest.h"
 
 @implementation MSALAutomationBaseAction
 
-- (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
+- (MSALPublicClientApplication *)applicationWithParameters:(MSIDAutomationTestRequest *)parameters
                                                      error:(NSError **)error
 {
-    BOOL validateAuthority = parameters[MSAL_VALIDATE_AUTHORITY_PARAM] ? [parameters[MSAL_VALIDATE_AUTHORITY_PARAM] boolValue] : YES;
+    BOOL validateAuthority = parameters.validateAuthority;
 
     MSALAuthority *authority = nil;
 
-    if (parameters[MSAL_AUTHORITY_PARAM])
+    if (parameters.configurationAuthority)
     {
-        __auto_type authorityUrl = [[NSURL alloc] initWithString:parameters[MSAL_AUTHORITY_PARAM]];
+        NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
         authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
 
     MSALPublicClientApplication *clientApplication =
-    [[MSALPublicClientApplication alloc] initWithClientId:parameters[MSAL_CLIENT_ID_PARAM]
+    [[MSALPublicClientApplication alloc] initWithClientId:parameters.clientId
                                                 authority:authority
-                                              redirectUri:parameters[MSAL_REDIRECT_URI_PARAM]
+                                              redirectUri:parameters.redirectUri
                                                     error:error];
 
     clientApplication.validateAuthority = validateAuthority;
-    clientApplication.sliceParameters = parameters[MSAL_SLICE_PARAMS];
+    clientApplication.sliceParameters = parameters.sliceParameters;
 
     return clientApplication;
 }
 
-- (MSALAccount *)accountWithParameters:(NSDictionary *)parameters
+- (MSALAccount *)accountWithParameters:(MSIDAutomationTestRequest *)parameters
                            application:(MSALPublicClientApplication *)application
                                  error:(NSError **)error
 {
-    NSString *accountIdentifier = parameters[MSAL_ACCOUNT_IDENTIFIER_PARAM];
+    NSString *accountIdentifier = parameters.homeAccountIdentifier;
 
     if (accountIdentifier)
     {
         return [application accountForHomeAccountId:accountIdentifier error:error];
     }
-    else if (parameters[MSAL_LEGACY_USER_PARAM])
+    else if (parameters.displayableAccountIdentifier)
     {
-        return [application accountForUsername:parameters[MSAL_LEGACY_USER_PARAM] error:error];
+        return [application accountForUsername:parameters.displayableAccountIdentifier error:error];
     }
 
     return nil;

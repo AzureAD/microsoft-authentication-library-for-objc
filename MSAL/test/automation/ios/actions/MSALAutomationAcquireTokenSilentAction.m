@@ -39,7 +39,7 @@
     return YES;
 }
 
-- (void)performActionWithParameters:(NSDictionary *)parameters
+- (void)performActionWithParameters:(MSIDAutomationTestRequest *)testRequest
                 containerController:(MSIDAutoViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {

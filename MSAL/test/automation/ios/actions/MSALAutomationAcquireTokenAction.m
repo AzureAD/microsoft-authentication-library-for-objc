@@ -32,6 +32,7 @@
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSALAutomationConstants.h"
 #import "MSIDAutomationMainViewController.h"
+#import "MSIDAutomationTestRequest.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -45,12 +46,12 @@
     return YES;
 }
 
-- (void)performActionWithParameters:(NSDictionary *)parameters
+- (void)performActionWithParameters:(MSIDAutomationTestRequest *)testRequest
                 containerController:(MSIDAutomationMainViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
     NSError *applicationError = nil;
-    MSALPublicClientApplication *application = [self applicationWithParameters:parameters error:&applicationError];
+    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:&applicationError];
 
     if (!application)
     {
@@ -60,7 +61,7 @@
     }
 
     NSError *accountError = nil;
-    MSALAccount *account = [self accountWithParameters:parameters application:application error:&accountError];
+    MSALAccount *account = [self accountWithParameters:testRequest application:application error:&accountError];
 
     if (accountError)
     {
@@ -69,45 +70,63 @@
         return;
     }
 
-    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_SCOPES_PARAM]];
-    NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:parameters[MSAL_EXTRA_SCOPES_PARAM]];
-    NSUUID *correlationId = parameters[MSAL_CORRELATION_ID_PARAM] ? [[NSUUID alloc] initWithUUIDString:parameters[MSAL_CORRELATION_ID_PARAM]] : nil;
-    NSString *claims = parameters[MSAL_CLAIMS_PARAM];
-    NSDictionary *extraQueryParameters = parameters[MSAL_EXTRA_QP_PARAM];
+    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
+    NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:testRequest.extraScopes];
+    NSUUID *correlationId = [NSUUID new];
+    NSString *claims = testRequest.claims;
+    NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
     MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
 
-    if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"force"])
+    if ([testRequest.uiBehavior isEqualToString:@"force"])
     {
         uiBehavior = MSALForceLogin;
     }
-    else if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"consent"])
+    else if ([testRequest.uiBehavior isEqualToString:@"consent"])
     {
         uiBehavior = MSALForceConsent;
     }
-    else if ([parameters[MSAL_UI_BEHAVIOR] isEqualToString:@"prompt_if_necessary"])
+    else if ([testRequest.uiBehavior isEqualToString:@"prompt_if_necessary"])
     {
         uiBehavior = MSALPromptIfNecessary;
     }
 
-    NSString *webviewSelection = parameters[MSAL_AUTOMATION_WEBVIEWSELECTION_PARAM];
-    if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_EMBEDDED])
-    {
-        application.webviewType = MSALWebviewTypeWKWebView;
+    MSIDWebviewType webviewSelection = testRequest.webViewType;
+
+    switch (webviewSelection) {
+        case MSIDWebviewTypeWKWebView:
+            application.webviewType = MSALWebviewTypeWKWebView;
+            break;
+
+        case MSIDWebviewTypeDefault:
+            application.webviewType = MSALWebviewTypeDefault;
+            break;
+
+        case MSIDWebviewTypeSafariViewController:
+            application.webviewType = MSALWebviewTypeSafariViewController;
+            break;
+
+        case MSIDWebviewTypeAuthenticationSession:
+            application.webviewType = MSALWebviewTypeAuthenticationSession;
+            break;
+
+        default:
+            break;
     }
-    else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SYSTEM])
-    {
-        application.webviewType = MSALWebviewTypeDefault;
-    }
-    else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_SAFARI])
-    {
-        application.webviewType = MSALWebviewTypeSafariViewController;
-    }
-    else if ([webviewSelection isEqualToString:MSAL_AUTOMATION_WEBVIEWSELECTION_VALUE_PASSED])
+
+    if (testRequest.usePassedWebView)
     {
         application.webviewType = MSALWebviewTypeWKWebView;
         application.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
+    }
+
+    MSALAuthority *acquireTokenAuthority = nil;
+
+    if (testRequest.acquireTokenAuthority)
+    {
+        NSURL *authorityUrl = [[NSURL alloc] initWithString:testRequest.acquireTokenAuthority];
+        acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
 
     if (account)
@@ -118,8 +137,7 @@
                                 uiBehavior:uiBehavior
                       extraQueryParameters:extraQueryParameters
                                     claims:claims
-         // TODO: separate PUB authority from acquire token authority
-                                 authority:nil // Will use the authority passed in with the application object
+                                 authority:acquireTokenAuthority
                              correlationId:correlationId
                            completionBlock:^(MSALResult *result, NSError *error)
          {
@@ -129,14 +147,12 @@
     }
     else
     {
-        NSString *loginHint = parameters[MSAL_LOGIN_HINT_PARAM];
-
         [application acquireTokenForScopes:scopes.array
                       extraScopesToConsent:extraScopes.array
-                                 loginHint:loginHint
+                                 loginHint:testRequest.loginHint
                                 uiBehavior:uiBehavior
                       extraQueryParameters:extraQueryParameters
-                                 authority:nil
+                                 authority:acquireTokenAuthority
                              correlationId:correlationId
                            completionBlock:^(MSALResult *result, NSError *error) {
 

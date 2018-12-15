@@ -31,18 +31,19 @@
 @class MSIDAutomationTestResult;
 @class MSALAccount;
 @class MSALResult;
+@class MSIDAutomationTestRequest;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALAutomationBaseAction : NSObject
 
-- (MSALPublicClientApplication *)applicationWithParameters:(NSDictionary *)parameters
+- (MSALPublicClientApplication *)applicationWithParameters:(MSIDAutomationTestRequest *)parameters
                                                      error:(NSError **)error;
 
 - (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error;
 - (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error;
 
-- (MSALAccount *)accountWithParameters:(NSDictionary *)parameters
+- (MSALAccount *)accountWithParameters:(MSIDAutomationTestRequest *)parameters
                            application:(MSALPublicClientApplication *)application
                                  error:(NSError **)error;
 
