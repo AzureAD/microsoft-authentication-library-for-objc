@@ -30,7 +30,6 @@
 #import "MSIDAutomationTestResult.h"
 #import <MSAL/MSAL.h>
 #import "NSOrderedSet+MSIDExtensions.h"
-#import "MSALAutomationConstants.h"
 #import "MSIDAutomationMainViewController.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationActionConstants.h"

@@ -27,7 +27,6 @@
 
 #import "MSALAutomationBaseAction.h"
 #import <MSAL/MSAL.h>
-#import "MSALAutomationConstants.h"
 #import "MSALAuthorityFactory.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
