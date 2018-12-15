@@ -25,17 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutomationAcquireTokenSilentAction.h"
+#import "MSALAutomationRemoveAccountAction.h"
 #import "MSIDAutomationTestRequest.h"
-#import "MSALAuthority.h"
-#import "MSALPublicClientApplication.h"
+#import "MSIDAutomationTestResult.h"
+#import <MSAL/MSAL.h>
 #import "MSIDAutomationActionConstants.h"
 
-@implementation MSALAutomationAcquireTokenSilentAction
+@implementation MSALAutomationRemoveAccountAction
 
 - (NSString *)actionIdentifier
 {
-    return MSID_AUTO_ACQUIRE_TOKEN_SILENT_ACTION_IDENTIFIER;
+    return MSID_AUTO_REMOVE_ACCOUNT_ACTION_IDENTIFIER;
 }
 
 - (BOOL)needsRequestParameters
@@ -48,7 +48,7 @@
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
     NSError *applicationError = nil;
-    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:nil];
+    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:&applicationError];
 
     if (!application)
     {
@@ -67,28 +67,18 @@
         return;
     }
 
-    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
-    BOOL forceRefresh = testRequest.forceRefresh;
-    NSUUID *correlationId = [NSUUID new];
+    NSError *removeError = nil;
+    BOOL removeResult = [application removeAccount:account error:&removeError];
 
-    MSALAuthority *silentAuthority = nil;
-
-    if (testRequest.acquireTokenAuthority)
+    if (!removeResult)
     {
-        // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
-        silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:testRequest.acquireTokenAuthority] error:nil];
+        MSIDAutomationTestResult *result = [self testResultWithMSALError:removeError];
+        completionBlock(result);
+        return;
     }
 
-    [application acquireTokenSilentForScopes:[scopes array]
-                                     account:account
-                                   authority:silentAuthority
-                                forceRefresh:forceRefresh
-                               correlationId:correlationId
-                             completionBlock:^(MSALResult *result, NSError *error)
-     {
-         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-         completionBlock(testResult);
-     }];
+    MSIDAutomationTestResult *result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:YES additionalInfo:nil];
+    completionBlock(result);
 }
 
 @end

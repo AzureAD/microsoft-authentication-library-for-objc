@@ -26,12 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDAutomationTestAction.h"
 #import "MSALAutomationBaseAction.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAutomationAcquireTokenAction : MSALAutomationBaseAction <MSIDAutomationTestAction>
+@interface MSALAutomationAcquireTokenAction : MSALAutomationBaseAction
 
 @end
 

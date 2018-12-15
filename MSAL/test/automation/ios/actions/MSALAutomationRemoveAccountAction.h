@@ -26,34 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSIDAutomationTestAction.h"
-
-@class MSALPublicClientApplication;
-@class MSIDAutomationTestResult;
-@class MSALAccount;
-@class MSALResult;
-@class MSIDAutomationTestRequest;
-@class MSIDLegacyTokenCacheAccessor;
-@class MSIDDefaultTokenCacheAccessor;
-@class MSIDAccountCredentialCache;
+#import "MSALAutomationBaseAction.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAutomationBaseAction : NSObject <MSIDAutomationTestAction>
-
-@property (nonatomic, strong) MSIDLegacyTokenCacheAccessor *legacyAccessor;
-@property (nonatomic, strong) MSIDDefaultTokenCacheAccessor *defaultAccessor;
-@property (nonatomic, strong) MSIDAccountCredentialCache *accountCredentialCache;
-
-- (MSALPublicClientApplication *)applicationWithParameters:(MSIDAutomationTestRequest *)parameters
-                                                     error:(NSError **)error;
-
-- (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error;
-- (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error;
-
-- (MSALAccount *)accountWithParameters:(MSIDAutomationTestRequest *)parameters
-                           application:(MSALPublicClientApplication *)application
-                                 error:(NSError **)error;
+@interface MSALAutomationRemoveAccountAction : MSALAutomationBaseAction
 
 @end
 

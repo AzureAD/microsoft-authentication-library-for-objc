@@ -33,12 +33,13 @@
 #import "MSALAutomationConstants.h"
 #import "MSIDAutomationMainViewController.h"
 #import "MSIDAutomationTestRequest.h"
+#import "MSIDAutomationActionConstants.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
 - (NSString *)actionIdentifier
 {
-    return @"acquire_token";
+    return MSID_AUTO_ACQUIRE_TOKEN_ACTION_IDENTIFIER;
 }
 
 - (BOOL)needsRequestParameters

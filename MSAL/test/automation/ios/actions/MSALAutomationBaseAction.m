@@ -30,8 +30,51 @@
 #import "MSALAutomationConstants.h"
 #import "MSALAuthorityFactory.h"
 #import "MSIDAutomationTestRequest.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAccountCredentialCache.h"
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDAutomationTestResult.h"
+#import "MSALResult+Automation.h"
 
 @implementation MSALAutomationBaseAction
+
+#pragma mark - Init
+
+- (instancetype)init
+{
+    self = [super init];
+
+    if (self)
+    {
+        self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
+        self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
+        self.accountCredentialCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
+    }
+
+    return self;
+}
+
+#pragma mark - MSIDAutomationTestAction
+
+- (NSString *)actionIdentifier
+{
+    return @"base_action";
+}
+
+- (BOOL)needsRequestParameters
+{
+    return NO;
+}
+
+- (void)performActionWithParameters:(MSIDAutomationTestRequest *)parameters
+                containerController:(MSIDAutomationMainViewController *)containerController
+                    completionBlock:(MSIDAutoCompletionBlock)completionBlock
+{
+    NSAssert(NO, @"Abstract method, it should never be called!");
+}
+
+#pragma mark - Helpers
 
 - (MSALPublicClientApplication *)applicationWithParameters:(MSIDAutomationTestRequest *)parameters
                                                      error:(NSError **)error
@@ -78,14 +121,51 @@
 
 - (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error
 {
-    // TODO
-    return nil;
+    NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
+
+    NSMutableDictionary *errorDictionary = [NSMutableDictionary new];
+    errorDictionary[@"error_title"] = errorString;
+
+    if ([error.domain isEqualToString:MSALErrorDomain])
+    {
+        errorDictionary[@"error_code"] = MSALStringForErrorCode(error.code);
+        errorDictionary[@"error_description"] = error.userInfo[MSALErrorDescriptionKey];
+
+        if (error.userInfo[MSALOAuthSubErrorKey])
+        {
+            errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
+        }
+
+        if (error.userInfo[NSUnderlyingErrorKey])
+        {
+            errorDictionary[@"underlying_error"] = [error.userInfo[NSUnderlyingErrorKey] description];
+        }
+
+        NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
+        [userInfo removeObjectForKey:NSUnderlyingErrorKey];
+        [userInfo removeObjectForKey:MSALInvalidResultKey];
+
+        errorDictionary[@"user_info"] = userInfo;
+    }
+    else if ([error.domain isEqualToString:MSIDErrorDomain])
+    {
+        @throw @"MSID errors should never be seen in MSAL";
+    }
+
+    MSIDAutomationTestResult *result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:NO additionalInfo:errorDictionary];
+
+    return result;
 }
 
 - (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error
 {
-    // TODO
-    return nil;
+    if (error)
+    {
+        return [self testResultWithMSALError:error];
+    }
+
+    NSDictionary *resultDictionary = [msalResult itemAsDictionary];
+    return [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:YES additionalInfo:resultDictionary];
 }
 
 @end

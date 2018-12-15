@@ -25,17 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutomationAcquireTokenSilentAction.h"
+#import "MSALAutomationReadAccountsAction.h"
+#import <MSAL/MSAL.h>
+#import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationTestRequest.h"
-#import "MSALAuthority.h"
-#import "MSALPublicClientApplication.h"
+#import "MSALUser+Automation.h"
 #import "MSIDAutomationActionConstants.h"
 
-@implementation MSALAutomationAcquireTokenSilentAction
+@implementation MSALAutomationReadAccountsAction
 
 - (NSString *)actionIdentifier
 {
-    return MSID_AUTO_ACQUIRE_TOKEN_SILENT_ACTION_IDENTIFIER;
+    return MSID_AUTO_READ_ACCOUNTS_ACTION_IDENTIFIER;
 }
 
 - (BOOL)needsRequestParameters
@@ -48,7 +49,7 @@
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
     NSError *applicationError = nil;
-    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:nil];
+    MSALPublicClientApplication *application = [self applicationWithParameters:testRequest error:&applicationError];
 
     if (!application)
     {
@@ -57,38 +58,30 @@
         return;
     }
 
-    NSError *accountError = nil;
-    MSALAccount *account = [self accountWithParameters:testRequest application:application error:&accountError];
+    NSError *error = nil;
+    NSArray *accounts = [application allAccounts:nil];
 
-    if (!account)
+    if (error)
     {
-        MSIDAutomationTestResult *result = [self testResultWithMSALError:accountError];
+        MSIDAutomationTestResult *result = [self testResultWithMSALError:error];
         completionBlock(result);
         return;
     }
 
-    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
-    BOOL forceRefresh = testRequest.forceRefresh;
-    NSUUID *correlationId = [NSUUID new];
+    NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
+    resultDictionary[@"account_count"] = @([accounts count]);
 
-    MSALAuthority *silentAuthority = nil;
+    NSMutableArray *items = [NSMutableArray array];
 
-    if (testRequest.acquireTokenAuthority)
+    for (MSALAccount *account in accounts)
     {
-        // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
-        silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:testRequest.acquireTokenAuthority] error:nil];
+        [items addObject:[account itemAsDictionary]];
     }
 
-    [application acquireTokenSilentForScopes:[scopes array]
-                                     account:account
-                                   authority:silentAuthority
-                                forceRefresh:forceRefresh
-                               correlationId:correlationId
-                             completionBlock:^(MSALResult *result, NSError *error)
-     {
-         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-         completionBlock(testResult);
-     }];
+    resultDictionary[@"accounts"] = items;
+
+    MSIDAutomationTestResult *result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:YES additionalInfo:resultDictionary];
+    completionBlock(result);
 }
 
 @end

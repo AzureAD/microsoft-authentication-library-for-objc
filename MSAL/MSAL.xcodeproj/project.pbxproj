@@ -111,6 +111,10 @@
 		B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
 		B256121B217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
+		B25A39D921C4C49D00213A62 /* MSALAutomationExpireATAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */; };
+		B25A39E021C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39DF21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m */; };
+		B25A39EA21C4C99700213A62 /* MSALAutomationRemoveAccountAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39E921C4C99700213A62 /* MSALAutomationRemoveAccountAction.m */; };
+		B25A39ED21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39EC21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m */; };
 		B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */; };
 		B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
 		B25A438F21C35A46000B3DD4 /* MainAutomation.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */; };
@@ -552,6 +556,14 @@
 		B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountId.m; sourceTree = "<group>"; };
 		B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccountId+Internal.h"; sourceTree = "<group>"; };
 		B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2FactoryProducerTests.m; sourceTree = "<group>"; };
+		B25A39D721C4C49D00213A62 /* MSALAutomationExpireATAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationExpireATAction.h; sourceTree = "<group>"; };
+		B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationExpireATAction.m; sourceTree = "<group>"; };
+		B25A39DE21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationInvalidateRTAction.h; sourceTree = "<group>"; };
+		B25A39DF21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationInvalidateRTAction.m; sourceTree = "<group>"; };
+		B25A39E821C4C99700213A62 /* MSALAutomationRemoveAccountAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationRemoveAccountAction.h; sourceTree = "<group>"; };
+		B25A39E921C4C99700213A62 /* MSALAutomationRemoveAccountAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationRemoveAccountAction.m; sourceTree = "<group>"; };
+		B25A39EB21C4CACE00213A62 /* MSALAutomationReadAccountsAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationReadAccountsAction.h; sourceTree = "<group>"; };
+		B25A39EC21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationReadAccountsAction.m; sourceTree = "<group>"; };
 		B25A438E21C35A46000B3DD4 /* MainAutomation.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = MainAutomation.storyboard; path = IdentityCore/IdentityCore/tests/automation/ui_common/ios/MainAutomation.storyboard; sourceTree = SOURCE_ROOT; };
 		B25A439121C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationAcquireTokenAction.h; sourceTree = "<group>"; };
 		B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationAcquireTokenAction.m; sourceTree = "<group>"; };
@@ -949,6 +961,14 @@
 				B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */,
 				B25A439421C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.h */,
 				B25A439521C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m */,
+				B25A39D721C4C49D00213A62 /* MSALAutomationExpireATAction.h */,
+				B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */,
+				B25A39DE21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.h */,
+				B25A39DF21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m */,
+				B25A39E821C4C99700213A62 /* MSALAutomationRemoveAccountAction.h */,
+				B25A39E921C4C99700213A62 /* MSALAutomationRemoveAccountAction.m */,
+				B25A39EB21C4CACE00213A62 /* MSALAutomationReadAccountsAction.h */,
+				B25A39EC21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m */,
 			);
 			path = actions;
 			sourceTree = "<group>";
@@ -1999,13 +2019,17 @@
 				B25A439921C35ED9000B3DD4 /* MSALAutomationBaseAction.m in Sources */,
 				B25A439321C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m in Sources */,
 				962E37ED1E72139100DE71FE /* MSALAutoMainViewController.m in Sources */,
+				B25A39EA21C4C99700213A62 /* MSALAutomationRemoveAccountAction.m in Sources */,
 				963D08D51E78D06E0025C726 /* MSALAutoSettings.m in Sources */,
+				B25A39E021C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m in Sources */,
 				96EA2EF21E721A5500EE2FC6 /* MSALAutoResultViewController.m in Sources */,
+				B25A39D921C4C49D00213A62 /* MSALAutomationExpireATAction.m in Sources */,
 				962E37E81E7211D200DE71FE /* main.m in Sources */,
 				B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */,
 				962E37E91E7211D200DE71FE /* MSALAutoAppDelegate.m in Sources */,
 				B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */,
 				B25A439621C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m in Sources */,
+				B25A39ED21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m in Sources */,
 				B25F1BC71EC3E4F700474D1B /* MSALAutomationConstants.m in Sources */,
 				B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */,
 				B2F4573F211D38CC00818910 /* MSALPassedInWebController.m in Sources */,
