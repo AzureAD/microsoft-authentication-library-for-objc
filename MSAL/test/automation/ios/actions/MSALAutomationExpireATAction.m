@@ -70,7 +70,7 @@
     MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:msalAuthority.msidAuthority
                                                                         redirectUri:nil
                                                                            clientId:testRequest.clientId
-                                                                             target:testRequest.requestTarget];
+                                                                             target:testRequest.requestScopes];
 
     MSIDAccessToken *accessToken = [self.defaultAccessor getAccessTokenForAccount:account
                                                                     configuration:configuration
@@ -87,7 +87,7 @@
     accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
     BOOL result = [self.accountCredentialCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
 
-    MSIDAutomationTestResult *testResult = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:result additionalInfo:nil];
+    MSIDAutomationTestResult *testResult = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:result additionalInfo:@{@"expired_access_token_count": @1}];
     completionBlock(testResult);
 }
 

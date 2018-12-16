@@ -26,12 +26,12 @@
 
 @implementation MSALADFSBaseUITest
 
-- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
 {
     return [self runSharedADFSInteractiveLoginWithRequest:request closeResultView:YES];
 }
 
-- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
                                        closeResultView:(BOOL)closeResultView
 {
     // 1. Do interactive login

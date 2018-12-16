@@ -25,9 +25,9 @@
 
 @interface MSALADFSBaseUITest : MSALBaseAADUITest
 
-- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
                                        closeResultView:(BOOL)closeResultView;
 
-- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSALTestRequest *)request;
+- (NSString *)runSharedADFSInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request;
 
 @end

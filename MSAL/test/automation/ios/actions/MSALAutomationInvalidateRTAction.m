@@ -70,7 +70,7 @@
     MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:msalAuthority.msidAuthority
                                                                         redirectUri:nil
                                                                            clientId:testRequest.clientId
-                                                                             target:testRequest.requestTarget];
+                                                                             target:testRequest.requestScopes];
 
     MSIDRefreshToken *refreshToken = [self.defaultAccessor getRefreshTokenWithAccount:account
                                                                              familyId:nil

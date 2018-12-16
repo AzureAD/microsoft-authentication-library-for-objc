@@ -30,6 +30,7 @@
 #import "MSIDAADV1IdTokenClaims.h"
 #import "XCUIElement+CrossPlat.h"
 #import "MSIDAADIdTokenClaimsFactory.h"
+#import "MSIDAutomationActionConstants.h"
 
 static MSIDTestAccountsProvider *s_accountsProvider;
 
@@ -76,7 +77,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 - (void)assertRefreshTokenInvalidated
 {
     NSDictionary *result = [self resultDictionary];
-    XCTAssertTrue([result[@"invalidated_refresh_token"] boolValue] == YES);
+    XCTAssertTrue([result[@"success"] boolValue] == YES);
 }
 
 - (void)assertAccessTokenExpired
@@ -299,15 +300,15 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [passwordTextField typeText:password];
 }
 
-- (void)closeAuthUIUsingWebViewType:(MSALWebviewType)webViewType
+- (void)closeAuthUIUsingWebViewType:(MSIDWebviewType)webViewType
                     passedInWebView:(BOOL)usesPassedInWebView
 {
     NSString *buttonTitle = @"Cancel";
 
     CGFloat osVersion = [[[UIDevice currentDevice] systemVersion] floatValue];
 
-    if (webViewType == MSALWebviewTypeSafariViewController
-        || (webViewType == MSALWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
+    if (webViewType == MSIDWebviewTypeSafariViewController
+        || (webViewType == MSIDWebviewTypeDefault && osVersion < 11.0f && !usesPassedInWebView))
     {
         buttonTitle = @"Done";
     }
@@ -322,49 +323,51 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (void)invalidateRefreshToken:(NSDictionary *)config
 {
-    [self performAction:@"invalidateRefreshToken" withConfig:config];
+    [self performAction:MSID_AUTO_INVALIDATE_RT_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)expireAccessToken:(NSDictionary *)config
 {
-    [self performAction:@"expireAccessToken" withConfig:config];
+    [self performAction:MSID_AUTO_EXPIRE_AT_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)acquireToken:(NSDictionary *)config
 {
-    [self performAction:@"acquireToken" withConfig:config];
+    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)acquireTokenSilent:(NSDictionary *)config
 {
-    [self performAction:@"acquireTokenSilent" withConfig:config];
+    [self performAction:MSID_AUTO_ACQUIRE_TOKEN_SILENT_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)clearKeychain
 {
-    [self.testApp.buttons[@"clearKeychain"] msidTap];
+    [self.testApp.buttons[MSID_AUTO_CLEAR_KEYCHAIN_ACTION_IDENTIFIER] msidTap];
+    [self waitForElement:self.testApp.buttons[@"Done"]];
     [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)clearCookies
 {
-    [self.testApp.buttons[@"clearCookies"] msidTap];
+    [self.testApp.buttons[MSID_AUTO_CLEAR_COOKIES_ACTION_IDENTIFIER] msidTap];
+    [self waitForElement:self.testApp.buttons[@"Done"]];
     [self.testApp.buttons[@"Done"] msidTap];
 }
 
 - (void)openURL:(NSDictionary *)config
 {
-    [self performAction:@"openUrlInSafari" withConfig:config];
+    [self performAction:MSID_AUTO_OPEN_URL_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)signout:(NSDictionary *)config
 {
-    [self performAction:@"signOut" withConfig:config];
+    [self performAction:MSID_AUTO_REMOVE_ACCOUNT_ACTION_IDENTIFIER withConfig:config];
 }
 
 - (void)readAccounts:(NSDictionary *)config
 {
-    [self performAction:@"getAccounts" withConfig:config];
+    [self performAction:MSID_AUTO_READ_ACCOUNTS_ACTION_IDENTIFIER withConfig:config];
 }
 
 #pragma mark - Helpers
@@ -400,44 +403,10 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 #pragma mark - Config
 
-- (NSDictionary *)configWithTestRequest:(MSALTestRequest *)request
+- (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request
 {
-    NSMutableDictionary *additionalConfig = [NSMutableDictionary dictionary];
-
-    if (request.clientId) additionalConfig[@"client_id"] = request.clientId;
-    if (request.redirectUri) additionalConfig[@"redirect_uri"] = request.redirectUri;
-    if (request.uiBehavior) additionalConfig[@"ui_behavior"] = request.uiBehavior;
-    if (request.authority) additionalConfig[@"authority"] = request.authority;
-    if (request.scopes) additionalConfig[@"scopes"] = request.scopes;
-    if (request.loginHint) additionalConfig[@"login_hint"] = request.loginHint;
-    if (request.claims) additionalConfig[@"claims"] = request.claims;
-    if (request.sliceParameters) additionalConfig[@"slice_params"] = request.sliceParameters;
-
-    if (request.usePassedWebView)
-    {
-        additionalConfig[@"webview_selection"] = @"passed_webview";
-    }
-    else
-    {
-        switch (request.webViewType) {
-            case MSALWebviewTypeSafariViewController:
-                additionalConfig[@"webview_selection"] = @"webview_safari";
-                break;
-            case MSALWebviewTypeWKWebView:
-                additionalConfig[@"webview_selection"] = @"webview_embedded";
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    if (request.accountIdentifier) additionalConfig[@"home_account_identifier"] = request.accountIdentifier;
-
-    additionalConfig[@"validate_authority"] = @(request.validateAuthority);
-    [additionalConfig addEntriesFromDictionary:request.additionalParameters];
-
-    return [self.testConfiguration configWithAdditionalConfiguration:additionalConfig];
+    MSIDAutomationTestRequest *updatedRequest = [self.class.accountsProvider fillDefaultRequestParams:request config:self.testConfiguration account:self.primaryAccount];
+    return updatedRequest.jsonDictionary;
 }
 
 @end

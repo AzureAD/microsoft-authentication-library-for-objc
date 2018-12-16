@@ -73,7 +73,7 @@
         return;
     }
 
-    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
+    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestScopes];
     BOOL forceRefresh = testRequest.forceRefresh;
     NSUUID *correlationId = [NSUUID new];
 

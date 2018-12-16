@@ -28,13 +28,13 @@
 
 @property (nonatomic, strong) NSString *consentTitle;
 
-- (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request;
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request
+- (NSString *)runSharedAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request;
+- (void)runSharedSilentAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request;
+- (void)runSharedSilentAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request
                            guestTenantScenario:(BOOL)usesGuestTenant;
 
-- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request;
-- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request
+- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSIDAutomationTestRequest *)request;
+- (NSString *)runSharedResultAssertionWithTestRequest:(MSIDAutomationTestRequest *)request
                                   guestTenantScenario:(BOOL)usesGuestTenant;
 - (void)selectAccountWithTitle:(NSString *)accountTitle;
 

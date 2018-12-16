@@ -76,7 +76,7 @@
         return;
     }
 
-    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestTarget];
+    NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestScopes];
     NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:testRequest.extraScopes];
     NSUUID *correlationId = [NSUUID new];
     NSString *claims = testRequest.claims;

@@ -144,7 +144,7 @@
     [allowButton tap];
 }
 
-- (void)acceptAuthSessionDialogIfNecessary:(MSALTestRequest *)request
+- (void)acceptAuthSessionDialogIfNecessary:(MSIDAutomationTestRequest *)request
 {
     if (request.webViewType == MSALWebviewTypeDefault
         && !request.usesEmbeddedWebView)

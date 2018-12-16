@@ -26,7 +26,7 @@
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfiguration.h"
 #import "MSIDTestAutomationConfigurationRequest.h"
-#import "MSALTestRequest.h"
+#import "MSIDAutomationTestRequest.h"
 
 @interface MSALBaseUITest : XCTestCase
 
@@ -67,7 +67,8 @@
 - (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
-- (void)closeAuthUIUsingWebViewType:(MSALWebviewType)webViewType passedInWebView:(BOOL)usesPassedInWebView;
+- (void)closeAuthUIUsingWebViewType:(MSIDWebviewType)webViewType
+                    passedInWebView:(BOOL)usesPassedInWebView;
 - (void)openURL:(NSDictionary *)config;
 - (void)signout:(NSDictionary *)config;
 - (void)readAccounts:(NSDictionary *)config;
@@ -77,6 +78,6 @@
 - (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
 
-- (NSDictionary *)configWithTestRequest:(MSALTestRequest *)request;
+- (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
 
 @end
