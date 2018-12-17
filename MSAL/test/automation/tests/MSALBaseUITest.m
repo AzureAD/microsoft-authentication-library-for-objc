@@ -24,7 +24,7 @@
 #import "MSALBaseUITest.h"
 #import "NSDictionary+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfigurationRequest.h"
-#import "MSIDTestAccountsProvider.h"
+#import "MSIDTestConfigurationProvider.h"
 #import "XCTestCase+TextFieldTap.h"
 #import "NSDictionary+MSALiOSUITests.h"
 #import "MSIDAADV1IdTokenClaims.h"
@@ -32,7 +32,7 @@
 #import "MSIDAADIdTokenClaimsFactory.h"
 #import "MSIDAutomationActionConstants.h"
 
-static MSIDTestAccountsProvider *s_accountsProvider;
+static MSIDTestConfigurationProvider *s_confProvider;
 
 @implementation MSALBaseUITest
 
@@ -40,7 +40,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 {
     [super setUp];
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
-    self.class.accountsProvider = [[MSIDTestAccountsProvider alloc] initWithConfigurationPath:confPath];
+    self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
 }
 
 - (void)setUp
@@ -62,14 +62,14 @@ static MSIDTestAccountsProvider *s_accountsProvider;
     [super tearDown];
 }
 
-+ (MSIDTestAccountsProvider *)accountsProvider
++ (MSIDTestConfigurationProvider *)confProvider
 {
-    return s_accountsProvider;
+    return s_confProvider;
 }
 
-+ (void)setAccountsProvider:(MSIDTestAccountsProvider *)accountsProvider
++ (void)setConfProvider:(MSIDTestConfigurationProvider *)accountsProvider
 {
-    s_accountsProvider = accountsProvider;
+    s_confProvider = accountsProvider;
 }
 
 #pragma mark - Asserts
@@ -180,7 +180,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get configuration"];
 
-    [self.class.accountsProvider configurationWithRequest:request
+    [self.class.confProvider configurationWithRequest:request
                                         completionHandler:^(MSIDTestAutomationConfiguration *configuration) {
 
                                       testConfig = configuration;
@@ -205,7 +205,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get password"];
 
-    [self.class.accountsProvider passwordForAccount:account
+    [self.class.confProvider passwordForAccount:account
                                   completionHandler:^(NSString *password) {
                                 [expectation fulfill];
                             }];
@@ -405,7 +405,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request
 {
-    MSIDAutomationTestRequest *updatedRequest = [self.class.accountsProvider fillDefaultRequestParams:request config:self.testConfiguration account:self.primaryAccount];
+    MSIDAutomationTestRequest *updatedRequest = [self.class.confProvider fillDefaultRequestParams:request config:self.testConfiguration account:self.primaryAccount];
     return updatedRequest.jsonDictionary;
 }
 

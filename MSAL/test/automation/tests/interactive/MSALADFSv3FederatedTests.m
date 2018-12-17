@@ -50,10 +50,10 @@
 // #290995 iteration 11
 - (void)testInteractiveADFSv3Login_withPromptAlways_noLoginHint_andSystemWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
@@ -64,17 +64,17 @@
 
     // 2. Now do silent login #296725
     request.homeAccountIdentifier = homeAccountId;
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andSafariViewController
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
@@ -87,11 +87,11 @@
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andEmbeddedWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;

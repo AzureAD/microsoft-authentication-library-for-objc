@@ -80,10 +80,10 @@
 // #290995 iteration 9
 - (void)testInteractivePingLogin_withNonConvergedApp_withPromptAlways_noLoginHint_andEmbeddedWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.uiBehavior = @"force";
     request.webViewType = MSIDWebviewTypeWKWebView;
@@ -104,11 +104,11 @@
 // #290995 iteration 10
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andSystemWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
 
     // 1. Run interactive
@@ -118,11 +118,11 @@
 
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
     request.usePassedWebView = YES;
     

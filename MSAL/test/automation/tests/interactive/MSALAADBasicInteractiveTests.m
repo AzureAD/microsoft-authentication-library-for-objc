@@ -28,7 +28,7 @@
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
 #import "MSIDAutomationTestRequest.h"
-#import "MSIDTestAccountsProvider.h"
+#import "MSIDTestConfigurationProvider.h"
 #import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALAADBasicInteractiveTests : MSALBaseAADUITest
@@ -65,12 +65,12 @@
 // Converged app tests
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -81,28 +81,28 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent wiht common authority
-    NSString *scopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
+    NSString *scopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     NSOrderedSet *scopesSet = [scopes msidScopeSet];
     NSString *firstScope = [scopesSet objectAtIndex:0];
-    request.acquireTokenAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    request.acquireTokenAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
     request.requestScopes = firstScope;
     request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 4. Run silent with tenant authority
-    request.acquireTokenAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.acquireTokenAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.requestScopes = firstScope;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 5. Run silent with invalid scopes
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"unsupported"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"unsupported"];
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInvalidScope"];
     [self closeResultView];
 
     // 6. Run silent with not consented scopes
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"not_consented"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"not_consented"];
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
@@ -127,12 +127,12 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andDifferentAuthorityAliases
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -154,21 +154,21 @@
 
     // 2. Run silent with a different authority alias
     request.homeAccountIdentifier = homeAccountId;
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"ww-alias"];
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias"];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_static"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -181,13 +181,13 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
-    NSString *tenantedAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    NSString *tenantedAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.configurationAuthority = tenantedAuthority;
     request.expectedResultAuthority = tenantedAuthority;
     request.cacheAuthority = tenantedAuthority;
@@ -199,15 +199,15 @@
 // Non-converged app tests
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andCommonEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_static"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -219,16 +219,16 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_static"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -240,16 +240,16 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -261,18 +261,18 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andInsufficientScopes_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    NSString *ignoredScope = [self.class.accountsProvider scopesForEnvironment:environment type:@"ignored"];
-    NSString *supportedScope = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    NSString *ignoredScope = [self.class.confProvider scopesForEnvironment:environment type:@"ignored"];
+    NSString *supportedScope = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     NSString *requestScopes = [NSString msidCombinedScopes:supportedScope withScopes:ignoredScope];
     request.requestScopes = requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
@@ -311,7 +311,7 @@
 
     // Now run silent with correct scopes
     request.requestScopes = supportedScope;
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
@@ -320,15 +320,15 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSelectAccount
 {
     // Sign in first time to ensure account will be there
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     
     [self runSharedAADLoginWithTestRequest:request];
 
@@ -349,12 +349,12 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andForceConsent_andLoginHint_andRejectConsent
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"consent";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.username;
     request.webViewType = MSIDWebviewTypeWKWebView;
 
@@ -377,15 +377,15 @@
 // 296732: Company Portal Install Prompt
 - (void)testCompanyPortalInstallPrompt_withNonConvergedApp_withSystemWebView
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
@@ -412,13 +412,13 @@
 // 296732: Company Portal Install Prompt
 - (void)testCompanyPortalInstallPrompt_withConvergedApp_withEmbeddedWebview
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
@@ -453,30 +453,30 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     [self runSharedAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andAccount
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Sign in interactively first
     [self runSharedAADLoginWithTestRequest:request];
@@ -489,14 +489,14 @@
 // TODO: this test will be failing until server side fixes the bug of returning .default
 - (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    NSString *scope = [self.class.accountsProvider resourceForEnvironment:environment type:@"aad_graph_guid"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    NSString *scope = [self.class.confProvider resourceForEnvironment:environment type:@"aad_graph_guid"];
     request.requestScopes = [scope stringByAppendingString:@"/.default"];
     request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.account;
 
     [self runSharedAADLoginWithTestRequest:request];
@@ -505,14 +505,14 @@
 // TODO: this test will be failing until server side fixes the bug of returning just user.read back
 - (void)DISABLED_testInteractiveAADLogin_withConvergedApp_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    NSString *scope = [self.class.accountsProvider resourceForEnvironment:environment type:@"ms_graph_guid"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    NSString *scope = [self.class.confProvider resourceForEnvironment:environment type:@"ms_graph_guid"];
     request.requestScopes = [scope stringByAppendingString:@"/.default"];
     request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.account;
 
     [self runSharedAADLoginWithTestRequest:request];
@@ -522,17 +522,17 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andPassedInWebView_andSelectAccount
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.usePassedWebView = YES;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -552,17 +552,17 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andPassedInEmbeddedWebView_andForceLogin
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.usePassedWebView = YES;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -581,16 +581,16 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMSGraphScopes_andOrganizationsEndpoint_andSafariViewController_andForceConsent
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.webViewType = MSIDWebviewTypeSafariViewController;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -619,12 +619,12 @@
 
 - (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.webViewType = MSIDWebviewTypeWKWebView;
     
     // 1. Run interactive without claims, which should succeed
@@ -646,15 +646,15 @@
 
 - (void)testClaimsChallenge_withNonConvergedApp_withSystemWebview
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     
     // 1. Run interactive without claims, which should succeed
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];

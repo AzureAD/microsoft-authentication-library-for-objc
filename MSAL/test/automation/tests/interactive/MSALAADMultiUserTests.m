@@ -63,14 +63,14 @@
     // 1. Sign in with first account
     self.primaryAccount = firstAccount;
 
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(firstHomeAccountId);
@@ -88,7 +88,7 @@
     // 3. Now do silent token refresh for first account
     self.primaryAccount = firstAccount;
 
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.homeAccountIdentifier = firstHomeAccountId;
     request.testAccount = self.primaryAccount;
 
@@ -114,10 +114,10 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.uiBehavior = @"force";
     request.webViewType = MSIDWebviewTypeWKWebView;

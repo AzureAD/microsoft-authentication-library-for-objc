@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 
 #import <XCTest/XCTest.h>
-#import "MSIDTestAccountsProvider.h"
+#import "MSIDTestConfigurationProvider.h"
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfiguration.h"
 #import "MSIDTestAutomationConfigurationRequest.h"
@@ -31,7 +31,7 @@
 @interface MSALBaseUITest : XCTestCase
 
 @property (nonatomic) XCUIApplication *testApp;
-@property (nonatomic, class) MSIDTestAccountsProvider *accountsProvider;
+@property (nonatomic, class) MSIDTestConfigurationProvider *confProvider;
 @property (nonatomic) MSIDTestAccount *primaryAccount;
 @property (nonatomic) MSIDTestAutomationConfiguration *testConfiguration;
 

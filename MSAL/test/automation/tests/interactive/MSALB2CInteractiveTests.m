@@ -94,7 +94,7 @@
     configurationRequest.accountProvider = MSIDTestAccountProviderB2CMSA;
     [self loadTestConfiguration:configurationRequest];
 
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [MSIDAutomationTestRequest new];
     request.clientId = self.testConfiguration.clientId;
     request.redirectUri = self.testConfiguration.redirectUri;
@@ -103,9 +103,9 @@
     request.testAccount = [self.primaryAccount copy];
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
-    request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.tenantName policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.tenantName policy:self.testConfiguration.policies[@"signin"]];
+    request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
     [self runSharedB2CLoginStartWithTestRequest:request];
@@ -129,7 +129,7 @@
     configurationRequest.accountProvider = MSIDTestAccountProviderB2CMSA;
     [self loadTestConfiguration:configurationRequest];
 
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [MSIDAutomationTestRequest new];
     request.clientId = self.testConfiguration.clientId;
     request.redirectUri = self.testConfiguration.redirectUri;
@@ -138,9 +138,9 @@
     request.testAccount = [self.primaryAccount copy];
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
-    request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
     [self runSharedB2CLoginStartWithTestRequest:request];
@@ -164,7 +164,7 @@
     configurationRequest.accountProvider = MSIDTestAccountProviderB2CMSA;
     [self loadTestConfiguration:configurationRequest];
 
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [MSIDAutomationTestRequest new];
     request.clientId = self.testConfiguration.clientId;
     request.redirectUri = self.testConfiguration.redirectUri;
@@ -173,9 +173,9 @@
     request.testAccount = [self.primaryAccount copy];
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.requestIDP = @"Microsoft";
-    request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
     [self runSharedB2CLoginStartWithTestRequest:request];
@@ -184,11 +184,8 @@
     NSString *homeAccountId = [self runSharedB2CMSALoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);
 
-    // 3. Run UI appeared step
-    [self runSharedAuthUIAppearsStepWithTestRequest:request];
-
     request.homeAccountIdentifier = homeAccountId;
-    // 4. Run silent login
+    // 3. Run silent login
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
@@ -201,7 +198,7 @@
     configurationRequest.accountProvider = MSIDTestAccountProviderB2CMSA;
     [self loadTestConfiguration:configurationRequest];
 
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [MSIDAutomationTestRequest new];
     request.clientId = self.testConfiguration.clientId;
     request.redirectUri = self.testConfiguration.redirectUri;
@@ -210,9 +207,9 @@
     request.testAccount = self.primaryAccount;
     request.usePassedWebView = YES;
     request.requestIDP = @"Microsoft";
-    request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
     [self runSharedB2CLoginStartWithTestRequest:request];
@@ -230,9 +227,9 @@
     profileRequest.testAccount = self.primaryAccount;
     profileRequest.usePassedWebView = YES;
     profileRequest.requestIDP = @"Microsoft";
-    profileRequest.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"profile"]];
-    profileRequest.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"profile"]];
-    profileRequest.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    profileRequest.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"profile"]];
+    profileRequest.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"profile"]];
+    profileRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     [self runSharedB2CLoginStartWithTestRequest:profileRequest];
 
@@ -245,7 +242,6 @@
     NSDictionary *resultDictionary = [self resultDictionary];
     NSString *profileHomeAccountId = resultDictionary[@"user"][@"home_account_id"];
     XCTAssertNotNil(profileHomeAccountId);
-    XCTAssertEqualObjects(profileHomeAccountId, profileRequest.testAccount.homeAccountId);
     [self closeResultView];
 
     // 5. Get token silently for the first request

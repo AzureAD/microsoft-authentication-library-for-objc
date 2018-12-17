@@ -50,14 +50,14 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:@"de" type:@"ms_graph"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
     request.expectedResultScopes = request.requestScopes;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
 
@@ -77,25 +77,25 @@
     [self closeResultView];
 
     // 4. Run silent with correct authority
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
     request.acquireTokenAuthority = request.configurationAuthority;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -112,24 +112,24 @@
     [self closeResultView];
 
     // 4. Run silent with correct authority
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
     request.acquireTokenAuthority = request.configurationAuthority;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.account;
 
     // 1. Run interactive
@@ -146,15 +146,15 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
     NSString *environment = @"de";
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
     request.uiBehavior = @"force";
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
-    request.expectedResultAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.cacheAuthority = request.expectedResultAuthority;
 
     // 1. Run interactive

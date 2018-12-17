@@ -48,13 +48,13 @@
 // #347620
 - (void)testInteractiveAndSilentAADLogin_withNonConvergedApp_withPromptAlways_noLoginHint_SystemWebView_signinIntoGuestTenantFirst
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.expectedResultAuthority = request.configurationAuthority;
     request.cacheAuthority = request.configurationAuthority;
 
@@ -72,7 +72,7 @@
     [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 3. Run silent for the home tenant
-    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
     request.expectedResultAuthority = request.configurationAuthority;
     request.cacheAuthority = request.configurationAuthority;
     request.testAccount.targetTenantId = request.testAccount.homeTenantId;
@@ -81,12 +81,12 @@
 
 - (void)testInteractiveAndSilentAADLogin_withNonConvergedApp_withPromptAlways_noLoginHint_EmbeddedWebView_signinIntoHomeTenantFirst
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *homeRequest = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultNonConvergedAppRequest];
     homeRequest.uiBehavior = @"force";
-    homeRequest.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    homeRequest.expectedResultScopes = [NSString msidCombinedScopes:homeRequest.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
-    homeRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    homeRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    homeRequest.expectedResultScopes = [NSString msidCombinedScopes:homeRequest.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
+    homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
     homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
     homeRequest.cacheAuthority = homeRequest.configurationAuthority;
     homeRequest.webViewType = MSIDWebviewTypeWKWebView;
@@ -106,12 +106,12 @@
     [self runSharedSilentAADLoginWithTestRequest:homeRequest];
 
     // 3. Run silent for the guest tenant
-    MSIDAutomationTestRequest *guestRequest = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultNonConvergedAppRequest];
     guestRequest.uiBehavior = @"force";
     guestRequest.testAccount = self.primaryAccount;
-    guestRequest.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
-    guestRequest.expectedResultScopes = [NSString msidCombinedScopes:guestRequest.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
-    guestRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    guestRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
+    guestRequest.expectedResultScopes = [NSString msidCombinedScopes:guestRequest.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
+    guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     guestRequest.expectedResultAuthority = guestRequest.configurationAuthority;
     guestRequest.cacheAuthority = guestRequest.configurationAuthority;
     guestRequest.homeAccountIdentifier = homeAccountId;
@@ -123,10 +123,10 @@
 // Test #347622
 - (void)testInteractiveAndSilentAADLogin_withConvergedApp_withPromptAlways_noLoginHint_SystemWebView_andGuestUserInHomeAndGuestTenant
 {
-    NSString *environment = self.class.accountsProvider.wwEnvironment;
-    MSIDAutomationTestRequest *guestRequest = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultConvergedAppRequest:environment];
     guestRequest.uiBehavior = @"force";
-    guestRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     guestRequest.expectedResultAuthority = guestRequest.configurationAuthority;
     guestRequest.cacheAuthority = guestRequest.configurationAuthority;
 
@@ -139,9 +139,9 @@
     [self closeResultView];
 
     // 2. Run interactive in the home tenant
-    MSIDAutomationTestRequest *homeRequest = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultConvergedAppRequest:environment];
     homeRequest.uiBehavior = @"force";
-    homeRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
+    homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
     homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
     homeRequest.cacheAuthority = homeRequest.configurationAuthority;
     homeRequest.testAccount = [self.primaryAccount copy];
