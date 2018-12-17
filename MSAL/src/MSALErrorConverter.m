@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import "MSALErrorConverter+Internal.h"
 #import "MSALError_Internal.h"
 #import "MSALResult+Internal.h"
 
@@ -34,11 +34,6 @@ static NSDictionary *s_errorCodeMapping;
 static NSDictionary *s_userInfoKeyMapping;
 
 @implementation MSALErrorConverter
-
-+ (void)load
-{
-    MSIDErrorConverter.errorConverter = [MSALErrorConverter new];
-}
 
 + (void)initialize
 {
@@ -120,13 +115,50 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
                              MSIDGrantedScopesKey: MSALGrantedScopesKey,
                              MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
-                             MSIDBrokerVersionKey: MSALBrokerVersionKey
+                             MSIDBrokerVersionKey: MSALBrokerVersionKey,
+                             MSIDHomeAccountIdkey: MSALHomeAccountIdKey
                              };
 }
 
-#pragma mark - MSIDErrorConverting
++ (NSErrorDomain)msalErrorDomainFromMsidError:(NSError *)msidError
+{
+    if (!msidError) return nil;
+    NSString *newDomain = s_errorDomainMapping[msidError.domain];
+    
+    return newDomain;
+}
 
-- (NSError *)errorWithDomain:(NSString *)domain
++ (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError
+{
+    if (!msidError) return MSALErrorInternal;
+    
+    NSString *msalDomain = [self msalErrorDomainFromMsidError:msidError];
+    if (!msalDomain) return msidError.code;
+    
+    
+    NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msidError.code)];
+    if (!mappedErrorCode)
+    {
+        MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msalDomain, (long)msidError.code);
+        return msidError.code;
+    }
+    
+    return [mappedErrorCode integerValue];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+{
+    return [self errorWithDomain:msidError.domain
+                            code:msidError.code
+                errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
+                      oauthError:msidError.userInfo[MSIDOAuthErrorKey]
+                        subError:msidError.userInfo[MSIDOAuthSubErrorKey]
+                 underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey]
+                        userInfo:msidError.userInfo];
+}
+
++ (NSError *)errorWithDomain:(NSString *)domain
                         code:(NSInteger)code
             errorDescription:(NSString *)errorDescription
                   oauthError:(NSString *)oauthError
@@ -197,16 +229,6 @@ static NSDictionary *s_userInfoKeyMapping;
     }
 
     return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
-}
-
-- (NSString *)oauthErrorKey
-{
-    return MSALOAuthErrorKey;
-}
-
-- (NSString *)subErrorKey
-{
-    return MSALOAuthSubErrorKey;
 }
 
 @end

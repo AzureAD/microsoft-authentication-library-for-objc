@@ -441,6 +441,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -453,7 +454,7 @@
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -531,6 +532,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -542,7 +544,7 @@
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -659,6 +661,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -671,7 +674,7 @@
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -755,6 +758,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -767,7 +771,7 @@
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -895,6 +899,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -908,7 +913,7 @@
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          // Mock auth code response with cloud_instance_host_name
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@", @"i+am+an+auth+code", QPs[@"state"], @"login.microsoftonline.de"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"login.microsoftonline.de", @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);

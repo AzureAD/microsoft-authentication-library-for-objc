@@ -25,13 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALUIBehavior_Internal_h
-#define MSALUIBehavior_Internal_h
+#import "MSALErrorConverter.h"
 
-#import "MSIDConstants.h"
+@interface MSALErrorConverter (Internal)
 
-extern NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
-extern MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior);
-extern NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior);
++ (NSError *)errorWithDomain:(NSString *)domain
+                        code:(NSInteger)code
+            errorDescription:(NSString *)errorDescription
+                  oauthError:(NSString *)oauthError
+                    subError:(NSString *)subError
+             underlyingError:(NSError *)underlyingError
+               correlationId:(NSUUID *)correlationId
+                    userInfo:(NSDictionary *)userInfo;
 
-#endif /* MSALUIBehavior_Internal_h */
+@end

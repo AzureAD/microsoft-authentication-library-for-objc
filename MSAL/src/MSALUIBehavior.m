@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSIDConstants.h"
 
 NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
 {
@@ -34,9 +35,22 @@ NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
             STRING_CASE(MSALSelectAccount);
             STRING_CASE(MSALForceLogin);
             STRING_CASE(MSALForceConsent);
+            STRING_CASE(MSALPromptIfNecessary);
     }
     
     @throw @"Unrecognized MSALUIBehavior";
+}
+
+MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior)
+{
+    switch (behavior)
+    {
+        case MSALForceLogin : return MSIDPromptTypeLogin;
+        case MSALForceConsent : return MSIDPromptTypeConsent;
+        case MSALSelectAccount : return MSIDPromptTypeSelectAccount;
+        case MSALPromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
+        default : return MSIDPromptTypeDefault;
+    }
 }
 
 NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
@@ -46,5 +60,6 @@ NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
         case MSALForceLogin : return @"login";
         case MSALForceConsent : return @"consent";
         case MSALSelectAccount : return @"select_account";
+        case MSALPromptIfNecessary : return @"";
     }
 }
