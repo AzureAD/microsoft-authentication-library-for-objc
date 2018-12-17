@@ -31,6 +31,7 @@
 #import "MSALPublicClientApplication.h"
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
+#import "MSIDAutomationTestResult.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 
@@ -68,7 +69,17 @@
 
     if (!account)
     {
-        MSIDAutomationTestResult *result = [self testResultWithMSALError:accountError];
+        MSIDAutomationTestResult *result = nil;
+
+        if (accountError)
+        {
+            result = [self testResultWithMSALError:accountError];
+        }
+        else
+        {
+            result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:NO additionalInfo:@{@"error_code": @"no_account"}];
+        }
+
         completionBlock(result);
         return;
     }

@@ -50,19 +50,13 @@
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
     [self closeResultView];
     return homeAccountId;
 }
 
 - (void)runSharedSilentAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request
-{
-    [self runSharedSilentAADLoginWithTestRequest:request guestTenantScenario:NO];
-}
-
-- (void)runSharedSilentAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request
-                           guestTenantScenario:(BOOL)usesGuestTenant
 {
     NSDictionary *config = [self configWithTestRequest:request];
     // Acquire token silently
@@ -79,7 +73,7 @@
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
 
-    [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:usesGuestTenant];
+    [self runSharedResultAssertionWithTestRequest:request];
 
     [self closeResultView];
 
@@ -88,7 +82,7 @@
     config = [self configWithTestRequest:request];
 
     [self acquireTokenSilent:config];
-    [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:usesGuestTenant];
+    [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
 }
 
@@ -107,7 +101,6 @@
 }
 
 - (NSString *)runSharedResultAssertionWithTestRequest:(MSIDAutomationTestRequest *)request
-                                  guestTenantScenario:(BOOL)usesGuestTenant
 {
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:[[request.expectedResultScopes msidScopeSet] array]];
@@ -130,17 +123,8 @@
 
         NSString *idTokenTenantId = claims.jsonDictionary[@"tid"];
 
-        if (!usesGuestTenant)
-        {
-            XCTAssertEqualObjects(resultTenantId, request.testAccount.homeTenantId);
-        }
-        else
-        {
-            XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
-        }
-
+        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
         XCTAssertEqualObjects(resultTenantId, idTokenTenantId);
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
     }
 
     return homeAccountId;

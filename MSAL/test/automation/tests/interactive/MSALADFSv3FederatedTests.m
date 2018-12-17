@@ -27,6 +27,7 @@
 
 #import "MSALADFSBaseUITest.h"
 #import "XCTestCase+TextFieldTap.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALADFSv3FederatedTests : MSALADFSBaseUITest
 
@@ -49,11 +50,12 @@
 // #290995 iteration 11
 - (void)testInteractiveADFSv3Login_withPromptAlways_noLoginHint_andSystemWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.uiBehavior = @"force";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
 
     // 1. Do interactive login
@@ -61,20 +63,21 @@
     XCTAssertNotNil(homeAccountId);
 
     // 2. Now do silent login #296725
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.homeAccountIdentifier = homeAccountId;
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andSafariViewController
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultNonConvergedAppRequest];
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeSafariViewController;
+    request.webViewType = MSIDWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.username;
 
     // Do interactive login
@@ -84,13 +87,14 @@
 
 - (void)testInteractiveADFSv3Login_withPromptAlways_withLoginHint_andEmbeddedWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.accountsProvider scopesForEnvironment:environment type:@"oidc"]];
     request.uiBehavior = @"force";
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.expectedResultScopes = @[@"https://graph.microsoft.com/.default", @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
+    request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.username;
 
     // Do interactive login

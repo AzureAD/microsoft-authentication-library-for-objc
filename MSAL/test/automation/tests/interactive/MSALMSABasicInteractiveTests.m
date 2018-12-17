@@ -54,15 +54,12 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSystemWebView_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes =  @[@"user.read",
-                                      @"tasks.read",
-                                      @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/common";
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = request.cacheAuthority;
 
     // 1. Do interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -71,8 +68,7 @@
     // 2. Run UI appears step
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
-    request.accountIdentifier = homeAccountId;
-    request.authority = nil;
+    request.homeAccountIdentifier = homeAccountId;
 
     // 3. Run silent
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -80,23 +76,22 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSafariViewController_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes =   @[@"user.read",
-                                       @"tasks.read",
-                                       @"openid", @"profile"];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.authority = @"https://login.microsoftonline.com/consumers";
-    request.webViewType = MSALWebviewTypeSafariViewController;
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
+    request.webViewType = MSIDWebviewTypeSafariViewController;
+    request.loginHint = self.primaryAccount.username;
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = request.cacheAuthority;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
 
     XCTAssertNotNil(homeAccountId);
 
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
 
     // 2. Run silent login
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -104,23 +99,20 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin_angLoginHint
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes =   @[@"user.read",
-                                       @"tasks.read",
-                                       @"openid", @"profile"];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
-    request.authority = @"https://login.microsoftonline.com/consumers";
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
+    request.loginHint = self.primaryAccount.account;
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = request.cacheAuthority;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-
     XCTAssertNotNil(homeAccountId);
 
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
 
     // 2. Run silent login
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -128,44 +120,44 @@
 
 - (void)testInteractiveMSALogin_withConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andEmbeddedWebview_andForceLogin_andLoginHint
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes =   @[@"user.read",
-                                       @"tasks.read",
-                                       @"openid", @"profile"];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
-    request.authority = @"https://login.microsoftonline.com/consumers";
-    request.webViewType = MSALWebviewTypeWKWebView;
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
+    request.loginHint = self.primaryAccount.account;
+    request.webViewType = MSIDWebviewTypeWKWebView;
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = request.cacheAuthority;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-
     XCTAssertNotNil(homeAccountId);
 
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
 
     // 2. Run silent login
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
-// TODO: consumers doesn't support select account?
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andSelectAccount
 {
     // 1. Sign in first time to ensure account will be there
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.scopes = @"tasks.read";
-    request.expectedResultScopes = @[@"tasks.read", @"openid", @"profile"];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.username;
     request.testAccount = self.primaryAccount;
+    request.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    request.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
+    request.expectedResultScopes = request.requestScopes;
+    request.loginHint = self.primaryAccount.account;
+    request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.expectedResultAuthority = request.cacheAuthority;
     [self runSharedAADLoginWithTestRequest:request];
 
     request.uiBehavior = @"select_account";
     request.loginHint = nil;
+    request.testAccount = nil;
 
     NSDictionary *config = [self configWithTestRequest:request];
     // 2. Now call acquire token with select account
@@ -173,42 +165,10 @@
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
-    
-    // TODO: why am I asked to enter my password again in system webview?
-    [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
 }
-
-#pragma mark - Non-converged app
-
-// TODO: server side bug here
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andConsumersEndpoint_andSystemWebView_andForceLogin
-{
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
-    configurationRequest.appVersion = MSIDAppVersionV1;
-    configurationRequest.accountFeatures = @[];
-    [self loadTestConfiguration:configurationRequest];
-
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/consumers";
-    request.uiBehavior = @"force";
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.testAccount = self.primaryAccount;
-
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireToken:config];
-    [self acceptAuthSessionDialog];
-    [self aadEnterEmail];
-    [self aadEnterPassword];
-    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
-    [self assertErrorCode:@"MSALErrorInvalidRequest"];
-    [self assertErrorDescription:@"Please use the /organizations or tenant-specific endpoint."];
-    [self closeResultView];
-}
-
-// TODO: fix account selection bug
 
 @end

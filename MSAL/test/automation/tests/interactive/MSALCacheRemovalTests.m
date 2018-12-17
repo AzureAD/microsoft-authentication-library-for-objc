@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALBaseAADUITest.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALCacheRemovalTests : MSALBaseAADUITest
 
@@ -51,24 +52,22 @@
 
 - (void)testRemoveAADAccount_whenOnlyOneAccountInCache_andConvergedApp
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.accountsProvider defaultConvergedAppRequest:environment];
     request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.account;
 
     // 1. Run interactive login
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
 
     // 2. Remove account
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     NSDictionary *config = [self configWithTestRequest:request];
     [self signout:config];
     NSDictionary *resultDictionary = [self resultDictionary];
-    XCTAssertEqualObjects(resultDictionary[@"user_signout_result"], @"yes");
+    XCTAssertEqualObjects(resultDictionary[@"success"], @1);
     [self closeResultView];
 
     // 3. Try silent and expect failure
@@ -76,15 +75,18 @@
     [self assertErrorCode:@"no_account"];
 }
 
-- (void)testRemoveAADAccount_whenMultipleAccountsInCache_andNonConvergedApp
+- (void)testRemoveAADAccount_whenMultipleAccountsInCache_andConvergedApp
 {
-    MSALTestRequest *firstRequest = [MSALTestRequest nonConvergedAppRequest];
+    NSString *environment = self.class.accountsProvider.wwEnvironment;
+    MSIDAutomationTestRequest *firstRequest = [self.class.accountsProvider defaultNonConvergedAppRequest];
     firstRequest.uiBehavior = @"force";
-    firstRequest.scopes = @"https://graph.windows.net/.default";
-    firstRequest.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    firstRequest.authority = @"https://login.microsoftonline.com/organizations";
+    firstRequest.testAccount = self.primaryAccount;
+    firstRequest.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    firstRequest.expectedResultScopes = firstRequest.requestScopes;
     firstRequest.loginHint = self.primaryAccount.account;
     firstRequest.testAccount = self.primaryAccount;
+    firstRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    firstRequest.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive login for the first account
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:firstRequest];
@@ -93,24 +95,27 @@
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];
 
-    MSALTestRequest *secondRequest = [MSALTestRequest nonConvergedAppRequest];
+    MSIDAutomationTestRequest *secondRequest = [self.class.accountsProvider defaultNonConvergedAppRequest];
     secondRequest.uiBehavior = @"force";
-    secondRequest.scopes = @"https://graph.windows.net/.default";
-    secondRequest.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    secondRequest.authority = @"https://login.microsoftonline.com/organizations";
+    secondRequest.testAccount = self.primaryAccount;
+    secondRequest.requestScopes = [self.class.accountsProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    secondRequest.expectedResultScopes = secondRequest.requestScopes;
     secondRequest.loginHint = self.primaryAccount.account;
     secondRequest.testAccount = self.primaryAccount;
+    secondRequest.configurationAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
+    secondRequest.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+
     // 2. Run interactive login for the second account
     NSString *secondHomeAccountId = [self runSharedAADLoginWithTestRequest:secondRequest];
     XCTAssertNotNil(secondHomeAccountId);
 
     // 3. Remove first account
     self.primaryAccount = self.testConfiguration.accounts[0];
-    firstRequest.accountIdentifier = firstHomeAccountId;
+    firstRequest.homeAccountIdentifier = firstHomeAccountId;
     NSDictionary *config = [self configWithTestRequest:firstRequest];
     [self signout:config];
     NSDictionary *resultDictionary = [self resultDictionary];
-    XCTAssertEqualObjects(resultDictionary[@"user_signout_result"], @"yes");
+    XCTAssertEqualObjects(resultDictionary[@"success"], @1);
     [self closeResultView];
 
     // 4. Try silent and expect failure for the first account
@@ -120,8 +125,7 @@
 
     // 5. Expect silent to still work for the second account
     self.primaryAccount = self.testConfiguration.accounts[1];
-    secondRequest.accountIdentifier = secondHomeAccountId;
-    secondRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    secondRequest.homeAccountIdentifier = secondHomeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:secondRequest];
 }
 

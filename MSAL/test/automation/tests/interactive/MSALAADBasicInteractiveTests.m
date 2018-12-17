@@ -675,14 +675,4 @@
     [self waitForElement:registerButton];
 }
 
-// TODO: add extra scopes
-// TODO: add third party resource
-// TODO: add different audiences tests
-// TODO: add test to talk to MS graph
-// TODO: first party tests
-// TODO: resolve conflicting classes
-// TODO: sovereign for other clouds (replace ww with us gov)
-// TODO: rename accounts provider to configuration provider
-// TODO: add test for prompt if necessary + login hint
-
 @end

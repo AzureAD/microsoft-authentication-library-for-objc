@@ -227,7 +227,7 @@ static MSIDTestAccountsProvider *s_accountsProvider;
 
 - (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app
 {
-    XCUIElement *emailTextField = app.textFields[@"Enter your email, phone, or Skype."];
+    XCUIElement *emailTextField = [app.textFields elementBoundByIndex:0];
     [self waitForElement:emailTextField];
     if ([email isEqualToString:emailTextField.value])
     {
