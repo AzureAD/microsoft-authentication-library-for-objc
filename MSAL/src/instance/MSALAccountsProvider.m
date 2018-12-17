@@ -97,7 +97,7 @@
 {
     NSError *msidError = nil;
 
-    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
     NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
 
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:homeAccountId];
@@ -128,7 +128,7 @@
 {
     NSError *msidError = nil;
 
-    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
     NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
 
     MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:nil];
@@ -162,7 +162,7 @@
 {
     NSError *msidError = nil;
 
-    MSIDAppMetadataCacheItem *appMetadata = [self appmetadataItem];
+    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
     NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
 
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:authority
@@ -193,7 +193,7 @@
     return [msalAccounts allObjects];
 }
 
-- (MSIDAppMetadataCacheItem *)appmetadataItem
+- (MSIDAppMetadataCacheItem *)appMetadataItem
 {
     MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:nil redirectUri:nil clientId:self.clientId target:nil];
 

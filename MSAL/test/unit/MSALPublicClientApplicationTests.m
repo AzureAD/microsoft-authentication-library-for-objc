@@ -1164,9 +1164,9 @@
     MSALAccount *account = accounts[0];
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
 }
 
 - (void)testAllAccounts_when2AccountExists_shouldReturn2Accounts
@@ -1186,16 +1186,16 @@
     MSALAccount *account = accounts[0];
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
     
     MSALAccount *account2 = accounts[1];
     XCTAssertEqualObjects(account2.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account2.environment, @"example.com");
-    XCTAssertEqualObjects(account2.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(account2.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account2.homeAccountId.identifier, @"myuid.utid");
+    XCTAssertEqualObjects(account2.homeAccountId.objectId, @"myuid");
+    XCTAssertEqualObjects(account2.homeAccountId.tenantId, @"utid");
 }
 
 - (void)testAllAccount_whenFociTokenExistsForOtherClient_andAppMetadataWithSameFamilyIdInCache_shouldReturnAccountNoError
@@ -1204,14 +1204,13 @@
     MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:@"https://login.microsoftonline.com/common" familyId:@"1"];
     MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:@"https://login.microsoftonline.com/common"];
 
-    NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
                                                                factory:[MSIDAADV2Oauth2Factory new]
                                                                context:nil
-                                                                 error:&error];
+                                                                 error:nil];
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     NSString *clientId = @"myclient";
 
@@ -1226,6 +1225,7 @@
     XCTAssertNil(appError);
     application.tokenCache = self.tokenCacheAccessor;
 
+    NSError *error = nil;
     NSArray *allAccounts = [application allAccounts:&error];
 
     XCTAssertNil(error);
@@ -1246,7 +1246,7 @@
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     NSString *clientId = @"myclient";
 
@@ -1281,7 +1281,7 @@
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 3);
 
     NSString *clientId = @"myclient";
 
@@ -1322,9 +1322,9 @@
         MSALAccount *account = accounts[0];
         XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
         XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-        XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-        XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-        XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+        XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+        XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+        XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
         
         [expectation fulfill];
     }];
@@ -1351,9 +1351,9 @@
          MSALAccount *account = accounts[0];
          XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
          XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-         XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-         XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+         XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+         XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+         XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
          
          [expectation fulfill];
      }];
@@ -1370,7 +1370,7 @@
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
     application.tokenCache = self.tokenCacheAccessor;
-    NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
+    NSString *homeAccountId = @"myuid.utid";
     
     NSError *error;
     __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
@@ -1379,9 +1379,9 @@
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
 }
 
 - (void)testAccountWithHomeAccountId_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
@@ -1413,7 +1413,7 @@
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     NSString *clientId = @"myclient";
 
@@ -1433,7 +1433,7 @@
     XCTAssertNil(appError);
     application.tokenCache = self.tokenCacheAccessor;
 
-    NSString *homeAccountId = @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031";
+    NSString *homeAccountId = @"myuid.utid";
     __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
 
     XCTAssertNil(error);
@@ -1457,9 +1457,9 @@
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(account.homeAccountId.identifier, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97.0287f963-2d72-4363-9e3a-5705c5b0f031");
-    XCTAssertEqualObjects(account.homeAccountId.objectId, @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97");
-    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"0287f963-2d72-4363-9e3a-5705c5b0f031");
+    XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
 }
 
 - (void)testAccountWithUsername_whenAccountExistsButNotMatching_shouldReturnNoAccountNoError
@@ -1490,7 +1490,7 @@
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
@@ -1542,18 +1542,18 @@
 - (void)testRemoveAccount_whenAccountExists_andIsFociClient_shouldRemoveAccount_andMarkClientNonFoci
 {
     // 1. Save response for a different clientId
-    NSString *authorityUrl = @"https://login.microsoftonline.com/0287f963-2d72-4363-9e3a-5705c5b0f031";
+    NSString *authorityUrl = @"https://login.microsoftonline.com/utid";
     MSIDAADV2TokenResponse *msidResponse = [self msalDefaultTokenResponseWithAuthority:authorityUrl familyId:@"1"];
     MSIDConfiguration *configuration = [self msalDefaultConfigurationWithAuthority:authorityUrl];
 
-    NSError *error = nil;
     BOOL result = [self.tokenCacheAccessor saveTokensWithConfiguration:configuration
                                                               response:msidResponse
                                                                factory:[MSIDAADV2Oauth2Factory new]
                                                                context:nil
-                                                                 error:&error];
+                                                                 error:nil];
+
     XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
 
     // 2. Create PublicClientApplication for a different app
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
@@ -1577,6 +1577,7 @@
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
 
     // 3. Remove account
+    NSError *error = nil;
     result = [application removeAccount:msalAccount error:&error];
 
     XCTAssertTrue(result);
@@ -1597,7 +1598,8 @@
 
     [self msalAddDiscoveryResponse:authorityUrl appendDefaultHeaders:YES];
 
-    // 5. Try to acquire token silently
+    // 5. Try to acquire token silently, expecting to get interaction required back
+    // That means FOCI wasn't used by the app although present
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token silent"];
 
     [application acquireTokenSilentForScopes:@[@"fakescope1"]
@@ -1731,8 +1733,8 @@
 
 - (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString familyId:(NSString *)familyId
 {
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"preferred_username": @"fakeuser@contoso.com"};
-    NSDictionary* clientInfoClaims = @{ @"uid" : @"29f3807a-4fb0-42f2-a44a-236aa0cb3f97", @"utid" : @"0287f963-2d72-4363-9e3a-5705c5b0f031"};
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com"};
+    NSDictionary* clientInfoClaims = @{ @"uid" : @"myuid", @"utid" : @"utid"};
     
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",
                             [NSString msidBase64UrlEncodedStringFromData:[NSJSONSerialization dataWithJSONObject:idTokenClaims options:0 error:nil]]];
