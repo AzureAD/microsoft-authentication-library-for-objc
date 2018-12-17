@@ -217,6 +217,38 @@ static BOOL adalAppInstalled = NO;
     return [self openAppWithAppId:@"adal_unified"];
 }
 
-// TODO: FOCI for MSAL
+- (void)testMSALCoexistenceWithUnifiedADAL_startSigninInADAL_withAADAccount_andDoTokenRefreshInMSAL_withFOCIToken
+{
+    // 1. Install previous ADAL version and signin
+    self.testApp = [self adalUnifiedApp];
+    
+    MSALTestRequest *request = [MSALTestRequest fociRequestWithOfficeApp];
+    request.additionalParameters = @{@"prompt_behavior": @"always",
+                                              @"resource": @"https://graph.windows.net"};
+    
+    request.authority = @"https://login.microsoftonline.com/common";
+    NSDictionary *config = [self configWithTestRequest:request];
+    
+    [self acquireToken:config];
+    [self aadEnterEmail];
+    [self aadEnterPassword];
+    
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+    
+    // 5. Run token refresh using FRT in MSAL
+    self.testApp = [XCUIApplication new];
+    [self.testApp activate];
+    
+    MSALTestRequest *secondAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
+    secondAppRequest.accountIdentifier = self.primaryAccount.homeAccountId;
+    secondAppRequest.scopes = @"https://graph.windows.net/.default";
+    
+    NSDictionary *msalConfig = [self configWithTestRequest:secondAppRequest];
+    //It should refresh access token using family refresh token saved by office app using Adal
+    [self acquireTokenSilent:msalConfig];
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+}
 
 @end
