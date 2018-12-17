@@ -82,11 +82,6 @@
     NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
     XCTAssertNotNil(homeAccountId);
 
-    if (request.testAccount)
-    {
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
-    }
-
     [self closeResultView];
     return homeAccountId;
 }
@@ -109,7 +104,7 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.tenantName policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = request.configurationAuthority;
+    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
@@ -144,7 +139,7 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = request.configurationAuthority;
+    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
@@ -179,7 +174,7 @@
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.requestIDP = @"Microsoft";
     request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = request.configurationAuthority;
+    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
@@ -216,7 +211,7 @@
     request.usePassedWebView = YES;
     request.requestIDP = @"Microsoft";
     request.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
-    request.expectedResultAuthority = request.configurationAuthority;
+    request.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     // 1. Start B2C login
@@ -236,7 +231,7 @@
     profileRequest.usePassedWebView = YES;
     profileRequest.requestIDP = @"Microsoft";
     profileRequest.configurationAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"profile"]];
-    profileRequest.expectedResultAuthority = profileRequest.configurationAuthority;
+    profileRequest.expectedResultAuthority = [self.class.accountsProvider b2cAuthorityForIdentifier:environment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"profile"]];
     profileRequest.cacheAuthority = [self.class.accountsProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
 
     [self runSharedB2CLoginStartWithTestRequest:profileRequest];
