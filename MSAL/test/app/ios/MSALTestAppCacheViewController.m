@@ -162,13 +162,17 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         [self.defaultAccessor clearCacheForAccount:account.accountIdentifier
                                          authority:nil
                                           clientId:nil
+                                          familyId:nil
                                            context:nil
                                              error:nil];
-        
+
         [self.legacyAccessor clearCacheForAccount:account.accountIdentifier
-                                          context:nil
-                                            error:nil];
-        
+                                         authority:nil
+                                          clientId:nil
+                                          familyId:nil
+                                           context:nil
+                                             error:nil];
+
         [self loadCache];
     }
 }
@@ -221,12 +225,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-        [self setAccounts:[self.defaultAccessor allAccountsForAuthority:nil
-                                                               clientId:nil
-                                                               familyId:nil
-                                                                context:nil
-                                                                  error:nil]];
-        
+        [self setAccounts:[self.defaultAccessor accountsWithAuthority:nil
+                                                             clientId:nil
+                                                             familyId:nil
+                                                    accountIdentifier:nil
+                                                              context:nil
+                                                                error:nil]];
+
         [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
         
         _cacheSections = [NSMutableDictionary dictionary];
