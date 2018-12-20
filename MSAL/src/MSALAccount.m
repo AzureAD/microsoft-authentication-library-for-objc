@@ -81,7 +81,7 @@
                                                                   objectId:localAccountId
                                                                   tenantId:tenantId];
 
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:homeAccountId];
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
     }
 
     return self;
