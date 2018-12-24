@@ -60,7 +60,7 @@
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:request closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
@@ -95,7 +95,7 @@
 
     // 1. Run interactive in the home tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.homeTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
@@ -132,7 +132,7 @@
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:guestRequest closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);

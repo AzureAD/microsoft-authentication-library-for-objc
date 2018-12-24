@@ -32,6 +32,7 @@
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationTestResult.h"
+#import "MSIDAutomationErrorResult.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 
@@ -77,7 +78,14 @@
         }
         else
         {
-            result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:NO additionalInfo:@{@"error_code": @"no_account"}];
+            NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil);
+
+            NSString *errorName = MSALStringForErrorCode(MSALErrorInteractionRequired);
+
+            result = [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
+                                                                 error:error
+                                                             errorName:errorName
+                                                        additionalInfo:nil];
         }
 
         completionBlock(result);

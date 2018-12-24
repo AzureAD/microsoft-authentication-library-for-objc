@@ -76,14 +76,15 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)assertRefreshTokenInvalidated
 {
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertTrue([result[@"success"] boolValue] == YES);
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    XCTAssertTrue(result.success);
 }
 
 - (void)assertAccessTokenExpired
 {
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertTrue([result[@"expired_access_token_count"] intValue] == 1);
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    XCTAssertTrue(result.success);
+    XCTAssertEqual(result.actionCount, 1);
 }
 
 - (void)assertAuthUIAppearsUsingEmbeddedWebView:(BOOL)useEmbedded
@@ -102,42 +103,38 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)assertErrorCode:(NSString *)expectedErrorCode
 {
-    [self assertErrorContent:expectedErrorCode key:@"error_code"];
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    NSString *actualErrorCode = result.errorName;
+    XCTAssertEqualObjects(expectedErrorCode, actualErrorCode);
 }
 
 - (void)assertErrorDescription:(NSString *)errorDescription
 {
-    NSDictionary *result = [self resultDictionary];
-    NSString *actualContent = result[@"error_description"];
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    NSString *actualContent = result.errorDescription;
     XCTAssertNotEqual([actualContent length], 0);
     XCTAssertTrue([actualContent containsString:errorDescription]);
 }
 
 - (void)assertErrorSubcode:(NSString *)errorSubcode
 {
-    [self assertErrorContent:errorSubcode key:@"subcode"];
-}
-
-- (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key
-{
-    NSDictionary *result = [self resultDictionary];
-    NSString *actualContent = result[key];
-    XCTAssertNotEqual([actualContent length], 0);
-    XCTAssertEqualObjects(actualContent, expectedContent);
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    NSString *actualSubCode = result.errorUserInfo[@"MSALOAuthSubErrorKey"];
+    XCTAssertEqualObjects(errorSubcode, actualSubCode);
 }
 
 - (void)assertAccessTokenNotNil
 {
-    NSDictionary *result = [self resultDictionary];
-    
-    XCTAssertTrue([result[@"access_token"] length] > 0);
-    XCTAssertEqual([result[@"error"] length], 0);
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+
+    XCTAssertTrue([result.accessToken length] > 0);
+    XCTAssertTrue(result.success);
 }
 
 - (void)assertScopesReturned:(NSArray *)expectedScopes
 {
-    NSDictionary *result = [self resultDictionary];
-    NSArray *resultScopes = result[@"scopes"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSArray *resultScopes = [[result.target msidScopeSet] array];
 
     for (NSString *expectedScope in expectedScopes)
     {
@@ -149,27 +146,21 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     if (!expectedAuthority) return;
 
-    NSDictionary *result = [self resultDictionary];
-    NSString *resultAuthority = result[@"authority"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSString *resultAuthority = result.authority;
     
     XCTAssertEqualObjects(expectedAuthority, resultAuthority);
 }
 
 - (NSDictionary *)resultIDTokenClaims
 {
-    NSDictionary *result = [self resultDictionary];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
 
-    NSString *idToken = result[@"id_token"];
+    NSString *idToken = result.idToken;
     XCTAssertTrue([idToken length] > 0);
 
     MSIDIdTokenClaims *idTokenClaims = [MSIDAADIdTokenClaimsFactory claimsFromRawIdToken:idToken error:nil];
     return [idTokenClaims jsonDictionary];
-}
-
-- (void)assertRefreshTokenNotNil
-{
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertTrue([result[@"refresh_token"] length] > 0);
 }
 
 #pragma mark - API fetch
@@ -383,7 +374,31 @@ static MSIDTestConfigurationProvider *s_confProvider;
     [self.testApp.buttons[@"Go"] msidTap];
 }
 
-- (NSDictionary *)resultDictionary
+- (MSIDAutomationErrorResult *)automationErrorResult
+{
+    MSIDAutomationErrorResult *result = [[MSIDAutomationErrorResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
+    XCTAssertNotNil(result);
+    XCTAssertFalse(result.success);
+    return result;
+}
+
+- (MSIDAutomationSuccessResult *)automationSuccessResult
+{
+    MSIDAutomationSuccessResult *result = [[MSIDAutomationSuccessResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
+    XCTAssertNotNil(result);
+    XCTAssertTrue(result.success);
+    return result;
+}
+
+- (MSIDAutomationAccountsResult *)automationAccountsResult
+{
+    MSIDAutomationAccountsResult *result = [[MSIDAutomationAccountsResult alloc] initWithJSONDictionary:[self automationResultDictionary] error:nil];
+    XCTAssertNotNil(result);
+    XCTAssertTrue(result.success);
+    return result;
+}
+
+- (NSDictionary *)automationResultDictionary
 {
     XCUIElement *resultTextView = self.testApp.textViews[@"resultInfo"];
     [self waitForElement:resultTextView];

@@ -78,8 +78,8 @@
     [self assertAccessTokenNotNil];
     [self assertScopesReturned:[request.expectedResultScopes msidScopeSet].array];
 
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSString *homeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(homeAccountId);
 
     [self closeResultView];
@@ -239,8 +239,8 @@
     [profileEditButton msidTap];
     [self assertAccessTokenNotNil];
 
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *profileHomeAccountId = resultDictionary[@"user"][@"home_account_id"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSString *profileHomeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(profileHomeAccountId);
     [self closeResultView];
 

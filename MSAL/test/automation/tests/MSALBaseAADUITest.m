@@ -106,16 +106,15 @@
     [self assertScopesReturned:[[request.expectedResultScopes msidScopeSet] array]];
     [self assertAuthorityReturned:request.expectedResultAuthority];
 
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSString *homeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(homeAccountId);
 
     if (request.testAccount)
     {
-        NSDictionary *result = [self resultDictionary];
-        NSString *resultTenantId = result[@"tenantId"];
+        NSString *resultTenantId = result.userInformation.tenantId;
 
-        NSString *idToken = result[@"id_token"];
+        NSString *idToken = result.idToken;
         XCTAssertNotNil(idToken);
 
         MSIDIdTokenClaims *claims = [MSIDAADIdTokenClaimsFactory claimsFromRawIdToken:idToken error:nil];

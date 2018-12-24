@@ -145,11 +145,11 @@
     NSDictionary *configuration = [self configWithTestRequest:request];
     [self readAccounts:configuration];
 
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertEqual([result[@"account_count"] integerValue], 1);
-    NSArray *accounts = result[@"accounts"];
-    NSDictionary *firstAccount = accounts[0];
-    XCTAssertEqualObjects(firstAccount[@"home_account_id"], homeAccountId);
+    MSIDAutomationAccountsResult *result = [self automationAccountsResult];
+    XCTAssertEqual([result.accounts count], 1);
+    NSArray *accounts = result.accounts;
+    MSIDAutomationUserInformation *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount.homeAccountId, homeAccountId);
     [self closeResultView];
 
     // 2. Run silent with a different authority alias
@@ -283,11 +283,11 @@
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
-    NSDictionary *resultContent = [self resultDictionary];
-    NSArray *declinedScopes = resultContent[@"user_info"][MSALDeclinedScopesKey];
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    NSArray *declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    NSArray *grantedScopes = resultContent[@"user_info"][MSALGrantedScopesKey];
+    NSArray *grantedScopes = result.errorUserInfo[MSALGrantedScopesKey];
     NSOrderedSet *expectedGrantedScopes = [supportedScope msidScopeSet];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:[NSOrderedSet orderedSetWithArray:grantedScopes]]);
 
@@ -300,11 +300,11 @@
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
-    resultContent = [self resultDictionary];
-    declinedScopes = resultContent[@"user_info"][MSALDeclinedScopesKey];
+    result = [self automationErrorResult];
+    declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    grantedScopes = resultContent[@"user_info"][MSALGrantedScopesKey];
+    grantedScopes = result.errorUserInfo[MSALGrantedScopesKey];
     XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:[NSOrderedSet orderedSetWithArray:grantedScopes]]);
 
     [self closeResultView];

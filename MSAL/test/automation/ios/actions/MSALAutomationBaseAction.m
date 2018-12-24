@@ -35,6 +35,10 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDAutomationTestResult.h"
 #import "MSALResult+Automation.h"
+#import "MSIDAutomationErrorResult.h"
+#import "MSIDAutomationSuccessResult.h"
+#import "MSALAccount.h"
+#import "MSALAccount+Internal.h"
 
 @implementation MSALAutomationBaseAction
 
@@ -120,40 +124,11 @@
 
 - (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error
 {
-    NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-
-    NSMutableDictionary *errorDictionary = [NSMutableDictionary new];
-    errorDictionary[@"error_title"] = errorString;
-
-    if ([error.domain isEqualToString:MSALErrorDomain])
-    {
-        errorDictionary[@"error_code"] = MSALStringForErrorCode(error.code);
-        errorDictionary[@"error_description"] = error.userInfo[MSALErrorDescriptionKey];
-
-        if (error.userInfo[MSALOAuthSubErrorKey])
-        {
-            errorDictionary[@"subcode"] = error.userInfo[MSALOAuthSubErrorKey];
-        }
-
-        if (error.userInfo[NSUnderlyingErrorKey])
-        {
-            errorDictionary[@"underlying_error"] = [error.userInfo[NSUnderlyingErrorKey] description];
-        }
-
-        NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
-        [userInfo removeObjectForKey:NSUnderlyingErrorKey];
-        [userInfo removeObjectForKey:MSALInvalidResultKey];
-
-        errorDictionary[@"user_info"] = userInfo;
-    }
-    else if ([error.domain isEqualToString:MSIDErrorDomain])
-    {
-        @throw @"MSID errors should never be seen in MSAL";
-    }
-
-    MSIDAutomationTestResult *result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:NO additionalInfo:errorDictionary];
-
-    return result;
+    NSString *errorName = MSALStringForErrorCode(error.code);
+    return [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
+                                                       error:error
+                                                   errorName:errorName
+                                              additionalInfo:nil];
 }
 
 - (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error
@@ -163,8 +138,31 @@
         return [self testResultWithMSALError:error];
     }
 
-    NSDictionary *resultDictionary = [msalResult itemAsDictionary];
-    return [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:YES additionalInfo:resultDictionary];
+    NSString *scopeString = [msalResult.scopes componentsJoinedByString:@" "];
+    NSInteger expiresOn = [msalResult.expiresOn timeIntervalSince1970];
+
+    MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
+    userInfo.objectId = msalResult.account.localAccountId.objectId;
+    userInfo.tenantId = msalResult.tenantId;
+    userInfo.username = msalResult.account.username;
+    userInfo.homeAccountId = msalResult.account.homeAccountId.identifier;
+    userInfo.localAccountId = msalResult.account.localAccountId.identifier;
+    userInfo.homeObjectId = msalResult.account.homeAccountId.objectId;
+    userInfo.homeTenantId = msalResult.account.homeAccountId.tenantId;
+    userInfo.environment = msalResult.account.environment;
+
+    MSIDAutomationTestResult *result = [[MSIDAutomationSuccessResult alloc] initWithAction:self.actionIdentifier
+                                                                               accessToken:msalResult.accessToken
+                                                                              refreshToken:@""
+                                                                                   idToken:msalResult.idToken
+                                                                                 authority:msalResult.authority.url.absoluteString
+                                                                                    target:scopeString
+                                                                             expiresOnDate:expiresOn
+                                                                                    isMRRT:YES
+                                                                           userInformation:userInfo
+                                                                            additionalInfo:nil];
+
+    return result;
 }
 
 @end

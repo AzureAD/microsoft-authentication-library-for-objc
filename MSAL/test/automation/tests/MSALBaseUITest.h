@@ -27,6 +27,9 @@
 #import "MSIDTestAutomationConfiguration.h"
 #import "MSIDTestAutomationConfigurationRequest.h"
 #import "MSIDAutomationTestRequest.h"
+#import "MSIDAutomationErrorResult.h"
+#import "MSIDAutomationSuccessResult.h"
+#import "MSIDAutomationAccountsResult.h"
 
 @interface MSALBaseUITest : XCTestCase
 
@@ -42,12 +45,10 @@
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
-- (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key;
 - (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
 - (void)assertAuthorityReturned:(NSString *)expectedAuthority;
 - (NSDictionary *)resultIDTokenClaims;
-- (void)assertRefreshTokenNotNil;
 
 - (void)closeResultView;
 - (void)invalidateRefreshToken:(NSDictionary *)config;
@@ -74,9 +75,12 @@
 - (void)readAccounts:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
-- (NSDictionary *)resultDictionary;
 - (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
+
+- (MSIDAutomationErrorResult *)automationErrorResult;
+- (MSIDAutomationSuccessResult *)automationSuccessResult;
+- (MSIDAutomationAccountsResult *)automationAccountsResult;
 
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
 

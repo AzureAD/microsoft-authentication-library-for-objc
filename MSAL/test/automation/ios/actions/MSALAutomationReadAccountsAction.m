@@ -32,6 +32,8 @@
 #import "MSALUser+Automation.h"
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
+#import "MSIDAutomationAccountsResult.h"
+#import "MSALAccount+Internal.h"
 
 @implementation MSALAutomationReadAccountsAction
 
@@ -74,19 +76,23 @@
         return;
     }
 
-    NSMutableDictionary *resultDictionary = [NSMutableDictionary dictionary];
-    resultDictionary[@"account_count"] = @([accounts count]);
-
     NSMutableArray *items = [NSMutableArray array];
 
     for (MSALAccount *account in accounts)
     {
-        [items addObject:[account itemAsDictionary]];
+        MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
+        userInfo.objectId = account.localAccountId.objectId;
+        userInfo.tenantId = account.localAccountId.tenantId;
+        userInfo.username = account.username;
+        userInfo.homeAccountId = account.homeAccountId.identifier;
+        userInfo.localAccountId = account.localAccountId.identifier;
+        userInfo.homeObjectId = account.homeAccountId.objectId;
+        userInfo.homeTenantId = account.homeAccountId.tenantId;
+        userInfo.environment = account.environment;
+        [items addObject:userInfo];
     }
 
-    resultDictionary[@"accounts"] = items;
-
-    MSIDAutomationTestResult *result = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:YES additionalInfo:resultDictionary];
+    MSIDAutomationAccountsResult *result = [[MSIDAutomationAccountsResult alloc] initWithAction:self.actionIdentifier accounts:items additionalInfo:nil];
     completionBlock(result);
 }
 

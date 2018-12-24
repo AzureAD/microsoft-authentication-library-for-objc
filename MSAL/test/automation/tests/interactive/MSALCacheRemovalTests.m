@@ -66,8 +66,7 @@
     request.homeAccountIdentifier = homeAccountId;
     NSDictionary *config = [self configWithTestRequest:request];
     [self signout:config];
-    NSDictionary *resultDictionary = [self resultDictionary];
-    XCTAssertEqualObjects(resultDictionary[@"success"], @1);
+    XCTAssertNotNil([self automationSuccessResult]);
     [self closeResultView];
 
     // 3. Try silent and expect failure
@@ -114,8 +113,7 @@
     firstRequest.homeAccountIdentifier = firstHomeAccountId;
     NSDictionary *config = [self configWithTestRequest:firstRequest];
     [self signout:config];
-    NSDictionary *resultDictionary = [self resultDictionary];
-    XCTAssertEqualObjects(resultDictionary[@"success"], @1);
+    XCTAssertNotNil([self automationSuccessResult]);
     [self closeResultView];
 
     // 4. Try silent and expect failure for the first account

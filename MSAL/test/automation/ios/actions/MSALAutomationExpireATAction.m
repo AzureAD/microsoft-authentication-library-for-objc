@@ -87,7 +87,8 @@
     accessToken.expiresOn = [NSDate dateWithTimeIntervalSinceNow:-1.0];
     BOOL result = [self.accountCredentialCache saveCredential:accessToken.tokenCacheItem context:nil error:nil];
 
-    MSIDAutomationTestResult *testResult = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:result additionalInfo:@{@"expired_access_token_count": @1}];
+    MSIDAutomationTestResult *testResult = [[MSIDAutomationTestResult alloc] initWithAction:self.actionIdentifier success:result additionalInfo:nil];
+    testResult.actionCount = 1;
     completionBlock(testResult);
 }
 

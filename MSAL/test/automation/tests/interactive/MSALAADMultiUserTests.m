@@ -107,8 +107,8 @@
     NSDictionary *configuration = [self configWithTestRequest:request];
     [self readAccounts:configuration];
 
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertEqual([result[@"account_count"] integerValue], 2);
+    MSIDAutomationAccountsResult *result = [self automationAccountsResult];
+    XCTAssertEqual([result.accounts count], 2);
     [self closeResultView];
 }
 
