@@ -71,7 +71,7 @@
 
     // 3. Try silent and expect failure
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"no_account"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
 }
 
 - (void)testRemoveAADAccount_whenMultipleAccountsInCache_andConvergedApp
@@ -118,7 +118,7 @@
 
     // 4. Try silent and expect failure for the first account
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"no_account"];
+    [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self closeResultView];
 
     // 5. Expect silent to still work for the second account
