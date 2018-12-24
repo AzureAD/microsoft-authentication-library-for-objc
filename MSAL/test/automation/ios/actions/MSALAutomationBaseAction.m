@@ -110,9 +110,9 @@
     {
         return [application accountForHomeAccountId:accountIdentifier error:error];
     }
-    else if (parameters.displayableAccountIdentifier)
+    else if (parameters.legacyAccountIdentifier)
     {
-        return [application accountForUsername:parameters.displayableAccountIdentifier error:error];
+        return [application accountForUsername:parameters.legacyAccountIdentifier error:error];
     }
 
     return nil;
