@@ -120,32 +120,6 @@ static NSDictionary *s_userInfoKeyMapping;
                              };
 }
 
-+ (NSErrorDomain)msalErrorDomainFromMsidError:(NSError *)msidError
-{
-    if (!msidError) return nil;
-    NSString *newDomain = s_errorDomainMapping[msidError.domain];
-    
-    return newDomain;
-}
-
-+ (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError
-{
-    if (!msidError) return MSALErrorInternal;
-    
-    NSString *msalDomain = [self msalErrorDomainFromMsidError:msidError];
-    if (!msalDomain) return msidError.code;
-    
-    
-    NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msidError.code)];
-    if (!mappedErrorCode)
-    {
-        NSAssert(NO, @"Error mapping incorrect - domain found, but code no match.");
-        return MSALErrorInternal;
-    }
-    
-    return [mappedErrorCode integerValue];
-}
-
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
 {
     return [self errorWithDomain:msidError.domain
