@@ -120,32 +120,6 @@ static NSDictionary *s_userInfoKeyMapping;
                              };
 }
 
-+ (NSErrorDomain)msalErrorDomainFromMsidError:(NSError *)msidError
-{
-    if (!msidError) return nil;
-    NSString *newDomain = s_errorDomainMapping[msidError.domain];
-    
-    return newDomain;
-}
-
-+ (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError
-{
-    if (!msidError) return MSALErrorInternal;
-    
-    NSString *msalDomain = [self msalErrorDomainFromMsidError:msidError];
-    if (!msalDomain) return msidError.code;
-    
-    
-    NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msidError.code)];
-    if (!mappedErrorCode)
-    {
-        MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msalDomain, (long)msidError.code);
-        return msidError.code;
-    }
-    
-    return [mappedErrorCode integerValue];
-}
-
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
 {
     return [self errorWithDomain:msidError.domain
@@ -171,29 +145,19 @@ static NSDictionary *s_userInfoKeyMapping;
     {
         return nil;
     }
-
-    NSString *msalDomain = domain;
-
+    
     // Map domain
-    NSString *newDomain = s_errorDomainMapping[domain];
-    if (newDomain)
-    {
-        msalDomain = newDomain;
-    }
-
+    NSString *mappedDomain = s_errorDomainMapping[domain];
+    
     // Map errorCode
     // errorCode mapping is needed only if domain is mapped
-    NSInteger msalErrorCode = code;
-    if (msalDomain && msalErrorCode && s_errorCodeMapping[msalDomain])
+    NSNumber *mappedCode = nil;
+    if (mappedDomain && s_errorCodeMapping[mappedDomain])
     {
-        NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msalErrorCode)];
-        if (mappedErrorCode != nil)
+        mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
+        if (!mappedCode)
         {
-            msalErrorCode = [mappedErrorCode integerValue];
-        }
-        else
-        {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)msalErrorCode);
+            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, code);
         }
     }
 
@@ -228,7 +192,9 @@ static NSDictionary *s_userInfoKeyMapping;
         [msalUserInfo removeObjectForKey:MSIDInvalidTokenResultKey];
     }
 
-    return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
+    return [NSError errorWithDomain:mappedDomain ? : domain
+                               code:mappedCode ? mappedCode.integerValue : code
+                           userInfo:msalUserInfo];
 }
 
 @end

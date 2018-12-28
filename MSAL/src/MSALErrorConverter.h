@@ -29,9 +29,6 @@
 
 @interface MSALErrorConverter : NSObject
 
-+ (NSErrorDomain)msalErrorDomainFromMsidError:(NSError *)msidError;
-+ (NSInteger)msalErrorCodeFromMsidError:(NSError *)msidError;
-
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError;
 
 @end
