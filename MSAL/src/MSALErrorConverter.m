@@ -139,8 +139,8 @@ static NSDictionary *s_userInfoKeyMapping;
     NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msidError.code)];
     if (!mappedErrorCode)
     {
-        MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", msalDomain, (long)msidError.code);
-        return msidError.code;
+        NSAssert(NO, @"Error mapping incorrect - domain found, but code no match.");
+        return MSALErrorInternal;
     }
     
     return [mappedErrorCode integerValue];
