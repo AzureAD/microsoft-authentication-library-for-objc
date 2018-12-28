@@ -80,12 +80,13 @@
     XCTAssertEqual(code, expectedErrorCode);
 }
 
-- (void)testErrorCodeFromMsidError_whenMappedDomainAndUnmappableCode_shouldReturnUnmappedCode
+- (void)testErrorCodeFromMsidError_whenMappedDomainAndUnmappableCode_shouldReturnErrorInternal
 {
     NSError *msidError = MSIDCreateError(MSIDErrorDomain, 99999, nil, nil, nil, nil, nil, nil);
-    NSInteger code = [MSALErrorConverter msalErrorCodeFromMsidError:msidError];
-    NSInteger expectedErrorCode = MSALErrorInternal;
-    XCTAssertEqual(code, expectedErrorCode);
+    XCTAssertThrowsSpecificNamed([MSALErrorConverter msalErrorCodeFromMsidError:msidError],
+                                 NSException,
+                                 NSInternalInconsistencyException,
+                                 @"Error mapping incorrect - domain found, but code no match");
 }
 
 - (void)testErrorCodeFromMsidError_whenUnmappedDomain_shouldReturnCodeAsIs
