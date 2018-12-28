@@ -192,8 +192,8 @@ static NSDictionary *s_userInfoKeyMapping;
         [msalUserInfo removeObjectForKey:MSIDInvalidTokenResultKey];
     }
 
-    return [NSError errorWithDomain:mappedDomain?:domain
-                               code:mappedCode? mappedCode.integerValue : code
+    return [NSError errorWithDomain:mappedDomain ? : domain
+                               code:mappedCode ? mappedCode.integerValue : code
                            userInfo:msalUserInfo];
 }
 
