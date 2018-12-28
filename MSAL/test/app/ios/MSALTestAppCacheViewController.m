@@ -267,7 +267,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (NSString *)rowIdentifier:(MSIDAccountIdentifier *)accountIdentifier
 {
-    return accountIdentifier.homeAccountId ? accountIdentifier.homeAccountId : accountIdentifier.legacyAccountId;
+    return accountIdentifier.homeAccountId ? accountIdentifier.homeAccountId : accountIdentifier.displayableId;
 }
 
 #pragma mark - UITableViewDataSource

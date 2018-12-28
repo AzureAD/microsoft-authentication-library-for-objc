@@ -788,7 +788,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -846,7 +846,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -908,7 +908,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -967,7 +967,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUser];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -1026,7 +1026,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAndAuthority];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
@@ -1088,7 +1088,7 @@
 
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
-         XCTAssertEqualObjects(params.accountIdentifier.legacyAccountId, @"user@contoso.com");
+         XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
          
