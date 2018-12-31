@@ -222,16 +222,20 @@
     }
 }
 
-- (void)testErrorConversion_whenDomainIsMappedAndCodeMissing_shouldThrowAssert
+- (void)testErrorConversion_whenDomainIsMappedAndCodeMissing_shouldReturnMSALInternalError
 {
-    XCTAssertThrows([MSALErrorConverter errorWithDomain:MSIDErrorDomain
-                                                   code:123456
-                                       errorDescription:@"Unmapped code error"
-                                             oauthError:nil
-                                               subError:nil
-                                        underlyingError:nil
-                                          correlationId:nil
-                                               userInfo:nil]);
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:123456
+                                            errorDescription:@"Unmapped code error"
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    
 }
 
 - (void)testErrorConversion_whenDomainNotMapped_shouldNotTouchCode
