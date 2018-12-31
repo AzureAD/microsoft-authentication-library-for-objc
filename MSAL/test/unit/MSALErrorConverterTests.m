@@ -222,5 +222,32 @@
     }
 }
 
+- (void)testErrorConversion_whenDomainIsMappedAndCodeMissing_shouldThrowAssert
+{
+    XCTAssertThrows([MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                   code:123456
+                                       errorDescription:@"Unmapped code error"
+                                             oauthError:nil
+                                               subError:nil
+                                        underlyingError:nil
+                                          correlationId:nil
+                                               userInfo:nil]);
+}
+
+- (void)testErrorConversion_whenDomainNotMapped_shouldNotTouchCode
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:@"Unmapped Domain"
+                                                        code:MSIDErrorUserCancel
+                                            errorDescription:nil
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
+    XCTAssertEqual(msalError.code, MSIDErrorUserCancel);
+}
+
 @end
 

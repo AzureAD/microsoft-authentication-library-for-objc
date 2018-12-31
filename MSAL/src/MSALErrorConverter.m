@@ -99,9 +99,6 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
-                                   },
-                           MSIDHttpErrorCodeDomain: @{
-                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
     
@@ -150,17 +147,18 @@ static NSDictionary *s_userInfoKeyMapping;
     NSString *mappedDomain = s_errorDomainMapping[domain];
     
     // Map errorCode
-    // errorCode mapping is needed only if domain is mapped
+    // errorCode mapping is needed only if domain is mapped to MSALErrorDomain
     NSNumber *mappedCode = nil;
-    if (mappedDomain && s_errorCodeMapping[mappedDomain])
+    if (mappedDomain == MSALErrorDomain)
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (!mappedCode)
         {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, code);
+            MSID_LOG_ERROR(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, code);
+            NSAssert(NO, @"Error converter assert - Error mapping incomplete  for domain (%@) + error code (%ld).", domain, code);
         }
     }
-
+    
     NSMutableDictionary *msalUserInfo = [NSMutableDictionary new];
 
     for (NSString *key in [userInfo allKeys])
