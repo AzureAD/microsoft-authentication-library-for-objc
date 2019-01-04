@@ -154,7 +154,7 @@ static NSDictionary *s_userInfoKeyMapping;
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (!mappedCode)
         {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, code);
+            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
         }
     }
