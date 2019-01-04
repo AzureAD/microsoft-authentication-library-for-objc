@@ -67,6 +67,9 @@
 #import "MSALRedirectUri.h"
 #import "MSIDConfiguration.h"
 #import "MSIDAppMetadataCacheItem.h"
+#import "MSIDIntuneUserDefaultsCacheDataSource.h"
+#import "MSIDIntuneMAMResourcesCache.h"
+#import "MSIDIntuneEnrollmentIdsCache.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -92,6 +95,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #else
     return nil;
 #endif
+}
+
++ (void)load
+{
+    [MSIDIntuneMAMResourcesCache setSharedCache:[[MSIDIntuneMAMResourcesCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
+    [MSIDIntuneEnrollmentIdsCache setSharedCache:[[MSIDIntuneEnrollmentIdsCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
 }
 
 - (id)initWithClientId:(NSString *)clientId
