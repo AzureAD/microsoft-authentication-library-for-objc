@@ -65,7 +65,7 @@ static BOOL msalAppInstalled = NO;
     request.scopes = @"https://graph.windows.net/.default";
     request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
     request.authority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
 
     NSDictionary *config = [self configWithTestRequest:request];
 
@@ -93,7 +93,7 @@ static BOOL msalAppInstalled = NO;
 - (void)testCoexistenceWithOtherMSAL_startSigninInCurrentMSAL_withAADAccount_andUseDifferentAuthorities
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
@@ -147,7 +147,7 @@ static BOOL msalAppInstalled = NO;
 - (void)testCoexistenceWithOtherMSAL_startSigninInCurrentMSAL_withAADAccount_OtherMSALUsesFRTToRefreshAccessToken
 {
     MSALTestRequest *request = [MSALTestRequest fociRequestWithOnedriveApp];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.authority = @"https://login.microsoftonline.com/organizations";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;

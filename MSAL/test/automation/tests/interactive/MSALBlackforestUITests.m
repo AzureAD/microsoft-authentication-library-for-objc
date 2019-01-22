@@ -52,7 +52,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
     request.expectedResultScopes = request.requestScopes;
@@ -87,7 +87,7 @@
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -122,7 +122,7 @@
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
@@ -148,7 +148,7 @@
     NSString *environment = @"de";
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
     request.clientId = self.testConfiguration.clientId;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;

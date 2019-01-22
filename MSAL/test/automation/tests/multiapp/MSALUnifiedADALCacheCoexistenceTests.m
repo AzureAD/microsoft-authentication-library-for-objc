@@ -112,7 +112,7 @@ static BOOL adalAppInstalled = NO;
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
 {
     MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.authority = @"https://login.windows.net/organizations";
     request.loginHint = self.primaryAccount.account;
     request.testAccount = self.primaryAccount;
@@ -163,7 +163,7 @@ static BOOL adalAppInstalled = NO;
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh_withFOCIToken
 {
     MSALTestRequest *firstAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
-    firstAppRequest.uiBehavior = @"force";
+    firstAppRequest.promptBehavior = @"force";
     firstAppRequest.authority = @"https://login.windows.net/organizations";
     firstAppRequest.loginHint = self.primaryAccount.account;
     firstAppRequest.testAccount = self.primaryAccount;

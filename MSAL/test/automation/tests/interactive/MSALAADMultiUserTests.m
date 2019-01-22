@@ -65,7 +65,7 @@
 
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
@@ -119,7 +119,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Sign in first time to ensure account will be there
@@ -130,7 +130,7 @@
     [self.testApp launch];
 
     // 2. Now call acquire token again with home account ID
-    request.uiBehavior = @"select_account";
+    request.promptBehavior = @"select_account";
     request.homeAccountIdentifier = homeAccountId;
     NSDictionary *config = [self configWithTestRequest:request];
 

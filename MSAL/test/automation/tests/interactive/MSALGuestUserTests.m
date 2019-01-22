@@ -50,7 +50,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
@@ -83,7 +83,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultNonConvergedAppRequest];
-    homeRequest.uiBehavior = @"force";
+    homeRequest.promptBehavior = @"force";
     homeRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     homeRequest.expectedResultScopes = [NSString msidCombinedScopes:homeRequest.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
     homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
@@ -107,7 +107,7 @@
 
     // 3. Run silent for the guest tenant
     MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultNonConvergedAppRequest];
-    guestRequest.uiBehavior = @"force";
+    guestRequest.promptBehavior = @"force";
     guestRequest.testAccount = self.primaryAccount;
     guestRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     guestRequest.expectedResultScopes = [NSString msidCombinedScopes:guestRequest.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
@@ -125,7 +125,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultConvergedAppRequest:environment];
-    guestRequest.uiBehavior = @"force";
+    guestRequest.promptBehavior = @"force";
     guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     guestRequest.expectedResultAuthority = guestRequest.configurationAuthority;
     guestRequest.cacheAuthority = guestRequest.configurationAuthority;
@@ -140,7 +140,7 @@
 
     // 2. Run interactive in the home tenant
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultConvergedAppRequest:environment];
-    homeRequest.uiBehavior = @"force";
+    homeRequest.promptBehavior = @"force";
     homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.homeTenantId];
     homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
     homeRequest.cacheAuthority = homeRequest.configurationAuthority;

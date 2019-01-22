@@ -1955,7 +1955,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\nfi";
+			shellScript = "FILENAME=conf.json\nRESOURCE_PATH=~/aadtests/$FILENAME\nBUILD_APP_DIR=${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}-Runner.app/PlugIns/${PRODUCT_NAME}.xctest\n\nif [ -e $RESOURCE_PATH ]\nthen cp $RESOURCE_PATH $BUILD_APP_DIR/$FILENAME\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

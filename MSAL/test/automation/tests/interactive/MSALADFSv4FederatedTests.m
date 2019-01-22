@@ -52,7 +52,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
 
     // 1. Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
@@ -71,7 +71,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.webViewType = MSIDWebviewTypeSafariViewController;
@@ -88,7 +88,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
     request.expectedResultScopes = request.requestScopes;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.webViewType = MSIDWebviewTypeWKWebView;

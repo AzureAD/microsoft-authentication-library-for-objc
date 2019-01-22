@@ -55,7 +55,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
 
     // 1. Do interactive login
@@ -75,7 +75,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.username;
@@ -92,7 +92,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.username;

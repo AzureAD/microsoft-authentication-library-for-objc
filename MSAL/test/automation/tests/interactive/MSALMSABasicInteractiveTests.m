@@ -56,7 +56,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
     request.expectedResultAuthority = request.cacheAuthority;
@@ -78,7 +78,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
     request.webViewType = MSIDWebviewTypeSafariViewController;
@@ -101,7 +101,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
     request.loginHint = self.primaryAccount.account;
@@ -122,7 +122,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"consumers"];
     request.loginHint = self.primaryAccount.account;
@@ -145,7 +145,7 @@
     // 1. Sign in first time to ensure account will be there
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
@@ -155,7 +155,7 @@
     request.expectedResultAuthority = request.cacheAuthority;
     [self runSharedAADLoginWithTestRequest:request];
 
-    request.uiBehavior = @"select_account";
+    request.promptBehavior = @"select_account";
     request.loginHint = nil;
     request.testAccount = nil;
 

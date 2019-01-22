@@ -54,7 +54,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.account;
 
@@ -78,7 +78,7 @@
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
     MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultNonConvergedAppRequest];
-    firstRequest.uiBehavior = @"force";
+    firstRequest.promptBehavior = @"force";
     firstRequest.testAccount = self.primaryAccount;
     firstRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     firstRequest.expectedResultScopes = firstRequest.requestScopes;
@@ -95,7 +95,7 @@
     [self loadPasswordForAccount:self.primaryAccount];
 
     MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultNonConvergedAppRequest];
-    secondRequest.uiBehavior = @"force";
+    secondRequest.promptBehavior = @"force";
     secondRequest.testAccount = self.primaryAccount;
     secondRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     secondRequest.expectedResultScopes = secondRequest.requestScopes;

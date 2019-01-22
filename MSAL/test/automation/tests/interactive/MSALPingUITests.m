@@ -85,7 +85,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Run interactive
@@ -109,7 +109,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
@@ -123,7 +123,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
     request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
-    request.uiBehavior = @"force";
+    request.promptBehavior = @"force";
     request.usePassedWebView = YES;
     
     // 1. Run interactive

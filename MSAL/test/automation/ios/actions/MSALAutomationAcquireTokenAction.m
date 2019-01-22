@@ -84,15 +84,15 @@
 
     MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
 
-    if ([testRequest.uiBehavior isEqualToString:@"force"])
+    if ([testRequest.promptBehavior isEqualToString:@"force"])
     {
         uiBehavior = MSALForceLogin;
     }
-    else if ([testRequest.uiBehavior isEqualToString:@"consent"])
+    else if ([testRequest.promptBehavior isEqualToString:@"consent"])
     {
         uiBehavior = MSALForceConsent;
     }
-    else if ([testRequest.uiBehavior isEqualToString:@"prompt_if_necessary"])
+    else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
         uiBehavior = MSALPromptIfNecessary;
     }

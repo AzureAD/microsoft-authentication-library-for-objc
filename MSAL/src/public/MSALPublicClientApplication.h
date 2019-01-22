@@ -252,7 +252,7 @@
 /*!
  Ask MSAL to handle a URL response.
 
- @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sesssions
+ @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sessions
  @param   sourceApplication     The application that opened your app with that URL. Can be retrieved from options by UIApplicationOpenURLOptionsSourceApplicationKey key.
                                 See more info here: https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623112-application?language=objc
                                 Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.

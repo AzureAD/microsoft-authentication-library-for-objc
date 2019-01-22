@@ -65,7 +65,7 @@
 
     MSALAuthority *msalAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
 
-    MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:testRequest.homeAccountIdentifier];
+    MSIDAccountIdentifier *account = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:testRequest.homeAccountIdentifier];
 
     MSIDConfiguration *configuration = [[MSIDConfiguration alloc] initWithAuthority:msalAuthority.msidAuthority
                                                                         redirectUri:nil

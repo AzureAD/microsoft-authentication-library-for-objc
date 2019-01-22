@@ -334,7 +334,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)clearKeychain
 {
-    [self.testApp.buttons[MSID_AUTO_CLEAR_KEYCHAIN_ACTION_IDENTIFIER] msidTap];
+    [self.testApp.buttons[MSID_AUTO_CLEAR_CACHE_ACTION_IDENTIFIER] msidTap];
     [self waitForElement:self.testApp.buttons[@"Done"]];
     [self.testApp.buttons[@"Done"] msidTap];
 }

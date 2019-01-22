@@ -100,7 +100,7 @@
     MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
     NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
 
-    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:nil homeAccountId:homeAccountId];
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:homeAccountId];
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
                                                           clientId:self.clientId
                                                           familyId:familyId
@@ -131,7 +131,7 @@
     MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
     NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
 
-    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:nil];
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:nil];
 
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
                                                           clientId:self.clientId
