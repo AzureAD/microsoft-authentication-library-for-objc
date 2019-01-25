@@ -31,6 +31,8 @@
 
 @interface MSALAADMultiUserTests : MSALBaseAADUITest
 
+@property (nonatomic) NSString *testEnvironment;
+
 @end
 
 @implementation MSALAADMultiUserTests
@@ -41,10 +43,11 @@
 {
     [super setUp];
     
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
+    
     // Load multiple accounts conf
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.needsMultipleUsers = YES;
     // TODO: no other app returns multiple accounts
     configurationRequest.appName = @"IDLABSAPP";
@@ -63,14 +66,12 @@
     // 1. Sign in with first account
     self.primaryAccount = firstAccount;
 
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
 
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(firstHomeAccountId);
@@ -88,7 +89,7 @@
     // 3. Now do silent token refresh for first account
     self.primaryAccount = firstAccount;
 
-    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.homeAccountIdentifier = firstHomeAccountId;
     request.testAccount = self.primaryAccount;
 
@@ -97,7 +98,7 @@
     // 4. Do silent for user 2 now
     self.primaryAccount = secondaryAccount;
 
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.homeAccountIdentifier = secondHomeAccountId;
     request.testAccount = self.primaryAccount;
 
@@ -114,10 +115,9 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_whenWrongAccountReturned
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.promptBehavior = @"force";
     request.webViewType = MSIDWebviewTypeWKWebView;

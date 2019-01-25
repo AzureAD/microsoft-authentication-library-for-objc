@@ -30,6 +30,8 @@
 
 @interface MSALADFSv4FederatedTests : MSALADFSBaseUITest
 
+@property (nonatomic) NSString *testEnvironment;
+
 @end
 
 @implementation MSALADFSv4FederatedTests
@@ -37,6 +39,8 @@
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderADfsv4;
@@ -47,11 +51,10 @@
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_noLoginHint_andSystemWebView
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph"];
-    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:[self.class.confProvider scopesForEnvironment:environment type:@"oidc"]];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.promptBehavior = @"force";
 
     // 1. Do interactive login
@@ -60,16 +63,15 @@
 
     // 2. Now do silent login #296725
     request.homeAccountIdentifier = homeAccountId;
-    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_withLoginHint_andSafariViewController
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
@@ -83,10 +85,9 @@
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_withLoginHint_andEmbeddedWebView
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
-    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"ms_graph_prefixed"];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_prefixed"];
     request.expectedResultScopes = request.requestScopes;
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;

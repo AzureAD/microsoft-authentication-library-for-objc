@@ -30,6 +30,8 @@
 
 @interface MSALCacheRemovalTests : MSALBaseAADUITest
 
+@property (nonatomic) NSString *testEnvironment;
+
 @end
 
 @implementation MSALCacheRemovalTests
@@ -38,10 +40,11 @@
 {
     [super setUp];
     
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
+    
     // Load multiple accounts conf
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.needsMultipleUsers = YES;
     // TODO: no other app returns multiple accounts
     configurationRequest.appName = @"IDLABSAPP";
@@ -52,8 +55,7 @@
 
 - (void)testRemoveAADAccount_whenOnlyOneAccountInCache_andConvergedApp
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.account;
@@ -76,16 +78,15 @@
 
 - (void)testRemoveAADAccount_whenMultipleAccountsInCache_andConvergedApp
 {
-    NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *firstRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     firstRequest.promptBehavior = @"force";
     firstRequest.testAccount = self.primaryAccount;
-    firstRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    firstRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     firstRequest.expectedResultScopes = firstRequest.requestScopes;
     firstRequest.loginHint = self.primaryAccount.account;
     firstRequest.testAccount = self.primaryAccount;
-    firstRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    firstRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    firstRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    firstRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive login for the first account
     NSString *firstHomeAccountId = [self runSharedAADLoginWithTestRequest:firstRequest];
@@ -94,15 +95,15 @@
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];
 
-    MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *secondRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     secondRequest.promptBehavior = @"force";
     secondRequest.testAccount = self.primaryAccount;
-    secondRequest.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    secondRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     secondRequest.expectedResultScopes = secondRequest.requestScopes;
     secondRequest.loginHint = self.primaryAccount.account;
     secondRequest.testAccount = self.primaryAccount;
-    secondRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"common"];
-    secondRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
+    secondRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    secondRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
     // 2. Run interactive login for the second account
     NSString *secondHomeAccountId = [self runSharedAADLoginWithTestRequest:secondRequest];

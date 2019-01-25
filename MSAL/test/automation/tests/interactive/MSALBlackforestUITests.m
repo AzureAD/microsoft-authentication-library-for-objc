@@ -51,7 +51,7 @@
 - (void)testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
@@ -85,7 +85,7 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.clientId = self.testConfiguration.clientId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
@@ -120,7 +120,7 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.clientId = self.testConfiguration.clientId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
@@ -129,7 +129,6 @@
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.account;
 
     // 1. Run interactive
@@ -146,7 +145,7 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
     NSString *environment = @"de";
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.clientId = self.testConfiguration.clientId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
@@ -154,8 +153,6 @@
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
-    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:self.primaryAccount.targetTenantId];
-    request.cacheAuthority = request.expectedResultAuthority;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];

@@ -31,6 +31,7 @@
 #import "XCUIElement+CrossPlat.h"
 #import "MSIDAADIdTokenClaimsFactory.h"
 #import "MSIDAutomationActionConstants.h"
+#import "MSIDTestConfigurationProvider.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
 
@@ -39,6 +40,9 @@ static MSIDTestConfigurationProvider *s_confProvider;
 + (void)setUp
 {
     [super setUp];
+    
+    MSIDTestAutomationConfiguration.defaultRegisteredScheme = @"x-msauth-msalautomationapp";
+    
     NSString *confPath = [[NSBundle bundleForClass:[self class]] pathForResource:@"conf" ofType:@"json"];
     self.class.confProvider = [[MSIDTestConfigurationProvider alloc] initWithConfigurationPath:confPath];
 }
