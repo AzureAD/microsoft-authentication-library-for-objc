@@ -48,6 +48,7 @@
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderMSA;
+    configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.accountFeatures = @[];
     [self loadTestConfiguration:configurationRequest];
 }
