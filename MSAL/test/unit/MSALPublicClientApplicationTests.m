@@ -379,8 +379,8 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
-         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.logComponent, @"MSAL");
          XCTAssertNotNil(params.correlationId);
@@ -434,11 +434,11 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
-         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          
          completionBlock(nil, nil);
@@ -486,9 +486,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
-         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypeLogin);
@@ -542,9 +542,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
-         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          XCTAssertEqualObjects(params.extraScopesToConsent, @"fakescope3");
          XCTAssertEqual(params.promptType, MSIDPromptTypeConsent);
@@ -608,9 +608,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
-         XCTAssertNil(params.extraQueryParameters);
+         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
@@ -668,9 +668,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertNotNil(params.correlationId);
-         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
@@ -731,9 +731,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          XCTAssertEqualObjects(params.correlationId, correlationId);
-         XCTAssertEqualObjects(params.extraQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
+         XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.accountIdentifier, account.lookupAccountIdentifier);
          XCTAssertEqualObjects(params.extraScopesToConsent, @"fakescope3");
@@ -790,7 +790,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" msalAuthority].msidAuthority);
          
@@ -848,7 +848,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
@@ -910,7 +910,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
@@ -969,7 +969,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1028,7 +1028,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1090,7 +1090,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.sliceParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
