@@ -83,5 +83,8 @@
 - (MSIDAutomationAccountsResult *)automationAccountsResult;
 
 - (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
+- (NSDictionary *)automationResultDictionary;
+- (void)performAction:(NSString *)action
+           withConfig:(NSDictionary *)config;
 
 @end

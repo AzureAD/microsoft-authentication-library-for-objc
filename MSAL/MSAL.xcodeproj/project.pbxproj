@@ -83,6 +83,12 @@
 		B203459721AF77FC00B221AA /* MSALRedirectUri.m in Sources */ = {isa = PBXBuildFile; fileRef = B203459321AF77FB00B221AA /* MSALRedirectUri.m */; };
 		B203459D21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B203459C21AFA1FB00B221AA /* MSALRedirectUri+Internal.h */; };
 		B203459E21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B203459C21AFA1FB00B221AA /* MSALRedirectUri+Internal.h */; };
+		B20E245B21FEB31A0037CA5E /* MSAL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B20E245D21FEB3650037CA5E /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		B20E245E21FEB3BB0037CA5E /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		B20E246021FEB3E20037CA5E /* MSAL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */; };
+		B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */; };
 		B210E3E31FC23D4700E7A325 /* MSALErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B210E3E21FC23D4700E7A325 /* MSALErrorTests.m */; };
 		B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
 		B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
@@ -96,8 +102,6 @@
 		B221CEDE20C0AC60002F5E94 /* MSALAccountId.m in Sources */ = {isa = PBXBuildFile; fileRef = B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */; };
 		B221CEEB20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
 		B221CEEC20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
-		B2341A2A21507CA1008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
-		B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; };
 		B256121B217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B25A39D921C4C49D00213A62 /* MSALAutomationExpireATAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */; };
@@ -430,6 +434,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		B20E245621FEB30F0037CA5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B20E245B21FEB31A0037CA5E /* MSAL.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20E245F21FEB3D80037CA5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				B20E246021FEB3E20037CA5E /* MSAL.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2FE601E20E5BB5900502BA6 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -516,6 +540,7 @@
 		B203459221AF77FB00B221AA /* MSALRedirectUri.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALRedirectUri.h; sourceTree = "<group>"; };
 		B203459321AF77FB00B221AA /* MSALRedirectUri.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALRedirectUri.m; sourceTree = "<group>"; };
 		B203459C21AFA1FB00B221AA /* MSALRedirectUri+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALRedirectUri+Internal.h"; sourceTree = "<group>"; };
+		B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/AuthenticationServices.framework; sourceTree = DEVELOPER_DIR; };
 		B210E3E21FC23D4700E7A325 /* MSALErrorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorTests.m; sourceTree = "<group>"; };
 		B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALRedirectUriVerifier.h; sourceTree = "<group>"; };
 		B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALRedirectUriVerifier.m; sourceTree = "<group>"; };
@@ -728,7 +753,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2341A2B21507CA7008E93FC /* AuthenticationServices.framework in Frameworks */,
+				B20E245E21FEB3BB0037CA5E /* AuthenticationServices.framework in Frameworks */,
 				B29E2ADC21238F8200B170ED /* SafariServices.framework in Frameworks */,
 				B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */,
 				B29E2AD921238F7600B170ED /* libIdentityAutomation iOS.a in Frameworks */,
@@ -739,7 +764,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B2341A2A21507CA1008E93FC /* AuthenticationServices.framework in Frameworks */,
+				B20E245D21FEB3650037CA5E /* AuthenticationServices.framework in Frameworks */,
 				B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */,
 				B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */,
 				B2BB73952112C46A000EA4C5 /* libIdentityAutomation iOS.a in Frameworks */,
@@ -1347,6 +1372,7 @@
 			isa = PBXGroup;
 			children = (
 				963C89A6214BA1760051AFEE /* AuthenticationServices.framework */,
+				B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */,
 				B29E2AC421238E0000B170ED /* SafariServices.framework */,
 				B2BB739B2112C7F9000EA4C5 /* Security.framework */,
 				96902DFC20E1590200200E6F /* SecurityInterface.framework */,
@@ -1513,6 +1539,7 @@
 				B29E2ACB21238F5200B170ED /* Frameworks */,
 				B29E2ACC21238F5200B170ED /* Resources */,
 				B29E2AD821238F6C00B170ED /* ShellScript */,
+				B20E245F21FEB3D80037CA5E /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -1532,6 +1559,7 @@
 				B2BB736D2112C32C000EA4C5 /* Frameworks */,
 				B2BB736E2112C32C000EA4C5 /* Resources */,
 				B2BB739A2112C588000EA4C5 /* ShellScript */,
+				B20E245621FEB30F0037CA5E /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -1993,6 +2021,8 @@
 				B29E2AE421238FBE00B170ED /* XCTestCase+TextFieldTap.m in Sources */,
 				B2BDEEE821FEA205001EBB8B /* MSALMultiAppCacheCoexistenceTests.m in Sources */,
 				B29E2AE621238FBE00B170ED /* XCUIElement+CrossPlat.m in Sources */,
+				B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */,
+				B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */,
 				B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */,
 				B29E2AE021238FBE00B170ED /* MSALADFSBaseUITest.m in Sources */,
 			);

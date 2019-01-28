@@ -25,6 +25,8 @@
 
 @interface MSALUnifiedADALCacheCoexistenceTests : MSALBaseAADUITest
 
+@property (nonatomic) NSString *testEnvironment;
+
 @end
 
 @implementation MSALUnifiedADALCacheCoexistenceTests
@@ -36,6 +38,8 @@ static BOOL adalAppInstalled = NO;
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
     // We only need to install app once for all the tests
     // It would be better to use +(void)setUp here, but XCUIApplication launch doesn't work then, so using this mechanism instead
@@ -49,7 +53,6 @@ static BOOL adalAppInstalled = NO;
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     [self loadTestConfiguration:configurationRequest];
 }
 
@@ -59,14 +62,14 @@ static BOOL adalAppInstalled = NO;
 {
     // 1. Install previous ADAL version and signin
     self.testApp = [self adalUnifiedApp];
+    
+    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    adalRequest.promptBehavior = @"always";
+    adalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
 
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.validateAuthority = YES;
-    request.additionalParameters = @{@"prompt_behavior": @"always"};
+    NSDictionary *adalConfig = [self configWithTestRequest:adalRequest];
 
-    NSDictionary *config = [self configWithTestRequest:request];
-
-    [self acquireToken:config];
+    [self acquireToken:adalConfig];
     [self aadEnterEmail];
     [self aadEnterPassword];
 
@@ -76,78 +79,89 @@ static BOOL adalAppInstalled = NO;
     // 2. Switch to MSAL and acquire token silently with organizations authority
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
-
-    request.authority = @"https://login.windows.net/organizations";
-    request.additionalParameters = @{@"user_legacy_identifier": self.primaryAccount.account};
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-
+    
+    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    msalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    msalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    msalRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    msalRequest.expectedResultScopes = msalRequest.requestScopes;
+    
     // 3. Check accounts are correctly returned
-    NSDictionary *configuration = [self configWithTestRequest:request];
-    [self readAccounts:configuration];
-
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertEqual([result[@"account_count"] integerValue], 1);
-    NSArray *accounts = result[@"accounts"];
-    NSDictionary *firstAccount = accounts[0];
-    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    [self readAccounts:[self configWithTestRequest:msalRequest]];
+    MSIDAutomationAccountsResult *legacyAccountsResult = [self automationAccountsResult];
+    XCTAssertNotNil(legacyAccountsResult);
+    XCTAssertEqual(legacyAccountsResult.accounts.count, 1);
+    MSIDAutomationUserInformation *firstAccount = legacyAccountsResult.accounts[0];
+    XCTAssertEqualObjects(firstAccount.username, self.primaryAccount.account);
     [self closeResultView];
 
     // 4. Run silent tests
-    [self runSharedSilentAADLoginWithTestRequest:request];
+    [self runSharedSilentAADLoginWithTestRequest:msalRequest];
 
     // 5. Check accounts are correctly updated
-    configuration = [self configWithTestRequest:request];
-    [self readAccounts:configuration];
-
-    result = [self resultDictionary];
-    XCTAssertEqual([result[@"account_count"] integerValue], 1);
-    accounts = result[@"accounts"];
-    firstAccount = accounts[0];
-    XCTAssertEqualObjects(firstAccount[@"username"], self.primaryAccount.account);
+    [self readAccounts:[self configWithTestRequest:msalRequest]];
+    MSIDAutomationAccountsResult *msalAccountsResult = [self automationAccountsResult];
+    XCTAssertNotNil(msalAccountsResult);
+    XCTAssertEqual(msalAccountsResult.accounts.count, 1);
+    MSIDAutomationUserInformation *firstMSALAccount = msalAccountsResult.accounts[0];
+    XCTAssertEqualObjects(firstMSALAccount.username, self.primaryAccount.account);
+    XCTAssertEqualObjects(firstMSALAccount.homeAccountId, self.primaryAccount.homeAccountId);
+    [self closeResultView];
+    
+    // 6. Switch back to ADAL and make sure ADAL still works
+    adalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    adalRequest.cacheAuthority = adalRequest.configurationAuthority;
+    NSDictionary *adalSilentConfig = [self configWithTestRequest:adalRequest];
+    self.testApp = [self adalUnifiedApp];
+    [self acquireTokenSilent:adalSilentConfig];
+    [self assertAccessTokenNotNil];
+    [self closeResultView];
+    
+    [self expireAccessToken:adalSilentConfig];
+    [self assertAccessTokenExpired];
+    [self closeResultView];
+    
+    [self acquireTokenSilent:adalSilentConfig];
+    [self assertAccessTokenNotNil];
     [self closeResultView];
 }
 
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.promptBehavior = @"force";
-    request.authority = @"https://login.windows.net/organizations";
-    request.loginHint = self.primaryAccount.account;
-    request.testAccount = self.primaryAccount;
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    msalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:nil];
+    msalRequest.promptBehavior = @"force";
+    msalRequest.loginHint = self.primaryAccount.account;
+    msalRequest.testAccount = self.primaryAccount;
+    msalRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    msalRequest.expectedResultScopes = msalRequest.requestScopes;
 
     // 1. Sign into the MSAL test app
-    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
+    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:msalRequest];
     XCTAssertNotNil(homeAccountId);
 
     // 2.Switch to unified ADAL and acquire token silently with common authority
     self.testApp = [self adalUnifiedApp];
-    request.additionalParameters = @{@"prompt_behavior": @"always",
-                                     @"resource": @"https://graph.windows.net",
-                                     @"user_identifier": self.primaryAccount.account
-                                     };
-
-    request.authority = @"https://login.microsoftonline.com/common";
-    NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireTokenSilent:config];
+    
+    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    adalRequest.promptBehavior = @"always";
+    adalRequest.requestResource = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph"];
+    adalRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    adalRequest.configurationAuthority = msalRequest.configurationAuthority;
+    adalRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    
+    NSDictionary *adalConfig = [self configWithTestRequest:adalRequest];
+    [self acquireTokenSilent:adalConfig];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
     // 3. Now expire token in non-unified ADAL
-    request.authority = @"https://login.windows.net/common";
-    request.additionalParameters = @{@"user_identifier": self.primaryAccount.account,
-                                     @"resource": @"https://graph.windows.net"
-                                     };
-    config = [self configWithTestRequest:request];
-    [self expireAccessToken:config];
+    [self expireAccessToken:adalConfig];
     [self assertAccessTokenExpired];
     [self closeResultView];
 
     // 4. Now acquire token silently
-    [self acquireTokenSilent:config];
+    [self acquireTokenSilent:adalConfig];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
@@ -155,20 +169,20 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
 
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-    [self runSharedSilentAADLoginWithTestRequest:request];
+    msalRequest.homeAccountIdentifier = homeAccountId;
+    [self runSharedSilentAADLoginWithTestRequest:msalRequest];
 }
 
 - (void)testCoexistenceWithUnifiedADAL_startSigninInMSAL_withAADAccount_andDoTokenRefresh_withFOCIToken
 {
-    MSALTestRequest *firstAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
+    MSIDAutomationTestRequest *firstAppRequest = [self.class.confProvider defaultFociRequestWithBroker];
     firstAppRequest.promptBehavior = @"force";
-    firstAppRequest.authority = @"https://login.windows.net/organizations";
+    firstAppRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:@"organizations"];
     firstAppRequest.loginHint = self.primaryAccount.account;
     firstAppRequest.testAccount = self.primaryAccount;
-    firstAppRequest.scopes = @"https://graph.windows.net/.default";
-    firstAppRequest.expectedResultScopes = @[@"https://graph.windows.net/.default"];
+    firstAppRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    firstAppRequest.expectedResultScopes = firstAppRequest.requestScopes;
+    firstAppRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Sign into the MSAL test app
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:firstAppRequest];
@@ -176,27 +190,24 @@ static BOOL adalAppInstalled = NO;
 
     // 2.Switch to unified ADAL and acquire token silently with common authority
     self.testApp = [self adalUnifiedApp];
-    MSALTestRequest *secondAppRequest = [MSALTestRequest fociRequestWithOfficeApp];
-    secondAppRequest.additionalParameters = @{@"prompt_behavior": @"always",
-                                              @"resource": @"https://graph.windows.net",
-                                              @"user_identifier": self.primaryAccount.account
-                                              };
-
-    secondAppRequest.authority = @"https://login.microsoftonline.com/common";
-    NSDictionary *config = [self configWithTestRequest:secondAppRequest];
-    [self acquireTokenSilent:config];
+    MSIDAutomationTestRequest *secondAppRequest = [self.class.confProvider defaultFociRequestWithoutBroker];
+    secondAppRequest.promptBehavior = @"always";
+    secondAppRequest.requestResource = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph"];
+    secondAppRequest.legacyAccountIdentifier = self.primaryAccount.account;
+    secondAppRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    
+    NSDictionary *adalConfig = [self configWithTestRequest:secondAppRequest];
+    [self acquireTokenSilent:adalConfig];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
     // 3. Now expire token in non-unified ADAL
-    secondAppRequest.authority = @"https://login.windows.net/common";
-    config = [self configWithTestRequest:secondAppRequest];
-    [self expireAccessToken:config];
+    [self expireAccessToken:adalConfig];
     [self assertAccessTokenExpired];
     [self closeResultView];
 
     // 4. Now acquire token silently
-    [self acquireTokenSilent:config];
+    [self acquireTokenSilent:adalConfig];
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
@@ -204,12 +215,8 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
 
-    secondAppRequest.accountIdentifier = homeAccountId;
-    secondAppRequest.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-    secondAppRequest.redirectUri = MSAL_TEST_DEFAULT_NON_CONVERGED_REDIRECT_URI;
-    secondAppRequest.scopes = @"https://graph.windows.net/.default";
-    secondAppRequest.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    [self runSharedSilentAADLoginWithTestRequest:secondAppRequest];
+    firstAppRequest.homeAccountIdentifier = homeAccountId;
+    [self runSharedSilentAADLoginWithTestRequest:firstAppRequest];
 }
 
 - (XCUIApplication *)adalUnifiedApp
@@ -222,14 +229,15 @@ static BOOL adalAppInstalled = NO;
     // 1. Install previous ADAL version and signin
     self.testApp = [self adalUnifiedApp];
     
-    MSALTestRequest *request = [MSALTestRequest fociRequestWithOfficeApp];
-    request.additionalParameters = @{@"prompt_behavior": @"always",
-                                              @"resource": @"https://graph.windows.net"};
+    MSIDAutomationTestRequest *adalRequest = [self.class.confProvider defaultFociRequestWithoutBroker];
+    adalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    adalRequest.cacheAuthority = adalRequest.configurationAuthority;
+    adalRequest.promptBehavior = @"always";
+    adalRequest.requestResource = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph"];
     
-    request.authority = @"https://login.microsoftonline.com/common";
-    NSDictionary *config = [self configWithTestRequest:request];
+    NSDictionary *adalConfig = [self configWithTestRequest:adalRequest];
     
-    [self acquireToken:config];
+    [self acquireToken:adalConfig];
     [self aadEnterEmail];
     [self aadEnterPassword];
     
@@ -240,11 +248,14 @@ static BOOL adalAppInstalled = NO;
     self.testApp = [XCUIApplication new];
     [self.testApp activate];
     
-    MSALTestRequest *secondAppRequest = [MSALTestRequest fociRequestWithOnedriveApp];
-    secondAppRequest.accountIdentifier = self.primaryAccount.homeAccountId;
-    secondAppRequest.scopes = @"https://graph.windows.net/.default";
+    MSIDAutomationTestRequest *msalRequest = [self.class.confProvider defaultFociRequestWithBroker];
+    msalRequest.homeAccountIdentifier = self.primaryAccount.homeAccountId;
+    msalRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    msalRequest.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    msalRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     
-    NSDictionary *msalConfig = [self configWithTestRequest:secondAppRequest];
+    NSDictionary *msalConfig = [self configWithTestRequest:msalRequest];
+    
     //It should refresh access token using family refresh token saved by office app using Adal
     [self acquireTokenSilent:msalConfig];
     [self assertAccessTokenNotNil];
