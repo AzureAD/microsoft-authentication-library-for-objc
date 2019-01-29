@@ -118,7 +118,7 @@
     {
         return [application accountForUsername:parameters.legacyAccountIdentifier error:error];
     }
-
+        
     return nil;
 }
 
