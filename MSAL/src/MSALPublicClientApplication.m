@@ -688,10 +688,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     params.loginHint = loginHint;
-    params.extraQueryParameters = extraQueryParameters;
+    params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     params.validateAuthority = _validateAuthority;
-    params.sliceParameters = _sliceParameters;
+    params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
@@ -845,7 +845,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.validateAuthority = _validateAuthority;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
-    params.sliceParameters = _sliceParameters;
+    params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
     
     MSID_LOG_INFO(params,
