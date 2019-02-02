@@ -339,7 +339,7 @@
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
     [self waitForElement:permissionText];
 
-    XCUIElement *acceptButton = [self.testApp.webViews elementBoundByIndex:0].buttons[@"Cancel"];
+    XCUIElement *acceptButton = self.testApp.webViews.buttons[@"Cancel"];
     [acceptButton msidTap];
 
     [self assertErrorCode:@"MSALErrorAuthorizationFailed"];

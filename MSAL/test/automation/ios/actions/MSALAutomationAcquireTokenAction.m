@@ -34,12 +34,16 @@
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
+#import "MSIDAutomationPassedInWebViewController.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
 + (void)load
 {
     [[MSIDAutomationActionManager sharedInstance] registerAction:[MSALAutomationAcquireTokenAction new]];
+    [MSIDAutomationPassedInWebViewController setCancelTappedCallback:^{
+        [MSALPublicClientApplication cancelCurrentWebAuthSession];
+    }];
 }
 
 - (NSString *)actionIdentifier
