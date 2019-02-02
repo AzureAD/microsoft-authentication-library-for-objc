@@ -140,9 +140,6 @@
     [self waitForElement:signIn];
     [signIn msidTap];
 
-    // Select to enter different account
-    [self selectAccountWithTitle:@"Use another account"];
-
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];
     [self aadEnterEmail];
