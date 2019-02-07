@@ -827,7 +827,7 @@
                                             query:nil];
     // Mock auth code grant response
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamanauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -866,7 +866,7 @@
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
