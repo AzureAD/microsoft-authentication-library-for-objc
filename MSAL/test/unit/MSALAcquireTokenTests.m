@@ -810,6 +810,99 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenInteractive_whenClaimsIsPassedAndLoginHintNotNil_shouldSendClaimsAndLoginHintToServer
+{
+    NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    // Mock auth code grant response
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+                                authority:DEFAULT_TEST_AUTHORITY
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
+                                   claims:claims];
+    
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+    
+    // Check claims is in start url
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+         XCTAssertNotNil(url);
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
+         
+         NSMutableDictionary *expectedQPs =
+         [@{
+            @"claims" : claims, //claims should be in the QPs
+            @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"return-client-request-id" : @"true",
+            @"state" : [MSIDTestRequireValueSentinel sentinel],
+            @"client_id" : UNIT_TEST_CLIENT_ID,
+            @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
+            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+            @"response_type" : @"code",
+            @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
+            @"code_challenge_method" : @"S256",
+            @"haschrome" : @"1",
+            @"eqpKey" : @"eqpValue",
+            @"login_hint": @"upn@test.com"
+            UT_SLICE_PARAMS_DICT
+            } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"i+am+an+auth+code", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
+     }];
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
+    application.webviewType = MSALWebviewTypeWKWebView;
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                             loginHint:@"upn@test.com"
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
+                                claims:claims
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 - (void)testAcquireTokenInteractive_whenClaimsNotProperJson_shouldReturnError
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
