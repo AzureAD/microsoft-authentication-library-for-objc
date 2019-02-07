@@ -436,6 +436,29 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                    loginHint:(nullable NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(nullable NSString *)claims
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:scopes
+           extraScopesToConsent:extraScopesToConsent
+                        account:nil
+                      loginHint:loginHint
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                         claims:claims
+                      authority:authority
+                  correlationId:correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndClaimsAndCorrelationId
+                completionBlock:completionBlock];
+}
+
 #pragma mark -
 #pragma mark Account
 
