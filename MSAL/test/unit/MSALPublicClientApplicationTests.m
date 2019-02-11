@@ -1706,6 +1706,7 @@
     }
 
     headers[@"Accept"] = @"application/json";
+    headers[@"x-ms-PkeyAuth"] = @"1.0";
     response->_requestHeaders = headers;
     __auto_type responseJson = @{
                                  @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
