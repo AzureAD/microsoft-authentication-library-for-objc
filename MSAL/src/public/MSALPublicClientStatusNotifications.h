@@ -27,29 +27,26 @@
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
+#ifndef MSALPublicClientStatusNotifications_h
+#define MSALPublicClientStatusNotifications_h
+
+/*! Fired at the start of a resource load in the webview. The URL of the load, if available, will be in the @"url" key in the userInfo dictionary */
+extern NSString *MSALWebAuthDidStartLoadNotification;
+
+/*! Fired when a resource finishes loading in the webview. */
+extern NSString *MSALWebAuthDidFinishLoadNotification;
+
+/*! Fired when web authentication fails due to reasons originating from the network. Look at the @"error" key in the userInfo dictionary for more details.*/
+extern NSString *MSALWebAuthDidFailNotification;
+
+/*! Fired when authentication finishes */
+extern NSString *MSALWebAuthDidCompleteNotification;
+
+/*! Fired before ADAL invokes the broker app */
+extern NSString *MSALWebAuthWillSwitchToBrokerApp;
+
+/*! Fired when the application receives a response from the broker. Look at the @"response"
+ key in the userInfo dictionary for the broker response */
+extern NSString *MSALWebAuthDidReceieveResponseFromBroker;
+
 #endif
-
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
-
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALRedirectUri.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
-#import <MSAL/MSALPublicClientStatusNotifications.h>
