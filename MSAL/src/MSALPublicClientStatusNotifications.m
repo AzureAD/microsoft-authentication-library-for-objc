@@ -25,31 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALPublicClientStatusNotifications.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+NSString *MSALWebAuthDidStartLoadNotification = @"MSALWebAuthDidStartLoadNotification";
+NSString *MSALWebAuthDidFinishLoadNotification = @"MSALWebAuthDidFinishLoadNotification";
+NSString *MSALWebAuthDidFailNotification = @"MSALWebAuthDidFailNotification";
+NSString *MSALWebAuthDidCompleteNotification = @"MSALWebAuthDidCompleteNotification";
+NSString *MSALWebAuthWillSwitchToBrokerApp = @"MSALWebAuthWillSwitchToBrokerApp";
+NSString *MSALWebAuthDidReceieveResponseFromBroker = @"MSALWebAuthDidReceieveResponseFromBroker";
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
-
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
-
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALRedirectUri.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
-#import <MSAL/MSALPublicClientStatusNotifications.h>
