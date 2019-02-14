@@ -1,3 +1,7 @@
+## [0.2.3] - 2019-02-12
+### Fixed
+- Fix issue when authorization code cannot be read due to a dummy fragment in response URL for B2C (#456)
+
 ## [0.2.2] - 2018-11-05
 ### Fixed
 - Fix warnings in the keychain component
