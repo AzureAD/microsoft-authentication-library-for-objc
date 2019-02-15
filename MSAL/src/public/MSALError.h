@@ -201,25 +201,7 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      */
     MSALErrorAccountRequired = -42106,
     
-    /*!
-        MSAL encounted an error when trying to store or retrieve items from
-        keychain. Inspect NSUnderlyingError from the userInfo dictionary for
-        more information about the specific error. Keychain error codes are
-        documented in Apple's <Security/SecBase.h> header file
-     */
-    MSALErrorTokenCacheItemFailure  = -42200,
-    MSALErrorAmbiguousAuthority     = -42201,
-    MSALErrorUserNotFound           = -42202,
-    MSALErrorNoAccessTokensFound    = -42203,
-    MSALErrorWrapperCacheFailure    = -42270,
-    /*!
-        MSAL encounted a network error while trying to authenticate. Inspect
-        NSUnderlyingError from the userInfo dictionary for more information
-        about the specific error. In most cases the errors will come from the
-        system's network layer and the individual errors will be detailed in
-        Apple's <Foundation/NSURLError.h> header file.
-     */
-    MSALErrorNetworkFailure = -42300,
+    MSALErrorWrapperCacheFailure = -42270,
     
     /*!
         The user cancelled the web auth session by tapping the "Done" button on the

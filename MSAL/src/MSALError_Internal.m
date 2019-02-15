@@ -39,10 +39,7 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
         STRING_CASE(MSALErrorMismatchedUser);
-        STRING_CASE(MSALErrorNetworkFailure);
-        STRING_CASE(MSALErrorTokenCacheItemFailure);
         STRING_CASE(MSALErrorWrapperCacheFailure);
-        STRING_CASE(MSALErrorAmbiguousAuthority);
         STRING_CASE(MSALErrorInteractionRequired);
         STRING_CASE(MSALErrorInvalidResponse);
         STRING_CASE(MSALErrorBadAuthorizationResponse);
@@ -55,7 +52,6 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInvalidState);
         STRING_CASE(MSALErrorNoViewController);
         STRING_CASE(MSALErrorInternal);
-        STRING_CASE(MSALErrorUserNotFound);
         STRING_CASE(MSALErrorUnhandledResponse);
         STRING_CASE(MSALErrorServerDeclinedScopes);
             
