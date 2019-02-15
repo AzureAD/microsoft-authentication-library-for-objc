@@ -58,7 +58,7 @@ static NSDictionary *s_userInfoKeyMapping;
 
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
-                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorCacheBadFormat),
+                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
                                    // Interactive flow
