@@ -28,7 +28,9 @@
 #import "MSALError_Internal.h"
 #import "MSALErrorConverter.h"
 
-NSString *MSALStringForErrorCode(MSALErrorCode code)
+// TODO: do we need this function?
+// If yes, we need to update it with new errors.
+NSString *MSALStringForErrorCode(NSInteger code)
 {
     switch (code)
     {
@@ -39,13 +41,10 @@ NSString *MSALStringForErrorCode(MSALErrorCode code)
         STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
         STRING_CASE(MSALErrorMismatchedUser);
-        STRING_CASE(MSALErrorWrapperCacheFailure);
+        STRING_CASE(MSALErrorCacheBadFormat);
         STRING_CASE(MSALErrorInteractionRequired);
         STRING_CASE(MSALErrorInvalidResponse);
-        STRING_CASE(MSALErrorBadAuthorizationResponse);
         STRING_CASE(MSALErrorAuthorizationFailed);
-        STRING_CASE(MSALErrorBadTokenResponse);
-        STRING_CASE(MSALErrorNoAuthorizationResponse);
         STRING_CASE(MSALErrorUserCanceled);
         STRING_CASE(MSALErrorSessionCanceled);
         STRING_CASE(MSALErrorInteractiveSessionAlreadyRunning);
