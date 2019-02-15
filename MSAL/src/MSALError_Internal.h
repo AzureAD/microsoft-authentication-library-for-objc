@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSALError.h" 
 
-extern NSString *MSALStringForErrorCode(NSInteger code);
+extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 
 extern void MSALLogError(id<MSIDRequestContext> ctx, NSError *error, const char *function, int line);
 
