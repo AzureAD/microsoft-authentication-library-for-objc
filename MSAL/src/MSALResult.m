@@ -39,6 +39,7 @@
 #import "MSALAuthorityFactory.h"
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
+#import "MSIDTokenResponse.h"
 
 @implementation MSALResult
 
@@ -81,7 +82,7 @@
     }
 
     MSIDAccount *resultAccount = tokenResult.account;
-    NSString *tenantId = [tokenResult.authority.url msidTenant];
+    NSString *tenantId = tokenResult.tokenResponse.idTokenObj.realm;
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
                                                             name:resultAccount.name
