@@ -73,6 +73,8 @@
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
 #import "MSIDTestURLResponse+Util.h"
+#import "MSIDVersion.h"
+#import "MSIDConstants.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -451,7 +453,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -541,6 +543,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -671,6 +674,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -768,6 +772,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -863,7 +868,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         
+         [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
@@ -1002,6 +1007,7 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
@@ -2376,6 +2382,24 @@
     BOOL removeRTResult = [self.tokenCache validateAndRemoveRefreshToken:refreshToken context:nil error:&removeRTError];
     XCTAssertNil(removeRTError);
     XCTAssertTrue(removeRTResult);
+}
+
+- (NSDictionary *)getAppMetadata
+{
+    NSDictionary *metadata = [[NSBundle mainBundle] infoDictionary];
+    
+    NSString *appName = metadata[@"CFBundleDisplayName"];
+    
+    if (!appName)
+    {
+        appName = metadata[@"CFBundleName"];
+    }
+    
+    NSString *appVer = metadata[@"CFBundleShortVersionString"];
+    
+    return @{MSID_VERSION_KEY : @MSAL_VERSION_STRING,
+             MSID_APP_NAME_KEY: appName ? appName : @"",
+             MSID_APP_VER_KEY: appVer ? appVer : @""};
 }
 
 @end
