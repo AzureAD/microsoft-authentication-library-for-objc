@@ -58,10 +58,9 @@ static NSDictionary *s_userInfoKeyMapping;
 
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
-                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
+                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
-                                   @(MSIDErrorAuthorityValidationWebFinger): @(MSALErrorFailedAuthorityValidation),
                                    // Interactive flow
                                    @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
@@ -89,7 +88,9 @@ static NSDictionary *s_userInfoKeyMapping;
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
-                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorRefreshTokenRejected),
+                                   // We don't support this error code in MSAL. This error
+                                   // exists specifically for ADAL.
+                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorInternal),
                                    @(MSIDErrorServerInvalidRequest) :@(MSALErrorInvalidRequest),
                                    @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
                                    @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
