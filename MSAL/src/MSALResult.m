@@ -82,7 +82,16 @@
     }
 
     MSIDAccount *resultAccount = tokenResult.account;
-    MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:error];
+    NSError *claimsError = nil;
+    MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
+    
+    if (!claims)
+    {
+        if (error) *error = claimsError;
+        
+        return nil;
+    }
+    
     NSString *tenantId = claims.realm;
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
