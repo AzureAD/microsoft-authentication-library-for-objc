@@ -113,7 +113,7 @@
     // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
     // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
     // image from another device. In this case it is best to detect that case and clean up local state.
-    if (!account && [localError.domain isEqualToString:MSALErrorDomain] && localError.code == MSALErrorUserNotFound)
+    if (!account && !localError)
     {
         [self cleanupLocalState];
     }
