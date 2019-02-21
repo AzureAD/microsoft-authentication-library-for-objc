@@ -107,7 +107,7 @@
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -124,7 +124,7 @@
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
