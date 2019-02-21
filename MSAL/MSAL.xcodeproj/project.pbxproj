@@ -14,6 +14,8 @@
 		1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */; };
 		1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A81E5AABC50086D120 /* MSALTestAppSettingsViewController.m */; };
 		1E665DB92162A83E0049A59A /* MSALTestAppProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E665DB82162A83E0049A59A /* MSALTestAppProfileViewController.m */; };
+		1E8FC6A3221F370C00B4D4C1 /* MSALResultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */; };
+		1E8FC6A4221F370C00B4D4C1 /* MSALResultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */; };
 		1EB7ABD621262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */; };
 		1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
@@ -470,6 +472,7 @@
 		1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppB2CAuthorityViewController.m; sourceTree = "<group>"; };
 		1E665DB72162A83E0049A59A /* MSALTestAppProfileViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppProfileViewController.h; sourceTree = "<group>"; };
 		1E665DB82162A83E0049A59A /* MSALTestAppProfileViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppProfileViewController.m; sourceTree = "<group>"; };
+		1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALResultTests.m; sourceTree = "<group>"; };
 		1EB7ABD421262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAuthorityTypeViewController.h; sourceTree = "<group>"; };
 		1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAuthorityTypeViewController.m; sourceTree = "<group>"; };
 		231CE9DD1FEC684C00E95D3E /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
@@ -1239,6 +1242,7 @@
 				B210E3E21FC23D4700E7A325 /* MSALErrorTests.m */,
 				960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */,
 				B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */,
+				1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -2158,6 +2162,7 @@
 				23A169B420732F3A00B051F3 /* MSALB2CPolicyTests.m in Sources */,
 				D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */,
 				23A68A9320F59E6B0071E435 /* NSString+MSALTestUtil.m in Sources */,
+				1E8FC6A3221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
 				960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
 				23CDA9B31FA45A9E00FDD5C0 /* MSALTelemetryTests.m in Sources */,
 				E02396FB1E7B005C004D6278 /* MSALTelemetryTestDispatcher.m in Sources */,
@@ -2180,6 +2185,7 @@
 				960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
 				D69ADB361E516F9B00952049 /* MSALTestBundle.m in Sources */,
 				B2D6672D210E766F00952595 /* MSALPublicClientApplicationTests.m in Sources */,
+				1E8FC6A4221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
 				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
