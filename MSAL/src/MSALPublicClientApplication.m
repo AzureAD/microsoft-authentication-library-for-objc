@@ -70,6 +70,8 @@
 #import "MSIDIntuneUserDefaultsCacheDataSource.h"
 #import "MSIDIntuneMAMResourcesCache.h"
 #import "MSIDIntuneEnrollmentIdsCache.h"
+#import "MSALPublicClientStatusNotifications.h"
+#import "MSIDNotifications.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -101,6 +103,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     [MSIDIntuneMAMResourcesCache setSharedCache:[[MSIDIntuneMAMResourcesCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
     [MSIDIntuneEnrollmentIdsCache setSharedCache:[[MSIDIntuneEnrollmentIdsCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
+    
+    MSIDNotifications.webAuthDidCompleteNotificationName = MSALWebAuthDidCompleteNotification;
+    MSIDNotifications.webAuthDidFailNotificationName = MSALWebAuthDidFailNotification;
+    MSIDNotifications.webAuthDidStartLoadNotificationName = MSALWebAuthDidStartLoadNotification;
+    MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
+    MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
+    MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceieveResponseFromBroker;
 }
 
 - (id)initWithClientId:(NSString *)clientId

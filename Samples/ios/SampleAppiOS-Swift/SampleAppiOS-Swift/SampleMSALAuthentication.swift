@@ -94,19 +94,23 @@ extension SampleMSALAuthentication {
         
         let clientApplication = try createClientApplication()
         
+        var acc: MSALAccount?
         do {
-            return try clientApplication.account(forHomeAccountId: accountIdentifier)
+            acc = try clientApplication.account(forHomeAccountId: accountIdentifier)
         } catch let error as NSError {
-            
+            throw SampleAppError.UserNotFound(error)
+        }
+        
+        guard let account = acc else {
             // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
             // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
             // image from another device. In this case it is best to detect that case and clean up local state.
-            if (error.domain == MSALErrorDomain && error.code == MSALErrorCode.userNotFound.rawValue) {
-                cleanupLocalState()
-            }
+            cleanupLocalState()
             
-            throw SampleAppError.UserNotFound(error)
+            throw SampleAppError.NoUserSignedIn
         }
+        
+        return account
     }
     
     func clearCurrentAccount() {
