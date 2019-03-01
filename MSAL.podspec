@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "MSAL"
-  s.version      = "0.2.3"
+  s.version      = "0.3.0"
   s.summary      = "Microsoft Authentication Library (MSAL) Preview for iOS"
 
   s.description  = <<-DESC
@@ -23,12 +23,12 @@ Pod::Spec.new do |s|
   }
 
   s.pod_target_xcconfig = { 'CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF' => 'NO' }
-  s.default_subspecs ='app-lib'
+  s.default_subspecs ='msal-lib'
   
   s.prefix_header_file = "MSAL/src/MSAL.pch"
   s.header_dir = "MSAL"
 
-  s.subspec 'app-lib' do |app|
+  s.subspec 'msal-lib' do |app|
   	app.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}"
   	app.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/*.h"
   	app.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h"
