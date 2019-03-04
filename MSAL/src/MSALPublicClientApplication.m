@@ -680,7 +680,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #if DEBUG && TARGET_OS_IPHONE
         // Unless broker is explicitly disabled, show the warning in debug mode to configure broker correctly
         NSURL *redirectUri = [MSALRedirectUriVerifier defaultBrokerCapableRedirectUri];
-        NSString *brokerWarning = [NSString stringWithFormat:@"The configured redirect URI for this application doesn't support brokered authentication. This means that your users might experience worse SSO rate or not be able to complete certain conditional access policies. To resolve it, register %@ scheme in your Info.plist and add \"msauthv2\" under LSApplicationQueriesSchemes. Go to \"aka.ms/msalbroker\" to check possible steps to resolve this warning", redirectUri.scheme];
+        NSString *brokerWarning = [NSString stringWithFormat:@"The configured redirect URI for this application doesn't support brokered authentication. This means that your users might experience worse SSO rate or not be able to complete certain conditional access policies. To resolve it, register %@ scheme in your Info.plist and add both \"msauth\" and \"msauthv2f6aaf03b\" under LSApplicationQueriesSchemes. Go to \"aka.ms/msalbroker\" to check possible steps to resolve this warning", redirectUri.scheme];
 
         MSID_LOG_WARN(nil, @"%@", brokerWarning);
         NSLog(@"%@", brokerWarning);
@@ -695,7 +695,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                                                       extraScopesToConsent:requestExtraScopes
                                                                                              correlationId:correlationId
                                                                                             telemetryApiId:requestTelemetryId
-                                                                                   supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
+                                                                                     requiredBrokerSchemes:@[MSID_BROKER_SCHEME, MSID_FLAG_SCHEME_FOR_MSAL_BROKER]
                                                                                                requestType:interactiveRequestType
                                                                                                      error:&msidError];
 

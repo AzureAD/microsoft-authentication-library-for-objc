@@ -57,7 +57,8 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>msauthv2</string>
+		<string>msauth</string>
+		<string>msauthv2f6aaf03b</string>
 	</array>
 </dict>
 </plist>
