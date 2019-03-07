@@ -73,6 +73,8 @@
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
 #import "MSIDTestURLResponse+Util.h"
+#import "MSIDVersion.h"
+#import "MSIDConstants.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -119,7 +121,7 @@
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:nil];
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
@@ -131,7 +133,7 @@
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
@@ -211,7 +213,7 @@
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
                                             query:@"p=b2c_1_policy"];
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:@"p=b2c_1_policy"
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
@@ -223,7 +225,7 @@
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
@@ -415,7 +417,7 @@
                                             query:nil];
     // Mock auth code grant response
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -441,6 +443,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -450,10 +453,10 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
-         
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -505,7 +508,7 @@
                                             query:nil];
     // Mock auth code grant response
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -531,6 +534,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -539,10 +543,11 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -633,7 +638,7 @@
                                             query:nil];
     // Mock auth code grant response
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -659,6 +664,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -668,10 +674,11 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -729,7 +736,7 @@
                                             query:nil];
     // Mock auth code grant response
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:DEFAULT_TEST_AUTHORITY
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -755,6 +762,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -764,10 +772,11 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@", @"i+am+an+auth+code", QPs[@"state"]];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -790,6 +799,99 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
+                            uiBehavior:MSALUIBehaviorDefault
+                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
+                                claims:claims
+                             authority:nil
+                         correlationId:nil
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(error);
+         XCTAssertNotNil(result);
+         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+         [expectation fulfill];
+     }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenInteractive_whenClaimsIsPassedAndLoginHintNotNil_shouldSendClaimsAndLoginHintToServer
+{
+    NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    // Mock auth code grant response
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"iamanauthcode"
+                                authority:DEFAULT_TEST_AUTHORITY
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
+                                   claims:claims];
+    
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+    
+    // Check claims is in start url
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+         NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+         XCTAssertNotNil(url);
+         NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
+         
+         NSMutableDictionary *expectedQPs =
+         [@{
+            @"claims" : claims, //claims should be in the QPs
+            @"client-request-id" : [MSIDTestRequireValueSentinel sentinel],
+            @"return-client-request-id" : @"true",
+            @"state" : [MSIDTestRequireValueSentinel sentinel],
+            @"client_id" : UNIT_TEST_CLIENT_ID,
+            @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
+            @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
+            @"response_type" : @"code",
+            @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
+            @"code_challenge_method" : @"S256",
+            @"haschrome" : @"1",
+            @"eqpKey" : @"eqpValue",
+            @"login_hint": @"upn@test.com"
+            UT_SLICE_PARAMS_DICT
+            } mutableCopy];
+         [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
+         XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@", @"iamanauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
+     }];
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
+                                                                                               error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
+    application.webviewType = MSALWebviewTypeWKWebView;
+    [application acquireTokenForScopes:@[@"fakescopes"]
+                  extraScopesToConsent:nil
+                             loginHint:@"upn@test.com"
                             uiBehavior:MSALUIBehaviorDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:claims
@@ -863,7 +965,7 @@
     // Mock auth code grant response for instance-aware flow
     // It will hit login.microsoftonline.de rather than login.microsoftonline.com
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:@"https://login.microsoftonline.de/common"
                                     query:nil
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
@@ -895,6 +997,7 @@
             @"prompt" : @"select_account",
             @"client_id" : UNIT_TEST_CLIENT_ID,
             @"scope" : @"fakescopes openid profile offline_access",
+            @"client_info" : @"1",
             @"redirect_uri" : UNIT_TEST_DEFAULT_REDIRECT_URI,
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
@@ -904,11 +1007,12 @@
             UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
+         [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
          
          XCTAssertTrue([expectedQPs compareAndPrintDiff:QPs]);
          
          // Mock auth code response with cloud_instance_host_name
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@", @"i+am+an+auth+code", QPs[@"state"], @"login.microsoftonline.de"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&cloud_instance_host_name=%@&client_info=%@", @"iamauthcode", QPs[@"state"], @"login.microsoftonline.de", @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
          completionHandler(oauthResponse, nil);
@@ -1341,7 +1445,7 @@
                                                     @"grant_type" : @"authorization_code",
                                                     @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],
                                                     MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
-                                                    MSID_OAUTH2_CODE : @"i am an auth code" }
+                                                    MSID_OAUTH2_CODE : @"iamauthcode" }
                                        authority:DEFAULT_TEST_AUTHORITY];
     
     // Check if instance_aware parameter is in start url
@@ -1349,7 +1453,7 @@
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                      context:nil error:nil];
@@ -2411,6 +2515,24 @@
     BOOL removeRTResult = [self.tokenCache validateAndRemoveRefreshToken:refreshToken context:nil error:&removeRTError];
     XCTAssertNil(removeRTError);
     XCTAssertTrue(removeRTResult);
+}
+
+- (NSDictionary *)getAppMetadata
+{
+    NSDictionary *metadata = [[NSBundle mainBundle] infoDictionary];
+    
+    NSString *appName = metadata[@"CFBundleDisplayName"];
+    
+    if (!appName)
+    {
+        appName = metadata[@"CFBundleName"];
+    }
+    
+    NSString *appVer = metadata[@"CFBundleShortVersionString"];
+    
+    return @{MSID_VERSION_KEY : @MSAL_VERSION_STRING,
+             MSID_APP_NAME_KEY: appName ? appName : @"",
+             MSID_APP_VER_KEY: appVer ? appVer : @""};
 }
 
 @end

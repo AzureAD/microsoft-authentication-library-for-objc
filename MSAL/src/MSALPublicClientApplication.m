@@ -65,6 +65,13 @@
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
 #import "MSALRedirectUri.h"
+#import "MSIDConfiguration.h"
+#import "MSIDAppMetadataCacheItem.h"
+#import "MSIDIntuneUserDefaultsCacheDataSource.h"
+#import "MSIDIntuneMAMResourcesCache.h"
+#import "MSIDIntuneEnrollmentIdsCache.h"
+#import "MSALPublicClientStatusNotifications.h"
+#import "MSIDNotifications.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -90,6 +97,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 #else
     return nil;
 #endif
+}
+
++ (void)load
+{
+    [MSIDIntuneMAMResourcesCache setSharedCache:[[MSIDIntuneMAMResourcesCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
+    [MSIDIntuneEnrollmentIdsCache setSharedCache:[[MSIDIntuneEnrollmentIdsCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
+    
+    MSIDNotifications.webAuthDidCompleteNotificationName = MSALWebAuthDidCompleteNotification;
+    MSIDNotifications.webAuthDidFailNotificationName = MSALWebAuthDidFailNotification;
+    MSIDNotifications.webAuthDidStartLoadNotificationName = MSALWebAuthDidStartLoadNotification;
+    MSIDNotifications.webAuthDidFinishLoadNotificationName = MSALWebAuthDidFinishLoadNotification;
+    MSIDNotifications.webAuthWillSwitchToBrokerAppNotificationName = MSALWebAuthWillSwitchToBrokerApp;
+    MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceieveResponseFromBroker;
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -425,6 +445,29 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                    loginHint:(nullable NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(nullable NSString *)claims
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:scopes
+           extraScopesToConsent:extraScopesToConsent
+                        account:nil
+                      loginHint:loginHint
+                     uiBehavior:uiBehavior
+           extraQueryParameters:extraQueryParameters
+                         claims:claims
+                      authority:authority
+                  correlationId:correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndClaimsAndCorrelationId
+                completionBlock:completionBlock];
+}
+
 #pragma mark -
 #pragma mark Account
 
@@ -677,10 +720,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     params.loginHint = loginHint;
-    params.extraQueryParameters = extraQueryParameters;
+    params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     params.validateAuthority = _validateAuthority;
-    params.sliceParameters = _sliceParameters;
+    params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
@@ -834,7 +877,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.validateAuthority = _validateAuthority;
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
-    params.sliceParameters = _sliceParameters;
+    params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
     
     MSID_LOG_INFO(params,
@@ -923,14 +966,34 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSError *msidError = nil;
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
-                                              authority:self.authority.msidAuthority
+                                              authority:nil
                                                clientId:self.clientId
+                                               familyId:nil
                                                 context:nil
                                                   error:&msidError];
-
-    if (msidError && error)
+    if (!result)
     {
-        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
+    }
+
+    NSError *metadataError = nil;
+    // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
+    // Therefore, we update app metadata to not have family id for this app after signout
+
+    NSURL *authorityURL = [NSURL msidURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
+
+    BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
+                                                                clientId:self.clientId
+                                                               authority:authority
+                                                                 context:nil
+                                                                   error:&metadataError];
+
+    if (!metadataResult)
+    {
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
     }
 
     return result;

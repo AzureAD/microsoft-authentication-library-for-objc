@@ -52,50 +52,6 @@
     [super tearDown];
 }
 
-- (void)testErrorDomainFromMsidError_whenNoError_shouldReturnNil
-{
-    NSErrorDomain newDomain = [MSALErrorConverter msalErrorDomainFromMsidError:nil];
-    XCTAssertNil(newDomain);
-}
-
-- (void)testErrorDomainFromMsidError_whenMappableError_shouldReturnMappedDomain
-{
-    NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, nil, nil, nil, nil, nil, nil);
-    NSErrorDomain newDomain = [MSALErrorConverter msalErrorDomainFromMsidError:msidError];
-    NSString *expectedErrorDomain = MSALErrorDomain;
-    XCTAssertEqualObjects(newDomain, expectedErrorDomain);
-}
-
-- (void)testErrorDomainFromMsidError_whenNotMappableError_shouldReturnNil
-{
-    NSError *msidError = MSIDCreateError(NSURLErrorDomain, NSURLErrorUnknown, nil, nil, nil, nil, nil, nil);
-    XCTAssertNil([MSALErrorConverter msalErrorDomainFromMsidError:msidError]);
-}
-
-- (void)testErrorCodeFromMsidError_whenMappedDomainAndMappableCode_shouldReturnMappedCode
-{
-    NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, nil, nil, nil, nil, nil, nil);
-    NSInteger code = [MSALErrorConverter msalErrorCodeFromMsidError:msidError];
-    NSInteger expectedErrorCode = MSALErrorInternal;
-    XCTAssertEqual(code, expectedErrorCode);
-}
-
-- (void)testErrorCodeFromMsidError_whenMappedDomainAndUnmappableCode_shouldReturnUnmappedCode
-{
-    NSError *msidError = MSIDCreateError(MSIDErrorDomain, 99999, nil, nil, nil, nil, nil, nil);
-    NSInteger code = [MSALErrorConverter msalErrorCodeFromMsidError:msidError];
-    NSInteger expectedErrorCode = 99999;
-    XCTAssertEqual(code, expectedErrorCode);
-}
-
-- (void)testErrorCodeFromMsidError_whenUnmappedDomain_shouldReturnCodeAsIs
-{
-    NSError *msidError = MSIDCreateError(NSURLErrorDomain, NSURLErrorUnknown, nil, nil, nil, nil, nil, nil);
-    NSInteger code = [MSALErrorConverter msalErrorCodeFromMsidError:msidError];
-    NSInteger expectedErrorCode = NSURLErrorUnknown;
-    XCTAssertEqual(code, expectedErrorCode);
-}
-
 - (void)testErrorFromMsidError_whenPassInNilError_shouldReturnNil
 {
     XCTAssertNil([MSALErrorConverter msalErrorFromMsidError:nil]);
@@ -264,6 +220,37 @@
             
         }
     }
+}
+
+- (void)testErrorConversion_whenDomainIsMappedAndCodeMissing_shouldReturnMSALInternalError
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:123456
+                                            errorDescription:@"Unmapped code error"
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    
+}
+
+- (void)testErrorConversion_whenDomainNotMapped_shouldNotTouchCode
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:@"Unmapped Domain"
+                                                        code:MSIDErrorUserCancel
+                                            errorDescription:nil
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
+    XCTAssertEqual(msalError.code, MSIDErrorUserCancel);
 }
 
 @end

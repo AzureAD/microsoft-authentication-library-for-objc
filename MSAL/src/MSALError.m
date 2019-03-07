@@ -39,3 +39,4 @@ NSString *MSALGrantedScopesKey = @"MSALGrantedScopesKey";
 NSString *MSALInvalidResultKey = @"MSALInvalidResultKey";
 NSString *MSALDisplayableUserIdKey = @"MSALDisplayableUserIdKey";
 NSString *MSALBrokerVersionKey = @"MSALBrokerVersionKey";
+NSString *MSALHomeAccountIdKey = @"MSALHomeAccountIdKey";

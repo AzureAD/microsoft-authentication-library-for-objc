@@ -54,7 +54,7 @@
 - (void)testInitWithMSIDAccount_whenValidAccount_shouldInit
 {
     MSIDAccount *msidAccount = [MSIDAccount new];
-    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:@"user@contoso.com" homeAccountId:@"uid.utid"];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.utid"];
     msidAccount.username = @"user@contoso.com";
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"localoid";
