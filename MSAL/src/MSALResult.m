@@ -39,6 +39,7 @@
 #import "MSALAuthorityFactory.h"
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
+#import "MSIDAADV2IdTokenClaims.h"
 
 @implementation MSALResult
 
@@ -81,7 +82,17 @@
     }
 
     MSIDAccount *resultAccount = tokenResult.account;
-    NSString *tenantId = [tokenResult.authority.url msidTenant];
+    NSError *claimsError = nil;
+    MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
+    
+    if (!claims)
+    {
+        if (error) *error = claimsError;
+        
+        return nil;
+    }
+    
+    NSString *tenantId = claims.realm;
 
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
                                                             name:resultAccount.name

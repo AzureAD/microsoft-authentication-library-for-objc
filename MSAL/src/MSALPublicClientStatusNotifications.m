@@ -25,10 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSIDError.h"
+#import "MSALPublicClientStatusNotifications.h"
 
-@interface MSALErrorConverter : NSObject
+NSString *MSALWebAuthDidStartLoadNotification = @"MSALWebAuthDidStartLoadNotification";
+NSString *MSALWebAuthDidFinishLoadNotification = @"MSALWebAuthDidFinishLoadNotification";
+NSString *MSALWebAuthDidFailNotification = @"MSALWebAuthDidFailNotification";
+NSString *MSALWebAuthDidCompleteNotification = @"MSALWebAuthDidCompleteNotification";
+NSString *MSALWebAuthWillSwitchToBrokerApp = @"MSALWebAuthWillSwitchToBrokerApp";
+NSString *MSALWebAuthDidReceieveResponseFromBroker = @"MSALWebAuthDidReceieveResponseFromBroker";
 
-+ (NSError *)msalErrorFromMsidError:(NSError *)msidError;
-
-@end

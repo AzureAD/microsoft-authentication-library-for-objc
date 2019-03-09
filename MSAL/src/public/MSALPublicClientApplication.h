@@ -107,7 +107,7 @@
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -124,7 +124,7 @@
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -236,7 +236,8 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
-#pragma SafariViewController Support
+#pragma mark -
+#pragma mark SafariViewController Support
 
 #if TARGET_OS_IPHONE
 /*!
@@ -252,7 +253,7 @@
 /*!
  Ask MSAL to handle a URL response.
 
- @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sesssions
+ @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sessions
  @param   sourceApplication     The application that opened your app with that URL. Can be retrieved from options by UIApplicationOpenURLOptionsSourceApplicationKey key.
                                 See more info here: https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623112-application?language=objc
                                 Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.
@@ -354,6 +355,42 @@
                     loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+/*!
+    Acquire a token for a new account using interactive authentication
+ 
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    guaranteed to be included in the access token returned.
+    @param  extraScopesToConsent    Permissions you want the account to consent to in the same
+                                    authentication flow, but won't be included in the returned
+                                    access token
+    @param  loginHint               A loginHint (usually an email) to pass to the service at the
+                                    beginning of the interactive authentication flow. The account returned
+                                    in the completion block is not guaranteed to match the loginHint.
+    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
+                                    the interactive authentication flow.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
+                                    it is of the form https://<instance/<tenant>, where <instance> is the
+                                    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated to the
+                                    tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                                    TenantID property of the directory)
+    @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
+    @param  correlationId           UUID to correlate this request with the server
+    @param  completionBlock         The completion block that will be called when the authentication
+                                    flow completes, or encounters an error.
+ */
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                    loginHint:(nullable NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
