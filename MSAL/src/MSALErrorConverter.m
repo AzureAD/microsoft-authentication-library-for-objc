@@ -180,8 +180,8 @@ static NSDictionary *s_userInfoKeyMapping;
 
         if (!msalResult)
         {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %ld, %@", (long)resultError.code, resultError.domain);
-            MSID_LOG_WARN_PII(nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", resultError);
+            MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %ld, %@", (long)resultError.code, resultError.domain);
+            MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", resultError);
         }
         else
         {
