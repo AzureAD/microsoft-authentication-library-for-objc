@@ -138,11 +138,11 @@ static MSIDTestConfigurationProvider *s_confProvider;
 - (void)assertScopesReturned:(NSArray *)expectedScopes
 {
     MSIDAutomationSuccessResult *result = [self automationSuccessResult];
-    NSArray *resultScopes = [[result.target msidScopeSet] array];
+    NSOrderedSet *resultScopes = [NSOrderedSet msidOrderedSetFromString:result.target normalize:YES];
 
     for (NSString *expectedScope in expectedScopes)
     {
-        XCTAssertTrue([resultScopes containsObject:expectedScope]);
+        XCTAssertTrue([resultScopes containsObject:expectedScope.lowercaseString]);
     }
 }
 

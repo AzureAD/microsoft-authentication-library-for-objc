@@ -266,9 +266,9 @@
     NSArray *declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    NSArray *grantedScopes = result.errorUserInfo[MSALGrantedScopesKey];
-    NSOrderedSet *expectedGrantedScopes = [supportedScope msidScopeSet];
-    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:[NSOrderedSet orderedSetWithArray:grantedScopes]]);
+    NSOrderedSet *grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
+    NSOrderedSet *expectedGrantedScopes = [NSOrderedSet msidOrderedSetFromString:supportedScope normalize:YES];
+    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
     [self closeResultView];
 
@@ -283,8 +283,8 @@
     declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    grantedScopes = result.errorUserInfo[MSALGrantedScopesKey];
-    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:[NSOrderedSet orderedSetWithArray:grantedScopes]]);
+    grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
+    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
     [self closeResultView];
 
