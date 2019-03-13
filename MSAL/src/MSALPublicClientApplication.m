@@ -635,15 +635,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        MSID_LOG_ERROR(ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
-        MSID_LOG_ERROR_PII(ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        MSID_LOG_NO_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
+        MSID_LOG_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msidTokenHash];
-        MSID_LOG_INFO(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
-        MSID_LOG_INFO_PII(ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
+        MSID_LOG_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
@@ -676,15 +676,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     else if (!_redirectUri.brokerCapable)
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
-
-#if DEBUG && TARGET_OS_IPHONE
-        // Unless broker is explicitly disabled, show the warning in debug mode to configure broker correctly
-        NSURL *redirectUri = [MSALRedirectUriVerifier defaultBrokerCapableRedirectUri];
-        NSString *brokerWarning = [NSString stringWithFormat:@"The configured redirect URI for this application doesn't support brokered authentication. This means that your users might experience worse SSO rate or not be able to complete certain conditional access policies. To resolve it, register %@ scheme in your Info.plist and add \"msauthv2\" under LSApplicationQueriesSchemes. Go to \"aka.ms/msalbroker\" to check possible steps to resolve this warning", redirectUri.scheme];
-
-        MSID_LOG_WARN(nil, @"%@", brokerWarning);
-        NSLog(@"%@", brokerWarning);
-#endif
     }
 
     MSIDInteractiveRequestParameters *params = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
@@ -742,7 +733,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.telemetryWebviewType = MSALStringForMSALWebviewType(_webviewType);
     params.customWebview = _customWebview;
     
-    MSID_LOG_INFO(params,
+    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
               "                                            account:%@\n"
@@ -754,7 +745,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                       capabilities:%@\n"
               "                                             claims:%@]",
              _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
-    MSID_LOG_INFO_PII(params,
+    MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
                   "                                            account:%@\n"
@@ -880,7 +871,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
     
-    MSID_LOG_INFO(params,
+    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                  account:%@\n"
               "                                                authority:%@\n"
@@ -891,7 +882,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
              _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
     
     
-    MSID_LOG_INFO_PII(params,
+    MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                  account:%@\n"
                   "                                                authority:%@\n"
