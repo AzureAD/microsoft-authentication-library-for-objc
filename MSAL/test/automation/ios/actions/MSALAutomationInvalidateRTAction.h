@@ -25,8 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
 
-@interface MSALAutoMainViewController : UIViewController
+#import <Foundation/Foundation.h>
+#import "MSALAutomationBaseAction.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALAutomationInvalidateRTAction : MSALAutomationBaseAction
 
 @end
+
+NS_ASSUME_NONNULL_END

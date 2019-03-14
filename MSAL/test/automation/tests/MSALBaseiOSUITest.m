@@ -30,7 +30,7 @@
 
 - (XCUIApplication *)brokerApp
 {
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:@"broker"];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:@"broker"];
     NSString *appBundleId = appConfiguration[@"app_bundle_id"];
 
     XCUIApplication *brokerApp = [[XCUIApplication alloc] initWithBundleIdentifier:appBundleId];
@@ -77,7 +77,7 @@
 
 - (XCUIApplication *)openDeviceRegistrationMenuInAuthenticator
 {
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:@"broker"];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:@"broker"];
     NSString *appBundleId = appConfiguration[@"app_bundle_id"];
     XCUIApplication *brokerApp = [[XCUIApplication alloc] initWithBundleIdentifier:appBundleId];
     [brokerApp terminate];
@@ -110,13 +110,14 @@
 {
     XCTAssertNotNil(appId);
 
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:appId];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:appId];
     XCTAssertNotNil(appConfiguration);
 
     NSString *appInstallUrl = appConfiguration[@"install_url"];
 
-    NSDictionary *dictionary = @{@"safari_url": appInstallUrl};
-    [self openURL:dictionary];
+    MSIDAutomationTestRequest *request = [MSIDAutomationTestRequest new];
+    request.extraQueryParameters = @{@"url": appInstallUrl};
+    [self openURL:request.jsonDictionary];
 
     XCUIApplication *safariApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.mobilesafari"];
 
@@ -126,7 +127,7 @@
 
 - (XCUIApplication *)openAppWithAppId:(NSString *)appId
 {
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:appId];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:appId];
     NSString *appBundleId = appConfiguration[@"app_bundle_id"];
 
     XCUIApplication *otherApp = [[XCUIApplication alloc] initWithBundleIdentifier:appBundleId];
@@ -144,7 +145,7 @@
     [allowButton tap];
 }
 
-- (void)acceptAuthSessionDialogIfNecessary:(MSALTestRequest *)request
+- (void)acceptAuthSessionDialogIfNecessary:(MSIDAutomationTestRequest *)request
 {
     if (request.webViewType == MSALWebviewTypeDefault
         && !request.usesEmbeddedWebView)
@@ -200,7 +201,7 @@
 
     sleep(3);
 
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:appId];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:appId];
     NSString *appName = appConfiguration[@"app_name"];
 
     __auto_type appIcon = springBoardApp.icons[appName];
@@ -221,7 +222,7 @@
 {
     XCTAssertNotNil(appId);
 
-    NSDictionary *appConfiguration = [self.class.accountsProvider appInstallForConfiguration:appId];
+    NSDictionary *appConfiguration = [self.class.confProvider appInstallForConfiguration:appId];
     XCTAssertNotNil(appConfiguration);
 
     XCUIApplication *springBoardApp = [[XCUIApplication alloc] initWithBundleIdentifier:@"com.apple.springboard"];

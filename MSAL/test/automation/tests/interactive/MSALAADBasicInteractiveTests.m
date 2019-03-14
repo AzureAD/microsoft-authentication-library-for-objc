@@ -27,11 +27,13 @@
 
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
+#import "MSIDAutomationTestRequest.h"
+#import "MSIDTestConfigurationProvider.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALAADBasicInteractiveTests : MSALBaseAADUITest
-{
-    id _interruptMonitor;
-}
+
+@property (nonatomic) NSString *testEnvironment;
 
 @end
 
@@ -42,10 +44,11 @@
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     [self loadTestConfiguration:configurationRequest];
 }
 
@@ -66,55 +69,49 @@
 // Converged app tests
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andForceLogin
 {
-    NSArray *expectedResultScopes = @[@"user.read",
-                                      @"tasks.read",
-                                      @"openid",
-                                      @"profile"];
-
-    NSString *cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = expectedResultScopes;
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-
     XCTAssertNotNil(homeAccountId);
+    XCTAssertEqualObjects(homeAccountId, self.primaryAccount.homeAccountId);
 
     // 2. Run auth UI appears
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
-    request.scopes = @"user.read";
-    request.authority = nil;
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = cacheAuthority;
-
-    // 3. Run silent
+    // 3. Run silent wiht common authority
+    NSString *scopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    NSOrderedSet *scopesSet = [scopes msidScopeSet];
+    NSString *firstScope = [scopesSet objectAtIndex:0];
+    request.acquireTokenAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = firstScope;
+    request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
-    // 4. Run silent with invalid scopes
-    request.scopes = @"Directory.ReadAll";
+    // 4. Run silent with tenanted authority
+    request.acquireTokenAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = firstScope;
+    [self runSharedSilentAADLoginWithTestRequest:request];
+
+    // 5. Run silent with invalid scopes
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"unsupported"];
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInvalidScope"];
     [self closeResultView];
 
-    // 5. Run silent with not consented scopes
-    request.scopes = @"Contacts.Read";
+    // 6. Run silent with not consented scopes
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"not_consented"];
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self assertErrorSubcode:@"consent_required"];
     [self closeResultView];
 
-    // 6. Invalidate refresh token and expire access token
-    request.scopes = @"user.read";
-    request.authority = cacheAuthority;
+    // 7. Invalidate refresh token and expire access token
+    request.requestScopes = firstScope;
     config = [self configWithTestRequest:request];
     [self invalidateRefreshToken:config];
     [self assertRefreshTokenInvalidated];
@@ -124,27 +121,16 @@
     [self assertAccessTokenExpired];
     [self closeResultView];
 
-    // 7. Assert invalid grant, because RT is invalid
+    // 8. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andDifferentAuthorityAliases
 {
-    NSArray *expectedResultScopes = @[@"user.read",
-                                      @"tasks.read",
-                                      @"openid",
-                                      @"profile"];
-
-    NSString *cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
-
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = expectedResultScopes;
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -157,54 +143,45 @@
     NSDictionary *configuration = [self configWithTestRequest:request];
     [self readAccounts:configuration];
 
-    NSDictionary *result = [self resultDictionary];
-    XCTAssertEqual([result[@"account_count"] integerValue], 1);
-    NSArray *accounts = result[@"accounts"];
-    NSDictionary *firstAccount = accounts[0];
-    XCTAssertEqualObjects(firstAccount[@"home_account_id"], homeAccountId);
+    MSIDAutomationAccountsResult *result = [self automationAccountsResult];
+    XCTAssertEqual([result.accounts count], 1);
+    NSArray *accounts = result.accounts;
+    MSIDAutomationUserInformation *firstAccount = accounts[0];
+    XCTAssertEqualObjects(firstAccount.homeAccountId, homeAccountId);
     [self closeResultView];
 
-    // Run silent with a different authority
-    request.cacheAuthority = cacheAuthority;
-    request.accountIdentifier = homeAccountId;
-    request.authority = @"https://login.windows.net/common";
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.windows.net/", self.primaryAccount.targetTenantId];
+    // 2. Run silent with a different authority alias
+    request.homeAccountIdentifier = homeAccountId;
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias"];
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"ww-alias" tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.expectedResultScopes = @[@"https://graph.microsoft.com/user.read",
-                                      @"https://graph.microsoft.com/.default",
-                                      @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountId);
 
     // 2. Run silent
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"https://graph.microsoft.com/user.read";
-    request.expectedResultScopes = @[@"https://graph.microsoft.com/user.read",
-                                      @"openid", @"profile"];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.cacheAuthority = request.authority;
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_prefixed"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     [self runSharedAADLoginWithTestRequest:request];
@@ -213,73 +190,68 @@
 // Non-converged app tests
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andCommonEndpoint_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
 
     // 2. Run silent
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.expectedResultScopes = @[@"https://graph.microsoft.com/user.read",
-                                     @"https://graph.microsoft.com/.default",
-                                     @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.username;
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountId);
 
     // 2. Run silent
-    request.accountIdentifier = homeAccountId;
-    request.scopes = @"https://graph.microsoft.com/user.read";
+    request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = @[@"user.read",
-                                     @"tasks.read"];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.cacheAuthority = request.authority;
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.username;
 
     // 1. Run Interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountId);
 
     // 2. Run silent
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andInsufficientScopes_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"user.read tasks.read address";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.uiBehavior = @"force";
+    NSString *ignoredScope = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ignored"];
+    NSString *supportedScope = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    NSString *requestScopes = [NSString msidCombinedScopes:supportedScope withScopes:ignoredScope];
+    request.requestScopes = requestScopes;
     request.testAccount = self.primaryAccount;
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.username;
 
     // Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
@@ -290,39 +262,35 @@
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
-    NSDictionary *resultContent = [self resultDictionary];
-    NSArray *declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
-    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    NSArray *declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
+    XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    NSArray *grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
-    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
-    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+    NSOrderedSet *grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
+    NSOrderedSet *expectedGrantedScopes = [NSOrderedSet msidOrderedSetFromString:supportedScope normalize:YES];
+    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
     [self closeResultView];
 
     // Now run silent with insufficient scopes
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.accountIdentifier = self.primaryAccount.homeAccountId;
+    request.homeAccountIdentifier = self.primaryAccount.homeAccountId;
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
 
     // Verify error and granted/declined scopes contents
     [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
-    resultContent = [self resultDictionary];
-    declinedScopes = resultContent[@"user_info"][@"MSALDeclinedScopesKey"];
-    XCTAssertEqualObjects(declinedScopes, @[@"address"]);
+    result = [self automationErrorResult];
+    declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
+    XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
 
-    grantedScopes = resultContent[@"user_info"][@"MSALGrantedScopesKey"];
-    XCTAssertTrue([grantedScopes containsObject:@"user.read"]);
-    XCTAssertTrue([grantedScopes containsObject:@"tasks.read"]);
+    grantedNormalizedScopes = [[NSOrderedSet orderedSetWithArray:result.errorUserInfo[MSALGrantedScopesKey]] normalizedScopeSet];
+    XCTAssertTrue([expectedGrantedScopes isSubsetOfOrderedSet:grantedNormalizedScopes]);
 
     [self closeResultView];
 
     // Now run silent with correct scopes
-    request.cacheAuthority = request.authority;
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = @[@"user.read", @"tasks.read", @"openid", @"profile"];
-
+    request.requestScopes = supportedScope;
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
@@ -331,57 +299,23 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSelectAccount
 {
     // Sign in first time to ensure account will be there
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read"];
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
     
     [self runSharedAADLoginWithTestRequest:request];
 
     // Now call acquire token with select account
-    request.uiBehavior = @"select_account";
+    request.promptBehavior = @"select_account";
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
-- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceConsent
-{
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.uiBehavior = @"force";
-    request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
-
-    // 1. Run interactive
-    [self runSharedAADLoginWithTestRequest:request];
-
-    // 2. Run force consent
-    request.uiBehavior = @"consent";
-    NSDictionary *config = [self configWithTestRequest:request];
-
-    // Now call acquire token with force consent
-    [self acquireToken:config];
-    [self acceptAuthSessionDialog];
-
-    [self selectAccountWithTitle:self.primaryAccount.account];
-
-    XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
-    [self waitForElement:permissionText];
-
-    XCUIElement *acceptButton = self.testApp.buttons[@"Accept"];
-    [acceptButton msidTap];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
@@ -391,25 +325,21 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andForceConsent_andLoginHint_andRejectConsent
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
-    request.loginHint = self.primaryAccount.username;
-    request.uiBehavior = @"consent";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"consent";
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.username;
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Sign in interactively
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
-    [self acceptAuthSessionDialog];
     [self aadEnterPassword];
 
     XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
     [self waitForElement:permissionText];
 
-    XCUIElement *acceptButton = [self.testApp.webViews elementBoundByIndex:0].buttons[@"Cancel"];
+    XCUIElement *acceptButton = self.testApp.webViews.buttons[@"Cancel"];
     [acceptButton msidTap];
 
     [self assertErrorCode:@"MSALErrorAuthorizationFailed"];
@@ -420,18 +350,20 @@
 // 296732: Company Portal Install Prompt
 - (void)testCompanyPortalInstallPrompt_withNonConvergedApp_withSystemWebView
 {
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.username;
+
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
-    // TODO: remove me once lab is fixed
-    configurationRequest.additionalQueryParameters = @{@"AppID": @"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"};
     [self loadTestConfiguration:configurationRequest];
 
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.username;
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
@@ -450,19 +382,19 @@
 // 296732: Company Portal Install Prompt
 - (void)testCompanyPortalInstallPrompt_withConvergedApp_withEmbeddedWebview
 {
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.username;
+
     MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
-    // TODO: remove me once lab is fixed
-    configurationRequest.additionalQueryParameters = @{@"AppID": @"4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"};
     [self loadTestConfiguration:configurationRequest];
 
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.webViewType = MSALWebviewTypeWKWebView;
-    request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
+    request.loginHint = self.primaryAccount.username;
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
@@ -488,112 +420,85 @@
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/user.read",
-                                     @"https://graph.windows.net/.default"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.account;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.username;
 
     [self runSharedAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andAccount
 {
-    // 1. Sign in first to get an account
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/user.read",
-                                     @"https://graph.windows.net/.default"];;
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.uiBehavior = @"force";
-    request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
-    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountId);
+    // 1. Sign in interactively first
+    [self runSharedAADLoginWithTestRequest:request];
 
-    // 2. Now pass the account identifier
-    request.accountIdentifier = homeAccountId;
+    // 2. Sign in with home account id now
+    request.homeAccountIdentifier = self.primaryAccount.homeAccountId;
     [self runSharedAADLoginWithTestRequest:request];
 }
 
-// TODO: server side bug!
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
+// TODO: this test will be failing until server side fixes the bug of returning .default
+- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"00000002-0000-0000-c000-000000000000/.default";
-    request.expectedResultScopes = @[@"00000002-0000-0000-c000-000000000000/user.read",
-                                     @"00000002-0000-0000-c000-000000000000/.default"];
-    request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.com/organizations";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    NSString *scope = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"aad_graph_guid"];
+    request.requestScopes = [scope stringByAppendingString:@"/.default"];
+    request.expectedResultScopes = request.requestScopes;
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     request.loginHint = self.primaryAccount.account;
-    request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+
+    [self runSharedAADLoginWithTestRequest:request];
+}
+
+// TODO: this test will be failing until server side fixes the bug of returning just user.read back
+- (void)DISABLED_testInteractiveAADLogin_withConvergedApp_andOrganizationsEndpoint_andForceLogin_andLoginHint_andResourceGUID
+{
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    NSString *scope = [self.class.confProvider resourceForEnvironment:self.testEnvironment type:@"ms_graph_guid"];
+    request.requestScopes = [scope stringByAppendingString:@"/.default"];
+    request.expectedResultScopes = request.requestScopes;
+    request.loginHint = self.primaryAccount.account;
 
     [self runSharedAADLoginWithTestRequest:request];
 }
 
 #pragma mark - Embedded webview
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andEmbeddedWebView_andForceConsent
-{
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.loginHint = self.primaryAccount.username;
-    request.webViewType = MSALWebviewTypeWKWebView;
-    request.uiBehavior = @"force";
-    request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
-
-    // 1. Sign in interactively
-    NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-    XCTAssertNotNil(homeAccountId);
-
-    request.accountIdentifier = homeAccountId;
-    request.uiBehavior = @"consent";
-
-    NSDictionary *config = [self configWithTestRequest:request];
-
-    // 2. Sign in with force consent
-    [self acquireToken:config];
-    [self aadEnterPassword];
-
-    XCUIElement *permissionText = self.testApp.staticTexts[@"Permissions requested"];
-    [self waitForElement:permissionText];
-
-    XCUIElement *acceptButton = self.testApp.buttons[@"Accept"];
-    [acceptButton msidTap];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
 - (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andPassedInWebView_andSelectAccount
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = @[@"user.read", @"tasks.read", @"openid", @"profile"];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
     request.usePassedWebView = YES;
-    request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
 
-    request.uiBehavior = @"select_account";
+    request.promptBehavior = @"select_account";
     request.loginHint = nil;
     NSDictionary *config = [self configWithTestRequest:request];
 
-    // 2. Now call acquire token with force consent
+    // 2. Now call acquire token with select account
     [self acquireToken:config];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
@@ -604,15 +509,14 @@
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andPassedInEmbeddedWebView_andForceLogin
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.authority = @"https://login.windows.net/common";
-    request.uiBehavior = @"force";
-    request.usePassedWebView = YES;
-    request.loginHint = self.primaryAccount.username;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.windows.net/", self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.username;
+    request.usePassedWebView = YES;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
@@ -621,7 +525,7 @@
     // 2. Run UI appears (will also cancel)
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.windows.net/%@", self.primaryAccount.targetTenantId];
     // 3. Run silent
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -629,17 +533,16 @@
 
 #pragma mark - SafariViewController
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_andDefaultScopes_andOrganizationsEndpoint_andSafariViewController_andForceConsent
+- (void)testInteractiveAADLogin_withNonConvergedApp_andMSGraphScopes_andOrganizationsEndpoint_andSafariViewController_andForceConsent
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.username;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeSafariViewController;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.loginHint = self.primaryAccount.username;
+    request.webViewType = MSIDWebviewTypeSafariViewController;
 
     // 1. Sign in first time to ensure account will be there
     [self runSharedAADLoginWithTestRequest:request];
@@ -647,7 +550,7 @@
     // 2. Run UI appears
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
-    request.uiBehavior = @"consent";
+    request.promptBehavior = @"consent";
     request.loginHint = nil;
     NSDictionary *config = [self configWithTestRequest:request];
 
@@ -666,56 +569,18 @@
     [self closeResultView];
 }
 
-- (void)testInteractiveAADLogin_withNonConvergedApp_andMicrosoftGraphScopes_andTenantedEndpoint_andSafariViewController_andSelectAccount
-{
-    // 1. Sign in first time to ensure account will be there
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    request.scopes = @"tasks.read";
-    request.expectedResultScopes = @[@"tasks.read", @"openid", @"profile"];
-    request.uiBehavior = @"force";
-    request.loginHint = self.primaryAccount.username;
-    request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeSafariViewController;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
-
-    [self runSharedAADLoginWithTestRequest:request];
-
-    request.uiBehavior = @"select_account";
-    request.loginHint = nil;
-
-    NSDictionary *config = [self configWithTestRequest:request];
-    // 2. Now call acquire token with force consent
-    [self acquireToken:config];
-
-    [self selectAccountWithTitle:self.primaryAccount.account];
-
-    [self assertAccessTokenNotNil];
-    [self closeResultView];
-}
-
 - (void)testClaimsChallenge_withConvergedApp_withEmbeddedWebview
 {
-    NSArray *expectedResultScopes = @[@"user.read",
-                                      @"tasks.read",
-                                      @"openid",
-                                      @"profile"];
-    
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.scopes = @"user.read tasks.read";
-    request.expectedResultScopes = expectedResultScopes;
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.uiBehavior = @"force";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    request.webViewType = MSIDWebviewTypeWKWebView;
     
     // 1. Run interactive without claims, which should succeed
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
-    
     XCTAssertNotNil(homeAccountId);
 
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     request.claims = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
     
     // 2. Run interactive with claims, which should prompt for Intune/Broker installation
@@ -730,18 +595,19 @@
 
 - (void)testClaimsChallenge_withNonConvergedApp_withSystemWebview
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.uiBehavior = @"force";
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.com/", self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     
     // 1. Run interactive without claims, which should succeed
     NSString *homeAccountId = [self runSharedAADLoginWithTestRequest:request];
     
     XCTAssertNotNil(homeAccountId);
     
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     request.claims = @"{\"access_token\":{\"deviceid\":{\"essential\":true}}}";
     
     // 2. Run interactive with claims, which should prompt for Intune/Broker installation

@@ -29,7 +29,7 @@
 
 #pragma mark - Shared parameterized steps
 
-- (NSString *)runSharedAADLoginWithTestRequest:(MSALTestRequest *)request
+- (NSString *)runSharedAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request
 {
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
@@ -42,7 +42,7 @@
         XCTAssertTrue(self.testApp.staticTexts[@"PassedIN"]);
     }
 
-    if (!request.loginHint && !request.accountIdentifier)
+    if (!request.loginHint && !request.homeAccountIdentifier)
     {
         [self aadEnterEmail];
     }
@@ -50,19 +50,13 @@
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
     [self closeResultView];
     return homeAccountId;
 }
 
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request
-{
-    [self runSharedSilentAADLoginWithTestRequest:request guestTenantScenario:NO];
-}
-
-- (void)runSharedSilentAADLoginWithTestRequest:(MSALTestRequest *)request
-                           guestTenantScenario:(BOOL)usesGuestTenant
+- (void)runSharedSilentAADLoginWithTestRequest:(MSIDAutomationTestRequest *)request
 {
     NSDictionary *config = [self configWithTestRequest:request];
     // Acquire token silently
@@ -70,14 +64,8 @@
     [self assertAccessTokenNotNil];
     [self closeResultView];
 
-    NSMutableDictionary *mutableConfig = [config mutableCopy];
-
-    // The developer provided authority is not necessarily the authority that MSAL does cache lookups with
-    // Therefore, authority used to expire access token might be different
-    if (request.cacheAuthority) mutableConfig[@"authority"] = request.cacheAuthority;
-
     // Now expire access token
-    [self expireAccessToken:mutableConfig];
+    [self expireAccessToken:config];
     [self assertAccessTokenExpired];
     [self closeResultView];
 
@@ -85,20 +73,20 @@
     [self acquireTokenSilent:config];
     [self assertAccessTokenNotNil];
 
-    [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:usesGuestTenant];
+    [self runSharedResultAssertionWithTestRequest:request];
 
     [self closeResultView];
 
     // Now lookup access token without authority
-    mutableConfig[@"authority"] = request.authority;
-    mutableConfig[@"silent_authority"] = nil;
+    request.acquireTokenAuthority = nil;
+    config = [self configWithTestRequest:request];
 
-    [self acquireTokenSilent:mutableConfig];
-    [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:usesGuestTenant];
+    [self acquireTokenSilent:config];
+    [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
 }
 
-- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSALTestRequest *)request
+- (void)runSharedAuthUIAppearsStepWithTestRequest:(MSIDAutomationTestRequest *)request
 {
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireToken:config];
@@ -112,23 +100,21 @@
     [self closeResultView];
 }
 
-- (NSString *)runSharedResultAssertionWithTestRequest:(MSALTestRequest *)request
-                                  guestTenantScenario:(BOOL)usesGuestTenant
+- (NSString *)runSharedResultAssertionWithTestRequest:(MSIDAutomationTestRequest *)request
 {
     [self assertAccessTokenNotNil];
-    [self assertScopesReturned:request.expectedResultScopes];
+    [self assertScopesReturned:[[request.expectedResultScopes msidScopeSet] array]];
     [self assertAuthorityReturned:request.expectedResultAuthority];
 
-    NSDictionary *resultDictionary = [self resultDictionary];
-    NSString *homeAccountId = resultDictionary[@"user"][@"home_account_id"];
+    MSIDAutomationSuccessResult *result = [self automationSuccessResult];
+    NSString *homeAccountId = result.userInformation.homeAccountId;
     XCTAssertNotNil(homeAccountId);
 
     if (request.testAccount)
     {
-        NSDictionary *result = [self resultDictionary];
-        NSString *resultTenantId = result[@"tenantId"];
+        NSString *resultTenantId = result.userInformation.tenantId;
 
-        NSString *idToken = result[@"id_token"];
+        NSString *idToken = result.idToken;
         XCTAssertNotNil(idToken);
 
         MSIDIdTokenClaims *claims = [MSIDAADIdTokenClaimsFactory claimsFromRawIdToken:idToken error:nil];
@@ -136,17 +122,8 @@
 
         NSString *idTokenTenantId = claims.jsonDictionary[@"tid"];
 
-        if (!usesGuestTenant)
-        {
-            XCTAssertEqualObjects(resultTenantId, request.testAccount.homeTenantId);
-        }
-        else
-        {
-            XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
-        }
-
+        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
         XCTAssertEqualObjects(resultTenantId, idTokenTenantId);
-        XCTAssertEqualObjects(homeAccountId, request.testAccount.homeAccountId);
     }
 
     return homeAccountId;

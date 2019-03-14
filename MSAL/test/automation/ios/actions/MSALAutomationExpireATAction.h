@@ -25,11 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+
 #import <Foundation/Foundation.h>
+#import "MSALAutomationBaseAction.h"
 
-// TODO: Change this for automation app
-#define AUTOMATION_APP_CLIENT_ID @"3c62ac97-29eb-4aed-a3c8-add0298508da"
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAutoSettings : NSObject
+@interface MSALAutomationExpireATAction : MSALAutomationBaseAction
 
 @end
+
+NS_ASSUME_NONNULL_END

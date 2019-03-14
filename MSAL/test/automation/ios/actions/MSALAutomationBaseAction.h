@@ -25,14 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
-#import <WebKit/WebKit.h>
+#import <Foundation/Foundation.h>
+#import "MSIDAutomationTestAction.h"
 
-@interface MSALPassedInWebController : UIViewController
+@class MSALPublicClientApplication;
+@class MSIDAutomationTestResult;
+@class MSALAccount;
+@class MSALResult;
+@class MSIDAutomationTestRequest;
+@class MSIDLegacyTokenCacheAccessor;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSIDAccountCredentialCache;
 
-@property (nonatomic, strong) IBOutlet UIView *contentView;
-@property (nonatomic, strong) WKWebView *webView;
+NS_ASSUME_NONNULL_BEGIN
 
-- (IBAction)cancel:(id)sender;
+@interface MSALAutomationBaseAction : NSObject <MSIDAutomationTestAction>
+
+@property (nonatomic, strong) MSIDLegacyTokenCacheAccessor *legacyAccessor;
+@property (nonatomic, strong) MSIDDefaultTokenCacheAccessor *defaultAccessor;
+@property (nonatomic, strong) MSIDAccountCredentialCache *accountCredentialCache;
+
+- (MSALPublicClientApplication *)applicationWithParameters:(MSIDAutomationTestRequest *)parameters
+                                                     error:(NSError **)error;
+
+- (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error;
+- (MSIDAutomationTestResult *)testResultWithMSALResult:(MSALResult *)msalResult error:(NSError *)error;
+
+- (MSALAccount *)accountWithParameters:(MSIDAutomationTestRequest *)parameters
+                           application:(MSALPublicClientApplication *)application
+                                 error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

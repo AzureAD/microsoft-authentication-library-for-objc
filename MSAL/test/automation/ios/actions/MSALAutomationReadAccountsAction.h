@@ -25,8 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutoSettings.h"
+#import <Foundation/Foundation.h>
+#import "MSALAutomationBaseAction.h"
 
-@implementation MSALAutoSettings
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALAutomationReadAccountsAction : MSALAutomationBaseAction
 
 @end
+
+NS_ASSUME_NONNULL_END
