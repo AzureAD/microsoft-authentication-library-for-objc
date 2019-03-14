@@ -25,11 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "MSALAutomationBaseAction.h"
 
-@interface MSALAutoResultViewController : UIViewController
+NS_ASSUME_NONNULL_BEGIN
 
-@property NSString *resultInfoString;
-@property NSString *resultLogsString;
+@interface MSALAutomationRemoveAccountAction : MSALAutomationBaseAction
 
 @end
+
+NS_ASSUME_NONNULL_END

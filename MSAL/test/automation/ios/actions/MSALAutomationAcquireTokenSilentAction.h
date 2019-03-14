@@ -25,48 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAutoRequestViewController.h"
-#import "MSALAutoSettings.h"
-#import "MSALAutomationConstants.h"
+#import <Foundation/Foundation.h>
+#import "MSALAutomationBaseAction.h"
 
-@interface MSALAutoRequestViewController ()
+NS_ASSUME_NONNULL_BEGIN
 
-@property (strong, nonatomic) IBOutlet UITextView *requestInfo;
-@property (strong, nonatomic) IBOutlet UIButton *requestGo;
+@interface MSALAutomationAcquireTokenSilentAction : MSALAutomationBaseAction
 
 @end
 
-@implementation MSALAutoRequestViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-- (IBAction)go:(id)sender {
-    
-    (void)sender;
-    
-    self.requestInfo.editable = NO;
-    self.requestGo.enabled = NO;
-    [self.requestGo setTitle:@"Running..." forState:UIControlStateDisabled];
-    
-    NSError *error = nil;
-    NSDictionary *params = [NSJSONSerialization JSONObjectWithData:[self.requestInfo.text dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    if (!params)
-    {
-        NSString *errorString = [NSString stringWithFormat:@"Error Domain=%@ Code=%ld Description=%@", error.domain, (long)error.code, error.localizedDescription];
-        
-        params = @{ MSAL_AUTOMATION_ERROR_PARAM : errorString };
-    }
-    
-    self.completionBlock(params);
-}
-
-@end
+NS_ASSUME_NONNULL_END

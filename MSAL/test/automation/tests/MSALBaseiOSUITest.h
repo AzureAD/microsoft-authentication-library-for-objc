@@ -31,7 +31,7 @@
 - (XCUIApplication *)openDeviceRegistrationMenuInAuthenticator;
 - (void)openAppInstallURLForAppId:(NSString *)appId;
 - (void)acceptNotificationsSystemDialog;
-- (void)acceptAuthSessionDialogIfNecessary:(MSALTestRequest *)request;
+- (void)acceptAuthSessionDialogIfNecessary:(MSIDAutomationTestRequest *)request;
 - (void)acceptAuthSessionDialog;
 - (void)waitForRedirectToTheTestApp;
 - (XCUIApplication *)installAppWithId:(NSString *)appId;
