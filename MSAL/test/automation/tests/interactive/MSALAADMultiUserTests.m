@@ -46,7 +46,7 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     // Load multiple accounts conf
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.needsMultipleUsers = YES;
     // TODO: no other app returns multiple accounts
