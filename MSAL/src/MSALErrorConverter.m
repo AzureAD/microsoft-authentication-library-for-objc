@@ -153,7 +153,7 @@ static NSDictionary *s_userInfoKeyMapping;
     if (mappedDomain == MSALErrorDomain)
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
-        if (!mappedCode)
+        if (mappedCode == nil)
         {
             MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
@@ -192,7 +192,7 @@ static NSDictionary *s_userInfoKeyMapping;
     }
 
     return [NSError errorWithDomain:mappedDomain ? : domain
-                               code:mappedCode ? mappedCode.integerValue : code
+                               code:(mappedCode != nil) ? mappedCode.integerValue : code
                            userInfo:msalUserInfo];
 }
 
