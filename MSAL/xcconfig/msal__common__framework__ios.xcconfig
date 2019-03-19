@@ -21,3 +21,10 @@ VALID_ARCHS[sdk=iphoneos10.*] = $(ARCHS)
 VALID_ARCHS[sdk=iphoneos11.*] = $(ARCHS)
 VALID_ARCHS[sdk=iphoneos12.0] = $(ARCHS)
 VALID_ARCHS[sdk=iphonesimulator*] = $(MS_SIM_ARCHS)
+
+// Use empty bitcode marker in simulators and debug configurations for real devices.
+OTHER_CFLAGS[sdk=iphonesimulator*] = $(OTHER_CFLAGS) -fembed-bitcode-marker
+OTHER_CFLAGS[config=Debug][sdk=iphoneos*] = $(OTHER_CFLAGS) -fembed-bitcode-marker
+
+// Activate full bitcode on release configuration for real devices.
+OTHER_CFLAGS[config=Release][sdk=iphoneos*] = $(OTHER_CFLAGS) -fembed-bitcode
