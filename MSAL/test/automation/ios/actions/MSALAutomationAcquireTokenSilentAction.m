@@ -33,6 +33,7 @@
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationErrorResult.h"
+#import "MSALSilentTokenParameters.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 
@@ -103,13 +104,12 @@
         // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
         silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:testRequest.acquireTokenAuthority] error:nil];
     }
-
-    [application acquireTokenSilentForScopes:[scopes array]
-                                     account:account
-                                   authority:silentAuthority
-                                forceRefresh:forceRefresh
-                               correlationId:correlationId
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:[scopes array] account:account];
+    parameters.authority = silentAuthority;
+    parameters.forceRefresh = forceRefresh;
+    parameters.correlationId = correlationId;
+    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
          completionBlock(testResult);

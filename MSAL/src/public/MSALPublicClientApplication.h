@@ -283,16 +283,6 @@
                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
- Acquire a token silently for a provided parameters.
- 
- @param  parameters Parameters used for silent authentication.
- @param  completionBlock The completion block that will be called when the authentication
- flow completes, or encounters an error.
- */
-- (void)acquireTokenSilentWithParameters:(nonnull MSALSilentTokenParameters *)parameters
-                         completionBlock:(nonnull MSALCompletionBlock)completionBlock;
-
-/*!
     Acquire a token for a new account using interactive authentication
  
     @param  scopes          Permissions you want included in the access token received
@@ -302,7 +292,10 @@
                             flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+#pragma mark - Acquire Token using Login Hint
+
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -318,7 +311,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                     loginHint:(nullable NSString *)loginHint
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -339,7 +332,7 @@
                     loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -373,7 +366,7 @@
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -409,7 +402,9 @@
                        claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+#pragma mark - Acquire Token using Account
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -425,7 +420,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                       account:(nullable MSALAccount *)account
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -446,7 +441,7 @@
                       account:(nullable MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -481,7 +476,7 @@
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
  Acquire a token interactively for an existing account. This is typically used after receiving
@@ -518,7 +513,19 @@
                        claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenWithParameters:completionBlock: instead.")));
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+#pragma mark - Acquire Token Silent
+
+/*!
+ Acquire a token silently for a provided parameters.
+ 
+ @param  parameters Parameters used for silent authentication.
+ @param  completionBlock The completion block that will be called when the authentication
+ flow completes, or encounters an error.
+ */
+- (void)acquireTokenSilentWithParameters:(nonnull MSALSilentTokenParameters *)parameters
+                         completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -533,7 +540,7 @@
  */
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenSilentWithParameters:completionBlock: instead.")));
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -556,7 +563,7 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenSilentWithParameters:completionBlock: instead.")));
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -583,7 +590,7 @@
                           authority:(nullable MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenSilentWithParameters:completionBlock: instead.")));
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
  Acquire a token silently for an existing account.
@@ -613,7 +620,7 @@
                              claims:(nullable NSString *)claims
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock __attribute((deprecated("Use acquireTokenSilentWithParameters:completionBlock: instead.")));
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 #pragma mark - Remove account from cache
 

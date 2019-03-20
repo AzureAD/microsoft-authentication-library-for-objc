@@ -385,21 +385,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-- (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
-                         completionBlock:(MSALCompletionBlock)completionBlock
-{
-    [self acquireTokenSilentForScopes:parameters.scopes
-                              account:parameters.account
-                            authority:parameters.authority
-                               claims:parameters.claims
-                         forceRefresh:parameters.forceRefresh
-                        correlationId:parameters.correlationId
-                                apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
-                      completionBlock:completionBlock];
-}
-
-#pragma mark - Acquire Token (Deprecated)
-
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -416,7 +401,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-#pragma mark - Login Hint (Deprecated)
+#pragma mark - Login Hint
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                     loginHint:(NSString *)loginHint
@@ -499,7 +484,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-#pragma mark - Account (Deprecated)
+#pragma mark - Account
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                       account:(MSALAccount *)account
@@ -585,7 +570,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
 }
 
-#pragma mark - Silent (Deprecated)
+#pragma mark - Silent
+
+- (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
+                         completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:parameters.scopes
+                              account:parameters.account
+                            authority:parameters.authority
+                               claims:parameters.claims
+                         forceRefresh:parameters.forceRefresh
+                        correlationId:parameters.correlationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
+                      completionBlock:completionBlock];
+}
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
@@ -971,8 +969,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }];
 }
 
-#pragma mark -
-#pragma mark remove account from cache
+#pragma mark - Remove account from cache
 
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
