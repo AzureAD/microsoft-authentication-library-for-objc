@@ -5,3 +5,26 @@ DYLIB_INSTALL_NAME_BASE = @rpath;
 LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 VERSIONING_SYSTEM = "apple-generic";
 VERSION_INFO_PREFIX = "";
+
+MS_SIM_ARCHS = x86_64 i386
+PRE_XCODE_10_1_ARCHS = armv7 armv7s arm64
+ARCHS[sdk=iphoneos*] = $(PRE_XCODE_10_1_ARCHS) arm64e
+ARCHS[sdk=iphoneos9.*] = $(PRE_XCODE_10_1_ARCHS)
+ARCHS[sdk=iphoneos10.*] = $(PRE_XCODE_10_1_ARCHS)
+ARCHS[sdk=iphoneos11.*] = $(PRE_XCODE_10_1_ARCHS)
+ARCHS[sdk=iphoneos12.0] = $(PRE_XCODE_10_1_ARCHS)
+ARCHS[sdk=iphonesimulator*] = $(MS_SIM_ARCHS)
+
+VALID_ARCHS[sdk=iphoneos*] = $(ARCHS)
+VALID_ARCHS[sdk=iphoneos9.*] = $(ARCHS)
+VALID_ARCHS[sdk=iphoneos10.*] = $(ARCHS)
+VALID_ARCHS[sdk=iphoneos11.*] = $(ARCHS)
+VALID_ARCHS[sdk=iphoneos12.0] = $(ARCHS)
+VALID_ARCHS[sdk=iphonesimulator*] = $(MS_SIM_ARCHS)
+
+// Use empty bitcode marker in simulators and debug configurations for real devices.
+OTHER_CFLAGS[sdk=iphonesimulator*] = $(OTHER_CFLAGS) -fembed-bitcode-marker
+OTHER_CFLAGS[config=Debug][sdk=iphoneos*] = $(OTHER_CFLAGS) -fembed-bitcode-marker
+
+// Activate full bitcode on release configuration for real devices.
+OTHER_CFLAGS[config=Release][sdk=iphoneos*] = $(OTHER_CFLAGS) -fembed-bitcode
