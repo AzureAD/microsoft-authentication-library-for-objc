@@ -416,6 +416,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0452D8BF2243F5E000CC70B8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
 		04A1DAB2223B5FBF006A48D6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -1917,6 +1924,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				0452D8C02243F5E000CC70B8 /* PBXTargetDependency */,
 			);
 			name = "MSAL Test App (Mac)";
 			productName = "MSAL Test App";
@@ -2650,6 +2658,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0452D8C02243F5E000CC70B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
+			targetProxy = 0452D8BF2243F5E000CC70B8 /* PBXContainerItemProxy */;
+		};
 		04A1DAB1223B5FBF006A48D6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "IdentityCore iOS";
