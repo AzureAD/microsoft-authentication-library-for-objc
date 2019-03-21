@@ -98,8 +98,8 @@
 		B21E07BE210E5458007E3A3C /* MSALRedirectUriVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07BC210E5458007E3A3C /* MSALRedirectUriVerifier.m */; };
 		B21E07C0210E56DD007E3A3C /* MSALRedirectUriVerifierTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07BF210E56DD007E3A3C /* MSALRedirectUriVerifierTests.m */; };
 		B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DE92120E89E00B1B40C /* MSALADFSBaseUITest.m */; };
-		B21FA9BF2204DC6000806B68 /* libIdentityLabAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BC2204DC5700806B68 /* libIdentityLabAutomation iOS.a */; };
-		B21FA9C42204DCBB00806B68 /* libIdentityLabAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BC2204DC5700806B68 /* libIdentityLabAutomation iOS.a */; };
+		B21FA9BF2204DC6000806B68 /* libIdentityAutomationTestLib iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */; };
+		B21FA9C42204DCBB00806B68 /* libIdentityAutomationTestLib iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */; };
 		B21FA9F022063EC800806B68 /* MainAutomation.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B21FA9EF22063EC800806B68 /* MainAutomation.storyboard */; };
 		B221CEDB20C0AC60002F5E94 /* MSALAccountId.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CED920C0AC60002F5E94 /* MSALAccountId.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B221CEDC20C0AC60002F5E94 /* MSALAccountId.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CED920C0AC60002F5E94 /* MSALAccountId.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -113,7 +113,7 @@
 		B25A39E021C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39DF21C4C4AA00213A62 /* MSALAutomationInvalidateRTAction.m */; };
 		B25A39EA21C4C99700213A62 /* MSALAutomationRemoveAccountAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39E921C4C99700213A62 /* MSALAutomationRemoveAccountAction.m */; };
 		B25A39ED21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39EC21C4CACE00213A62 /* MSALAutomationReadAccountsAction.m */; };
-		B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */; };
+		B25A438A21C358D3000B3DD4 /* libIdentityAutomationAppLib iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B29520A220B4CB9F0068C021 /* libIdentityAutomationAppLib iOS.a */; };
 		B25A438B21C35936000B3DD4 /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
 		B25A439321C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439221C35A7B000B3DD4 /* MSALAutomationAcquireTokenAction.m */; };
 		B25A439621C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A439521C35A90000B3DD4 /* MSALAutomationAcquireTokenSilentAction.m */; };
@@ -770,7 +770,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B25A438A21C358D3000B3DD4 /* libIdentityAutomation iOS.a in Frameworks */,
+				B25A438A21C358D3000B3DD4 /* libIdentityAutomationAppLib iOS.a in Frameworks */,
 				B2F45738211D376F00818910 /* WebKit.framework in Frameworks */,
 				B2BB739D2112C82E000EA4C5 /* Security.framework in Frameworks */,
 				B2FE601A20E5BB5700502BA6 /* MSAL.framework in Frameworks */,
@@ -783,7 +783,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B21FA9C42204DCBB00806B68 /* libIdentityLabAutomation iOS.a in Frameworks */,
+				B21FA9C42204DCBB00806B68 /* libIdentityAutomationTestLib iOS.a in Frameworks */,
 				B20E245E21FEB3BB0037CA5E /* AuthenticationServices.framework in Frameworks */,
 				B29E2ADC21238F8200B170ED /* SafariServices.framework in Frameworks */,
 				B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */,
@@ -794,7 +794,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B21FA9BF2204DC6000806B68 /* libIdentityLabAutomation iOS.a in Frameworks */,
+				B21FA9BF2204DC6000806B68 /* libIdentityAutomationTestLib iOS.a in Frameworks */,
 				B20E245D21FEB3650037CA5E /* AuthenticationServices.framework in Frameworks */,
 				B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */,
 				B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */,
@@ -1395,10 +1395,10 @@
 				D6A2062B1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
 				D6A2062D1FC50A4D00755A51 /* IdentityCoreTests.xctest */,
 				231CE9D31FEC641D00E95D3E /* MSIDTestsHostApp.app */,
-				B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */,
-				B29520A420B4CB9F0068C021 /* libIdentityAutomation Mac.dylib */,
-				B21FA9BC2204DC5700806B68 /* libIdentityLabAutomation iOS.a */,
-				B21FA9BE2204DC5700806B68 /* libIdentityLabAutomation Mac.a */,
+				B29520A220B4CB9F0068C021 /* libIdentityAutomationAppLib iOS.a */,
+				B29520A420B4CB9F0068C021 /* libIdentityAutomationAppLib Mac.dylib */,
+				B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */,
+				B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1856,31 +1856,31 @@
 			remoteRef = 231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B21FA9BC2204DC5700806B68 /* libIdentityLabAutomation iOS.a */ = {
+		B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libIdentityLabAutomation iOS.a";
+			path = "libIdentityAutomationTestLib iOS.a";
 			remoteRef = B21FA9BB2204DC5700806B68 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B21FA9BE2204DC5700806B68 /* libIdentityLabAutomation Mac.a */ = {
+		B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libIdentityLabAutomation Mac.a";
+			path = "libIdentityAutomationTestLib Mac.a";
 			remoteRef = B21FA9BD2204DC5700806B68 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B29520A220B4CB9F0068C021 /* libIdentityAutomation iOS.a */ = {
+		B29520A220B4CB9F0068C021 /* libIdentityAutomationAppLib iOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "libIdentityAutomation iOS.a";
+			path = "libIdentityAutomationAppLib iOS.a";
 			remoteRef = B29520A120B4CB9F0068C021 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		B29520A420B4CB9F0068C021 /* libIdentityAutomation Mac.dylib */ = {
+		B29520A420B4CB9F0068C021 /* libIdentityAutomationAppLib Mac.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = "libIdentityAutomation Mac.dylib";
+			path = "libIdentityAutomationAppLib Mac.dylib";
 			remoteRef = B29520A320B4CB9F0068C021 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -2721,11 +2721,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-					armv7s,
-				);
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
@@ -2739,11 +2734,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FE71E40002800C69FBA /* msal__framework__ios.xcconfig */;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					arm64e,
-					armv7s,
-				);
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";

@@ -25,7 +25,7 @@
 #import "MSIDTestConfigurationProvider.h"
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfiguration.h"
-#import "MSIDTestAutomationConfigurationRequest.h"
+#import "MSIDAutomationConfigurationRequest.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSIDAutomationSuccessResult.h"
@@ -75,7 +75,7 @@
 - (void)readAccounts:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
-- (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
+- (void)loadTestConfiguration:(MSIDAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
 
 - (MSIDAutomationErrorResult *)automationErrorResult;
