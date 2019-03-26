@@ -72,6 +72,8 @@
 #import "MSIDIntuneEnrollmentIdsCache.h"
 #import "MSALPublicClientStatusNotifications.h"
 #import "MSIDNotifications.h"
+#import "MSALInteractiveTokenParameters.h"
+#import "MSALSilentTokenParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -365,8 +367,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return NO;
 }
 
-#pragma mark -
-#pragma mark acquireToken
+#pragma mark - Acquire Token
+
+- (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
+                   completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:parameters.scopes
+           extraScopesToConsent:parameters.extraScopesToConsent
+                        account:parameters.account
+                      loginHint:parameters.loginHint
+                     uiBehavior:parameters.uiBehavior
+           extraQueryParameters:parameters.extraQueryParameters
+                         claims:parameters.claims
+                      authority:parameters.authority
+                  correlationId:parameters.correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithTokenParameters
+                completionBlock:completionBlock];
+}
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -384,8 +401,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-#pragma mark -
-#pragma mark Login Hint
+#pragma mark - Login Hint
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                     loginHint:(NSString *)loginHint
@@ -468,9 +484,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-#pragma mark -
-#pragma mark Account
-
+#pragma mark - Account
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                       account:(MSALAccount *)account
@@ -556,8 +570,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
 }
 
-#pragma mark -
-#pragma mark Silent
+#pragma mark - Silent
+
+- (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
+                         completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:parameters.scopes
+                              account:parameters.account
+                            authority:parameters.authority
+                               claims:parameters.claims
+                         forceRefresh:parameters.forceRefresh
+                        correlationId:parameters.correlationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
+                      completionBlock:completionBlock];
+}
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
@@ -943,8 +969,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }];
 }
 
-#pragma mark -
-#pragma mark remove account from cache
+#pragma mark - Remove account from cache
 
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
