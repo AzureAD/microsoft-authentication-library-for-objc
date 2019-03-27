@@ -37,6 +37,7 @@
 #import "MSIDAccountCredentialCache.h"
 #import "MSALPublicClientApplication.h"
 #import "MSALResult.h"
+#import "MSALSilentTokenParameters.h"
 
 @implementation MSALStressTestHelper
 
@@ -95,18 +96,17 @@ static BOOL s_runningTest = NO;
                 {
                     userIndex = ++userIndex >= [accounts count] ? 0 : userIndex;
                 }
-
-                [application acquireTokenSilentForScopes:[[MSALTestAppSettings settings].scopes allObjects]
-                                                 account:account
-                                         completionBlock:^(MSALResult *result, NSError *error)
+                
+                __auto_type scopes = [[MSALTestAppSettings settings].scopes allObjects];
+                MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+                
+                [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, __unused NSError *error)
                  {
-                     (void)error;
-
                      if (expireToken && result.account)
                      {
                          [self expireAllAccessTokens];
                      }
-
+                     
                      dispatch_semaphore_signal(sem);
                  }];
             });
@@ -135,12 +135,11 @@ static BOOL s_runningTest = NO;
                     }
                     else
                     {
-                        [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                                         account:accounts[0]
-                                                 completionBlock:^(MSALResult *result, NSError *error)
+                        __auto_type scopes = [settings.scopes allObjects];
+                        MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:accounts[0]];
+                        
+                        [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, __unused NSError *error)
                          {
-                             (void)error;
-
                              if (result.accessToken)
                              {
                                  s_stop = YES;

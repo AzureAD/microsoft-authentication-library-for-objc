@@ -35,6 +35,7 @@
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationPassedInWebViewController.h"
+#import "MSALInteractiveTokenParameters.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -138,38 +139,21 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:testRequest.acquireTokenAuthority];
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
-
-    if (account)
-    {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                   account:account
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                    claims:claims
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error)
-         {
-             MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-             completionBlock(testResult);
-         }];
-    }
-    else
-    {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                 loginHint:testRequest.loginHint
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error) {
-
-                               MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-                               completionBlock(testResult);
-                           }];
-    }
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
+    parameters.extraScopesToConsent = extraScopes.array;
+    parameters.account = account;
+    parameters.loginHint = testRequest.loginHint;
+    parameters.uiBehavior = uiBehavior;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claims = claims;
+    parameters.authority = acquireTokenAuthority;
+    parameters.correlationId = correlationId;
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+     {
+         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+         completionBlock(testResult);
+     }];
 }
 
 @end
