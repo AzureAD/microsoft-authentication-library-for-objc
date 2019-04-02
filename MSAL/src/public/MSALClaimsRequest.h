@@ -30,6 +30,10 @@
 
 @class MSALIndividualClaimRequest;
 
+/*!
+ Claims targets. Currently we support only "access_token" and "id_token".
+ "userinfo" is not supported.
+ */
 typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)
 {
     MSALClaimsRequestTargetIdToken,
@@ -38,12 +42,31 @@ typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*!
+ Represents the claims request parameter as an object.
+ See more info here: https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter
+ */
 @interface MSALClaimsRequest : NSObject <MSALJsonStringSerializable>
 
+/*!
+ Adds a request for a specific claim to be included in the target via the claims request parameter.
+ If claim request alredy exists, provided claim request takes its place.
+ @param request Individual claim request.
+ @param target Target of individual claim.
+ */
 - (void)requestClaim:(MSALIndividualClaimRequest *)request forTarget:(MSALClaimsRequestTarget)target;
 
+/*!
+ Return the list of requested claims for the target.
+ @param target Target of requested claims.
+ */
 - (NSArray<MSALIndividualClaimRequest *> *)claimRequestsForTarget:(MSALClaimsRequestTarget)target;
 
+/*!
+ Remove requested claims for the target.
+ @param name of requested claim.
+ @param target Target of individual claim.
+ */
 - (void)removeClaimRequestWithName:(NSString *)name target:(MSALClaimsRequestTarget)target;
 
 @end

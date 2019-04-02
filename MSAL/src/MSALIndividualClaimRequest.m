@@ -44,6 +44,11 @@
     return self;
 }
 
+- (NSString *)description
+{
+    return [self.msidIndividualClaimRequest description];
+}
+
 - (instancetype)initWithMsidIndividualClaimRequest:(MSIDIndividualClaimRequest *)msidIndividualClaimRequest
 {
     self = [super init];

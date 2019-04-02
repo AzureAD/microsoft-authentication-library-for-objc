@@ -25,20 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALClaimsRequest.h"
+#import "MSALClaimsRequest+Internal.h"
 #import "MSIDJsonSerializable.h"
 #import "MSALIndividualClaimRequest+Internal.h"
 #import "MSALIndividualClaimRequestAdditionalInfo.h"
 #import "MSIDClaimsRequest.h"
 #import "MSIDJsonSerializer.h"
 #import "MSALErrorConverter.h"
-
-@interface MSALClaimsRequest ()
-
-@property (nonatomic) MSIDClaimsRequest *msidClaimsRequest;
-@property (nonatomic) id<MSIDJsonSerializing> jsonSerializer;
-
-@end
 
 @implementation MSALClaimsRequest
 
@@ -52,6 +45,11 @@
         _msidClaimsRequest = [MSIDClaimsRequest new];
     }
     return self;
+}
+
+- (NSString *)description
+{
+    return [self.msidClaimsRequest description];
 }
 
 - (void)requestClaim:(MSALIndividualClaimRequest *)request forTarget:(MSALClaimsRequestTarget)target

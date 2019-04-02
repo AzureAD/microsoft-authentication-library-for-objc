@@ -74,6 +74,7 @@
 #import "MSIDNotifications.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALClaimsRequest+Internal.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -378,7 +379,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:parameters.loginHint
                      uiBehavior:parameters.uiBehavior
            extraQueryParameters:parameters.extraQueryParameters
-                         claims:parameters.claims
+                  claimsRequest:parameters.claimsRequest
                       authority:parameters.authority
                   correlationId:parameters.correlationId
                           apiId:MSALTelemetryApiIdAcquireWithTokenParameters
@@ -394,7 +395,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquire
@@ -413,7 +414,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:loginHint
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHint
@@ -432,7 +433,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters
@@ -454,7 +455,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId
@@ -466,7 +467,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                     loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(nullable NSString *)claims
+                claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock
@@ -477,7 +478,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:loginHint
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:claims
+                  claimsRequest:claimsRequest
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndClaimsAndCorrelationId
@@ -496,7 +497,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:nil
                      uiBehavior:MSALUIBehaviorDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
@@ -516,7 +517,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
@@ -538,7 +539,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
@@ -551,7 +552,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       account:(MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
+                claimsRequest:(MSALClaimsRequest *)claimsRequest
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -562,7 +563,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                       loginHint:nil
                      uiBehavior:uiBehavior
            extraQueryParameters:extraQueryParameters
-                         claims:claims
+                  claimsRequest:claimsRequest
                       authority:authority
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
@@ -578,7 +579,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:parameters.scopes
                               account:parameters.account
                             authority:parameters.authority
-                               claims:parameters.claims
+                        claimsRequest:parameters.claimsRequest
                          forceRefresh:parameters.forceRefresh
                         correlationId:parameters.correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
@@ -592,7 +593,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:nil
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
@@ -607,7 +608,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAndAuthority
@@ -624,7 +625,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
@@ -634,7 +635,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
-                             claims:(nullable NSString *)claims
+                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock
@@ -642,7 +643,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:claims
+                        claimsRequest:claimsRequest
                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
@@ -679,7 +680,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                     loginHint:(NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
+                claimsRequest:(MSALClaimsRequest *)claimsRequest
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
@@ -769,8 +770,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                          authority:%@\n"
               "                                      correlationId:%@\n"
               "                                       capabilities:%@\n"
-              "                                             claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
+              "                                      claimsRequest:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claimsRequest);
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -781,8 +782,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                          authority:%@\n"
                   "                                      correlationId:%@\n"
                   "                                       capabilities:%@\n"
-                  "                                             claims:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
+                  "                                      claimsRequest:%@]",
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId, _clientCapabilities, claimsRequest);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
@@ -802,9 +803,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     };
     
     NSError *claimsError = nil;
-
     // Configure claims
-    if (![params setClaimsFromJSON:claims error:&claimsError])
+    if (![params setClaimsRequest:claimsRequest.msidClaimsRequest error:&claimsError])
     {
         block(nil, claimsError);
         return;
@@ -849,7 +849,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
                           authority:(MSALAuthority *)authority
-                             claims:(NSString *)claims
+                      claimsRequest:(MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
@@ -904,8 +904,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                             forceRefresh:%@\n"
               "                                            correlationId:%@\n"
               "                                             capabilities:%@\n"
-              "                                                   claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
+              "                                            claimsRequest:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claimsRequest);
     
     
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
@@ -915,8 +915,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                             forceRefresh:%@\n"
                   "                                            correlationId:%@\n"
                   "                                             capabilities:%@\n"
-                  "                                                   claims:%@]",
-                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
+                  "                                            claimsRequest:%@]",
+                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claimsRequest);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
@@ -928,7 +928,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     NSError *claimsError = nil;
 
     // Set claims
-    if (![params setClaimsFromJSON:claims error:&claimsError])
+    if (![params setClaimsRequest:claimsRequest.msidClaimsRequest error:&claimsError])
     {
         block(nil, claimsError);
         return;

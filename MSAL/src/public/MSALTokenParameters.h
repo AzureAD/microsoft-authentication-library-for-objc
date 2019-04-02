@@ -29,6 +29,7 @@
 
 @class MSALAccount;
 @class MSALAuthority;
+@class MSALClaimsRequest;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -66,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
  The claims parameter that needs to be sent to authorization or token endpoint.
  If claims parameter is passed in silent flow, access token will be skipped and refresh token will be tried.
  */
-@property (nonatomic, nullable) NSString *claims;
+@property (nonatomic, nullable) MSALClaimsRequest *claimsRequest;
 
 /*!
  UUID to correlate this request with the server.

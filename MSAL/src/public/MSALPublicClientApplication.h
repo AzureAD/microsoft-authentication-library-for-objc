@@ -35,6 +35,7 @@
 @class MSALRedirectUri;
 @class MSALSilentTokenParameters;
 @class MSALInteractiveTokenParameters;
+@class MSALClaimsRequest;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -389,7 +390,7 @@
                                     identifier within the directory itself (e.g. a domain associated to the
                                     tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                     TenantID property of the directory)
-    @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
+    @param  claimsRequest           The claims parameter that needs to be sent to authorization endpoint.
     @param  correlationId           UUID to correlate this request with the server
     @param  completionBlock         The completion block that will be called when the authentication
                                     flow completes, or encounters an error.
@@ -399,7 +400,7 @@
                     loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(nullable NSString *)claims
+                claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
@@ -493,7 +494,7 @@
  @param  uiBehavior              A UI behavior for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                  the interactive authentication flow. This should not be url-encoded value.
- @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
+ @param  claimsRequest           The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
                                  Azure AD it is of the form https://<instance/<tenant>, where
                                  <instance> is the directory host
@@ -510,7 +511,7 @@
                       account:(nullable MSALAccount *)account
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(nullable NSString *)claims
+                claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
@@ -606,7 +607,7 @@
                                  identifier within the directory itself (e.g. a domain associated
                                  to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                  representing the TenantID property of the directory)
- @param  claims                  The claims parameter that needs to be sent to token endpoint. When claims
+ @param  claimsRequest           The claims parameter that needs to be sent to token endpoint. When claims
                                  is passed, access token will be skipped and refresh token will be tried.
  @param  forceRefresh            Ignore any existing access token in the cache and force MSAL to
                                  get a new access token from the service.
@@ -617,7 +618,7 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
-                             claims:(nullable NSString *)claims
+                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock;

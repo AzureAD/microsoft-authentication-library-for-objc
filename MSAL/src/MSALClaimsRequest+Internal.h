@@ -25,37 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALClaimsRequest.h"
 
-@class MSALIndividualClaimRequestAdditionalInfo;
+@class MSIDClaimsRequest;
+@protocol MSIDJsonSerializing;
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
- Represents the individual claim request.
- See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
- */
-@interface MSALIndividualClaimRequest : NSObject
+@interface MSALClaimsRequest ()
 
-/*!
- Init with claim name.
- @param name Name of the requsted claim.
- */
-- (instancetype)initWithName:(NSString *)name;
-
-+ (instancetype)new NS_UNAVAILABLE;
-
-- (instancetype)init NS_UNAVAILABLE;
-
-/*!
- Name of the claim being requested.
- */
-@property (nonatomic) NSString *name;
-
-/*!
- Additional information that can be optionally sent to the authorization server (default is null) for a particular requested claim.
- */
-@property (nonatomic, nullable) MSALIndividualClaimRequestAdditionalInfo *additionalInfo;
+@property (nonatomic) MSIDClaimsRequest *msidClaimsRequest;
+@property (nonatomic) id<MSIDJsonSerializing> jsonSerializer;
 
 @end
 

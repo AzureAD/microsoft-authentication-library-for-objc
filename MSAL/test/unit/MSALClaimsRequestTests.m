@@ -174,7 +174,7 @@
     XCTAssertNotNil(claim.additionalInfo);
     XCTAssertNil(claim.additionalInfo.essential);
     XCTAssertNil(claim.additionalInfo.value);
-    __auto_type expectedValues = @[@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze"];
+    __auto_type expectedValues = [[NSSet alloc] initWithArray:@[@"urn:mace:incommon:iap:bronze", @"urn:mace:incommon:iap:silver"]];
     XCTAssertEqualObjects(expectedValues, claim.additionalInfo.values);
 }
 
@@ -194,7 +194,7 @@
     XCTAssertNotNil(claim.additionalInfo);
     XCTAssertTrue(claim.additionalInfo.essential);
     XCTAssertEqualObjects(@248289761001, claim.additionalInfo.value);
-    __auto_type expectedValues = @[@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze"];
+    __auto_type expectedValues = [[NSSet alloc] initWithArray:@[@"urn:mace:incommon:iap:bronze", @"urn:mace:incommon:iap:silver"]];
     XCTAssertEqualObjects(expectedValues, claim.additionalInfo.values);
 }
 
@@ -336,12 +336,12 @@
     __auto_type claimsRequest = [MSALClaimsRequest new];
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"acr"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
-    claimRequest.additionalInfo.values = @[@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze"];
+    claimRequest.additionalInfo.values = [[NSSet alloc] initWithObjects:@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze", nil];
     [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
     
     NSString *jsonString = [claimsRequest jsonString];
     
-    XCTAssertEqualObjects(@"{\"id_token\":{\"acr\":{\"values\":[\"urn:mace:incommon:iap:silver\",\"urn:mace:incommon:iap:bronze\"]}}}", jsonString);
+    XCTAssertEqualObjects(@"{\"id_token\":{\"acr\":{\"values\":[\"urn:mace:incommon:iap:bronze\",\"urn:mace:incommon:iap:silver\"]}}}", jsonString);
 }
 
 - (void)testJSONString_whenClaimRequestedWithAllPossibleValues_shouldReturnProperJsonString
@@ -351,12 +351,12 @@
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.essential = @YES;
     claimRequest.additionalInfo.value = @248289761001;
-    claimRequest.additionalInfo.values = @[@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze"];
+    claimRequest.additionalInfo.values = [[NSSet alloc] initWithObjects:@"urn:mace:incommon:iap:silver", @"urn:mace:incommon:iap:bronze", nil];
     [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
     
     NSString *jsonString = [claimsRequest jsonString];
     
-    __auto_type expectedJsonString = @"{\"id_token\":{\"acr\":{\"value\":248289761001,\"values\":[\"urn:mace:incommon:iap:silver\",\"urn:mace:incommon:iap:bronze\"],\"essential\":true}}}";
+    __auto_type expectedJsonString = @"{\"id_token\":{\"acr\":{\"value\":248289761001,\"values\":[\"urn:mace:incommon:iap:bronze\",\"urn:mace:incommon:iap:silver\"],\"essential\":true}}}";
     XCTAssertEqualObjects(expectedJsonString, jsonString);
 }
 
@@ -419,7 +419,7 @@
     __auto_type claimsRequest = [MSALClaimsRequest new];
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
-    claimRequest.additionalInfo.values = @[[NSDate new]];
+    claimRequest.additionalInfo.values = [[NSSet alloc] initWithObjects:[NSDate new], nil];
     [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
     
     XCTAssertThrows([claimsRequest jsonString]);

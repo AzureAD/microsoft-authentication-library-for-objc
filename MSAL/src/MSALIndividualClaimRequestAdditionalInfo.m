@@ -42,6 +42,11 @@
     return self;
 }
 
+- (NSString *)description
+{
+    return [self.msidAdditionalInfo description];
+}
+
 - (instancetype)initWithMsidIndividualClaimRequestAdditionalInfo:(MSIDIndividualClaimRequestAdditionalInfo *)msidAdditionalInfo
 {
     if (!msidAdditionalInfo) return nil;
