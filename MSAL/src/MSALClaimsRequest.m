@@ -89,10 +89,10 @@
         [self commonInit];
         
         NSError *msidError;
-        _msidClaimsRequest = [self.jsonSerializer fromJsonString:jsonString
-                                                         ofType:MSIDClaimsRequest.class
-                                                        context:nil
-                                                          error:&msidError];
+        _msidClaimsRequest = (MSIDClaimsRequest *)[self.jsonSerializer fromJsonString:jsonString
+                                                                               ofType:MSIDClaimsRequest.class
+                                                                              context:nil
+                                                                                error:&msidError];
         
         if (msidError)
         {

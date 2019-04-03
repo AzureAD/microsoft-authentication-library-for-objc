@@ -759,6 +759,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.webviewType = msidWebViewType;
     params.telemetryWebviewType = MSALStringForMSALWebviewType(_webviewType);
     params.customWebview = _customWebview;
+    params.claimsRequest = claimsRequest.msidClaimsRequest;
     
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
@@ -801,14 +802,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             });
         }
     };
-    
-    NSError *claimsError = nil;
-    // Configure claims
-    if (![params setClaimsRequest:claimsRequest.msidClaimsRequest error:&claimsError])
-    {
-        block(nil, claimsError);
-        return;
-    }
 
     NSError *requestError = nil;
 
@@ -896,6 +889,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.clientCapabilities = _clientCapabilities;
     params.extraURLQueryParameters = _sliceParameters;
     params.tokenExpirationBuffer = _expirationBuffer;
+    params.claimsRequest = claimsRequest.msidClaimsRequest;
     
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -924,15 +918,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:params];
         completionBlock(result, msalError);
     };
-
-    NSError *claimsError = nil;
-
-    // Set claims
-    if (![params setClaimsRequest:claimsRequest.msidClaimsRequest error:&claimsError])
-    {
-        block(nil, claimsError);
-        return;
-    }
 
     NSError *requestError = nil;
     MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_authority.url context:nil error:&requestError];

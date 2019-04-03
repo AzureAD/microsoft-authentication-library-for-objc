@@ -178,6 +178,20 @@
     XCTAssertEqualObjects(expectedValues, claim.additionalInfo.values);
 }
 
+- (void)testInitWithJSONString_whenClaimRequestedWithDuplicateValues_shouldFailWithError
+{
+    NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"values\": [\"v1\", \"v1\"]}}}";
+    NSError *error;
+    
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    
+    XCTAssertNil(claimsRequest);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"values are not unique.");
+}
+
 - (void)testInitWithJSONString_whenClaimRequestedWithAllPossibleValues_shouldInitClaimRequest
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"essential\": true, \"value\": 248289761001, \"values\": [\"urn:mace:incommon:iap:silver\", \"urn:mace:incommon:iap:bronze\"]}}}";
