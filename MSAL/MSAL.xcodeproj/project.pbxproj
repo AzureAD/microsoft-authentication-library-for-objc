@@ -34,8 +34,8 @@
 		232D616322485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D616022485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.h */; };
 		232D616422485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D616122485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m */; };
 		232D616522485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D616122485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m */; };
-		232D616A22498EDF00260C42 /* MSALJsonStringSerializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D616922498EDF00260C42 /* MSALJsonStringSerializable.h */; };
-		232D616B22498EDF00260C42 /* MSALJsonStringSerializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D616922498EDF00260C42 /* MSALJsonStringSerializable.h */; };
+		232D616A22498EDF00260C42 /* MSALJsonSerializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D616922498EDF00260C42 /* MSALJsonSerializable.h */; };
+		232D616B22498EDF00260C42 /* MSALJsonSerializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D616922498EDF00260C42 /* MSALJsonSerializable.h */; };
 		232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */; };
 		232D6193224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */; };
 		232D6195224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D6194224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h */; };
@@ -85,6 +85,8 @@
 		23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = 23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */; };
 		23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
 		23F32F0D1FF4789200B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
+		23FB5C1D22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; };
+		23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */ = {isa = PBXBuildFile; fileRef = 23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */; };
 		94E876CE1E492D6000FB96ED /* MSALAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 94E876CB1E492D6000FB96ED /* MSALAuthority.m */; };
 		960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
 		960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 960751BA2183E82C00F2BF2F /* MSALAccountIdTests.m */; };
@@ -559,7 +561,7 @@
 		232D615B22485B4600260C42 /* MSALIndividualClaimRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALIndividualClaimRequest.m; sourceTree = "<group>"; };
 		232D616022485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALIndividualClaimRequestAdditionalInfo.h; sourceTree = "<group>"; };
 		232D616122485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALIndividualClaimRequestAdditionalInfo.m; sourceTree = "<group>"; };
-		232D616922498EDF00260C42 /* MSALJsonStringSerializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonStringSerializable.h; sourceTree = "<group>"; };
+		232D616922498EDF00260C42 /* MSALJsonSerializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonSerializable.h; sourceTree = "<group>"; };
 		232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALClaimsRequestTests.m; sourceTree = "<group>"; };
 		232D6194224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALIndividualClaimRequest+Internal.h"; sourceTree = "<group>"; };
 		232D6197224DC44400260C42 /* MSALIndividualClaimRequestAdditionalInfo+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALIndividualClaimRequestAdditionalInfo+Internal.h"; sourceTree = "<group>"; };
@@ -588,6 +590,7 @@
 		23CDA9B01FA4443800FDD5C0 /* MSALTelemetryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetryTests.m; sourceTree = "<group>"; };
 		23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSIDTestURLResponse+MSAL.h"; sourceTree = "<group>"; };
 		23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSIDTestURLResponse+MSAL.m"; sourceTree = "<group>"; };
+		23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALJsonDeserializable.h; sourceTree = "<group>"; };
 		60DEF15A1E67756800966664 /* MSAL Test App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "MSAL Test App.entitlements"; path = "../../../../MSAL Test App.entitlements"; sourceTree = "<group>"; };
 		94E876B01E4556B400FB96ED /* MSAL.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSAL.pch; sourceTree = "<group>"; };
 		94E876CA1E492D6000FB96ED /* MSALAuthority.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALAuthority.h; sourceTree = "<group>"; };
@@ -1283,7 +1286,8 @@
 				232D61482248484C00260C42 /* MSALClaimsRequest.h */,
 				232D615A22485B4600260C42 /* MSALIndividualClaimRequest.h */,
 				232D616022485BA700260C42 /* MSALIndividualClaimRequestAdditionalInfo.h */,
-				232D616922498EDF00260C42 /* MSALJsonStringSerializable.h */,
+				232D616922498EDF00260C42 /* MSALJsonSerializable.h */,
+				23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */,
 			);
 			path = public;
 			sourceTree = "<group>";
@@ -1560,7 +1564,7 @@
 				1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */,
 				D65A6FB21E3FF41D00C69FBA /* MSALError.h in Headers */,
 				B28BDA8E217E9EAB003E5670 /* MSALOauth2FactoryProducer.h in Headers */,
-				232D616A22498EDF00260C42 /* MSALJsonStringSerializable.h in Headers */,
+				232D616A22498EDF00260C42 /* MSALJsonSerializable.h in Headers */,
 				23576D402252C07700D6F7BA /* MSALClaimsRequest+Internal.h in Headers */,
 				232D6198224DC44400260C42 /* MSALIndividualClaimRequestAdditionalInfo+Internal.h in Headers */,
 				232D6195224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h in Headers */,
@@ -1577,6 +1581,7 @@
 				232D69002240A3FF00594BBD /* MSALTokenParameters+Internal.h in Headers */,
 				D65A6FB11E3FF41D00C69FBA /* MSAL.h in Headers */,
 				232D68D6223DB8C200594BBD /* MSALSilentTokenParameters.h in Headers */,
+				23FB5C1D22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */,
 				963377BF211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
 				B203459D21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */,
 				232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */,
@@ -1604,7 +1609,7 @@
 				B2B5F08C1FCA61EB00F6AFAD /* MSALTelemetryDefaultEvent.h in Headers */,
 				D673F0791E4A633B0018BA91 /* MSALError_Internal.h in Headers */,
 				B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
-				232D616B22498EDF00260C42 /* MSALJsonStringSerializable.h in Headers */,
+				232D616B22498EDF00260C42 /* MSALJsonSerializable.h in Headers */,
 				23576D412252C07700D6F7BA /* MSALClaimsRequest+Internal.h in Headers */,
 				232D6199224DC44400260C42 /* MSALIndividualClaimRequestAdditionalInfo+Internal.h in Headers */,
 				232D6196224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h in Headers */,
@@ -1621,6 +1626,7 @@
 				23A68A8120F538DE0071E435 /* MSALADFSAuthority.h in Headers */,
 				D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */,
 				23A68A8E20F57A440071E435 /* MSALAuthorityFactory.h in Headers */,
+				23FB5C1E22542B99002BF1EB /* MSALJsonDeserializable.h in Headers */,
 				B2A3C29721460D290082525C /* MSALAuthority.h in Headers */,
 				1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */,
 				B28BBD342211DC7D00F51723 /* MSALPublicClientStatusNotifications.h in Headers */,

@@ -26,7 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALJsonStringSerializable.h"
+#import "MSALJsonSerializable.h"
+#import "MSALJsonDeserializable.h"
 
 @class MSALIndividualClaimRequest;
 
@@ -46,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
  Represents the claims request parameter as an object.
  See more info here: https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter
  */
-@interface MSALClaimsRequest : NSObject <MSALJsonStringSerializable>
+@interface MSALClaimsRequest : NSObject <MSALJsonSerializable, MSALJsonDeserializable>
 
 /*!
  Adds a request for a specific claim to be included in the target via the claims request parameter.
@@ -57,8 +58,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)requestClaim:(MSALIndividualClaimRequest *)request forTarget:(MSALClaimsRequestTarget)target;
 
 /*!
- Return the list of requested claims for the target.
+ Return the array of requested claims for the target.
  @param target Target of requested claims.
+ @return Array of individual claim requests.
  */
 - (NSArray<MSALIndividualClaimRequest *> *)claimRequestsForTarget:(MSALClaimsRequestTarget)target;
 

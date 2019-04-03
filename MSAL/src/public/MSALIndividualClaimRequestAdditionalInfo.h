@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALJsonStringSerializable.h"
+#import "MSALJsonSerializable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
