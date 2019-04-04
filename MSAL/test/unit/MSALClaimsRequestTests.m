@@ -333,6 +333,45 @@
     XCTAssertEqualObjects(@"{\"id_token\":{\"given_name\":{\"essential\":true}}}", jsonString);
 }
 
+- (void)testJSONString_whenClaimRequestedWithEssentialFlagAndItIs10_shouldReturnProperJsonString
+{
+    __auto_type claimsRequest = [MSALClaimsRequest new];
+    __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
+    claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
+    claimRequest.additionalInfo.essential = @10;
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    
+    NSString *jsonString = [claimsRequest jsonString];
+    
+    XCTAssertEqualObjects(@"{\"id_token\":{\"given_name\":{\"essential\":true}}}", jsonString);
+}
+
+- (void)testJSONString_whenClaimRequestedWithEssentialFlagAndItIs0_shouldReturnProperJsonString
+{
+    __auto_type claimsRequest = [MSALClaimsRequest new];
+    __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
+    claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
+    claimRequest.additionalInfo.essential = @0;
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    
+    NSString *jsonString = [claimsRequest jsonString];
+    
+    XCTAssertEqualObjects(@"{\"id_token\":{\"given_name\":{\"essential\":false}}}", jsonString);
+}
+
+- (void)testJSONString_whenClaimRequestedWithEssentialFlagAndItIsNegative1_shouldReturnProperJsonString
+{
+    __auto_type claimsRequest = [MSALClaimsRequest new];
+    __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
+    claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
+    claimRequest.additionalInfo.essential = @-1;
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    
+    NSString *jsonString = [claimsRequest jsonString];
+    
+    XCTAssertEqualObjects(@"{\"id_token\":{\"given_name\":{\"essential\":true}}}", jsonString);
+}
+
 - (void)testJSONString_whenClaimRequestedWithValue_shouldReturnProperJsonString
 {
     __auto_type claimsRequest = [MSALClaimsRequest new];
