@@ -745,6 +745,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
     params.clientCapabilities = _clientCapabilities;
 
+#if TARGET_OS_IPHONE
+    params.parentViewController = _parentViewController;
+    params.presentationType = _presentationType;
+#endif
+
     // Configure webview
     NSError *msidWebviewError = nil;
     MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(_webviewType, &msidWebviewError);

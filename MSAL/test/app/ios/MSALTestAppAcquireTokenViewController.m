@@ -70,6 +70,8 @@
     
     UISegmentedControl *_uiBehavior;
     UISegmentedControl *_webviewSelection;
+    UISegmentedControl *_parentViewControllerSelection;
+    UISegmentedControl *_presentationTypeSelection;
     UISegmentedControl *_customWebViewSelection;
     
     UITextView *_resultView;
@@ -181,7 +183,17 @@
     _webviewSelection.selectedSegmentIndex = 0;
     [_webviewSelection addTarget:self action:@selector(webviewTypeChanged:) forControlEvents:UIControlEventValueChanged];
     [layout addControl:_webviewSelection title:@"webview"];
-    
+
+    // parent view controller selection
+    _parentViewControllerSelection = [[UISegmentedControl alloc] initWithItems:@[@"Self", @"Window"]];
+    _parentViewControllerSelection.selectedSegmentIndex = 0;
+    [layout addControl:_parentViewControllerSelection title:@"parentController"];
+
+    // presentation type selection
+    _presentationTypeSelection = [[UISegmentedControl alloc] initWithItems:@[@"Full Screen", @"Form Sheet"]];
+    _presentationTypeSelection.selectedSegmentIndex = 0;
+    [layout addControl:_presentationTypeSelection title:@"presentationType"];
+
     _customWebViewSelection = [[UISegmentedControl alloc] initWithItems:@[@"MSAL", @"Passed In"]];
     _customWebViewSelection.selectedSegmentIndex = 0;
     [layout addControl:_customWebViewSelection title:@"embeddedWV"];
@@ -539,7 +551,9 @@
     
     application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     application.customWebview = nil;
-    
+    application.parentViewController = _parentViewControllerSelection.selectedSegmentIndex == 0 ? nil : self;
+    application.presentationType = _presentationTypeSelection.selectedSegmentIndex == 0 ? UIModalPresentationFullScreen : UIModalPresentationFormSheet;
+
     if (application.webviewType == MSALWebviewTypeWKWebView &&
         _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {

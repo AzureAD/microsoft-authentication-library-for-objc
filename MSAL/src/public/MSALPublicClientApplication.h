@@ -95,6 +95,11 @@
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property (nullable) WKWebView *customWebview;
 
+#if TARGET_OS_IPHONE
+@property (nullable, weak, nonatomic) UIViewController *parentViewController;
+@property (nonatomic) UIModalPresentationStyle presentationType;
+#endif
+
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
  
