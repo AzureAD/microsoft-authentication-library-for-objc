@@ -79,6 +79,7 @@
     
     [self.msidClaimsRequest removeClaimRequestWithName:name target:msidTarget];
 }
+
 #pragma mark - MSALJsonDeserializable
 
 - (instancetype)initWithJSONString:(NSString *)jsonString error:(NSError **)error

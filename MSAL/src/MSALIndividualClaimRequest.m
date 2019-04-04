@@ -37,9 +37,7 @@
     self = [super init];
     if (self)
     {
-        // TODO: provide name in constructor.
-        _msidIndividualClaimRequest = [MSIDIndividualClaimRequest new];
-        _msidIndividualClaimRequest.name = name;
+        _msidIndividualClaimRequest = [[MSIDIndividualClaimRequest alloc] initWithName:name];
     }
     return self;
 }

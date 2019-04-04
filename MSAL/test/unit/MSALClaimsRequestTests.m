@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALClaimsRequest.h"
+#import "MSALClaimsRequest+Internal.h"
 #import "MSALIndividualClaimRequest.h"
 #import "MSALIndividualClaimRequestAdditionalInfo.h"
+#import "MSIDClaimsRequestMock.h"
 
 @interface MSALClaimsRequestTests : XCTestCase
 
@@ -394,25 +395,18 @@
 
 #pragma mark - requestClaim
 
-- (void)testRequestClaim_whenSameClaimRequestedTwice_shouldReplaceCurrentRequest
+- (void)testRequestClaim_shouldInvokeRequestClaimOnMSIDClaimRequest
 {
     __auto_type claimsRequest = [MSALClaimsRequest new];
+    __auto_type mock = [MSIDClaimsRequestMock new];
+    claimsRequest.msidClaimsRequest = mock;
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @1;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
-    claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
-    claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
-    claimRequest.additionalInfo.value = @2;
     
     [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
     
-    __auto_type requests = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
-    XCTAssertEqual(1, requests.count);
-    MSALIndividualClaimRequest *request = requests.firstObject;
-    XCTAssertEqualObjects(@"sub", request.name);
-    XCTAssertNotNil(request.additionalInfo);
-    XCTAssertEqualObjects(@2, request.additionalInfo.value);
+    XCTAssertEqual(1, mock.requestClaimInvokedCount);
 }
 
 #pragma mark - testJSONString from invalid parameters
@@ -454,40 +448,30 @@
 
 #pragma mark - removeClaimRequestWithName
 
-- (void)testRemoveClaimRequestWithName_whenClaimExistsInTarget_shouldRemoveIt
+- (void)testRemoveClaimRequestWithName_whenClaimExistsInTarget_shouldInvokeMSIDClaimRequest
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim2\": null, \"claim3\": null }}";
     NSError *error;
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type mock = [MSIDClaimsRequestMock new];
+    claimsRequest.msidClaimsRequest = mock;
 
     [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
-    XCTAssertNotNil(claimsRequest);
-    XCTAssertNil(error);
-    XCTAssertEqual(claims.count, 2);
-    MSALIndividualClaimRequest *claim = claims[0];
-    XCTAssertEqualObjects(@"claim1", claim.name);
-    claim = claims[1];
-    XCTAssertEqualObjects(@"claim3", claim.name);
+    XCTAssertEqual(1, mock.removeClaimRequestWithNameInvokedCount);
 }
 
-- (void)testRemoveClaimRequestWithName_whenClaimDoesntExistInTarget_shouldIgnoreIt
+- (void)testRemoveClaimRequestWithName_whenClaimDoesntExistInTarget_shouldInvokeMSIDClaimRequest
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim3\": null }}";
     NSError *error;
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type mock = [MSIDClaimsRequestMock new];
+    claimsRequest.msidClaimsRequest = mock;
     
     [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
-    XCTAssertNotNil(claimsRequest);
-    XCTAssertNil(error);
-    XCTAssertEqual(claims.count, 2);
-    MSALIndividualClaimRequest *claim = claims[0];
-    XCTAssertEqualObjects(@"claim1", claim.name);
-    claim = claims[1];
-    XCTAssertEqualObjects(@"claim3", claim.name);
+    XCTAssertEqual(1, mock.removeClaimRequestWithNameInvokedCount);
 }
 
 @end
