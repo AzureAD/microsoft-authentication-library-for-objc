@@ -127,7 +127,8 @@ extension SampleMSALAuthentication {
         do {
             let clientApplication = try createClientApplication()
             
-            clientApplication.acquireToken(forScopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue]) {
+            let parameters = MSALInteractiveTokenParameters(scopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue])
+            clientApplication.acquireToken(with: parameters) {
                 (result: MSALResult?, error: Error?) in
                 
                 guard let acquireTokenResult = result, error == nil else {
@@ -161,15 +162,15 @@ extension SampleMSALAuthentication {
             // for graph in this sample, we would like to get an access token for the account's home authority.
             // acquireTokenSilent call without any authority will use account's home authority by default.
             
-            application.acquireTokenSilent(forScopes: scopes, account: account, completionBlock: {
-                (result: MSALResult?, error: Error?) in
+            let parameters = MSALSilentTokenParameters(scopes: scopes, account: account)
+            application.acquireTokenSilent(with: parameters) { (result: MSALResult?, error: Error?) in
                 guard let acquireTokenResult = result, error == nil else {
                     completion(nil, error)
                     return
                 }
-      
+                
                 completion(acquireTokenResult.accessToken, nil)
-            })
+            }
         } catch let error {
             completion(nil, error)
         }
@@ -180,7 +181,11 @@ extension SampleMSALAuthentication {
             let application = try createClientApplication()
             let account = try currentAccount()
             
-            application.acquireToken(forScopes: scopes, account: account, uiBehavior: .MSALUIBehaviorDefault, extraQueryParameters: [:], completionBlock: {
+            let parameters = MSALInteractiveTokenParameters(scopes: scopes)
+            parameters.account = account
+            parameters.uiBehavior = .MSALUIBehaviorDefault
+            
+            application.acquireToken(with: parameters) {
                 (result: MSALResult?, error: Error?) in
                 
                 guard let acquireTokenResult = result, error == nil else {
@@ -189,7 +194,7 @@ extension SampleMSALAuthentication {
                 }
                 
                 completion(acquireTokenResult.accessToken, nil)
-            })
+            }
         } catch let error {
             completion(nil, error)
         }

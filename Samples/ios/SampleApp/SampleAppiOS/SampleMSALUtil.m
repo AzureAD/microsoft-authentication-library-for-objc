@@ -139,8 +139,9 @@
     // Request as many scopes as possible up front that you know your application will
     // want to use so the service can request consent for them up front and minimize
     // how much users are interrupted for interactive auth.
-    [application acquireTokenForScopes:@[@"User.Read", @"Calendars.Read"]
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"User.Read", @"Calendars.Read"]];
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         if (error)
         {
@@ -179,9 +180,9 @@
     // tokens of varying authorities for this account in the cache. Because we are trying to get a token specifically
     // for graph in this sample, we would like to get an access token for the account's home authority.
     // acquireTokenSilent call without any authority will use account's home authority by default.
-    [application acquireTokenSilentForScopes:scopes
-                                     account:currentAccount
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:currentAccount];
+    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         acquireTokenBlock(result.accessToken, error);
     }];
@@ -199,12 +200,12 @@
         acquireTokenBlock(nil, error);
         return;
     }
-
-    [application acquireTokenForScopes:scopes
-                               account:currentAccount
-                            uiBehavior:MSALUIBehaviorDefault
-                  extraQueryParameters:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.account = currentAccount;
+    parameters.uiBehavior = MSALUIBehaviorDefault;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          acquireTokenBlock(result.accessToken, error);
      }];
