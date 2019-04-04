@@ -1,5 +1,5 @@
 //
-//  main.m
+//  AppDelegate.h
 //  MSALMacTestApp
 //
 //  Created by Rohit Narula on 4/3/19.
@@ -8,6 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-int main(int argc, const char * argv[]) {
-    return NSApplicationMain(argc, argv);
-}
+@interface AppDelegate : NSObject <NSApplicationDelegate>
+
+
+@end
+
