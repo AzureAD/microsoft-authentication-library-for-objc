@@ -444,14 +444,19 @@
 {
     __auto_type claimsRequest = [MSALClaimsRequest new];
     __auto_type mock = [MSIDClaimsRequestMock new];
+    mock.resultToReturn = YES;
+    mock.errorToReturn = [NSError new];
     claimsRequest.msidClaimsRequest = mock;
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @1;
+    NSError *error;
     
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
+    BOOL result = [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:&error];
     
     XCTAssertEqual(1, mock.requestClaimInvokedCount);
+    XCTAssertTrue(result);
+    XCTAssertEqualObjects(error, mock.errorToReturn);
 }
 
 #pragma mark - testJSONString from invalid parameters
@@ -497,26 +502,33 @@
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim2\": null, \"claim3\": null }}";
     NSError *error;
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:nil];
     __auto_type mock = [MSIDClaimsRequestMock new];
+    mock.resultToReturn = YES;
     claimsRequest.msidClaimsRequest = mock;
 
-    [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken];
+    BOOL result = [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken error:&error];
     
     XCTAssertEqual(1, mock.removeClaimRequestWithNameInvokedCount);
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
 }
 
 - (void)testRemoveClaimRequestWithName_whenClaimDoesntExistInTarget_shouldInvokeMSIDClaimRequest
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim3\": null }}";
     NSError *error;
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:nil];
     __auto_type mock = [MSIDClaimsRequestMock new];
+    mock.resultToReturn = NO;
+    mock.errorToReturn = [NSError new];
     claimsRequest.msidClaimsRequest = mock;
     
-    [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken];
+    BOOL result = [claimsRequest removeClaimRequestWithName:@"claim2" target:MSALClaimsRequestTargetIdToken error:&error];
     
     XCTAssertEqual(1, mock.removeClaimRequestWithNameInvokedCount);
+    XCTAssertFalse(result);
+    XCTAssertNotNil(error);
 }
 
 @end

@@ -77,11 +77,13 @@
     return claimRequests;
 }
 
-- (void)removeClaimRequestWithName:(NSString *)name target:(MSALClaimsRequestTarget)target
+- (BOOL)removeClaimRequestWithName:(NSString *)name
+                            target:(MSALClaimsRequestTarget)target
+                             error:(NSError **)error
 {
     __auto_type msidTarget = [self msidTargetFromTarget:target];
     
-    [self.msidClaimsRequest removeClaimRequestWithName:name target:msidTarget];
+    return [self.msidClaimsRequest removeClaimRequestWithName:name target:msidTarget error:error];
 }
 
 #pragma mark - MSALJsonDeserializable

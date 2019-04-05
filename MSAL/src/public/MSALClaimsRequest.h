@@ -72,8 +72,12 @@ NS_ASSUME_NONNULL_BEGIN
  Remove requested claims for the target.
  @param name of requested claim.
  @param target Target of individual claim.
+ @param error The error that occurred during removing the claim request.
+ @return YES if operation was successful, NO otherwise.
  */
-- (void)removeClaimRequestWithName:(NSString *)name target:(MSALClaimsRequestTarget)target;
+- (BOOL)removeClaimRequestWithName:(NSString *)name
+                            target:(MSALClaimsRequestTarget)target
+                             error:(NSError * _Nullable * _Nullable)error;
 
 @end
 
