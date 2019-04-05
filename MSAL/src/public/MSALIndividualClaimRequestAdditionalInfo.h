@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  Requests that the Claim be returned with one of a set of values, with the values appearing in order of preference.
  */
-@property (nonatomic, nullable) NSSet *values;
+@property (nonatomic, nullable) NSArray *values;
 
 @end
 

@@ -44,7 +44,7 @@ typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)
 NS_ASSUME_NONNULL_BEGIN
 
 /*!
- Represents the claims request parameter as an object.
+ Represents the claims request parameter as an object. It is not thread safe.
  See more info here: https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter
  */
 @interface MSALClaimsRequest : NSObject <MSALJsonSerializable, MSALJsonDeserializable>

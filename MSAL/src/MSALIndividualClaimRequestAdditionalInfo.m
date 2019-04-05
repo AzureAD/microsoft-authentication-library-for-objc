@@ -79,12 +79,12 @@
     return self.msidAdditionalInfo.value;
 }
 
-- (void)setValues:(NSSet *)values
+- (void)setValues:(NSArray *)values
 {
     self.msidAdditionalInfo.values = values;
 }
 
-- (NSSet *)values
+- (NSArray *)values
 {
     return self.msidAdditionalInfo.values;
 }
