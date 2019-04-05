@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param jsonString Json string to deserialize from.
  @param error The error that occurred during deserialization.
  */
-- (instancetype)initWithJSONString:(NSString *)jsonString
+- (instancetype)initWithJsonString:(NSString *)jsonString
                              error:(NSError * _Nullable * _Nullable)error;
 
 @end

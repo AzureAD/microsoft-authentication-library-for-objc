@@ -404,7 +404,7 @@
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedViaOverloadedAcquireToken_shouldSendClaims
 {
     NSString *claims = @"{\"id_token\":{\"nickname\":null}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -601,7 +601,7 @@
 
     application.brokerAvailability = MSALBrokeredAvailabilityNone;
     NSString *claims = @"{\"id_token\": {\"nickname\": null }}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -725,7 +725,7 @@
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedAndCapabilitiesSet_shouldSendClaimsToServer
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -823,7 +823,7 @@
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedAndLoginHintNotNil_shouldSendClaimsAndLoginHintToServer
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -1585,7 +1585,7 @@
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
@@ -1885,7 +1885,7 @@
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1969,7 +1969,7 @@
     
     // Add mock error response for refresh token grant
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claims error:nil];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"

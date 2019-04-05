@@ -87,7 +87,7 @@
     NSUUID *correlationId = [NSUUID new];
     
     NSError *claimsError;
-    MSALClaimsRequest *claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:testRequest.claims error:&claimsError];
+    MSALClaimsRequest *claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
     if (claimsError)
     {
         MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];

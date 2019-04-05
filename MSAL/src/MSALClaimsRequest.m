@@ -82,7 +82,7 @@
 
 #pragma mark - MSALJsonDeserializable
 
-- (instancetype)initWithJSONString:(NSString *)jsonString error:(NSError **)error
+- (instancetype)initWithJsonString:(NSString *)jsonString error:(NSError **)error
 {
     self = [super init];
     if (self)

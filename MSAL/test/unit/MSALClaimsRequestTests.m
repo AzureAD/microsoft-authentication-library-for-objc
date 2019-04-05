@@ -52,7 +52,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"nickname\": null }}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -68,7 +68,7 @@
     NSString *claimsJsonString = @"{\"access_token\": {\"nickname\": null }}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetAccessToken];
     XCTAssertNotNil(claimsRequest);
@@ -84,7 +84,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"nickname\": null }, \"access_token\": {\"some_claim\": null }}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -107,7 +107,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"given_name\": {\"essential\": true}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -126,7 +126,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"sub\": {\"value\": 248289761001}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -145,7 +145,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"sub\": {\"value\": 1}, \"sub\": {\"value\": 2}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -164,7 +164,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"values\": [\"urn:mace:incommon:iap:silver\", \"urn:mace:incommon:iap:bronze\"]}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -184,7 +184,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"values\": [\"v1\", \"v1\"]}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -198,7 +198,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"essential\": true, \"value\": 248289761001, \"values\": [\"urn:mace:incommon:iap:silver\", \"urn:mace:incommon:iap:bronze\"]}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
@@ -220,7 +220,7 @@
     NSString *claimsJsonString = @"{\"id_token\": \"nickname\": null }}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -233,7 +233,7 @@
     NSString *claimsJsonString = @"{\"qwe\": {\"nickname\": null }}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -247,7 +247,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"sub\": {\"invalid_param\": 1}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -261,7 +261,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"given_name\": {\"essential\": \"qwe\"}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -275,7 +275,7 @@
     NSString *claimsJsonString = @"{\"id_token\": {\"acr\": {\"essential\": true, \"value\": 248289761001, \"values\": \"urn:mace:incommon:iap:silver\"}}}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -289,7 +289,7 @@
     NSString *claimsJsonString = @"{\"id_token\": \"acr\"}";
     NSError *error;
     
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
@@ -491,7 +491,7 @@
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim2\": null, \"claim3\": null }}";
     NSError *error;
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     __auto_type mock = [MSIDClaimsRequestMock new];
     claimsRequest.msidClaimsRequest = mock;
 
@@ -504,7 +504,7 @@
 {
     NSString *claimsJsonString = @"{\"id_token\": {\"claim1\": null, \"claim3\": null }}";
     NSError *error;
-    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJSONString:claimsJsonString error:&error];
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     __auto_type mock = [MSIDClaimsRequestMock new];
     claimsRequest.msidClaimsRequest = mock;
     
