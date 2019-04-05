@@ -167,7 +167,7 @@
     [application acquireTokenForScopes:@[@"fakeb2cscopes"]
                   extraScopesToConsent:nil
                              loginHint:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                              authority:secondAuthority
                          correlationId:nil
