@@ -52,10 +52,14 @@
     return [self.msidClaimsRequest description];
 }
 
-- (void)requestClaim:(MSALIndividualClaimRequest *)request forTarget:(MSALClaimsRequestTarget)target
+- (BOOL)requestClaim:(MSALIndividualClaimRequest *)request
+           forTarget:(MSALClaimsRequestTarget)target
+               error:(NSError **)error
 {
     __auto_type msidTarget = [self msidTargetFromTarget:target];
-    [self.msidClaimsRequest requestClaim:request.msidIndividualClaimRequest forTarget:msidTarget];
+    return [self.msidClaimsRequest requestClaim:request.msidIndividualClaimRequest
+                                      forTarget:msidTarget
+                                          error:error];
 }
 
 - (NSArray<MSALIndividualClaimRequest *> *)claimRequestsForTarget:(MSALClaimsRequestTarget)target

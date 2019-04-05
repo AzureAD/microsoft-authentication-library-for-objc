@@ -54,8 +54,12 @@ NS_ASSUME_NONNULL_BEGIN
  If claim request alredy exists, provided claim request takes its place.
  @param request Individual claim request.
  @param target Target of individual claim.
+ @param error The error that occurred during requesting the claim.
+ @return YES if operation was successful, NO otherwise.
  */
-- (void)requestClaim:(MSALIndividualClaimRequest *)request forTarget:(MSALClaimsRequestTarget)target;
+- (BOOL)requestClaim:(MSALIndividualClaimRequest *)request
+           forTarget:(MSALClaimsRequestTarget)target
+               error:(NSError * _Nullable * _Nullable)error;
 
 /*!
  Return the array of requested claims for the target.

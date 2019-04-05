@@ -319,7 +319,7 @@
 {
     __auto_type claimsRequest = [MSALClaimsRequest new];
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"nickname"];
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -332,7 +332,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.essential = @YES;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -345,7 +345,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.essential = @10;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -358,7 +358,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.essential = @0;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -371,7 +371,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"given_name"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.essential = @-1;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -384,7 +384,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @248289761001;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -397,7 +397,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"acr"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.values = @[@"urn:mace:incommon:iap:bronze", @"urn:mace:incommon:iap:silver"];
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -412,7 +412,7 @@
     claimRequest.additionalInfo.essential = @YES;
     claimRequest.additionalInfo.value = @248289761001;
     claimRequest.additionalInfo.values = @[@"urn:mace:incommon:iap:bronze", @"urn:mace:incommon:iap:silver"];
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -426,11 +426,11 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @1;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @2;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *jsonString = [claimsRequest jsonString];
     
@@ -449,7 +449,7 @@
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = @1;
     
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     XCTAssertEqual(1, mock.requestClaimInvokedCount);
 }
@@ -462,7 +462,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.value = [NSDate new];
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     XCTAssertThrows([claimsRequest jsonString]);
 }
@@ -473,7 +473,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     claimRequest.additionalInfo = [MSALIndividualClaimRequestAdditionalInfo new];
     claimRequest.additionalInfo.values = @[[NSDate new]];
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     XCTAssertThrows([claimsRequest jsonString]);
 }
@@ -484,7 +484,7 @@
     __auto_type claimRequest = [[MSALIndividualClaimRequest alloc] initWithName:@"sub"];
     NSString *name;
     claimRequest.name = name;
-    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken];
+    [claimsRequest requestClaim:claimRequest forTarget:MSALClaimsRequestTargetIdToken error:nil];
     
     NSString *result = [claimsRequest jsonString];
     
