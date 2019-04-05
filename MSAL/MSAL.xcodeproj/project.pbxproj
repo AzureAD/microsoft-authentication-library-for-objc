@@ -11,6 +11,8 @@
 		04D32CAF1FD615B3000B123E /* MSALErrorConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */; };
 		04D32CD01FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
 		04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */; };
+		1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
+		1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E1A2E052256D194001009ED /* AppKit.framework */; };
 		1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */; };
 		1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A81E5AABC50086D120 /* MSALTestAppSettingsViewController.m */; };
 		1E614BDE22558D8300EBF62F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BDD22558D8300EBF62F /* AppDelegate.m */; };
@@ -24,6 +26,7 @@
 		1EB7ABD621262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */; };
 		1EC12C112255DB9200339572 /* AcquireTokenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC12C102255DB9200339572 /* AcquireTokenViewController.m */; };
 		1EC12C1A2255DBB100339572 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC12C192255DBB100339572 /* SettingsViewController.m */; };
+		1EC12C3A2256BC6800339572 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
 		1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -291,6 +294,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1EC12C382256BC5400339572 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
+			remoteInfo = "MSAL (Mac Framework)";
+		};
 		231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -524,6 +534,7 @@
 		04D32CAC1FD61585000B123E /* MSALErrorConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALErrorConverter.h; sourceTree = "<group>"; };
 		04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverter.m; sourceTree = "<group>"; };
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
+		1E1A2E052256D194001009ED /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		1E394C422123812700CC1616 /* MSALTestAppB2CAuthorityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppB2CAuthorityViewController.h; sourceTree = "<group>"; };
 		1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppB2CAuthorityViewController.m; sourceTree = "<group>"; };
 		1E614BDA22558D8300EBF62F /* MSALMacTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALMacTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -799,6 +810,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */,
+				1EC12C3A2256BC6800339572 /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -910,13 +923,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1E614BD522558B1800EBF62F /* New Group */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "New Group";
-			sourceTree = "<group>";
-		};
 		94E876C91E492D2800FB96ED /* instance */ = {
 			isa = PBXGroup;
 			children = (
@@ -1101,7 +1107,6 @@
 		D61A647E1E5AA7C60086D120 /* ios */ = {
 			isa = PBXGroup;
 			children = (
-				1E614BD522558B1800EBF62F /* New Group */,
 				D61A64821E5AA7C60086D120 /* resources */,
 				D61A64811E5AA7C60086D120 /* main.m */,
 				D61A647F1E5AA7C60086D120 /* MSALTestAppDelegate.h */,
@@ -1447,6 +1452,7 @@
 		D6A2062E1FC5106F00755A51 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1E1A2E052256D194001009ED /* AppKit.framework */,
 				963C89A6214BA1760051AFEE /* AuthenticationServices.framework */,
 				B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */,
 				B29E2AC421238E0000B170ED /* SafariServices.framework */,
@@ -1608,6 +1614,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				1EC12C392256BC5400339572 /* PBXTargetDependency */,
 			);
 			name = MSALMacTestApp;
 			productName = MSALMacTestApp;
@@ -2102,6 +2109,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */,
 				1E614BE122558D8300EBF62F /* ViewController.m in Sources */,
 				1EC12C112255DB9200339572 /* AcquireTokenViewController.m in Sources */,
 				1EC12C1A2255DBB100339572 /* SettingsViewController.m in Sources */,
@@ -2333,6 +2341,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1EC12C392256BC5400339572 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
+			targetProxy = 1EC12C382256BC5400339572 /* PBXContainerItemProxy */;
+		};
 		231CE9D91FEC677D00E95D3E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "IdentityTest iOS";
@@ -2447,7 +2460,6 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -2499,6 +2511,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
 			name = Debug;
 		};
@@ -2511,7 +2524,6 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -2560,6 +2572,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
 			name = Release;
 		};
@@ -2863,6 +2876,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -2879,6 +2893,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D61A64661E5AA6B40086D120 /* msal__test_app__ios.xcconfig */;
 			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = "MSAL Test App.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
