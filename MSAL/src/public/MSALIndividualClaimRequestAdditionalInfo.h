@@ -33,6 +33,11 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Represents the additional information that can be sent to an authorization server for a request claim in the claim request parameter.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
+ 
+ Example of Individual Claim Request Additional Info serialized to json:
+ 
+    {"essential": true}
+ 
  */
 @interface MSALIndividualClaimRequestAdditionalInfo : NSObject
 

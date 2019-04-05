@@ -34,6 +34,11 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Represents the individual claim request.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
+ 
+ Example of Individual Claim Request serialized to json:
+ 
+    "auth_time": {"essential": true}
+ 
  */
 @interface MSALIndividualClaimRequest : NSObject
 

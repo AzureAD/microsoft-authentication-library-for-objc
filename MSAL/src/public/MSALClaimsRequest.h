@@ -46,6 +46,21 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Represents the claims request parameter as an object. It is not thread safe.
  See more info here: https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter
+ 
+ Example of Claims Request serialized to json:
+ 
+ {
+    "access_token":
+    {
+        "capolids": {"essential":true, "values":["00000000-0000-0000-0000-000000000001"]}
+    },
+    "id_token":
+    {
+     "auth_time": {"essential": true},
+     "acr": {"values": ["urn:mace:incommon:iap:silver"]}
+    }
+ }
+ 
  */
 @interface MSALClaimsRequest : NSObject <MSALJsonSerializable, MSALJsonDeserializable>
 
