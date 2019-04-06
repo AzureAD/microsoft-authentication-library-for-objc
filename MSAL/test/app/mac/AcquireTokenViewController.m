@@ -24,6 +24,12 @@ static NSString * const redirectUri = @"redirectUri";
 @end
 
 @implementation AcquireTokenViewController
+
+- (IBAction)selectScopes:(id)sender
+{
+    
+}
+
 - (IBAction)acquireTokenInteractive:(id)sender
 {
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:@"1234" error:nil];
@@ -60,6 +66,11 @@ static NSString * const redirectUri = @"redirectUri";
     [settings setProfile:[[MSALTestAppSettings profiles] objectForKey:currentProfile]];
     self.clientId.stringValue = [settings.profile objectForKey:clientId];
     self.redirectUri.stringValue = [settings.profile objectForKey:redirectUri];
+}
+
+- (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
+{
+    
 }
 
 @end

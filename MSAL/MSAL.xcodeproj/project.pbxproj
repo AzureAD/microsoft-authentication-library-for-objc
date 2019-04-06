@@ -14,6 +14,7 @@
 		1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64B01E5AAC5C0086D120 /* MSALTestAppSettings.m */; };
 		1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E1A2E052256D194001009ED /* AppKit.framework */; };
 		1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */; };
+		1E4522AD22581B8A00D27CA7 /* ScopesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4522AC22581B8A00D27CA7 /* ScopesViewController.m */; };
 		1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A81E5AABC50086D120 /* MSALTestAppSettingsViewController.m */; };
 		1E614BDE22558D8300EBF62F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BDD22558D8300EBF62F /* AppDelegate.m */; };
 		1E614BE122558D8300EBF62F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BE022558D8300EBF62F /* ViewController.m */; };
@@ -537,6 +538,8 @@
 		1E1A2E052256D194001009ED /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		1E394C422123812700CC1616 /* MSALTestAppB2CAuthorityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppB2CAuthorityViewController.h; sourceTree = "<group>"; };
 		1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppB2CAuthorityViewController.m; sourceTree = "<group>"; };
+		1E4522AB22581B8A00D27CA7 /* ScopesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScopesViewController.h; sourceTree = "<group>"; };
+		1E4522AC22581B8A00D27CA7 /* ScopesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScopesViewController.m; sourceTree = "<group>"; };
 		1E614BDA22558D8300EBF62F /* MSALMacTestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MSALMacTestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E614BDC22558D8300EBF62F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1E614BDD22558D8300EBF62F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -1169,6 +1172,8 @@
 				1EC12C102255DB9200339572 /* AcquireTokenViewController.m */,
 				1EC12C182255DBB100339572 /* SettingsViewController.h */,
 				1EC12C192255DBB100339572 /* SettingsViewController.m */,
+				1E4522AB22581B8A00D27CA7 /* ScopesViewController.h */,
+				1E4522AC22581B8A00D27CA7 /* ScopesViewController.m */,
 			);
 			path = mac;
 			sourceTree = "<group>";
@@ -2113,6 +2118,7 @@
 				1E614BE122558D8300EBF62F /* ViewController.m in Sources */,
 				1EC12C112255DB9200339572 /* AcquireTokenViewController.m in Sources */,
 				1EC12C1A2255DBB100339572 /* SettingsViewController.m in Sources */,
+				1E4522AD22581B8A00D27CA7 /* ScopesViewController.m in Sources */,
 				1E614BE922558D8300EBF62F /* main.m in Sources */,
 				1E614BDE22558D8300EBF62F /* AppDelegate.m in Sources */,
 			);
