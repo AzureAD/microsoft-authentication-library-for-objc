@@ -1,0 +1,8 @@
+#include "msal__common.xcconfig"
+#include "msal__common__ios.xcconfig"
+#include "msal__common__framework__ios.xcconfig"
+
+PUBLIC_HEADERS_FOLDER_PATH = src/public
+DSTROOT = /usr/local/lib
+PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO
+GENERATE_MASTER_OBJECT_FILE = YES
