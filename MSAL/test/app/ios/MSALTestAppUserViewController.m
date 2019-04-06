@@ -67,7 +67,7 @@
     _accounts = nil;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [settings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];

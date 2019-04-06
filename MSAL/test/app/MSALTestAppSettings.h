@@ -34,10 +34,9 @@ extern NSString* MSALTestAppCacheChangeNotification;
 @interface MSALTestAppSettings : NSObject
 
 #define MSAL_APP_CLIENT_ID @"clientId"
-#define MSAL_APP_PROFILE @"profile"
+#define MSAL_APP_PROFILE @"currentProfile"
 #define MSAL_APP_REDIRECT_URI @"redirectUri"
 
-@property (nonatomic) NSDictionary *profile;
 @property (nonatomic) MSALAuthority *authority;
 @property (nonatomic) MSALAccount *currentAccount;
 @property (nonatomic) NSString *loginHint;
@@ -49,7 +48,12 @@ extern NSString* MSALTestAppCacheChangeNotification;
 + (NSArray<NSString *> *)b2cAuthorities;
 + (NSArray<NSString *> *)authorityTypes;
 + (NSArray<NSString *> *)availableScopes;
+
 + (NSDictionary *)profiles;
+- (NSString *)currentProfileName;
+- (NSDictionary *)currentProfile;
+- (void)setCurrentProfile:(NSUInteger)index;
+- (NSString *)profileTitleForIndex:(NSUInteger)index;
 
 - (BOOL)addScope:(NSString *)scope;
 - (BOOL)removeScope:(NSString *)scope;
