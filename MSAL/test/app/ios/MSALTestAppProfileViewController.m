@@ -72,7 +72,7 @@
 
 - (NSString *)labelForRow:(NSInteger)row
 {
-    return [[MSALTestAppSettings settings] profileTitleForIndex:row];
+    return [MSALTestAppSettings profileTitleForIndex:row];
 }
 
 - (void)rowSelected:(NSInteger)row
@@ -83,7 +83,7 @@
 
 + (NSString *)currentTitle
 {
-    return [[MSALTestAppSettings settings] currentProfileName];
+    return [MSALTestAppSettings currentProfileName];
 }
 
 @end

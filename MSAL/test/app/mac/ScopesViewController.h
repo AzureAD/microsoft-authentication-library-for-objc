@@ -10,7 +10,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
+@protocol ScopesDelegate <NSObject>
+- (void)setScopes:(NSMutableArray *)scopes;
+@end
+
+@interface ScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
+
+@property (weak) id<ScopesDelegate> delegate;
 
 @end
 

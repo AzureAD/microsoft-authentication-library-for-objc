@@ -286,27 +286,28 @@ static NSDictionary *s_currentProfile = nil;
     return s_profiles;
 }
 
-- (NSDictionary *)currentProfile
++ (NSDictionary *)currentProfile
 {
     return s_currentProfile;
 }
 
-- (void)setCurrentProfile:(NSUInteger)index
-{
-   s_currentProfileIdx = index;
-   NSString *profileName = [s_profileTitles objectAtIndex:index];
-   s_currentProfile = [s_profiles objectForKey:profileName];
-   [self setValue:profileName forKey:MSAL_APP_PROFILE];
-}
-
-- (NSString *)currentProfileName
++ (NSString *)currentProfileName
 {
     return [s_profileTitles objectAtIndex:s_currentProfileIdx];
 }
 
-- (NSString *)profileTitleForIndex:(NSUInteger)index
++ (NSString *)profileTitleForIndex:(NSUInteger)index
 {
     return [s_profileTitles objectAtIndex:index];
 }
+
+- (void)setCurrentProfile:(NSUInteger)index
+{
+    s_currentProfileIdx = index;
+    NSString *profileName = [s_profileTitles objectAtIndex:index];
+    s_currentProfile = [s_profiles objectForKey:profileName];
+    [self setValue:profileName forKey:MSAL_APP_PROFILE];
+}
+
 
 @end

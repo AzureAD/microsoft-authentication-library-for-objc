@@ -50,10 +50,10 @@ extern NSString* MSALTestAppCacheChangeNotification;
 + (NSArray<NSString *> *)availableScopes;
 
 + (NSDictionary *)profiles;
-- (NSString *)currentProfileName;
-- (NSDictionary *)currentProfile;
++ (NSString *)currentProfileName;
++ (NSDictionary *)currentProfile;
++ (NSString *)profileTitleForIndex:(NSUInteger)index;
 - (void)setCurrentProfile:(NSUInteger)index;
-- (NSString *)profileTitleForIndex:(NSUInteger)index;
 
 - (BOOL)addScope:(NSString *)scope;
 - (BOOL)removeScope:(NSString *)scope;
