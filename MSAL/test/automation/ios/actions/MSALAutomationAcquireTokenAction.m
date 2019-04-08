@@ -35,6 +35,7 @@
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationPassedInWebViewController.h"
+#import "MSALInteractiveTokenParameters.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -86,19 +87,19 @@
     NSString *claims = testRequest.claims;
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
-    MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+    MSALPromptType promptType = MSALPromptTypeDefault;
 
     if ([testRequest.promptBehavior isEqualToString:@"force"])
     {
-        uiBehavior = MSALForceLogin;
+        promptType = MSALPromptTypeLogin;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"consent"])
     {
-        uiBehavior = MSALForceConsent;
+        promptType = MSALPromptTypeConsent;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
-        uiBehavior = MSALPromptIfNecessary;
+        promptType = MSALPromptTypePromptIfNecessary;
     }
 
     MSIDWebviewType webviewSelection = testRequest.webViewType;
@@ -138,38 +139,21 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:testRequest.acquireTokenAuthority];
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
-
-    if (account)
-    {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                   account:account
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                    claims:claims
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error)
-         {
-             MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-             completionBlock(testResult);
-         }];
-    }
-    else
-    {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                 loginHint:testRequest.loginHint
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error) {
-
-                               MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-                               completionBlock(testResult);
-                           }];
-    }
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
+    parameters.extraScopesToConsent = extraScopes.array;
+    parameters.account = account;
+    parameters.loginHint = testRequest.loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claims = claims;
+    parameters.authority = acquireTokenAuthority;
+    parameters.correlationId = correlationId;
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+     {
+         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+         completionBlock(testResult);
+     }];
 }
 
 @end

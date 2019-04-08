@@ -33,6 +33,8 @@
 @class MSALAuthority;
 @class WKWebView;
 @class MSALRedirectUri;
+@class MSALSilentTokenParameters;
+@class MSALInteractiveTokenParameters;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -236,8 +238,7 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
-#pragma mark -
-#pragma mark SafariViewController Support
+#pragma mark - SafariViewController Support
 
 #if TARGET_OS_IPHONE
 /*!
@@ -269,8 +270,17 @@
  */
 + (BOOL)cancelCurrentWebAuthSession;
 
-#pragma mark -
-#pragma mark acquireToken
+#pragma mark - Acquire Token
+
+/*!
+ Acquire a token for a provided parameters using interactive authentication.
+ 
+ @param  parameters Parameters used for interactive authentication.
+ @param  completionBlock The completion block that will be called when the authentication
+ flow completes, or encounters an error.
+ */
+- (void)acquireTokenWithParameters:(nonnull MSALInteractiveTokenParameters *)parameters
+                   completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -284,8 +294,7 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
-#pragma mark -
-#pragma mark acquireToken using Login Hint
+#pragma mark - Acquire Token using Login Hint
 
 
 /*!
@@ -313,7 +322,7 @@
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
                             beginning of the interactive authentication flow. The account returned
                             in the completion block is not guaranteed to match the loginHint.
-    @param  uiBehavior      A specific UI behavior for the interactive authentication flow
+    @param  promptType      A specific prompt type for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock The completion block that will be called when the authentication
@@ -321,7 +330,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                     loginHint:(nullable NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
@@ -337,7 +346,7 @@
     @param  loginHint               A loginHint (usually an email) to pass to the service at the
                                     beginning of the interactive authentication flow. The account returned
                                     in the completion block is not guaranteed to match the loginHint.
-    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  promptType              A prompt type for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
@@ -353,7 +362,7 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(nullable NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
@@ -371,7 +380,7 @@
     @param  loginHint               A loginHint (usually an email) to pass to the service at the
                                     beginning of the interactive authentication flow. The account returned
                                     in the completion block is not guaranteed to match the loginHint.
-    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  promptType              A prompt type for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
@@ -388,15 +397,14 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(nullable NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
-#pragma mark -
-#pragma mark acquireToken using Account
+#pragma mark - Acquire Token using Account
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -423,7 +431,7 @@
                                     gauranteed to be included in the access token returned.
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  promptType              A prompt type for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow. This should not be url-encoded value.
     @param  completionBlock         The completion block that will be called when the authentication
@@ -431,7 +439,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                       account:(nullable MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
@@ -447,7 +455,7 @@
                                     access token
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
-    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  promptType              A prompt type for the interactive authentication flow
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
@@ -464,7 +472,7 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
                       account:(nullable MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
@@ -482,7 +490,7 @@
                                  access token
  @param  account                 An account object retrieved from the application object that the
                                  interactive authentication flow will be locked down to.
- @param  uiBehavior              A UI behavior for the interactive authentication flow
+ @param  promptType              A prompt type for the interactive authentication flow
  @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                  the interactive authentication flow. This should not be url-encoded value.
  @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
@@ -500,15 +508,24 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
                       account:(nullable MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
-#pragma mark -
-#pragma mark acquireTokenSilent
+#pragma mark - Acquire Token Silent
+
+/*!
+ Acquire a token silently for a provided parameters.
+ 
+ @param  parameters Parameters used for silent authentication.
+ @param  completionBlock The completion block that will be called when the authentication
+ flow completes, or encounters an error.
+ */
+- (void)acquireTokenSilentWithParameters:(nonnull MSALSilentTokenParameters *)parameters
+                         completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
 /*!
     Acquire a token silently for an existing account.
@@ -605,8 +622,7 @@
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock;
 
-#pragma mark -
-#pragma mark remove account from cache
+#pragma mark - Remove account from cache
 
 /*!
     Removes all tokens from the cache for this application for the provided account

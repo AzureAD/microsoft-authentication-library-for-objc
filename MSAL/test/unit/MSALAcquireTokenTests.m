@@ -479,7 +479,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:claims
                              authority:nil
@@ -570,7 +570,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                                 claims:@""
                              authority:nil
@@ -605,7 +605,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue", @"claims":@"claims_value"}
                                 claims:@"{\"fake_claims\":\"fake_value\"}"
                              authority:nil
@@ -703,7 +703,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:nil
                              authority:nil
@@ -801,7 +801,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:claims
                              authority:nil
@@ -894,7 +894,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                              loginHint:@"upn@test.com"
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:claims
                              authority:nil
@@ -933,7 +933,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                                 claims:claims
                              authority:nil
@@ -1037,7 +1037,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"instance_aware":@"true"}
                              authority:nil
                          correlationId:nil
@@ -1485,7 +1485,7 @@
     [application acquireTokenForScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                              authority:nil
                          correlationId:nil
@@ -2544,7 +2544,7 @@
     [application acquireTokenForScopes:@[@"fakescope"]
                   extraScopesToConsent:nil
                                account:account
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                              authority:nil
                          correlationId:nil

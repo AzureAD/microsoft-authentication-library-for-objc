@@ -28,38 +28,38 @@
 #import <Foundation/Foundation.h>
 #import "MSIDConstants.h"
 
-NSString *MSALStringForMSALUIBehavior(MSALPromptType behavior)
+NSString *MSALStringForPromptType(MSALPromptType promptType)
 {
-    switch (behavior)
+    switch (promptType)
     {
-            STRING_CASE(MSALSelectAccount);
-            STRING_CASE(MSALForceLogin);
-            STRING_CASE(MSALForceConsent);
-            STRING_CASE(MSALPromptIfNecessary);
+            STRING_CASE(MSALPromptTypeSelectAccount);
+            STRING_CASE(MSALPromptTypeLogin);
+            STRING_CASE(MSALPromptTypeConsent);
+            STRING_CASE(MSALPromptTypePromptIfNecessary);
     }
     
-    @throw @"Unrecognized MSALUIBehavior";
+    @throw @"Unrecognized MSALPromptType";
 }
 
-MSIDPromptType MSIDPromptTypeForBehavior(MSALPromptType behavior)
+MSIDPromptType MSIDPromptTypeForPromptType(MSALPromptType promptType)
 {
-    switch (behavior)
+    switch (promptType)
     {
-        case MSALForceLogin : return MSIDPromptTypeLogin;
-        case MSALForceConsent : return MSIDPromptTypeConsent;
-        case MSALSelectAccount : return MSIDPromptTypeSelectAccount;
-        case MSALPromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
+        case MSALPromptTypeLogin : return MSIDPromptTypeLogin;
+        case MSALPromptTypeConsent : return MSIDPromptTypeConsent;
+        case MSALPromptTypeSelectAccount : return MSIDPromptTypeSelectAccount;
+        case MSALPromptTypePromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
         default : return MSIDPromptTypeDefault;
     }
 }
 
-NSString *MSALParameterStringForBehavior(MSALPromptType behavior)
+NSString *MSALParameterStringForPromptType(MSALPromptType promptType)
 {
-    switch (behavior)
+    switch (promptType)
     {
-        case MSALForceLogin : return @"login";
-        case MSALForceConsent : return @"consent";
-        case MSALSelectAccount : return @"select_account";
-        case MSALPromptIfNecessary : return @"";
+        case MSALPromptTypeLogin : return @"login";
+        case MSALPromptTypeConsent : return @"consent";
+        case MSALPromptTypeSelectAccount : return @"select_account";
+        case MSALPromptTypePromptIfNecessary : return @"";
     }
 }

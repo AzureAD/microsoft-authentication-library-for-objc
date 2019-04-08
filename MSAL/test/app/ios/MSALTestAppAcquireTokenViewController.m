@@ -41,6 +41,8 @@
 #import "MSALResult.h"
 #import "MSALLogger.h"
 #import "MSALConstants.h"
+#import "MSALInteractiveTokenParameters.h"
+#import "MSALSilentTokenParameters.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -66,7 +68,7 @@
     
     UIButton *_acquireSilentButton;
     
-    UISegmentedControl *_uiBehavior;
+    UISegmentedControl *_promptType;
     UISegmentedControl *_webviewSelection;
     UISegmentedControl *_customWebViewSelection;
     
@@ -170,9 +172,9 @@
                                    action:@selector(selectScope:)];
     [layout addControl:_scopesButton title:@"scopes"];
     
-    _uiBehavior = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
-    _uiBehavior.selectedSegmentIndex = 0;
-    [layout addControl:_uiBehavior title:@"behavior"];
+    _promptType = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
+    _promptType.selectedSegmentIndex = 0;
+    [layout addControl:_promptType title:@"behavior"];
     
     //_webviewSelection
     _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[@"Embedded", @"System"]];
@@ -459,16 +461,16 @@
     NSLog(@"%@", resultText);
 }
 
-- (MSALUIBehavior)uiBehavior
+- (MSALPromptType)promptType
 {
-    NSString *label = [_uiBehavior titleForSegmentAtIndex:_uiBehavior.selectedSegmentIndex];
+    NSString *label = [_promptType titleForSegmentAtIndex:_promptType.selectedSegmentIndex];
     
     if ([label isEqualToString:@"Select"])
-        return MSALSelectAccount;
+        return MSALPromptTypeSelectAccount;
     if ([label isEqualToString:@"Login"])
-        return MSALForceLogin;
+        return MSALPromptTypeLogin;
     if ([label isEqualToString:@"Consent"])
-        return MSALForceConsent;
+        return MSALPromptTypeConsent;
     
     @throw @"Do not recognize prompt behavior";
 }
@@ -476,6 +478,7 @@
 - (void)acquireTokenInteractive:(id)sender
 {
     (void)sender;
+    
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     NSDictionary *currentProfile = [settings profile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
@@ -546,22 +549,13 @@
         [_authView setHidden:NO];
     }
     
-    if ([_loginHintField.text length])
-    {
-        [application acquireTokenForScopes:[settings.scopes allObjects]
-                                 loginHint:_loginHintField.text
-                                uiBehavior:[self uiBehavior]
-                      extraQueryParameters:extraQueryParameters
-                           completionBlock:completionBlock];
-    }
-    else
-    {
-        [application acquireTokenForScopes:[settings.scopes allObjects]
-                                   account:settings.currentAccount
-                                uiBehavior:[self uiBehavior]
-                      extraQueryParameters:extraQueryParameters
-                           completionBlock:completionBlock];
-    }
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
+    parameters.loginHint = _loginHintField.text;
+    parameters.account = settings.currentAccount;
+    parameters.promptType = [self promptType];
+    parameters.extraQueryParameters = extraQueryParameters;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (IBAction)cancelAuth:(id)sender
@@ -608,11 +602,13 @@
     
     __block BOOL fBlockHit = NO;
     _acquireSilentButton.enabled = NO;
-
-    [application acquireTokenSilentForScopes:[settings.scopes allObjects]
-                                     account:settings.currentAccount
-                                   authority:settings.authority
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    __auto_type scopes = [settings.scopes allObjects];
+    __auto_type account = settings.currentAccount;
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.authority = settings.authority;
+    
+    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         if (fBlockHit)
         {

@@ -180,6 +180,8 @@
     return nil;
 }
 
+#pragma mark - Accounts Convenience
+
 + (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims
 {
     if ([msidAccount.authority.class isKindOfClass:MSIDAADAuthority.class])

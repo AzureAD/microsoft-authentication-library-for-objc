@@ -25,41 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSIDConstants.h"
+#import "MSALTokenParameters.h"
 
-NSString *MSALStringForMSALUIBehavior(MSALPromptType behavior)
-{
-    switch (behavior)
-    {
-            STRING_CASE(MSALSelectAccount);
-            STRING_CASE(MSALForceLogin);
-            STRING_CASE(MSALForceConsent);
-            STRING_CASE(MSALPromptIfNecessary);
-    }
-    
-    @throw @"Unrecognized MSALUIBehavior";
-}
+NS_ASSUME_NONNULL_BEGIN
 
-MSIDPromptType MSIDPromptTypeForBehavior(MSALPromptType behavior)
-{
-    switch (behavior)
-    {
-        case MSALForceLogin : return MSIDPromptTypeLogin;
-        case MSALForceConsent : return MSIDPromptTypeConsent;
-        case MSALSelectAccount : return MSIDPromptTypeSelectAccount;
-        case MSALPromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
-        default : return MSIDPromptTypeDefault;
-    }
-}
+/*!
+ Token parameters to be used in silent flow.
+ */
+@interface MSALSilentTokenParameters : MSALTokenParameters
 
-NSString *MSALParameterStringForBehavior(MSALPromptType behavior)
-{
-    switch (behavior)
-    {
-        case MSALForceLogin : return @"login";
-        case MSALForceConsent : return @"consent";
-        case MSALSelectAccount : return @"select_account";
-        case MSALPromptIfNecessary : return @"";
-    }
-}
+/*!
+ Ignore any existing access token in the cache and force MSAL to
+ get a new access token from the service.
+ */
+@property (nonatomic) BOOL forceRefresh;
+
+/*!
+ Initialize a MSALSilentTokenParameters with scopes and account.
+ 
+ @param scopes      Permissions you want included in the access token received
+                    in the result in the completionBlock. Not all scopes are
+                    gauranteed to be included in the access token returned.
+ @param account     An account object retrieved from the application object that the
+                    interactive authentication flow will be locked down to.
+ */
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
+                       account:(MSALAccount *)account NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
+
+@end
+
+NS_ASSUME_NONNULL_END

@@ -27,7 +27,7 @@
 
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALError_Internal.h"
-#import "MSALUIBehavior_Internal.h"
+#import "MSALPromptType_Internal.h"
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
@@ -72,6 +72,8 @@
 #import "MSIDIntuneEnrollmentIdsCache.h"
 #import "MSALPublicClientStatusNotifications.h"
 #import "MSIDNotifications.h"
+#import "MSALInteractiveTokenParameters.h"
+#import "MSALSilentTokenParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -365,8 +367,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return NO;
 }
 
-#pragma mark -
-#pragma mark acquireToken
+#pragma mark - Acquire Token
+
+- (void)acquireTokenWithParameters:(MSALInteractiveTokenParameters *)parameters
+                   completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenForScopes:parameters.scopes
+           extraScopesToConsent:parameters.extraScopesToConsent
+                        account:parameters.account
+                      loginHint:parameters.loginHint
+                     promptType:parameters.promptType
+           extraQueryParameters:parameters.extraQueryParameters
+                         claims:parameters.claims
+                      authority:parameters.authority
+                  correlationId:parameters.correlationId
+                          apiId:MSALTelemetryApiIdAcquireWithTokenParameters
+                completionBlock:completionBlock];
+}
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -375,7 +392,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:nil
                         account:nil
                       loginHint:nil
-                     uiBehavior:MSALUIBehaviorDefault
+                     promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
@@ -384,8 +401,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 completionBlock:completionBlock];
 }
 
-#pragma mark -
-#pragma mark Login Hint
+#pragma mark - Login Hint
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                     loginHint:(NSString *)loginHint
@@ -395,7 +411,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:nil
                         account:nil
                       loginHint:loginHint
-                     uiBehavior:MSALUIBehaviorDefault
+                     promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
@@ -406,7 +422,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                     loginHint:(NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -414,19 +430,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:nil
                         account:nil
                       loginHint:loginHint
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:nil
                   correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters
+                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters
                 completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
@@ -436,19 +452,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:extraScopesToConsent
                         account:nil
                       loginHint:loginHint
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:authority
                   correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId
+                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
          extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
                     loginHint:(nullable NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
@@ -459,18 +475,16 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:extraScopesToConsent
                         account:nil
                       loginHint:loginHint
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:claims
                       authority:authority
                   correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndClaimsAndCorrelationId
+                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndClaimsAndCorrelationId
                 completionBlock:completionBlock];
 }
 
-#pragma mark -
-#pragma mark Account
-
+#pragma mark - Account
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                       account:(MSALAccount *)account
@@ -480,19 +494,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:nil
                         account:account
                       loginHint:nil
-                     uiBehavior:MSALUIBehaviorDefault
+                     promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
                   correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
+                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
                 completionBlock:completionBlock];
     
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
                       account:(MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
@@ -500,19 +514,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:nil
                         account:account
                       loginHint:nil
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:nil
                   correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters
+                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
                 completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                       account:(MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
@@ -522,12 +536,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:extraScopesToConsent
                         account:account
                       loginHint:nil
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:authority
                   correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
+                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
     
 }
@@ -535,7 +549,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                       account:(MSALAccount *)account
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(NSString *)claims
                     authority:(MSALAuthority *)authority
@@ -546,18 +560,30 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraScopesToConsent:extraScopesToConsent
                         account:account
                       loginHint:nil
-                     uiBehavior:uiBehavior
+                     promptType:promptType
            extraQueryParameters:extraQueryParameters
                          claims:claims
                       authority:authority
                   correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId
+                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
     
 }
 
-#pragma mark -
-#pragma mark Silent
+#pragma mark - Silent
+
+- (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
+                         completionBlock:(MSALCompletionBlock)completionBlock
+{
+    [self acquireTokenSilentForScopes:parameters.scopes
+                              account:parameters.account
+                            authority:parameters.authority
+                               claims:parameters.claims
+                         forceRefresh:parameters.forceRefresh
+                        correlationId:parameters.correlationId
+                                apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
+                      completionBlock:completionBlock];
+}
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
@@ -651,7 +677,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
          extraScopesToConsent:(NSArray<NSString *> *)extraScopesToConsent
                       account:(MSALAccount *)account
                     loginHint:(NSString *)loginHint
-                   uiBehavior:(MSALUIBehavior)uiBehavior
+                   promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(NSString *)claims
                     authority:(MSALAuthority *)authority
@@ -701,13 +727,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     // Select account experience is undefined if user identity is passed (login_hint or account)
     // Therefore, if there's user identity, we don't pass select account prompt type
-    if (accountHintPresent && uiBehavior == MSALSelectAccount)
+    if (accountHintPresent && promptType == MSALPromptTypeSelectAccount)
     {
         params.promptType = MSIDPromptTypePromptIfNecessary;
     }
     else
     {
-        params.promptType = MSIDPromptTypeForBehavior(uiBehavior);
+        params.promptType = MSIDPromptTypeForPromptType(promptType);
     }
 
     params.loginHint = loginHint;
@@ -738,25 +764,25 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                               extraScopesToConsent:%@\n"
               "                                            account:%@\n"
               "                                          loginHint:%@\n"
-              "                                         uiBehavior:%@\n"
+              "                                         promptType:%@\n"
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
               "                                      correlationId:%@\n"
               "                                       capabilities:%@\n"
               "                                             claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForPromptType(promptType), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
                   "                                            account:%@\n"
                   "                                          loginHint:%@\n"
-                  "                                         uiBehavior:%@\n"
+                  "                                         promptType:%@\n"
                   "                               extraQueryParameters:%@\n"
                   "                                          authority:%@\n"
                   "                                      correlationId:%@\n"
                   "                                       capabilities:%@\n"
                   "                                             claims:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForMSALUIBehavior(uiBehavior), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForPromptType(promptType), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
@@ -943,8 +969,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }];
 }
 
-#pragma mark -
-#pragma mark remove account from cache
+#pragma mark - Remove account from cache
 
 - (BOOL)removeAccount:(MSALAccount *)account
                 error:(NSError * __autoreleasing *)error
