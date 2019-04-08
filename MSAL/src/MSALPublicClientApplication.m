@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALError_Internal.h"
 #import "MSALPromptType_Internal.h"
+#import "MSALError.h"
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
@@ -187,7 +187,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     if ([NSString msidIsStringNilOrBlank:clientId])
     {
-        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"clientId is a required parameter and must not be nil or empty.");
+        NSError *msidError;
+        MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, @"clientId is a required parameter and must not be nil or empty.", nil);
+        
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        
         return nil;
     }
 
