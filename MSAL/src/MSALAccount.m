@@ -95,7 +95,7 @@
                     homeAccountId:account.accountIdentifier.homeAccountId
                    localAccountId:account.localAccountId
                       environment:account.authority.environment
-                         tenantId:account.authority.url.msidTenant
+                         tenantId:account.tenantId
                     idTokenClaims:idTokenClaims];
 }
 

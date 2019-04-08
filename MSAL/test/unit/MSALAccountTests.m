@@ -61,7 +61,8 @@
     msidAccount.username = @"user@contoso.com";
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"localoid";
-    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    msidAccount.tenantId = @"tid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
     __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     msidAccount.authority = authority;
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",

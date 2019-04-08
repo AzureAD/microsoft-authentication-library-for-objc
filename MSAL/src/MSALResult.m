@@ -83,6 +83,7 @@
         return nil;
     }
 
+    MSIDAccount *resultAccount = tokenResult.account;
     NSError *claimsError = nil;
     MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
     
@@ -93,12 +94,7 @@
         return nil;
     }
     
-    // Has some questions about this logic:
-    MSIDAccount *resultAccount = [tokenResult.account copy];
-    NSString *environment = tokenResult.authority.environment;
     NSString *tenantId = claims.realm;
-    __auto_type authorityUrl = [NSURL msidURLWithEnvironment:environment tenant:tenantId];
-    resultAccount.authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
     MSALAccount *account = [MSALAccountsProvider msalAccountFromMSIDAccount:resultAccount idTokenClaims:claims];
 
