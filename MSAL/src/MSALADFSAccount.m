@@ -25,29 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALADFSAccount.h"
+#import "MSALAccount.h"
+#import "MSIDIdToken.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdTokenClaims.h"
 
-@class MSIDDefaultTokenCacheAccessor;
-@class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
+@implementation MSALADFSAccount
 
-@interface MSALAccountsProvider : NSObject
+- (MSALAccountType)accountType
+{
+    return MSALAccountTypeAAD;
+}
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
-
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims
+{
+    // In future, additional claims for ADFS account could be extracted here
+    return nil;
+}
 
 @end

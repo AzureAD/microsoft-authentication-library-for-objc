@@ -590,7 +590,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -650,7 +651,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -713,7 +715,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];;
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -810,7 +813,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];;
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -870,7 +874,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];;
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -930,7 +935,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                        tenantId:@"custom_guest_tenant"
+                                                   idTokenClaims:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -989,7 +995,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                        tenantId:@"custom_guest_tenant"
+                                                   idTokenClaims:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1048,7 +1055,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                        tenantId:@"custom_guest_tenant"
+                                                   idTokenClaims:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1111,7 +1119,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];;
     
     authority = [@"https://login.microsoft.com/common" msalAuthority];
     
@@ -1525,7 +1534,7 @@
     
     MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
                                                                configuration:[self msalDefaultConfiguration]];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account idTokenClaims:nil];
     
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
     
@@ -1572,7 +1581,7 @@
 
     MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:msidResponse
                                                                configuration:configuration];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account idTokenClaims:nil];
 
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
 
@@ -1627,7 +1636,8 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                        tenantId:@"1234-5678-90abcdefg"
+                                                   idTokenClaims:nil];;
     
     NSError *error;
     BOOL result = [application removeAccount:account error:&error];

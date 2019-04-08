@@ -28,6 +28,15 @@
 #import <Foundation/Foundation.h>
 
 @class MSALAccountId;
+@class MSALTenantProfile;
+
+typedef NS_ENUM(NSInteger, MSALAccountType)
+{
+    MSALAccountTypeAAD,
+    MSALAccountTypeB2C,
+    MSALAccountTypeMSA,
+    MSALAccountTypeUnknown
+};
 
 @interface MSALAccount : NSObject <NSCopying>
 
@@ -45,6 +54,10 @@
  Host part of the authority string used for authentication.
  */
 @property (readonly, nonnull) NSString *environment;
+
+@property (readonly) MSALAccountType accountType;
+
+@property (readonly, nonnull) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
 

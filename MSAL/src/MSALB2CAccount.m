@@ -25,29 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALB2CAccount.h"
+#import "MSALAccount.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdToken.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdTokenClaims.h"
 
-@class MSIDDefaultTokenCacheAccessor;
-@class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
+@implementation MSALB2CAccount
 
-@interface MSALAccountsProvider : NSObject
+- (MSALAccountType)accountType
+{
+    return MSALAccountTypeB2C;
+}
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
-
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims
+{
+    // In future, additional claims for B2C account could be extracted here
+    return nil;
+}
 
 @end

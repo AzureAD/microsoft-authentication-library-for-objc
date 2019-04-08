@@ -40,6 +40,8 @@
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
 #import "MSIDAADV2IdTokenClaims.h"
+#import "MSALAccountsProvider.h"
+#import "MSIDAuthorityFactory.h"
 
 @implementation MSALResult
 
@@ -81,7 +83,6 @@
         return nil;
     }
 
-    MSIDAccount *resultAccount = tokenResult.account;
     NSError *claimsError = nil;
     MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
     
@@ -92,14 +93,14 @@
         return nil;
     }
     
+    // Has some questions about this logic:
+    MSIDAccount *resultAccount = [tokenResult.account copy];
+    NSString *environment = tokenResult.authority.environment;
     NSString *tenantId = claims.realm;
+    __auto_type authorityUrl = [NSURL msidURLWithEnvironment:environment tenant:tenantId];
+    resultAccount.authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
 
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
-                                                            name:resultAccount.name
-                                                   homeAccountId:resultAccount.accountIdentifier.homeAccountId
-                                                  localAccountId:resultAccount.localAccountId
-                                                     environment:tokenResult.authority.environment
-                                                        tenantId:tenantId];
+    MSALAccount *account = [MSALAccountsProvider msalAccountFromMSIDAccount:resultAccount idTokenClaims:claims];
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url

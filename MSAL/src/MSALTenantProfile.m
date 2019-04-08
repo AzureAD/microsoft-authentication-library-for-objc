@@ -25,29 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
 
-@class MSIDDefaultTokenCacheAccessor;
-@class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
+@implementation MSALTenantProfile
 
-@interface MSALAccountsProvider : NSObject
+- (id)initWithUserObjectId:(NSString *)userObjectId
+                  tenantId:(NSString *)tenantId
+           addtionalClaims:(NSDictionary *)additionalClaims
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _userObjectId = userObjectId;
+        _tenantId = tenantId;
+        _additionalClaims = additionalClaims;
+    }
+    
+    return self;
+}
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
+#pragma mark - NSCopying
 
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+- (id)copyWithZone:(NSZone *)zone
+{
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile allocWithZone:zone] init];
+    tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
+    tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
+    tenantProfile->_additionalClaims = [[NSDictionary alloc] initWithDictionary:_additionalClaims copyItems:YES];
+    return tenantProfile;
+}
 
 @end

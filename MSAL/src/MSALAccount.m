@@ -36,14 +36,8 @@
 #import "MSIDAccount.h"
 #import "MSALAccountId+Internal.h"
 #import "MSIDAuthority.h"
-
-@interface MSALAccount ()
-
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-
-@end
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
 
 @implementation MSALAccount
 
@@ -53,6 +47,7 @@
         localAccountId:(NSString *)localAccountId
            environment:(NSString *)environment
               tenantId:(NSString *)tenantId
+         idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims
 {
     self = [super init];
 
@@ -76,25 +71,41 @@
         _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
                                                                  objectId:uid
                                                                  tenantId:utid];
-        
-        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
-                                                                  objectId:localAccountId
-                                                                  tenantId:tenantId];
 
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+        
+        _mutableTenantProfiles = [NSMutableArray new];
+        MSIDIdTokenClaims *additionalClaims = [self additionalClaimsFromIdToken:idTokenClaims];
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:localAccountId
+                                                                                  tenantId:tenantId
+                                                                           addtionalClaims:additionalClaims.jsonDictionary];
+        [_mutableTenantProfiles addObject:tenantProfile];
     }
 
     return self;
 }
 
 - (id)initWithMSIDAccount:(MSIDAccount *)account
+            idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims
 {
     return [self initWithUsername:account.username
                              name:account.name
                     homeAccountId:account.accountIdentifier.homeAccountId
                    localAccountId:account.localAccountId
                       environment:account.authority.environment
-                         tenantId:account.authority.url.msidTenant];
+                         tenantId:account.authority.url.msidTenant
+                    idTokenClaims:idTokenClaims];
+}
+
+- (MSALAccountType)accountType
+{
+    return MSALAccountTypeUnknown;
+}
+
+- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims
+{
+    // Exposing additional claims should be implemeted in subclasses
+    return nil;
 }
 
 #pragma mark - NSCopying
@@ -105,7 +116,7 @@
     account.username = [self.username copyWithZone:zone];
     account.name = [self.name copyWithZone:zone];
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.localAccountId = [self.localAccountId copyWithZone:zone];
+    account.mutableTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mutableTenantProfiles copyItems:YES];
     account.environment = [self.environment copyWithZone:zone];
     return account;
 }
@@ -182,6 +193,20 @@
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
 
     return result;
+}
+
+#pragma mark - Tenant profiles
+
+- (NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    return self.mutableTenantProfiles;
+}
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    if (!tenantProfiles) return;
+    
+    [self.mutableTenantProfiles addObjectsFromArray:tenantProfiles];
 }
 
 @end

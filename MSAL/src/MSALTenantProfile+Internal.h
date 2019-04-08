@@ -25,29 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-
-@class MSIDDefaultTokenCacheAccessor;
 @class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
 
-@interface MSALAccountsProvider : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
+@interface MSALTenantProfile ()
 
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
+@property (readwrite, nullable) NSString *userObjectId;
+@property (readwrite, nullable) NSString *tenantId;
+@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *additionalClaims;
 
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+- (id)initWithUserObjectId:(NSString *)userObjectId
+                  tenantId:(NSString *)tenantId
+           addtionalClaims:(NSDictionary* _Nullable)additionalClaims;
 
 @end
+
+NS_ASSUME_NONNULL_END

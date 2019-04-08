@@ -32,19 +32,16 @@
 @class MSIDClientInfo;
 @class MSIDAccount;
 @class MSALAccountId;
+@class MSIDIdTokenClaims;
 
 @interface MSALAccount ()
 
+@property (nonatomic) MSALAccountId *homeAccountId;
+@property (nonatomic) NSString *username;
+@property (nonatomic) NSString *environment;
+@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mutableTenantProfiles;
+
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-
-/* TODO: These properties will be public once we agree on having an account per tenant.
-   For now, will keep them here.
- */
-
-/*!
- Account identifier for the target tenant
- */
-@property (nonatomic) MSALAccountId *localAccountId;
 
 /*!
  The displayable name of the account. Can be nil if not returned by the service.
@@ -67,12 +64,17 @@
          homeAccountId:(NSString *)homeAccountId
         localAccountId:(NSString *)localAccountId
            environment:(NSString *)environment
-              tenantId:(NSString *)tenantId;
+              tenantId:(NSString *)tenantId
+         idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
 
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account;
+- (id)initWithMSIDAccount:(MSIDAccount *)account idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+
+- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims;
 
 @end

@@ -37,6 +37,13 @@
 #import "MSIDConfiguration.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDConstants.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDB2CAuthority.h"
+#import "MSIDADFSAuthority.h"
+#import "MSALAADAccount.h"
+#import "MSALB2CAccount.h"
+#import "MSALADFSAccount.h"
+#import "MSIDIdTokenClaims.h"
 
 @interface MSALAccountsProvider()
 
@@ -116,8 +123,17 @@
 
     if ([msidAccounts count])
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
-        return msalAccount;
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts];
+        if (msalAccounts.count == 1)
+        {
+            return msalAccounts[0];
+        }
+        else if (msalAccounts.count > 1)
+        {
+            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts for the same home accout id! (More info: environments are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].username == msalAccounts[1].username? @"YES" : @"NO");
+            
+            return msalAccounts[0];
+        }
     }
 
     return nil;
@@ -148,11 +164,40 @@
     
     if ([msidAccounts count])
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
-        return msalAccount;
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts];
+        if (msalAccounts.count == 1)
+        {
+            return msalAccounts[0];
+        }
+        else if (msalAccounts.count > 1)
+        {
+            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts for the same username! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].homeAccountId == msalAccounts[1].homeAccountId? @"YES" : @"NO");
+            
+            return msalAccounts[0];
+        }
     }
     
     return nil;
+}
+
++ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims
+{
+    if ([msidAccount.authority.class isKindOfClass:MSIDAADAuthority.class])
+    {
+        return [[MSALAADAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+    }
+    else if ([msidAccount.authority.class isKindOfClass:MSIDB2CAuthority.class])
+    {
+        return [[MSALB2CAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+    }
+    else if ([msidAccount.authority.class isKindOfClass:MSIDADFSAuthority.class])
+    {
+        return [[MSALADFSAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+    }
+    else
+    {
+        return [[MSALAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+    }
 }
 
 #pragma mark - Private
@@ -178,19 +223,40 @@
         return nil;
     }
     
+    return [self msalAccountsFromMSIDAccounts:msidAccounts];
+}
+
+- (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
+{
     NSMutableSet *msalAccounts = [NSMutableSet new];
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        MSALAccount *msalAccount = [self msalAccountFromMSIDAccount:msidAccount];
+        if (!msalAccount) continue;
         
-        if (msalAccount)
+        MSALAccount *existAccount = [msalAccounts member:msalAccount];
+        if (!existAccount)
         {
             [msalAccounts addObject:msalAccount];
+        }
+        else
+        {
+            [existAccount addTenantProfiles:msalAccount.tenantProfiles];
         }
     }
     
     return [msalAccounts allObjects];
+}
+
+- (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount
+{
+    // TODO: if neccessary(e.g. for B2C account), retrieve ID token for each account if neccessary here.
+    //       So far MSIDAccount contains all the info we need
+    
+    MSALAccount *msalAccount = [self.class msalAccountFromMSIDAccount:msidAccount idTokenClaims:nil];
+    
+    return msalAccount;
 }
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem

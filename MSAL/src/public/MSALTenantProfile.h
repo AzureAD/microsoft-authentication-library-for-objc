@@ -25,29 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-
-@class MSIDDefaultTokenCacheAccessor;
 @class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
 
-@interface MSALAccountsProvider : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
+@interface MSALTenantProfile : NSObject <NSCopying>
 
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+@property (readonly, nullable) NSString *userObjectId;
+@property (readonly, nullable) NSString *tenantId;
+@property (readonly, nullable) NSDictionary<NSString *, NSString *> *additionalClaims;
 
 @end
+
+NS_ASSUME_NONNULL_END
