@@ -57,7 +57,7 @@
 - (void)testInitWithMSIDAccount_whenValidAccount_shouldInit
 {
     MSIDAccount *msidAccount = [MSIDAccount new];
-    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.utid"];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
     msidAccount.username = @"user@contoso.com";
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"localoid";
@@ -65,7 +65,7 @@
     __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     msidAccount.authority = authority;
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
-                                        @"utid" : @"utid"
+                                        @"utid" : @"tid"
                                         };
     
     
@@ -82,12 +82,13 @@
 
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
-    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
     XCTAssertEqualObjects(account.name, @"User");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqual(account.tenantProfiles.count, 1);
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"localoid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, YES);
 }
 
 - (void)testAddTenantProfiles_whenAddTenantProfiles_shouldAddTenantProfilesToExistingAccount
@@ -116,7 +117,7 @@
                                                     homeAccountId:@"1.2"
                                                    localAccountId:@"5"
                                                       environment:@"login.microsoftonline.com"
-                                                         tenantId:@"6"
+                                                         tenantId:@"2"
                                                     idTokenClaims:idTokenClaims2];
     XCTAssertNotNil(account2);
     
@@ -125,8 +126,10 @@
     XCTAssertEqual(account.tenantProfiles.count, 2);
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"3");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"4");
+    XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, NO);
     XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, @"5");
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"6");
+    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"2");
+    XCTAssertEqual(account.tenantProfiles[1].isHomeTenant, YES);
 }
 
 - (void)testAddTenantProfiles_whenAddNilTenantProfiles_shouldNotAddToExistingAccount
@@ -178,12 +181,13 @@
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
                                                           environment:@"login.microsoftonline.com"
-                                                             tenantId:@"3"
+                                                             tenantId:@"2"
                                                    idTokenClaims:idTokenClaims];
     XCTAssertNotNil(account);
     
     MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:@"4"
                                                                               tenantId:@"5"
+                                                                          isHomeTenant:NO
                                                                        addtionalClaims:@{@"key1" : @"value1",
                                                                                          @"key2" : @"value2",
                                                                                          }];
@@ -209,8 +213,10 @@
     
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, account2.tenantProfiles[0].userObjectId);
+    XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, account2.tenantProfiles[0].isHomeTenant);
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, account2.tenantProfiles[1].userObjectId);
+    XCTAssertEqual(account.tenantProfiles[1].isHomeTenant, account2.tenantProfiles[1].isHomeTenant);
     
     // additionalClaims should be deep copied
     XCTAssertNotEqual(account.tenantProfiles[1].additionalClaims, account2.tenantProfiles[1].additionalClaims);

@@ -32,6 +32,7 @@
 
 - (id)initWithUserObjectId:(NSString *)userObjectId
                   tenantId:(NSString *)tenantId
+              isHomeTenant:(BOOL)isHomeTenant
            addtionalClaims:(NSDictionary *)additionalClaims
 {
     self = [super init];
@@ -40,6 +41,7 @@
     {
         _userObjectId = userObjectId;
         _tenantId = tenantId;
+        _isHomeTenant = isHomeTenant;
         _additionalClaims = additionalClaims;
     }
     
@@ -53,6 +55,7 @@
     MSALTenantProfile *tenantProfile = [[MSALTenantProfile allocWithZone:zone] init];
     tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
     tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
+    tenantProfile->_isHomeTenant = _isHomeTenant;
     tenantProfile->_additionalClaims = [[NSDictionary alloc] initWithDictionary:_additionalClaims copyItems:YES];
     return tenantProfile;
 }

@@ -76,8 +76,10 @@
         
         _mutableTenantProfiles = [NSMutableArray new];
         MSIDIdTokenClaims *additionalClaims = [self additionalClaimsFromIdToken:idTokenClaims];
+        BOOL isHomeTenant = [utid isEqualToString:tenantId];
         MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:localAccountId
                                                                                   tenantId:tenantId
+                                                                              isHomeTenant:isHomeTenant
                                                                            addtionalClaims:additionalClaims.jsonDictionary];
         [_mutableTenantProfiles addObject:tenantProfile];
     }
