@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
 @class MSALAuthority;
 

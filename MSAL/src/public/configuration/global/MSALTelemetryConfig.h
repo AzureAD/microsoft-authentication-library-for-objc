@@ -26,12 +26,44 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALTelemetry.h"
 
-typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
 
-@interface MSALTestAppTelemetryDispatcher : NSObject <MSALTelemetryDispatcher>
+/*!
+ @protocol MSALTelemetryDispatcher
+ 
+ Developer should implement it in order to receive telemetry events.
+ 
+ Usage: an instance of MSALTelemetryDispatcher implementation is required when registerring dispatcher for MSALTelemetry.
+ */
+@protocol MSALTelemetryDispatcher <NSObject>
 
-@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
+/*!
+ Callback function that will be called by MSAL when telemetry events are flushed.
+ @param events events is represented by an array of dictionary of key-value pair of event property name/value.
+ */
+- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events;
+- (BOOL)onFailureOnly;
 
 @end
+
+
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALTelemetryConfig : NSObject
+
+/*!
+ Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
+ */
+@property BOOL piiEnabled;
+@property NSMutableArray<id<MSALTelemetryDispatcher>> *dispatchers;
+
++ (instancetype)defaultConfig;
++ (instancetype)configWithPIIEnabled:(BOOL)piiEnabled;
+
+- (nullable instancetype)init NS_UNAVAILABLE;
++ (nullable instancetype)new NS_UNAVAILABLE;
+
+@end
+
+NS_ASSUME_NONNULL_END

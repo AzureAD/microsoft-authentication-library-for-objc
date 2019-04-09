@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,21 +17,33 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSIDTelemetryDispatcher.h"
-#import "MSALTelemetryConfig.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
+NS_ASSUME_NONNULL_BEGIN
 
-+ (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
-- (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
+@interface MSALCacheConfig : NSObject
 
-- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
-   setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+@property BOOL cacheEnabled;
+
+#if TARGET_OS_IPHONE
+@property NSString *keychainSharingGroup;
+
+#endif
+
++ (instancetype)defaultConfig;
++ (instancetype)configWithCacheEnabled:(BOOL)enabled;
+
+- (nullable instancetype)init NS_UNAVAILABLE;
++ (nullable instancetype)new NS_UNAVAILABLE;
 
 @end
+
+NS_ASSUME_NONNULL_END

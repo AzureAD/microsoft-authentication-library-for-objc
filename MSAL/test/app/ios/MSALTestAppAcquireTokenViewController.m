@@ -40,7 +40,7 @@
 #import "MSALTestAppProfileViewController.h"
 #import "MSALResult.h"
 #import "MSALLogger.h"
-#import "MSALConstants.h"
+#import "MSALDefinitions.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
 

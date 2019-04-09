@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,21 +17,50 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSIDTelemetryDispatcher.h"
-#import "MSALTelemetryConfig.h"
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
+#import "MSALCacheConfig.h"
 
-+ (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
-- (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
+@implementation MSALCacheConfig
+  
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+#if TARGET_OS_IPHONE
+        _keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
+#endif
+        _cacheEnabled = YES;
+    }
+    return self;
+}
 
-- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
-   setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
++ (instancetype)configWithCacheEnabled:(BOOL)enabled
+{
+    MSALCacheConfig *config = [[self.class alloc] init];
+    config.cacheEnabled = enabled;
+    
+#if TARGET_OS_IPHONE
+    if (enabled)
+    {
+        config.keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
+    }
+#endif
+    
+    return config;
+}
+
++ (instancetype)defaultConfig
+{
+    return [self configWithCacheEnabled:YES];
+}
 
 @end

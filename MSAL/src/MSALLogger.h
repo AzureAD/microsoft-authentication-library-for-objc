@@ -26,32 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
-{
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
-
-
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     If the message might contain Personally Identifiable Information (PII)
-                            this will be true. Log messages possibly containing PII will not be
-                            sent to the callback unless PIllLoggingEnabled is set to YES on the
-                            logger.
-
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
-
+#import "MSALDefinitions.h"
 
 @interface MSALLogger : NSObject
 

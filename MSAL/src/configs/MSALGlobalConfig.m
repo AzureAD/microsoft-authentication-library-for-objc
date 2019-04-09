@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,21 +17,49 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSIDTelemetryDispatcher.h"
+#import "MSALGlobalConfig.h"
+#import "MSALHTTPConfig.h"
 #import "MSALTelemetryConfig.h"
+#import "MSALCacheConfig.h"
+#import "MSALLoggerConfig.h"
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
+@implementation MSALGlobalConfig
 
-+ (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
-- (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
++ (instancetype)sharedInstance
+{
+    static MSALGlobalConfig *sharedInstance;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
+    return sharedInstance;
+}
 
-- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
-   setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        self.httpConfig = [MSALHTTPConfig defaultConfig];
+        self.telemetryConfig = [MSALTelemetryConfig defaultConfig];
+        self.cacheConfig = [MSALCacheConfig defaultConfig];
+        self.loggerConfig = [MSALLoggerConfig defaultConfig];
+        
+    }
+    return self;
+}
+
+- (void)loadConfig
+{
+    
+}
 
 @end

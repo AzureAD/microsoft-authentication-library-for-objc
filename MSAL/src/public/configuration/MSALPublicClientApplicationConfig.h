@@ -25,21 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppTelemetryDispatcher.h"
+#import <Foundation/Foundation.h>
+#import "MSALDefinitions.h"
 
-@implementation MSALTestAppTelemetryDispatcher
+@class MSALRedirectUri;
+@class MSALAuthority;
+@class MSALWebViewConfig;
+@class MSALSliceConfig;
 
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
-{
-    if (_dispatcherCallback)
-    {
-        _dispatcherCallback(events);
-    }
-}
+NS_ASSUME_NONNULL_BEGIN
 
-- (BOOL)onFailureOnly
-{
-    return YES;
-}
+@interface MSALPublicClientApplicationConfig : NSObject
+
+@property NSString *clientId;
+@property MSALRedirectUri *redirecrUri;
+
+@property(nullable) NSArray<MSALAuthority *> *knownAuthorities;
+@property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
+
+@property MSALWebviewType webviewType;
+@property MSALBrokeredAvailability brokerAvailability;
+
+@property(nullable) MSALSliceConfig *slice;
+
+@property double tokenExpirationBuffer;
+
+- (nullable instancetype)initWithClientId:(NSString *)clientId
+                              redirectURI:(NSString *)redirectURI;
+
+- (nullable instancetype)init NS_UNAVAILABLE;
++ (nullable instancetype)new NS_UNAVAILABLE;
+
+// Todo: add a init that takes in a config file.
 
 @end
+
+NS_ASSUME_NONNULL_END

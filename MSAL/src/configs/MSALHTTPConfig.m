@@ -25,21 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppTelemetryDispatcher.h"
+#import "MSALHTTPConfig.h"
 
-@implementation MSALTestAppTelemetryDispatcher
+@implementation MSALHTTPConfig
 
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
++ (instancetype)defaultConfig
 {
-    if (_dispatcherCallback)
-    {
-        _dispatcherCallback(events);
-    }
+    MSALHTTPConfig *config = [[self alloc] initWithConnectionTimeout:30 * 1000 // 30 seconds
+                                                         readTimeout:60 * 1000]; // 60 seconds
+    return config;
 }
 
-- (BOOL)onFailureOnly
++ (instancetype)configWithConnectionTimeout:(double)connectionTimeout readTimeout:(double)readTimeout
 {
-    return YES;
+    MSALHTTPConfig *config = [[self alloc] initWithConnectionTimeout:connectionTimeout
+                                                         readTimeout:readTimeout];
+    return config;
+}
+
+- (nullable instancetype)initWithConnectionTimeout:(double)connectionTimeout
+                              readTimeout:(double)readTimeout
+{
+    self = [super init];
+    if (self)
+    {
+        self.connectionTimeout = connectionTimeout;
+        self.readTimeout = readTimeout;
+    }
+    return self;
 }
 
 @end
