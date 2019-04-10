@@ -479,7 +479,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
 
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -500,7 +500,7 @@
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
-                            uiBehavior:MSALForceLogin
+                            promptType:MSALPromptTypeLogin
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -535,7 +535,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
 
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -558,7 +558,7 @@
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
                              loginHint:@"fakeuser@contoso.com"
-                            uiBehavior:MSALForceConsent
+                            promptType:MSALPromptTypeConsent
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
                              authority:authority
                          correlationId:correlationId
@@ -601,7 +601,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
 
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -661,7 +661,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
 
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -683,7 +683,7 @@
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -724,7 +724,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
 
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -748,7 +748,7 @@
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
                                account:account
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
                              authority:authority
                          correlationId:correlationId

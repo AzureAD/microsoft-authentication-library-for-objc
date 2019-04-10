@@ -180,7 +180,7 @@ extension SampleMSALAuthentication {
             let application = try createClientApplication()
             let account = try currentAccount()
             
-            application.acquireToken(forScopes: scopes, account: account, uiBehavior: .MSALUIBehaviorDefault, extraQueryParameters: [:], completionBlock: {
+            application.acquireToken(forScopes: scopes, account: account, promptType: .default, extraQueryParameters: [:], completionBlock: {
                 (result: MSALResult?, error: Error?) in
                 
                 guard let acquireTokenResult = result, error == nil else {
