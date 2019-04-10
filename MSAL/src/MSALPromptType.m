@@ -25,13 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALUIBehavior_Internal_h
-#define MSALUIBehavior_Internal_h
-
+#import <Foundation/Foundation.h>
 #import "MSIDConstants.h"
 
-extern NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
-extern MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior);
-extern NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior);
+NSString *MSALStringForPromptType(MSALPromptType promptType)
+{
+    switch (promptType)
+    {
+            STRING_CASE(MSALPromptTypeSelectAccount);
+            STRING_CASE(MSALPromptTypeLogin);
+            STRING_CASE(MSALPromptTypeConsent);
+            STRING_CASE(MSALPromptTypePromptIfNecessary);
+    }
+    
+    @throw @"Unrecognized MSALPromptType";
+}
 
-#endif /* MSALUIBehavior_Internal_h */
+MSIDPromptType MSIDPromptTypeForPromptType(MSALPromptType promptType)
+{
+    switch (promptType)
+    {
+        case MSALPromptTypeLogin : return MSIDPromptTypeLogin;
+        case MSALPromptTypeConsent : return MSIDPromptTypeConsent;
+        case MSALPromptTypeSelectAccount : return MSIDPromptTypeSelectAccount;
+        case MSALPromptTypePromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
+        default : return MSIDPromptTypeDefault;
+    }
+}
+
+NSString *MSALParameterStringForPromptType(MSALPromptType promptType)
+{
+    switch (promptType)
+    {
+        case MSALPromptTypeLogin : return @"login";
+        case MSALPromptTypeConsent : return @"consent";
+        case MSALPromptTypeSelectAccount : return @"select_account";
+        case MSALPromptTypePromptIfNecessary : return @"";
+    }
+}
