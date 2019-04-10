@@ -41,7 +41,7 @@
 // github enlistment!
 static NSDictionary* _additionalProfiles()
 {
-    return
+    return nil;
 }
 #endif
 

@@ -23,6 +23,8 @@ static NSString * const defaultScope = @"User.Read";
 
 @interface AcquireTokenViewController ()
 
+@property NSArray *selectedScopes;
+
 @property (weak) IBOutlet NSPopUpButton *profiles;
 @property (weak) IBOutlet NSTextField *clientId;
 @property (weak) IBOutlet NSTextField *redirectUri;
@@ -39,87 +41,11 @@ static NSString * const defaultScope = @"User.Read";
 
 @implementation AcquireTokenViewController
 
-- (IBAction)acquireTokenInteractive:(id)sender
-{
-    (void)sender;
-    
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    MSALAuthority *authority = [settings authority];
-    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsField stringValue]];
-    
-    NSError *error = nil;
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
-    
-    if (!application)
-    {
-        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultView setString:resultText];
-        return;
-    }
-    
-    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
-    
-    __block BOOL fBlockHit = NO;
-    
-    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
-        
-        [self queryAccounts];
-        if (fBlockHit)
-        {
-            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-            return;
-        }
-        fBlockHit = YES;
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-
-            if (result)
-            {
-                [self updateResultView:result];
-            }
-            else
-            {
-                [self updateResultViewError:error];
-            }
-
-//            [_webView loadHTMLString:@"<html><head></head></html>" baseURL:nil];
-//            [_authView setHidden:YES];
-
-            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-        });
-    };
-    
-    if ([self embeddedWebView])
-    {
-//        [_webview loadHTMLString:@"<html><head></head><body>Loading...</body></html>" baseURL:nil];
-//        [context setWebView:_webview];
-//        [_authView setFrame:self.window.contentView.frame];
-//        
-//        [_acquireSettingsView setHidden:YES];
-//        [_authView setHidden:NO];
-    }
-    
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
-    parameters.loginHint = [self.loginHintField stringValue];
-    parameters.account = settings.currentAccount;
-    parameters.uiBehavior = [self uiBehavior];
-    parameters.extraQueryParameters = extraQueryParameters;
-    
-    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
-    
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _settings = [MSALTestAppSettings settings];
+    self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
+    self.selectedScopes = @[defaultScope];
     // Do view setup here.
 }
 
@@ -159,10 +85,12 @@ static NSString * const defaultScope = @"User.Read";
     {
         NSString *selectedScopes = [scopes componentsJoinedByString:@","];
         [self.scopesLabel setStringValue:selectedScopes];
+        self.selectedScopes = scopes;
     }
     else
     {
         [self.scopesLabel setStringValue:defaultScope];
+        self.selectedScopes = @[defaultScope];
     }
 }
 
@@ -199,7 +127,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (BOOL)embeddedWebView
 {
-    NSString* webViewType = [self.webViewType labelForSegment:[_webViewType selectedSegment]];
+    NSString* webViewType = [self.webViewType labelForSegment:[self.webViewType selectedSegment]];
     
     if ([webViewType isEqualToString:@"MSAL"])
     {
@@ -262,75 +190,6 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-
-- (IBAction)acquireTokenSilent:(id)sender
-{
-    (void)sender;
-    
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    
-    if (!settings.currentAccount)
-    {
-        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
-        return;
-    }
-    
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    __auto_type authority = [settings authority];
-    
-    NSError *error = nil;
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
-    if (!application)
-    {
-        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultView setString:resultText];
-        return;
-    }
-    
-    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
-    
-    __block BOOL fBlockHit = NO;
-//    _acquireSilentButton.enabled = NO;
-    
-    __auto_type scopes = [settings.scopes allObjects];
-    __auto_type account = settings.currentAccount;
-    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
-    parameters.authority = settings.authority;
-    
-    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
-     {
-         if (fBlockHit)
-         {
-             dispatch_async(dispatch_get_main_queue(), ^{
-//                 _acquireSilentButton.enabled = YES;
-                 [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
-             });
-             
-             return;
-         }
-         fBlockHit = YES;
-         
-         dispatch_async(dispatch_get_main_queue(), ^{
-//             _acquireSilentButton.enabled = YES;
-             if (result)
-             {
-                 [self updateResultView:result];
-             }
-             else
-             {
-                 [self updateResultViewError:error];
-             }
-             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
-         });
-     }];
-}
-
 - (IBAction)clearCookies:(id)sender
 {
     NSHTTPCookieStorage* cookieStore = [NSHTTPCookieStorage sharedHTTPCookieStorage];
@@ -373,5 +232,150 @@ static NSString * const defaultScope = @"User.Read";
 //        });
     }];
 }
+
+- (IBAction)acquireTokenInteractive:(id)sender
+{
+    (void)sender;
+    
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    MSALAuthority *authority = [settings authority];
+    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsField stringValue]];
+    
+    NSError *error = nil;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
+    
+    if (!application)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultView setString:resultText];
+        return;
+    }
+    
+    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
+    
+    __block BOOL fBlockHit = NO;
+    
+    void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
+        
+        [self queryAccounts];
+        if (fBlockHit)
+        {
+            [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+            return;
+        }
+        fBlockHit = YES;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (result)
+            {
+                [self updateResultView:result];
+            }
+            else
+            {
+                [self updateResultViewError:error];
+            }
+            
+            //            [_webView loadHTMLString:@"<html><head></head></html>" baseURL:nil];
+            //            [_authView setHidden:YES];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+        });
+    };
+    
+    if ([self embeddedWebView])
+    {
+        //        [_webview loadHTMLString:@"<html><head></head><body>Loading...</body></html>" baseURL:nil];
+        //        [context setWebView:_webview];
+        //        [_authView setFrame:self.window.contentView.frame];
+        //
+        //        [_acquireSettingsView setHidden:YES];
+        //        [_authView setHidden:NO];
+    }
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes];
+    parameters.loginHint = [self.loginHintField stringValue];
+    parameters.account = settings.currentAccount;
+    parameters.uiBehavior = [self uiBehavior];
+    parameters.extraQueryParameters = extraQueryParameters;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
+    
+}
+
+- (IBAction)acquireTokenSilent:(id)sender
+{
+    (void)sender;
+    
+    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    
+    if (!settings.currentAccount)
+    {
+        [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
+        return;
+    }
+    
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    __auto_type authority = [settings authority];
+    
+    NSError *error = nil;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
+                                                                                           authority:authority
+                                                                                         redirectUri:redirectUri
+                                                                                               error:&error];
+    if (!application)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultView setString:resultText];
+        return;
+    }
+    
+    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
+    
+    __block BOOL fBlockHit = NO;
+    //    _acquireSilentButton.enabled = NO;
+    
+    __auto_type account = settings.currentAccount;
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:account];
+    parameters.authority = settings.authority;
+    
+    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+     {
+         if (fBlockHit)
+         {
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 //                 _acquireSilentButton.enabled = YES;
+                 [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
+             });
+             
+             return;
+         }
+         fBlockHit = YES;
+         
+         dispatch_async(dispatch_get_main_queue(), ^{
+             //             _acquireSilentButton.enabled = YES;
+             if (result)
+             {
+                 [self updateResultView:result];
+             }
+             else
+             {
+                 [self updateResultViewError:error];
+             }
+             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
+         });
+     }];
+}
+
 
 @end
