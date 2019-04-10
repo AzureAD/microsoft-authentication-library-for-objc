@@ -90,7 +90,7 @@ target_specifiers = [
 	},
 	{
 		"name" : "Mac Test App",
-		"scheme" : "MSAL Test App (Mac)",
+		"scheme" : "MSALMacTestApp",
 		"operations" : [ "build" ],
 		"platform" : "Mac",
 	},
