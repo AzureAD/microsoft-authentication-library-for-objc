@@ -30,14 +30,14 @@
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryHttpEvent.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "MSALTelemetryTestDispatcher.h"
+#import "MSALTestTelemetryEventsObserver.h"
 #import "XCTestCase+HelperMethods.h"
 #import "NSData+MSIDExtensions.h"
 
 @interface MSALTelemetryTests : MSALTestCase
 
 @property (nonatomic) NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
-@property (nonatomic) MSALTelemetryTestDispatcher *dispatcher;
+@property (nonatomic) MSALTestTelemetryEventsObserver *observer;
 
 @end
 
@@ -47,14 +47,14 @@
 {
     [super setUp];
     
-    self.dispatcher = [MSALTelemetryTestDispatcher new];
+    self.observer = [MSALTestTelemetryEventsObserver new];
     
-    [[MSALTelemetry sharedInstance] addDispatcher:self.dispatcher setTelemetryOnFailure:NO];
+    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO];
     
     __weak MSALTelemetryTests *weakSelf = self;
-    [self.dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
+    [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
      {
-         weakSelf.receivedEvents = event;
+         weakSelf.receivedEvents = events;
      }];
     
     [MSALTelemetry sharedInstance].piiEnabled = NO;
@@ -64,12 +64,16 @@
 {
     [super tearDown];
     
-    self.dispatcher = nil;
+    self.observer = nil;
     
     [MSALTelemetry sharedInstance].piiEnabled = NO;
+    [[MSALTelemetry sharedInstance] removeAllObservers];
+    self.receivedEvents = nil;
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
+#pragma mark - Telemetry Pii Rules
+
+- (void)testTelemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = NO;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
@@ -86,7 +90,7 @@
     XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
 }
 
-- (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
+- (void)testTelemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
@@ -103,7 +107,40 @@
 
     NSString *x = [@"id1234" dataUsingEncoding:NSUTF8StringEncoding].msidSHA256.msidHexString;
     MSALAssertStringEquals([dictionary objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)],  x);
+}
 
+#pragma mark - flush
+
+- (void)testFlush_whenThereIsObserver_shouldSendEvents
+{
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    NSString *eventName = @"test event";
+    MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
+    [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
+    
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+    
+    NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
+    XCTAssertNotNil(dictionary);
+    XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
+}
+
+- (void)testFlush_whenObserverRemoved_shouldNotSendEvents
+{
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    NSString *eventName = @"test event";
+    MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
+    [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
+    [[MSALTelemetry sharedInstance] removeObserver:self.observer];
+    
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+    
+    NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
+    XCTAssertNil(dictionary);
 }
 
 #pragma mark - Private
@@ -111,7 +148,8 @@
 - (NSDictionary *)getEventPropertiesByEventName:(NSString *)eventName
 {
     for (NSDictionary *eventInfo in self.receivedEvents) {
-        if ([[eventInfo objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_EVENT_NAME)] isEqualToString:eventName]) {
+        if ([[eventInfo objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_EVENT_NAME)] isEqualToString:eventName])
+        {
             return eventInfo;
         }
     }

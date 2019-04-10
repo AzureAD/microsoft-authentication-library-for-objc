@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
-#import "MSALTelemetryTestDispatcher.h"
+#import "MSALTestTelemetryEventsObserver.h"
 #import "MSALTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryHttpEvent.h"
@@ -105,17 +105,13 @@
 
 - (void)testDispatcherEmpty
 {
-    MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
-    
-    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    
-    [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
+    MSALTestTelemetryEventsObserver *observer = [MSALTestTelemetryEventsObserver new];
+    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
+    [observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
      {
-         receivedEvents = event;
+        receivedEvents = events;
      }];
-    
-    [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
-    
+    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:NO];
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
     // Flush without adding any additional events
@@ -128,18 +124,15 @@
 - (void)testDispatcherAll
 {
     [MSALTelemetry sharedInstance].piiEnabled = YES;
-    MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
-    
-    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    
-    [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
-    
-    [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
+    MSALTestTelemetryEventsObserver *observer = [MSALTestTelemetryEventsObserver new];
+    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
+    [observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
      {
-         receivedEvents = event;
+         receivedEvents = events;
      }];
-    
-    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:NO];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+
     NSUUID* correlationId = [NSUUID UUID];
     id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
@@ -206,18 +199,14 @@
 
 - (void)testDispatcherErrorOnlyWithError
 {
-    MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
-    
-    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    
-    [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:YES];
-    
-    [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
+    MSALTestTelemetryEventsObserver *observer = [MSALTestTelemetryEventsObserver new];
+    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
+    [observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
      {
-         receivedEvents = event;
+         receivedEvents = events;
      }];
-    
-    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:YES];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];
@@ -241,18 +230,14 @@
 
 - (void)testDispatcherErrorOnlyWithoutError
 {
-    MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
-    
-    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
-    
-    [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:YES];
-    
-    [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
+    MSALTestTelemetryEventsObserver *observer = [MSALTestTelemetryEventsObserver new];
+    __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
+    [observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
      {
-         receivedEvents = event;
+         receivedEvents = events;
      }];
-    
-    NSString* requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:YES];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     id<MSIDRequestContext> ctx = [[MSALTestRequestContext alloc] initWithTelemetryRequestId:requestId
                                                                                correlationId:correlationId];

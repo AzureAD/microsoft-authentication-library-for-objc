@@ -25,16 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTelemetryTestDispatcher.h"
+#import <Foundation/Foundation.h>
 
-@implementation MSALTelemetryTestDispatcher
+NS_ASSUME_NONNULL_BEGIN
 
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
-{
-    if (_dispatcherCallback)
-    {
-        _dispatcherCallback(events);
-    }
-}
+/*!
+ @protocol MSALTelemetryEventsObserving
+ 
+ Developer should implement it in order to receive telemetry events.
+ 
+ Usage: an instance of MSALTelemetryEventsObserving implementation is required when registerring dispatcher for MSALTelemetry.
+ */
+@protocol MSALTelemetryEventsObserving <NSObject>
+
+/*!
+ Invoked when telemetry data is received.
+ 
+ @param events Array of Dictionaries keyed on event name, valued on event data.
+ */
+- (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events;
 
 @end
+
+NS_ASSUME_NONNULL_END

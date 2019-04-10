@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALTelemetry.h"
+#import "MSALTestAppTelemetryEventsObserver.h"
 
-typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
+@implementation MSALTestAppTelemetryEventsObserver
 
-@interface MSALTestAppTelemetryDispatcher : NSObject <MSALDispatcher>
-
-@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
+- (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events
+{
+    if (self.eventsReceivedBlock) self.eventsReceivedBlock(events);
+}
 
 @end

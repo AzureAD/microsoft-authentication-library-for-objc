@@ -28,11 +28,12 @@
 #import "MSIDTelemetryBaseEvent.h"
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSIDTelemetryEventStrings.h"
+#import "MSALTelemetryEventsObserving.h"
 
 @interface MSALDefaultDispatcher ()
 {
     NSMutableDictionary* _objectsToBeDispatched;
-    id<MSALDispatcher> _dispatcher;
+    id<MSALTelemetryEventsObserving> _observer;
     NSLock* _dispatchLock;
     BOOL _setTelemetryOnFailure;
     NSMutableArray *_errorEvents;
@@ -43,7 +44,7 @@
 
 @implementation MSALDefaultDispatcher
 
-- (id)initWithDispatcher:(id<MSALDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
     self = [super init];
     if (self)
@@ -52,7 +53,7 @@
         _errorEvents = [NSMutableArray new];
         _dispatchLock = [NSLock new];
         
-        _dispatcher = dispatcher;
+        _observer = observer;
         _setTelemetryOnFailure = setTelemetryOnFailure;
         
         _defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
@@ -60,9 +61,9 @@
     return self;
 }
 
-- (BOOL)containsDispatcher:(id<MSALDispatcher>)dispatcher
+- (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)dispatcher
 {
-    return _dispatcher == dispatcher;
+    return _observer == dispatcher;
 }
 
 - (void)flush:(NSString *)requestId
@@ -91,14 +92,10 @@
     }
 }
 
-- (void)receive:(__unused NSString *)requestId
+- (void)receive:(NSString *)requestId
           event:(id<MSIDTelemetryEventInterface>)event
 {
-    if ([NSString msidIsStringNilOrBlank:requestId] || !event)
-    {
-        return;
-        
-    }
+    if ([NSString msidIsStringNilOrBlank:requestId] || !event) return;
     
     [_dispatchLock lock]; //make sure no one changes _objectsToBeDispatched while using it
     NSMutableArray* eventsForRequestId = [_objectsToBeDispatched objectForKey:requestId];
@@ -118,7 +115,7 @@
     [_dispatchLock unlock];
 }
 
-- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents;
+- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents
 {
     NSMutableArray *eventsToBeDispatched = [NSMutableArray new];
     
@@ -127,7 +124,7 @@
         [eventsToBeDispatched addObject:[self appendPrefixForEvent:event]];
     }
     
-    [_dispatcher dispatchEvent:eventsToBeDispatched];
+    [_observer onEventsReceived:eventsToBeDispatched];
 }
 
 - (NSDictionary *)appendPrefixForEvent:(NSDictionary *)event

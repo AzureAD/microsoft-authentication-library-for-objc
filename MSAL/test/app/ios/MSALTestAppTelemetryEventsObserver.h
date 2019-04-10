@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,25 +17,21 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSIDTelemetryDispatcher.h"
+#import <Foundation/Foundation.h>
+#import "MSALTelemetryEventsObserving.h"
 
-@protocol MSALTelemetryEventsObserving;
+typedef void(^OnEventsReceivedBlock)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALTestAppTelemetryEventsObserver : NSObject <MSALTelemetryEventsObserving>
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
-
-- (instancetype _Nullable)init NS_UNAVAILABLE;
-+ (instancetype _Nullable)new NS_UNAVAILABLE;
-
-- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+@property (nonatomic, copy) OnEventsReceivedBlock eventsReceivedBlock;
 
 @end
-
-NS_ASSUME_NONNULL_END

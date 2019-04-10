@@ -37,7 +37,7 @@
 + (MSALTelemetry *)sharedInstance
 {
     static dispatch_once_t once;
-    static MSALTelemetry* singleton = nil;
+    static MSALTelemetry *singleton = nil;
     
     dispatch_once(&once, ^{
         singleton = [[MSALTelemetry alloc] initInternal];
@@ -46,21 +46,21 @@
     return singleton;
 }
 
-- (void)addDispatcher:(nonnull id<MSALDispatcher>)dispatcher
-setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
-    MSALDefaultDispatcher *telemetryDispatcher = [[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
-                                                                             setTelemetryOnFailure:setTelemetryOnFailure];
+    if (!observer) return;
     
-    [[MSIDTelemetry sharedInstance] addDispatcher:telemetryDispatcher];
+    __auto_type dispatcher = [[MSALDefaultDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    
+    [[MSIDTelemetry sharedInstance] addDispatcher:dispatcher];
 }
 
-- (void)removeDispatcher:(nonnull id<MSALDispatcher>)dispatcher
+- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer
 {
-    [[MSIDTelemetry sharedInstance] findAndRemoveDispatcher:dispatcher];
+    [[MSIDTelemetry sharedInstance] removeDispatcherByObserver:observer];
 }
 
-- (void)removeAllDispatchers
+- (void)removeAllObservers
 {
     [[MSIDTelemetry sharedInstance] removeAllDispatchers];
 }
