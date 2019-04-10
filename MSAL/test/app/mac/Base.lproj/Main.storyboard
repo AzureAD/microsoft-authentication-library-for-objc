@@ -1430,7 +1430,7 @@
         <!--Cache-->
         <scene sceneID="DRF-aE-cHy">
             <objects>
-                <viewController title="Cache" id="vqt-0E-aDE" customClass="SettingsViewController" sceneMemberID="viewController">
+                <viewController title="Cache" id="vqt-0E-aDE" customClass="CacheViewController" sceneMemberID="viewController">
                     <view key="view" id="Nrf-Nq-1iU">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>

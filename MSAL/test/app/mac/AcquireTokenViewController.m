@@ -1,10 +1,29 @@
+//------------------------------------------------------------------------------
 //
-//  AcquireTokenViewController.m
-//  MSALMacTestApp
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
 //
-//  Created by Rohit Narula on 4/3/19.
-//  Copyright © 2019 Microsoft. All rights reserved.
+// This code is licensed under the MIT License.
 //
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
 #import "AcquireTokenViewController.h"
 #import <MSAL/MSAL.h>
@@ -15,27 +34,27 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALSilentTokenParameters.h"
+#import "WebKit/WebKit.h"
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
 
-
 @interface AcquireTokenViewController ()
-
-@property NSArray *selectedScopes;
 
 @property (weak) IBOutlet NSPopUpButton *profiles;
 @property (weak) IBOutlet NSTextField *clientId;
 @property (weak) IBOutlet NSTextField *redirectUri;
 @property (weak) IBOutlet NSTextField *scopesLabel;
 @property (weak) IBOutlet NSSegmentedControl *promptBehavior;
-@property MSALTestAppSettings *settings;
 @property (weak) IBOutlet NSTextField *loginHintField;
 @property (weak) IBOutlet NSTextView *resultView;
 @property (weak) IBOutlet NSTextField *extraQueryParamsField;
 @property (weak) IBOutlet NSSegmentedControl *webViewType;
 @property (weak) IBOutlet NSSegmentedControl *validateAuthority;
+
+@property MSALTestAppSettings *settings;
+@property NSArray *selectedScopes;
 
 @end
 
@@ -46,7 +65,6 @@ static NSString * const defaultScope = @"User.Read";
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
     self.selectedScopes = @[defaultScope];
-    // Do view setup here.
 }
 
 - (void)populateProfiles
@@ -146,7 +164,6 @@ static NSString * const defaultScope = @"User.Read";
 - (void)showAlert:(NSString *)messageText informativeText:(NSString *)informativeText
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        
         NSAlert *alert = [[NSAlert alloc] init];
         alert.messageText = messageText;
         [alert addButtonWithTitle:@"OK"];
@@ -200,6 +217,14 @@ static NSString * const defaultScope = @"User.Read";
     }
     
     [_resultView setString:[NSString stringWithFormat:@"Cleared %lu cookies.", (unsigned long)cookies.count]];
+    
+    // Clear WKWebView cookies
+    if (@available(macOS 10.11, *)) {
+        NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
+        [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
+                                                   modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
+                                               completionHandler:^{}];
+    }
 }
 
 - (void)queryAccounts

@@ -25,9 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Cocoa/Cocoa.h>
+#import "CacheViewController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface CacheViewController ()
 
 @end
 
+@implementation CacheViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do view setup here.
+}
+
+@end

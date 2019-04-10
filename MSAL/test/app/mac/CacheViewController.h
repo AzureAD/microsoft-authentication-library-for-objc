@@ -27,7 +27,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+NS_ASSUME_NONNULL_BEGIN
+
+@interface CacheViewController : NSViewController
 
 @end
 
+NS_ASSUME_NONNULL_END
