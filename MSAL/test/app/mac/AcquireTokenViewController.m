@@ -111,16 +111,16 @@ static NSString * const defaultScope = @"User.Read";
     NSLog(@"%@", resultText);
 }
 
-- (MSALUIBehavior)uiBehavior
+- (MSALPromptType)promptType
 {
-    NSString *promptBehavior = [self.promptBehavior labelForSegment:[self.promptBehavior selectedSegment]];
+    NSString *promptType = [self.promptBehavior labelForSegment:[self.promptBehavior selectedSegment]];
     
-    if ([promptBehavior isEqualToString:@"Select"])
-        return MSALSelectAccount;
-    if ([promptBehavior isEqualToString:@"Login"])
-        return MSALForceLogin;
-    if ([promptBehavior isEqualToString:@"Consent"])
-        return MSALForceConsent;
+    if ([promptType isEqualToString:@"Select"])
+        return MSALPromptTypeSelectAccount;
+    if ([promptType isEqualToString:@"Login"])
+        return MSALPromptTypeLogin;
+    if ([promptType isEqualToString:@"Consent"])
+        return MSALPromptTypeConsent;
     
     @throw @"Do not recognize prompt behavior";
 }
@@ -303,7 +303,7 @@ static NSString * const defaultScope = @"User.Read";
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes];
     parameters.loginHint = [self.loginHintField stringValue];
     parameters.account = settings.currentAccount;
-    parameters.uiBehavior = [self uiBehavior];
+    parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
