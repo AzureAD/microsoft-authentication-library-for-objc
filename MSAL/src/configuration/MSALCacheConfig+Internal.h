@@ -25,23 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTelemetryConfig.h"
+#import "MSALCacheConfig.h"
 
-@implementation MSALTelemetryConfig
+@interface MSALCacheConfig (Internal)
 
-+ (instancetype)configWithPIIEnabled:(BOOL)piiEnabled
-{
-    MSALTelemetryConfig *config = [[self.class alloc] init];
-    config.piiEnabled = piiEnabled;
-    config.dispatchers = [NSMutableArray new];
-    
-    return config;
-}
-
-+ (instancetype)defaultConfig
-{
-    return [self configWithPIIEnabled:NO];
-}
-
++ (instancetype)defaultConfig;
++ (instancetype)configWithCacheEnabled:(BOOL)enabled;
 
 @end

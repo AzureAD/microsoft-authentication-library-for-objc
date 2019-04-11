@@ -36,18 +36,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALGlobalConfig : NSObject
 
-@property MSALHTTPConfig *httpConfig;
-@property MSALTelemetryConfig *telemetryConfig;
-@property MSALLoggerConfig *loggerConfig;
-@property MSALCacheConfig *cacheConfig;
+@property (class, readonly) MSALHTTPConfig *httpConfig;
+@property (class, readonly) MSALTelemetryConfig *telemetryConfig;
+@property (class, readonly) MSALLoggerConfig *loggerConfig;
+@property (class, readonly) MSALCacheConfig *cacheConfig;
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;
-
-+ (instancetype)sharedInstance;
-
-// TODO: Add external config file support
-- (void)loadConfig;
 
 @end
 

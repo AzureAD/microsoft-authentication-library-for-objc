@@ -25,34 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALHTTPConfig.h"
+#import "MSALHTTPConfig+Internal.h"
+#import "MSIDNetworkConfiguration.h"
 
 @implementation MSALHTTPConfig
 
 + (instancetype)defaultConfig
 {
-    MSALHTTPConfig *config = [[self alloc] initWithConnectionTimeout:30 * 1000 // 30 seconds
-                                                         readTimeout:60 * 1000]; // 60 seconds
+    MSALHTTPConfig *config = [[self alloc] init];
     return config;
 }
 
-+ (instancetype)configWithConnectionTimeout:(double)connectionTimeout readTimeout:(double)readTimeout
-{
-    MSALHTTPConfig *config = [[self alloc] initWithConnectionTimeout:connectionTimeout
-                                                         readTimeout:readTimeout];
-    return config;
-}
+- (NSInteger)retryCount { return MSIDNetworkConfiguration.retryCount; }
+- (NSTimeInterval)timeoutIntervalForResource { return MSIDNetworkConfiguration.timeoutIntervalForResource; }
+- (NSTimeInterval)timeoutIntervalForRequest { return MSIDNetworkConfiguration.timeoutIntervalForRequest; }
 
-- (nullable instancetype)initWithConnectionTimeout:(double)connectionTimeout
-                              readTimeout:(double)readTimeout
+- (void)setRetryCount:(NSInteger)retryCount { MSIDNetworkConfiguration.retryCount = retryCount; }
+- (void)setTimeoutIntervalForResource:(NSTimeInterval)timeoutIntervalForResource
 {
-    self = [super init];
-    if (self)
-    {
-        self.connectionTimeout = connectionTimeout;
-        self.readTimeout = readTimeout;
-    }
-    return self;
+    MSIDNetworkConfiguration.timeoutIntervalForResource = timeoutIntervalForResource;
+}
+- (void)setTimeoutIntervalForRequest:(NSTimeInterval)timeoutIntervalForRequest
+{
+    MSIDNetworkConfiguration.timeoutIntervalForRequest = timeoutIntervalForRequest;
 }
 
 @end

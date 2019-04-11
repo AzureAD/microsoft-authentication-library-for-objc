@@ -25,22 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALGlobalConfig+Internal.h"
+#import "MSALHTTPConfig+Internal.h"
+#import "MSALTelemetryConfig+Internal.h"
+#import "MSALCacheConfig+Internal.h"
+#import "MSALLoggerConfig+Internal.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation MSALGlobalConfig
 
-@interface MSALCacheConfig : NSObject
++ (instancetype)sharedInstance
+{
+    static MSALGlobalConfig *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [self.class init];
+        
+        sharedInstance.httpConfig = [MSALHTTPConfig defaultConfig];
+        sharedInstance.telemetryConfig = [MSALTelemetryConfig defaultConfig];
+        sharedInstance.loggerConfig = [MSALLoggerConfig defaultConfig];
+        sharedInstance.cacheConfig = [MSALCacheConfig defaultConfig];
+    });
+    
+    return sharedInstance;
+}
 
-@property BOOL cacheEnabled;
-
-#if TARGET_OS_IPHONE
-@property NSString *keychainSharingGroup;
-
-#endif
-
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
++ (MSALHTTPConfig *)httpConfig { return MSALGlobalConfig.sharedInstance.httpConfig; }
++ (MSALTelemetryConfig *)telemetryConfig { return MSALGlobalConfig.sharedInstance.telemetryConfig; }
++ (MSALLoggerConfig *)loggerConfig { return MSALGlobalConfig.sharedInstance.loggerConfig; }
++ (MSALCacheConfig *)cacheConfig { return MSALGlobalConfig.sharedInstance.cacheConfig; }
 
 @end
-
-NS_ASSUME_NONNULL_END

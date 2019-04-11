@@ -32,20 +32,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLoggerConfig : NSObject
 
-@property NSString *logComponent;
 @property MSALLogLevel logLevel;
 @property BOOL piiEnabled;
 
-@property MSALLogCallback callback;
+@property (readonly) MSALLogCallback callback;
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;
 
-+ (instancetype)defaultConfig;
-+ (instancetype)configWithLogComponent:(NSString *)logComponent
-                              logLevel:(MSALLogLevel)logLevel
-                            piiEnabled:(BOOL)piiEnabled
-                              callback:(nullable MSALLogCallback)callback;
+- (void)setCallback:(MSALLogCallback)callback;
 
 @end
 

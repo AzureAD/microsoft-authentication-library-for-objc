@@ -37,18 +37,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALPublicClientApplicationConfig : NSObject
 
+/*! The client ID of the application, this should come from the app developer portal. */
 @property NSString *clientId;
-@property MSALRedirectUri *redirecrUri;
+
+/*! The redirect URI of the application */
+@property NSString *redirecrUri;
+
+/*! The authority the application will use to obtain tokens */
+@property MSALAuthority *authority;
+
+/*! Enable to return access token with extended lifttime during server outage. */
+@property BOOL extendedLifetimeEnabled;
 
 @property(nullable) NSArray<MSALAuthority *> *knownAuthorities;
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
 @property MSALWebviewType webviewType;
-@property MSALBrokeredAvailability brokerAvailability;
 
 @property(nullable) MSALSliceConfig *slice;
 
 @property double tokenExpirationBuffer;
+
+- (nullable instancetype)initWithClientId:(NSString *)clientId NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithClientId:(NSString *)clientId
                               redirectURI:(NSString *)redirectURI;

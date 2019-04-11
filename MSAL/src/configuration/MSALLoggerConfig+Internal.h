@@ -25,13 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALPublicClientApplicationConfig+Internal.h"
+#import "MSALLoggerConfig.h"
 
-@implementation MSALPublicClientApplicationConfig
+@interface MSALLoggerConfig (Internal)
 
-- (instancetype)initWithClientId:(NSString *)clientId redirectURI:(NSString *)redirectURI
-{
-    return nil;
-}
+@property MSALLogCallback callback;
++ (instancetype)defaultConfig;
 
 @end

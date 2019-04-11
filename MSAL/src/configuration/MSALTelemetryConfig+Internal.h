@@ -25,22 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTelemetryConfig.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALTelemetryConfig (Internal)
 
-@interface MSALCacheConfig : NSObject
-
-@property BOOL cacheEnabled;
-
-#if TARGET_OS_IPHONE
-@property NSString *keychainSharingGroup;
-
-#endif
-
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
++ (instancetype)defaultConfig;
 
 @end
-
-NS_ASSUME_NONNULL_END

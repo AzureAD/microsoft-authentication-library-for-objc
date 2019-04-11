@@ -25,41 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALGlobalConfig.h"
-#import "MSALHTTPConfig.h"
-#import "MSALTelemetryConfig.h"
-#import "MSALCacheConfig.h"
-#import "MSALLoggerConfig.h"
+#import "MSALPublicClientApplicationConfig.h"
 
-@implementation MSALGlobalConfig
+@class MSALExtraQueryParameters;
 
-+ (instancetype)sharedInstance
-{
-    static MSALGlobalConfig *sharedInstance;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        sharedInstance = [[self.class alloc] init];
-    });
-    return sharedInstance;
-}
+@interface MSALPublicClientApplicationConfig (Internal)
 
-- (instancetype)init
-{
-    self = [super init];
-    if (self)
-    {
-        self.httpConfig = [MSALHTTPConfig defaultConfig];
-        self.telemetryConfig = [MSALTelemetryConfig defaultConfig];
-        self.cacheConfig = [MSALCacheConfig defaultConfig];
-        self.loggerConfig = [MSALLoggerConfig defaultConfig];
-        
-    }
-    return self;
-}
-
-- (void)loadConfig
-{
-    
-}
+@property (readwrite) MSALExtraQueryParameters *extraQueryParameters;
+@property (readwrite) MSALRedirectUri *verifiedRedirectUri;
 
 @end

@@ -33,17 +33,27 @@
 @implementation MSALADFSAuthority
 
 - (instancetype)initWithURL:(NSURL *)url
-                    context:(id<MSIDRequestContext>)context
+          validateAuthority:(BOOL)validateAuthority
                       error:(NSError **)error
 {
-    self = [super initWithURL:url context:context error:error];
+    self = [super initWithURL:url error:error];
     if (self)
     {
-        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
+        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:nil error:error];
         if (!self.msidAuthority) return nil;
+        
+        self.validateAuthority = validateAuthority;
     }
     
     return self;
+}
+
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError *__autoreleasing  _Nullable *)error
+{
+    return [self initWithURL:url
+           validateAuthority:YES
+                       error:error];
 }
 
 - (NSURL *)url

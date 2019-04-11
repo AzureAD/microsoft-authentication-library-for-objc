@@ -25,22 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALHTTPConfig.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALHTTPConfig (Internal)
 
-@interface MSALCacheConfig : NSObject
-
-@property BOOL cacheEnabled;
-
-#if TARGET_OS_IPHONE
-@property NSString *keychainSharingGroup;
-
-#endif
-
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
++ (instancetype)defaultConfig;
 
 @end
-
-NS_ASSUME_NONNULL_END

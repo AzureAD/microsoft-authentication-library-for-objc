@@ -25,30 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALLoggerConfig.h"
+#import "MSALLoggerConfig+Internal.h"
+#import "MSALLogger.h"
 
 @implementation MSALLoggerConfig
 
 + (instancetype)defaultConfig
 {
-    return [self configWithLogComponent:@""
-                               logLevel:MSALLogLevelWarning
-                             piiEnabled:NO
-                               callback:nil];
+    return [[self.class alloc] init];
 }
 
-+ (instancetype)configWithLogComponent:(NSString *)logComponent
-                              logLevel:(MSALLogLevel)logLevel
-                            piiEnabled:(BOOL)piiEnabled
-                              callback:(MSALLogCallback)callback
-{
-    MSALLoggerConfig *config = [[self.class alloc] init];
-    config.logComponent = logComponent;
-    config.piiEnabled = piiEnabled;
-    config.logLevel = logLevel;
-    config.callback = callback;
-    
-    return config;
-}
+- (MSALLogLevel)logLevel { return MSALLogger.sharedLogger.level; }
+- (void)setLogLevel:(MSALLogLevel)logLevel { MSALLogger.sharedLogger.level = logLevel; }
+- (BOOL)piiEnabled { return MSALLogger.sharedLogger.PiiLoggingEnabled; }
+- (void)setPiiEnabled:(BOOL)piiEnabled { MSALLogger.sharedLogger.PiiLoggingEnabled = YES; }
+
+- (void)setCallback:(MSALLogCallback)callback { [MSALLogger.sharedLogger setCallback:callback]; }
 
 @end

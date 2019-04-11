@@ -25,12 +25,39 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALPublicClientApplicationConfig.h"
+#import "MSALTelemetryConfig+Internal.h"
+#import "MSALTelemetry.h"
 
-@class MSALExtraQueryParameter;
+@implementation MSALTelemetryConfig
 
-@interface MSALPublicClientApplicationConfig (Internal)
++ (instancetype)defaultConfig
+{
+    static MSALTelemetryConfig *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [self.class init];
+    });
+    
+    return sharedInstance;
+}
 
-@property (readwrite) MSALExtraQueryParameter *extraQueryParameter;
+- (BOOL)piiEnabled { return MSALTelemetry.sharedInstance.piiEnabled; }
+- (void)setPiiEnabled:(BOOL)piiEnabled { MSALTelemetry.sharedInstance.piiEnabled = piiEnabled ;}
+
+- (void)addDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
+setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+{
+    [MSALTelemetry.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:setTelemetryOnFailure];
+}
+
+- (void)removeDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
+{
+    [MSALTelemetry.sharedInstance removeDispatcher:dispatcher];
+}
+
+- (void)removeAllDispatchers
+{
+    [MSALTelemetry.sharedInstance removeAllDispatchers];
+}
 
 @end

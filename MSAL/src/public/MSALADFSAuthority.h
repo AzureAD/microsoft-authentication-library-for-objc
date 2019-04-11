@@ -31,7 +31,12 @@
 @interface MSALADFSAuthority : MSALAuthority
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
-                             context:(nullable id<MSIDRequestContext>)context
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use initWithURL:context:validateAuthority:error: method instead");
+
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                   validateAuthority:(BOOL)validateAuthority
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
+
+@property BOOL validateAuthority;
 
 @end

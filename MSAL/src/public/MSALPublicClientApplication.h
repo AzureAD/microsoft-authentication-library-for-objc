@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALPublicClientApplicationConfig.h"
+#import "MSALGlobalConfig.h"
 
 @class MSALResult;
 @class MSALAccount;
@@ -38,45 +40,47 @@
 
 @interface MSALPublicClientApplication : NSObject
 
+@property (readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
+
 /*!
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
-@property BOOL validateAuthority;
+@property (readonly) BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("use configuration.authority.validateAuthority for MSALADFSAuthority");
 
 /*! Enable to return access token with extended lifttime during server outage. */
-@property BOOL extendedLifetimeEnabled;
+@property (readonly) BOOL extendedLifetimeEnabled DEPRECATED_MSG_ATTRIBUTE("use configuration.extendedLifetimeEnabled instead");
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly, nonnull) MSALAuthority *authority;
+@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("use configuration.authority instead");
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property (readonly, nonnull) NSString *clientId;
+@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("use configuration.clientId instead");
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) MSALRedirectUri *redirectUri;
+@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("use configuration.redirectURI instead");
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property NSUInteger expirationBuffer;
+@property (readonly) NSUInteger expirationBuffer DEPRECATED_MSG_ATTRIBUTE("use configuration.tokenExpirationBuffer instead");
 
 /*!
  List of additional ESTS features that client handles.
  */
-@property (nullable) NSArray<NSString *> *clientCapabilities;
+@property (readonly, nullable) NSArray<NSString *> *clientCapabilities DEPRECATED_MSG_ATTRIBUTE("use configuration.clientApplicationCapabilities instead");
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
     to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
-@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters;
+@property (readonly, nullable) NSDictionary<NSString *, NSString *> *sliceParameters DEPRECATED_MSG_ATTRIBUTE("use configuration.slice instead");
 
 /*! Used in logging callbacks to identify what component in the application
     called MSAL. */
-@property (nullable) NSString *component;
+@property (readonly, nullable) NSString *component DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.logComponent instead");
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.
