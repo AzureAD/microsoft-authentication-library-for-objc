@@ -26,6 +26,7 @@
 #import "MSALDefaultDispatcher.h"
 #import "MSIDTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
+#import "MSALAggregatedDispatcher.h"
 
 @implementation MSALTelemetry
 
@@ -52,7 +53,15 @@
 {
     if (!observer) return;
     
-    __auto_type dispatcher = [[MSALDefaultDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    id<MSIDTelemetryDispatcher> dispatcher;
+    if (aggregationRequired)
+    {
+        dispatcher = [[MSALAggregatedDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    }
+    else
+    {
+        dispatcher = [[MSALDefaultDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    }
     
     [[MSIDTelemetry sharedInstance] addDispatcher:dispatcher];
 }

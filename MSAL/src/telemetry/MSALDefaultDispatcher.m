@@ -21,24 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSALDefaultDispatcher+Internal.h"
 #import "MSALTelemetry.h"
 #import "MSIDTelemetryEventInterface.h"
-#import "MSALDefaultDispatcher.h"
 #import "MSIDTelemetryEventInterface.h"
 #import "MSIDTelemetryBaseEvent.h"
 #import "MSALTelemetryDefaultEvent.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "MSALTelemetryEventsObserving.h"
-
-@interface MSALDefaultDispatcher ()
-{
-    NSMutableDictionary* _objectsToBeDispatched;
-    id<MSALTelemetryEventsObserving> _observer;
-    NSLock* _dispatchLock;
-    BOOL _setTelemetryOnFailure;
-    NSMutableArray *_errorEvents;
-}
-@end
 
 @implementation MSALDefaultDispatcher
 
@@ -47,45 +37,36 @@
     self = [super init];
     if (self)
     {
-        _objectsToBeDispatched = [NSMutableDictionary new];
-        _errorEvents = [NSMutableArray new];
-        _dispatchLock = [NSLock new];
-        
+        _eventsToBeDispatched = [NSMutableDictionary new];
+        _errorEvents = [NSMutableSet new];
         _observer = observer;
         _setTelemetryOnFailure = setTelemetryOnFailure;
+        NSString *queueName = [NSString stringWithFormat:@"com.microsoft.dispatcher-%@", [NSUUID UUID].UUIDString];
+        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }
 
 - (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)dispatcher
 {
-    return _observer == dispatcher;
+    return self.observer == dispatcher;
 }
 
 - (void)flush:(NSString *)requestId
 {
-    BOOL errorInEvent = [_errorEvents containsObject:requestId];
-    
-    [_dispatchLock lock];
-    // Remove requestId as we won't need it anymore
-    [_errorEvents removeObject:requestId];
-    [_dispatchLock unlock];
-    
-    if (_setTelemetryOnFailure && !errorInEvent)
-    {
-        return;
-    }
-    
-    [_dispatchLock lock]; //avoid access conflict when manipulating _objectsToBeDispatched
-    NSArray* events = [_objectsToBeDispatched objectForKey:requestId];
-    [_objectsToBeDispatched removeObjectForKey:requestId];
-    [_dispatchLock unlock];
+    NSArray<id<MSIDTelemetryEventInterface>> *events = [self popEventsForReuquestId:requestId];
     
     if ([events count])
     {
         __auto_type defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
-        NSArray *eventsToBeDispatched = @[[defaultEvent getProperties]];
-        [self dispatchEvents:[eventsToBeDispatched arrayByAddingObjectsFromArray:events]];
+        NSMutableArray *eventsToBeDispatched = [@[[defaultEvent getProperties]] mutableCopy];
+        
+        for (id<MSIDTelemetryEventInterface> event in events)
+        {
+            [eventsToBeDispatched addObject:[event getProperties]];
+        }
+        
+        [self dispatchEvents:eventsToBeDispatched];
     }
 }
 
@@ -94,22 +75,18 @@
 {
     if ([NSString msidIsStringNilOrBlank:requestId] || !event) return;
     
-    [_dispatchLock lock]; //make sure no one changes _objectsToBeDispatched while using it
-    NSMutableArray* eventsForRequestId = [_objectsToBeDispatched objectForKey:requestId];
-    if (!eventsForRequestId)
-    {
-        eventsForRequestId = [NSMutableArray new];
-        [_objectsToBeDispatched setObject:eventsForRequestId forKey:requestId];
-    }
-    
-    [eventsForRequestId addObject:[event getProperties]];
-    
-    if ([event errorInEvent])
-    {
-        [_errorEvents addObject:requestId];
-    }
-    
-    [_dispatchLock unlock];
+    dispatch_sync(self.synchronizationQueue, ^{
+        NSMutableArray *eventsForRequestId = self.eventsToBeDispatched[requestId];
+        if (!eventsForRequestId)
+        {
+            eventsForRequestId = [NSMutableArray new];
+            [self.eventsToBeDispatched setObject:eventsForRequestId forKey:requestId];
+        }
+        
+        [eventsForRequestId addObject:event];
+        
+        if (event.errorInEvent) [self.errorEvents addObject:requestId];
+    });
 }
 
 - (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents
@@ -121,8 +98,30 @@
         [eventsToBeDispatched addObject:[self appendPrefixForEvent:event]];
     }
     
-    [_observer onEventsReceived:eventsToBeDispatched];
+    [self.observer onEventsReceived:eventsToBeDispatched];
 }
+
+#pragma mark - Protected
+
+- (NSArray *)popEventsForReuquestId:(NSString *)requestId
+{
+    __block NSArray *events;
+    dispatch_sync(self.synchronizationQueue, ^{
+        BOOL errorInEvent = [self.errorEvents containsObject:requestId];
+        
+        // Remove requestId as we won't need it anymore
+        [self.errorEvents removeObject:requestId];
+        
+        if (self.setTelemetryOnFailure && !errorInEvent) return;
+        
+        events = [self.eventsToBeDispatched[requestId] copy];
+        [self.eventsToBeDispatched removeObjectForKey:requestId];
+    });
+    
+    return events;
+}
+
+#pragma mark - Private
 
 - (NSDictionary *)appendPrefixForEvent:(NSDictionary *)event
 {
