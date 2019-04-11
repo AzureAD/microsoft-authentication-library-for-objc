@@ -80,7 +80,7 @@
          [self refresh];
      }];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:NO];
+    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:NO aggregationRequired:NO];
 }
 
 - (void)stopTracking

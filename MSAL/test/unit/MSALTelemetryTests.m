@@ -33,6 +33,59 @@
 #import "MSALTestTelemetryEventsObserver.h"
 #import "XCTestCase+HelperMethods.h"
 #import "NSData+MSIDExtensions.h"
+#import "MSIDTestContext.h"
+#import "MSIDTelemetryAPIEvent.h"
+
+@interface MSALTestCase (MSALAssert)
+
+- (void)assertDefaultEvent:(NSDictionary *)eventInfo piiEnabled:(BOOL)piiEnabled;
+- (void)assertAPIEvent:(NSDictionary *)eventInfo;
+- (void)assertHTTPEvent:(NSDictionary *)eventInfo;
+
+@end
+
+@implementation MSALTestCase (MSALAssert)
+
+- (void)assertDefaultEvent:(NSDictionary *)eventInfo piiEnabled:(BOOL)piiEnabled
+{
+    __auto_type defaultEventPropertyNames = [[NSSet alloc] initWithArray:[eventInfo allKeys]];
+    XCTAssertEqual([defaultEventPropertyNames count], piiEnabled ? 9 : 6);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.event_name"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_cpu"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_dm"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_os"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_sku"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_ver"]);
+    XCTAssertEqualObjects(eventInfo[@"msal.event_name"], @"default_event");
+    
+    if (!piiEnabled) return;
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_name"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_version"]);
+    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_id"]);
+}
+
+- (void)assertAPIEvent:(NSDictionary *)eventInfo
+{
+    __auto_type apiEventPropertyNames = [[NSSet alloc] initWithArray:[eventInfo allKeys]];
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.start_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.stop_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.correlation_id"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertTrue([apiEventPropertyNames containsObject:@"msal.request_id"]);
+    XCTAssertEqualObjects(eventInfo[@"msal.event_name"], @"apiEvent");
+    XCTAssertEqualObjects(eventInfo[@"msal.api_property"], @"api_value");
+}
+
+- (void)assertHTTPEvent:(NSDictionary *)eventInfo
+{
+    __auto_type httpEventPropertyNames = [[NSSet alloc] initWithArray:[eventInfo allKeys]];
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.start_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.stop_time"]);
+    XCTAssertTrue([httpEventPropertyNames containsObject:@"msal.response_time"]);
+    XCTAssertEqualObjects(eventInfo[@"msal.event_name"], @"httpEvent");
+}
+
+@end
 
 @interface MSALTelemetryTests : MSALTestCase
 
@@ -49,7 +102,7 @@
     
     self.observer = [MSALTestTelemetryEventsObserver new];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO];
+    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:NO];
     
     __weak MSALTelemetryTests *weakSelf = self;
     [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
@@ -87,7 +140,7 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-    XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
+    XCTAssertNil(dictionary[MSID_TELEMETRY_KEY_USER_ID]);
 }
 
 - (void)testTelemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
@@ -104,14 +157,13 @@
     
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
-
     NSString *x = [@"id1234" dataUsingEncoding:NSUTF8StringEncoding].msidSHA256.msidHexString;
-    MSALAssertStringEquals([dictionary objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)],  x);
+    MSALAssertStringEquals(dictionary[TELEMETRY_KEY(MSID_TELEMETRY_KEY_USER_ID)],  x);
 }
 
 #pragma mark - flush
 
-- (void)testFlush_whenThereIsObserver_shouldSendEvents
+- (void)testFlush_whenThereIsEventAndObserverIsSet_shouldSendEvents
 {
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
@@ -127,7 +179,7 @@
     XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
 }
 
-- (void)testFlush_whenObserverRemoved_shouldNotSendEvents
+- (void)testFlush_whenThereIsEventAndObserverRemoved_shouldNotSendEvents
 {
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
@@ -139,15 +191,97 @@
     
     [[MSIDTelemetry sharedInstance] flush:requestId];
     
-    NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
-    XCTAssertNil(dictionary);
+    XCTAssertNil(self.receivedEvents);
+}
+
+- (void)testFlush_whenThereIsNoEventAndObserverIsSet_shouldNotSendEvents
+{
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    
+    // Flush without adding any additional events
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+    
+    XCTAssertNil(self.receivedEvents);
+}
+
+- (void)testFlush_whenThereAre2EventsAndObserverIsSet_shouldSendEvents
+{
+    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    NSUUID *correlationId = [NSUUID UUID];
+    __auto_type context = [MSIDTestContext new];
+    context.telemetryRequestId = requestId;
+    context.correlationId = correlationId;
+    // API event
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"apiEvent"];
+    MSIDTelemetryAPIEvent *apiEvent = [[MSIDTelemetryAPIEvent alloc] initWithName:@"apiEvent" context:context];
+    [apiEvent setProperty:@"api_property" value:@"api_value"];
+    [apiEvent setCorrelationId:correlationId];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:apiEvent];
+    // HTTP event
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId
+                                        event:[[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:context]];
+    
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+    
+    // Verify results: there should be 3 events (default, API, HTTP)
+    XCTAssertEqual([self.receivedEvents count], 3);
+    [self assertDefaultEvent:self.receivedEvents[0] piiEnabled:YES];
+    [self assertAPIEvent:self.receivedEvents[1]];
+    [self assertHTTPEvent:self.receivedEvents[2]];
+}
+
+- (void)testFlush_whenThereAre2EventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldFilterEvents
+{
+    [[MSALTelemetry sharedInstance] removeAllObservers];
+    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    NSUUID *correlationId = [NSUUID UUID];
+    __auto_type context = [MSIDTestContext new];
+    context.telemetryRequestId = requestId;
+    context.correlationId = correlationId;
+    // HTTP event
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:context];
+    [httpEvent setHttpErrorCode:@"error_code_123"];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
+
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+
+    XCTAssertEqual([self.receivedEvents count], 2);
+    [self assertDefaultEvent:self.receivedEvents[0] piiEnabled:NO];
+    [self assertHTTPEvent:self.receivedEvents[1]];
+    NSString *errorCode = self.receivedEvents[1][TELEMETRY_KEY(MSID_TELEMETRY_KEY_HTTP_RESPONSE_CODE)];
+    XCTAssertNotNil(errorCode);
+    XCTAssertEqualObjects(errorCode, @"error_code_123");
+}
+
+- (void)testFlush_whenThereIs1NonErrorEventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldNotSendEvents
+{
+    [[MSALTelemetry sharedInstance] removeAllObservers];
+    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
+    NSUUID* correlationId = [NSUUID UUID];
+    __auto_type context = [MSIDTestContext new];
+    context.telemetryRequestId = requestId;
+    context.correlationId = correlationId;
+    // HTTP event
+    [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
+    MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:context];
+    [[MSIDTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
+    
+    [[MSIDTelemetry sharedInstance] flush:requestId];
+    
+    XCTAssertNil(self.receivedEvents);
 }
 
 #pragma mark - Private
 
 - (NSDictionary *)getEventPropertiesByEventName:(NSString *)eventName
 {
-    for (NSDictionary *eventInfo in self.receivedEvents) {
+    for (NSDictionary *eventInfo in self.receivedEvents)
+    {
         if ([[eventInfo objectForKey:TELEMETRY_KEY(MSID_TELEMETRY_KEY_EVENT_NAME)] isEqualToString:eventName])
         {
             return eventInfo;

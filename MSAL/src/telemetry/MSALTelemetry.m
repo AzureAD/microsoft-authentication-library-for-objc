@@ -46,7 +46,9 @@
     return singleton;
 }
 
-- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
+    setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+      aggregationRequired:(BOOL)aggregationRequired
 {
     if (!observer) return;
     

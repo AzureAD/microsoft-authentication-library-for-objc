@@ -37,8 +37,6 @@
     NSLock* _dispatchLock;
     BOOL _setTelemetryOnFailure;
     NSMutableArray *_errorEvents;
-    
-    MSALTelemetryDefaultEvent *_defaultEvent;
 }
 @end
 
@@ -55,8 +53,6 @@
         
         _observer = observer;
         _setTelemetryOnFailure = setTelemetryOnFailure;
-        
-        _defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
     }
     return self;
 }
@@ -87,7 +83,8 @@
     
     if ([events count])
     {
-        NSArray* eventsToBeDispatched = @[[_defaultEvent getProperties]];
+        __auto_type defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
+        NSArray *eventsToBeDispatched = @[[defaultEvent getProperties]];
         [self dispatchEvents:[eventsToBeDispatched arrayByAddingObjectsFromArray:events]];
     }
 }

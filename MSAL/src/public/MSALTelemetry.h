@@ -55,8 +55,13 @@ NS_ASSUME_NONNULL_BEGIN
  @param observer                An instance of MSALTelemetryEventsObserving implementation.
  @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
                                 If set NO, MSAL will dispatch all events.
+ @param aggregationRequired     If set NO, all telemetry events collected by MSAL will be dispatched;
+                                If set YES, MSAL will dispatch only one event for each acquire token call,
+                                where the event is a brief summary (but with far less details) of all telemetry events for that acquire token call.
  */
-- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
+    setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+      aggregationRequired:(BOOL)aggregationRequired;
 
 /*!
  Remove a telemetry observer added for receiving telemetry events.
