@@ -52,6 +52,9 @@ static NSString * const defaultScope = @"User.Read";
 @property (weak) IBOutlet NSTextField *extraQueryParamsField;
 @property (weak) IBOutlet NSSegmentedControl *webViewType;
 @property (weak) IBOutlet NSSegmentedControl *validateAuthority;
+@property (weak) IBOutlet NSStackView *acquireTokenView;
+@property (weak) IBOutlet WKWebView *webView;
+
 
 @property MSALTestAppSettings *settings;
 @property NSArray *selectedScopes;
@@ -143,7 +146,7 @@ static NSString * const defaultScope = @"User.Read";
     @throw @"Do not recognize prompt behavior";
 }
 
-- (BOOL)embeddedWebView
+- (BOOL)passedInWebview
 {
     NSString* webViewType = [self.webViewType labelForSegment:[self.webViewType selectedSegment]];
     
@@ -193,11 +196,7 @@ static NSString * const defaultScope = @"User.Read";
     if (result)
     {
         [self.resultView setString:@"Successfully cleared cache."];
-        
         settings.currentAccount = nil;
-        
-//        [_userButton setTitle:[MSALTestAppUserViewController currentTitle]
-//                     forState:UIControlStateNormal];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
     }
@@ -225,37 +224,6 @@ static NSString * const defaultScope = @"User.Read";
                                                    modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
                                                completionHandler:^{}];
     }
-}
-
-- (void)queryAccounts
-{
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    MSALAuthority *authority = [settings authority];
-    NSError *error = nil;
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
-    
-    
-    if (!application)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to create public client application: %@", error);
-        return;
-    }
-    
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
-        
-//        _accounts = accounts;
-//
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [super refresh];
-//        });
-    }];
 }
 
 - (IBAction)acquireTokenInteractive:(id)sender
@@ -289,7 +257,6 @@ static NSString * const defaultScope = @"User.Read";
     
     void (^completionBlock)(MSALResult *result, NSError *error) = ^(MSALResult *result, NSError *error) {
         
-        [self queryAccounts];
         if (fBlockHit)
         {
             [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
@@ -308,21 +275,18 @@ static NSString * const defaultScope = @"User.Read";
                 [self updateResultViewError:error];
             }
             
-            //            [_webView loadHTMLString:@"<html><head></head></html>" baseURL:nil];
-            //            [_authView setHidden:YES];
+            [self.webView setHidden:YES];
+            [self.acquireTokenView setHidden:NO];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
     
-    if ([self embeddedWebView])
+    if ([self passedInWebview])
     {
-        //        [_webview loadHTMLString:@"<html><head></head><body>Loading...</body></html>" baseURL:nil];
-        //        [context setWebView:_webview];
-        //        [_authView setFrame:self.window.contentView.frame];
-        //
-        //        [_acquireSettingsView setHidden:YES];
-        //        [_authView setHidden:NO];
+        application.customWebview = self.webView;
+        [self.acquireTokenView setHidden:YES];
+        [self.webView setHidden:NO];
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes];
@@ -368,7 +332,6 @@ static NSString * const defaultScope = @"User.Read";
     application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
     
     __block BOOL fBlockHit = NO;
-    //    _acquireSilentButton.enabled = NO;
     
     __auto_type account = settings.currentAccount;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:account];
@@ -379,7 +342,6 @@ static NSString * const defaultScope = @"User.Read";
          if (fBlockHit)
          {
              dispatch_async(dispatch_get_main_queue(), ^{
-                 //                 _acquireSilentButton.enabled = YES;
                  [self showAlert:@"Error!" informativeText:@"Completion block was hit multiple times!"];
              });
              
@@ -388,7 +350,6 @@ static NSString * const defaultScope = @"User.Read";
          fBlockHit = YES;
          
          dispatch_async(dispatch_get_main_queue(), ^{
-             //             _acquireSilentButton.enabled = YES;
              if (result)
              {
                  [self updateResultView:result];
