@@ -47,16 +47,16 @@
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
-@property (readonly) BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("use configuration.authority.validateAuthority for MSALADFSAuthority");
+@property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("use configuration.authority.validateAuthority instead");
 
 /*! Enable to return access token with extended lifttime during server outage. */
-@property (readonly) BOOL extendedLifetimeEnabled DEPRECATED_MSG_ATTRIBUTE("use configuration.extendedLifetimeEnabled instead");
+@property BOOL extendedLifetimeEnabled DEPRECATED_MSG_ATTRIBUTE("use configuration.extendedLifetimeEnabled instead");
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("use configuration.authority instead");
+@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("use PublicClientApplicationConfig's authority property instead");
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("use configuration.clientId instead");
+@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("use PublicClientApplicationConfig's clientId property instead");
 
 /*! The redirect URI of the application */
 @property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("use configuration.redirectURI instead");
@@ -65,39 +65,45 @@
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property (readonly) NSUInteger expirationBuffer DEPRECATED_MSG_ATTRIBUTE("use configuration.tokenExpirationBuffer instead");
+@property NSUInteger expirationBuffer DEPRECATED_MSG_ATTRIBUTE("use configuration.tokenExpirationBuffer instead");
 
 /*!
  List of additional ESTS features that client handles.
  */
-@property (readonly, nullable) NSArray<NSString *> *clientCapabilities DEPRECATED_MSG_ATTRIBUTE("use configuration.clientApplicationCapabilities instead");
+@property (nullable) NSArray<NSString *> *clientCapabilities DEPRECATED_MSG_ATTRIBUTE("use configuration.clientApplicationCapabilities instead");
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
     to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *sliceParameters DEPRECATED_MSG_ATTRIBUTE("use configuration.slice instead");
-
-/*! Used in logging callbacks to identify what component in the application
-    called MSAL. */
-@property (readonly, nullable) NSString *component DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.logComponent instead");
+@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters DEPRECATED_MSG_ATTRIBUTE("use configuration.slice instead");
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.
  - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
  - macOS:  WKWebView
  */
-@property MSALWebviewType webviewType;
+@property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("use MSALInteractiveTokenParameters instance property - webviewType");
 
 /*!
  Setting to define MSAL behavior regarding broker.
  Broker is enabled by default.
  */
-@property MSALBrokeredAvailability brokerAvailability;
+@property MSALBrokeredAvailability brokerAvailability DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.enableBroker property instead");
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
-@property (nullable) WKWebView *customWebview;
+@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("use MSALInteractiveTokenParameters instance property - customWebview");
+
+
+/*!
+ Initialize a MSALPublicClientApplication with a given configuration
+ 
+ @param  config       Configuration for PublicClientApplication
+ @param  error        The error that occurred creating the application object, if any (optional)
+ */
+- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
@@ -106,7 +112,7 @@
     @param  error       The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
@@ -123,7 +129,7 @@
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                                 authority:(nullable MSALAuthority *)authority
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri
@@ -142,7 +148,7 @@
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                                 authority:(nullable MSALAuthority *)authority
                               redirectUri:(nullable NSString *)redirectUri
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 
 
 #if TARGET_OS_IPHONE
@@ -150,7 +156,7 @@
  The keychain sharing group to use for the token cache.
  If it is nil, default MSAL group will be used.
  */
-@property (nonatomic, readonly, nullable) NSString *keychainGroup;
+@property (nonatomic, readonly, nullable) NSString *keychainGroup DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.cacheConfig.keychainSharingGroup instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID and keychain group
@@ -162,7 +168,7 @@
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                             keychainGroup:(nullable NSString *)keychainGroup
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
@@ -182,7 +188,7 @@
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                             keychainGroup:(nullable NSString *)keychainGroup
                                 authority:(nullable MSALAuthority *)authority
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
@@ -204,7 +210,7 @@
                             keychainGroup:(nullable NSString *)keychainGroup
                                 authority:(nullable MSALAuthority *)authority
                               redirectUri:(nullable NSString *)redirectUri
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("use initWithConfiguration:error: instead");
 #endif
 
 /*!
@@ -253,7 +259,7 @@
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(nonnull NSURL *)response __attribute((deprecated("Use the handleMSALResponse:sourceApplication: method instead.")));
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response DEPRECATED_MSG_ATTRIBUTE("Use the handleMSALResponse:sourceApplication: method instead.");
 
 /*!
  Ask MSAL to handle a URL response.

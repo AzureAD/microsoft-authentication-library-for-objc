@@ -37,4 +37,14 @@
     return config;
 }
 
+- (NSDictionary *)sliceDictionary
+{
+    return @{ @"slice" : self.slice, @"dc" : self.dc };
+}
+
+- (void)setSliceWithDictionary:(NSDictionary *)sliceDict
+{
+    self.slice = sliceDict[@"slice"];
+    self.dc = sliceDict[@"dc"];
+}
 @end

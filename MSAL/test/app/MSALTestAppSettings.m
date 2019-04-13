@@ -149,10 +149,12 @@ static NSDictionary *s_profiles = nil;
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:_authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectURI:redirectUri];
+    pcaConfig.authority = _authority;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+
     if (application == nil)
     {
         MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);

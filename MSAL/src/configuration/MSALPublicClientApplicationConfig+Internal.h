@@ -29,7 +29,7 @@
 
 @class MSALExtraQueryParameters;
 
-@interface MSALPublicClientApplicationConfig (Internal)
+@interface MSALPublicClientApplicationConfig ()
 
 @property (readwrite) MSALExtraQueryParameters *extraQueryParameters;
 @property (readwrite) MSALRedirectUri *verifiedRedirectUri;

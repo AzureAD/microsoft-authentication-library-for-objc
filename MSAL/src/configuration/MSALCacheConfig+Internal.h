@@ -27,7 +27,7 @@
 
 #import "MSALCacheConfig.h"
 
-@interface MSALCacheConfig (Internal)
+@interface MSALCacheConfig ()
 
 + (instancetype)defaultConfig;
 + (instancetype)configWithCacheEnabled:(BOOL)enabled;

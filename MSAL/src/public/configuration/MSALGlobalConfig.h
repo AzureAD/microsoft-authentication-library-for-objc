@@ -41,6 +41,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
 @property (class, readonly) MSALCacheConfig *cacheConfig;
 
+@property (class) MSALWebviewType defaultWebviewType;
+#if TARGET_OS_IPHONE
+@property (class) MSALBrokeredAvailability brokerAvailability;
+#endif
+
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;
 

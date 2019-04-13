@@ -27,7 +27,7 @@
 
 #import "MSALGlobalConfig.h"
 
-@interface MSALGlobalConfig (Internal)
+@interface MSALGlobalConfig ()
 
 + (instancetype)sharedInstance;
 

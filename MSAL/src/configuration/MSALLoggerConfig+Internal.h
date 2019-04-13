@@ -27,9 +27,8 @@
 
 #import "MSALLoggerConfig.h"
 
-@interface MSALLoggerConfig (Internal)
+@interface MSALLoggerConfig ()
 
-@property MSALLogCallback callback;
 + (instancetype)defaultConfig;
 
 @end

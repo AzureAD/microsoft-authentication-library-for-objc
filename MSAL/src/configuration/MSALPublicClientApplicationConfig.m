@@ -40,16 +40,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     self = [super init];
     if (self)
     {
-        self.clientId = clientId;
-#if TARGET_OS_IPHONE
-        self.webviewType = MSALWebviewTypeDefault;
-#else
-        self.webviewType = MSALWebviewTypeWKWebView;
-#endif
+        _clientId = clientId;
         NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
-        self.authority = [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
+        _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
         
-        self.extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
+        _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
     }
     
     return self;

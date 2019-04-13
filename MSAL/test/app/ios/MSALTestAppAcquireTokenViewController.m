@@ -43,6 +43,7 @@
 #import "MSALDefinitions.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALAuthority.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -488,18 +489,20 @@
 
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+    
+                                                                                                   redirectURI:redirectUri];
+    authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    pcaConfig.authority = authority;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
-    
-    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     

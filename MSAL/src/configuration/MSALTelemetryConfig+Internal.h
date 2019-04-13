@@ -27,7 +27,7 @@
 
 #import "MSALTelemetryConfig.h"
 
-@interface MSALTelemetryConfig (Internal)
+@interface MSALTelemetryConfig ()
 
 + (instancetype)defaultConfig;
 

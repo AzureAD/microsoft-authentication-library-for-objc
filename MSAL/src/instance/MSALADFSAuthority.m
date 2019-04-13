@@ -29,11 +29,11 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDADFSAuthority.h"
 #import "MSIDAuthority+Internal.h"
+#import "MSALAuthority_Internal.h"
 
 @implementation MSALADFSAuthority
 
 - (instancetype)initWithURL:(NSURL *)url
-          validateAuthority:(BOOL)validateAuthority
                       error:(NSError **)error
 {
     self = [super initWithURL:url error:error];
@@ -41,24 +41,15 @@
     {
         self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:nil error:error];
         if (!self.msidAuthority) return nil;
-        
-        self.validateAuthority = validateAuthority;
     }
     
     return self;
-}
-
-- (instancetype)initWithURL:(NSURL *)url
-                      error:(NSError *__autoreleasing  _Nullable *)error
-{
-    return [self initWithURL:url
-           validateAuthority:YES
-                       error:error];
 }
 
 - (NSURL *)url
 {
     return self.msidAuthority.url;
 }
+
 
 @end

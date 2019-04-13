@@ -55,7 +55,7 @@
     
     if ([MSIDADFSAuthority isAuthorityFormatValid:url context:context error:nil])
     {
-        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url validateAuthority:YES error:nil];
+        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url error:nil];
         if (adfsAuthority) return adfsAuthority;
     }
     

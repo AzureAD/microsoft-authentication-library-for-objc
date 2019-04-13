@@ -40,6 +40,6 @@
 - (BOOL)piiEnabled { return MSALLogger.sharedLogger.PiiLoggingEnabled; }
 - (void)setPiiEnabled:(BOOL)piiEnabled { MSALLogger.sharedLogger.PiiLoggingEnabled = YES; }
 
-- (void)setCallback:(MSALLogCallback)callback { [MSALLogger.sharedLogger setCallback:callback]; }
+- (void)setLogCallback:(MSALLogCallback)callback { [MSALLogger.sharedLogger setCallback:callback]; }
 
 @end

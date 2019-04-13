@@ -51,9 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nullable) NSArray<MSALAuthority *> *knownAuthorities;
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
-
-@property MSALWebviewType webviewType;
-
 @property(nullable) MSALSliceConfig *slice;
 
 @property double tokenExpirationBuffer;

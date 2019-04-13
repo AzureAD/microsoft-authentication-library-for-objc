@@ -35,12 +35,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property MSALLogLevel logLevel;
 @property BOOL piiEnabled;
 
+- (void)setLogCallback:(MSALLogCallback)callback;
 @property (readonly) MSALLogCallback callback;
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;
 
-- (void)setCallback:(MSALLogCallback)callback;
+
 
 @end
 

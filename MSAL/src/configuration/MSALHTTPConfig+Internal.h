@@ -27,7 +27,7 @@
 
 #import "MSALHTTPConfig.h"
 
-@interface MSALHTTPConfig (Internal)
+@interface MSALHTTPConfig ()
 
 + (instancetype)defaultConfig;
 
