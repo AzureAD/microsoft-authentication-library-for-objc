@@ -40,14 +40,12 @@ static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityA
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
 
-
-
 + (instancetype)sharedInstance
 {
     static MSALGlobalConfig *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [self.class init];
+        sharedInstance = [[self.class alloc] init];
         
         sharedInstance.httpConfig = [MSALHTTPConfig defaultConfig];
         sharedInstance.telemetryConfig = [MSALTelemetryConfig defaultConfig];

@@ -35,7 +35,7 @@
     static MSALTelemetryConfig *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [self.class init];
+        sharedInstance = [[self.class alloc] init];
     });
     
     return sharedInstance;
