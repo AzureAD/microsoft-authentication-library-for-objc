@@ -151,7 +151,7 @@ static NSDictionary *s_profiles = nil;
     NSError *error = nil;
 
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectURI:redirectUri];
+                                                                                                   redirectUri:redirectUri];
     pcaConfig.authority = _authority;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
 

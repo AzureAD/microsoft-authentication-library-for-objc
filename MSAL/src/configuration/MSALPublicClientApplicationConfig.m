@@ -50,12 +50,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return self;
 }
 
-- (instancetype)initWithClientId:(NSString *)clientId redirectURI:(NSString *)redirectURI
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(NSString *)redirectUri
 {
     self = [self initWithClientId:clientId];
     if (self)
     {
-        _redirecrUri = redirectURI;
+        _redirecrUri = redirectUri;
     }
     
     return self;

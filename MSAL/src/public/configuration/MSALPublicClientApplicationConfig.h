@@ -49,16 +49,36 @@ NS_ASSUME_NONNULL_BEGIN
 /*! Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
+/*! List of known authorities that application should trust. */
 @property(nullable) NSArray<MSALAuthority *> *knownAuthorities;
-@property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
-@property(nullable) MSALSliceConfig *slice;
 
+/*! List of additional ESTS features that client handles. */
+@property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
+
+/*! When checking an access token for expiration we check if time to expiration
+ is less than this value (in seconds) before making the request. The goal is to
+ refresh the token ahead of its expiration and also not to return a token that is
+ about to expire. */
 @property double tokenExpirationBuffer;
 
+/*! slice configuration for testing. */
+@property(nullable) MSALSliceConfig *slice;
+
+/*!
+ Initialize a MSALPublicClientApplicationConfig with a given clientId
+ 
+ @param  clientId   The clientID of your application, you should get this from the app portal.
+ */
 - (nullable instancetype)initWithClientId:(NSString *)clientId NS_DESIGNATED_INITIALIZER;
 
+/*!
+ Initialize a MSALPublicClientApplicationConfig with a given clientId
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  redirectUri    The redirect URI of the application
+ */
 - (nullable instancetype)initWithClientId:(NSString *)clientId
-                              redirectURI:(NSString *)redirectURI;
+                              redirectUri:(NSString *)redirectUri;
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;

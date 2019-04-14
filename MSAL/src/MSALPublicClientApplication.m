@@ -271,7 +271,7 @@
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup;
 #endif
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectURI:redirectUri];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri];
     config.authority = authority;
     config.redirecrUri = redirectUri;
     

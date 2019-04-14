@@ -31,10 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALHTTPConfig : NSObject
 
-// In miliseconds
 @property NSInteger retryCount;
-@property NSTimeInterval timeoutIntervalForResource;
-@property NSTimeInterval timeoutIntervalForRequest;
+@property NSTimeInterval timeoutIntervalForResource; // In miliseconds
+@property NSTimeInterval timeoutIntervalForRequest;  // In miliseconds
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;

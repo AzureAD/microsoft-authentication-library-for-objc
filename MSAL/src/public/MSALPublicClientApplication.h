@@ -59,7 +59,7 @@
 @property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("use PublicClientApplicationConfig's clientId property instead");
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("use configuration.redirectURI instead");
+@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("use configuration.redirectUri instead");
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to

@@ -42,6 +42,9 @@
  @param events events is represented by an array of dictionary of key-value pair of event property name/value.
  */
 - (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events;
+/*!
+ Configuration to dispatch only for failures.
+ */
 - (BOOL)onFailureOnly;
 
 @end
@@ -57,8 +60,23 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property BOOL piiEnabled;
 
+/*!
+ Register a telemetry dispatcher for receiving telemetry events.
+ @param dispatcher              An instance of MSALTelemetryDispatcher implementation.
+ @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
+ If set NO, MSAL will dispatch will dispatch all events.
+ */
 - (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+
+/*!
+ Remove a telemetry dispatcher added for receiving telemetry events.
+ @param dispatcher An instance of MSALTelemetryDispatcher implementation added to the dispatches before.
+ */
 - (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher;
+
+/*!
+ Remove all telemetry dispatchers added to the dispatchers collection.
+ */
 - (void)removeAllDispatchers;
 
 - (nullable instancetype)init NS_UNAVAILABLE;

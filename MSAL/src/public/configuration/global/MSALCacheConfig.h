@@ -34,6 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property BOOL cacheEnabled;
 
 #if TARGET_OS_IPHONE
+/*! The keychain sharing group to use for the token cache. */
 @property NSString *keychainSharingGroup;
 
 #endif

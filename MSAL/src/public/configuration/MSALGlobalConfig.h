@@ -41,8 +41,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
 @property (class, readonly) MSALCacheConfig *cacheConfig;
 
+/*! The webview selection to be used for authentication.
+ By default, it is going to use the following to authenticate.
+ - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+ - macOS:  WKWebView
+ */
 @property (class) MSALWebviewType defaultWebviewType;
+
 #if TARGET_OS_IPHONE
+/*!
+ Setting to define MSAL behavior regarding broker.
+ Broker is enabled by default.
+ */
 @property (class) MSALBrokeredAvailability brokerAvailability;
 #endif
 

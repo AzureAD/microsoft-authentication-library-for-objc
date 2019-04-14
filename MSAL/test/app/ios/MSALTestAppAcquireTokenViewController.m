@@ -490,7 +490,7 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectURI:redirectUri];
+                                                                                                   redirectUri:redirectUri];
     authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     pcaConfig.authority = authority;
     
@@ -589,7 +589,7 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectURI:redirectUri];
+                                                                                                   redirectUri:redirectUri];
     authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     pcaConfig.authority = authority;
     
@@ -653,7 +653,7 @@
     
     NSError *error = nil;
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectURI:redirectUri];
+                                                                                                   redirectUri:redirectUri];
     pcaConfig.authority = authority;
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
@@ -783,7 +783,7 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectURI:redirectUri];
+                                                                                                   redirectUri:redirectUri];
     pcaConfig.authority = authority;
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
