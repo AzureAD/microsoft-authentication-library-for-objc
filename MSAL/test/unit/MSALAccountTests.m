@@ -37,6 +37,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSALAccount+Internal.h"
+#import "MSALAuthority.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -54,15 +55,14 @@
     [super tearDown];
 }
 
-- (void)testInitWithMSIDAccount_whenValidAccount_shouldInit
+- (void)testInitWithMSIDAccount_whenValidAccountAndCreateTenantProfileYes_shouldInitAndCreateTenantProfile
 {
     MSIDAccount *msidAccount = [MSIDAccount new];
     msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
     msidAccount.username = @"user@contoso.com";
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"localoid";
-    msidAccount.tenantId = @"tid";
-    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com"];
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
     __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
     msidAccount.authority = authority;
     NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
@@ -76,10 +76,11 @@
     NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
                                          @"oid" : @"ff9feb5a"
                                          };
+    
     MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
     XCTAssertNotNil(idTokenClaims);
-
-    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+    msidAccount.idTokenClaims = idTokenClaims;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
 
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
@@ -90,109 +91,199 @@
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"localoid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, YES);
+    XCTAssertEqualObjects(account.tenantProfiles[0].authority.url, authority.url);
+    XCTAssertEqualObjects(account.tenantProfiles[0].claims, idTokenDictionary);
 }
 
-- (void)testAddTenantProfiles_whenAddTenantProfiles_shouldAddTenantProfilesToExistingAccount
+- (void)testInitWithMSIDAccount_whenValidAccountAndCreateTenantProfileNo_shouldInitAndNotCreateTenantProfile
 {
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"localoid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.authority = authority;
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+                                        };
+    
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+    
+    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
+                                         @"oid" : @"ff9feb5a"
+                                         };
+    
+    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
+    XCTAssertNotNil(idTokenClaims);
+    msidAccount.idTokenClaims = idTokenClaims;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:NO];
+    
+    XCTAssertNotNil(account);
+    XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
+    XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
+    XCTAssertEqualObjects(account.name, @"User");
+    XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertNil(account.tenantProfiles);
+}
+
+- (void)testInitWithMSIDAccount_whenInvalidAccountWithoutAuthority_shouldReturnNil
+{
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"localoid";
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+                                        };
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+    
     NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
                                          @"oid" : @"ff9feb5a"
                                          };
     MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
     XCTAssertNotNil(idTokenClaims);
+    msidAccount.idTokenClaims = idTokenClaims;
     
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                            name:@"name"
-                                                   homeAccountId:@"1.2"
-                                                  localAccountId:@"3"
-                                                     environment:@"login.microsoftonline.com"
-                                                        tenantId:@"4"
-                                                   idTokenClaims:idTokenClaims];
-    XCTAssertNotNil(account);
+    msidAccount.authority = nil;
     
-    NSDictionary *idTokenDictionary2 = @{ @"aud" : @"j890k23",
-                                         @"oid" : @"l89j924"
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
+    
+    XCTAssertNil(account);
+}
+
+- (void)testAddTenantProfiles_whenAddValidTenantProfiles_shouldAddIt
+{
+    // Create MSAL account 1
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"guest_oid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/guest_tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.authority = authority;
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+                                        };
+    
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+    
+    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
+                                         @"oid" : @"ff9feb5a"
                                          };
-    MSIDIdTokenClaims *idTokenClaims2 = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary2 error:nil];
-    MSALAccount *account2 = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                             name:@"name"
-                                                    homeAccountId:@"1.2"
-                                                   localAccountId:@"5"
-                                                      environment:@"login.microsoftonline.com"
-                                                         tenantId:@"2"
-                                                    idTokenClaims:idTokenClaims2];
+    
+    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
+    XCTAssertNotNil(idTokenClaims);
+    msidAccount.idTokenClaims = idTokenClaims;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
+    
+    // Create MSAL account 2
+    MSIDAccount *msidAccount2 = [msidAccount copy];
+    msidAccount2.localAccountId = @"oid";
+    __auto_type homeAuthorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
+    __auto_type homeAuthority = [[MSIDAADAuthority alloc] initWithURL:homeAuthorityUrl context:nil error:nil];
+    msidAccount2.authority = homeAuthority;
+    
+    MSALAccount *account2 = [[MSALAccount alloc] initWithMSIDAccount:msidAccount2 createTenantProfile:YES];
     XCTAssertNotNil(account2);
     
+    // Add tenant profiles
     [account addTenantProfiles:account2.tenantProfiles];
     
     XCTAssertEqual(account.tenantProfiles.count, 2);
-    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"3");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"4");
+    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"guest_oid");
+    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"guest_tid");
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, NO);
-    XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, @"5");
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"2");
+    XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, @"oid");
+    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"tid");
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenant, YES);
 }
 
 - (void)testAddTenantProfiles_whenAddNilTenantProfiles_shouldNotAddToExistingAccount
 {
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid"]
+                                                         error:nil];
+    XCTAssertNotNil(authority);
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:@"1"
+                                                                              tenantId:@"2"
+                                                                             authority:authority
+                                                                          isHomeTenant:YES
+                                                                                claims:@{@"key" : @"value"}];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                             name:@"name"
                                                    homeAccountId:@"1.2"
                                                   localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"4"
-                                                   idTokenClaims:nil];
+                                                  tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
     
     [account addTenantProfiles:nil];
     
     XCTAssertEqual(account.tenantProfiles.count, 1);
-    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"3");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"4");
+    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"1");
+    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"2");
 }
 
 - (void)testAddTenantProfiles_whenAddEmptyTenantProfiles_shouldNotAddToExistingAccount
 {
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid"]
+                                                         error:nil];
+    XCTAssertNotNil(authority);
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:@"1"
+                                                                              tenantId:@"2"
+                                                                             authority:authority
+                                                                          isHomeTenant:YES
+                                                                                claims:@{@"key" : @"value"}];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                             name:@"name"
                                                    homeAccountId:@"1.2"
                                                   localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"4"
-                                                   idTokenClaims:nil];
+                                                  tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
-    
+
     [account addTenantProfiles:[NSArray new]];
-    
+
     XCTAssertEqual(account.tenantProfiles.count, 1);
-    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"3");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"4");
+    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"1");
+    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"2");
 }
 
 - (void)testCopy_whenValidAccount_shouldDeepCopy
 {
-    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
-                                         @"oid" : @"ff9feb5a"
-                                         };
-    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
-    XCTAssertNotNil(idTokenClaims);
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid"]
+                                                         error:nil];
+    XCTAssertNotNil(authority);
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:@"oid"
+                                                                              tenantId:@"tid"
+                                                                             authority:authority
+                                                                          isHomeTenant:YES
+                                                                                claims:@{@"key" : @"value"}];
+    
+    authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid2"]
+                                          error:nil];
+    XCTAssertNotNil(authority);
+    MSALTenantProfile *tenantProfile2 = [[MSALTenantProfile alloc] initWithUserObjectId:@"oid2"
+                                                                               tenantId:@"tid2"
+                                                                              authority:authority
+                                                                           isHomeTenant:YES
+                                                                                 claims:@{@"key2" : @"value2"}];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.2"
-                                                       localAccountId:@"2.3"
-                                                          environment:@"login.microsoftonline.com"
-                                                             tenantId:@"2"
-                                                   idTokenClaims:idTokenClaims];
+                                                            name:@"name"
+                                                   homeAccountId:@"1.2"
+                                                  localAccountId:@"3"
+                                                     environment:@"login.microsoftonline.com"
+                                                  tenantProfiles:@[tenantProfile, tenantProfile2]];
     XCTAssertNotNil(account);
-    
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:@"4"
-                                                                              tenantId:@"5"
-                                                                          isHomeTenant:NO
-                                                                       addtionalClaims:@{@"key1" : @"value1",
-                                                                                         @"key2" : @"value2",
-                                                                                         }];
-    [account addTenantProfiles:@[tenantProfile]];
     XCTAssertEqual(account.tenantProfiles.count, 2);
     
     MSALAccount *account2 = [account copy];
@@ -203,10 +294,11 @@
     XCTAssertNotEqual(account, account2);
     XCTAssertEqualObjects(account.homeAccountId.objectId, account2.homeAccountId.objectId);
     XCTAssertEqualObjects(account.homeAccountId.tenantId, account2.homeAccountId.tenantId);
+    XCTAssertEqualObjects(account.environment, account2.environment);
     XCTAssertEqualObjects(account.username, account2.username);
     XCTAssertEqualObjects(account.name, account2.name);
     
-    // tenantProfiles should be be deep copied
+    // tenantProfiles should be deep copied and have different pointers
     XCTAssertNotEqual(account.tenantProfiles, account2.tenantProfiles);
     XCTAssertEqual(account.tenantProfiles.count, account2.tenantProfiles.count);
     XCTAssertNotEqual(account.tenantProfiles[0], account2.tenantProfiles[0]);
@@ -214,14 +306,21 @@
     
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, account2.tenantProfiles[0].userObjectId);
+    XCTAssertNotEqual(account.tenantProfiles[0].authority, account2.tenantProfiles[0].authority);
+    XCTAssertEqualObjects(account.tenantProfiles[0].authority.url, account2.tenantProfiles[0].authority.url);
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenant, account2.tenantProfiles[0].isHomeTenant);
+    
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, account2.tenantProfiles[1].userObjectId);
+    XCTAssertNotEqual(account.tenantProfiles[1].authority, account2.tenantProfiles[1].authority);
+    XCTAssertEqualObjects(account.tenantProfiles[1].authority.url, account2.tenantProfiles[1].authority.url);
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenant, account2.tenantProfiles[1].isHomeTenant);
     
-    // additionalClaims should be deep copied
-    XCTAssertNotEqual(account.tenantProfiles[1].additionalClaims, account2.tenantProfiles[1].additionalClaims);
-    XCTAssertEqualObjects(account.tenantProfiles[1].additionalClaims, account2.tenantProfiles[1].additionalClaims);
+    // claims should be deep copied
+    XCTAssertNotEqual(account.tenantProfiles[0].claims, account2.tenantProfiles[0].claims);
+    XCTAssertEqualObjects(account.tenantProfiles[0].claims, account2.tenantProfiles[0].claims);
+    XCTAssertNotEqual(account.tenantProfiles[1].claims, account2.tenantProfiles[1].claims);
+    XCTAssertEqualObjects(account.tenantProfiles[1].claims, account2.tenantProfiles[1].claims);
 }
 
 - (void)testEquals_whenEqual_shouldReturnTrue
@@ -231,8 +330,7 @@
                                                         homeAccountId:@"1.2"
                                                        localAccountId:@"2.3"
                                                           environment:@"login.microsoftonline.com"
-                                                             tenantId:@"3"
-                                                   idTokenClaims:nil];
+                                                  tenantProfiles:nil];
     
     XCTAssertNotNil(account);
     MSALAccount *account2 = [account copy];

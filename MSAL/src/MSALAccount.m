@@ -88,7 +88,6 @@
 - (id)initWithMSIDAccount:(MSIDAccount *)account
       createTenantProfile:(BOOL)createTenantProfile
 {
-    BOOL isHomeTenant = [account.accountIdentifier.utid isEqualToString:account.tenantId];
     NSError *error;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
     if (error || !authority)
@@ -103,7 +102,7 @@
         MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
                                                                                   tenantId:account.tenantId
                                                                                  authority:authority
-                                                                              isHomeTenant:isHomeTenant
+                                                                              isHomeTenant:account.isHomeTenantAccount
                                                                                     claims:account.idTokenClaims.jsonDictionary];
         
         tenantProfiles = @[tenantProfile];

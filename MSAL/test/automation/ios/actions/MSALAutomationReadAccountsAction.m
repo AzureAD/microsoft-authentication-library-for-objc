@@ -82,14 +82,15 @@
     for (MSALAccount *account in accounts)
     {
         MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
-        userInfo.objectId = account.tenantProfiles[0].userObjectId;
-        userInfo.tenantId = account.tenantProfiles[0].tenantId;
         userInfo.username = account.username;
         userInfo.homeAccountId = account.homeAccountId.identifier;
         userInfo.localAccountId = account.tenantProfiles[0].userObjectId;
         userInfo.homeObjectId = account.homeAccountId.objectId;
         userInfo.homeTenantId = account.homeAccountId.tenantId;
         userInfo.environment = account.environment;
+        NSArray<MSALTenantProfile *> *tenantProfiles = [account loadAllTenantProfiles:application error:nil];
+        userInfo.objectId = tenantProfiles[0].userObjectId;
+        userInfo.tenantId = tenantProfiles[0].tenantId;
         [items addObject:userInfo];
     }
 

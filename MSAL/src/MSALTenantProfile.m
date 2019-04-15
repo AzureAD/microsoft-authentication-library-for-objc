@@ -61,7 +61,7 @@
     tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
     tenantProfile->_authority = [MSALAuthorityFactory authorityFromUrl:_authority.url context:nil error:nil];
     tenantProfile->_isHomeTenant = _isHomeTenant;
-    tenantProfile->_additionalClaims = [[NSDictionary alloc] initWithDictionary:_additionalClaims copyItems:YES];
+    tenantProfile->_claims = [[NSDictionary alloc] initWithDictionary:_claims copyItems:YES];
     return tenantProfile;
 }
 

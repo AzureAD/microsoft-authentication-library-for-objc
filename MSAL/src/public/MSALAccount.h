@@ -29,7 +29,7 @@
 
 @class MSALAccountId;
 @class MSALTenantProfile;
-@class MSALPublicApplication;
+@class MSALPublicClientApplication;
 
 @interface MSALAccount : NSObject <NSCopying>
 
@@ -48,7 +48,7 @@
  */
 @property (readonly, nonnull) NSString *environment;
 
-- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicApplication *)application error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicClientApplication *)application error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

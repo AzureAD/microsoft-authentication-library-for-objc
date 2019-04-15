@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite, nullable) NSString *userObjectId;
 @property (readwrite, nullable) NSString *tenantId;
 @property (readwrite) BOOL isHomeTenant;
-@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *additionalClaims;
+@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 
 - (id)initWithUserObjectId:(NSString *)userObjectId
                   tenantId:(NSString *)tenantId
