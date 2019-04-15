@@ -39,7 +39,7 @@
 @property (nonatomic) MSALAccountId *homeAccountId;
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mutableTenantProfiles;
+@property (nonatomic) NSMutableArray<MSALTenantProfile *> *tenantProfiles;
 
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
@@ -57,21 +57,20 @@
  @param  homeAccountId       Unique identifier of the account in the home directory
  @param  localAccountId      Unique identifier of the account in the signed in directory.
  @param  environment         Host part of the authority string
- @param  tenantId            An identifier for the tenant that the account was acquired from
+ @param  tenantProfiles      All tenant profiles associated to this account
  */
 - (id)initWithUsername:(NSString *)username
                   name:(NSString *)name
          homeAccountId:(NSString *)homeAccountId
         localAccountId:(NSString *)localAccountId
            environment:(NSString *)environment
-              tenantId:(NSString *)tenantId
-         idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+        tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
+- (id)initWithMSIDAccount:(MSIDAccount *)account;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 

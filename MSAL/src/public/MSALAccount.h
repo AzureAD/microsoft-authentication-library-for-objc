@@ -29,6 +29,7 @@
 
 @class MSALAccountId;
 @class MSALTenantProfile;
+@class MSALPublicApplication;
 
 typedef NS_ENUM(NSInteger, MSALAccountType)
 {
@@ -57,7 +58,7 @@ typedef NS_ENUM(NSInteger, MSALAccountType)
 
 @property (readonly) MSALAccountType accountType;
 
-@property (readonly, nonnull) NSArray<MSALTenantProfile *> *tenantProfiles;
+- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicApplication *)application error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

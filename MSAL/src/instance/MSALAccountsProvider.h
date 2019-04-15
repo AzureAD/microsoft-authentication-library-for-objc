@@ -48,6 +48,6 @@
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error;
 
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims;
++ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount;
 
 @end

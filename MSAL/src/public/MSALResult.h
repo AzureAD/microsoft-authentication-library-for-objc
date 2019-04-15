@@ -29,6 +29,7 @@
 
 @class MSALAccount;
 @class MSALAuthority;
+@class MSALTenantProfile;
 
 @interface MSALResult : NSObject
 
@@ -51,6 +52,8 @@
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
  */
 @property (readonly, nullable) NSString *tenantId;
+
+@property (readonly, nonnull) MSALTenantProfile *tenantProfile;
 
 /*!
     The account object that holds account information.

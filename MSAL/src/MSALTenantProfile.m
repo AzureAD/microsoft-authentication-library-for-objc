@@ -27,13 +27,16 @@
 
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
+#import "MSALAuthority.h"
+#import "MSALAuthorityFactory.h"
 
 @implementation MSALTenantProfile
 
 - (id)initWithUserObjectId:(NSString *)userObjectId
                   tenantId:(NSString *)tenantId
+                 authority:(MSALAuthority *)authority
               isHomeTenant:(BOOL)isHomeTenant
-           addtionalClaims:(NSDictionary *)additionalClaims
+                    claims:(NSDictionary *)claims
 {
     self = [super init];
     
@@ -41,8 +44,9 @@
     {
         _userObjectId = userObjectId;
         _tenantId = tenantId;
+        _authority = authority;
         _isHomeTenant = isHomeTenant;
-        _additionalClaims = additionalClaims;
+        _claims = claims;
     }
     
     return self;
@@ -52,9 +56,10 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile allocWithZone:zone] init];
+    MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
     tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
     tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
+    tenantProfile->_authority = [MSALAuthorityFactory authorityFromUrl:_authority.url context:nil error:nil];
     tenantProfile->_isHomeTenant = _isHomeTenant;
     tenantProfile->_additionalClaims = [[NSDictionary alloc] initWithDictionary:_additionalClaims copyItems:YES];
     return tenantProfile;

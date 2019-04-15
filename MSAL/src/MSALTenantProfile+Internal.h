@@ -38,8 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (id)initWithUserObjectId:(NSString *)userObjectId
                   tenantId:(NSString *)tenantId
+                 authority:(MSALAuthority *)authority
               isHomeTenant:(BOOL)isHomeTenant
-           addtionalClaims:(NSDictionary* _Nullable)additionalClaims;
+                    claims:(NSDictionary* _Nullable)claims;
 
 @end
 

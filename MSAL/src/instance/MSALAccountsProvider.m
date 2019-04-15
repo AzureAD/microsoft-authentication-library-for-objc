@@ -44,6 +44,8 @@
 #import "MSALB2CAccount.h"
 #import "MSALADFSAccount.h"
 #import "MSIDIdTokenClaims.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdToken.h"
 
 @interface MSALAccountsProvider()
 
@@ -182,23 +184,23 @@
 
 #pragma mark - Accounts Convenience
 
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount idTokenClaims:(MSIDIdTokenClaims *)idTokenClaims
++ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount
 {
     if ([msidAccount.authority.class isKindOfClass:MSIDAADAuthority.class])
     {
-        return [[MSALAADAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+        return [[MSALAADAccount alloc] initWithMSIDAccount:msidAccount];
     }
     else if ([msidAccount.authority.class isKindOfClass:MSIDB2CAuthority.class])
     {
-        return [[MSALB2CAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+        return [[MSALB2CAccount alloc] initWithMSIDAccount:msidAccount];
     }
     else if ([msidAccount.authority.class isKindOfClass:MSIDADFSAuthority.class])
     {
-        return [[MSALADFSAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+        return [[MSALADFSAccount alloc] initWithMSIDAccount:msidAccount];
     }
     else
     {
-        return [[MSALAccount alloc] initWithMSIDAccount:msidAccount idTokenClaims:idTokenClaims];
+        return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
     }
 }
 
@@ -234,7 +236,9 @@
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        MSALAccount *msalAccount = [self msalAccountFromMSIDAccount:msidAccount];
+        [self loadIdTokenClaimsForMSIDAccount:msidAccount];
+        
+        MSALAccount *msalAccount = [self.class msalAccountFromMSIDAccount:msidAccount];
         if (!msalAccount) continue;
         
         MSALAccount *existAccount = [msalAccounts member:msalAccount];
@@ -251,14 +255,32 @@
     return [msalAccounts allObjects];
 }
 
-- (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount
+- (void)loadIdTokenClaimsForMSIDAccount:(MSIDAccount *)msidAccount
 {
-    // TODO: if neccessary(e.g. for B2C account), retrieve ID token for each account if neccessary here.
-    //       So far MSIDAccount contains all the info we need
+    // Return if id token claims is already loaded. This normally happen msidAccount retrieved from legacy tokens
+    if (msidAccount.idTokenClaims) return;
     
-    MSALAccount *msalAccount = [self.class msalAccountFromMSIDAccount:msidAccount idTokenClaims:nil];
+    MSIDConfiguration *config = [MSIDConfiguration new];
+    config.authority = msidAccount.authority;
+    config.clientId = self.clientId;
+    NSError *error;
+    MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:msidAccount.accountIdentifier
+                                                   configuration:config
+                                                     idTokenType:MSIDIDTokenType
+                                                         context:nil
+                                                           error:&error];
+    if (error || !idToken)
+    {
+        MSID_LOG_ERROR(nil, @"Failed to retrive ID token when load id token claims for msidAccount!");
+    }
     
-    return msalAccount;
+    error =  nil;
+    msidAccount.idTokenClaims = [[MSIDIdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&error];
+    
+    if (error)
+    {
+        MSID_LOG_ERROR(nil, @"Failed to create id token claims when load id token claims for msidAccount!");
+    }
 }
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem

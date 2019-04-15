@@ -42,6 +42,8 @@
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccountsProvider.h"
 #import "MSIDAuthorityFactory.h"
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
 
 @implementation MSALResult
 
@@ -53,6 +55,7 @@
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
+                        tenantProfile:(MSALTenantProfile *)tenantProfile
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
@@ -65,6 +68,7 @@
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
     result->_tenantId = tenantId;
+    result->_tenantProfile = tenantProfile;
     result->_account = account;
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
@@ -96,7 +100,7 @@
     
     NSString *tenantId = claims.realm;
 
-    MSALAccount *account = [MSALAccountsProvider msalAccountFromMSIDAccount:resultAccount idTokenClaims:claims];
+    MSALAccount *account = [MSALAccountsProvider msalAccountFromMSIDAccount:resultAccount];
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
@@ -113,11 +117,18 @@
 
         return nil;
     }
+    
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:claims.objectId
+                                                                              tenantId:claims.realm
+                                                                             authority:authority
+                                                                          isHomeTenant:resultAccount.isHomeTenantAccount
+                                                                                claims:claims.jsonDictionary];
 
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantId
+                         tenantProfile:tenantProfile
                                account:account
                                idToken:tokenResult.rawIdToken
                               uniqueId:resultAccount.localAccountId
