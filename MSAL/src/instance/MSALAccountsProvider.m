@@ -213,7 +213,7 @@
     {
         [self loadIdTokenClaimsForMSIDAccount:msidAccount];
         
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
         MSALAccount *existAccount = [msalAccounts member:msalAccount];

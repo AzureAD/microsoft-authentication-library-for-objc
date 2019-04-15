@@ -69,11 +69,10 @@
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
+ @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account;
+- (id)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
-
-- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims;
 
 @end

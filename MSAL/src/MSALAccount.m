@@ -40,6 +40,7 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALAuthorityFactory.h"
+#import "MSALAccountsProvider.h"
 
 @implementation MSALAccount
 
@@ -75,10 +76,9 @@
 
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
         
-        _tenantProfiles = [NSMutableArray new];
         if (tenantProfiles.count > 0)
         {
-            [_tenantProfiles addObjectsFromArray:tenantProfiles];
+            _tenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
         }
     }
 
@@ -86,6 +86,7 @@
 }
 
 - (id)initWithMSIDAccount:(MSIDAccount *)account
+      createTenantProfile:(BOOL)createTenantProfile
 {
     BOOL isHomeTenant = [account.accountIdentifier.utid isEqualToString:account.tenantId];
     NSError *error;
@@ -95,30 +96,25 @@
         MSID_LOG_ERROR(nil, @"Failed to create msal authority from msid authority!");
         return nil;
     }
+    
+    NSArray *tenantProfiles;
+    if (createTenantProfile)
+    {
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
+                                                                                  tenantId:account.tenantId
+                                                                                 authority:authority
+                                                                              isHomeTenant:isHomeTenant
+                                                                                    claims:account.idTokenClaims.jsonDictionary];
         
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
-                                                                              tenantId:account.tenantId
-                                                                             authority:authority
-                                                                          isHomeTenant:isHomeTenant
-                                                                                claims:account.idTokenClaims.jsonDictionary];
+        tenantProfiles = @[tenantProfile];
+    }
     
     return [self initWithUsername:account.username
                              name:account.name
                     homeAccountId:account.accountIdentifier.homeAccountId
                    localAccountId:account.localAccountId
                       environment:account.authority.environment
-                   tenantProfiles:@[tenantProfile]];
-}
-
-- (MSALAccountType)accountType
-{
-    return MSALAccountTypeUnknown;
-}
-
-- (MSIDIdTokenClaims *)additionalClaimsFromIdToken:(MSIDIdTokenClaims *)idTokenClaims
-{
-    // Exposing additional claims should be implemeted in subclasses
-    return nil;
+                   tenantProfiles:tenantProfiles];
 }
 
 #pragma mark - NSCopying
@@ -214,22 +210,40 @@
 {
     if (!application)
     {
-        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"application a required parameter to load tenant profiles and must not be nil or empty.");
+        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"application is a required parameter to load tenant profiles and must not be nil or empty.");
         return nil;
     }
     
+    // if tenant profiles are already laoded, just return it
     if (self.tenantProfiles) return self.tenantProfiles;
     
-    //TODO JZ: fetch tenant profiles info from cache
+    MSALAccountsProvider *accountProvider = [[MSALAccountsProvider alloc] initWithTokenCache:application.tokenCache clientId:application.clientId];
     
-    return nil;
+    if (!accountProvider)
+    {
+        MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"Failed to create account provider when loading all tenant profile!");
+        return nil;
+    }
+    
+    MSALAccount *accountWithTenatnProfiles = [accountProvider accountForHomeAccountId:self.homeAccountId.identifier error:error];
+    if (error || !accountWithTenatnProfiles) return nil;
+    
+    self.tenantProfiles = accountWithTenatnProfiles.tenantProfiles;
+    return self.tenantProfiles;
 }
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
-    if (!tenantProfiles) return;
+    if (tenantProfiles.count <= 0) return;
     
-    [self.tenantProfiles addObjectsFromArray:tenantProfiles];
+    if (self.tenantProfiles)
+    {
+        [self.tenantProfiles addObjectsFromArray:tenantProfiles];
+    }
+    else
+    {
+        self.tenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+    }
 }
 
 @end

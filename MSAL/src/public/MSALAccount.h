@@ -31,14 +31,6 @@
 @class MSALTenantProfile;
 @class MSALPublicApplication;
 
-typedef NS_ENUM(NSInteger, MSALAccountType)
-{
-    MSALAccountTypeAAD,
-    MSALAccountTypeB2C,
-    MSALAccountTypeMSA,
-    MSALAccountTypeUnknown
-};
-
 @interface MSALAccount : NSObject <NSCopying>
 
 /*!
