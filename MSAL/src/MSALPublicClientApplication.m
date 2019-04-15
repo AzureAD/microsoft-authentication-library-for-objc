@@ -779,7 +779,7 @@
     params.loginHint = loginHint;
     params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
-    params.validateAuthority = _configuration.authority.validateAuthority;
+    
     params.extraAuthorizeURLQueryParameters = _configuration.extraQueryParameters.extraAuthorizeURLQueryParameters;
     params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
     params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
@@ -787,6 +787,19 @@
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
 
+    params.validateAuthority = _configuration.authority.validateAuthority;
+    
+    if (params.validateAuthority && _configuration.knownAuthorities)
+    {
+        for (MSALAuthority *knownAuthority in _configuration.knownAuthorities)
+        {
+            if ([knownAuthority.url isEqual:params.authority.url])
+            {
+                params.validateAuthority = NO;
+            }
+        }
+    }
+    
     // Configure webview
     NSError *msidWebviewError = nil;
     MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);
@@ -916,6 +929,7 @@
 
     NSError *msidError = nil;
 
+    // add known authorities here.
     MSIDRequestParameters *params = [[MSIDRequestParameters alloc] initWithAuthority:msidAuthority
                                                                          redirectUri:_configuration.redirecrUri
                                                                             clientId:_configuration.clientId
