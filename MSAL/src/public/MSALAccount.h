@@ -56,8 +56,6 @@ typedef NS_ENUM(NSInteger, MSALAccountType)
  */
 @property (readonly, nonnull) NSString *environment;
 
-@property (readonly) MSALAccountType accountType;
-
 - (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicApplication *)application error:(NSError * _Nullable * _Nullable)error;
 
 @end

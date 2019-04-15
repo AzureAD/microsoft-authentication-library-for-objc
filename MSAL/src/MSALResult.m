@@ -100,7 +100,7 @@
     
     NSString *tenantId = claims.realm;
 
-    MSALAccount *account = [MSALAccountsProvider msalAccountFromMSIDAccount:resultAccount];
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:resultAccount];
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url

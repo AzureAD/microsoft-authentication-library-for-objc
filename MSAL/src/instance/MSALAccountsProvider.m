@@ -40,9 +40,6 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDADFSAuthority.h"
-#import "MSALAADAccount.h"
-#import "MSALB2CAccount.h"
-#import "MSALADFSAccount.h"
 #import "MSIDIdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
@@ -182,28 +179,6 @@
     return nil;
 }
 
-#pragma mark - Accounts Convenience
-
-+ (MSALAccount *)msalAccountFromMSIDAccount:(MSIDAccount *)msidAccount
-{
-    if ([msidAccount.authority.class isKindOfClass:MSIDAADAuthority.class])
-    {
-        return [[MSALAADAccount alloc] initWithMSIDAccount:msidAccount];
-    }
-    else if ([msidAccount.authority.class isKindOfClass:MSIDB2CAuthority.class])
-    {
-        return [[MSALB2CAccount alloc] initWithMSIDAccount:msidAccount];
-    }
-    else if ([msidAccount.authority.class isKindOfClass:MSIDADFSAuthority.class])
-    {
-        return [[MSALADFSAccount alloc] initWithMSIDAccount:msidAccount];
-    }
-    else
-    {
-        return [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
-    }
-}
-
 #pragma mark - Private
 
 - (NSArray <MSALAccount *> *)allAccountsForAuthority:(MSIDAuthority *)authority
@@ -238,7 +213,7 @@
     {
         [self loadIdTokenClaimsForMSIDAccount:msidAccount];
         
-        MSALAccount *msalAccount = [self.class msalAccountFromMSIDAccount:msidAccount];
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
         if (!msalAccount) continue;
         
         MSALAccount *existAccount = [msalAccounts member:msalAccount];
