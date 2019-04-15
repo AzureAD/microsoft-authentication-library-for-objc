@@ -21,8 +21,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSIDTelemetryBaseEvent.h"
+#import <Foundation/Foundation.h>
+#import "MSIDTelemetryEventsObserving.h"
 
-@interface MSALTelemetryDefaultEvent : MSIDTelemetryBaseEvent
+@protocol MSALTelemetryEventsObserving;
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface MSALTelemetryEventsObservingProxy : NSObject <MSIDTelemetryEventsObserving>
+
+- (instancetype _Nullable)init NS_UNAVAILABLE;
++ (instancetype _Nullable)new NS_UNAVAILABLE;
+
+- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer;
+
+@property (nonatomic, weak, readonly) id<MSALTelemetryEventsObserving> observer;
 
 @end
+
+NS_ASSUME_NONNULL_END

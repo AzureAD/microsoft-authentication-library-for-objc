@@ -21,21 +21,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryDefaultEvent.h"
+#import "MSALTelemetryEventsObservingProxy.h"
+#import "MSALTelemetryEventsObserving.h"
 
-@implementation MSALTelemetryDefaultEvent
+@interface MSALTelemetryEventsObservingProxy()
 
-- (id)initWithName:(NSString *)eventName
-           context:(id<MSIDRequestContext>)context
+@property (nonatomic, weak) id<MSALTelemetryEventsObserving> observer;
+
+@end
+
+@implementation MSALTelemetryEventsObservingProxy
+
+- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer
 {
-    if (!(self = [super initWithName:eventName context:context]))
+    self = [super init];
+    if (self)
     {
-        return nil;
+        _observer = observer;
     }
-    
-    [self addDefaultProperties];
-    
     return self;
+}
+
+#pragma mark - MSALTelemetryEventsObserving
+
+- (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events
+{
+    [self.observer onEventsReceived:events];
 }
 
 @end

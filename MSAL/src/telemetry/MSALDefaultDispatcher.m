@@ -21,118 +21,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALDefaultDispatcher+Internal.h"
-#import "MSALTelemetry.h"
-#import "MSIDTelemetryEventInterface.h"
-#import "MSIDTelemetryEventInterface.h"
-#import "MSIDTelemetryBaseEvent.h"
-#import "MSALTelemetryDefaultEvent.h"
-#import "MSIDTelemetryEventStrings.h"
-#import "MSALTelemetryEventsObserving.h"
+#import "MSALDefaultDispatcher.h"
+#import "MSALTelemetryEventsObservingProxy.h"
+
+@interface MSALDefaultDispatcher()
+
+@property (nonatomic) MSALTelemetryEventsObservingProxy *proxyObserver;
+
+@end
 
 @implementation MSALDefaultDispatcher
 
-- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
-    self = [super init];
+    self = [super initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
     if (self)
     {
-        _eventsToBeDispatched = [NSMutableDictionary new];
-        _errorEvents = [NSMutableSet new];
-        _observer = observer;
-        _setTelemetryOnFailure = setTelemetryOnFailure;
-        NSString *queueName = [NSString stringWithFormat:@"com.microsoft.dispatcher-%@", [NSUUID UUID].UUIDString];
-        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
+        _proxyObserver = observer;
     }
     return self;
 }
 
-- (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)dispatcher
+#pragma mark - MSIDTelemetryDispatcher
+
+- (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)observer
 {
-    return self.observer == dispatcher;
-}
-
-- (void)flush:(NSString *)requestId
-{
-    NSArray<id<MSIDTelemetryEventInterface>> *events = [self popEventsForReuquestId:requestId];
+    if (self.proxyObserver) return self.proxyObserver.observer == observer;
     
-    if ([events count])
-    {
-        __auto_type defaultEvent = [[MSALTelemetryDefaultEvent alloc] initWithName:MSID_TELEMETRY_EVENT_DEFAULT_EVENT context:nil];
-        NSMutableArray *eventsToBeDispatched = [@[[defaultEvent getProperties]] mutableCopy];
-        
-        for (id<MSIDTelemetryEventInterface> event in events)
-        {
-            [eventsToBeDispatched addObject:[event getProperties]];
-        }
-        
-        [self dispatchEvents:eventsToBeDispatched];
-    }
-}
-
-- (void)receive:(NSString *)requestId
-          event:(id<MSIDTelemetryEventInterface>)event
-{
-    if ([NSString msidIsStringNilOrBlank:requestId] || !event) return;
-    
-    dispatch_sync(self.synchronizationQueue, ^{
-        NSMutableArray *eventsForRequestId = self.eventsToBeDispatched[requestId];
-        if (!eventsForRequestId)
-        {
-            eventsForRequestId = [NSMutableArray new];
-            [self.eventsToBeDispatched setObject:eventsForRequestId forKey:requestId];
-        }
-        
-        [eventsForRequestId addObject:event];
-        
-        if (event.errorInEvent) [self.errorEvents addObject:requestId];
-    });
-}
-
-- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents
-{
-    NSMutableArray *eventsToBeDispatched = [NSMutableArray new];
-    
-    for (NSDictionary *event in rawEvents)
-    {
-        [eventsToBeDispatched addObject:[self appendPrefixForEvent:event]];
-    }
-    
-    [self.observer onEventsReceived:eventsToBeDispatched];
-}
-
-#pragma mark - Protected
-
-- (NSArray *)popEventsForReuquestId:(NSString *)requestId
-{
-    __block NSArray *events;
-    dispatch_sync(self.synchronizationQueue, ^{
-        BOOL errorInEvent = [self.errorEvents containsObject:requestId];
-        
-        // Remove requestId as we won't need it anymore
-        [self.errorEvents removeObject:requestId];
-        
-        if (self.setTelemetryOnFailure && !errorInEvent) return;
-        
-        events = [self.eventsToBeDispatched[requestId] copy];
-        [self.eventsToBeDispatched removeObjectForKey:requestId];
-    });
-    
-    return events;
-}
-
-#pragma mark - Private
-
-- (NSDictionary *)appendPrefixForEvent:(NSDictionary *)event
-{
-    NSMutableDictionary *eventWithPrefix = [NSMutableDictionary new];
-    
-    for (NSString *propertyName in [event allKeys])
-    {
-        [eventWithPrefix setValue:event[propertyName] forKey:TELEMETRY_KEY(propertyName)];
-    }
-    
-    return eventWithPrefix;
+    return [super containsObserver:observer];
 }
 
 @end

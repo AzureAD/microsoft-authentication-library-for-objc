@@ -29,10 +29,10 @@
 #import "MSALTelemetry.h"
 #import "MSALTelemetryEventsObserving.h"
 
-typedef void(^OnEventsReceivedBlock)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
+typedef void(^MSALOnEventsReceivedBlock)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
 
 @interface MSALTestTelemetryEventsObserver : NSObject <MSALTelemetryEventsObserving>
 
-@property (nonatomic, copy) OnEventsReceivedBlock eventsReceivedBlock;
+@property (nonatomic, copy) MSALOnEventsReceivedBlock eventsReceivedBlock;
 
 @end

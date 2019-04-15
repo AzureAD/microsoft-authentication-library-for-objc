@@ -27,6 +27,7 @@
 #import "MSIDTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSALAggregatedDispatcher.h"
+#import "MSALTelemetryEventsObservingProxy.h"
 
 @implementation MSALTelemetry
 
@@ -53,14 +54,15 @@
 {
     if (!observer) return;
     
+    __auto_type proxyObserver = [[MSALTelemetryEventsObservingProxy alloc] initWithObserver:observer];
     id<MSIDTelemetryDispatcher> dispatcher;
     if (aggregationRequired)
     {
-        dispatcher = [[MSALAggregatedDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+        dispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
     }
     else
     {
-        dispatcher = [[MSALDefaultDispatcher alloc] initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+        dispatcher = [[MSALDefaultDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
     }
     
     [[MSIDTelemetry sharedInstance] addDispatcher:dispatcher];

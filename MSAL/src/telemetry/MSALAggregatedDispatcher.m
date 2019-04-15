@@ -22,71 +22,36 @@
 // THE SOFTWARE.
 
 #import "MSALAggregatedDispatcher.h"
-#import "MSALDefaultDispatcher+Internal.h"
+#import "MSIDDefaultDispatcher+Internal.h"
 #import "MSIDTelemetryBaseEvent.h"
 #import "MSIDTelemetryEventStrings.h"
-
-typedef NS_ENUM(NSInteger, MSALTelemetryCollectionBehavior)
-{
-    MSALTelemetryCollectionBehaviorCollectOnly,
-    MSALTelemetryCollectionBehaviorCollectAndCount
-};
-
-static NSDictionary *s_telemetryCollectionRules;
+#import "MSALTelemetryEventsObservingProxy.h"
 
 @interface MSALAggregatedDispatcher ()
+
+@property (nonatomic) MSALTelemetryEventsObservingProxy *proxyObserver;
 
 @end
 
 @implementation MSALAggregatedDispatcher
 
-+ (void)initialize
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
-    if (self == [MSALAggregatedDispatcher self])
+    self = [super initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    if (self)
     {
-        s_telemetryCollectionRules = @{
-                                       // Collect and count
-                                       MSID_TELEMETRY_KEY_UI_EVENT_COUNT: @(MSALTelemetryCollectionBehaviorCollectAndCount),
-                                       MSID_TELEMETRY_KEY_HTTP_EVENT_COUNT: @(MSALTelemetryCollectionBehaviorCollectAndCount),
-                                       MSID_TELEMETRY_KEY_CACHE_EVENT_COUNT: @(MSALTelemetryCollectionBehaviorCollectAndCount),
-                                       };
+        _proxyObserver = observer;
     }
+    return self;
 }
 
 #pragma mark - MSIDTelemetryDispatcher
 
-- (void)flush:(NSString *)requestId
+- (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)observer
 {
-    NSArray<id<MSIDTelemetryEventInterface>> *events = [self popEventsForReuquestId:requestId];
+    if (self.proxyObserver) return self.proxyObserver.observer == observer;
     
-    NSMutableDictionary *aggregatedEvent = [[MSIDTelemetryBaseEvent defaultParameters] mutableCopy];
-    for (id<MSIDTelemetryEventInterface> event in events)
-    {
-        [self addProperties:aggregatedEvent fromEvent:event];
-    }
-    
-    [self dispatchEvents:@[aggregatedEvent]];
-}
-
-#pragma mark - Private
-
-- (void)addProperties:(NSMutableDictionary *)aggregatedEvent fromEvent:(id<MSIDTelemetryEventInterface>)event
-{
-    __auto_type propertyNames = [event propertiesToAggregate];
-    for (NSString *propertyName in propertyNames)
-    {
-        MSALTelemetryCollectionBehavior collectionBehavior = [s_telemetryCollectionRules[propertyName] integerValue];
-        
-        if (collectionBehavior == MSALTelemetryCollectionBehaviorCollectAndCount)
-        {
-            int eventsCount = [aggregatedEvent[propertyName] intValue] + 1;
-            aggregatedEvent[propertyName] = [[NSNumber alloc] initWithInt:eventsCount];
-        }
-        else
-        {
-            aggregatedEvent[propertyName] = [event propertyWithName:propertyName];
-        }
-    }
+    return [super containsObserver:observer];
 }
 
 @end

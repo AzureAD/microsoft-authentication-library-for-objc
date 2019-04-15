@@ -21,20 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSIDTelemetryDispatcher.h"
+#import "MSIDDefaultDispatcher.h"
 
-@protocol MSALTelemetryEventsObserving;
+@class MSALTelemetryEventsObservingProxy;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
+@interface MSALDefaultDispatcher : MSIDDefaultDispatcher
 
-- (instancetype _Nullable)init NS_UNAVAILABLE;
-+ (instancetype _Nullable)new NS_UNAVAILABLE;
-
-- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
-
-- (void)dispatchEvents:(NSArray<NSDictionary<NSString *, NSString *> *> *)rawEvents;
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
 
 @end
 

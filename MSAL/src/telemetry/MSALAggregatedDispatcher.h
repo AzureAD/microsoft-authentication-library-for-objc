@@ -22,11 +22,15 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MSALDefaultDispatcher.h"
+#import "MSIDAggregatedDispatcher.h"
+
+@class MSALTelemetryEventsObservingProxy;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAggregatedDispatcher : MSALDefaultDispatcher
+@interface MSALAggregatedDispatcher : MSIDAggregatedDispatcher
+
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
 
 @end
 
