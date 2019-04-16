@@ -114,7 +114,7 @@
     parameters.extraScopesToConsent = extraScopes.array;
     parameters.account = account;
     parameters.loginHint = testRequest.loginHint;
-    parameters.uiBehavior = uiBehavior;
+    parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.claims = claims;
     parameters.authority = acquireTokenAuthority;
@@ -150,16 +150,6 @@
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
-    parameters.extraScopesToConsent = extraScopes.array;
-    parameters.account = account;
-    parameters.loginHint = testRequest.loginHint;
-    parameters.promptType = promptType;
-    parameters.extraQueryParameters = extraQueryParameters;
-    parameters.claims = claims;
-    parameters.authority = acquireTokenAuthority;
-    parameters.correlationId = correlationId;
-
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
