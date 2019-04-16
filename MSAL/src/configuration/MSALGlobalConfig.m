@@ -40,6 +40,8 @@ static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityA
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
 
+static NSArray<MSALAuthority *> *s_knownAuthorities;
+
 + (instancetype)sharedInstance
 {
     static MSALGlobalConfig *sharedInstance = nil;
@@ -66,4 +68,8 @@ static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
 + (MSALWebviewType)defaultWebviewType { return s_webviewType; }
 + (void)setDefaultWebviewType:(MSALWebviewType)defaultWebviewType { s_webviewType = defaultWebviewType; }
+
++ (NSArray<MSALAuthority *> *)knownAuthorities { return s_knownAuthorities; }
++ (void)setKnownAuthorities:(NSArray<MSALAuthority *> *)knownAuthorities { s_knownAuthorities = knownAuthorities; }
+
 @end

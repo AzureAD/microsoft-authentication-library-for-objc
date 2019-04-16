@@ -788,9 +788,9 @@
 
     params.validateAuthority = _configuration.authority.validateAuthority;
     
-    if (params.validateAuthority && _configuration.knownAuthorities)
+    if (params.validateAuthority && MSALGlobalConfig.knownAuthorities)
     {
-        for (MSALAuthority *knownAuthority in _configuration.knownAuthorities)
+        for (MSALAuthority *knownAuthority in MSALGlobalConfig.knownAuthorities)
         {
             if ([params.authority isKindOfClass:knownAuthority.class]
                 && [knownAuthority.url isEqual:params.authority.url])

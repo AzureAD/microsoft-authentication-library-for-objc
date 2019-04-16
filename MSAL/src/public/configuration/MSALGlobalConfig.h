@@ -33,13 +33,21 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSALTelemetryConfig;
 @class MSALLoggerConfig;
 @class MSALCacheConfig;
+@class MSALAuthority;
 
 @interface MSALGlobalConfig : NSObject
 
+/*! Network configuration, , refer to MSALHTTPConfig.h for more detail */
 @property (class, readonly) MSALHTTPConfig *httpConfig;
+/*! Telemetry configurations, refer to MSALTelemetryConfig.h for more detail */
 @property (class, readonly) MSALTelemetryConfig *telemetryConfig;
+/*! Logger configurations, refer to MSALLoggerConfig.h for more detail */
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
+/*! Cache configurations, refer to MSALCacheConfig.h for more detail */
 @property (class, readonly) MSALCacheConfig *cacheConfig;
+
+/*! List of known authorities that application should trust. */
+@property (class) NSArray<MSALAuthority *> *knownAuthorities;
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.

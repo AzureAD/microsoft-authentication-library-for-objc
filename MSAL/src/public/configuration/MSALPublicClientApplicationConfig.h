@@ -49,9 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
 /*! Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
-/*! List of known authorities that application should trust. */
-@property(nullable) NSArray<MSALAuthority *> *knownAuthorities;
-
 /*! List of additional ESTS features that client handles. */
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
