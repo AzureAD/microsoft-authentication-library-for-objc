@@ -42,14 +42,23 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALDefinitions.h>
 #import <MSAL/MSALRedirectUri.h>
 #import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
+#import <MSAL/MSALPublicClientApplicationConfig.h>
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALLoggerConfig.h>
+#import <MSAL/MSALTelemetryConfig.h>
+#import <MSAL/MSALHTTPConfig.h>
+#import <MSAL/MSALCacheConfig.h>
 #import <MSAL/MSALPublicClientApplication.h>
+#import <MSAL/MSALSliceConfig.h>
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALAccount.h>
 #import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
 #import <MSAL/MSALAuthority.h>
 #import <MSAL/MSALAADAuthority.h>
 #import <MSAL/MSALB2CAuthority.h>
 #import <MSAL/MSALADFSAuthority.h>
 #import <MSAL/MSALPublicClientStatusNotifications.h>
+#import <MSAL/MSALTokenParameters.h>
+#import <MSAL/MSALSilentTokenParameters.h>
+#import <MSAL/MSALInteractiveTokenParameters.h>
+

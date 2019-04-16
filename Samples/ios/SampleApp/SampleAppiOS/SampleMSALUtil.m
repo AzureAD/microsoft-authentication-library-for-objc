@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <MSAL/MSAL.h>
+#import <MSAL/MSALLoggerConfig.h>
 
 #import "SampleMSALUtil.h"
 #import "SampleAppErrors.h"
@@ -51,7 +52,7 @@
 
 + (void)setup
 {
-    [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
+    [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
         // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
         // containsPII == NO. In this case, you only need to capture either one set of messages.
