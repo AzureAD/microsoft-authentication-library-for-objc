@@ -66,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param  clientId   The clientID of your application, you should get this from the app portal.
  */
-- (nullable instancetype)initWithClientId:(NSString *)clientId NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithClientId:(NSString *)clientId NS_DESIGNATED_INITIALIZER;
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
@@ -74,11 +74,11 @@ NS_ASSUME_NONNULL_BEGIN
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  redirectUri    The redirect URI of the application
  */
-- (nullable instancetype)initWithClientId:(NSString *)clientId
+- (nonnull instancetype)initWithClientId:(NSString *)clientId
                               redirectUri:(NSString *)redirectUri;
 
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 // Todo: add a init that takes in a config file.
 

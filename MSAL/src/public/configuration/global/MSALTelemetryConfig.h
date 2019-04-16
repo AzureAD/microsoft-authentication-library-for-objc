@@ -79,8 +79,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)removeAllDispatchers;
 
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 

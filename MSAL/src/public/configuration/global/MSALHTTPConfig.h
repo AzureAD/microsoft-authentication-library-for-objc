@@ -35,8 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSTimeInterval timeoutIntervalForResource; // In miliseconds
 @property NSTimeInterval timeoutIntervalForRequest;  // In miliseconds
 
-- (nullable instancetype)init NS_UNAVAILABLE;
-+ (nullable instancetype)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 
