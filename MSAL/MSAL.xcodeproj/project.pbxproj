@@ -22,7 +22,7 @@
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
 		231CE9DE1FEC684C00E95D3E /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 231CE9DD1FEC684C00E95D3E /* Security.framework */; };
 		231CE9DF1FEC7E8400E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206291FC50A4D00755A51 /* libIdentityTest.a */; };
-		232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D68C8223DB00500594BBD /* MSALTokenParameters.h */; };
+		232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D68C8223DB00500594BBD /* MSALTokenParameters.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		232D68CB223DB00500594BBD /* MSALTokenParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 232D68C8223DB00500594BBD /* MSALTokenParameters.h */; };
 		232D68CC223DB00500594BBD /* MSALTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D68C9223DB00500594BBD /* MSALTokenParameters.m */; };
 		232D68CD223DB00500594BBD /* MSALTokenParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 232D68C9223DB00500594BBD /* MSALTokenParameters.m */; };
@@ -1634,6 +1634,7 @@
 				96B5E6DA2256D15A002232F9 /* MSALHTTPConfig.h in Headers */,
 				1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */,
 				96B5E6EC2256D180002232F9 /* MSALSliceConfig.h in Headers */,
+				232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */,
 				232D68DC223DBA0700594BBD /* MSALInteractiveTokenParameters.h in Headers */,
 				B221CEDB20C0AC60002F5E94 /* MSALAccountId.h in Headers */,
 				9627C7AD22542EDC0028A859 /* MSALPublicClientApplicationConfig.h in Headers */,
@@ -1651,7 +1652,6 @@
 				D65A6FB11E3FF41D00C69FBA /* MSAL.h in Headers */,
 				963377BF211E14C600943EE0 /* MSALWebviewType_Internal.h in Headers */,
 				B203459D21AFA1FB00B221AA /* MSALRedirectUri+Internal.h in Headers */,
-				232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
