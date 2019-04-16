@@ -71,6 +71,8 @@
 		23A68A9020F57A440071E435 /* MSALAuthorityFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 23A68A8C20F57A440071E435 /* MSALAuthorityFactory.m */; };
 		23A68A9320F59E6B0071E435 /* NSString+MSALTestUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 23A68A9220F59E6B0071E435 /* NSString+MSALTestUtil.m */; };
 		23A68A9420F59E6B0071E435 /* NSString+MSALTestUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 23A68A9220F59E6B0071E435 /* NSString+MSALTestUtil.m */; };
+		23CC0005226579720045CBE1 /* MSALTestTelemetryEventsObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = E02396F91E7B005C004D6278 /* MSALTestTelemetryEventsObserver.m */; };
+		23CC000C22657EE30045CBE1 /* MSALTelemetryDefaultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9B01FA4443800FDD5C0 /* MSALTelemetryDefaultTests.m */; };
 		23CDA9B31FA45A9E00FDD5C0 /* MSALTelemetryDefaultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CDA9B01FA4443800FDD5C0 /* MSALTelemetryDefaultTests.m */; };
 		23F32F071FF4787600B2905E /* MSIDTestURLResponse+MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = 23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */; };
 		23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F32F061FF4787600B2905E /* MSIDTestURLResponse+MSAL.m */; };
@@ -2297,6 +2299,7 @@
 				D62746DA1E9B5F1E00EFCE99 /* MSALUserTests.m in Sources */,
 				B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */,
 				D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */,
+				23CC000C22657EE30045CBE1 /* MSALTelemetryDefaultTests.m in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				D69ADB3E1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,
 				960751BC2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
@@ -2304,6 +2307,7 @@
 				B2D6672D210E766F00952595 /* MSALPublicClientApplicationTests.m in Sources */,
 				1E8FC6A4221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
 				2364C74C1FB3E5CC00835428 /* XCTestCase+HelperMethods.m in Sources */,
+				23CC0005226579720045CBE1 /* MSALTestTelemetryEventsObserver.m in Sources */,
 				233E970C226571AC007FCE2A /* MSALTelemetryAggregatedTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

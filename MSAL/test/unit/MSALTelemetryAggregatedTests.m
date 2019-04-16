@@ -100,14 +100,18 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 9);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.http_event_count"], @1);
     XCTAssertEqualObjects(eventInfo[@"msal.oauth_error_code"], @"");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertEqualObjects(eventInfo[@"msal.response_code"], @"");
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -135,7 +139,12 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 13);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.http_event_count"], @2);
     XCTAssertEqualObjects(eventInfo[@"msal.oauth_error_code"], @"invalid_grant");
@@ -146,7 +155,6 @@
     XCTAssertEqualObjects(eventInfo[@"msal.rt_age"], @"255.0643");
     XCTAssertEqualObjects(eventInfo[@"msal.spe_info"], @"some info");
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -165,12 +173,16 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 7);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.response_time"]);
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -205,12 +217,16 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 16);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 15);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.response_time"]);
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -237,12 +253,16 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 7);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.cache_event_count"], @1);
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -272,7 +292,12 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 13);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.cache_event_count"], @2);
     XCTAssertEqualObjects(eventInfo[@"msal.token_rt_status"], @"1");
@@ -283,7 +308,6 @@
     XCTAssertEqualObjects(eventInfo[@"msal.wipe_time"], @"6");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -302,14 +326,18 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 9);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertEqualObjects(eventInfo[@"msal.ntlm"], @"");
     XCTAssertEqualObjects(eventInfo[@"msal.ui_event_count"], @1);
     XCTAssertEqualObjects(eventInfo[@"msal.user_cancel"], @"");
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -337,7 +365,13 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+    XCTAssertNotNil(eventInfo[@"msal.application_version"]);
+#else
+    XCTAssertEqual(eventInfo.count, 12);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertEqualObjects(eventInfo[@"msal.ntlm"], @"3");
@@ -345,12 +379,10 @@
     XCTAssertEqualObjects(eventInfo[@"msal.user_cancel"], @"1");
     XCTAssertEqualObjects(eventInfo[@"msal.login_hint"], @"d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35");
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
     XCTAssertNotNil(eventInfo[@"msal.application_name"]);
-    XCTAssertNotNil(eventInfo[@"msal.application_version"]);
     XCTAssertNotNil(eventInfo[@"msal.device_id"]);
 }
 
@@ -367,12 +399,16 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 7);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.broker_app"], @"Microsoft Authenticator");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -397,13 +433,17 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 9);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 8);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.broker_app"], @"Microsoft Authenticator");
     XCTAssertEqualObjects(eventInfo[@"msal.broker_version"], @"134");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -422,11 +462,15 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 7);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 6);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
@@ -454,19 +498,23 @@
     XCTAssertNotNil(self.receivedEvents);
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 13);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+    XCTAssertNotNil(eventInfo[@"msal.application_version"]);
+#else
+    XCTAssertEqual(eventInfo.count, 11);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.authority_validation_status"], @"1");
     XCTAssertEqualObjects(eventInfo[@"msal.authority_type"], @"2");
     XCTAssertEqualObjects(eventInfo[@"msal.authority"], @"3");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);
     XCTAssertNotNil(eventInfo[@"msal.application_name"]);
-    XCTAssertNotNil(eventInfo[@"msal.application_version"]);
     XCTAssertNotNil(eventInfo[@"msal.device_id"]);
 }
 
@@ -499,14 +547,18 @@
     
     XCTAssertEqual(self.receivedEvents.count, 1);
     NSDictionary *eventInfo = self.receivedEvents.firstObject;
+#if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual(eventInfo.count, 9);
+#endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.http_event_count"], @1);
     XCTAssertEqualObjects(eventInfo[@"msal.oauth_error_code"], @"");
     XCTAssertEqualObjects(eventInfo[@"msal.response_code"], @"error_code_123");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_cpu"]);
-    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_os"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_sku"]);
     XCTAssertNotNil(eventInfo[@"msal.x_client_ver"]);

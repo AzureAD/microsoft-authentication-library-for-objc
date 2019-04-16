@@ -247,10 +247,14 @@
 - (void)assertDefaultEvent:(NSDictionary *)eventInfo piiEnabled:(BOOL)piiEnabled
 {
     __auto_type defaultEventPropertyNames = [[NSSet alloc] initWithArray:[eventInfo allKeys]];
+#if TARGET_OS_IPHONE
     XCTAssertEqual([defaultEventPropertyNames count], piiEnabled ? 9 : 6);
+    XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
+#else
+    XCTAssertEqual([defaultEventPropertyNames count], piiEnabled ? 7 : 5);
+#endif
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.event_name"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_cpu"]);
-    XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_dm"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_os"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_sku"]);
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.x_client_ver"]);
@@ -258,7 +262,9 @@
     
     if (!piiEnabled) return;
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_name"]);
+#if TARGET_OS_IPHONE
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.application_version"]);
+#endif
     XCTAssertTrue([defaultEventPropertyNames containsObject:@"msal.device_id"]);
 }
 
