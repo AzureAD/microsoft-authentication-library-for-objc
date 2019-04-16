@@ -75,6 +75,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         _extraQueryParameters.extraURLQueryParameters[@"slice"] = sliceConfig.slice;
         _extraQueryParameters.extraURLQueryParameters[@"dc"] = sliceConfig.dc;
     }
+    else
+    {
+        [_extraQueryParameters.extraURLQueryParameters removeObjectForKey:@"slice"];
+        [_extraQueryParameters.extraURLQueryParameters removeObjectForKey:@"dc"];
+    }
 }
 
 - (MSALSliceConfig *)sliceConfig

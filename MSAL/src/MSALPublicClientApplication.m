@@ -775,18 +775,13 @@
     params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     
-    if (_configuration.extraQueryParameters.extraURLQueryParameters.count > 0)
-    {
-        params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
-    }
-    if (_configuration.extraQueryParameters.extraAuthorizeURLQueryParameters.count > 0)
-    {
-        params.extraAuthorizeURLQueryParameters = _configuration.extraQueryParameters.extraAuthorizeURLQueryParameters;
-    }
-    if (_configuration.extraQueryParameters.extraTokenURLParameters.count > 0)
-    {
-        params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
-    }
+    params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
+
+    NSMutableDictionary *extraAuthorizeURLQueryParameters = [_configuration.extraQueryParameters.extraAuthorizeURLQueryParameters mutableCopy];
+    [extraAuthorizeURLQueryParameters addEntriesFromDictionary:extraQueryParameters];
+    params.extraAuthorizeURLQueryParameters = extraAuthorizeURLQueryParameters;
+    params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
+    
     params.tokenExpirationBuffer = _configuration.tokenExpirationBuffer;
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
