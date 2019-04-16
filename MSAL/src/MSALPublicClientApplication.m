@@ -94,15 +94,6 @@
 
 @implementation MSALPublicClientApplication
 
-- (NSString *)defaultKeychainGroup
-{
-#if TARGET_OS_IPHONE
-    return MSIDKeychainTokenCache.defaultKeychainGroup;
-#else
-    return nil;
-#endif
-}
-
 + (void)load
 {
     [MSIDIntuneMAMResourcesCache setSharedCache:[[MSIDIntuneMAMResourcesCache alloc] initWithDataSource:[MSIDIntuneUserDefaultsCacheDataSource new]]];
@@ -130,31 +121,32 @@
     }
 }
 
-- (BOOL)extendedLifetimeEnabled { return self.configuration.extendedLifetimeEnabled; }
-- (void)setExtendedLifetimeEnabled:(BOOL)extendedLifetimeEnabled { self.configuration.extendedLifetimeEnabled = extendedLifetimeEnabled; }
-
 - (MSALAuthority *)authority { return self.configuration.authority; }
 - (NSString *)clientId { return self.configuration.clientId; }
 - (MSALRedirectUri *)redirectUri { return self.configuration.verifiedRedirectUri; }
 
-- (NSUInteger)expirationBuffer { return self.configuration.tokenExpirationBuffer; }
-- (void)setExpirationBuffer:(NSUInteger)expirationBuffer { self.configuration.tokenExpirationBuffer = expirationBuffer; }
+- (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.configuration.sliceConfig.sliceDictionary; }
+- (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
+{
+    self.configuration.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
+}
 
-- (NSArray<NSString *> *)clientCapabilities { return self.configuration.clientApplicationCapabilities; }
-- (void)setClientCapabilities:(NSArray<NSString *> *)clientCapabilities { self.configuration.clientApplicationCapabilities = clientCapabilities; }
+- (MSALWebviewType)webviewType { return MSALGlobalConfig.defaultWebviewType; }
+- (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
 
-- (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.configuration.slice.sliceDictionary; }
-- (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters { [self.configuration.slice setSliceWithDictionary:sliceParameters]; }
 #if TARGET_OS_IPHONE
-- (MSALBrokeredAvailability)brokerAvailability { return MSALGlobalConfig.brokerAvailability; }
-- (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { MSALGlobalConfig.brokerAvailability = brokerAvailability; }
+- (NSString *)keychainGroup { return MSALGlobalConfig.cacheConfig.keychainSharingGroup; }
+- (void)setKeychainGroup:(NSString * _Nullable)keychainGroup { MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup; }
+#else
+- (NSString *)keychainGroup { return nil; }
 #endif
 
+#pragma mark - Initializers
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:nil
                       redirectUri:nil
                             error:error];
@@ -165,7 +157,7 @@
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
@@ -177,7 +169,7 @@
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
@@ -252,8 +244,10 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
 #endif
-    
     _configuration = config;
+    
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    
     return self;
 }
 
@@ -269,10 +263,11 @@
     }
 
 #if TARGET_OS_IPHONE
-    MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup;
+    if (keychainGroup) MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup;
+    else MSALGlobalConfig.cacheConfig.keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
 #endif
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri];
-    config.authority = authority;
+    if (authority) config.authority = authority;
     config.redirecrUri = redirectUri;
     
     return [self initWithConfiguration:config error:error];
@@ -745,7 +740,7 @@
     }
 #endif
     MSIDInteractiveRequestParameters *params = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
-                                                                                               redirectUri:_configuration.redirecrUri
+                                                                                               redirectUri:_configuration.verifiedRedirectUri.url.absoluteString
                                                                                                   clientId:_configuration.clientId
                                                                                                     scopes:requestScopes
                                                                                                 oidcScopes:requestOIDCScopes
@@ -780,9 +775,18 @@
     params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
     
-    params.extraAuthorizeURLQueryParameters = _configuration.extraQueryParameters.extraAuthorizeURLQueryParameters;
-    params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
-    params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
+    if (_configuration.extraQueryParameters.extraURLQueryParameters.count > 0)
+    {
+        params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
+    }
+    if (_configuration.extraQueryParameters.extraAuthorizeURLQueryParameters.count > 0)
+    {
+        params.extraAuthorizeURLQueryParameters = _configuration.extraQueryParameters.extraAuthorizeURLQueryParameters;
+    }
+    if (_configuration.extraQueryParameters.extraTokenURLParameters.count > 0)
+    {
+        params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
+    }
     params.tokenExpirationBuffer = _configuration.tokenExpirationBuffer;
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
@@ -793,7 +797,8 @@
     {
         for (MSALAuthority *knownAuthority in _configuration.knownAuthorities)
         {
-            if ([knownAuthority.url isEqual:params.authority.url])
+            if ([params.authority isKindOfClass:knownAuthority.class]
+                && [knownAuthority.url isEqual:params.authority.url])
             {
                 params.validateAuthority = NO;
             }
@@ -811,7 +816,7 @@
     }
 
     params.webviewType = msidWebViewType;
-    params.telemetryWebviewType = MSALStringForMSALWebviewType(_webviewType);
+    params.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
     params.customWebview = customWebview;
 
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
@@ -931,7 +936,7 @@
 
     // add known authorities here.
     MSIDRequestParameters *params = [[MSIDRequestParameters alloc] initWithAuthority:msidAuthority
-                                                                         redirectUri:_configuration.redirecrUri
+                                                                         redirectUri:_configuration.verifiedRedirectUri.url.absoluteString
                                                                             clientId:_configuration.clientId
                                                                               scopes:requestScopes
                                                                           oidcScopes:requestOIDCScopes
@@ -1082,11 +1087,6 @@
     return [NSOrderedSet orderedSetWithObjects:MSID_OAUTH2_SCOPE_OPENID_VALUE,
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
-}
-
-+ (NSDictionary *)defaultSliceParameters
-{
-    return @{ DEFAULT_SLICE_PARAMS };
 }
 
 @end

@@ -39,6 +39,7 @@
 #import "MSIDAutomationSuccessResult.h"
 #import "MSALAccount.h"
 #import "MSALAccount+Internal.h"
+#import "MSALSliceConfig.h"
 
 @implementation MSALAutomationBaseAction
 
@@ -91,16 +92,15 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
         authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
-
-    MSALPublicClientApplication *clientApplication =
-    [[MSALPublicClientApplication alloc] initWithClientId:parameters.clientId
-                                                authority:authority
-                                              redirectUri:parameters.redirectUri
-                                                    error:error];
-
-    clientApplication.validateAuthority = validateAuthority;
-    clientApplication.sliceParameters = parameters.sliceParameters;
-
+    authority.validateAuthority = validateAuthority;
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:parameters.clientId
+                                                                                              redirectUri:parameters.redirectUri];
+    config.authority = authority;
+    config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:parameters.sliceParameters[@"slice"] dc:parameters.sliceParameters[@"dc"]];
+    
+    MSALPublicClientApplication *clientApplication = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
+  
     return clientApplication;
 }
 

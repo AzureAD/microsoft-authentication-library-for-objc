@@ -32,6 +32,11 @@
 #import "MSALSliceConfig.h"
 
 @implementation MSALPublicClientApplicationConfig
+{
+    MSALSliceConfig *_sliceConfig;
+}
+
+
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
@@ -61,22 +66,20 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return self;
 }
 
-- (MSALSliceConfig *)slice { return self.slice; }
-
-- (void)setSlice:(MSALSliceConfig *)slice
+- (void)setSliceConfig:(MSALSliceConfig *)sliceConfig
 {
-    if (!slice)
-    {
-        [self.extraQueryParameters.extraURLQueryParameters removeObjectForKey:@"slice"];
-        [self.extraQueryParameters.extraURLQueryParameters removeObjectForKey:@"dc"];
-    }
-    else
-    {
-        [self.extraQueryParameters.extraTokenURLParameters setObject:slice.slice forKey:@"slice"];
-        [self.extraQueryParameters.extraTokenURLParameters setObject:slice.dc forKey:@"dc"];
-    }
+    _sliceConfig = sliceConfig;
 
-    
+    if (sliceConfig)
+    {
+        _extraQueryParameters.extraURLQueryParameters[@"slice"] = sliceConfig.slice;
+        _extraQueryParameters.extraURLQueryParameters[@"dc"] = sliceConfig.dc;
+    }
+}
+
+- (MSALSliceConfig *)sliceConfig
+{
+    return _sliceConfig;
 }
 
 @end

@@ -34,9 +34,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSString *slice;
 @property NSString *dc;
 
-- (NSDictionary *)sliceDictionary;
-- (void)setSliceWithDictionary:(NSDictionary *)sliceDict;
-+ (id)configWithSlice:(NSString *)slice dc:(NSString *)dc;
+@property (readonly) NSDictionary *sliceDictionary;
+
+- (nullable instancetype)initWithSlice:(NSString *)slice dc:(NSString *)dc NS_DESIGNATED_INITIALIZER;
+
++ (nullable instancetype)configWithSlice:(NSString *)slice dc:(NSString *)dc;
 
 - (nullable instancetype)init NS_UNAVAILABLE;
 + (nullable instancetype)new NS_UNAVAILABLE;

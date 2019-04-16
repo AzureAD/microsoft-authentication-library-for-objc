@@ -27,6 +27,7 @@
 
 
 #import "MSALCacheConfig.h"
+#import "MSIDKeychainTokenCache.h"
 
 @implementation MSALCacheConfig
   
@@ -36,7 +37,7 @@
     if (self)
     {
 #if TARGET_OS_IPHONE
-        _keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
+        _keychainSharingGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
 #endif
         _cacheEnabled = YES;
     }
@@ -47,14 +48,6 @@
 {
     MSALCacheConfig *config = [[self.class alloc] init];
     config.cacheEnabled = enabled;
-    
-#if TARGET_OS_IPHONE
-    if (enabled)
-    {
-        config.keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
-    }
-#endif
-    
     return config;
 }
 

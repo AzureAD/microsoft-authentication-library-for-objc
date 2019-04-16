@@ -304,7 +304,7 @@
 
 + (NSDictionary *)defaultQueryParameters
 {
-    return @{MSID_VERSION_KEY:MSIDVersion.sdkVersion, UT_SLICE_PARAMS_DICT};
+    return @{MSID_VERSION_KEY:MSIDVersion.sdkVersion};
 }
 
 @end

@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property double tokenExpirationBuffer;
 
 /*! slice configuration for testing. */
-@property(nullable) MSALSliceConfig *slice;
+@property(nullable) MSALSliceConfig *sliceConfig;
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId

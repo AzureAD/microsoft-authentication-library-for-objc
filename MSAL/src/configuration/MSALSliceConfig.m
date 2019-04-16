@@ -29,12 +29,20 @@
 
 @implementation MSALSliceConfig
 
-+ (id)configWithSlice:(NSString *)slice dc:(NSString *)dc
+- (nullable instancetype)initWithSlice:(NSString *)slice dc:(NSString *)dc
 {
-    MSALSliceConfig *config = [[self alloc] init];
-    config.slice = slice;
-    config.dc = dc;
-    return config;
+    self = [super init];
+    if (self)
+    {
+        self.slice = slice;
+        self.dc = dc;
+    }
+    return self;
+}
+
++ (nullable instancetype)configWithSlice:(NSString *)slice dc:(NSString *)dc
+{
+    return [[MSALSliceConfig alloc] initWithSlice:slice dc:dc];
 }
 
 - (NSDictionary *)sliceDictionary
@@ -42,9 +50,4 @@
     return @{ @"slice" : self.slice, @"dc" : self.dc };
 }
 
-- (void)setSliceWithDictionary:(NSDictionary *)sliceDict
-{
-    self.slice = sliceDict[@"slice"];
-    self.dc = sliceDict[@"dc"];
-}
 @end

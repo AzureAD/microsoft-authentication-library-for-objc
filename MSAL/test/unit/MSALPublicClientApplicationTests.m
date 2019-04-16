@@ -64,6 +64,8 @@
 #import "MSALRedirectUri.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDTestURLResponse+Util.h"
+#import "MSALSliceConfig.h"
+#import "MSALCacheConfig.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -95,6 +97,7 @@
     id<MSIDTokenCacheDataSource> dataSource = nil;
     
 #if TARGET_OS_IPHONE
+    MSALGlobalConfig.cacheConfig.keychainSharingGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
 #else
     dataSource = MSIDMacTokenCache.defaultCache;
@@ -357,10 +360,12 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.sliceParameters = @{ @"slice" : @"myslice" };
-    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
+    
+    __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                           @"dc" : @"dc" };
     
     __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
     
@@ -379,7 +384,7 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);
          XCTAssertNil(params.extraAuthorizeURLQueryParameters);
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.logComponent, @"MSAL");
@@ -388,7 +393,7 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope"]
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -412,8 +417,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -434,7 +439,10 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
@@ -444,7 +452,7 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -464,8 +472,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -486,7 +494,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -496,7 +506,7 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -518,8 +528,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -542,7 +552,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -553,7 +565,7 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
@@ -579,8 +591,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -608,7 +620,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraAuthorizeURLQueryParameters);
          XCTAssertNil(params.loginHint);
@@ -620,7 +634,7 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
@@ -639,8 +653,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -668,7 +682,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -679,7 +695,7 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
@@ -700,8 +716,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -731,7 +747,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -743,7 +761,7 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
@@ -771,8 +789,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -790,7 +808,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" msalAuthority].msidAuthority);
          
@@ -829,8 +849,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -848,7 +868,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
@@ -891,8 +913,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -910,7 +932,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
@@ -950,8 +974,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -969,7 +993,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1009,8 +1035,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -1028,7 +1054,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1069,8 +1097,8 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                           authority:authority
                                                                               error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    
+    application.configuration.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -1090,7 +1118,9 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         __auto_type expectedURLQueryParam = @{ @"slice" : @"slice",
+                                                @"dc" : @"dc" };
+         XCTAssertEqualObjects(params.extraURLQueryParameters, expectedURLQueryParam);;
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
