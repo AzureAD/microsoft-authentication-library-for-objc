@@ -75,28 +75,29 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
 };
 
 
-typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+typedef NS_ENUM(NSUInteger, MSALPromptType)
+{
     /*!
      If no user is specified the authentication webview will present a list of users currently
      signed in for the user to select among.
      */
-    MSALSelectAccount,
+    MSALPromptTypeSelectAccount,
 
     /*!
      Require the user to authenticate in the webview
      */
-    MSALForceLogin,
+    MSALPromptTypeLogin,
     /*!
      Require the user to consent to the current set of scopes for the request.
      */
-    MSALForceConsent,
+    MSALPromptTypeConsent,
     /*!
      The SSO experience will be determined by the presence of cookies in the webview and account type.
      User won't be prompted unless necessary.
      If multiple users are signed in, select account experience will be presented.
      */
-    MSALPromptIfNecessary,
-    MSALUIBehaviorDefault = MSALSelectAccount,
+    MSALPromptTypePromptIfNecessary,
+    MSALPromptTypeDefault = MSALPromptTypeSelectAccount,
 };
 
 typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);

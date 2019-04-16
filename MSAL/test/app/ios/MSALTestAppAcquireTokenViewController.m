@@ -69,7 +69,7 @@
     
     UIButton *_acquireSilentButton;
     
-    UISegmentedControl *_uiBehavior;
+    UISegmentedControl *_promptType;
     UISegmentedControl *_webviewSelection;
     UISegmentedControl *_customWebViewSelection;
     
@@ -173,9 +173,9 @@
                                    action:@selector(selectScope:)];
     [layout addControl:_scopesButton title:@"scopes"];
     
-    _uiBehavior = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
-    _uiBehavior.selectedSegmentIndex = 0;
-    [layout addControl:_uiBehavior title:@"behavior"];
+    _promptType = [[UISegmentedControl alloc] initWithItems:@[@"Select", @"Login", @"Consent"]];
+    _promptType.selectedSegmentIndex = 0;
+    [layout addControl:_promptType title:@"behavior"];
     
     //_webviewSelection
     _webviewSelection = [[UISegmentedControl alloc] initWithItems:@[@"Embedded", @"System"]];
@@ -462,16 +462,16 @@
     NSLog(@"%@", resultText);
 }
 
-- (MSALUIBehavior)uiBehavior
+- (MSALPromptType)promptType
 {
-    NSString *label = [_uiBehavior titleForSegmentAtIndex:_uiBehavior.selectedSegmentIndex];
+    NSString *label = [_promptType titleForSegmentAtIndex:_promptType.selectedSegmentIndex];
     
     if ([label isEqualToString:@"Select"])
-        return MSALSelectAccount;
+        return MSALPromptTypeSelectAccount;
     if ([label isEqualToString:@"Login"])
-        return MSALForceLogin;
+        return MSALPromptTypeLogin;
     if ([label isEqualToString:@"Consent"])
-        return MSALForceConsent;
+        return MSALPromptTypeConsent;
     
     @throw @"Do not recognize prompt behavior";
 }
@@ -553,7 +553,7 @@
         
     parameters.loginHint = _loginHintField.text;
     parameters.account = settings.currentAccount;
-    parameters.uiBehavior = [self uiBehavior];
+    parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];

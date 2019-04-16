@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 #import "MSIDConstants.h"
 
-NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
+NSString *MSALStringForMSALUIBehavior(MSALPromptType behavior)
 {
     switch (behavior)
     {
@@ -41,7 +41,7 @@ NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
     @throw @"Unrecognized MSALUIBehavior";
 }
 
-MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior)
+MSIDPromptType MSIDPromptTypeForBehavior(MSALPromptType behavior)
 {
     switch (behavior)
     {
@@ -53,7 +53,7 @@ MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior)
     }
 }
 
-NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
+NSString *MSALParameterStringForBehavior(MSALPromptType behavior)
 {
     switch (behavior)
     {

@@ -87,19 +87,19 @@
     NSString *claims = testRequest.claims;
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
-    MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+    MSALPromptType promptType = MSALPromptTypeDefault;
 
     if ([testRequest.promptBehavior isEqualToString:@"force"])
     {
-        uiBehavior = MSALForceLogin;
+        promptType = MSALPromptTypeLogin;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"consent"])
     {
-        uiBehavior = MSALForceConsent;
+        promptType = MSALPromptTypeConsent;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
-        uiBehavior = MSALPromptIfNecessary;
+        promptType = MSALPromptTypePromptIfNecessary;
     }
 
     MSALAuthority *acquireTokenAuthority = nil;
@@ -150,6 +150,16 @@
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
     
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
+    parameters.extraScopesToConsent = extraScopes.array;
+    parameters.account = account;
+    parameters.loginHint = testRequest.loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claims = claims;
+    parameters.authority = acquireTokenAuthority;
+    parameters.correlationId = correlationId;
+
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];

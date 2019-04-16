@@ -203,7 +203,7 @@
 
     [application acquireTokenForScopes:scopes
                                account:currentAccount
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                        completionBlock:^(MSALResult *result, NSError *error)
      {

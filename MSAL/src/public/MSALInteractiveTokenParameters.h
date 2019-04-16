@@ -37,9 +37,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALInteractiveTokenParameters : MSALTokenParameters
 
 /*!
- A specific UI behavior for the interactive authentication flow.
+ A specific prompt type for the interactive authentication flow.
  */
-@property (nonatomic) MSALUIBehavior uiBehavior;
+@property (nonatomic) MSALPromptType promptType;
 
 /*!
  A loginHint (usually an email) to pass to the service at the
