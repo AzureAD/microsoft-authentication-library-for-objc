@@ -48,7 +48,8 @@
  */
 @property (readonly, nonnull) NSString *environment;
 
-- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicClientApplication *)application error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicClientApplication *)application
+                                                           error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

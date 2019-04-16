@@ -53,17 +53,20 @@
  */
 @property (readonly, nullable) NSString *tenantId;
 
+/*!
+ The raw id token if it's returned by the service or nil if no id token is returned.
+ */
+@property (readonly, nullable) NSString *idToken;
+
+/*!
+ A tenant profile object that contains all the tenant-specific information, including tenant id, user object id, etc. It also contains all the id token claims as a dictionary.
+ */
 @property (readonly, nonnull) MSALTenantProfile *tenantProfile;
 
 /*!
     The account object that holds account information.
  */
 @property (readonly, nonnull) MSALAccount *account;
-
-/*!
-    The raw id token if it's returned by the service or nil if no id token is returned.
-*/
-@property (readonly, nullable) NSString *idToken;
 
 /*!
     The unique id of the user.
