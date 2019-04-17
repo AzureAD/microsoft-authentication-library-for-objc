@@ -154,7 +154,7 @@
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
-    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
+    [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
