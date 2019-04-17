@@ -122,6 +122,58 @@ extern NSString *MSALHomeAccountIdKey;
 
 extern NSString *MSALErrorDomain;
 
+/*!
+ MSALError enum contains all errors that should be considered for handling in runtime.
+ */
+typedef NS_ENUM(NSInteger, MSALError)
+{
+    /*!
+     An unrecoverable error occured either within the MSAL client or on server side.
+     Generally, this error cannot be resolved in runtime. Log the error, then inspect the MSALInternalErrorCodeKey in the userInfo dictionary.
+     More detailed information about the specific error under MSALInternalErrorCodeKey can be found in MSALInternalError enum.
+     */
+    MSALErrorInternal                            = -50000,
+    
+    /*!
+     Workplace join is required to proceed.
+     */
+    MSALErrorWorkplaceJoinRequired               = -50001,
+    
+    /*!
+     Interaction required errors occur because of a wide variety of errors
+     returned by the authentication service. In all cases the proper response
+     is to use a MSAL interactive AcquireToken call with the same parameters.
+     For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
+     in the userInfo dictionary.
+     */
+    MSALErrorInteractionRequired                 = -50002,
+    
+    /*!
+     The request was not fully completed and some scopes were not granted access to.
+     This can be caused by a user declining consent on certain scopes.
+     For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
+     in the userInfo dictionary.
+     */
+    MSALErrorServerDeclinedScopes                = -50003,
+    
+    /*!
+     The requested resource is protected by an Intune Conditional Access policy.
+     The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+     please see https://aka.ms/intuneMAMSDK for more information.
+     */
+    MSALErrorServerProtectionPoliciesRequired    = -50004,
+    
+    /*!
+     The user cancelled the web auth session by tapping the "Done" button on the
+     SFSafariViewController.
+     */
+    MSALErrorUserCanceled                        = -50005,
+};
+
+/*!
+ MSALInternalError enum contains all possible errors under MSALInternalErrorCodeKey.
+ This enum exists only for the reference, you should not try to handle these errors in runtime.
+ */
 typedef NS_ENUM(NSInteger, MSALInternalError)
 {
     /*!
@@ -290,49 +342,4 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      Broker returned unreadable result.
      */
     MSALInternalErrorBrokerUnknown                      = -42711
-};
-
-typedef NS_ENUM(NSInteger, MSALError)
-{
-    /*!
-     An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
-     in the userInfo dictionary for more detailed information about the specific
-     error.
-     */
-    MSALErrorInternal                            = -50000,
-    
-    /*!
-     Workplace join is required to proceed
-     */
-    MSALErrorWorkplaceJoinRequired               = -50001,
-    
-    /*!
-     Interaction required errors occur because of a wide variety of errors
-     returned by the authentication service. In all cases the proper response
-     is to use a MSAL interactive AcquireToken call with the same parameters.
-     For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
-     in the userInfo dictionary.
-     */
-    MSALErrorInteractionRequired                 = -50002,
-    
-    /*!
-     The request was not fully completed and some scopes were not granted access to.
-     This can be caused by a user declining consent on certain scopes.
-     For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
-     in the userInfo dictionary.
-     */
-    MSALErrorServerDeclinedScopes                = -50003,
-    
-    /*!
-     The requested resource is protected by an Intune Conditional Access policy.
-     The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
-     please see https://aka.ms/intuneMAMSDK for more information.
-     */
-    MSALErrorServerProtectionPoliciesRequired    = -50004,
-    
-    /*!
-     The user cancelled the web auth session by tapping the "Done" button on the
-     SFSafariViewController.
-     */
-    MSALErrorUserCanceled                        = -50005,
 };

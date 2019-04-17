@@ -84,7 +84,6 @@
 
             result = [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                                  error:error
-                                                             errorName:@""
                                                         additionalInfo:nil];
         }
 
