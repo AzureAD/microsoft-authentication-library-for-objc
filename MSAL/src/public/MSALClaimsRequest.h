@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param target Target of requested claims.
  @return Array of individual claim requests.
  */
-- (NSArray<MSALIndividualClaimRequest *> *)claimRequestsForTarget:(MSALClaimsRequestTarget)target;
+- (nullable NSArray<MSALIndividualClaimRequest *> *)claimsRequestsForTarget:(MSALClaimsRequestTarget)target;
 
 /*!
  Remove requested claims for the target.

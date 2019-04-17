@@ -62,10 +62,10 @@
                                           error:error];
 }
 
-- (NSArray<MSALIndividualClaimRequest *> *)claimRequestsForTarget:(MSALClaimsRequestTarget)target
+- (NSArray<MSALIndividualClaimRequest *> *)claimsRequestsForTarget:(MSALClaimsRequestTarget)target
 {
     __auto_type msidTarget = [self msidTargetFromTarget:target];
-    __auto_type msidClaimRequests = [self.msidClaimsRequest claimRequestsForTarget:msidTarget];
+    __auto_type msidClaimRequests = [self.msidClaimsRequest claimsRequestsForTarget:msidTarget];
     
     NSMutableArray<MSALIndividualClaimRequest *> *claimRequests = [NSMutableArray new];
     for (MSIDIndividualClaimRequest *r in msidClaimRequests)

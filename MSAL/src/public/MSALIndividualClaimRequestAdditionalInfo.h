@@ -49,11 +49,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 /*!
  Requests that the Claim be returned with a particular value.
+ Must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
  */
 @property (nonatomic, nullable) id value;
 
 /*
  Requests that the Claim be returned with one of a set of values, with the values appearing in order of preference.
+ All values must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
  */
 @property (nonatomic, nullable) NSArray *values;
 

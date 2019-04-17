@@ -54,7 +54,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -70,7 +70,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetAccessToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetAccessToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -86,14 +86,14 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
     MSALIndividualClaimRequest *claim = claims.firstObject;
     XCTAssertEqualObjects(@"nickname", claim.name);
     XCTAssertNil(claim.additionalInfo);
-    claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetAccessToken];
+    claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetAccessToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -109,7 +109,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -128,7 +128,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -147,7 +147,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -166,7 +166,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -186,7 +186,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -206,7 +206,7 @@
     
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claimsJsonString error:&error];
     
-    __auto_type claims = [claimsRequest claimRequestsForTarget:MSALClaimsRequestTargetIdToken];
+    __auto_type claims = [claimsRequest claimsRequestsForTarget:MSALClaimsRequestTargetIdToken];
     XCTAssertNotNil(claimsRequest);
     XCTAssertNil(error);
     XCTAssertEqual(claims.count, 1);
@@ -259,7 +259,7 @@
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInvalidParameter);
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Failed to init claim additional info from json string.");
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Failed to init claim additional info from json.");
 }
 
 - (void)testInitWithJSONString_whenClaimRequestedWithInvalidEssential_shouldFailWithError
