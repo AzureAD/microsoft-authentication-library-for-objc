@@ -1791,9 +1791,9 @@
 			productReference = 04A6B57B226921890035C7C2 /* libMSAL.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		04A6B59B2269286F0035C7C2 /* MSAL (macOS Static Library) */ = {
+		04A6B59B2269286F0035C7C2 /* MSAL (Mac Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (macOS Static Library)" */;
+			buildConfigurationList = 04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */;
 			buildPhases = (
 				04A6B5982269286F0035C7C2 /* Headers */,
 				04A6B5992269286F0035C7C2 /* Sources */,
@@ -1804,7 +1804,7 @@
 			dependencies = (
 				04A6B5AD226935190035C7C2 /* PBXTargetDependency */,
 			);
-			name = "MSAL (macOS Static Library)";
+			name = "MSAL (Mac Static Library)";
 			productName = "MSAL (macOS Static Library)";
 			productReference = 04A6B59C2269286F0035C7C2 /* libMSAL.a */;
 			productType = "com.apple.product-type.library.static";
@@ -2109,7 +2109,7 @@
 				B2BB736F2112C32C000EA4C5 /* InteractiveiOSTests */,
 				B29E2ACD21238F5200B170ED /* MultiAppiOSTests */,
 				04A6B57A226921890035C7C2 /* MSAL (iOS Static Library) */,
-				04A6B59B2269286F0035C7C2 /* MSAL (macOS Static Library) */,
+				04A6B59B2269286F0035C7C2 /* MSAL (Mac Static Library) */,
 			);
 		};
 /* End PBXProject section */
@@ -3227,7 +3227,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (macOS Static Library)" */ = {
+		04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				04A6B5A32269286F0035C7C2 /* Debug */,
