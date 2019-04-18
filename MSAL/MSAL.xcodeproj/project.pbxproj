@@ -6,20 +6,6 @@
 	objectVersion = 46;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		04A1DAF5223B6034006A48D6 /* MSAL (iOS Universal Static Framework) */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 04A1DAF6223B6035006A48D6 /* Build configuration list for PBXAggregateTarget "MSAL (iOS Universal Static Framework)" */;
-			buildPhases = (
-				04A1DAF9223B6054006A48D6 /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = "MSAL (iOS Universal Static Framework)";
-			productName = "MSAL (iOS Static Framework)";
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		049BC840224ED33200AE7FBB /* MSALWebviewType.h in Headers */ = {isa = PBXBuildFile; fileRef = 9682624620E304180080694D /* MSALWebviewType.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A1DAB4223B5FBF006A48D6 /* MSALFramework.m in Sources */ = {isa = PBXBuildFile; fileRef = D61F5BC91E59359900912CB8 /* MSALFramework.m */; };
@@ -424,6 +410,13 @@
 			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
 			remoteInfo = "MSAL (Mac Framework)";
 		};
+		046284C82268109E00884892 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D68FB4861FBA698A005308BB;
+			remoteInfo = "IdentityCore iOS";
+		};
 		04A1DB38223B66E8006A48D6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -620,9 +613,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		04A1DAAF223B5F5C006A48D6 /* build.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
-		04A1DAF3223B5FBF006A48D6 /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		04A1DB7E223B66E8006A48D6 /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		04A1DAF3223B5FBF006A48D6 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMSAL.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		04A1DB7E223B66E8006A48D6 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMSAL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04B1C8CE2252BDFA00CBD876 /* msal__static__lib__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__ios.xcconfig; sourceTree = "<group>"; };
 		04B1C8D32252BDFA00CBD876 /* msal__static__lib__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__mac.xcconfig; sourceTree = "<group>"; };
 		04D32CAC1FD61585000B123E /* MSALErrorConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALErrorConverter.h; sourceTree = "<group>"; };
@@ -1040,22 +1032,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		04A1DAA9223B5F35006A48D6 /* scripts */ = {
-			isa = PBXGroup;
-			children = (
-				04A1DAAE223B5F3C006A48D6 /* iOS */,
-			);
-			path = scripts;
-			sourceTree = "<group>";
-		};
-		04A1DAAE223B5F3C006A48D6 /* iOS */ = {
-			isa = PBXGroup;
-			children = (
-				04A1DAAF223B5F5C006A48D6 /* build.sh */,
-			);
-			path = iOS;
-			sourceTree = "<group>";
-		};
 		94E876C91E492D2800FB96ED /* instance */ = {
 			isa = PBXGroup;
 			children = (
@@ -1609,7 +1585,6 @@
 		D6DFF3991E2579360012891A = {
 			isa = PBXGroup;
 			children = (
-				04A1DAA9223B5F35006A48D6 /* scripts */,
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
 				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
 				D65A6F671E3FF3D900C69FBA /* src */,
@@ -1634,8 +1609,8 @@
 				D672279F1EBD111900F3422A /* unit-test-host.app */,
 				B2BB73702112C32C000EA4C5 /* InteractiveiOSTests.xctest */,
 				B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */,
-				04A1DAF3223B5FBF006A48D6 /* MSAL.framework */,
-				04A1DB7E223B66E8006A48D6 /* MSAL.framework */,
+				04A1DAF3223B5FBF006A48D6 /* libMSAL.a */,
+				04A1DB7E223B66E8006A48D6 /* libMSAL.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1809,15 +1784,16 @@
 			buildRules = (
 			);
 			dependencies = (
+				046284C92268109E00884892 /* PBXTargetDependency */,
 			);
 			name = "MSAL (iOS Static Library)";
 			productName = "MSAL (Framework)";
-			productReference = 04A1DAF3223B5FBF006A48D6 /* MSAL.framework */;
-			productType = "com.apple.product-type.framework";
+			productReference = 04A1DAF3223B5FBF006A48D6 /* libMSAL.a */;
+			productType = "com.apple.product-type.library.static";
 		};
-		04A1DB36223B66E8006A48D6 /* MSAL (Mac Static Framework) */ = {
+		04A1DB36223B66E8006A48D6 /* MSAL (Mac Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 04A1DB7B223B66E8006A48D6 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Framework)" */;
+			buildConfigurationList = 04A1DB7B223B66E8006A48D6 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */;
 			buildPhases = (
 				04A1DB39223B66E8006A48D6 /* Sources */,
 				04A1DB56223B66E8006A48D6 /* Frameworks */,
@@ -1829,10 +1805,10 @@
 			dependencies = (
 				04A1DB37223B66E8006A48D6 /* PBXTargetDependency */,
 			);
-			name = "MSAL (Mac Static Framework)";
+			name = "MSAL (Mac Static Library)";
 			productName = "MSAL (Mac Framework)";
-			productReference = 04A1DB7E223B66E8006A48D6 /* MSAL.framework */;
-			productType = "com.apple.product-type.framework";
+			productReference = 04A1DB7E223B66E8006A48D6 /* libMSAL.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 		962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */ = {
 			isa = PBXNativeTarget;
@@ -2034,10 +2010,6 @@
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
-					04A1DAF5223B6034006A48D6 = {
-						CreatedOnToolsVersion = 10.1;
-						ProvisioningStyle = Automatic;
-					};
 					962E37A61E720C5D00DE71FE = {
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
@@ -2131,8 +2103,7 @@
 				B2BB736F2112C32C000EA4C5 /* InteractiveiOSTests */,
 				B29E2ACD21238F5200B170ED /* MultiAppiOSTests */,
 				04A1DAB0223B5FBF006A48D6 /* MSAL (iOS Static Library) */,
-				04A1DAF5223B6034006A48D6 /* MSAL (iOS Universal Static Framework) */,
-				04A1DB36223B66E8006A48D6 /* MSAL (Mac Static Framework) */,
+				04A1DB36223B66E8006A48D6 /* MSAL (Mac Static Library) */,
 			);
 		};
 /* End PBXProject section */
@@ -2302,23 +2273,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		04A1DAF9223B6054006A48D6 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "./scripts/iOS/build.sh\n";
-		};
 		B29E2AD821238F6C00B170ED /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2661,6 +2615,11 @@
 			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
 			targetProxy = 0452D8BF2243F5E000CC70B8 /* PBXContainerItemProxy */;
 		};
+		046284C92268109E00884892 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "IdentityCore iOS";
+			targetProxy = 046284C82268109E00884892 /* PBXContainerItemProxy */;
+		};
 		04A1DB37223B66E8006A48D6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "IdentityCore Mac";
@@ -2786,22 +2745,6 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-			};
-			name = Release;
-		};
-		04A1DAF7223B6035006A48D6 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		04A1DAF8223B6035006A48D6 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -3301,16 +3244,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		04A1DAF6223B6035006A48D6 /* Build configuration list for PBXAggregateTarget "MSAL (iOS Universal Static Framework)" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				04A1DAF7223B6035006A48D6 /* Debug */,
-				04A1DAF8223B6035006A48D6 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		04A1DB7B223B66E8006A48D6 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Framework)" */ = {
+		04A1DB7B223B66E8006A48D6 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				04A1DB7C223B66E8006A48D6 /* Debug */,
