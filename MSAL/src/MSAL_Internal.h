@@ -38,8 +38,6 @@
 #import "IdentityCore_Internal.h"
 #import "MSIDLogger+Internal.h"
 #import "MSIDRequestContext.h"
-#import "MSALConstants.h"
 #import "MSALError.h"
 #include "MSIDLogger+Internal.h"
-#include "MSALError_Internal.h"
 #import "MSALDefinitions.h"
