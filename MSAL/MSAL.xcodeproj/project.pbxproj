@@ -484,6 +484,7 @@
 		04A6B57B226921890035C7C2 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMSAL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__ios.xcconfig; sourceTree = "<group>"; };
 		04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__mac.xcconfig; sourceTree = "<group>"; };
+		04A6B59C2269286F0035C7C2 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libMSAL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		04D32CAC1FD61585000B123E /* MSALErrorConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALErrorConverter.h; sourceTree = "<group>"; };
 		04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverter.m; sourceTree = "<group>"; };
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
@@ -755,6 +756,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		04A6B578226921890035C7C2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04A6B59A2269286F0035C7C2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1457,6 +1465,7 @@
 				B2BB73702112C32C000EA4C5 /* InteractiveiOSTests.xctest */,
 				B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */,
 				04A6B57B226921890035C7C2 /* libMSAL.a */,
+				04A6B59C2269286F0035C7C2 /* libMSAL.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1486,6 +1495,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		04A6B5982269286F0035C7C2 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D65A6F401E3FD30A00C69FBA /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1568,6 +1584,23 @@
 			name = "MSAL (iOS Static Library)";
 			productName = "MSAL (iOS Static Library)";
 			productReference = 04A6B57B226921890035C7C2 /* libMSAL.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		04A6B59B2269286F0035C7C2 /* MSAL (macOS Static Library) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (macOS Static Library)" */;
+			buildPhases = (
+				04A6B5982269286F0035C7C2 /* Headers */,
+				04A6B5992269286F0035C7C2 /* Sources */,
+				04A6B59A2269286F0035C7C2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MSAL (macOS Static Library)";
+			productName = "MSAL (macOS Static Library)";
+			productReference = 04A6B59C2269286F0035C7C2 /* libMSAL.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		962E37A61E720C5D00DE71FE /* MSAL Test Automation (iOS) */ = {
@@ -1773,6 +1806,10 @@
 						CreatedOnToolsVersion = 10.1;
 						ProvisioningStyle = Automatic;
 					};
+					04A6B59B2269286F0035C7C2 = {
+						CreatedOnToolsVersion = 10.1;
+						ProvisioningStyle = Automatic;
+					};
 					962E37A61E720C5D00DE71FE = {
 						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
@@ -1866,6 +1903,7 @@
 				B2BB736F2112C32C000EA4C5 /* InteractiveiOSTests */,
 				B29E2ACD21238F5200B170ED /* MultiAppiOSTests */,
 				04A6B57A226921890035C7C2 /* MSAL (iOS Static Library) */,
+				04A6B59B2269286F0035C7C2 /* MSAL (macOS Static Library) */,
 			);
 		};
 /* End PBXProject section */
@@ -2051,6 +2089,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		04A6B577226921890035C7C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04A6B5992269286F0035C7C2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2413,6 +2458,23 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		04A6B5A32269286F0035C7C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
+			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+			};
+			name = Debug;
+		};
+		04A6B5A42269286F0035C7C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
 			name = Release;
 		};
@@ -2889,6 +2951,15 @@
 			buildConfigurations = (
 				04A6B582226921890035C7C2 /* Debug */,
 				04A6B583226921890035C7C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (macOS Static Library)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04A6B5A32269286F0035C7C2 /* Debug */,
+				04A6B5A42269286F0035C7C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
