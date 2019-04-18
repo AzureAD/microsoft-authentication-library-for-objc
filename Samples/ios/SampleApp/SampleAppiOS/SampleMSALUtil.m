@@ -203,7 +203,7 @@
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
     parameters.account = currentAccount;
-    parameters.uiBehavior = MSALUIBehaviorDefault;
+    parameters.promptType = MSALPromptTypeDefault;
     
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {

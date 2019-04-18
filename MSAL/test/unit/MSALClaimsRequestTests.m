@@ -243,7 +243,8 @@
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid claims target: qwe");
 }
@@ -257,7 +258,8 @@
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Failed to init claim additional info from json.");
 }
@@ -271,7 +273,8 @@
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"essential is not a NSNumber.");
 }
@@ -285,7 +288,8 @@
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"values is not an NSArray.");
 }
@@ -299,7 +303,8 @@
     
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"id_token is not a NSDictionary.");
 }

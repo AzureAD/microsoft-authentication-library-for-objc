@@ -97,19 +97,19 @@
     
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
-    MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+    MSALPromptType promptType = MSALPromptTypeDefault;
 
     if ([testRequest.promptBehavior isEqualToString:@"force"])
     {
-        uiBehavior = MSALForceLogin;
+        promptType = MSALPromptTypeLogin;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"consent"])
     {
-        uiBehavior = MSALForceConsent;
+        promptType = MSALPromptTypeConsent;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
-        uiBehavior = MSALPromptIfNecessary;
+        promptType = MSALPromptTypePromptIfNecessary;
     }
 
     MSIDWebviewType webviewSelection = testRequest.webViewType;
@@ -154,7 +154,7 @@
     parameters.extraScopesToConsent = extraScopes.array;
     parameters.account = account;
     parameters.loginHint = testRequest.loginHint;
-    parameters.uiBehavior = uiBehavior;
+    parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
     parameters.claimsRequest = claimsRequest;
     parameters.authority = acquireTokenAuthority;

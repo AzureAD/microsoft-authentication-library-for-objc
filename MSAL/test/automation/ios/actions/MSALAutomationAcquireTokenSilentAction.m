@@ -34,6 +34,7 @@
 #import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALError.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 

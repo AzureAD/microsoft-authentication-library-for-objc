@@ -183,7 +183,7 @@ extension SampleMSALAuthentication {
             
             let parameters = MSALInteractiveTokenParameters(scopes: scopes)
             parameters.account = account
-            parameters.uiBehavior = .MSALUIBehaviorDefault
+            parameters.promptType = .default
             
             application.acquireToken(with: parameters) {
                 (result: MSALResult?, error: Error?) in
@@ -217,7 +217,7 @@ extension SampleMSALAuthentication {
             let nsError = error! as NSError
 
             if (nsError.domain == MSALErrorDomain &&
-                nsError.code == MSALErrorCode.interactionRequired.rawValue) {
+                nsError.code == MSALError.interactionRequired.rawValue) {
                 DispatchQueue.main.async {
                     self.acquireTokenInteractiveForCurrentAccount(forScopes: scopes, completion: completion)
                 }

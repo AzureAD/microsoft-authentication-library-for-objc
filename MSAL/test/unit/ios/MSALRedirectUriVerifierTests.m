@@ -105,7 +105,7 @@
 
     XCTAssertNil(result);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
+    XCTAssertEqual(error.code, MSIDErrorRedirectSchemeNotRegistered);
 }
 
 - (void)testMSALRedirectUri_whenDefaultRedirectUri_andBrokerCapableUrlRegistered_shouldReturnUriAndBrokerCapableYes
@@ -147,17 +147,16 @@
     NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"myscheme"]}];
     [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
     [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
-
     NSString *clientId = @"msalclient";
-
     NSError *error = nil;
+    
     MSALRedirectUri *result = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:nil clientId:clientId error:&error];
 
     XCTAssertNil(result);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
-    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier\""]);
-    XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier://auth\""]);
+    XCTAssertEqual(error.code, MSIDErrorRedirectSchemeNotRegistered);
+    XCTAssertTrue([error.userInfo[MSIDErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier\""]);
+    XCTAssertTrue([error.userInfo[MSIDErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier://auth\""]);
 }
 
 @end

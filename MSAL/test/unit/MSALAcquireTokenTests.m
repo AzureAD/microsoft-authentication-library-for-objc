@@ -479,7 +479,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                          claimsRequest:claimsRequest
                              authority:nil
@@ -570,7 +570,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                          claimsRequest:[MSALClaimsRequest new]
                              authority:nil
@@ -607,7 +607,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue", @"claims":@"claims_value"}
                          claimsRequest:claimsRequest
                              authority:nil
@@ -617,7 +617,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
          XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
          [expectation fulfill];
      }];
@@ -705,7 +707,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                          claimsRequest:nil
                              authority:nil
@@ -804,7 +806,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                          claimsRequest:claimsRequest
                              authority:nil
@@ -898,7 +900,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                              loginHint:@"upn@test.com"
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
                          claimsRequest:claimsRequest
                              authority:nil
@@ -1001,7 +1003,7 @@
     [application acquireTokenForScopes:@[@"fakescopes"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"instance_aware":@"true"}
                              authority:nil
                          correlationId:nil
@@ -1178,7 +1180,9 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorUnhandledResponse);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorUnhandledResponse);
          
          [expectation fulfill];
      }];
@@ -1444,7 +1448,7 @@
     [application acquireTokenForScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
                   extraScopesToConsent:nil
                                account:nil
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                              authority:nil
                          correlationId:nil
@@ -2493,7 +2497,7 @@
     [application acquireTokenForScopes:@[@"fakescope"]
                   extraScopesToConsent:nil
                                account:account
-                            uiBehavior:MSALUIBehaviorDefault
+                            promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
                              authority:nil
                          correlationId:nil
@@ -2504,7 +2508,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorMismatchedUser);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorMismatchedUser);
          
          [expectation fulfill];
      }];

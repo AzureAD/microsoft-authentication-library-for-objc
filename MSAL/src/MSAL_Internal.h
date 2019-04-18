@@ -35,31 +35,8 @@
 // Framework versions only support high and low for the double value, sadly.
 #define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
 
-
-//General macro for throwing exception named NSInvalidArgumentException
-#define THROW_ON_CONDITION_ARGUMENT(CONDITION, ARG) \
-{ \
-    if (CONDITION) \
-    { \
-        MSID_LOG_ERROR(nil, @"InvalidArgumentException: " #ARG); \
-        @throw [NSException exceptionWithName: NSInvalidArgumentException \
-                                       reason:@"Please provide a valid '" #ARG "' parameter." \
-                                     userInfo:nil];  \
-    } \
-}
-
-//Checks a selector argument for being null. Throws NSException with name NSInvalidArgumentException if
-//the argument is invalid
-#define THROW_ON_NIL_ARGUMENT(ARG) THROW_ON_CONDITION_ARGUMENT(!(ARG), ARG);
-
-@class NSOrderedSet<T>;
-@class NSString;
-
-// Internally scopes usually are passed around as an ordered set of strings
-typedef NSOrderedSet<NSString *> MSALScopes;
-
 #import "IdentityCore_Internal.h"
-#include "MSIDLogger+Internal.h"
-#include "MSALError_Internal.h"
-#import  "MSIDRequestContext.h"
+#import "MSIDLogger+Internal.h"
+#import "MSIDRequestContext.h"
 #import "MSALConstants.h"
+#import "MSALError.h"
