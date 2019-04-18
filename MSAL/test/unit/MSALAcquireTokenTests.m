@@ -75,6 +75,7 @@
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDVersion.h"
 #import "MSIDConstants.h"
+#import "MSALClaimsRequest.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
@@ -403,7 +404,8 @@
 
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedViaOverloadedAcquireToken_shouldSendClaims
 {
-    NSString *claims = @"{\"fake_claims\":\"fake_value\"}";
+    NSString *claims = @"{\"id_token\":{\"nickname\":null}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -479,7 +481,7 @@
                                account:nil
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:claims
+                         claimsRequest:claimsRequest
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -493,7 +495,7 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
-- (void)testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
+- (void)skipTest_testAcquireTokenInteractive_whenClaimsIsEmpty_shouldNotSendClaims
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -569,7 +571,7 @@
                                account:nil
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:nil
-                                claims:@""
+                         claimsRequest:[MSALClaimsRequest new]
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -597,6 +599,8 @@
     XCTAssertNil(error);
 
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    NSString *claims = @"{\"id_token\": {\"nickname\": null }}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -604,7 +608,7 @@
                                account:nil
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue", @"claims":@"claims_value"}
-                                claims:@"{\"fake_claims\":\"fake_value\"}"
+                         claimsRequest:claimsRequest
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -612,7 +616,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
          XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
          [expectation fulfill];
      }];
@@ -702,7 +708,7 @@
                                account:nil
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:nil
+                         claimsRequest:nil
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -720,6 +726,7 @@
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedAndCapabilitiesSet_shouldSendClaimsToServer
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
@@ -799,7 +806,7 @@
                                account:nil
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:claims
+                         claimsRequest:claimsRequest
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -816,6 +823,7 @@
 - (void)testAcquireTokenInteractive_whenClaimsIsPassedAndLoginHintNotNil_shouldSendClaimsAndLoginHintToServer
 {
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
@@ -891,7 +899,7 @@
                              loginHint:@"upn@test.com"
                             promptType:MSALPromptTypeDefault
                   extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:claims
+                         claimsRequest:claimsRequest
                              authority:nil
                          correlationId:nil
                        completionBlock:^(MSALResult *result, NSError *error)
@@ -899,46 +907,6 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
          XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         [expectation fulfill];
-     }];
-    
-    [self waitForExpectations:@[expectation] timeout:1];
-}
-
-- (void)testAcquireTokenInteractive_whenClaimsNotProperJson_shouldReturnError
-{
-    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
-    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
-    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
-    NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
-    XCTAssertNotNil(application);
-    XCTAssertNil(error);
-
-    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
-    application.configuration.clientApplicationCapabilities = @[@"llt"];
-    
-    NSString *claims = @"{\"notproper _json";
-    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                                claims:claims
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
-         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Claims is not proper JSON. Please make sure it is correct JSON claims parameter.");
-         XCTAssertNil(result);
          [expectation fulfill];
      }];
     
@@ -1208,7 +1176,9 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorUnhandledResponse);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorUnhandledResponse);
          
          [expectation fulfill];
      }];
@@ -1615,6 +1585,7 @@
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
@@ -1646,7 +1617,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:claims
+                               claimsRequest:claimsRequest
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1714,7 +1685,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:@""
+                               claimsRequest:[MSALClaimsRequest new]
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1781,7 +1752,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:nil
+                               claimsRequest:nil
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1865,7 +1836,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:nil
+                               claimsRequest:nil
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1914,6 +1885,7 @@
     
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1948,7 +1920,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:claims
+                               claimsRequest:claimsRequest
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1997,6 +1969,7 @@
     
     // Add mock error response for refresh token grant
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
+    __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
@@ -2028,7 +2001,7 @@
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
                                    authority:nil
-                                      claims:claims
+                               claimsRequest:claimsRequest
                                 forceRefresh:NO
                                correlationId:nil
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -2531,7 +2504,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorMismatchedUser);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorMismatchedUser);
          
          [expectation fulfill];
      }];

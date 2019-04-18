@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALError_Internal.h"
 #import "MSALPromptType_Internal.h"
+#import "MSALError.h"
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
@@ -82,6 +82,7 @@
 #import "MSALExtraQueryParameters.h"
 #import "MSIDAADAuthority.h"
 #import "MSALCacheConfig.h"
+#import "MSALClaimsRequest+Internal.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -202,7 +203,11 @@
     // Verify required fields
     if ([NSString msidIsStringNilOrBlank:config.clientId])
     {
-        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"clientId is a required parameter and must not be nil or empty.");
+        NSError *msidError;
+        MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, @"clientId is a required parameter and must not be nil or empty.", nil);
+        
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        
         return nil;
     }
 
@@ -376,7 +381,7 @@
                       loginHint:parameters.loginHint
                      promptType:parameters.promptType
            extraQueryParameters:parameters.extraQueryParameters
-                         claims:parameters.claims
+                  claimsRequest:parameters.claimsRequest
                       authority:parameters.authority
                     webviewType:parameters.webviewType
                   customWebview:parameters.customWebview
@@ -394,7 +399,7 @@
                       loginHint:nil
                      promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -415,7 +420,7 @@
                       loginHint:loginHint
                      promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -436,7 +441,7 @@
                       loginHint:loginHint
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -460,7 +465,7 @@
                       loginHint:loginHint
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:authority
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -474,7 +479,7 @@
                     loginHint:(nullable NSString *)loginHint
                    promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(nullable NSString *)claims
+                claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock
@@ -485,7 +490,7 @@
                       loginHint:loginHint
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:claims
+                  claimsRequest:claimsRequest
                       authority:authority
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -506,7 +511,7 @@
                       loginHint:nil
                      promptType:MSALPromptTypeDefault
            extraQueryParameters:nil
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -528,7 +533,7 @@
                       loginHint:nil
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:nil
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -552,7 +557,7 @@
                       loginHint:nil
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:nil
+                  claimsRequest:nil
                       authority:authority
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -567,7 +572,7 @@
                       account:(MSALAccount *)account
                    promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
+                claimsRequest:(MSALClaimsRequest *)claimsRequest
                     authority:(MSALAuthority *)authority
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -578,7 +583,7 @@
                       loginHint:nil
                      promptType:promptType
            extraQueryParameters:extraQueryParameters
-                         claims:claims
+                  claimsRequest:claimsRequest
                       authority:authority
                     webviewType:MSALGlobalConfig.defaultWebviewType
                   customWebview:nil
@@ -596,7 +601,7 @@
     [self acquireTokenSilentForScopes:parameters.scopes
                               account:parameters.account
                             authority:parameters.authority
-                               claims:parameters.claims
+                        claimsRequest:parameters.claimsRequest
                          forceRefresh:parameters.forceRefresh
                         correlationId:parameters.correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
@@ -610,7 +615,7 @@
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:nil
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUser
@@ -625,7 +630,7 @@
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:NO
                         correlationId:nil
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAndAuthority
@@ -642,7 +647,7 @@
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:nil
+                        claimsRequest:nil
                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
@@ -652,7 +657,7 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
-                             claims:(nullable NSString *)claims
+                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock
@@ -660,7 +665,7 @@
     [self acquireTokenSilentForScopes:scopes
                               account:account
                             authority:authority
-                               claims:claims
+                        claimsRequest:claimsRequest
                          forceRefresh:forceRefresh
                         correlationId:correlationId
                                 apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
@@ -697,7 +702,7 @@
                     loginHint:(NSString *)loginHint
                    promptType:(MSALPromptType)promptType
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
-                       claims:(NSString *)claims
+                claimsRequest:(MSALClaimsRequest *)claimsRequest
                     authority:(MSALAuthority *)authority
                   webviewType:(MSALWebviewType)webviewType
                 customWebview:(WKWebView *)customWebview
@@ -800,7 +805,8 @@
     params.webviewType = msidWebViewType;
     params.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
     params.customWebview = customWebview;
-
+    params.claimsRequest = claimsRequest.msidClaimsRequest;
+    
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
@@ -813,9 +819,9 @@
               "                                      customWebview:%@\n"
               "                                      correlationId:%@\n"
               "                                       capabilities:%@\n"
-              "                                             claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForPromptType(promptType), extraQueryParameters, _PII_NULLIFY(authority), MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claims);
+              "                                      claimsRequest:%@]",
 
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForPromptType(promptType), extraQueryParameters, _PII_NULLIFY(authority), MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claimsRequest);
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -828,8 +834,8 @@
                   "                                      customWebview:%@\n"
                   "                                      correlationId:%@\n"
                   "                                       capabilities:%@\n"
-                  "                                             claims:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForPromptType(promptType), extraQueryParameters, authority, MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claims);
+                  "                                      claimsRequest:%@]",
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForPromptType(promptType), extraQueryParameters, authority, MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claimsRequest);
 
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
@@ -847,15 +853,6 @@
             });
         }
     };
-
-    NSError *claimsError = nil;
-
-    // Configure claims
-    if (![params setClaimsFromJSON:claims error:&claimsError])
-    {
-        block(nil, claimsError);
-        return;
-    }
 
     NSError *requestError = nil;
 
@@ -896,7 +893,7 @@
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
                             account:(MSALAccount *)account
                           authority:(MSALAuthority *)authority
-                             claims:(NSString *)claims
+                      claimsRequest:(MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(NSUUID *)correlationId
                               apiId:(MSALTelemetryApiId)apiId
@@ -941,7 +938,8 @@
     params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
     params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
     params.tokenExpirationBuffer = _configuration.tokenExpirationBuffer;
-
+    params.claimsRequest = claimsRequest.msidClaimsRequest;
+    
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                  account:%@\n"
@@ -949,9 +947,8 @@
               "                                             forceRefresh:%@\n"
               "                                            correlationId:%@\n"
               "                                             capabilities:%@\n"
-              "                                                   claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claims);
-
+              "                                            claimsRequest:%@]",
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claimsRequest);
 
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -960,8 +957,8 @@
                   "                                             forceRefresh:%@\n"
                   "                                            correlationId:%@\n"
                   "                                             capabilities:%@\n"
-                  "                                                   claims:%@]",
-                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claims);
+                  "                                            claimsRequest:%@]",
+                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claimsRequest);
 
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
@@ -969,15 +966,6 @@
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:params];
         completionBlock(result, msalError);
     };
-
-    NSError *claimsError = nil;
-
-    // Set claims
-    if (![params setClaimsFromJSON:claims error:&claimsError])
-    {
-        block(nil, claimsError);
-        return;
-    }
 
     NSError *requestError = nil;
     MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_configuration.authority.url context:nil error:&requestError];

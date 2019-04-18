@@ -36,6 +36,7 @@
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationPassedInWebViewController.h"
 #import "MSALInteractiveTokenParameters.h"
+#import "MSALClaimsRequest.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -84,7 +85,16 @@
     NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestScopes];
     NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:testRequest.extraScopes];
     NSUUID *correlationId = [NSUUID new];
-    NSString *claims = testRequest.claims;
+    
+    NSError *claimsError;
+    MSALClaimsRequest *claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
+    if (claimsError)
+    {
+        MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];
+        completionBlock(result);
+        return;
+    }
+    
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
     MSALPromptType promptType = MSALPromptTypeDefault;
@@ -116,7 +126,7 @@
     parameters.loginHint = testRequest.loginHint;
     parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
-    parameters.claims = claims;
+    parameters.claimsRequest = claimsRequest;
     parameters.authority = acquireTokenAuthority;
     parameters.correlationId = correlationId;
     

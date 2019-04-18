@@ -127,7 +127,9 @@
     
     XCTAssertNil(application);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertNotNil(error.userInfo[MSALErrorDescriptionKey]);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"clientId"]);
@@ -210,7 +212,9 @@
     
     XCTAssertNil(application);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorRedirectSchemeNotRegistered);
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 

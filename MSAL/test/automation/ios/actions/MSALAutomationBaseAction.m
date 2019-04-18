@@ -125,10 +125,8 @@
 
 - (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error
 {
-    NSString *errorName = MSALStringForErrorCode(error.code);
     return [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                        error:error
-                                                   errorName:errorName
                                               additionalInfo:nil];
 }
 

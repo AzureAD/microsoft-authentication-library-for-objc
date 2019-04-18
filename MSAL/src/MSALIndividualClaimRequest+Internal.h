@@ -25,19 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        3
-#define MSAL_VER_PATCH      0
+#import "MSALIndividualClaimRequest.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@class MSIDIndividualClaimRequest;
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+NS_ASSUME_NONNULL_BEGIN
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+@interface MSALIndividualClaimRequest ()
+
+- (instancetype)initWithMsidIndividualClaimRequest:(MSIDIndividualClaimRequest *)msidIndividualClaimRequest;
+
+@property (nonatomic) MSIDIndividualClaimRequest *msidIndividualClaimRequest;
+
+@end
+
+NS_ASSUME_NONNULL_END
