@@ -27,7 +27,10 @@
 
 
 #import "MSALCacheConfig.h"
+
+#if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
+#endif
 
 @implementation MSALCacheConfig
   
@@ -54,7 +57,11 @@
 
 + (instancetype)defaultConfig
 {
+#if TARGET_OS_IPHONE
     return [[self.class alloc] initWithKeychainSharingGroup:MSIDKeychainTokenCache.defaultKeychainGroup];
+#else
+    return [[self.class alloc] initWithKeychainSharingGroup:nil];
+#endif
 }
 
 + (nullable instancetype)configWithKeychainSharingGroup:(NSString *)keychainSharingGroup
