@@ -99,14 +99,14 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"unsupported"];
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInvalidScope"];
+    [self assertErrorCode:MSALInternalErrorInvalidScope];
     [self closeResultView];
 
     // 6. Run silent with not consented scopes
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"not_consented"];
     config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
     [self assertErrorSubcode:@"consent_required"];
     [self closeResultView];
 
@@ -123,7 +123,7 @@
 
     // 8. Assert invalid grant, because RT is invalid
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
 }
 
 - (void)testInteractiveAADLogin_withConvergedApp_andMicrosoftGraphScopes_andCommonEndpoint_andDifferentAuthorityAliases
@@ -261,7 +261,7 @@
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
 
     // Verify error and granted/declined scopes contents
-    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    [self assertErrorCode:MSALErrorServerDeclinedScopes];
     MSIDAutomationErrorResult *result = [self automationErrorResult];
     NSArray *declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
@@ -278,7 +278,7 @@
     [self acquireTokenSilent:config];
 
     // Verify error and granted/declined scopes contents
-    [self assertErrorCode:@"MSALErrorServerDeclinedScopes"];
+    [self assertErrorCode:MSALErrorServerDeclinedScopes];
     result = [self automationErrorResult];
     declinedScopes = result.errorUserInfo[MSALDeclinedScopesKey];
     XCTAssertEqualObjects(declinedScopes, @[ignoredScope]);
@@ -342,7 +342,7 @@
     XCUIElement *acceptButton = self.testApp.webViews.buttons[@"Cancel"];
     [acceptButton msidTap];
 
-    [self assertErrorCode:@"MSALErrorAuthorizationFailed"];
+    [self assertErrorCode:MSALInternalErrorAuthorizationFailed];
 }
 
 #pragma mark - MDM
@@ -413,7 +413,7 @@
     [self waitForElement:getTheAppButton];
     [self.testApp activate];
 
-    [self assertErrorCode:@"MSALErrorSessionCanceled"];
+    [self assertErrorCode:MSALInternalErrorSessionCanceled];
 }
 
 #pragma mark - Login hint

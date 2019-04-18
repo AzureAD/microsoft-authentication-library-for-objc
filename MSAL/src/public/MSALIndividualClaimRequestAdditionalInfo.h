@@ -25,18 +25,42 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        3
-#define MSAL_VER_PATCH      0
+#import <Foundation/Foundation.h>
+#import "MSALJsonSerializable.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+NS_ASSUME_NONNULL_BEGIN
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+/*!
+ Represents the additional information that can be sent to an authorization server for a request claim in the claim request parameter.
+ See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
+ 
+ Example of Individual Claim Request Additional Info serialized to json:
+ 
+    {"essential": true}
+ 
+ */
+@interface MSALIndividualClaimRequestAdditionalInfo : NSObject
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSIDRequestContext.h"
-#import "MSALConstants.h"
-#import "MSALError.h"
+/*!
+ Indicates whether the Claim being requested is an Essential Claim.
+ Should be either boolean or nil.
+*/
+@property (nonatomic, nullable) NSNumber *essential;
+
+/*!
+ Requests that the Claim be returned with a particular value.
+ Must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
+ */
+@property (nonatomic, nullable) id value;
+
+/*
+ Requests that the Claim be returned with one of a set of values, with the values appearing in order of preference.
+ All values must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
+ */
+@property (nonatomic, nullable) NSArray *values;
+
+@end
+
+NS_ASSUME_NONNULL_END

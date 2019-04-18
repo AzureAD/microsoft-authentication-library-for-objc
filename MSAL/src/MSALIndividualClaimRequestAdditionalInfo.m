@@ -25,18 +25,68 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        3
-#define MSAL_VER_PATCH      0
+#import "MSALIndividualClaimRequestAdditionalInfo+Internal.h"
+#import "MSIDIndividualClaimRequestAdditionalInfo.h"
+#import "MSIDJsonSerializer.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@implementation MSALIndividualClaimRequestAdditionalInfo
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        _msidAdditionalInfo = [MSIDIndividualClaimRequestAdditionalInfo new];
+        _jsonSerializer = [MSIDJsonSerializer new];
+    }
+    return self;
+}
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSIDRequestContext.h"
-#import "MSALConstants.h"
-#import "MSALError.h"
+- (NSString *)description
+{
+    return [self.msidAdditionalInfo description];
+}
+
+- (instancetype)initWithMsidIndividualClaimRequestAdditionalInfo:(MSIDIndividualClaimRequestAdditionalInfo *)msidAdditionalInfo
+{
+    if (!msidAdditionalInfo) return nil;
+    
+    self = [super init];
+    if (self)
+    {
+        _msidAdditionalInfo = msidAdditionalInfo;
+    }
+    return self;
+}
+
+- (void)setEssential:(NSNumber *)essential
+{
+    self.msidAdditionalInfo.essential = essential;
+}
+
+- (NSNumber *)essential
+{
+    return self.msidAdditionalInfo.essential;
+}
+
+- (void)setValue:(id)value
+{
+    self.msidAdditionalInfo.value = value;
+}
+
+- (id)value
+{
+    return self.msidAdditionalInfo.value;
+}
+
+- (void)setValues:(NSArray *)values
+{
+    self.msidAdditionalInfo.values = values;
+}
+
+- (NSArray *)values
+{
+    return self.msidAdditionalInfo.values;
+}
+
+@end

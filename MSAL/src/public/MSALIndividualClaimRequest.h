@@ -25,18 +25,43 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        3
-#define MSAL_VER_PATCH      0
+#import <Foundation/Foundation.h>
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@class MSALIndividualClaimRequestAdditionalInfo;
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+NS_ASSUME_NONNULL_BEGIN
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSIDRequestContext.h"
-#import "MSALConstants.h"
-#import "MSALError.h"
+/*!
+ Represents the individual claim request.
+ See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
+ 
+ Example of Individual Claim Request serialized to json:
+ 
+    "auth_time": {"essential": true}
+ 
+ */
+@interface MSALIndividualClaimRequest : NSObject
+
+/*!
+ Init with claim name.
+ @param name Name of the requsted claim.
+ */
+- (instancetype)initWithName:(NSString *)name;
+
++ (instancetype)new NS_UNAVAILABLE;
+
+- (instancetype)init NS_UNAVAILABLE;
+
+/*!
+ Name of the claim being requested.
+ */
+@property (nonatomic) NSString *name;
+
+/*!
+ Additional information that can be optionally sent to the authorization server (default is null) for a particular requested claim.
+ */
+@property (nonatomic, nullable) MSALIndividualClaimRequestAdditionalInfo *additionalInfo;
+
+@end
+
+NS_ASSUME_NONNULL_END

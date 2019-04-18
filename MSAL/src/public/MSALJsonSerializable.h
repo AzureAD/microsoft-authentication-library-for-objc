@@ -25,18 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        3
-#define MSAL_VER_PATCH      0
+#import <Foundation/Foundation.h>
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+NS_ASSUME_NONNULL_BEGIN
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+/*!
+ A protocol that objects adopt to provide serialization to JSON.
+ */
+@protocol MSALJsonSerializable <NSObject>
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSIDRequestContext.h"
-#import "MSALConstants.h"
-#import "MSALError.h"
+/*!
+ Deserialize object to json string.
+ @return Json string.
+ */
+- (nullable NSString *)jsonString;
+
+@end
+
+NS_ASSUME_NONNULL_END

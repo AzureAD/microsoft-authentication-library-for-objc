@@ -86,8 +86,8 @@
     MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
     
     XCTAssertNil(result);
-    XCTAssertEqualObjects(error.domain, @"MSALErrorDomain");
-    XCTAssertEqual(error.code, -42000);
+    XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
+    XCTAssertEqual(error.code, MSIDErrorInvalidDeveloperParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertEqualObjects(error.userInfo[MSIDErrorDescriptionKey], @"Provided authority url is not a valid authority.");
 }
