@@ -46,7 +46,7 @@
     return singleton;
 }
 
-- (void)addDispatcher:(nonnull id<MSALDispatcher>)dispatcher
+- (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
 setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
     MSALDefaultDispatcher *telemetryDispatcher = [[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
@@ -55,7 +55,7 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
     [[MSIDTelemetry sharedInstance] addDispatcher:telemetryDispatcher];
 }
 
-- (void)removeDispatcher:(nonnull id<MSALDispatcher>)dispatcher
+- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
 {
     [[MSIDTelemetry sharedInstance] findAndRemoveDispatcher:dispatcher];
 }

@@ -40,9 +40,10 @@
 #import "MSALTestAppProfileViewController.h"
 #import "MSALResult.h"
 #import "MSALLogger.h"
-#import "MSALConstants.h"
+#import "MSALDefinitions.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALAuthority.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -488,18 +489,19 @@
 
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri];
+    authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    pcaConfig.authority = authority;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
-    
-    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     
@@ -536,20 +538,19 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
+
     
-    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
-    application.customWebview = nil;
-    
-    if (application.webviewType == MSALWebviewTypeWKWebView &&
-        _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
+    parameters.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    if (parameters.webviewType == MSALWebviewTypeWKWebView
+        && _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
-        application.customWebview = _webView;
+        parameters.customWebview = _webView;
         
         [_acquireSettingsView setHidden:YES];
         [_authView setHidden:NO];
     }
-    
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
+        
     parameters.loginHint = _loginHintField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptType];
@@ -587,18 +588,18 @@
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri];
+    authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    pcaConfig.authority = authority;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
-    
-    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     _acquireSilentButton.enabled = NO;
@@ -651,10 +652,12 @@
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri];
+    pcaConfig.authority = authority;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
+                                                                                                    error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
@@ -779,10 +782,11 @@
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri];
+    pcaConfig.authority = authority;
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)
     {

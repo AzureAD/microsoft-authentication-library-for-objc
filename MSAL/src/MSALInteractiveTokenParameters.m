@@ -27,12 +27,18 @@
 
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALTokenParameters+Internal.h"
-
+#import "MSALGlobalConfig.h"
 @implementation MSALInteractiveTokenParameters
 
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
 {
-    return [super initWithScopes:scopes];
+    self = [super initWithScopes:scopes];
+    if (self)
+    {
+        _webviewType = MSALGlobalConfig.defaultWebviewType;
+        _customWebview = nil;
+    }
+    return self;
 }
 
 @end

@@ -116,6 +116,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     __auto_type authority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
+    
     MSIDTestURLResponse *oidcResponse =
     [MSIDTestURLResponse oidcResponseForAuthority:authority.msidAuthority.url.absoluteString
                                       responseUrl:@"https://login.microsoftonline.com/contosob2c"
@@ -370,7 +371,7 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
@@ -449,8 +450,7 @@
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
             @"haschrome" : @"1",
-            @"eqpKey" : @"eqpValue",
-            UT_SLICE_PARAMS_DICT
+            @"eqpKey" : @"eqpValue"
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
@@ -470,7 +470,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -539,8 +539,7 @@
             @"response_type" : @"code",
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
-            @"haschrome" : @"1",
-            UT_SLICE_PARAMS_DICT
+            @"haschrome" : @"1"
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
@@ -561,7 +560,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -597,7 +596,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     [application acquireTokenForScopes:@[@"fakescopes"]
@@ -672,8 +671,7 @@
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
             @"haschrome" : @"1",
-            @"eqpKey" : @"eqpValue",
-            UT_SLICE_PARAMS_DICT
+            @"eqpKey" : @"eqpValue"
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
@@ -694,9 +692,10 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    [application setClientCapabilities:@[@"llt"]];
+    
+    application.configuration.clientApplicationCapabilities = @[@"llt"];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -771,7 +770,6 @@
             @"code_challenge_method" : @"S256",
             @"haschrome" : @"1",
             @"eqpKey" : @"eqpValue",
-            UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
@@ -792,9 +790,9 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    [application setClientCapabilities:@[@"llt"]];
+    application.configuration.clientApplicationCapabilities = @[@"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -867,7 +865,6 @@
             @"haschrome" : @"1",
             @"eqpKey" : @"eqpValue",
             @"login_hint": @"upn@test.com"
-            UT_SLICE_PARAMS_DICT
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary:[self getAppMetadata]];
@@ -887,7 +884,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -923,9 +920,9 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
-    [application setClientCapabilities:@[@"llt"]];
+    application.configuration.clientApplicationCapabilities = @[@"llt"];
     
     NSString *claims = @"{\"notproper _json";
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
@@ -1007,8 +1004,7 @@
             @"code_challenge": [MSIDTestRequireValueSentinel sentinel],
             @"code_challenge_method" : @"S256",
             @"haschrome" : @"1",
-            @"instance_aware" : @"true", //instance_aware parameter should be sent
-            UT_SLICE_PARAMS_DICT
+            @"instance_aware" : @"true" //instance_aware parameter should be sent
             } mutableCopy];
          [expectedQPs addEntriesFromDictionary:[MSIDDeviceId deviceId]];
          [expectedQPs addEntriesFromDictionary: [self getAppMetadata]];
@@ -1030,7 +1026,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
@@ -1135,7 +1131,7 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
+    application.configuration.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1205,7 +1201,7 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.extendedLifetimeEnabled = NO; //default is NO
+    application.configuration.extendedLifetimeEnabled = NO; //default is NO
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1409,7 +1405,7 @@
                                                                                                error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
+    application.configuration.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1475,7 +1471,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
@@ -1712,7 +1708,7 @@
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
     
-    [application setClientCapabilities:@[@"cp1"]];
+    application.configuration.clientApplicationCapabilities = @[@"cp1"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1779,7 +1775,7 @@
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
     
-    [application setClientCapabilities:@[@"cp1"]];
+    application.configuration.clientApplicationCapabilities = @[@"cp1"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1869,7 +1865,7 @@
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
     
-    [application setClientCapabilities:@[@"cp1", @"llt"]];
+    application.configuration.clientApplicationCapabilities = @[@"cp1", @"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1952,7 +1948,7 @@
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
     
-    [application setClientCapabilities:@[@"llt"]];
+    application.configuration.clientApplicationCapabilities = @[@"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -2514,7 +2510,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;

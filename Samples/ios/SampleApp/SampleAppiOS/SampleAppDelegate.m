@@ -73,7 +73,11 @@
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
+<<<<<<< HEAD
     if ([MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]])
+=======
+    if ([MSALPublicClientApplication handleMSALResponse:url sourceApplication:UIApplicationOpenURLOptionsSourceApplicationKey])
+>>>>>>> origin/jak/config-obj
     {
         NSLog(@"This URL is handled by MSAL");
     }

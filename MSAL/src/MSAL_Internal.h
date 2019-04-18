@@ -36,7 +36,14 @@
 #define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
 
 #import "IdentityCore_Internal.h"
+<<<<<<< HEAD
 #import "MSIDLogger+Internal.h"
 #import "MSIDRequestContext.h"
 #import "MSALConstants.h"
 #import "MSALError.h"
+=======
+#include "MSIDLogger+Internal.h"
+#include "MSALError_Internal.h"
+#import  "MSIDRequestContext.h"
+#import "MSALDefinitions.h"
+>>>>>>> origin/jak/config-obj

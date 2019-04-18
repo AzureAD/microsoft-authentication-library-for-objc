@@ -74,6 +74,12 @@
 #import "MSIDNotifications.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALSliceConfig.h"
+#import "MSALGlobalConfig.h"
+#import "MSALPublicClientApplicationConfig+Internal.h"
+#import "MSALCacheConfig.h"
+#import "MSALADFSAuthority.h"
+#import "MSALExtraQueryParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -82,24 +88,11 @@
 }
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
-#if TARGET_OS_IPHONE
-@property (nonatomic, readwrite) NSString *keychainGroup;
-#endif
 
 @end
 
-static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @implementation MSALPublicClientApplication
-
-- (NSString *)defaultKeychainGroup
-{
-#if TARGET_OS_IPHONE
-    return MSIDKeychainTokenCache.defaultKeychainGroup;
-#else
-    return nil;
-#endif
-}
 
 + (void)load
 {
@@ -114,11 +107,46 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceieveResponseFromBroker;
 }
 
+#pragma mark - Properties
+- (BOOL)validateAuthority { return YES; }
+- (void)setValidateAuthority:(BOOL)validateAuthority
+{
+    if ([self.configuration.authority isKindOfClass:MSALADFSAuthority.class])
+    {
+        ((MSALADFSAuthority *)self.configuration.authority).validateAuthority = validateAuthority;
+    }
+    else
+    {
+        MSID_LOG_WARN(nil, @"Authority validation is only available for authority targetting AD FS.");
+    }
+}
+
+- (MSALAuthority *)authority { return self.configuration.authority; }
+- (NSString *)clientId { return self.configuration.clientId; }
+- (MSALRedirectUri *)redirectUri { return self.configuration.verifiedRedirectUri; }
+
+- (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.configuration.sliceConfig.sliceDictionary; }
+- (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
+{
+    self.configuration.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
+}
+
+- (MSALWebviewType)webviewType { return MSALGlobalConfig.defaultWebviewType; }
+- (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
+
+#if TARGET_OS_IPHONE
+- (NSString *)keychainGroup { return MSALGlobalConfig.cacheConfig.keychainSharingGroup; }
+- (void)setKeychainGroup:(NSString * _Nullable)keychainGroup { MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup; }
+#else
+- (NSString *)keychainGroup { return nil; }
+#endif
+
+#pragma mark - Initializers
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:nil
                       redirectUri:nil
                             error:error];
@@ -129,7 +157,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
@@ -141,7 +169,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.defaultKeychainGroup
+                    keychainGroup:self.keychainGroup
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
@@ -174,6 +202,59 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #endif
 
+- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    
+    // Verify required fields
+    if ([NSString msidIsStringNilOrBlank:config.clientId])
+    {
+        NSError *msidError;
+        MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, @"clientId is a required parameter and must not be nil or empty.", nil);
+        
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        
+        return nil;
+    }
+
+    NSError *msidError = nil;
+    MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirecrUri
+                                                                                    clientId:config.clientId
+                                                                                       error:&msidError];
+    
+    if (!msalRedirectUri)
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
+    
+    config.verifiedRedirectUri = msalRedirectUri;
+    
+#if TARGET_OS_IPHONE
+    // Optional Paramater
+    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSALGlobalConfig.cacheConfig.keychainSharingGroup];
+    
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
+    
+    self.tokenCache = defaultAccessor;
+#else
+    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
+    
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    self.tokenCache = defaultAccessor;
+#endif
+    _configuration = config;
+    
+    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    
+    return self;
+}
+
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
              authority:(MSALAuthority *)authority
@@ -185,86 +266,15 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         return nil;
     }
 
-    if ([NSString msidIsStringNilOrBlank:clientId])
-    {
-        NSError *msidError;
-        MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, @"clientId is a required parameter and must not be nil or empty.", nil);
-        
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        
-        return nil;
-    }
-
-    _clientId = clientId;
-
-    NSError *msidError = nil;
-    
-    if (authority)
-    {
-        _authority = authority;
-    }
-    else
-    {
-        // TODO: Rationalize our default authority behavior (#93)
-        NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
-        _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL context:nil error:&msidError];
-    }
-
-    if (!_authority)
-    {
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        return nil;
-    }
-
-    MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:redirectUri
-                                                                                    clientId:clientId
-                                                                                       error:&msidError];
-
-    if (!msalRedirectUri)
-    {
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        return nil;
-    }
-
-    _redirectUri = msalRedirectUri;
-
 #if TARGET_OS_IPHONE
-    // Optional Paramater
-    _keychainGroup = keychainGroup;
-
-    MSIDKeychainTokenCache *dataSource;
-    if (_keychainGroup == nil)
-    {
-        _keychainGroup = [[NSBundle mainBundle] bundleIdentifier];
-    }
-    
-    dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:_keychainGroup];
-
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
-    
-    self.tokenCache = defaultAccessor;
-    
-    _webviewType = MSALWebviewTypeDefault;
-    
-#else
-    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
-
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    self.tokenCache = defaultAccessor;
-    _webviewType = MSALWebviewTypeWKWebView;
-    
+    if (keychainGroup) MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup;
+    else MSALGlobalConfig.cacheConfig.keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
 #endif
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri];
+    if (authority) config.authority = authority;
+    config.redirecrUri = redirectUri;
     
-    _validateAuthority = YES;
-    _extendedLifetimeEnabled = NO;
-    
-    _sliceParameters = [MSALPublicClientApplication defaultSliceParameters];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
-    _expirationBuffer = 300;  //in seconds, ensures catching of clock differences between the server and the device
-    
-    return self;
+    return [self initWithConfiguration:config error:error];
 }
 
 #pragma mark - Accounts
@@ -272,11 +282,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                          clientId:self.clientId];
+                                                                            clientId:self.configuration.clientId];
     NSError *msidError = nil;
     NSArray *accounts = [request allAccounts:&msidError];
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-    
+
     return accounts;
 }
 
@@ -284,12 +294,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                    error:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                          clientId:self.clientId];
+                                                                            clientId:self.configuration.clientId];
     NSError *msidError = nil;
     MSALAccount *account = [request accountForHomeAccountId:homeAccountId error:&msidError];
-    
+
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-    
+
     return account;
 }
 
@@ -297,21 +307,23 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                               error:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                          clientId:self.clientId];
+                                                                            clientId:self.configuration.clientId];
     NSError *msidError = nil;
     MSALAccount *account = [request accountForUsername:username error:&msidError];
-    
+
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-    
+
     return account;
 }
+
 
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                          clientId:self.clientId];
+                                                                            clientId:self.configuration.clientId];
 
-    [request allAccountsFilteredByAuthority:self.authority completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
+    [request allAccountsFilteredByAuthority:self.configuration.authority
+                            completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
         completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:msidError]);
     }];
 }
@@ -384,6 +396,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:parameters.extraQueryParameters
                          claims:parameters.claims
                       authority:parameters.authority
+                    webviewType:parameters.webviewType
+                  customWebview:parameters.customWebview
                   correlationId:parameters.correlationId
                           apiId:MSALTelemetryApiIdAcquireWithTokenParameters
                 completionBlock:completionBlock];
@@ -400,6 +414,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquire
                 completionBlock:completionBlock];
@@ -419,6 +435,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHint
                 completionBlock:completionBlock];
@@ -438,6 +456,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:nil
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters
                 completionBlock:completionBlock];
@@ -460,6 +480,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:authority
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
@@ -483,6 +505,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:claims
                       authority:authority
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndClaimsAndCorrelationId
                 completionBlock:completionBlock];
@@ -502,6 +526,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:nil
                          claims:nil
                       authority:nil
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
                 completionBlock:completionBlock];
@@ -522,6 +548,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:nil
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:nil
                           apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
                 completionBlock:completionBlock];
@@ -544,6 +572,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:nil
                       authority:authority
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
@@ -568,6 +598,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
            extraQueryParameters:extraQueryParameters
                          claims:claims
                       authority:authority
+                    webviewType:MSALGlobalConfig.defaultWebviewType
+                  customWebview:nil
                   correlationId:correlationId
                           apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
                 completionBlock:completionBlock];
@@ -685,11 +717,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
                        claims:(NSString *)claims
                     authority:(MSALAuthority *)authority
+                  webviewType:(MSALWebviewType)webviewType
+                customWebview:(WKWebView *)customWebview
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDAuthority *requestAuthority = authority.msidAuthority ?: _authority.msidAuthority;
+    MSIDAuthority *requestAuthority = authority.msidAuthority ?: self.configuration.authority.msidAuthority;
     NSOrderedSet *requestScopes = [[NSOrderedSet alloc] initWithArray:scopes copyItems:YES];
     NSOrderedSet *requestExtraScopes = extraScopesToConsent ? [[NSOrderedSet alloc] initWithArray:extraScopesToConsent copyItems:YES] : nil;
     NSOrderedSet *requestOIDCScopes = [self.class defaultOIDCScopes];
@@ -699,18 +733,19 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
 
-    if (_brokerAvailability == MSALBrokeredAvailabilityNone)
+#if TARGET_OS_IPHONE
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
-    else if (!_redirectUri.brokerCapable)
+    else if (!_configuration.verifiedRedirectUri.brokerCapable)
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
-
+#endif
     MSIDInteractiveRequestParameters *params = [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
-                                                                                               redirectUri:_redirectUri.url.absoluteString
-                                                                                                  clientId:_clientId
+                                                                                               redirectUri:_configuration.verifiedRedirectUri.url.absoluteString
+                                                                                                  clientId:_configuration.clientId
                                                                                                     scopes:requestScopes
                                                                                                 oidcScopes:requestOIDCScopes
                                                                                       extraScopesToConsent:requestExtraScopes
@@ -743,15 +778,35 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     params.loginHint = loginHint;
     params.extraAuthorizeURLQueryParameters = extraQueryParameters;
     params.accountIdentifier = account.lookupAccountIdentifier;
-    params.validateAuthority = _validateAuthority;
-    params.extraURLQueryParameters = _sliceParameters;
-    params.tokenExpirationBuffer = _expirationBuffer;
-    params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
-    params.clientCapabilities = _clientCapabilities;
+    
+    params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
 
+    NSMutableDictionary *extraAuthorizeURLQueryParameters = [_configuration.extraQueryParameters.extraAuthorizeURLQueryParameters mutableCopy];
+    [extraAuthorizeURLQueryParameters addEntriesFromDictionary:extraQueryParameters];
+    params.extraAuthorizeURLQueryParameters = extraAuthorizeURLQueryParameters;
+    params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
+    
+    params.tokenExpirationBuffer = _configuration.tokenExpirationBuffer;
+    params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
+    params.clientCapabilities = _configuration.clientApplicationCapabilities;
+
+    params.validateAuthority = _configuration.authority.validateAuthority;
+    
+    if (params.validateAuthority && MSALGlobalConfig.knownAuthorities)
+    {
+        for (MSALAuthority *knownAuthority in MSALGlobalConfig.knownAuthorities)
+        {
+            if ([params.authority isKindOfClass:knownAuthority.class]
+                && [knownAuthority.url isEqual:params.authority.url])
+            {
+                params.validateAuthority = NO;
+            }
+        }
+    }
+    
     // Configure webview
     NSError *msidWebviewError = nil;
-    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(_webviewType, &msidWebviewError);
+    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);
 
     if (msidWebviewError)
     {
@@ -760,9 +815,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     params.webviewType = msidWebViewType;
-    params.telemetryWebviewType = MSALStringForMSALWebviewType(_webviewType);
-    params.customWebview = _customWebview;
-    
+    params.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
+    params.customWebview = customWebview;
+
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
               "                               extraScopesToConsent:%@\n"
@@ -771,10 +826,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                         promptType:%@\n"
               "                               extraQueryParameters:%@\n"
               "                                          authority:%@\n"
+              "                                        webviewType:%@\n"
+              "                                      customWebview:%@\n"
               "                                      correlationId:%@\n"
               "                                       capabilities:%@\n"
               "                                             claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForPromptType(promptType), extraQueryParameters, _PII_NULLIFY(authority), correlationId, _clientCapabilities, claims);
+             _PII_NULLIFY(scopes), _PII_NULLIFY(extraScopesToConsent), _PII_NULLIFY(account.homeAccountId), _PII_NULLIFY(loginHint), MSALStringForPromptType(promptType), extraQueryParameters, _PII_NULLIFY(authority), MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claims);
+
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenForScopes:%@\n"
                   "                               extraScopesToConsent:%@\n"
@@ -783,11 +841,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                         promptType:%@\n"
                   "                               extraQueryParameters:%@\n"
                   "                                          authority:%@\n"
+                  "                                        webviewType:%@\n"
+                  "                                      customWebview:%@\n"
                   "                                      correlationId:%@\n"
                   "                                       capabilities:%@\n"
                   "                                             claims:%@]",
-                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForPromptType(promptType), extraQueryParameters, authority, correlationId, _clientCapabilities, claims);
-    
+                 scopes, extraScopesToConsent, account.homeAccountId, loginHint, MSALStringForPromptType(promptType), extraQueryParameters, authority, MSALStringForMSALWebviewType(webviewType), customWebview, correlationId, _configuration.clientApplicationCapabilities, claims);
+
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
@@ -804,7 +864,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             });
         }
     };
-    
+
     NSError *claimsError = nil;
 
     // Configure claims
@@ -816,7 +876,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     NSError *requestError = nil;
 
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_authority.url context:nil error:&requestError];
+    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_configuration.authority.url context:nil error:&requestError];
 
     if (!oauth2Factory)
     {
@@ -859,12 +919,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                               apiId:(MSALTelemetryApiId)apiId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDAuthority *msidAuthority = authority.msidAuthority;
-
-    if (!msidAuthority)
-    {
-        msidAuthority = self.authority.msidAuthority;
-    }
+    
+    MSIDAuthority *msidAuthority = authority.msidAuthority ?: self.configuration.authority.msidAuthority;
 
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
@@ -878,9 +934,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     NSError *msidError = nil;
 
+    // add known authorities here.
     MSIDRequestParameters *params = [[MSIDRequestParameters alloc] initWithAuthority:msidAuthority
-                                                                         redirectUri:_redirectUri.url.absoluteString
-                                                                            clientId:_clientId
+                                                                         redirectUri:_configuration.verifiedRedirectUri.url.absoluteString
+                                                                            clientId:_configuration.clientId
                                                                               scopes:requestScopes
                                                                           oidcScopes:requestOIDCScopes
                                                                        correlationId:correlationId
@@ -895,12 +952,13 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     // Set optional params
     params.accountIdentifier = account.lookupAccountIdentifier;
-    params.validateAuthority = _validateAuthority;
-    params.extendedLifetimeEnabled = _extendedLifetimeEnabled;
-    params.clientCapabilities = _clientCapabilities;
-    params.extraURLQueryParameters = _sliceParameters;
-    params.tokenExpirationBuffer = _expirationBuffer;
-    
+    params.validateAuthority = _configuration.authority.validateAuthority;
+    params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
+    params.clientCapabilities = _configuration.clientApplicationCapabilities;
+    params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;
+    params.extraTokenRequestParameters = _configuration.extraQueryParameters.extraTokenURLParameters;
+    params.tokenExpirationBuffer = _configuration.tokenExpirationBuffer;
+
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
               "                                                  account:%@\n"
@@ -909,9 +967,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
               "                                            correlationId:%@\n"
               "                                             capabilities:%@\n"
               "                                                   claims:%@]",
-             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
-    
-    
+             _PII_NULLIFY(scopes), _PII_NULLIFY(account), _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claims);
+
+
     MSID_LOG_PII(MSIDLogLevelInfo, nil, params,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                   "                                                  account:%@\n"
@@ -920,8 +978,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                   "                                            correlationId:%@\n"
                   "                                             capabilities:%@\n"
                   "                                                   claims:%@]",
-                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _clientCapabilities, claims);
-    
+                 scopes, account, _PII_NULLIFY(authority), forceRefresh ? @"Yes" : @"No", correlationId, _configuration.clientApplicationCapabilities, claims);
+
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
@@ -939,7 +997,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     }
 
     NSError *requestError = nil;
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_authority.url context:nil error:&requestError];
+    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:_configuration.authority.url context:nil error:&requestError];
 
     if (!oauth2Factory)
     {
@@ -987,7 +1045,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
     BOOL result = [self.tokenCache clearCacheForAccount:account.lookupAccountIdentifier
                                               authority:nil
-                                               clientId:self.clientId
+                                               clientId:_configuration.clientId
                                                familyId:nil
                                                 context:nil
                                                   error:&msidError];
@@ -1005,7 +1063,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
 
     BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
-                                                                clientId:self.clientId
+                                                                clientId:_configuration.clientId
                                                                authority:authority
                                                                  context:nil
                                                                    error:&metadataError];
@@ -1029,11 +1087,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return [NSOrderedSet orderedSetWithObjects:MSID_OAUTH2_SCOPE_OPENID_VALUE,
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
-}
-
-+ (NSDictionary *)defaultSliceParameters
-{
-    return @{ DEFAULT_SLICE_PARAMS };
 }
 
 @end
