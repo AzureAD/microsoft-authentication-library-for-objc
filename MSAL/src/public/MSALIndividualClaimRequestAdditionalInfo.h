@@ -26,38 +26,41 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALJsonSerializable.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+NS_ASSUME_NONNULL_BEGIN
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+/*!
+ Represents the additional information that can be sent to an authorization server for a request claim in the claim request parameter.
+ See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
+ 
+ Example of Individual Claim Request Additional Info serialized to json:
+ 
+    {"essential": true}
+ 
+ */
+@interface MSALIndividualClaimRequestAdditionalInfo : NSObject
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
+/*!
+ Indicates whether the Claim being requested is an Essential Claim.
+ Should be either boolean or nil.
+*/
+@property (nonatomic, nullable) NSNumber *essential;
 
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALRedirectUri.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
-#import <MSAL/MSALPublicClientStatusNotifications.h>
-#import <MSAL/MSALSilentTokenParameters.h>
-#import <MSAL/MSALInteractiveTokenParameters.h>
-#import <MSAL/MSALTokenParameters.h>
-#import <MSAL/MSALClaimsRequest.h>
-#import <MSAL/MSALIndividualClaimRequest.h>
-#import <MSAL/MSALIndividualClaimRequestAdditionalInfo.h>
-#import <MSAL/MSALJsonSerializable.h>
-#import <MSAL/MSALJsonDeserializable.h>
+/*!
+ Requests that the Claim be returned with a particular value.
+ Must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
+ */
+@property (nonatomic, nullable) id value;
+
+/*
+ Requests that the Claim be returned with one of a set of values, with the values appearing in order of preference.
+ All values must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
+ Otherwise exception will be thrown during json serialization.
+ */
+@property (nonatomic, nullable) NSArray *values;
+
+@end
+
+NS_ASSUME_NONNULL_END

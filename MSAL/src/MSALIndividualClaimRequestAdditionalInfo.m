@@ -25,39 +25,68 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALIndividualClaimRequestAdditionalInfo+Internal.h"
+#import "MSIDIndividualClaimRequestAdditionalInfo.h"
+#import "MSIDJsonSerializer.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+@implementation MSALIndividualClaimRequestAdditionalInfo
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        _msidAdditionalInfo = [MSIDIndividualClaimRequestAdditionalInfo new];
+        _jsonSerializer = [MSIDJsonSerializer new];
+    }
+    return self;
+}
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
+- (NSString *)description
+{
+    return [self.msidAdditionalInfo description];
+}
 
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALRedirectUri.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
-#import <MSAL/MSALPublicClientStatusNotifications.h>
-#import <MSAL/MSALSilentTokenParameters.h>
-#import <MSAL/MSALInteractiveTokenParameters.h>
-#import <MSAL/MSALTokenParameters.h>
-#import <MSAL/MSALClaimsRequest.h>
-#import <MSAL/MSALIndividualClaimRequest.h>
-#import <MSAL/MSALIndividualClaimRequestAdditionalInfo.h>
-#import <MSAL/MSALJsonSerializable.h>
-#import <MSAL/MSALJsonDeserializable.h>
+- (instancetype)initWithMsidIndividualClaimRequestAdditionalInfo:(MSIDIndividualClaimRequestAdditionalInfo *)msidAdditionalInfo
+{
+    if (!msidAdditionalInfo) return nil;
+    
+    self = [super init];
+    if (self)
+    {
+        _msidAdditionalInfo = msidAdditionalInfo;
+    }
+    return self;
+}
+
+- (void)setEssential:(NSNumber *)essential
+{
+    self.msidAdditionalInfo.essential = essential;
+}
+
+- (NSNumber *)essential
+{
+    return self.msidAdditionalInfo.essential;
+}
+
+- (void)setValue:(id)value
+{
+    self.msidAdditionalInfo.value = value;
+}
+
+- (id)value
+{
+    return self.msidAdditionalInfo.value;
+}
+
+- (void)setValues:(NSArray *)values
+{
+    self.msidAdditionalInfo.values = values;
+}
+
+- (NSArray *)values
+{
+    return self.msidAdditionalInfo.values;
+}
+
+@end

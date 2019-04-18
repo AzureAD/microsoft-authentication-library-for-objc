@@ -25,39 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALClaimsRequest.h"
 
-#if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
-#else
-#import <Cocoa/Cocoa.h>
-#endif
+@class MSIDClaimsRequest;
+@protocol MSIDJsonSerializing;
 
-//! Project version number for MSAL.
-FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
+NS_ASSUME_NONNULL_BEGIN
 
-//! Project version string for MSAL.
-FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
+@interface MSALClaimsRequest ()
 
-#import <MSAL/MSALConstants.h>
-#import <MSAL/MSALRedirectUri.h>
-#import <MSAL/MSALError.h>
-#import <MSAL/MSALLogger.h>
-#import <MSAL/MSALPublicClientApplication.h>
-#import <MSAL/MSALResult.h>
-#import <MSAL/MSALAccount.h>
-#import <MSAL/MSALAccountId.h>
-#import <MSAL/MSALTelemetry.h>
-#import <MSAL/MSALAuthority.h>
-#import <MSAL/MSALAADAuthority.h>
-#import <MSAL/MSALB2CAuthority.h>
-#import <MSAL/MSALADFSAuthority.h>
-#import <MSAL/MSALPublicClientStatusNotifications.h>
-#import <MSAL/MSALSilentTokenParameters.h>
-#import <MSAL/MSALInteractiveTokenParameters.h>
-#import <MSAL/MSALTokenParameters.h>
-#import <MSAL/MSALClaimsRequest.h>
-#import <MSAL/MSALIndividualClaimRequest.h>
-#import <MSAL/MSALIndividualClaimRequestAdditionalInfo.h>
-#import <MSAL/MSALJsonSerializable.h>
-#import <MSAL/MSALJsonDeserializable.h>
+@property (nonatomic) MSIDClaimsRequest *msidClaimsRequest;
+@property (nonatomic) id<MSIDJsonSerializing> jsonSerializer;
+
+@end
+
+NS_ASSUME_NONNULL_END
