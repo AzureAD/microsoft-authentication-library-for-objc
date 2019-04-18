@@ -613,7 +613,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
          XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
          [expectation fulfill];
      }];
@@ -939,7 +941,9 @@
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNotNil(error);
-         XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
          XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Claims is not proper JSON. Please make sure it is correct JSON claims parameter.");
          XCTAssertNil(result);
          [expectation fulfill];
@@ -1212,7 +1216,9 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorUnhandledResponse);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorUnhandledResponse);
          
          [expectation fulfill];
      }];
@@ -2535,7 +2541,9 @@
          XCTAssertNotNil(error);
          XCTAssertNil(result);
          XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorMismatchedUser);
+         XCTAssertEqual(error.code, MSALErrorInternal);
+         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+         XCTAssertEqual(internalErrorCode, MSALInternalErrorMismatchedUser);
          
          [expectation fulfill];
      }];
