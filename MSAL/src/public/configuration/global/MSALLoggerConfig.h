@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
  the program's execution.
  */
 - (void)setLogCallback:(MSALLogCallback)callback;
-@property (readonly) MSALLogCallback callback;
+- (MSALLogCallback)callback;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

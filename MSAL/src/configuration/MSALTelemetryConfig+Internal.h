@@ -29,6 +29,6 @@
 
 @interface MSALTelemetryConfig ()
 
-+ (instancetype)defaultConfig;
++ (instancetype)sharedInstance;
 
 @end

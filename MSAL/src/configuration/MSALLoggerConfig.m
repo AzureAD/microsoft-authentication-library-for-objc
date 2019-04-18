@@ -30,7 +30,7 @@
 
 @implementation MSALLoggerConfig
 
-+ (instancetype)defaultConfig
++ (instancetype)sharedInstance
 {
     static dispatch_once_t once;
     static MSALLoggerConfig *s_loggerConfig;

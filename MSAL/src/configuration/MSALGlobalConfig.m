@@ -47,9 +47,9 @@ static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[self.class alloc] init];
         
-        sharedInstance.httpConfig = [MSALHTTPConfig defaultConfig];
-        sharedInstance.telemetryConfig = [MSALTelemetryConfig defaultConfig];
-        sharedInstance.loggerConfig = [MSALLoggerConfig defaultConfig];
+        sharedInstance.httpConfig = [MSALHTTPConfig sharedInstance];
+        sharedInstance.telemetryConfig = [MSALTelemetryConfig sharedInstance];
+        sharedInstance.loggerConfig = [MSALLoggerConfig sharedInstance];
     });
     
     return sharedInstance;

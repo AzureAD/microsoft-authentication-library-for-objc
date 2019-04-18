@@ -29,6 +29,6 @@
 
 @interface MSALHTTPConfig ()
 
-+ (instancetype)defaultConfig;
++ (instancetype)sharedInstance;
 
 @end

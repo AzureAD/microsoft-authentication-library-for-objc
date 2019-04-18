@@ -29,7 +29,7 @@
 
 @interface MSALLoggerConfig ()
 
-+ (instancetype)defaultConfig;
++ (instancetype)sharedInstance;
 
 @property MSALLogCallback callback;
 

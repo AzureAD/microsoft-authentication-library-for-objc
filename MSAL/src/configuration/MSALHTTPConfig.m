@@ -31,10 +31,17 @@
 
 @implementation MSALHTTPConfig
 
-+ (instancetype)defaultConfig
++ (instancetype)sharedInstance
 {
-    return [[self.class alloc] init];
+    static MSALHTTPConfig *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
+    
+    return sharedInstance;
 }
+
 
 - (NSInteger)retryCount { return MSIDHttpRequest.retryCountSetting; }
 - (void)setRetryCount:(NSInteger)retryCount { MSIDHttpRequest.retryCountSetting = retryCount; }
