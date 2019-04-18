@@ -38,7 +38,7 @@
     self = [super initWithURL:url error:error];
     if (self)
     {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:nil error:error];
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url validateFormat:NO context:nil  error:error];
         if (!self.msidAuthority) return nil;
     }
 

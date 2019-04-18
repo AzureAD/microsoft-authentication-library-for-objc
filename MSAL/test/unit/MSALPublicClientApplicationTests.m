@@ -97,7 +97,6 @@
     id<MSIDTokenCacheDataSource> dataSource = nil;
     
 #if TARGET_OS_IPHONE
-    MSALGlobalConfig.cacheConfig.keychainSharingGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
 #else
     dataSource = MSIDMacTokenCache.defaultCache;

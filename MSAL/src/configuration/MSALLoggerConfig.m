@@ -26,20 +26,65 @@
 //------------------------------------------------------------------------------
 
 #import "MSALLoggerConfig+Internal.h"
-#import "MSALLogger.h"
+#import "MSIDLogger.h"
 
 @implementation MSALLoggerConfig
 
 + (instancetype)defaultConfig
 {
-    return [[self.class alloc] init];
+    static dispatch_once_t once;
+    static MSALLoggerConfig *s_loggerConfig;
+    
+    dispatch_once(&once, ^{
+        s_loggerConfig = [self.class init];
+        
+        [[MSIDLogger sharedLogger] setCallback:^(MSIDLogLevel level, NSString *message, BOOL containsPII) {
+            
+            if (s_loggerConfig->_callback)
+            {
+                s_loggerConfig->_callback((MSALLogLevel)level, message, containsPII);
+            }
+            
+        }];
+    });
+    return s_loggerConfig;
 }
 
-- (MSALLogLevel)logLevel { return MSALLogger.sharedLogger.level; }
-- (void)setLogLevel:(MSALLogLevel)logLevel { MSALLogger.sharedLogger.level = logLevel; }
-- (BOOL)piiEnabled { return MSALLogger.sharedLogger.PiiLoggingEnabled; }
-- (void)setPiiEnabled:(BOOL)piiEnabled { MSALLogger.sharedLogger.PiiLoggingEnabled = YES; }
+- (void)setLogCallback:(MSALLogCallback)callback
+{
+    if (self.callback != nil)
+    {
+        @throw @"MSAL logging callback can only be set once per process and should never changed once set.";
+    }
+    
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        self.callback = callback;
+    });
+}
 
-- (void)setLogCallback:(MSALLogCallback)callback { [MSALLogger.sharedLogger setCallback:callback]; }
+#pragma mark - Level
+
+- (void)setLogLevel:(MSALLogLevel)level
+{
+    [MSIDLogger sharedLogger].level = (MSIDLogLevel)level;
+}
+
+- (MSALLogLevel)logLevel
+{
+    return (MSALLogLevel)[MSIDLogger sharedLogger].level;
+}
+
+#pragma mark - Pii logging
+
+- (void)setPiiEnabled:(BOOL)piiEnabled
+{
+    [MSIDLogger sharedLogger].PiiLoggingEnabled = piiEnabled;
+}
+
+- (BOOL)piiEnabled
+{
+    return [MSIDLogger sharedLogger].PiiLoggingEnabled;
+}
 
 @end

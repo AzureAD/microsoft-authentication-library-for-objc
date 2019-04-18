@@ -31,4 +31,6 @@
 
 + (instancetype)defaultConfig;
 
+@property MSALLogCallback callback;
+
 @end

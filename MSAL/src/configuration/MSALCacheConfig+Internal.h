@@ -30,6 +30,5 @@
 @interface MSALCacheConfig ()
 
 + (instancetype)defaultConfig;
-+ (instancetype)configWithCacheEnabled:(BOOL)enabled;
 
 @end

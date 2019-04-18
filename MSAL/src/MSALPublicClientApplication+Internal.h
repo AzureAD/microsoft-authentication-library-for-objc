@@ -27,9 +27,6 @@
 
 #import "MSALPublicClientApplication.h"
 
-// If modifying this make sure UT_SLICE_PARAMS_QUERY matches
-#define DEFAULT_SLICE_PARAMS
-
 @class MSIDDefaultTokenCacheAccessor;
 
 @interface MSALPublicClientApplication (Internal)

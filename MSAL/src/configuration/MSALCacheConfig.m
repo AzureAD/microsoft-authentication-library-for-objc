@@ -31,29 +31,34 @@
 
 @implementation MSALCacheConfig
   
-- (instancetype)init
+- (instancetype)initWithKeychainSharingGroup:(NSString *)keychainSharingGroup
 {
     self = [super init];
     if (self)
     {
 #if TARGET_OS_IPHONE
-        _keychainSharingGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
+        _keychainSharingGroup = keychainSharingGroup;
 #endif
-        _cacheEnabled = YES;
     }
     return self;
 }
 
-+ (instancetype)configWithCacheEnabled:(BOOL)enabled
++ (NSString *)defaultKeychainSharingGroup
 {
-    MSALCacheConfig *config = [[self.class alloc] init];
-    config.cacheEnabled = enabled;
-    return config;
+#if TARGET_OS_IPHONE
+    return MSIDKeychainTokenCache.defaultKeychainGroup;
+#else
+    return nil;
+#endif
 }
 
 + (instancetype)defaultConfig
 {
-    return [self configWithCacheEnabled:YES];
+    return [[self.class alloc] initWithKeychainSharingGroup:MSIDKeychainTokenCache.defaultKeychainGroup];
 }
 
++ (nullable instancetype)configWithKeychainSharingGroup:(NSString *)keychainSharingGroup
+{
+    return [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+}
 @end

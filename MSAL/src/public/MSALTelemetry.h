@@ -38,12 +38,12 @@
 /*!
  Get a singleton instance of MSALTelemetry.
  */
-+ (nonnull MSALTelemetry *)sharedInstance;
++ (nonnull MSALTelemetry *)sharedInstance  DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
 
 /*!
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
-@property (nonatomic) BOOL piiEnabled;
+@property (nonatomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
 
 /*!
  Register a telemetry dispatcher for receiving telemetry events.
@@ -52,17 +52,17 @@
                                 If set NO, MSAL will dispatch will dispatch all events.
  */
 - (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
-setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+setTelemetryOnFailure:(BOOL)setTelemetryOnFailure DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig addDispatcher:setTelemetryOnFailure: instead");
 
 /*!
  Remove a telemetry dispatcher added for receiving telemetry events.
  @param dispatcher An instance of MSALTelemetryDispatcher implementation added to the dispatches before.
  */
-- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher;
+- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig removeDispatcher: instead");
 
 /*!
  Remove all telemetry dispatchers added to the dispatchers collection.
  */
-- (void)removeAllDispatchers;
+- (void)removeAllDispatchers DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig removeDispatcher: instead");
 
 @end

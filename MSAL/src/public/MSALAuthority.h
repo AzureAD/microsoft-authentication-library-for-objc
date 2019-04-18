@@ -41,8 +41,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-@property BOOL validateAuthority;
-
 NS_ASSUME_NONNULL_END
 
 @end

@@ -26,28 +26,37 @@
 //------------------------------------------------------------------------------
 
 #import "MSALHTTPConfig+Internal.h"
-#import "MSIDNetworkConfiguration.h"
+#import "MSIDURLSessionManager.h"
+#import "MSIDHttpRequest.h"
 
 @implementation MSALHTTPConfig
 
 + (instancetype)defaultConfig
 {
-    MSALHTTPConfig *config = [[self alloc] init];
-    return config;
+    return [[self.class alloc] init];
 }
 
-- (NSInteger)retryCount { return MSIDNetworkConfiguration.retryCount; }
-- (NSTimeInterval)timeoutIntervalForResource { return MSIDNetworkConfiguration.timeoutIntervalForResource; }
-- (NSTimeInterval)timeoutIntervalForRequest { return MSIDNetworkConfiguration.timeoutIntervalForRequest; }
+- (NSInteger)retryCount { return MSIDHttpRequest.retryCountSetting; }
+- (void)setRetryCount:(NSInteger)retryCount { MSIDHttpRequest.retryCountSetting = retryCount; }
 
-- (void)setRetryCount:(NSInteger)retryCount { MSIDNetworkConfiguration.retryCount = retryCount; }
+- (NSTimeInterval)retryInterval { return MSIDHttpRequest.retryIntervalSetting; }
+- (void)setRetryInterval:(NSTimeInterval)retryInterval { MSIDHttpRequest.retryIntervalSetting = retryInterval; }
+
+- (NSTimeInterval)timeoutIntervalForResource
+{
+    return MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForResource;
+}
 - (void)setTimeoutIntervalForResource:(NSTimeInterval)timeoutIntervalForResource
 {
-    MSIDNetworkConfiguration.timeoutIntervalForResource = timeoutIntervalForResource;
+    MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForResource = timeoutIntervalForResource;
+}
+
+- (NSTimeInterval)timeoutIntervalForRequest {
+    return MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForRequest;
 }
 - (void)setTimeoutIntervalForRequest:(NSTimeInterval)timeoutIntervalForRequest
 {
-    MSIDNetworkConfiguration.timeoutIntervalForRequest = timeoutIntervalForRequest;
+    MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForRequest = timeoutIntervalForRequest;
 }
 
 @end

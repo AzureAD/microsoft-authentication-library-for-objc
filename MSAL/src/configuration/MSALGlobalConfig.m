@@ -28,7 +28,6 @@
 #import "MSALGlobalConfig+Internal.h"
 #import "MSALHTTPConfig+Internal.h"
 #import "MSALTelemetryConfig+Internal.h"
-#import "MSALCacheConfig+Internal.h"
 #import "MSALLoggerConfig+Internal.h"
 
 @implementation MSALGlobalConfig
@@ -40,7 +39,6 @@ static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityA
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
 
-static NSArray<MSALAuthority *> *s_knownAuthorities;
 
 + (instancetype)sharedInstance
 {
@@ -52,7 +50,6 @@ static NSArray<MSALAuthority *> *s_knownAuthorities;
         sharedInstance.httpConfig = [MSALHTTPConfig defaultConfig];
         sharedInstance.telemetryConfig = [MSALTelemetryConfig defaultConfig];
         sharedInstance.loggerConfig = [MSALLoggerConfig defaultConfig];
-        sharedInstance.cacheConfig = [MSALCacheConfig defaultConfig];
     });
     
     return sharedInstance;
@@ -61,15 +58,11 @@ static NSArray<MSALAuthority *> *s_knownAuthorities;
 + (MSALHTTPConfig *)httpConfig { return MSALGlobalConfig.sharedInstance.httpConfig; }
 + (MSALTelemetryConfig *)telemetryConfig { return MSALGlobalConfig.sharedInstance.telemetryConfig; }
 + (MSALLoggerConfig *)loggerConfig { return MSALGlobalConfig.sharedInstance.loggerConfig; }
-+ (MSALCacheConfig *)cacheConfig { return MSALGlobalConfig.sharedInstance.cacheConfig; }
 #if TARGET_OS_IPHONE
 + (MSALBrokeredAvailability)brokerAvailability { return s_brokerAvailability; }
 + (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { s_brokerAvailability = brokerAvailability; }
 #endif
 + (MSALWebviewType)defaultWebviewType { return s_webviewType; }
 + (void)setDefaultWebviewType:(MSALWebviewType)defaultWebviewType { s_webviewType = defaultWebviewType; }
-
-+ (NSArray<MSALAuthority *> *)knownAuthorities { return s_knownAuthorities; }
-+ (void)setKnownAuthorities:(NSArray<MSALAuthority *> *)knownAuthorities { s_knownAuthorities = knownAuthorities; }
 
 @end

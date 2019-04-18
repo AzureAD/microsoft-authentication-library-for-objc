@@ -74,9 +74,9 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri];
-    pcaConfig.authority = authority;
-    
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)

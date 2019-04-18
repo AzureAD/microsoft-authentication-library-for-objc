@@ -92,11 +92,12 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
         authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
-    authority.validateAuthority = validateAuthority;
+    
     
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:parameters.clientId
-                                                                                              redirectUri:parameters.redirectUri];
-    config.authority = authority;
+                                                                                                redirectUri:parameters.redirectUri
+                                                                                                  authority:authority];
+    config.validateAuthority = validateAuthority;
     config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:parameters.sliceParameters[@"slice"] dc:parameters.sliceParameters[@"dc"]];
     
     MSALPublicClientApplication *clientApplication = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];

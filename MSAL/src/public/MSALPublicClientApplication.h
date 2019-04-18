@@ -40,6 +40,11 @@
 
 @interface MSALPublicClientApplication : NSObject
 
+/*!
+    Parameter to be used to configure MSALPublicClientApplication.
+    It contains all values to be used in the instance and is a superset of all properties
+    known to this class.
+ */
 @property (readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
 
 /*!
@@ -57,6 +62,12 @@
 
 /*! The redirect URI of the application */
 @property (readonly, nonnull) MSALRedirectUri *redirectUri;
+
+/*!
+ Used to specify query parameters that must be passed to both the authorize and token endpoints
+ to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
+ */
+@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters;
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.

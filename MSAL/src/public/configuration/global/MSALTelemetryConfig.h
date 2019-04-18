@@ -42,14 +42,8 @@
  @param events events is represented by an array of dictionary of key-value pair of event property name/value.
  */
 - (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events;
-/*!
- Configuration to dispatch only for failures.
- */
-- (BOOL)onFailureOnly;
 
 @end
-
-
 
 NS_ASSUME_NONNULL_BEGIN
 

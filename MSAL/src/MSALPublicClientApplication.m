@@ -80,6 +80,8 @@
 #import "MSALCacheConfig.h"
 #import "MSALADFSAuthority.h"
 #import "MSALExtraQueryParameters.h"
+#import "MSIDAADAuthority.h"
+#import "MSALCacheConfig.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -108,18 +110,8 @@
 }
 
 #pragma mark - Properties
-- (BOOL)validateAuthority { return YES; }
-- (void)setValidateAuthority:(BOOL)validateAuthority
-{
-    if ([self.configuration.authority isKindOfClass:MSALADFSAuthority.class])
-    {
-        ((MSALADFSAuthority *)self.configuration.authority).validateAuthority = validateAuthority;
-    }
-    else
-    {
-        MSID_LOG_WARN(nil, @"Authority validation is only available for authority targetting AD FS.");
-    }
-}
+- (BOOL)validateAuthority { return _configuration.validateAuthority; }
+- (void)setValidateAuthority:(BOOL)validateAuthority { _configuration.validateAuthority = validateAuthority; }
 
 - (MSALAuthority *)authority { return self.configuration.authority; }
 - (NSString *)clientId { return self.configuration.clientId; }
@@ -135,10 +127,7 @@
 - (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
 
 #if TARGET_OS_IPHONE
-- (NSString *)keychainGroup { return MSALGlobalConfig.cacheConfig.keychainSharingGroup; }
-- (void)setKeychainGroup:(NSString * _Nullable)keychainGroup { MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup; }
-#else
-- (NSString *)keychainGroup { return nil; }
+- (NSString *)keychainGroup { return _configuration.cacheConfig.keychainSharingGroup; }
 #endif
 
 #pragma mark - Initializers
@@ -146,7 +135,7 @@
                  error:(NSError * __autoreleasing *)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.keychainGroup
+                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
                         authority:nil
                       redirectUri:nil
                             error:error];
@@ -157,7 +146,7 @@
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.keychainGroup
+                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
                         authority:authority
                       redirectUri:nil
                             error:error];
@@ -169,7 +158,7 @@
                  error:(NSError **)error
 {
     return [self initWithClientId:clientId
-                    keychainGroup:self.keychainGroup
+                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
                         authority:authority
                       redirectUri:redirectUri
                             error:error];
@@ -218,7 +207,7 @@
     }
 
     NSError *msidError = nil;
-    MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirecrUri
+    MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirectUri
                                                                                     clientId:config.clientId
                                                                                        error:&msidError];
     
@@ -232,7 +221,7 @@
     
 #if TARGET_OS_IPHONE
     // Optional Paramater
-    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSALGlobalConfig.cacheConfig.keychainSharingGroup];
+    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyAccessor]];
@@ -261,14 +250,11 @@
     {
         return nil;
     }
-
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
+    
 #if TARGET_OS_IPHONE
-    if (keychainGroup) MSALGlobalConfig.cacheConfig.keychainSharingGroup = keychainGroup;
-    else MSALGlobalConfig.cacheConfig.keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
+    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
 #endif
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri];
-    if (authority) config.authority = authority;
-    config.redirecrUri = redirectUri;
     
     return [self initWithConfiguration:config error:error];
 }
@@ -786,11 +772,12 @@
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
 
-    params.validateAuthority = _configuration.authority.validateAuthority;
+    params.validateAuthority = _configuration.validateAuthority
+        || [MSIDAADAuthority isAuthorityFormatValid:_configuration.authority.url context:nil error:nil];
     
-    if (params.validateAuthority && MSALGlobalConfig.knownAuthorities)
+    if (params.validateAuthority && _configuration.knownAuthorities)
     {
-        for (MSALAuthority *knownAuthority in MSALGlobalConfig.knownAuthorities)
+        for (MSALAuthority *knownAuthority in _configuration.knownAuthorities)
         {
             if ([params.authority isKindOfClass:knownAuthority.class]
                 && [knownAuthority.url isEqual:params.authority.url])
@@ -948,7 +935,7 @@
 
     // Set optional params
     params.accountIdentifier = account.lookupAccountIdentifier;
-    params.validateAuthority = _configuration.authority.validateAuthority;
+    params.validateAuthority = _configuration.validateAuthority;
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
     params.extraURLQueryParameters = _configuration.extraQueryParameters.extraURLQueryParameters;

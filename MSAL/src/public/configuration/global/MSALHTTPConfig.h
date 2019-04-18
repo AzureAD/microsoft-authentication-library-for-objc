@@ -31,8 +31,27 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALHTTPConfig : NSObject
 
+/*!
+ Number of retry attemps to be made in case of a network error,
+ with error code 500 ~ 599.
+ */
 @property NSInteger retryCount;
+/*!
+ Time interval before retrying a request in case of retry.
+ */
+@property NSTimeInterval retryInterval;
+
+/*!
+ The maximum amount of time that a resource request should be allowed to take.
+ visit https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration/1408259-timeoutintervalforrequest?language=objc
+ for more detail.
+ */
 @property NSTimeInterval timeoutIntervalForResource; // In miliseconds
+/*!
+ The timeout interval to use when waiting for additional data.
+ visit https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration/1408153-timeoutintervalforresource?language=objc
+ for more detail.
+ */
 @property NSTimeInterval timeoutIntervalForRequest;  // In miliseconds
 
 - (nonnull instancetype)init NS_UNAVAILABLE;

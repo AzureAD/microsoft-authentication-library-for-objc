@@ -28,10 +28,12 @@
 #import "MSALPublicClientApplicationConfig.h"
 
 @class MSALExtraQueryParameters;
+@class MSALCacheConfig;
 
 @interface MSALPublicClientApplicationConfig ()
 
 @property (readwrite) MSALExtraQueryParameters *extraQueryParameters;
 @property (readwrite) MSALRedirectUri *verifiedRedirectUri;
+@property (readwrite) MSALCacheConfig *cacheConfig;
 
 @end

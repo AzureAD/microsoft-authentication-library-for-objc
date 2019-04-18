@@ -26,7 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTelemetryConfig+Internal.h"
-#import "MSALTelemetry.h"
+
+#import "MSIDTelemetryEventInterface.h"
+#import "MSALDefaultDispatcher.h"
+#import "MSIDTelemetry.h"
+#import "MSIDTelemetry+Internal.h"
 
 @implementation MSALTelemetryConfig
 
@@ -41,23 +45,25 @@
     return sharedInstance;
 }
 
-- (BOOL)piiEnabled { return MSALTelemetry.sharedInstance.piiEnabled; }
-- (void)setPiiEnabled:(BOOL)piiEnabled { MSALTelemetry.sharedInstance.piiEnabled = piiEnabled ;}
+- (BOOL)piiEnabled { return MSIDTelemetry.sharedInstance.piiEnabled; }
+- (void)setPiiEnabled:(BOOL)piiEnabled { [[MSIDTelemetry sharedInstance] setPiiEnabled:piiEnabled]; }
 
-- (void)addDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
-setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
-    [MSALTelemetry.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:setTelemetryOnFailure];
+    MSALDefaultDispatcher *telemetryDispatcher = [[MSALDefaultDispatcher alloc] initWithDispatcher:dispatcher
+                                                                             setTelemetryOnFailure:setTelemetryOnFailure];
+    
+    [[MSIDTelemetry sharedInstance] addDispatcher:telemetryDispatcher];
 }
 
 - (void)removeDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
 {
-    [MSALTelemetry.sharedInstance removeDispatcher:dispatcher];
+    [MSIDTelemetry.sharedInstance findAndRemoveDispatcher:dispatcher];
 }
 
 - (void)removeAllDispatchers
 {
-    [MSALTelemetry.sharedInstance removeAllDispatchers];
+    [MSIDTelemetry.sharedInstance removeAllDispatchers];
 }
 
 @end

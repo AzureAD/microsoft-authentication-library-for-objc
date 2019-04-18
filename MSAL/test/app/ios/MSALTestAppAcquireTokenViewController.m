@@ -39,11 +39,12 @@
 #import "MSALTestAppAuthorityTypeViewController.h"
 #import "MSALTestAppProfileViewController.h"
 #import "MSALResult.h"
-#import "MSALLogger.h"
 #import "MSALDefinitions.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
 #import "MSALAuthority.h"
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALLoggerConfig.h>
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -490,9 +491,9 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri];
-    authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
-    pcaConfig.authority = authority;
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    pcaConfig.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
@@ -589,9 +590,10 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri];
-    authority.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
-    pcaConfig.authority = authority;
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    
+    pcaConfig.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)
@@ -653,8 +655,8 @@
     
     NSError *error = nil;
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri];
-    pcaConfig.authority = authority;
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
                                                                                                     error:&error];
@@ -783,9 +785,9 @@
     NSError *error = nil;
     
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri];
-    pcaConfig.authority = authority;
-    
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)
@@ -806,8 +808,8 @@
         }
 
         [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-        [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
-
+        MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelNothing;
+        
         if ([MSALStressTestHelper runStressTestWithType:type application:application])
         {
             _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
@@ -827,7 +829,7 @@
     _resultView.text = [NSString stringWithFormat:@"Stopped the currently running stress test at %@", [NSDate date]];
     
     [[MSALTestAppTelemetryViewController sharedController] startTracking];
-    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
+    MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
 }
 
 @end

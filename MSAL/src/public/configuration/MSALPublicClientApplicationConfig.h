@@ -32,6 +32,7 @@
 @class MSALAuthority;
 @class MSALWebViewConfig;
 @class MSALSliceConfig;
+@class MSALCacheConfig;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -41,10 +42,25 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSString *clientId;
 
 /*! The redirect URI of the application */
-@property NSString *redirecrUri;
+@property NSString *redirectUri;
 
 /*! The authority the application will use to obtain tokens */
 @property MSALAuthority *authority;
+
+/*! List of known authorities that application should trust.
+    Note that authorities listed here will bypass authority validation logic.
+    Thus, it is advised not putting in here dynamically resolving authorities here.
+ */
+@property NSArray<MSALAuthority *> *knownAuthorities;
+
+/*!
+ When set to YES (default), MSAL will compare the application's authority against well-known URLs
+ templates representing well-formed authorities. It is useful when the authority is obtained at
+ run time to prevent MSAL from displaying authentication prompts from malicious pages.
+ 
+ Authorities that are in knownAuthorities will not be validated regardless of this setting.
+ */
+@property BOOL validateAuthority;
 
 /*! Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
@@ -61,21 +77,26 @@ NS_ASSUME_NONNULL_BEGIN
 /*! slice configuration for testing. */
 @property(nullable) MSALSliceConfig *sliceConfig;
 
+/*! Cache configurations, refer to MSALCacheConfig.h for more detail */
+@property (readonly) MSALCacheConfig *cacheConfig;
+
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId   The clientID of your application, you should get this from the app portal.
  */
-- (nonnull instancetype)initWithClientId:(NSString *)clientId NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithClientId:(NSString *)clientId;
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  redirectUri    The redirect URI of the application
+ @param  authority      The target authority
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
-                              redirectUri:(NSString *)redirectUri;
+                             redirectUri:(nullable NSString *)redirectUri
+                               authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

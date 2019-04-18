@@ -31,16 +31,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALCacheConfig : NSObject
 
-@property BOOL cacheEnabled;
-
-#if TARGET_OS_IPHONE
-/*! The keychain sharing group to use for the token cache. */
+/*!
+    The keychain sharing group to use for the token cache.
+    The default value is com.microsoft.adalcache.
+ */
 @property NSString *keychainSharingGroup;
-
-#endif
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
+
++ (NSString *)defaultKeychainSharingGroup;
+
++ (nullable instancetype)configWithKeychainSharingGroup:(NSString *)keychainSharingGroup;
 
 @end
 

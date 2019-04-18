@@ -30,37 +30,37 @@
 #import "MSALAADAuthority.h"
 #import "MSALExtraQueryParameters.h"
 #import "MSALSliceConfig.h"
+#import "MSALCacheConfig+Internal.h"
 
 @implementation MSALPublicClientApplicationConfig
 {
     MSALSliceConfig *_sliceConfig;
 }
 
-
-
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
+static NSArray<MSALAuthority *> *s_knownAuthorities;
 
 - (instancetype)initWithClientId:(NSString *)clientId
+{
+    return [self initWithClientId:clientId redirectUri:nil authority:nil];
+}
+
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
 {
     self = [super init];
     if (self)
     {
         _clientId = clientId;
-        NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
-        _authority = [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
+        _redirectUri = redirectUri;
         
+        NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
+        
+        _authority = authority ?: [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
         _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
-    }
-    
-    return self;
-}
-
-- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(NSString *)redirectUri
-{
-    self = [self initWithClientId:clientId];
-    if (self)
-    {
-        _redirecrUri = redirectUri;
+        
+        _validateAuthority = YES;
+        
+        _cacheConfig = [MSALCacheConfig defaultConfig];
     }
     
     return self;
@@ -86,5 +86,9 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 {
     return _sliceConfig;
 }
+
++ (NSArray<MSALAuthority *> *)knownAuthorities { return s_knownAuthorities; }
++ (void)setKnownAuthorities:(NSArray<MSALAuthority *> *)knownAuthorities { s_knownAuthorities = knownAuthorities; }
+
 
 @end

@@ -33,6 +33,7 @@
 #import "MSALTelemetryTestDispatcher.h"
 #import "XCTestCase+HelperMethods.h"
 #import "NSData+MSIDExtensions.h"
+#import "MSALTelemetryConfig+Internal.h"
 
 @interface MSALTelemetryTests : MSALTestCase
 
@@ -49,7 +50,7 @@
     
     self.dispatcher = [MSALTelemetryTestDispatcher new];
     
-    [[MSALTelemetry sharedInstance] addDispatcher:self.dispatcher setTelemetryOnFailure:NO];
+    [MSALTelemetryConfig.defaultConfig addDispatcher:self.dispatcher setTelemetryOnFailure:NO];
     
     __weak MSALTelemetryTests *weakSelf = self;
     [self.dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
@@ -57,7 +58,7 @@
          weakSelf.receivedEvents = event;
      }];
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALTelemetryConfig.defaultConfig.piiEnabled = NO;
 }
 
 - (void)tearDown
@@ -66,12 +67,12 @@
     
     self.dispatcher = nil;
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALTelemetryConfig.defaultConfig.piiEnabled = NO;
 }
 
 - (void)test_telemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALTelemetryConfig.defaultConfig.piiEnabled = NO;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
@@ -88,7 +89,7 @@
 
 - (void)test_telemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALTelemetryConfig.defaultConfig.piiEnabled = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];

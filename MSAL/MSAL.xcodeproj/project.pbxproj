@@ -120,6 +120,8 @@
 		96B5E6F32256D197002232F9 /* MSALExtraQueryParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = 96B5E6F02256D197002232F9 /* MSALExtraQueryParameters.h */; };
 		96B5E6F42256D197002232F9 /* MSALExtraQueryParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 96B5E6F12256D197002232F9 /* MSALExtraQueryParameters.m */; };
 		96B5E6F52256D197002232F9 /* MSALExtraQueryParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 96B5E6F12256D197002232F9 /* MSALExtraQueryParameters.m */; };
+		96C44E962267E72200E66080 /* MSALTelemetry.h in Headers */ = {isa = PBXBuildFile; fileRef = 96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		96C44E972267E72400E66080 /* MSALLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = D65A6F831E3FF3D900C69FBA /* MSALLogger.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96CFA00B1E6E3460003BFCDC /* MSALTestAppScopesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 96CFA0091E6E3454003BFCDC /* MSALTestAppScopesViewController.m */; };
 		96D9A5451E4AB1DC00674A85 /* MSALTelemetry.h in Headers */ = {isa = PBXBuildFile; fileRef = 96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		96D9A54A1E4AB23100674A85 /* MSALTelemetry.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D9A5471E4AB22900674A85 /* MSALTelemetry.m */; };
@@ -978,7 +980,6 @@
 			children = (
 				96B5E6DE2256D166002232F9 /* MSALTelemetryConfig.h */,
 				96B5E6D82256D15A002232F9 /* MSALHTTPConfig.h */,
-				96B5E6CC2256D152002232F9 /* MSALCacheConfig.h */,
 				96B5E6E42256D174002232F9 /* MSALLoggerConfig.h */,
 			);
 			path = global;
@@ -988,6 +989,7 @@
 			isa = PBXGroup;
 			children = (
 				96B5E6EA2256D180002232F9 /* MSALSliceConfig.h */,
+				96B5E6CC2256D152002232F9 /* MSALCacheConfig.h */,
 			);
 			path = publicClientApplication;
 			sourceTree = "<group>";
@@ -1063,7 +1065,6 @@
 			isa = PBXGroup;
 			children = (
 				E02396D41E787D60004D6278 /* events */,
-				96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */,
 				96D9A5471E4AB22900674A85 /* MSALTelemetry.m */,
 				E02396D11E776F10004D6278 /* MSALDefaultDispatcher.h */,
 				E02396D21E776F10004D6278 /* MSALDefaultDispatcher.m */,
@@ -1307,7 +1308,6 @@
 				969DDBC921B0B047000B4C73 /* MSALErrorConverter+Internal.h */,
 				04D32CAC1FD61585000B123E /* MSALErrorConverter.h */,
 				04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */,
-				D65A6F831E3FF3D900C69FBA /* MSALLogger.h */,
 				D65A6F771E3FF3D900C69FBA /* MSALLogger.m */,
 				D65A6F781E3FF3D900C69FBA /* MSALPublicClientApplication.m */,
 				D62746D11E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h */,
@@ -1349,6 +1349,8 @@
 				23A68A7220F5386A0071E435 /* MSALAADAuthority.h */,
 				23A68A7820F538B90071E435 /* MSALB2CAuthority.h */,
 				23A68A7E20F538DE0071E435 /* MSALADFSAuthority.h */,
+				D65A6F831E3FF3D900C69FBA /* MSALLogger.h */,
+				96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */,
 				B203459221AF77FB00B221AA /* MSALRedirectUri.h */,
 				B28BBD312211DC7D00F51723 /* MSALPublicClientStatusNotifications.h */,
 				232D68C8223DB00500594BBD /* MSALTokenParameters.h */,
@@ -1635,7 +1637,9 @@
 				1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */,
 				96B5E6EC2256D180002232F9 /* MSALSliceConfig.h in Headers */,
 				232D68CA223DB00500594BBD /* MSALTokenParameters.h in Headers */,
+				96C44E972267E72400E66080 /* MSALLogger.h in Headers */,
 				232D68DC223DBA0700594BBD /* MSALInteractiveTokenParameters.h in Headers */,
+				96C44E962267E72200E66080 /* MSALTelemetry.h in Headers */,
 				B221CEDB20C0AC60002F5E94 /* MSALAccountId.h in Headers */,
 				9627C7AD22542EDC0028A859 /* MSALPublicClientApplicationConfig.h in Headers */,
 				232D68D6223DB8C200594BBD /* MSALSilentTokenParameters.h in Headers */,
@@ -2883,7 +2887,7 @@
 			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
 			name = Debug;
 		};
@@ -2892,7 +2896,7 @@
 			baseConfigurationReference = D61A64671E5AA6BE0086D120 /* msal__test_app__mac.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
 			name = Release;
 		};
