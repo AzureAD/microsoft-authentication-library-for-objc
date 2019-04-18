@@ -116,7 +116,7 @@
          receivedEvents = event;
      }];
     
-    [MSALTelemetryConfig.defaultConfig addDispatcher:dispatcher setTelemetryOnFailure:NO];
+    [MSALTelemetryConfig.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
@@ -129,12 +129,12 @@
 
 - (void)testDispatcherAll
 {
-    MSALTelemetryConfig.defaultConfig.piiEnabled = YES;
+    MSALTelemetryConfig.sharedInstance.piiEnabled = YES;
     MSALTelemetryTestDispatcher* dispatcher = [MSALTelemetryTestDispatcher new];
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
     
-    [MSALTelemetryConfig.defaultConfig addDispatcher:dispatcher setTelemetryOnFailure:NO];
+    [MSALTelemetryConfig.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:NO];
     
     [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
      {
@@ -212,7 +212,7 @@
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
     
-    [MSALTelemetryConfig.defaultConfig addDispatcher:dispatcher setTelemetryOnFailure:YES];
+    [MSALTelemetryConfig.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:YES];
     
     [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
      {
@@ -247,7 +247,7 @@
     
     __block NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents = nil;
     
-    [MSALTelemetryConfig.defaultConfig addDispatcher:dispatcher setTelemetryOnFailure:YES];
+    [MSALTelemetryConfig.sharedInstance addDispatcher:dispatcher setTelemetryOnFailure:YES];
     
     [dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
      {
