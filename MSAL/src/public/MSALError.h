@@ -135,7 +135,7 @@ typedef NS_ENUM(NSInteger, MSALError)
     MSALErrorInternal                            = -50000,
     
     /*!
-     Workplace join is required to proceed.
+     Workplace join is required to proceed. Handling of this error is optional.
      */
     MSALErrorWorkplaceJoinRequired               = -50001,
     
@@ -144,7 +144,7 @@ typedef NS_ENUM(NSInteger, MSALError)
      returned by the authentication service. In all cases the proper response
      is to use a MSAL interactive AcquireToken call with the same parameters.
      For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
-     in the userInfo dictionary.
+     in the userInfo dictionary. Handling of this error is required.
      */
     MSALErrorInteractionRequired                 = -50002,
     
@@ -152,20 +152,21 @@ typedef NS_ENUM(NSInteger, MSALError)
      The request was not fully completed and some scopes were not granted access to.
      This can be caused by a user declining consent on certain scopes.
      For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
-     in the userInfo dictionary.
+     in the userInfo dictionary. Handling of this error is required.
      */
     MSALErrorServerDeclinedScopes                = -50003,
     
     /*!
      The requested resource is protected by an Intune Conditional Access policy.
      The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
-     please see https://aka.ms/intuneMAMSDK for more information.
+     please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
+     if you are going to access resources protected by an Intune Conditional Access policy).
      */
     MSALErrorServerProtectionPoliciesRequired    = -50004,
     
     /*!
-     The user cancelled the web auth session by tapping the "Done" button on the
-     SFSafariViewController.
+     The user cancelled the web auth session by tapping the "Done" button on the SFSafariViewController.
+     Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
 };
