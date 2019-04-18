@@ -1,0 +1,7 @@
+#include "msal__framework__mac.xcconfig"
+
+// Force the linker to resolve symbols.
+GENERATE_MASTER_OBJECT_FILE = YES
+
+// Build static library.
+MACH_O_TYPE = staticlib
