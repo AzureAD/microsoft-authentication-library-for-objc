@@ -212,7 +212,7 @@ extension SampleMSALAuthentication {
             let nsError = error! as NSError
 
             if (nsError.domain == MSALErrorDomain &&
-                nsError.code == MSALErrorCode.interactionRequired.rawValue) {
+                nsError.code == MSALError.interactionRequired.rawValue) {
                 DispatchQueue.main.async {
                     self.acquireTokenInteractiveForCurrentAccount(forScopes: scopes, completion: completion)
                 }

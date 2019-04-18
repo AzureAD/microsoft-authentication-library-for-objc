@@ -63,6 +63,11 @@ extern NSString *MSALOAuthSubErrorKey;
 extern NSString *MSALErrorDescriptionKey;
 
 /*!
+ Internal error code returned together with MSALErrorInternal error.
+ */
+extern NSString *MSALInternalErrorCodeKey;
+
+/*!
  Contains all http headers returned from the http error response
  */
 extern NSString *MSALHTTPHeadersKey;
@@ -117,13 +122,65 @@ extern NSString *MSALHomeAccountIdKey;
 
 extern NSString *MSALErrorDomain;
 
-typedef NS_ENUM(NSInteger, MSALErrorCode)
+/*!
+ MSALError enum contains all errors that should be considered for handling in runtime.
+ */
+typedef NS_ENUM(NSInteger, MSALError)
+{
+    /*!
+     An unrecoverable error occured either within the MSAL client or on server side.
+     Generally, this error cannot be resolved in runtime. Log the error, then inspect the MSALInternalErrorCodeKey in the userInfo dictionary.
+     More detailed information about the specific error under MSALInternalErrorCodeKey can be found in MSALInternalError enum.
+     */
+    MSALErrorInternal                            = -50000,
+    
+    /*!
+     Workplace join is required to proceed.
+     */
+    MSALErrorWorkplaceJoinRequired               = -50001,
+    
+    /*!
+     Interaction required errors occur because of a wide variety of errors
+     returned by the authentication service. In all cases the proper response
+     is to use a MSAL interactive AcquireToken call with the same parameters.
+     For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
+     in the userInfo dictionary.
+     */
+    MSALErrorInteractionRequired                 = -50002,
+    
+    /*!
+     The request was not fully completed and some scopes were not granted access to.
+     This can be caused by a user declining consent on certain scopes.
+     For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
+     in the userInfo dictionary.
+     */
+    MSALErrorServerDeclinedScopes                = -50003,
+    
+    /*!
+     The requested resource is protected by an Intune Conditional Access policy.
+     The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
+     please see https://aka.ms/intuneMAMSDK for more information.
+     */
+    MSALErrorServerProtectionPoliciesRequired    = -50004,
+    
+    /*!
+     The user cancelled the web auth session by tapping the "Done" button on the
+     SFSafariViewController.
+     */
+    MSALErrorUserCanceled                        = -50005,
+};
+
+/*!
+ MSALInternalError enum contains all possible errors under MSALInternalErrorCodeKey.
+ This enum exists only for the reference, you should not try to handle these errors in runtime.
+ */
+typedef NS_ENUM(NSInteger, MSALInternalError)
 {
     /*!
      A required parameter was not provided, or a passed in parameter was
      invalid. See MSALErrorDescriptionKey for more information.
      */
-    MSALErrorInvalidParameter                   = -42000,
+    MSALInternalErrorInvalidParameter                   = -42000,
     
     /*!
      The required MSAL URL scheme is not registered in the app's info.plist.
@@ -147,105 +204,75 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      </dict>
      
      */
-    MSALErrorRedirectSchemeNotRegistered        = -42001,
+    MSALInternalErrorRedirectSchemeNotRegistered        = -42001,
     
-    MSALErrorInvalidRequest                     = -42002,
-    MSALErrorInvalidClient                      = -42003,
-    MSALErrorInvalidGrant                       = -42004,
-    MSALErrorInvalidScope                       = -42005,
-    MSALErrorUnauthorizedClient                 = -42006,
+    MSALInternalErrorInvalidRequest                     = -42002,
+    MSALInternalErrorInvalidClient                      = -42003,
+    MSALInternalErrorInvalidGrant                       = -42004,
+    MSALInternalErrorInvalidScope                       = -42005,
+    MSALInternalErrorUnauthorizedClient                 = -42006,
     
     /*!
      The server returned an unexpected http response. For instance, this code
      is returned for 5xx server response when something has gone wrong on the server but the
      server could not be more specific on what the exact problem is.
      */
-    MSALErrorUnhandledResponse                  = -42007,
-    
-    /*!
-     The request was not fully completed and some scopes were not granted access to.
-     This can be caused by a user declining consent on certain scopes.
-     For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
-     in the userInfo dictionary.
-     */
-    MSALErrorServerDeclinedScopes               = -42008,
+    MSALInternalErrorUnhandledResponse                  = -42007,
     
     /*!
      The passed in authority URL does not pass validation.
      If you're trying to use B2C, you must disable authority validation by
      setting validateAuthority of MSALPublicClientApplication to NO.
      */
-    MSALErrorFailedAuthorityValidation          = -42010,
+    MSALInternalErrorFailedAuthorityValidation          = -42010,
     
-    /*!
-     Interaction required errors occur because of a wide variety of errors
-     returned by the authentication service. In all cases the proper response
-     is to use a MSAL interactive AcquireToken call with the same parameters.
-     For more details check MSALOAuthErrorKey and MSALOAuthErrorDescriptionKey
-     in the userInfo dictionary.
-     */
-    MSALErrorInteractionRequired                = -42100,
-    
-    MSALErrorMismatchedUser                     = -42101,
+    MSALInternalErrorMismatchedUser                     = -42101,
     
     /*!
      The user or application failed to authenticate in the interactive flow.
      Inspect MSALOAuthErrorKey and MSALErrorDescriptionKey in the userInfo
      dictionary for more detailed information about the specific error.
      */
-    MSALErrorAuthorizationFailed                = -42104,
+    MSALInternalErrorAuthorizationFailed                = -42104,
     
     /*!
      MSAL requires a non-nil account for the acquire token silent call
      */
-    MSALErrorAccountRequired                    = -42106,
-    
-    /*!
-     The user cancelled the web auth session by tapping the "Done" button on the
-     SFSafariViewController.
-     */
-    MSALErrorUserCanceled                       = -42400,
+    MSALInternalErrorAccountRequired                    = -42106,
     
     /*!
      The authentication request was cancelled programmatically.
      */
-    MSALErrorSessionCanceled                    = -42401,
+    MSALInternalErrorSessionCanceled                    = -42401,
     
     /*!
      An interactive authentication session is already running with the
      SafariViewController visible. Another authentication session can not be
      launched yet.
      */
-    MSALErrorInteractiveSessionAlreadyRunning   = -42402,
+    MSALInternalErrorInteractiveSessionAlreadyRunning   = -42402,
     
     /*!
      MSAL could not find the current view controller in the view controller
      heirarchy to display the SFSafariViewController on top of.
      */
-    MSALErrorNoViewController                   = -42403,
+    MSALInternalErrorNoViewController                   = -42403,
     
     /*!
      MSAL tried to open a URL from an extension, which is not allowed.
      */
-    MSALErrorAttemptToOpenURLFromExtension      = -42404,
+    MSALInternalErrorAttemptToOpenURLFromExtension      = -42404,
     
     /*!
      MSAL tried to show UI in the extension, which is not allowed.
      */
-    MSALErrorUINotSupportedInExtension          = -42405,
-    
-    /*!
-     An error ocurred within the MSAL client, inspect the MSALErrorDescriptionKey
-     in the userInfo dictionary for more detailed information about the specific
-     error.
-     */
-    MSALErrorInternal                           = -42500,
+    MSALInternalErrorUINotSupportedInExtension          = -42405,
     
     /*!
      The state returned by the server does not match the state that was sent to
      the server at the beginning of the authorization attempt.
      */
-    MSALErrorInvalidState                       = -42501,
+    MSALInternalErrorInvalidState                       = -42501,
     
     /*!
      Response was received in a network call, but the response body was invalid.
@@ -254,75 +281,65 @@ typedef NS_ENUM(NSInteger, MSALErrorCode)
      the json response does not contain "key1" elements
      
      */
-    MSALErrorInvalidResponse                    = -42600,
+    MSALInternalErrorInvalidResponse                    = -42600,
     
     /*!
      Server tried to redirect to non https URL.
      */
-    MSALErrorNonHttpsRedirect                   = -42602,
-    
-    /*!
-     The requested resource is protected by an Intune Conditional Access policy.
-     The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
-     please see https://aka.ms/intuneMAMSDK for more information.
-     */
-    MSALErrorServerProtectionPoliciesRequired   = -42603,
+    MSALInternalErrorNonHttpsRedirect                   = -42602,
     
     /*!
      User returned manually to the application without completion authentication inside the broker
      */
-    MSALErrorBrokerResponseNotReceived          = -42700,
+    MSALInternalErrorBrokerResponseNotReceived          = -42700,
     
     /*!
      MSAL cannot read broker resume state. It might be that application removed it, or NSUserDefaults is corrupted.
      */
-    MSALErrorBrokerNoResumeStateFound           = -42701,
+    MSALInternalErrorBrokerNoResumeStateFound           = -42701,
     
     /*!
      MSAL cannot read broker resume state. It is corrupted.
      */
-    MSALErrorBrokerBadResumeStateFound          = -42702,
+    MSALInternalErrorBrokerBadResumeStateFound          = -42702,
     
     /*!
      MSAL cannot read broker resume state. It is saved for a different redirect uri. The app should check its registered schemes.
      */
-    MSALErrorBrokerMismatchedResumeState        = -42703,
+    MSALInternalErrorBrokerMismatchedResumeState        = -42703,
     
     /*!
      Invalid broker response.
      */
-    MSALErrorBrokerResponseHashMissing          = -42704,
+    MSALInternalErrorBrokerResponseHashMissing          = -42704,
     
     /*!
      Corrupted broker response.
      */
-    MSALErrorBrokerCorruptedResponse            = -42705,
+    MSALInternalErrorBrokerCorruptedResponse            = -42705,
     
     /*!
      Decryption of broker response failed.
      */
-    MSALErrorBrokerResponseDecryptionFailed     = -42706,
+    MSALInternalErrorBrokerResponseDecryptionFailed     = -42706,
     
     /*!
      Unexpected broker response hash.
      */
-    MSALErrorBrokerResponseHashMismatch         = -42707,
+    MSALInternalErrorBrokerResponseHashMismatch         = -42707,
     
     /*!
      Failed to create broker key.
      */
-    MSALErrorBrokerKeyFailedToCreate            = -42708,
+    MSALInternalErrorBrokerKeyFailedToCreate            = -42708,
     
     /*!
      Couldn't read broker key. Maybe broker key got wiped from the keychain.
      */
-    MSALErrorBrokerKeyNotFound                  = -42709,
-    
-    // Workplace join is required to proceed
-    MSALErrorWorkplaceJoinRequired              = -42710,
+    MSALInternalErrorBrokerKeyNotFound                  = -42709,
     
     /*!
      Broker returned unreadable result.
      */
-    MSALErrorBrokerUnknown                      = -42711
+    MSALInternalErrorBrokerUnknown                      = -42711
 };
