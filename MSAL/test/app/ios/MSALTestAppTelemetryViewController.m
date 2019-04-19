@@ -28,6 +28,8 @@
 #import "MSALTestAppTelemetryViewController.h"
 #import "MSALTestAppTelemetryDispatcher.h"
 #import "MSIDTelemetryEventStrings.h"
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALTelemetryConfig.h>
 
 @interface MSALTestAppTelemetryViewController ()
 {
@@ -80,12 +82,12 @@
          [self refresh];
      }];
     
-    [[MSALTelemetry sharedInstance] addDispatcher:dispatcher setTelemetryOnFailure:NO];
+    [MSALGlobalConfig.telemetryConfig addDispatcher:dispatcher setTelemetryOnFailure:NO];
 }
 
 - (void)stopTracking
 {
-    [[MSALTelemetry sharedInstance] removeAllDispatchers];
+    [MSALGlobalConfig.telemetryConfig removeAllDispatchers];
 }
 
 #pragma mark -

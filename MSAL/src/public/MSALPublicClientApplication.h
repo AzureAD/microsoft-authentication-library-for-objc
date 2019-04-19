@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALPublicClientApplicationConfig.h"
+#import "MSALGlobalConfig.h"
 
 @class MSALResult;
 @class MSALAccount;
@@ -40,14 +42,18 @@
 @interface MSALPublicClientApplication : NSObject
 
 /*!
+    Parameter to be used to configure MSALPublicClientApplication.
+    It contains all values to be used in the instance and is a superset of all properties
+    known to this class.
+ */
+@property (readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
+
+/*!
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
 @property BOOL validateAuthority;
-
-/*! Enable to return access token with extended lifttime during server outage. */
-@property BOOL extendedLifetimeEnabled;
 
 /*! The authority the application will use to obtain tokens */
 @property (readonly, nonnull) MSALAuthority *authority;
@@ -58,26 +64,11 @@
 /*! The redirect URI of the application */
 @property (readonly, nonnull) MSALRedirectUri *redirectUri;
 
-/*! When checking an access token for expiration we check if time to expiration
- is less than this value (in seconds) before making the request. The goal is to
- refresh the token ahead of its expiration and also not to return a token that is
- about to expire. */
-@property NSUInteger expirationBuffer;
-
 /*!
- List of additional ESTS features that client handles.
- */
-@property (nullable) NSArray<NSString *> *clientCapabilities;
-
-/*!
-    Used to specify query parameters that must be passed to both the authorize and token endpoints
-    to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
+ Used to specify query parameters that must be passed to both the authorize and token endpoints
+ to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
 @property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters;
-
-/*! Used in logging callbacks to identify what component in the application
-    called MSAL. */
-@property (nullable) NSString *component;
 
 /*! The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.
@@ -86,15 +77,19 @@
  */
 @property MSALWebviewType webviewType;
 
-/*!
- Setting to define MSAL behavior regarding broker.
- Broker is enabled by default.
- */
-@property MSALBrokeredAvailability brokerAvailability;
-
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property (nullable) WKWebView *customWebview;
+
+
+/*!
+ Initialize a MSALPublicClientApplication with a given configuration
+ 
+ @param  config       Configuration for PublicClientApplication
+ @param  error        The error that occurred creating the application object, if any (optional)
+ */
+- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
     Initialize a MSALPublicClientApplication with a given clientID
@@ -104,7 +99,6 @@
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
@@ -237,7 +231,7 @@
  
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-- (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
 #pragma mark - SafariViewController Support
 
@@ -250,7 +244,7 @@
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(nonnull NSURL *)response __attribute((deprecated("Use the handleMSALResponse:sourceApplication: method instead.")));
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response DEPRECATED_MSG_ATTRIBUTE("Use the handleMSALResponse:sourceApplication: method instead.");
 
 /*!
  Ask MSAL to handle a URL response.

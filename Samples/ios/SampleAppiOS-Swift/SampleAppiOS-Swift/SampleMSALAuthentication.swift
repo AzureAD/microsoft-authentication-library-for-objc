@@ -40,7 +40,7 @@ class SampleMSALAuthentication {
     
     // Setup
     func setup() {
-        MSALLogger.shared().setCallback {
+        MSALGlobalConfig.loggerConfig.setLogCallback {
             (level: MSALLogLevel, message: String?, containsPII: Bool) in
             // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
             // containsPII == NO. In this case, you only need to capture either one set of messages.

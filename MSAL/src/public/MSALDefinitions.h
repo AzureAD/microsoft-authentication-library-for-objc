@@ -25,14 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALConstants_h
-#define MSALConstants_h
+#ifndef MSALDefinitions_h
+#define MSALDefinitions_h
 
 @class MSALResult;
 @class MSALAccount;
 
-typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
-typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+
+/*! Levels of logging. Defines the priority of the logged message */
+typedef NS_ENUM(NSInteger, MSALLogLevel)
+{
+    MSALLogLevelNothing,
+    MSALLogLevelError,
+    MSALLogLevelWarning,
+    MSALLogLevelInfo,
+    MSALLogLevelVerbose,
+    MSALLogLevelLast = MSALLogLevelVerbose,
+};
+
 
 typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
@@ -89,5 +99,23 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
     MSALPromptTypePromptIfNecessary,
     MSALPromptTypeDefault = MSALPromptTypeSelectAccount,
 };
+
+typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+
+
+/*!
+ The LogCallback block for the MSAL logger
+ 
+ @param  level           The level of the log message
+ @param  message         The message being logged
+ @param  containsPII     If the message might contain Personally Identifiable Information (PII)
+ this will be true. Log messages possibly containing PII will not be
+ sent to the callback unless PIllLoggingEnabled is set to YES on the
+ logger.
+ 
+ */
+typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
+
 
 #endif /* MSALConstants_h */

@@ -59,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         // This is for SafariViewController only.
-        if MSALPublicClientApplication.handleMSALResponse(url) == true {
+        if MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as! String) == true {
             print("This URL is handled by MSAL")
         }
         return true

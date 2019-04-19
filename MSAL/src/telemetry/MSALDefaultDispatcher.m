@@ -32,7 +32,7 @@
 @interface MSALDefaultDispatcher ()
 {
     NSMutableDictionary* _objectsToBeDispatched;
-    id<MSALDispatcher> _dispatcher;
+    id<MSALTelemetryDispatcher> _dispatcher;
     NSLock* _dispatchLock;
     BOOL _setTelemetryOnFailure;
     NSMutableArray *_errorEvents;
@@ -43,7 +43,7 @@
 
 @implementation MSALDefaultDispatcher
 
-- (id)initWithDispatcher:(id<MSALDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 {
     self = [super init];
     if (self)
@@ -60,7 +60,7 @@
     return self;
 }
 
-- (BOOL)containsDispatcher:(id<MSALDispatcher>)dispatcher
+- (BOOL)containsDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
 {
     return _dispatcher == dispatcher;
 }
