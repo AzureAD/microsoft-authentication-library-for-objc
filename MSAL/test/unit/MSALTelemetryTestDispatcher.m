@@ -37,9 +37,5 @@
     }
 }
 
-- (BOOL)onFailureOnly {
-    return YES;
-}
-
 
 @end

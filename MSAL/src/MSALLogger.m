@@ -35,12 +35,17 @@
 
 + (MSALLogger *)sharedLogger
 {
-    return [self.class new];
+    static MSALLogger *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
+    return sharedInstance;
 }
 
-- (void)setCallback:(MSALLogCallback)callback {
+- (void)setCallback:(MSALLogCallback)callback
+{
     [MSALGlobalConfig.loggerConfig setLogCallback:callback];
-    
 }
 
 #pragma mark - Pii logging

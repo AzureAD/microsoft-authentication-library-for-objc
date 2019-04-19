@@ -777,8 +777,7 @@
     params.extendedLifetimeEnabled = _configuration.extendedLifetimeEnabled;
     params.clientCapabilities = _configuration.clientApplicationCapabilities;
 
-    params.validateAuthority = _configuration.validateAuthority
-        || [MSIDAADAuthority isAuthorityFormatValid:_configuration.authority.url context:nil error:nil];
+    params.validateAuthority = _configuration.validateAuthority;
     
     if (params.validateAuthority && _configuration.knownAuthorities)
     {

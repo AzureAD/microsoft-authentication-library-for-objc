@@ -1320,6 +1320,8 @@
 
 #pragma mark - allAccountsFilteredByAuthority
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -1377,6 +1379,7 @@
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
+#pragma clang diagnostic pop
 
 #pragma mark - loadAccountForHomeAccountId
 

@@ -64,8 +64,4 @@
 #endif
 }
 
-+ (nullable instancetype)configWithKeychainSharingGroup:(NSString *)keychainSharingGroup
-{
-    return [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
-}
 @end

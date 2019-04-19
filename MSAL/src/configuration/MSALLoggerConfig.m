@@ -36,7 +36,7 @@
     static MSALLoggerConfig *s_loggerConfig;
     
     dispatch_once(&once, ^{
-        s_loggerConfig = [self.class init];
+        s_loggerConfig = [[self.class alloc] init];
         
         [[MSIDLogger sharedLogger] setCallback:^(MSIDLogLevel level, NSString *message, BOOL containsPII) {
             

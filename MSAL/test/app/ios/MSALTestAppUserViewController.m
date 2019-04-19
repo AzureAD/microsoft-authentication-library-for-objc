@@ -85,14 +85,10 @@
         return;
     }
 
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
-
-        _accounts = accounts;
-
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [super refresh];
-        });
-    }];
+    _accounts = [application allAccounts:nil];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [super refresh];
+    });
 }
 
 - (NSInteger)numberOfRows

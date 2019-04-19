@@ -64,14 +64,12 @@ static BOOL s_runningTest = NO;
                                useMultipleUsers:(BOOL)multipleUsers
                                     application:(MSALPublicClientApplication *)application
 {
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
-
-        [self testAcquireTokenSilentWithExpiringTokenImpl:expireToken
-                                         useMultipleUsers:multipleUsers
-                                              application:application
-                                                 accounts:accounts];
-
-    }];
+    NSArray<MSALAccount *> *accounts = [application allAccounts:nil];
+    
+    [self testAcquireTokenSilentWithExpiringTokenImpl:expireToken
+                                     useMultipleUsers:multipleUsers
+                                          application:application
+                                             accounts:accounts];
 }
 
 + (void)testAcquireTokenSilentWithExpiringTokenImpl:(BOOL)expireToken
@@ -127,30 +125,27 @@ static BOOL s_runningTest = NO;
             
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-                [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
-
-                    if (![accounts count])
-                    {
-                        dispatch_semaphore_signal(sem);
-                    }
-                    else
-                    {
-                        __auto_type scopes = [settings.scopes allObjects];
-                        MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:accounts[0]];
-                        
-                        [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, __unused NSError *error)
+                NSArray<MSALAccount *> *accounts = [application allAccounts:nil];
+                if (![accounts count])
+                {
+                    dispatch_semaphore_signal(sem);
+                }
+                else
+                {
+                    __auto_type scopes = [settings.scopes allObjects];
+                    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:accounts[0]];
+                    
+                    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, __unused NSError *error)
+                     {
+                         if (result.accessToken)
                          {
-                             if (result.accessToken)
-                             {
-                                 s_stop = YES;
-                                 s_runningTest = NO;
-                             }
-
-                             dispatch_semaphore_signal(sem);
-                         }];
-                    }
-
-                }];
+                             s_stop = YES;
+                             s_runningTest = NO;
+                         }
+                         
+                         dispatch_semaphore_signal(sem);
+                     }];
+                }
             });
         }
     });

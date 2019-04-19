@@ -231,7 +231,7 @@
  
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
-- (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
+- (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
 #pragma mark - SafariViewController Support
 

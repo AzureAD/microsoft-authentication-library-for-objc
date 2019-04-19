@@ -796,30 +796,28 @@
         return;
     }
 
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+    NSArray<MSALAccount *> *accounts = [application allAccounts:nil];
 
-        NSUInteger existingUserCount = [accounts count];
-        NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
-
-        if (existingUserCount != requiredUserCount)
-        {
-            _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
-            return;
-        }
-
-        [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-        MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelNothing;
-        
-        if ([MSALStressTestHelper runStressTestWithType:type application:application])
-        {
-            _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
-        }
-        else
-        {
-            _resultView.text = @"Cannot start test, because other test is currently running!";
-        }
-
-    }];
+    NSUInteger existingUserCount = [accounts count];
+    NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
+    
+    if (existingUserCount != requiredUserCount)
+    {
+        _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
+        return;
+    }
+    
+    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
+    MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelNothing;
+    
+    if ([MSALStressTestHelper runStressTestWithType:type application:application])
+    {
+        _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
+    }
+    else
+    {
+        _resultView.text = @"Cannot start test, because other test is currently running!";
+    }
 }
 
 - (void)stopStressTest

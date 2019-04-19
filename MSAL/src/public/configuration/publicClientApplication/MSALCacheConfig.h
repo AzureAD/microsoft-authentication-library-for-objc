@@ -42,8 +42,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)defaultKeychainSharingGroup;
 
-+ (nullable instancetype)configWithKeychainSharingGroup:(NSString *)keychainSharingGroup;
-
 @end
 
 NS_ASSUME_NONNULL_END
