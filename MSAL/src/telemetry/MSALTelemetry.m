@@ -29,7 +29,12 @@
 
 + (MSALTelemetry *)sharedInstance
 {
-    return [[self.class alloc] init];
+    static MSALTelemetry *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
+    return sharedInstance;
 }
 
 - (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
