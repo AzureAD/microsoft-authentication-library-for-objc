@@ -32,6 +32,10 @@
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAADV2IdTokenClaims.h"
+#import "MSALTenantProfile.h"
+#import "MSALAuthority.h"
+#import "MSALAccount.h"
+#import "MSALAccountId.h"
 
 @interface MSALResultTests : MSALTestCase
 
@@ -98,12 +102,12 @@
     tokenResult.rawIdToken = @"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJ0ZW5hbnRfaWQifQ.t3T_3W7IcUfkjxTEUlM4beC1KccZJG7JaCJvTLjYg6M";
     NSError *claimsError = nil;
     MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
-    __auto_type authority = [@"https://login.microsoftonline.com/common" authority];
+    __auto_type authority = [@"https://login.microsoftonline.com/tenant_id" authority];
     tokenResult.authority = authority;
     MSIDAccount *account = [MSIDAccount new];
     account.authority = authority;
     account.localAccountId = @"local account id";
-    account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"some id"];
+    account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"uid.tenant_id"];
     tokenResult.account = account;
     
     NSError *error = nil;
@@ -112,6 +116,16 @@
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.tenantId, claims.realm);
     XCTAssertEqual(result.uniqueId, @"local account id");
+    XCTAssertNotNil(result.tenantProfile);
+    XCTAssertEqualObjects(result.tenantProfile.authority.url, authority.url);
+    XCTAssertEqual(result.tenantProfile.isHomeTenant, YES);
+    XCTAssertEqualObjects(result.tenantProfile.tenantId, @"tenant_id");
+    XCTAssertNotNil(result.tenantProfile.claims);
+    XCTAssertNotNil(result.account);
+    XCTAssertEqualObjects(result.account.homeAccountId.identifier, @"uid.tenant_id");
+    XCTAssertNil(result.account.allTenantProfiles);
 }
+
+//TODOJZ: init result with cache
 
 @end

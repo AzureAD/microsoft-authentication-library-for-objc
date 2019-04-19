@@ -26,19 +26,42 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
+#import "MSIDCacheAccessor.h"
+#import "MSIDTestTokenResponse.h"
+#import "MSIDTestIdTokenUtil.h"
+#import "MSIDTestConfiguration.h"
+#import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDAADV1Oauth2Factory.h"
+#import "MSIDAADV2TokenResponse.h"
+#import "MSIDAADV1TokenResponse.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDKeychainTokenCache.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
 @end
 
 @implementation MSALAccountsProviderTests
-
-- (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+{
+    MSIDDefaultTokenCacheAccessor *defaultCache;
+    MSIDLegacyTokenCacheAccessor *legacyCache;
 }
 
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+- (void)setUp {
+    id<MSIDTokenCacheDataSource> dataSource = nil;
+    
+#if TARGET_OS_IPHONE
+    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+#else
+    dataSource = MSIDMacTokenCache.defaultCache;
+#endif
+    
+    legacyCache = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource
+                                                       otherCacheAccessors:@[]];
+    defaultCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyCache]];
+    
+    [defaultCache clearWithContext:nil error:nil];
 }
 
 - (void)testExample {
@@ -46,11 +69,68 @@
     // Use XCTAssert and related functions to verify your tests produce the correct results.
 }
 
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
+- (BOOL)saveDefaultTokensWithAuthority:(NSString *)authority
+                              clientId:(NSString *)clientId
+                                   upn:(NSString *)upn
+                                  name:(NSString *)name
+                                   uid:(NSString *)uid
+                                  utid:(NSString *)utid
+                              tenantId:(NSString *)tid
+                                 cache:(id<MSIDCacheAccessor>)cache
+{
+    NSString *idToken = [MSIDTestIdTokenUtil idTokenWithName:upn preferredUsername:upn tenantId:tid];
+    
+    MSIDTokenResponse *response = [MSIDTestTokenResponse v2TokenResponseWithAT:@"access token"
+                                                                            RT:@"refresh token"
+                                                                        scopes:[NSOrderedSet orderedSetWithObjects:@"user.read", nil]
+                                                                       idToken:idToken
+                                                                           uid:uid
+                                                                          utid:utid
+                                                                      familyId:nil];
+    
+    MSIDConfiguration * config = [MSIDTestConfiguration configurationWithAuthority:authority
+                                                                          clientId:clientId
+                                                                       redirectUri:nil
+                                                                            target:@"user.read"];
+    
+    return [cache saveTokensWithConfiguration:config
+                                     response:response
+                                      factory:[MSIDAADV2Oauth2Factory new]
+                                      context:nil
+                                        error:nil];
+}
+
+- (BOOL)saveLegacyTokensWithAuthority:(NSString *)authority
+                             clientId:(NSString *)clientId
+                                  upn:(NSString *)upn
+                                 name:(NSString *)name
+                                  uid:(NSString *)uid
+                                 utid:(NSString *)utid
+                             tenantId:(NSString *)tid
+                                cache:(id<MSIDCacheAccessor>)cache
+{
+    
+    NSString *idToken = [MSIDTestIdTokenUtil idTokenWithName:name upn:upn tenantId:tid];
+    
+    MSIDTokenResponse *response = [MSIDTestTokenResponse v1TokenResponseWithAT:@"access token"
+                                                                            rt:@"refresh token"
+                                                                      resource:@"graph resource"
+                                                                           uid:uid
+                                                                          utid:utid
+                                                                       idToken:idToken
+                                                              additionalFields:nil];
+    
+    MSIDConfiguration * config = [MSIDTestConfiguration configurationWithAuthority:authority
+                                                                          clientId:clientId
+                                                                       redirectUri:nil
+                                                                            target:@"fake_resource"];
+    
+    return [cache saveTokensWithConfiguration:config
+                                     response:response
+                                      factory:[MSIDAADV1Oauth2Factory new]
+                                      context:nil
+                                        error:nil];
+    
 }
 
 @end
