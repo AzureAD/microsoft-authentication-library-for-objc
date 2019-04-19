@@ -121,6 +121,9 @@
 - (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.configuration.sliceConfig.sliceDictionary; }
 - (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
 {
+    if (!sliceParameters) MSID_LOG_WARN(nil, @"setting slice parameter with nil object.");
+    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WARN(nil, @"slice parameter does not contain slice nor dc");
+    
     self.configuration.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
 }
 
