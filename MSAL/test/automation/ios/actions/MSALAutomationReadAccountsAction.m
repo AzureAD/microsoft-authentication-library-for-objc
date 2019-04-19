@@ -88,9 +88,8 @@
         userInfo.homeObjectId = account.homeAccountId.objectId;
         userInfo.homeTenantId = account.homeAccountId.tenantId;
         userInfo.environment = account.environment;
-        NSArray<MSALTenantProfile *> *tenantProfiles = [account loadAllTenantProfiles:application error:nil];
-        userInfo.objectId = tenantProfiles[0].userObjectId;
-        userInfo.tenantId = tenantProfiles[0].tenantId;
+        userInfo.objectId = account.allTenantProfiles[0].userObjectId;
+        userInfo.tenantId = account.allTenantProfiles[0].tenantId;
         [items addObject:userInfo];
     }
 

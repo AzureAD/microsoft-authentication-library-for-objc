@@ -48,8 +48,10 @@
  */
 @property (readonly, nonnull) NSString *environment;
 
-- (nullable NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(nonnull MSALPublicClientApplication *)application
-                                                           error:(NSError * _Nullable * _Nullable)error;
+/*!
+ Array of all tenants which are logged in for this account.
+ */
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *allTenantProfiles;
 
 @end
 

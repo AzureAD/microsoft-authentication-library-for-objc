@@ -54,7 +54,7 @@
     MSIDTokenResult *tokenResult = nil;
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult tokenCache:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -68,7 +68,7 @@
     MSIDTokenResult *tokenResult = [MSIDTokenResult new];
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult tokenCache:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -83,7 +83,7 @@
     tokenResult.rawIdToken = @"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJ0ZW5hbnRfaWQifQ.t3T_3W7IcUfkjxTEUlM4beC1KccZJG7JaCJvTLjYg6M";
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult tokenCache:nil error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSALErrorDomain");
@@ -107,7 +107,7 @@
     tokenResult.account = account;
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult tokenCache:nil error:&error];
     
     XCTAssertNotNil(result);
     XCTAssertEqualObjects(result.tenantId, claims.realm);

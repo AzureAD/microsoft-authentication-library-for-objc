@@ -32,11 +32,11 @@
 
 @implementation MSALTenantProfile
 
-- (id)initWithUserObjectId:(NSString *)userObjectId
-                  tenantId:(NSString *)tenantId
-                 authority:(MSALAuthority *)authority
-              isHomeTenant:(BOOL)isHomeTenant
-                    claims:(NSDictionary *)claims
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(NSDictionary *)claims
 {
     self = [super init];
     

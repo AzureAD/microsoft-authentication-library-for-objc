@@ -111,6 +111,7 @@
                                                           clientId:self.clientId
                                                           familyId:familyId
                                                  accountIdentifier:accountIdentifier
+                                                 loadIdTokenClaims:YES
                                                            context:nil
                                                              error:&msidError];
     
@@ -152,6 +153,7 @@
                                                           clientId:self.clientId
                                                           familyId:familyId
                                                  accountIdentifier:accountIdentifier
+                                                 loadIdTokenClaims:YES
                                                            context:nil
                                                              error:&msidError];
     
@@ -193,6 +195,7 @@
                                                           clientId:self.clientId
                                                           familyId:familyId
                                                  accountIdentifier:nil
+                                                 loadIdTokenClaims:YES
                                                            context:nil
                                                              error:&msidError];
     
@@ -211,8 +214,6 @@
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        [self loadIdTokenClaimsForMSIDAccount:msidAccount];
-        
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
@@ -228,34 +229,6 @@
     }
     
     return [msalAccounts allObjects];
-}
-
-- (void)loadIdTokenClaimsForMSIDAccount:(MSIDAccount *)msidAccount
-{
-    // Return if id token claims is already loaded. This normally happen msidAccount retrieved from legacy tokens
-    if (msidAccount.idTokenClaims) return;
-    
-    MSIDConfiguration *config = [MSIDConfiguration new];
-    config.authority = msidAccount.authority;
-    config.clientId = self.clientId;
-    NSError *error;
-    MSIDIdToken *idToken = [self.tokenCache getIDTokenForAccount:msidAccount.accountIdentifier
-                                                   configuration:config
-                                                     idTokenType:MSIDIDTokenType
-                                                         context:nil
-                                                           error:&error];
-    if (error || !idToken)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to retrive ID token when load id token claims for msidAccount!");
-    }
-    
-    error =  nil;
-    msidAccount.idTokenClaims = [[MSIDIdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&error];
-    
-    if (error)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to create id token claims when load id token claims for msidAccount!");
-    }
 }
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem

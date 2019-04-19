@@ -205,29 +205,8 @@
 
 #pragma mark - Tenant profiles
 
-- (NSArray<MSALTenantProfile *> *)loadAllTenantProfiles:(MSALPublicClientApplication *)application error:(NSError **)error
+- (NSArray<MSALTenantProfile *> *)allTenantProfiles
 {
-    if (!application)
-    {
-        MSAL_ERROR_PARAM(nil, MSALErrorInvalidParameter, @"application is a required parameter to load tenant profiles and must not be nil or empty.");
-        return nil;
-    }
-    
-    // if tenant profiles are already laoded, just return it
-    if (self.tenantProfiles) return self.tenantProfiles;
-    
-    MSALAccountsProvider *accountProvider = [[MSALAccountsProvider alloc] initWithTokenCache:application.tokenCache clientId:application.clientId];
-    
-    if (!accountProvider)
-    {
-        MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"Failed to create account provider when loading all tenant profile!");
-        return nil;
-    }
-    
-    MSALAccount *accountWithTenatnProfiles = [accountProvider accountForHomeAccountId:self.homeAccountId.identifier error:error];
-    if (error || !accountWithTenatnProfiles) return nil;
-    
-    self.tenantProfiles = accountWithTenatnProfiles.tenantProfiles;
     return self.tenantProfiles;
 }
 

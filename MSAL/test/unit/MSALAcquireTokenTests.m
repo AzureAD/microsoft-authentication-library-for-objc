@@ -75,6 +75,7 @@
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDVersion.h"
 #import "MSIDConstants.h"
+#import "MSALTenantProfile.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
