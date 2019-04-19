@@ -25,11 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Cocoa/Cocoa.h>
+#import "MSALClaimsRequest.h"
+
+@class MSIDClaimsRequest;
+@protocol MSIDJsonSerializing;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CacheViewController : NSViewController
+@interface MSALClaimsRequest ()
+
+@property (nonatomic) MSIDClaimsRequest *msidClaimsRequest;
+@property (nonatomic) id<MSIDJsonSerializing> jsonSerializer;
 
 @end
 

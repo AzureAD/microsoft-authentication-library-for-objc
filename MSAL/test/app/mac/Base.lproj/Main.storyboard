@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
         <plugIn identifier="com.apple.WebKit2IBPlugin" version="14460.31"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -732,7 +731,7 @@
         <!--Acquire Token-->
         <scene sceneID="K3P-2B-Htg">
             <objects>
-                <viewController title="Acquire Token" id="TI1-y4-O1V" customClass="AcquireTokenViewController" sceneMemberID="viewController">
+                <viewController title="Acquire Token" id="TI1-y4-O1V" customClass="MSALAcquireTokenViewController" sceneMemberID="viewController">
                     <view key="view" id="abS-Lb-mBp">
                         <rect key="frame" x="0.0" y="0.0" width="1014" height="670"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1101,7 +1100,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
                                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="x3g-AR-BEb">
                                                     <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
-                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <textView importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="t7N-kO-jh7">
                                                             <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
@@ -1258,7 +1257,7 @@
         <!--Configure Scopes-->
         <scene sceneID="lLy-lP-ZnF">
             <objects>
-                <viewController title="Configure Scopes" id="iiy-h0-CG7" customClass="ScopesViewController" sceneMemberID="viewController">
+                <viewController title="Configure Scopes" id="iiy-h0-CG7" customClass="MSALScopesViewController" sceneMemberID="viewController">
                     <view key="view" id="uOv-08-Tfb">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="649"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -1292,7 +1291,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="430" height="565"/>
                                                 <clipView key="contentView" id="oyy-gY-gNa">
                                                     <rect key="frame" x="1" y="0.0" width="428" height="564"/>
-                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="Uyn-TP-cCj" viewBased="YES" id="RLv-sX-YPS">
                                                             <rect key="frame" x="0.0" y="0.0" width="428" height="541"/>
@@ -1444,7 +1443,7 @@
         <!--Cache-->
         <scene sceneID="DRF-aE-cHy">
             <objects>
-                <viewController title="Cache" id="vqt-0E-aDE" customClass="CacheViewController" sceneMemberID="viewController">
+                <viewController title="Cache" id="vqt-0E-aDE" customClass="MSALCacheViewController" sceneMemberID="viewController">
                     <view key="view" id="Nrf-Nq-1iU">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>

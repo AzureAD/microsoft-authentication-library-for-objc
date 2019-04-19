@@ -25,18 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Cocoa/Cocoa.h>
+#import "MSALTelemetryConfig.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALTelemetryConfig ()
 
-@protocol ScopesDelegate <NSObject>
-- (void)setScopes:(NSMutableArray *)scopes;
-@end
-
-@interface ScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
-
-@property (weak) id<ScopesDelegate> delegate;
++ (instancetype)sharedInstance;
 
 @end
-
-NS_ASSUME_NONNULL_END

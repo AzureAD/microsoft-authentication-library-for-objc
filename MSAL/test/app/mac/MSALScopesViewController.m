@@ -25,17 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "ScopesViewController.h"
+#import "MSALScopesViewController.h"
 #import "MSALTestAppSettings.h"
 
-@interface ScopesViewController ()
+@interface MSALScopesViewController ()
 @property NSMutableArray *scopesList;
 @property (weak) IBOutlet NSTableView *scopesView;
 @property (weak) IBOutlet NSTextField *scopesText;
 
 @end
 
-@implementation ScopesViewController
+@implementation MSALScopesViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];

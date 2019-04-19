@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "AcquireTokenViewController.h"
+#import "MSALAcquireTokenViewController.h"
 #import <MSAL/MSAL.h>
 #import "MSALTestAppSettings.h"
-#import "ScopesViewController.h"
+#import "MSALScopesViewController.h"
 #import "MSALInteractiveTokenParameters.h"
-#import "MSALConstants.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALSilentTokenParameters.h"
@@ -40,7 +39,7 @@ static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
 static NSString * const defaultScope = @"User.Read";
 
-@interface AcquireTokenViewController ()
+@interface MSALAcquireTokenViewController ()
 
 @property (weak) IBOutlet NSPopUpButton *profiles;
 @property (weak) IBOutlet NSTextField *clientId;
@@ -61,7 +60,7 @@ static NSString * const defaultScope = @"User.Read";
 
 @end
 
-@implementation AcquireTokenViewController
+@implementation MSALAcquireTokenViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -95,7 +94,7 @@ static NSString * const defaultScope = @"User.Read";
 {
     if ([segue.identifier isEqualToString:@"addScopesSegue"])
     {
-        ScopesViewController *scopesController = (ScopesViewController *)segue.destinationController;
+        MSALScopesViewController *scopesController = (MSALScopesViewController *)segue.destinationController;
         scopesController.delegate = self;
     }
 }

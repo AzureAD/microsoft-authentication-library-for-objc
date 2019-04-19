@@ -29,17 +29,17 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDADFSAuthority.h"
 #import "MSIDAuthority+Internal.h"
+#import "MSALAuthority_Internal.h"
 
 @implementation MSALADFSAuthority
 
 - (instancetype)initWithURL:(NSURL *)url
-                    context:(id<MSIDRequestContext>)context
                       error:(NSError **)error
 {
-    self = [super initWithURL:url context:context error:error];
+    self = [super initWithURL:url error:error];
     if (self)
     {
-        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:context error:error];
+        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:nil error:error];
         if (!self.msidAuthority) return nil;
     }
     
@@ -50,5 +50,6 @@
 {
     return self.msidAuthority.url;
 }
+
 
 @end

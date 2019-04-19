@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "1E614BD922558D8300EBF62F"
-               BuildableName = "MSALMacTestApp.app"
-               BlueprintName = "MSALMacTestApp"
+               BuildableName = "MSAL Test App (Mac).app"
+               BlueprintName = "MSAL Test App (Mac)"
                ReferencedContainer = "container:MSAL.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -33,8 +33,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E614BD922558D8300EBF62F"
-            BuildableName = "MSALMacTestApp.app"
-            BlueprintName = "MSALMacTestApp"
+            BuildableName = "MSAL Test App (Mac).app"
+            BlueprintName = "MSAL Test App (Mac)"
             ReferencedContainer = "container:MSAL.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -56,8 +56,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E614BD922558D8300EBF62F"
-            BuildableName = "MSALMacTestApp.app"
-            BlueprintName = "MSALMacTestApp"
+            BuildableName = "MSAL Test App (Mac).app"
+            BlueprintName = "MSAL Test App (Mac)"
             ReferencedContainer = "container:MSAL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -75,8 +75,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "1E614BD922558D8300EBF62F"
-            BuildableName = "MSALMacTestApp.app"
-            BlueprintName = "MSALMacTestApp"
+            BuildableName = "MSAL Test App (Mac).app"
+            BlueprintName = "MSAL Test App (Mac)"
             ReferencedContainer = "container:MSAL.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

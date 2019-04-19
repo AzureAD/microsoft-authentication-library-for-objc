@@ -25,12 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Cocoa/Cocoa.h>
-#import "ScopesViewController.h"
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AcquireTokenViewController : NSViewController <ScopesDelegate>
+@interface MSALExtraQueryParameters : NSObject
+
+@property NSMutableDictionary<NSString *, NSString *> *extraURLQueryParameters;
+@property NSMutableDictionary<NSString *, NSString *> *extraTokenURLParameters;
+@property NSMutableDictionary<NSString *, NSString *> *extraAuthorizeURLQueryParameters;
 
 @end
 

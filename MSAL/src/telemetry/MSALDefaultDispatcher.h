@@ -22,12 +22,14 @@
 // THE SOFTWARE.
 
 #import "MSIDTelemetryDispatcher.h"
+#import "MSALTelemetryConfig.h"
 
 @interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
 
 + (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
 - (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
 
-- (id)initWithDispatcher:(id<MSALDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
+   setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
 
 @end

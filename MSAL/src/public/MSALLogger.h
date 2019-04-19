@@ -26,48 +26,24 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-/*! Levels of logging. Defines the priority of the logged message */
-typedef NS_ENUM(NSInteger, MSALLogLevel)
-{
-    MSALLogLevelNothing,
-    MSALLogLevelError,
-    MSALLogLevelWarning,
-    MSALLogLevelInfo,
-    MSALLogLevelVerbose,
-    MSALLogLevelLast = MSALLogLevelVerbose,
-};
-
-
-/*!
-    The LogCallback block for the MSAL logger
- 
-    @param  level           The level of the log message
-    @param  message         The message being logged
-    @param  containsPII     If the message might contain Personally Identifiable Information (PII)
-                            this will be true. Log messages possibly containing PII will not be
-                            sent to the callback unless PIllLoggingEnabled is set to YES on the
-                            logger.
-
- */
-typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
-
+#import "MSALDefinitions.h"
 
 @interface MSALLogger : NSObject
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
-+ (nonnull MSALLogger *)sharedLogger;
++ (nonnull MSALLogger *)sharedLogger DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig instead");
+                                                            
 
 /*!
     The minimum log level for messages to be passed onto the log callback.
  */
-@property (readwrite) MSALLogLevel level;
+@property (readwrite) MSALLogLevel level DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.logLevel instead");
 
 /*!
     MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
-@property (readwrite) BOOL PiiLoggingEnabled;
+@property (readwrite) BOOL PiiLoggingEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.piiEnabled instead");
 
 /*!
     Sets the callback block to send MSAL log messages to.
@@ -75,6 +51,6 @@ typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message
     NOTE: Once this is set this can not be unset, and it should be set early in
           the program's execution.
  */
-- (void)setCallback:(nonnull MSALLogCallback)callback;
+- (void)setCallback:(nonnull MSALLogCallback)callback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig setLogCallback: instead");;
 
 @end
