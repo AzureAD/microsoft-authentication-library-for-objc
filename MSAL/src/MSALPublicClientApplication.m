@@ -291,7 +291,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [request allAccountsFilteredByAuthority:self.authority completionBlock:completionBlock];
 }
 
-#pragma SafariViewController Support
+#pragma mark -
+#pragma mark SafariViewController Support
 
 #if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
