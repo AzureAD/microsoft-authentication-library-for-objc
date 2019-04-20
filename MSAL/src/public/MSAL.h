@@ -66,4 +66,6 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALIndividualClaimRequestAdditionalInfo.h>
 #import <MSAL/MSALJsonSerializable.h>
 #import <MSAL/MSALJsonDeserializable.h>
+#import <MSAL/MSALLogger.h>
+#import <MSAL/MSALTelemetry.h>
 

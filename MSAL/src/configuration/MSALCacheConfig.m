@@ -64,4 +64,12 @@
 #endif
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSString *keychainSharingGroup = [_keychainSharingGroup copyWithZone:zone];
+    return [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+}
+
 @end

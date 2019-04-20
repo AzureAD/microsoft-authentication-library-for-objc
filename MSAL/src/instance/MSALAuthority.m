@@ -45,4 +45,46 @@
                                             error:error];
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MSALAuthority *authority = [[self.class alloc] init];
+    authority->_msidAuthority = [_msidAuthority copyWithZone:zone];
+    return authority;
+}
+
+#pragma mark - NSObject
+
+- (BOOL)isEqual:(id)object
+{
+    if (self == object)
+    {
+        return YES;
+    }
+    
+    if (![object isKindOfClass:MSALAuthority.class])
+    {
+        return NO;
+    }
+    
+    return [self isEqualToAuthority:(MSALAuthority *)object];
+}
+
+- (NSUInteger)hash
+{
+    NSUInteger hash = 0;
+    hash = hash * 31 + self.msidAuthority.hash;
+    return hash;
+}
+
+- (BOOL)isEqualToAuthority:(MSALAuthority *)authority
+{
+    if (!authority) return NO;
+    
+    BOOL result = YES;
+    result &= (!self.msidAuthority && !authority.msidAuthority) || [self.msidAuthority isEqual:authority.msidAuthority];
+    return result;
+}
+
 @end

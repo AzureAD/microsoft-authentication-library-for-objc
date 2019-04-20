@@ -688,17 +688,17 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
+    config.clientApplicationCapabilities = @[@"llt"];
+    
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    
-    application.configuration.clientApplicationCapabilities = @[@"llt"];
-
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
@@ -787,17 +787,18 @@
          completionHandler(oauthResponse, nil);
      }];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
+    config.clientApplicationCapabilities = @[@"llt"];;
+    
     // Acquire token call
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                           authority:[DEFAULT_TEST_AUTHORITY msalAuthority]
-                                                                                               error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
 
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
-    application.configuration.clientApplicationCapabilities = @[@"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     application.webviewType = MSALWebviewTypeWKWebView;
@@ -1089,13 +1090,14 @@
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
+    
     // Enable extended lifetime token and acquire token
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                               error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.configuration.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1159,13 +1161,14 @@
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.extendedLifetimeEnabled = NO;
+    
     // Enable extended lifetime token and acquire token
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                               error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.configuration.extendedLifetimeEnabled = NO; //default is NO
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1364,12 +1367,14 @@
     [MSIDTestURLSession addResponse:tokenResponse];
     
     // Enable extended lifetime token and acquire token
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.extendedLifetimeEnabled = YES;
+    
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                                               error:&error];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    application.configuration.extendedLifetimeEnabled = YES; //Turn on extended lifetime token
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1665,15 +1670,15 @@
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.clientApplicationCapabilities = @[@"cp1"];
+    
     // Acquire a token silently
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    
-    application.configuration.clientApplicationCapabilities = @[@"cp1"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1732,15 +1737,15 @@
     MSIDTestURLResponse *oidcResponse = [MSIDTestURLResponse oidcResponseForAuthority:authority];
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.clientApplicationCapabilities = @[@"cp1"];
+    
     // Acquire a token silently
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    
-    application.configuration.clientApplicationCapabilities = @[@"cp1"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                             name:@"user@contoso.com"
@@ -1823,14 +1828,15 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.clientApplicationCapabilities = @[@"cp1", @"llt"];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    
-    application.configuration.clientApplicationCapabilities = @[@"cp1", @"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1907,14 +1913,15 @@
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.clientApplicationCapabilities = @[@"llt"];
+    
     NSError *error = nil;
     MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                    error:&error];
+    [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     XCTAssertNotNil(application);
     application.tokenCache = self.tokenCache;
-    
-    application.configuration.clientApplicationCapabilities = @[@"llt"];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]

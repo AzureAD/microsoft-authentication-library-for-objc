@@ -32,13 +32,14 @@
 #import "MSALSliceConfig.h"
 #import "MSALCacheConfig+Internal.h"
 
+static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
+
 @implementation MSALPublicClientApplicationConfig
 {
     MSALSliceConfig *_sliceConfig;
 }
 
 static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
-static NSArray<MSALAuthority *> *s_knownAuthorities;
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
@@ -58,9 +59,8 @@ static NSArray<MSALAuthority *> *s_knownAuthorities;
         _authority = authority ?: [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
         _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
         
-        _validateAuthority = YES;
-        
         _cacheConfig = [MSALCacheConfig defaultConfig];
+        _tokenExpirationBuffer = defaultTokenExpirationBuffer;
     }
     
     return self;
@@ -87,8 +87,33 @@ static NSArray<MSALAuthority *> *s_knownAuthorities;
     return _sliceConfig;
 }
 
-+ (NSArray<MSALAuthority *> *)knownAuthorities { return s_knownAuthorities; }
-+ (void)setKnownAuthorities:(NSArray<MSALAuthority *> *)knownAuthorities { s_knownAuthorities = knownAuthorities; }
+#pragma mark - NSCopying
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSString *clientId = [_clientId copyWithZone:zone];
+    MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId];
+    item->_redirectUri = [_redirectUri copyWithZone:zone];
+    item->_authority = [_authority copyWithZone:zone];
+    
+    if (_knownAuthorities)
+    {
+        item->_knownAuthorities = [[NSArray alloc] initWithArray:_knownAuthorities copyItems:YES];
+    }
+    
+    item->_extendedLifetimeEnabled = _extendedLifetimeEnabled;
+    
+    if (_clientApplicationCapabilities)
+    {
+        item->_clientApplicationCapabilities = [[NSArray alloc] initWithArray:_clientApplicationCapabilities copyItems:YES];
+    }
+    
+    item->_tokenExpirationBuffer = _tokenExpirationBuffer;
+    item->_sliceConfig = [_sliceConfig copyWithZone:zone];
+    item->_cacheConfig = [_cacheConfig copyWithZone:zone];
+    item->_verifiedRedirectUri = [_verifiedRedirectUri copyWithZone:zone];
+    item->_extraQueryParameters = [_extraQueryParameters copyWithZone:zone];
+    return item;
+}
 
 @end

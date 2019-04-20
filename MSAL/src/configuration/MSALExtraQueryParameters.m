@@ -41,4 +41,15 @@
     return self;
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    MSALExtraQueryParameters *params = [MSALExtraQueryParameters new];
+    params->_extraTokenURLParameters = [_extraTokenURLParameters mutableCopy];
+    params->_extraURLQueryParameters = [_extraURLQueryParameters mutableCopy];
+    params->_extraAuthorizeURLQueryParameters = [_extraAuthorizeURLQueryParameters mutableCopy];
+    return params;
+}
+
 @end
