@@ -43,6 +43,7 @@
 - (void)assertAccessTokenExpired;
 - (void)assertAuthUIAppearsUsingEmbeddedWebView:(BOOL)useEmbedded;
 - (void)assertErrorCode:(NSInteger)expectedErrorCode;
+- (void)assertInternalErrorCode:(NSInteger)internalErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
 - (void)assertAccessTokenNotNil;

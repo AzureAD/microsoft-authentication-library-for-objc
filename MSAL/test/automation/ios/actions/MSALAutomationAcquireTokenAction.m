@@ -164,9 +164,7 @@
         parameters.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
-    
-    NSLog(@"Application: %@", application);
-    
+        
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];

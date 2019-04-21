@@ -66,7 +66,7 @@ static NSSet *s_recoverableErrorCode;
                                    // Interactive flow
                                    @(MSIDErrorAuthorizationFailed) : @(MSALInternalErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
-                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALInternalErrorSessionCanceled),
+                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorUserCanceled),
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALInternalErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALInternalErrorNoViewController),
