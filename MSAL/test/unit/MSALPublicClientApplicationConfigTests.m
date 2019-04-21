@@ -54,7 +54,9 @@
     XCTAssertNil(config.sliceConfig.slice);
     XCTAssertNil(config.sliceConfig);
     XCTAssertNotNil(config.cacheConfig);
+#if TARGET_OS_IPHONE
     XCTAssertEqualObjects(config.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
+#endif
     XCTAssertNil(config.verifiedRedirectUri);
     XCTAssertNotNil(config.extraQueryParameters);
     XCTAssertFalse(config.extendedLifetimeEnabled);
@@ -76,7 +78,9 @@
     XCTAssertNil(config.sliceConfig.slice);
     XCTAssertNil(config.sliceConfig);
     XCTAssertNotNil(config.cacheConfig);
+#if TARGET_OS_IPHONE
     XCTAssertEqualObjects(config.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
+#endif
     XCTAssertNil(config.verifiedRedirectUri);
     XCTAssertNotNil(config.extraQueryParameters);
     XCTAssertFalse(config.extendedLifetimeEnabled);
@@ -100,7 +104,9 @@
     XCTAssertNil(copiedConfig.sliceConfig.slice);
     XCTAssertNil(copiedConfig.sliceConfig);
     XCTAssertNotNil(copiedConfig.cacheConfig);
+#if TARGET_OS_IPHONE
     XCTAssertEqualObjects(copiedConfig.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
+#endif
     XCTAssertNil(copiedConfig.verifiedRedirectUri);
     XCTAssertNotNil(copiedConfig.extraQueryParameters);
     XCTAssertFalse(copiedConfig.extendedLifetimeEnabled);
@@ -134,7 +140,9 @@
     XCTAssertEqualObjects(copiedConfig.sliceConfig.slice, @"myslice");
     XCTAssertNotNil(copiedConfig.sliceConfig);
     XCTAssertNotNil(copiedConfig.cacheConfig);
+#if TARGET_OS_IPHONE
     XCTAssertEqualObjects(copiedConfig.cacheConfig.keychainSharingGroup, @"my.test.group");
+#endif
     XCTAssertNil(copiedConfig.verifiedRedirectUri);
     XCTAssertNotNil(copiedConfig.extraQueryParameters);
     NSDictionary *expectedQP = @{@"slice":@"myslice", @"dc": @"mydc"};
