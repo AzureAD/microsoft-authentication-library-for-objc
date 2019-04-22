@@ -324,7 +324,8 @@
     }];
 }
 
-#pragma SafariViewController Support
+#pragma mark -
+#pragma mark SafariViewController Support
 
 #if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
