@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
                   tenantId:(NSString *)tenantId
                  authority:(MSALAuthority *)authority
               isHomeTenant:(BOOL)isHomeTenant
-                    claims:(NSDictionary* _Nullable)claims;
+                    claims:(nullable NSDictionary *)claims;
 
 @end
 
