@@ -26,37 +26,48 @@
 //------------------------------------------------------------------------------
 
 #import "MSALError_Internal.h"
+#import "MSALErrorConverter.h"
 
 NSString *MSALStringForErrorCode(MSALErrorCode code)
 {
     switch (code)
     {
         STRING_CASE(MSALErrorInvalidParameter);
+        STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
+        STRING_CASE(MSALErrorInvalidRequest);
         STRING_CASE(MSALErrorInvalidClient);
         STRING_CASE(MSALErrorInvalidGrant);
         STRING_CASE(MSALErrorInvalidScope);
-        STRING_CASE(MSALErrorInvalidRequest);
-        STRING_CASE(MSALErrorRedirectSchemeNotRegistered);
-        STRING_CASE(MSALErrorMismatchedUser);
-        STRING_CASE(MSALErrorNetworkFailure);
-        STRING_CASE(MSALErrorTokenCacheItemFailure);
-        STRING_CASE(MSALErrorWrapperCacheFailure);
-        STRING_CASE(MSALErrorAmbiguousAuthority);
+        STRING_CASE(MSALErrorUnauthorizedClient);
+        STRING_CASE(MSALErrorUnhandledResponse);
+        STRING_CASE(MSALErrorServerDeclinedScopes);
+        STRING_CASE(MSALErrorFailedAuthorityValidation);
         STRING_CASE(MSALErrorInteractionRequired);
-        STRING_CASE(MSALErrorInvalidResponse);
-        STRING_CASE(MSALErrorBadAuthorizationResponse);
+        STRING_CASE(MSALErrorMismatchedUser);
         STRING_CASE(MSALErrorAuthorizationFailed);
-        STRING_CASE(MSALErrorBadTokenResponse);
-        STRING_CASE(MSALErrorNoAuthorizationResponse);
+        STRING_CASE(MSALErrorAccountRequired);
         STRING_CASE(MSALErrorUserCanceled);
         STRING_CASE(MSALErrorSessionCanceled);
         STRING_CASE(MSALErrorInteractiveSessionAlreadyRunning);
-        STRING_CASE(MSALErrorInvalidState);
         STRING_CASE(MSALErrorNoViewController);
-        STRING_CASE(MSALErrorInternal);
-        STRING_CASE(MSALErrorUserNotFound);
-        STRING_CASE(MSALErrorUnhandledResponse);
-        STRING_CASE(MSALErrorServerDeclinedScopes);
+        STRING_CASE(MSALErrorAttemptToOpenURLFromExtension);
+        STRING_CASE(MSALErrorUINotSupportedInExtension);
+        STRING_CASE(MSALErrorInvalidState);
+        STRING_CASE(MSALErrorInvalidResponse);
+        STRING_CASE(MSALErrorNonHttpsRedirect);
+        STRING_CASE(MSALErrorServerProtectionPoliciesRequired);
+        STRING_CASE(MSALErrorBrokerResponseNotReceived);
+        STRING_CASE(MSALErrorBrokerNoResumeStateFound);
+        STRING_CASE(MSALErrorBrokerBadResumeStateFound);
+        STRING_CASE(MSALErrorBrokerMismatchedResumeState);
+        STRING_CASE(MSALErrorBrokerResponseHashMissing);
+        STRING_CASE(MSALErrorBrokerCorruptedResponse);
+        STRING_CASE(MSALErrorBrokerResponseDecryptionFailed);
+        STRING_CASE(MSALErrorBrokerResponseHashMismatch);
+        STRING_CASE(MSALErrorBrokerKeyFailedToCreate);
+        STRING_CASE(MSALErrorBrokerKeyNotFound);
+        STRING_CASE(MSALErrorWorkplaceJoinRequired);
+        STRING_CASE(MSALErrorBrokerUnknown);
             
         default:
             return [NSString stringWithFormat:@"Unmapped Error %ld", (long)code];
@@ -102,7 +113,7 @@ NSError *MSALCreateAndLogError(id<MSIDRequestContext> ctx, NSString *domain, NSI
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
 
-    NSError *error = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    NSError *error = [MSALErrorConverter msalErrorFromMsidError:MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo)];
     MSALLogError(ctx, error, function, line);
     return error;
 }
@@ -114,7 +125,7 @@ void MSALFillAndLogError(NSError * __autoreleasing * error, id<MSIDRequestContex
     NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
 
-    NSError *msalError = MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo);
+    NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:MSIDCreateError(domain, code, description, oauthError, subError, underlyingError, nil, additionalUserInfo)];
     MSALLogError(ctx, msalError, function, line);
     
     if (error)

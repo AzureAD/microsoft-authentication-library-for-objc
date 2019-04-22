@@ -32,6 +32,7 @@
 				<string>msalb6c69a37-df96-4db0-9088-2ab96e1d8215</string>
 				<string>ms-onedrive</string>
 				<string>msalb6c69a37-df96-4db0-9088-2ab96e1d8215</string>
+				<string>ms-sharepoint-auth</string>
 			</array>
 		</dict>
 	</array>
@@ -47,7 +48,7 @@
 	<key>UILaunchStoryboardName</key>
 	<string>Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
+	<string>MainAutomation</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

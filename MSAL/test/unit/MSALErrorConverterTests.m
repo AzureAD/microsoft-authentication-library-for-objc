@@ -26,8 +26,17 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#include "MSALErrorConverter.h"
+#import "MSALErrorConverter+Internal.h"
 #include "MSIDError.h"
+#import "MSIDTokenResult.h"
+#import "MSIDTestURLResponse+Util.h"
+#import "MSIDAADV2Oauth2Factory.h"
+#import "MSIDConfiguration.h"
+#import "MSIDAuthorityFactory.h"
+#import "MSIDTokenResponse.h"
+#import "MSIDAccessToken.h"
+#import "MSIDRefreshToken.h"
+#import "MSALResult.h"
 
 @interface MSALErrorConverterTests : XCTestCase
 
@@ -43,20 +52,23 @@
     [super tearDown];
 }
 
+- (void)testErrorFromMsidError_whenPassInNilError_shouldReturnNil
+{
+    XCTAssertNil([MSALErrorConverter msalErrorFromMsidError:nil]);
+}
+
 
 - (void)testErrorConversion_whenPassInNilDomain_ShouldReturnNil {
-    MSALErrorConverter *converter = [MSALErrorConverter new];
-
     NSString *msalDomain = nil;
-
-    NSError *msalError = [converter errorWithDomain:msalDomain
-                                               code:0
-                                   errorDescription:nil
-                                         oauthError:nil
-                                           subError:nil
-                                    underlyingError:nil
-                                      correlationId:nil
-                                           userInfo:nil];
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:msalDomain
+                                                        code:0
+                                            errorDescription:nil
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
     XCTAssertNil(msalError);
 }
 
@@ -69,19 +81,18 @@
     NSUUID *correlationId = [NSUUID UUID];
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
-
-    MSALErrorConverter *converter = [MSALErrorConverter new];
-    NSError *msalError = [converter errorWithDomain:MSIDKeychainErrorDomain
-                                               code:errorCode
-                                   errorDescription:errorDescription
-                                         oauthError:oauthError
-                                           subError:subError
-                                    underlyingError:underlyingError
-                                      correlationId:correlationId
-                                           userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
-                                                      MSIDHTTPResponseCodeKey : httpResponseCode,
-                                                      @"additional_user_info": @"unmapped_userinfo"}];
-
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDKeychainErrorDomain
+                                                        code:errorCode
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:underlyingError
+                                               correlationId:correlationId
+                                                    userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
+                                                               MSIDHTTPResponseCodeKey : httpResponseCode,
+                                                               @"additional_user_info": @"unmapped_userinfo"}];
+    
     NSString *expectedErrorDomain = NSOSStatusErrorDomain;
     XCTAssertNotNil(msalError);
     XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
@@ -109,18 +120,18 @@
     NSUUID *correlationId = [NSUUID UUID];
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
-
-    MSALErrorConverter *converter = [MSALErrorConverter new];
-    NSError *msalError = [converter errorWithDomain:MSIDOAuthErrorDomain
-                                               code:errorCode
-                                   errorDescription:errorDescription
-                                         oauthError:oauthError
-                                           subError:subError
-                                    underlyingError:underlyingError
-                                      correlationId:correlationId
-                                           userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
-                                                      MSIDHTTPResponseCodeKey : httpResponseCode,
-                                                      @"additional_user_info": @"unmapped_userinfo"}];
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDOAuthErrorDomain
+                                                        code:errorCode
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:underlyingError
+                                               correlationId:correlationId
+                                                    userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
+                                                               MSIDHTTPResponseCodeKey : httpResponseCode,
+                                                               @"additional_user_info": @"unmapped_userinfo",
+                                                               MSIDInvalidTokenResultKey : [self testTokenResult]}];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     NSInteger expectedErrorCode = MSALErrorInteractionRequired;
@@ -139,6 +150,41 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
     XCTAssertNil(msalError.userInfo[MSIDHTTPResponseCodeKey]);
     XCTAssertEqualObjects(msalError.userInfo[@"additional_user_info"], @"unmapped_userinfo");
+    XCTAssertNil(msalError.userInfo[MSIDInvalidTokenResultKey]);
+    XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
+    MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
+    XCTAssertEqualObjects(result.accessToken, @"access-token");
+}
+
+- (MSIDTokenResult *)testTokenResult
+{
+    NSDictionary *testResponse = [MSIDTestURLResponse tokenResponseWithAT:@"access-token"
+                                                               responseRT:@"refresh-token"
+                                                               responseID:nil
+                                                            responseScope:nil
+                                                       responseClientInfo:nil
+                                                                expiresIn:nil
+                                                                     foci:nil
+                                                             extExpiresIn:nil];
+
+    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDConfiguration *conf = [[MSIDConfiguration alloc] initWithAuthority:authority redirectUri:nil clientId:@"myclient" target:@"test.scope"];
+
+    MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];
+    MSIDTokenResponse *response = [factory tokenResponseFromJSON:testResponse context:nil error:nil];
+    MSIDAccessToken *accessToken = [factory accessTokenFromResponse:response configuration:conf];
+    MSIDRefreshToken *refreshToken = [factory refreshTokenFromResponse:response configuration:conf];
+    MSIDAccount *account = [factory accountFromResponse:response configuration:conf];
+
+    MSIDTokenResult *result = [[MSIDTokenResult alloc] initWithAccessToken:accessToken
+                                                              refreshToken:refreshToken
+                                                                   idToken:response.idToken
+                                                                   account:account
+                                                                 authority:accessToken.authority
+                                                             correlationId:[NSUUID UUID]
+                                                             tokenResponse:response];
+
+    return result;
 }
 
 /*!
@@ -159,16 +205,15 @@
         for (NSNumber *code in codes)
         {
             MSIDErrorCode errorCode = [code integerValue];
-
-            MSALErrorConverter *converter = [MSALErrorConverter new];
-            NSError *error = [converter errorWithDomain:domain
-                                                   code:[code integerValue]
-                                       errorDescription:nil
-                                             oauthError:nil
-                                               subError:nil
-                                        underlyingError:nil
-                                          correlationId:nil
-                                               userInfo:nil];
+            
+            NSError *error = [MSALErrorConverter errorWithDomain:domain
+                                                            code:[code integerValue]
+                                                errorDescription:nil
+                                                      oauthError:nil
+                                                        subError:nil
+                                                 underlyingError:nil
+                                                   correlationId:nil
+                                                        userInfo:nil];
             
             XCTAssertNotEqual(error.code, errorCode);
             XCTAssertNotEqualObjects(error.domain, domain);
@@ -177,4 +222,36 @@
     }
 }
 
+- (void)testErrorConversion_whenDomainIsMappedAndCodeMissing_shouldReturnMSALInternalError
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:123456
+                                            errorDescription:@"Unmapped code error"
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    
+}
+
+- (void)testErrorConversion_whenDomainNotMapped_shouldNotTouchCode
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:@"Unmapped Domain"
+                                                        code:MSIDErrorUserCancel
+                                            errorDescription:nil
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
+    XCTAssertEqual(msalError.code, MSIDErrorUserCancel);
+}
+
 @end
+

@@ -26,13 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import <MSAL/MSAL.h>
 
 @class MSALResult;
 @class MSALAccount;
 @class MSALTokenRequest;
 @class MSALAuthority;
 @class WKWebView;
+@class MSALRedirectUri;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -53,13 +53,18 @@
 @property (readonly, nonnull) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) NSString *redirectUri;
+@property (readonly, nonnull) MSALRedirectUri *redirectUri;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
 @property NSUInteger expirationBuffer;
+
+/*!
+ List of additional ESTS features that client handles.
+ */
+@property (nullable) NSArray<NSString *> *clientCapabilities;
 
 /*!
     Used to specify query parameters that must be passed to both the authorize and token endpoints
@@ -77,6 +82,12 @@
  - macOS:  WKWebView
  */
 @property MSALWebviewType webviewType;
+
+/*!
+ Setting to define MSAL behavior regarding broker.
+ Broker is enabled by default.
+ */
+@property MSALBrokeredAvailability brokerAvailability;
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
@@ -96,7 +107,7 @@
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -113,7 +124,7 @@
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        it is of the form https://<instance>/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
@@ -225,7 +236,8 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
-#pragma SafariViewController Support
+#pragma mark -
+#pragma mark SafariViewController Support
 
 #if TARGET_OS_IPHONE
 /*!
@@ -236,7 +248,18 @@
     @return  YES if URL is a response to a MSAL web authentication session and handled,
              NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(nonnull NSURL *)response;
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response __attribute((deprecated("Use the handleMSALResponse:sourceApplication: method instead.")));
+
+/*!
+ Ask MSAL to handle a URL response.
+
+ @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sessions
+ @param   sourceApplication     The application that opened your app with that URL. Can be retrieved from options by UIApplicationOpenURLOptionsSourceApplicationKey key.
+                                See more info here: https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623112-application?language=objc
+                                Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.
+ @return  YES if URL is a response to a MSAL web or brokered session and handled, NO otherwise.
+ */
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response sourceApplication:(nonnull NSString *)sourceApplication;
 #endif
 
 /*!
@@ -244,7 +267,7 @@
     in the SafariViewController being dismissed and the acquireToken request ending
     in a cancelation error.
  */
-+ (void)cancelCurrentWebAuthSession;
++ (BOOL)cancelCurrentWebAuthSession;
 
 #pragma mark -
 #pragma mark acquireToken
@@ -332,6 +355,42 @@
                     loginHint:(nullable NSString *)loginHint
                    uiBehavior:(MSALUIBehavior)uiBehavior
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                    authority:(nullable MSALAuthority *)authority
+                correlationId:(nullable NSUUID *)correlationId
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+/*!
+    Acquire a token for a new account using interactive authentication
+ 
+    @param  scopes                  Permissions you want included in the access token received
+                                    in the result in the completionBlock. Not all scopes are
+                                    guaranteed to be included in the access token returned.
+    @param  extraScopesToConsent    Permissions you want the account to consent to in the same
+                                    authentication flow, but won't be included in the returned
+                                    access token
+    @param  loginHint               A loginHint (usually an email) to pass to the service at the
+                                    beginning of the interactive authentication flow. The account returned
+                                    in the completion block is not guaranteed to match the loginHint.
+    @param  uiBehavior              A UI behavior for the interactive authentication flow
+    @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
+                                    the interactive authentication flow.
+    @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
+                                    it is of the form https://<instance/<tenant>, where <instance> is the
+                                    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    identifier within the directory itself (e.g. a domain associated to the
+                                    tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                                    TenantID property of the directory)
+    @param  claims                  The claims parameter that needs to be sent to authorization endpoint.
+    @param  correlationId           UUID to correlate this request with the server
+    @param  completionBlock         The completion block that will be called when the authentication
+                                    flow completes, or encounters an error.
+ */
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+         extraScopesToConsent:(nullable NSArray<NSString *> *)extraScopesToConsent
+                    loginHint:(nullable NSString *)loginHint
+                   uiBehavior:(MSALUIBehavior)uiBehavior
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+                       claims:(nullable NSString *)claims
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock;
@@ -512,6 +571,36 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(nullable NSUUID *)correlationId
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+
+/*!
+ Acquire a token silently for an existing account.
+ 
+ @param  scopes                  Scopes to request from the server, the scopes that come back
+                                 can differ from the ones in the original call
+ @param  account                 An account object retrieved from the application object that the
+                                 interactive authentication flow will be locked down to.
+ @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
+                                 Azure AD it is of the form https://<instance/<tenant>, where
+                                 <instance> is the directory host
+                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 identifier within the directory itself (e.g. a domain associated
+                                 to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                 representing the TenantID property of the directory)
+ @param  claims                  The claims parameter that needs to be sent to token endpoint. When claims
+                                 is passed, access token will be skipped and refresh token will be tried.
+ @param  forceRefresh            Ignore any existing access token in the cache and force MSAL to
+                                 get a new access token from the service.
+ @param  correlationId           UUID to correlate this request with the server
+ @param  completionBlock         The completion block that will be called when the authentication
+                                 flow completes, or encounters an error.
+ */
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                             claims:(nullable NSString *)claims
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock;

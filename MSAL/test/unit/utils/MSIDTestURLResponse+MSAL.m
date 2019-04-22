@@ -28,12 +28,13 @@
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDDeviceId.h"
 #import "NSDictionary+MSIDTestUtil.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSALTestConstants.h"
 #import "MSALAccountId.h"
 #import "MSIDConstants.h"
 #import "MSIDVersion.h"
 #import "NSOrderedSet+MSIDExtensions.h"
+#import "MSALAccount.h"
 
 @implementation MSIDTestURLResponse (MSAL)
 
@@ -47,8 +48,9 @@
         headers[@"return-client-request-id"] = @"true";
         headers[@"client-request-id"] = [MSIDTestRequireValueSentinel sentinel];
         headers[@"Accept"] = @"application/json";
-        headers[@"x-app-name"] = @"UnitTestHost";
+        headers[@"x-app-name"] = @"MSIDTestsHostApp";
         headers[@"x-app-ver"] = @"1.0";
+        headers[@"x-ms-PkeyAuth"] = @"1.0";
 
         s_msalHeaders = [headers copy];
     });
@@ -145,28 +147,34 @@
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
                                         user:(MSALAccount *)user
+                                      claims:(NSString *)claims
 {
     NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
+    
+    NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                           MSID_OAUTH2_SCOPE : [scopes msidToString],
+                                           MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
+                                           @"client_info" : @"1",
+                                           @"grant_type" : @"refresh_token" } mutableCopy];
+    if (claims) [requestBody setValue:claims forKey:@"claims"];
     
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
-                                             MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
-                                             @"client_info" : @"1",
-                                             @"grant_type" : @"refresh_token" }
+                        requestParamsBody:requestBody
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
                          dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
                                              @"expires_in" : @"600",
                                              @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil idTokenWithName:@"Test name"
+                                             @"id_token" : [MSIDTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.username
                                                                                        tenantId:tid ? tid : user.homeAccountId.objectId],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson] } ];
+                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson],
+                                             @"scope": [scopes msidToString]
+                                             } ];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     
@@ -180,17 +188,22 @@
                                         errorCode:(NSString *)errorCode
                                  errorDescription:(NSString *)errorDescription
                                          subError:(NSString *)subError
+                                           claims:(NSString *)claims
+                                     refreshToken:(NSString *)refreshToken
 {
     NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
 
+    NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                           MSID_OAUTH2_SCOPE : [scopes msidToString],
+                                           MSID_OAUTH2_REFRESH_TOKEN : refreshToken ? refreshToken : @"i am a refresh token!",
+                                           @"client_info" : @"1",
+                                           @"grant_type" : @"refresh_token" } mutableCopy];
+    if (claims) [requestBody setValue:claims forKey:@"claims"];
+    
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:[NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority]
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
-                                             MSID_OAUTH2_REFRESH_TOKEN : @"i am a refresh token!",
-                                             @"client_info" : @"1",
-                                             @"grant_type" : @"refresh_token" }
+                        requestParamsBody:requestBody
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:400
                          httpHeaderFields:nil
@@ -208,12 +221,14 @@
                                 authority:(NSString *)authority
                                     query:(NSString *)query
                                    scopes:(MSALScopes *)scopes
+                                   claims:(NSString *)claims
 {
     return [self authCodeResponse:authcode
                         authority:authority
                             query:query
                            scopes:scopes
-                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSALTestIdTokenUtil defaultTenantId]}]; // Use default client info here
+                       clientInfo:@{ @"uid" : @"1", @"utid" : [MSIDTestIdTokenUtil defaultTenantId]} // Use default client info here
+                           claims:claims];
 }
 
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
@@ -221,6 +236,7 @@
                                     query:(NSString *)query
                                    scopes:(MSALScopes *)scopes
                                clientInfo:(NSDictionary *)clientInfo
+                                   claims:(NSString *)claims
 {
     NSDictionary *tokenReqHeaders = [self msalDefaultRequestHeaders];
     
@@ -240,27 +256,32 @@
         requestUrlStr = [NSString stringWithFormat:@"%@/oauth2/v2.0/token", authority];
     }
     
+    NSMutableDictionary *requestBody = [@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
+                                           MSID_OAUTH2_SCOPE : [scopes msidToString],
+                                           @"client_info" : @"1",
+                                           @"grant_type" : @"authorization_code",
+                                           @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],
+                                           MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
+                                           MSID_OAUTH2_CODE : authcode} mutableCopy];
+    if (claims) [requestBody setValue:claims forKey:@"claims"];
+    
+    NSMutableDictionary *responseBody = [@{ @"access_token" : @"i am an updated access token!",
+                                            @"expires_in" : @"600",
+                                            @"refresh_token" : @"i am a refresh token",
+                                            @"id_token" : [MSIDTestIdTokenUtil defaultV2IdToken],
+                                            @"id_token_expires_in" : @"1200",
+                                            @"scope": [scopes msidToString]
+                                            } mutableCopy];
+    if (clientInfo.msidBase64UrlJson) [responseBody setValue:clientInfo.msidBase64UrlJson forKey:@"client_info"];
+    
     MSIDTestURLResponse *tokenResponse =
     [MSIDTestURLResponse requestURLString:requestUrlStr
                            requestHeaders:tokenReqHeaders
-                        requestParamsBody:@{ MSID_OAUTH2_CLIENT_ID : UNIT_TEST_CLIENT_ID,
-                                             MSID_OAUTH2_SCOPE : [scopes msidToString],
-                                             @"client_info" : @"1",
-                                             @"grant_type" : @"authorization_code",
-                                             @"code_verifier" : [MSIDTestRequireValueSentinel sentinel],
-                                             MSID_OAUTH2_REDIRECT_URI : UNIT_TEST_DEFAULT_REDIRECT_URI,
-                                             MSID_OAUTH2_CODE : authcode }
+                        requestParamsBody:requestBody
                         responseURLString:@"https://someresponseurl.com"
                              responseCode:200
                          httpHeaderFields:nil
-                         dictionaryAsJSON:@{ @"access_token" : @"i am an updated access token!",
-                                             @"expires_in" : @"600",
-                                             @"refresh_token" : @"i am a refresh token",
-                                             @"id_token" : [MSALTestIdTokenUtil defaultIdToken],
-                                             @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [clientInfo msidBase64UrlJson],
-                                             @"scope": [scopes msidToString]
-                                             } ];
+                         dictionaryAsJSON:responseBody];
     
     [tokenResponse->_requestHeaders removeObjectForKey:@"Content-Length"];
     

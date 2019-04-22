@@ -26,8 +26,11 @@
 //------------------------------------------------------------------------------
 
 #import "MSALADFSBaseUITest.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALADFSv4FederatedTests : MSALADFSBaseUITest
+
+@property (nonatomic) NSString *testEnvironment;
 
 @end
 
@@ -36,8 +39,10 @@
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderADfsv4;
     [self loadTestConfiguration:configurationRequest];
 }
@@ -46,33 +51,32 @@
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_noLoginHint_andSystemWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.testAccount = self.primaryAccount;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.promptBehavior = @"force";
 
     // 1. Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);
 
     // 2. Now do silent login #296725
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    request.homeAccountIdentifier = homeAccountId;
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_withLoginHint_andSafariViewController
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeSafariViewController;
     request.loginHint = self.primaryAccount.username;
+    request.webViewType = MSIDWebviewTypeSafariViewController;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];
@@ -81,14 +85,14 @@
 
 - (void)testInteractiveADFSv4Login_withPromptAlways_withLoginHint_andEmbeddedWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"https://graph.microsoft.com/.default";
-    request.expectedResultScopes = @[@"https://graph.microsoft.com/.default", @"openid", @"profile"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_prefixed"];
+    request.expectedResultScopes = request.requestScopes;
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.username;
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     // Do interactive login
     NSString *homeAccountId = [self runSharedADFSInteractiveLoginWithRequest:request];

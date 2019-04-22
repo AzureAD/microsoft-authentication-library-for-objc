@@ -28,7 +28,10 @@
 #ifndef MSALUIBehavior_Internal_h
 #define MSALUIBehavior_Internal_h
 
+#import "MSIDConstants.h"
+
 extern NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
+extern MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior);
 extern NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior);
 
 #endif /* MSALUIBehavior_Internal_h */

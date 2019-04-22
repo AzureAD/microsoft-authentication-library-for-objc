@@ -28,8 +28,11 @@
 #import "MSALBaseAADUITest.h"
 #import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALPingUITests : MSALBaseAADUITest
+
+@property (nonatomic) NSString *testEnvironment;
 
 @end
 
@@ -39,15 +42,16 @@
 {
     [super setUp];
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
+    
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderPing;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     [self loadTestConfiguration:configurationRequest];
 }
 
 #pragma mark - Shared
 
-- (NSString *)runSharedPingInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedPingInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
 {
     // 1. Do interactive login
     NSDictionary *config = [self configWithTestRequest:request];
@@ -67,9 +71,9 @@
                         embeddedWebView:request.usesEmbeddedWebView];
 
     [self assertAccessTokenNotNil];
-    [self assertScopesReturned:request.expectedResultScopes];
+    [self assertScopesReturned:[request.expectedResultScopes msidScopeSet].array];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
     return homeAccountId;
 }
@@ -79,13 +83,12 @@
 // #290995 iteration 9
 - (void)testInteractivePingLogin_withNonConvergedApp_withPromptAlways_noLoginHint_andEmbeddedWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
+    request.promptBehavior = @"force";
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
@@ -95,7 +98,7 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
@@ -103,13 +106,11 @@
 // #290995 iteration 10
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andSystemWebView
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.testAccount = self.primaryAccount;
-    request.loginHint = self.primaryAccount.account;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.promptBehavior = @"force";
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
@@ -118,15 +119,13 @@
 
 - (void)testInteractivePingLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.testAccount = self.primaryAccount;
-    request.loginHint = self.primaryAccount.account;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.promptBehavior = @"force";
     request.usePassedWebView = YES;
-
+    
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedPingInteractiveLoginWithRequest:request];
     XCTAssertNotNil(homeAccountId);

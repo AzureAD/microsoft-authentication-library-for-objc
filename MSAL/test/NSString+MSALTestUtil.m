@@ -32,9 +32,8 @@
 
 - (MSALAuthority *)msalAuthority
 {
-    __auto_type authorityFactory = [MSALAuthorityFactory new];
     __auto_type authorityUrl = [[NSURL alloc] initWithString:self];
-    __auto_type authority = [authorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     
     return authority;
 }

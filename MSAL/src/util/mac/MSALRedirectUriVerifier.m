@@ -26,37 +26,34 @@
 //------------------------------------------------------------------------------
 
 #import "MSALRedirectUriVerifier.h"
+#import "MSALRedirectUri+Internal.h"
 
 @implementation MSALRedirectUriVerifier
 
-+ (BOOL)verifyRedirectUri:(NSURL *)redirectUri
-            brokerEnabled:(BOOL)brokerEnabled
-                    error:(NSError **)error
++ (NSURL *)defaultBrokerCapableRedirectUri
 {
-    // There's currently no verification necessary for macOS redirectUri
-    return YES;
+    return nil;
 }
 
-+ (NSURL *)generateRedirectUri:(NSString *)inputRedirectUri
-                      clientId:(NSString *)clientId
-                 brokerEnabled:(BOOL)brokerEnabled
-                         error:(NSError **)error
++ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
 {
-    if (![NSString msidIsStringNilOrBlank:inputRedirectUri])
-    {
-        return [NSURL URLWithString:inputRedirectUri];
-    }
-
-    if ([NSString msidIsStringNilOrBlank:clientId])
-    {
-        MSAL_ERROR_PARAM(nil, MSALErrorInternal, @"The client ID provided is empty or nil.");
-        return nil;
-    }
-
-    // macOS doesn't support broker
     NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
     NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
     return [NSURL URLWithString:redirectUriString];
+}
+
++ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
+                                         clientId:(NSString *)clientId
+                                            error:(NSError * __autoreleasing *)error
+{
+    if (![NSString msidIsStringNilOrBlank:customRedirectUri])
+    {
+        return [[MSALRedirectUri alloc] initWithRedirectUri:[NSURL URLWithString:customRedirectUri]
+                                              brokerCapable:NO];
+    }
+
+    return [[MSALRedirectUri alloc] initWithRedirectUri:[self defaultNonBrokerRedirectUri:clientId]
+                                          brokerCapable:NO];
 }
 
 @end

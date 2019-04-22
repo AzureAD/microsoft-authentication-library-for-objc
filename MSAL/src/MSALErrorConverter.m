@@ -25,19 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALErrorConverter.h"
+#import "MSALErrorConverter+Internal.h"
 #import "MSALError_Internal.h"
+#import "MSALResult+Internal.h"
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
 static NSDictionary *s_userInfoKeyMapping;
 
 @implementation MSALErrorConverter
-
-+ (void)load
-{
-    MSIDErrorConverter.errorConverter = [MSALErrorConverter new];
-}
 
 + (void)initialize
 {
@@ -55,9 +51,14 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
                                    @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal),
+                                   @(MSIDErrorMissingAccountParameter): @(MSALErrorAccountRequired),
+                                   @(MSIDErrorInteractionRequired): @(MSALErrorInteractionRequired),
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
+                                   @(MSIDErrorMismatchedAccount): @(MSALErrorMismatchedUser),
+
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
-                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorWrapperCacheFailure),
+                                   @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
                                    // Interactive flow
@@ -67,21 +68,37 @@ static NSDictionary *s_userInfoKeyMapping;
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
+                                   @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALErrorAttemptToOpenURLFromExtension),
+                                   @(MSIDErrorUINotSupportedInExtension): @(MSALErrorUINotSupportedInExtension),
+
+                                   // Broker errors
+                                   @(MSIDErrorBrokerResponseNotReceived): @(MSALErrorBrokerResponseNotReceived),
+                                   @(MSIDErrorBrokerNoResumeStateFound): @(MSALErrorBrokerNoResumeStateFound),
+                                   @(MSIDErrorBrokerBadResumeStateFound): @(MSALErrorBrokerBadResumeStateFound),
+                                   @(MSIDErrorBrokerMismatchedResumeState): @(MSALErrorBrokerMismatchedResumeState),
+                                   @(MSIDErrorBrokerResponseHashMissing): @(MSALErrorBrokerResponseHashMissing),
+                                   @(MSIDErrorBrokerCorruptedResponse): @(MSALErrorBrokerCorruptedResponse),
+                                   @(MSIDErrorBrokerResponseDecryptionFailed): @(MSALErrorBrokerResponseDecryptionFailed),
+                                   @(MSIDErrorBrokerResponseHashMismatch): @(MSALErrorBrokerResponseHashMismatch),
+                                   @(MSIDErrorBrokerKeyFailedToCreate): @(MSALErrorBrokerKeyFailedToCreate),
+                                   @(MSIDErrorBrokerKeyNotFound): @(MSALErrorBrokerKeyNotFound),
+                                   @(MSIDErrorWorkplaceJoinRequired): @(MSALErrorWorkplaceJoinRequired),
+                                   @(MSIDErrorBrokerUnknown): @(MSALErrorBrokerUnknown),
+
                                    // Oauth2 errors
-                                   @(MSIDErrorInteractionRequired) : @(MSALErrorInteractionRequired),
                                    @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
                                    @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
-                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorRefreshTokenRejected),
+                                   // We don't support this error code in MSAL. This error
+                                   // exists specifically for ADAL.
+                                   @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorInternal),
                                    @(MSIDErrorServerInvalidRequest) :@(MSALErrorInvalidRequest),
                                    @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
                                    @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
                                    @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
+                                   @(MSIDErrorServerUnauthorizedClient): @(MSALErrorUnauthorizedClient),
+                                   @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
                                    @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
-                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
-                                   },
-                           MSIDHttpErrorCodeDomain: @{
                                    @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
                                    }
                            };
@@ -92,13 +109,28 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDCorrelationIdKey : MSALCorrelationIDKey,
                              MSIDErrorDescriptionKey : MSALErrorDescriptionKey,
                              MSIDOAuthErrorKey: MSALOAuthErrorKey,
-                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey
+                             MSIDOAuthSubErrorKey: MSALOAuthSubErrorKey,
+                             MSIDDeclinedScopesKey: MSALDeclinedScopesKey,
+                             MSIDGrantedScopesKey: MSALGrantedScopesKey,
+                             MSIDUserDisplayableIdkey: MSALDisplayableUserIdKey,
+                             MSIDBrokerVersionKey: MSALBrokerVersionKey,
+                             MSIDHomeAccountIdkey: MSALHomeAccountIdKey
                              };
 }
 
-#pragma mark - MSIDErrorConverting
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+{
+    return [self errorWithDomain:msidError.domain
+                            code:msidError.code
+                errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
+                      oauthError:msidError.userInfo[MSIDOAuthErrorKey]
+                        subError:msidError.userInfo[MSIDOAuthSubErrorKey]
+                 underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
+                   correlationId:msidError.userInfo[MSIDCorrelationIdKey]
+                        userInfo:msidError.userInfo];
+}
 
-- (NSError *)errorWithDomain:(NSString *)domain
++ (NSError *)errorWithDomain:(NSString *)domain
                         code:(NSInteger)code
             errorDescription:(NSString *)errorDescription
                   oauthError:(NSString *)oauthError
@@ -111,32 +143,23 @@ static NSDictionary *s_userInfoKeyMapping;
     {
         return nil;
     }
-
-    NSString *msalDomain = domain;
-
+    
     // Map domain
-    NSString *newDomain = s_errorDomainMapping[domain];
-    if (newDomain)
-    {
-        msalDomain = newDomain;
-    }
-
+    NSString *mappedDomain = s_errorDomainMapping[domain];
+    
     // Map errorCode
-    // errorCode mapping is needed only if domain is mapped
-    NSInteger msalErrorCode = code;
-    if (msalDomain && msalErrorCode && s_errorCodeMapping[msalDomain])
+    // errorCode mapping is needed only if domain is mapped to MSALErrorDomain
+    NSNumber *mappedCode = nil;
+    if (mappedDomain == MSALErrorDomain)
     {
-        NSNumber *mappedErrorCode = s_errorCodeMapping[msalDomain][@(msalErrorCode)];
-        if (mappedErrorCode != nil)
+        mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
+        if (mappedCode == nil)
         {
-            msalErrorCode = [mappedErrorCode integerValue];
-        }
-        else
-        {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)msalErrorCode);
+            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
+            mappedCode = @(MSALErrorInternal);
         }
     }
-
+    
     NSMutableDictionary *msalUserInfo = [NSMutableDictionary new];
 
     for (NSString *key in [userInfo allKeys])
@@ -150,7 +173,27 @@ static NSDictionary *s_userInfoKeyMapping;
     msalUserInfo[MSALOAuthSubErrorKey] = subError;
     msalUserInfo[NSUnderlyingErrorKey]  = underlyingError;
 
-    return [NSError errorWithDomain:msalDomain code:msalErrorCode userInfo:msalUserInfo];
+    if (userInfo[MSIDInvalidTokenResultKey])
+    {
+        NSError *resultError = nil;
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+
+        if (!msalResult)
+        {
+            MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %ld, %@", (long)resultError.code, resultError.domain);
+            MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", resultError);
+        }
+        else
+        {
+            msalUserInfo[MSALInvalidResultKey] = msalResult;
+        }
+
+        [msalUserInfo removeObjectForKey:MSIDInvalidTokenResultKey];
+    }
+
+    return [NSError errorWithDomain:mappedDomain ? : domain
+                               code:(mappedCode != nil) ? mappedCode.integerValue : code
+                           userInfo:msalUserInfo];
 }
 
 @end

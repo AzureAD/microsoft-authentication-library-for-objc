@@ -27,13 +27,15 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSALAuthority;
+
 @interface MSALAuthorityFactory : NSObject
 
-- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
++ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
                                      context:(nullable id<MSIDRequestContext>)context
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
-- (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
++ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
                                    rawTenant:(nullable NSString *)rawTenant
                                      context:(nullable id<MSIDRequestContext>)context
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;

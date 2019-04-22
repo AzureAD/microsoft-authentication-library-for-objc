@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAutoAppDelegate.h"
+#import "MSALPublicClientApplication.h"
+#import "MSIDAutomationMainViewController.h"
+#import <MSAL/MSAL.h>
 
 @implementation MSALAutoAppDelegate
 
@@ -33,6 +36,10 @@
 {
     (void)application;
     (void)launchOptions;
+    
+    [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII) {
+        [MSIDAutomationMainViewController forwardIdentitySDKLog:message];
+    }];
     
     return YES;
 }
@@ -77,7 +84,7 @@
     (void)app;
     (void)options;
     
-    [MSALPublicClientApplication handleMSALResponse:url];
+    [MSALPublicClientApplication handleMSALResponse:url sourceApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]];
    
     return YES;
 }
