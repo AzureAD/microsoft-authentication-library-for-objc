@@ -73,15 +73,15 @@
             utid = accountIdComponents[1];
         }
 
-        _homeAccountId = [[MSALAccountId alloc] initWithHomeAccountIdentifier:homeAccountId
-                                                                          uid:uid
-                                                                         utid:utid];
+        _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
+                                                                 objectId:uid
+                                                                 tenantId:utid];
+        
+        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
+                                                                  objectId:localAccountId
+                                                                  tenantId:tenantId];
 
-        _localAccountId = [[MSALAccountId alloc] initWithLocalAccountIdentifier:localAccountId
-                                                                       objectId:localAccountId
-                                                                       tenantId:tenantId];
-
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithLegacyAccountId:username homeAccountId:homeAccountId];
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
     }
 
     return self;

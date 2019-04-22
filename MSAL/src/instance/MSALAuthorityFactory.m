@@ -35,14 +35,14 @@
 
 @implementation MSALAuthorityFactory
 
-- (MSALAuthority *)authorityFromUrl:(NSURL *)url
++ (MSALAuthority *)authorityFromUrl:(NSURL *)url
                             context:(id<MSIDRequestContext>)context
                               error:(NSError **)error
 {
     return [self authorityFromUrl:url rawTenant:nil context:context error:error];
 }
 
-- (MSALAuthority *)authorityFromUrl:(NSURL *)url
++ (MSALAuthority *)authorityFromUrl:(NSURL *)url
                           rawTenant:(NSString *)rawTenant
                             context:(id<MSIDRequestContext>)context
                               error:(NSError **)error

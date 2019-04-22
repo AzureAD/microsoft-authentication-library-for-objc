@@ -1,0 +1,7 @@
+# These owners will be the default owners for everything in the repo.
+# Unless a later match takes precedence, these users will be requested
+# for review whenever someone opens a pull request.
+*       @AzureAD/AppleIdentity
+# For more details about inheritance patterns, or to assign different
+# owners for individual file extensions, see:
+# https://help.github.com/articles/about-codeowners/

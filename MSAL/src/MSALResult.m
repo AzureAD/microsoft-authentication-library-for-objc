@@ -37,6 +37,9 @@
 #import "MSIDAuthority.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSALAuthorityFactory.h"
+#import "MSIDTokenResult.h"
+#import "MSIDAccount.h"
+#import "MSIDAADV2IdTokenClaims.h"
 
 @implementation MSALResult
 
@@ -69,50 +72,59 @@
     return result;
 }
 
-+ (MSALResult *)resultWithAccessToken:(MSIDAccessToken *)accessToken
-                              idToken:(MSIDIdToken *)idToken
-              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
++ (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                 error:(NSError **)error
 {
-    NSError *idTokenError = nil;
-    __auto_type idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:idToken.rawIdToken error:&idTokenError];
-
-    if (error)
+    if (!tokenResult)
     {
-        MSID_LOG_WARN(nil, @"Invalid ID token");
-        MSID_LOG_WARN_PII(nil, @"Invalid ID token, error %@", idTokenError);
+        MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil token result provided", nil);
+        return nil;
     }
 
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:idTokenClaims.preferredUsername
-                                                            name:idTokenClaims.name
-                                                   homeAccountId:accessToken.accountIdentifier.homeAccountId
-                                                  localAccountId:idTokenClaims.objectId
-                                                     environment:accessToken.authority.environment
-                                                        tenantId:idTokenClaims.tenantId];
+    MSIDAccount *resultAccount = tokenResult.account;
+    NSError *claimsError = nil;
+    MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
+    
+    if (!claims)
+    {
+        if (error) *error = claimsError;
+        
+        return nil;
+    }
+    
+    NSString *tenantId = claims.realm;
+
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
+                                                            name:resultAccount.name
+                                                   homeAccountId:resultAccount.accountIdentifier.homeAccountId
+                                                  localAccountId:resultAccount.localAccountId
+                                                     environment:tokenResult.authority.environment
+                                                        tenantId:tenantId];
 
     NSError *authorityError = nil;
-    MSALAuthority *authority = [[MSALAuthorityFactory new] authorityFromUrl:accessToken.authority.url
-                                                                    context:nil
-                                                                      error:&authorityError];
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
+                                                            rawTenant:tenantId
+                                                              context:nil
+                                                                error:&authorityError];
 
     if (!authority)
     {
-        MSID_LOG_WARN(nil, @"Invalid authority");
-        MSID_LOG_WARN_PII(nil, @"Invalid authority, error %@", authorityError);
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
 
         if (error) *error = authorityError;
 
         return nil;
     }
-    
-    return [self resultWithAccessToken:accessToken.accessToken
-                             expiresOn:accessToken.expiresOn
-               isExtendedLifetimeToken:isExtendedLifetimeToken
-                              tenantId:accessToken.authority.url.msidTenant
+
+    return [self resultWithAccessToken:tokenResult.accessToken.accessToken
+                             expiresOn:tokenResult.accessToken.expiresOn
+               isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
+                              tenantId:tenantId
                                account:account
-                               idToken:idToken.rawIdToken
-                              uniqueId:idTokenClaims.uniqueId
-                                scopes:[accessToken.scopes array]
+                               idToken:tokenResult.rawIdToken
+                              uniqueId:resultAccount.localAccountId
+                                scopes:[tokenResult.accessToken.scopes array]
                              authority:authority];
 }
 

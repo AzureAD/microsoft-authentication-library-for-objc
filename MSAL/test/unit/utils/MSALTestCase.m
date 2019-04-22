@@ -30,7 +30,7 @@
 #import "MSALAuthority.h"
 
 #import "MSALTestBundle.h"
-#import "MSALTestSwizzle.h"
+#import "MSIDTestSwizzle.h"
 
 #import "MSIDTestURLSession.h"
 
@@ -48,7 +48,7 @@
 {
     [super setUp];
     [MSALTestBundle reset];
-    [MSALTestSwizzle reset];
+    [MSIDTestSwizzle reset];
     [MSALAuthority initialize];
     
     [MSIDTestURLSession clearResponses];

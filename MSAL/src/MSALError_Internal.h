@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
+#import "MSALError.h" 
 
 extern NSString *MSALStringForErrorCode(MSALErrorCode code);
 

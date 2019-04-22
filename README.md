@@ -1,13 +1,12 @@
 Microsoft Authentication Library Preview for iOS
 =====================================
 
-| [Get Started](https://apps.dev.microsoft.com/)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](https://azuread.github.io/docs/objc/) | [Support](README.md#community-help-and-support)
+| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [API Reference](http://cocoadocs.org/docsets/MSAL) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
 
+The MSAL library preview gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
-The MSAL library preview for iOS gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Microsoft Azure B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
-
-Note that for the preview, **only iOS is supported.** macOS support will be provided later. 
+Note that for the preview, **only iOS is supported.** macOS support will be provided in a future realse.  Need it sooner? Let us know! 
 
 ## Important Note about the MSAL Preview
 
@@ -159,7 +158,7 @@ If you find a security issue with our libraries or services please report it to 
 ## Using MSAL
 
 ### Adding MSAL to your project
-1. If you have not done so already, create an app listing at [apps.dev.microsoft.com](https://apps.dev.microsoft.com)
+1. Register your app in the [Azure portal](https://aka.ms/AppRegistrationsPreview)
 2. Clone the repository
 ```
     git clone https://github.com/AzureAD/microsoft-authentication-library-for-objc.git
@@ -182,10 +181,14 @@ If you find a security issue with our libraries or services please report it to 
         </dict>
     </array>
 ```
-
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
 Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
+
+6. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
+
+![](Images/keychain_example.png)
+
 
 ### iOS 10 support
 

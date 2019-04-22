@@ -29,11 +29,10 @@
 
 #import "MSALTestBundle.h"
 #import "MSALTestConstants.h"
-#import "MSALTestSwizzle.h"
-#import "MSALBaseRequest+TestExtensions.h"
+#import "MSIDTestSwizzle.h"
 #import "MSIDTestURLSession+MSAL.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSALTestIdTokenUtil.h"
+#import "MSIDTestIdTokenUtil.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+MSAL.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
@@ -49,6 +48,9 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDWebAADAuthResponse.h"
 
+#import "MSALResult.h"
+#import "MSALAccount.h"
+
 @interface MSALB2CPolicyTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
@@ -63,7 +65,7 @@
 
     [MSIDKeychainTokenCache reset];
 
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil factory:[MSIDAADV2Oauth2Factory new]];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
@@ -90,11 +92,12 @@
 
     // User identifier should be uid-policy
     MSIDTestURLResponse *tokenResponse =
-    [MSIDTestURLResponse authCodeResponse:@"i am an auth code"
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
                                 authority:@"https://login.microsoftonline.com/contosob2c"
                                     query:query
                                    scopes:[NSOrderedSet orderedSetWithArray:@[@"fakeb2cscopes", @"openid", @"profile", @"offline_access"]]
-                               clientInfo:@{ @"uid" : uid, @"utid" : [MSALTestIdTokenUtil defaultTenantId]}];
+                               clientInfo:@{ @"uid" : uid, @"utid" : [MSIDTestIdTokenUtil defaultTenantId]}
+                                   claims:nil];
 
     [MSIDTestURLSession addResponses:@[oidcResponse, tokenResponse]];
 }
@@ -115,11 +118,11 @@
     __auto_type firstAuthority = [@"https://login.microsoftonline.com/tfp/contosob2c/b2c_1_policy" msalAuthority];
     [self setupURLSessionWithB2CAuthority:firstAuthority policy:@"b2c_1_policy"];
 
-    [MSALTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
                            class:[MSIDWebviewAuthorization class]
                            block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
      {
-         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=i+am+an+auth+code"];
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=iamauthcode"];
          
          MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
                                                                                     context:nil error:nil];    
@@ -146,7 +149,7 @@
          XCTAssertNil(error);
          XCTAssertNotNil(result);
 
-         NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+         NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
          XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
          [expectation fulfill];
      }];
@@ -173,7 +176,7 @@
                            XCTAssertNil(error);
                            XCTAssertNotNil(result);
 
-                           NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSALTestIdTokenUtil defaultTenantId]];
+                           NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
                            XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
                            [expectation fulfill];
     }];

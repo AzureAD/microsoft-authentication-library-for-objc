@@ -28,8 +28,11 @@
 #import "MSALBaseAADUITest.h"
 #import "XCTestCase+TextFieldTap.h"
 #import "XCUIElement+CrossPlat.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALShibUITests : MSALBaseAADUITest
+
+@property (nonatomic) NSString *testEnvironment;
 
 @end
 
@@ -38,16 +41,17 @@
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderShibboleth;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     [self loadTestConfiguration:configurationRequest];
 }
 
 #pragma mark - Shared
 
-- (NSString *)runSharedShibbolethInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedShibbolethInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
 {
     // 1. Do interactive login
     NSDictionary *config = [self configWithTestRequest:request];
@@ -66,7 +70,7 @@
     [self acceptMSSTSConsentIfNecessary:@"Accept"
                         embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
     return homeAccountId;
 }
@@ -76,13 +80,12 @@
 // #290995 iteration 5
 - (void)testInteractiveShibLogin_withNonConvergedApp_withPromptAlways_noLoginHint_andEmbeddedWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"https://graph.windows.net/.default";
-    request.expectedResultScopes = @[@"https://graph.windows.net/.default"];
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.testAccount = self.primaryAccount;
-    request.webViewType = MSALWebviewTypeWKWebView;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
+    request.promptBehavior = @"force";
+    request.webViewType = MSIDWebviewTypeWKWebView;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedShibbolethInteractiveLoginWithRequest:request];
@@ -92,7 +95,7 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent
-    request.accountIdentifier = homeAccountId;
+    request.homeAccountIdentifier = homeAccountId;
     request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
@@ -100,13 +103,13 @@
 // #290995 iteration 6
 - (void)testInteractiveShibLogin_withConvergedApp_withPromptAlways_withLoginHint_andSystemWebView
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.testAccount = self.primaryAccount;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.promptBehavior = @"force";
     request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
 
     // 1. Run interactive
     NSString *homeAccountId = [self runSharedShibbolethInteractiveLoginWithRequest:request];
@@ -115,13 +118,13 @@
 
 - (void)testInteractiveShibLogin_withConvergedApp_withPromptAlways_withLoginHint_andPassedInWebView
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"profile", @"openid"];
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.testAccount = self.primaryAccount;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.promptBehavior = @"force";
     request.loginHint = self.primaryAccount.account;
+    request.testAccount = self.primaryAccount;
     request.usePassedWebView = YES;
 
     // 1. Run interactive

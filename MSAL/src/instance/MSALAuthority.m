@@ -41,9 +41,9 @@
 + (MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                               error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    return [[MSALAuthorityFactory new] authorityFromUrl:url
-                                                context:nil
-                                                  error:error];
+    return [MSALAuthorityFactory authorityFromUrl:url
+                                          context:nil
+                                            error:error];
 }
 
 @end

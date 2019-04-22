@@ -22,16 +22,19 @@
 // THE SOFTWARE.
 
 #import <XCTest/XCTest.h>
-#import "MSIDTestAccountsProvider.h"
+#import "MSIDTestConfigurationProvider.h"
 #import "XCUIElement+MSALiOSUITests.h"
 #import "MSIDTestAutomationConfiguration.h"
-#import "MSIDTestAutomationConfigurationRequest.h"
-#import "MSALTestRequest.h"
+#import "MSIDAutomationConfigurationRequest.h"
+#import "MSIDAutomationTestRequest.h"
+#import "MSIDAutomationErrorResult.h"
+#import "MSIDAutomationSuccessResult.h"
+#import "MSIDAutomationAccountsResult.h"
 
 @interface MSALBaseUITest : XCTestCase
 
 @property (nonatomic) XCUIApplication *testApp;
-@property (nonatomic, class) MSIDTestAccountsProvider *accountsProvider;
+@property (nonatomic, class) MSIDTestConfigurationProvider *confProvider;
 @property (nonatomic) MSIDTestAccount *primaryAccount;
 @property (nonatomic) MSIDTestAutomationConfiguration *testConfiguration;
 
@@ -42,12 +45,10 @@
 - (void)assertErrorCode:(NSString *)expectedErrorCode;
 - (void)assertErrorDescription:(NSString *)errorDescription;
 - (void)assertErrorSubcode:(NSString *)errorSubcode;
-- (void)assertErrorContent:(NSString *)expectedContent key:(NSString *)key;
 - (void)assertAccessTokenNotNil;
 - (void)assertScopesReturned:(NSArray *)expectedScopes;
 - (void)assertAuthorityReturned:(NSString *)expectedAuthority;
 - (NSDictionary *)resultIDTokenClaims;
-- (void)assertRefreshTokenNotNil;
 
 - (void)closeResultView;
 - (void)invalidateRefreshToken:(NSDictionary *)config;
@@ -67,16 +68,23 @@
 - (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
-- (void)closeAuthUIUsingWebViewType:(MSALWebviewType)webViewType passedInWebView:(BOOL)usesPassedInWebView;
+- (void)closeAuthUIUsingWebViewType:(MSIDWebviewType)webViewType
+                    passedInWebView:(BOOL)usesPassedInWebView;
 - (void)openURL:(NSDictionary *)config;
 - (void)signout:(NSDictionary *)config;
 - (void)readAccounts:(NSDictionary *)config;
 
 - (void)waitForElement:(id)object;
-- (NSDictionary *)resultDictionary;
-- (void)loadTestConfiguration:(MSIDTestAutomationConfigurationRequest *)request;
+- (void)loadTestConfiguration:(MSIDAutomationConfigurationRequest *)request;
 - (void)loadPasswordForAccount:(MSIDTestAccount *)account;
 
-- (NSDictionary *)configWithTestRequest:(MSALTestRequest *)request;
+- (MSIDAutomationErrorResult *)automationErrorResult;
+- (MSIDAutomationSuccessResult *)automationSuccessResult;
+- (MSIDAutomationAccountsResult *)automationAccountsResult;
+
+- (NSDictionary *)configWithTestRequest:(MSIDAutomationTestRequest *)request;
+- (NSDictionary *)automationResultDictionary;
+- (void)performAction:(NSString *)action
+           withConfig:(NSDictionary *)config;
 
 @end

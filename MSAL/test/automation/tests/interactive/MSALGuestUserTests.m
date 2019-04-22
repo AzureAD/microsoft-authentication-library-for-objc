@@ -27,8 +27,11 @@
 
 #import "MSALADFSBaseUITest.h"
 #import "XCTestCase+TextFieldTap.h"
+#import "NSString+MSIDAutomationUtils.h"
 
 @interface MSALGuestUserTests : MSALADFSBaseUITest
+
+@property (nonatomic) NSString *testEnvironment;
 
 @end
 
@@ -37,8 +40,10 @@
 - (void)setUp
 {
     [super setUp];
+    
+    self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.accountFeatures = @[MSIDTestAccountFeatureGuestUser];
     [self loadTestConfiguration:configurationRequest];
@@ -47,119 +52,109 @@
 // #347620
 - (void)testInteractiveAndSilentAADLogin_withNonConvergedApp_withPromptAlways_noLoginHint_SystemWebView_signinIntoGuestTenantFirst
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.scopes = @"user.read";
-    request.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
+    request.testAccount = self.primaryAccount;
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    request.expectedResultScopes = [NSString msidCombinedScopes:request.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:request closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
-    // TODO: lab should return homeObjectId
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
     [self closeResultView];
 
     // 2. Run silent for the guest tenant
-    request.accountIdentifier = homeAccountId;
-    request.cacheAuthority = request.authority;
-    request.testAccount = [self.primaryAccount copy];
-    // TODO: lab doesn't return correct home object ID at the moment, need to follow up on that!
-    request.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
+    request.homeAccountIdentifier = homeAccountId;
 
-    [self runSharedSilentAADLoginWithTestRequest:request guestTenantScenario:YES];
+    [self runSharedSilentAADLoginWithTestRequest:request];
 
     // 3. Run silent for the home tenant
-    request.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
+    request.expectedResultAuthority = request.configurationAuthority;
+    request.cacheAuthority = request.configurationAuthority;
     request.testAccount.targetTenantId = request.testAccount.homeTenantId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAndSilentAADLogin_withNonConvergedApp_withPromptAlways_noLoginHint_EmbeddedWebView_signinIntoHomeTenantFirst
 {
-    MSALTestRequest *homeRequest = [MSALTestRequest nonConvergedAppRequest];
-    homeRequest.uiBehavior = @"force";
-    homeRequest.scopes = @"user.read";
-    homeRequest.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    homeRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
+    MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    homeRequest.promptBehavior = @"force";
+    homeRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    homeRequest.expectedResultScopes = [NSString msidCombinedScopes:homeRequest.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
+    homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
+    homeRequest.cacheAuthority = homeRequest.configurationAuthority;
+    homeRequest.webViewType = MSIDWebviewTypeWKWebView;
+    homeRequest.testAccount = [self.primaryAccount copy];
+    homeRequest.testAccount.targetTenantId = homeRequest.testAccount.homeTenantId;
 
     // 1. Run interactive in the home tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.homeTenantId);
     XCTAssertNotNil(homeAccountId);
-    // TODO: lab should return homeObjectId
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
     [self closeResultView];
 
     // 2. Run silent for the home tenant
-    homeRequest.accountIdentifier = homeAccountId;
-    homeRequest.cacheAuthority = homeRequest.authority;
-    homeRequest.testAccount = [self.primaryAccount copy];
-    homeRequest.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
-    homeRequest.testAccount.targetTenantId = self.primaryAccount.homeTenantId;
+    homeRequest.homeAccountIdentifier = homeAccountId;
     [self runSharedSilentAADLoginWithTestRequest:homeRequest];
 
     // 3. Run silent for the guest tenant
-    MSALTestRequest *guestRequest = [MSALTestRequest nonConvergedAppRequest];
-    guestRequest.uiBehavior = @"force";
-    guestRequest.scopes = @"user.read";
-    guestRequest.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    guestRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
-    guestRequest.testAccount = [self.primaryAccount copy];
-    guestRequest.accountIdentifier = homeAccountId;
+    MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    guestRequest.promptBehavior = @"force";
+    guestRequest.testAccount = self.primaryAccount;
+    guestRequest.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
+    guestRequest.expectedResultScopes = [NSString msidCombinedScopes:guestRequest.requestScopes withScopes:self.class.confProvider.oidcScopes];
+    guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    guestRequest.homeAccountIdentifier = homeAccountId;
     guestRequest.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
-    [self runSharedSilentAADLoginWithTestRequest:guestRequest guestTenantScenario:YES];
+    guestRequest.webViewType = MSIDWebviewTypeWKWebView;
+    [self runSharedSilentAADLoginWithTestRequest:guestRequest];
 }
 
 // Test #347622
 - (void)testInteractiveAndSilentAADLogin_withConvergedApp_withPromptAlways_noLoginHint_SystemWebView_andGuestUserInHomeAndGuestTenant
 {
-    MSALTestRequest *guestRequest = [MSALTestRequest convergedAppRequest];
-    guestRequest.uiBehavior = @"force";
-    guestRequest.scopes = @"user.read";
-    guestRequest.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    guestRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *guestRequest = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    guestRequest.promptBehavior = @"force";
+    guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
+    guestRequest.expectedResultAuthority = guestRequest.configurationAuthority;
+    guestRequest.cacheAuthority = guestRequest.configurationAuthority;
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:guestRequest closeResultView:NO];
-    NSString *resultTenantId = [self resultDictionary][@"tenantId"];
+    NSString *resultTenantId = [self automationSuccessResult].userInformation.tenantId;
     XCTAssertEqualObjects(resultTenantId, self.primaryAccount.targetTenantId);
     XCTAssertNotNil(homeAccountId);
-    // TODO: lab should return homeObjectId
     XCTAssertTrue([homeAccountId hasSuffix:self.primaryAccount.homeTenantId]);
     [self closeResultView];
 
     // 2. Run interactive in the home tenant
-    MSALTestRequest *homeRequest = [MSALTestRequest convergedAppRequest];
-    homeRequest.uiBehavior = @"force";
-    homeRequest.scopes = @"user.read";
-    homeRequest.expectedResultScopes = @[@"user.read", @"openid", @"profile"];
-    homeRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
+    MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.homeTenantId];
+    homeRequest.promptBehavior = @"force";
+    homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
     homeRequest.testAccount = [self.primaryAccount copy];
-    // TODO: lab doesn't return correct home object ID at the moment, need to follow up on that!
-    homeRequest.testAccount.homeObjectId = [[homeAccountId componentsSeparatedByString:@"."] firstObject];
     homeRequest.testAccount.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:YES];
 
     // 3. Run silent for the guest tenant
-    guestRequest.accountIdentifier = homeAccountId;
-    guestRequest.cacheAuthority = guestRequest.authority;
-    guestRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.targetTenantId];
+    guestRequest.homeAccountIdentifier = homeAccountId;
     guestRequest.testAccount.targetTenantId = self.primaryAccount.targetTenantId;
-    [self runSharedSilentAADLoginWithTestRequest:guestRequest guestTenantScenario:YES];
+    [self runSharedSilentAADLoginWithTestRequest:guestRequest];
 
-    // 3. Run silent for the home tenant
-    homeRequest.accountIdentifier = homeAccountId;
-    homeRequest.cacheAuthority = homeRequest.authority;
-    homeRequest.authority = [NSString stringWithFormat:@"https://login.microsoftonline.com/%@", self.primaryAccount.homeTenantId];
+    // 4. Run silent for the home tenant
+    homeRequest.homeAccountIdentifier = homeAccountId;
     homeRequest.testAccount.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedSilentAADLoginWithTestRequest:homeRequest];
 }
 
-- (NSString *)runSharedGuestInteractiveLoginWithRequest:(MSALTestRequest *)request
+- (NSString *)runSharedGuestInteractiveLoginWithRequest:(MSIDAutomationTestRequest *)request
                                         closeResultView:(BOOL)closeResultView
 {
     // 1. Do interactive login
@@ -177,7 +172,7 @@
     [self enterGuestPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
-    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request guestTenantScenario:NO];
+    NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 
     if (closeResultView)
     {

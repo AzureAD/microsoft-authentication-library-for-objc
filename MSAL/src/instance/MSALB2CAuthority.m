@@ -28,6 +28,7 @@
 #import "MSALB2CAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDB2CAuthority.h"
+#import "MSIDAuthority+Internal.h"
 
 @implementation MSALB2CAuthority
 

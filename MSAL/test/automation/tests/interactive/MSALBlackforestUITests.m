@@ -40,29 +40,26 @@
 {
     [super setUp];
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderBlackForest;
-    configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.needsMultipleUsers = NO;
-    configurationRequest.accountFeatures = @[];
     [self loadTestConfiguration:configurationRequest];
-
-    self.continueAfterFailure = YES;
 }
 
 #pragma mark - Interactive tests
 
 - (void)testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
-    MSALTestRequest *request = [MSALTestRequest convergedAppRequest];
-    request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.com/common";
-    request.scopes = @"email";
-    request.expectedResultScopes = @[@"email", @"openid", @"profile"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
-    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.webViewType = MSALWebviewTypeWKWebView;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
+    request.expectedResultScopes = request.requestScopes;
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.webViewType = MSIDWebviewTypeWKWebView;
+    request.extraQueryParameters = @{@"instance_aware": @"true"};
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -72,31 +69,33 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent with wrong authority
-    request.accountIdentifier = homeAccountID;
+    request.homeAccountIdentifier = homeAccountID;
+    request.acquireTokenAuthority = request.configurationAuthority;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self closeResultView];
 
     // 4. Run silent with correct authority
-    request.authority = @"https://login.microsoftonline.de/common";
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
+    request.acquireTokenAuthority = request.configurationAuthority;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"https://graph.cloudapi.de/.default";
-    // TODO: German cloud doesn't currently return openid and profile scopes for Microsoft graph, so commenting this out until it's fixed
-    // request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
-    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testConfiguration.clientId;
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.webViewType = MSALWebviewTypeWKWebView;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.extraQueryParameters = @{@"instance_aware": @"true"};
+    request.webViewType = MSIDWebviewTypeWKWebView;
+    request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
+    request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -106,30 +105,31 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent with wrong authority
-    request.accountIdentifier = homeAccountID;
+    request.homeAccountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
     [self assertErrorCode:@"MSALErrorInteractionRequired"];
     [self closeResultView];
 
     // 4. Run silent with correct authority
-    request.authority = @"https://login.microsoftonline.de/common";
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de"];
+    request.acquireTokenAuthority = request.configurationAuthority;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.com/organizations";
-    request.scopes = @"https://graph.cloudapi.de/.default";
-    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
+    NSString *environment = self.class.confProvider.wwEnvironment;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testConfiguration.clientId;
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.webViewType = MSALWebviewTypeWKWebView;
+    request.extraQueryParameters = @{@"instance_aware": @"true"};
+    request.webViewType = MSIDWebviewTypeWKWebView;
     request.loginHint = self.primaryAccount.account;
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
 
     // 1. Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
@@ -139,27 +139,27 @@
     [self assertAccessTokenNotNil];
 }
 
+
 // The following test needs slice parameter to be sent to instance discovery endpoint to work.
 // Therefore disable the it for now as that is not happening.
-- (void)DISABLED_testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
+- (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
-    MSALTestRequest *request = [MSALTestRequest nonConvergedAppRequest];
-    request.uiBehavior = @"force";
-    request.authority = @"https://login.microsoftonline.de/organizations";
-    request.scopes = @"https://graph.cloudapi.de/.default";
-    request.expectedResultScopes = @[@"https://graph.cloudapi.de/.default", @"openid", @"profile"];
+    NSString *environment = @"de";
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testConfiguration.clientId;
+    request.promptBehavior = @"force";
+    request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
+    request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];
+    request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.additionalParameters = @{@"extra_qp": @{@"instance_aware": @"true"}};
-    request.expectedResultAuthority = [NSString stringWithFormat:@"%@%@", @"https://login.microsoftonline.de/", self.primaryAccount.targetTenantId];
+    request.extraQueryParameters = @{@"instance_aware": @"true"};
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
     XCTAssertNotNil(homeAccountID);
 
     // 2. Run silent with correct authority
-    request.accountIdentifier = homeAccountID;
-    request.authority = @"https://login.microsoftonline.de/common";
-    request.cacheAuthority = [NSString stringWithFormat:@"https://login.microsoftonline.de/%@", self.primaryAccount.targetTenantId];
+    request.homeAccountIdentifier = homeAccountID;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
