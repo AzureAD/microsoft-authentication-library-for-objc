@@ -45,6 +45,7 @@
 #import "MSALAuthority.h"
 #import <MSAL/MSALGlobalConfig.h>
 #import <MSAL/MSALLoggerConfig.h>
+#import "MSALHTTPConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -493,7 +494,10 @@
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
-    pcaConfig.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    if (_validateAuthority.selectedSegmentIndex == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
@@ -593,7 +597,10 @@
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
     
-    pcaConfig.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
+    if (_validateAuthority.selectedSegmentIndex == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)

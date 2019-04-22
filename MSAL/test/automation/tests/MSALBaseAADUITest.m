@@ -95,8 +95,8 @@
 
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
     [self closeAuthUIUsingWebViewType:request.webViewType passedInWebView:request.usePassedWebView];
-
-    [self assertErrorCode:request.usePassedWebView ? MSALInternalErrorSessionCanceled : MSALErrorUserCanceled];
+    
+    [self assertErrorCode:MSALErrorUserCanceled];
     [self closeResultView];
 }
 

@@ -111,6 +111,12 @@ static MSIDTestConfigurationProvider *s_confProvider;
     XCTAssertEqual(expectedErrorCode, result.errorCode);
 }
 
+- (void)assertInternalErrorCode:(NSInteger)internalErrorCode
+{
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    XCTAssertEqual(internalErrorCode, [result.errorUserInfo[MSALInternalErrorCodeKey] integerValue]);
+}
+
 - (void)assertErrorDescription:(NSString *)errorDescription
 {
     MSIDAutomationErrorResult *result = [self automationErrorResult];

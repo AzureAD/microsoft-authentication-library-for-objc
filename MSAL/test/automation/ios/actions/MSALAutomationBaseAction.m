@@ -97,7 +97,12 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:parameters.clientId
                                                                                                 redirectUri:parameters.redirectUri
                                                                                                   authority:authority];
-    config.validateAuthority = validateAuthority;
+    
+    if (!validateAuthority)
+    {
+        config.knownAuthorities = @[config.authority];
+    }
+    
     config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:parameters.sliceParameters[@"slice"] dc:parameters.sliceParameters[@"dc"]];
     
     MSALPublicClientApplication *clientApplication = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];

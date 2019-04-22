@@ -29,7 +29,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALCacheConfig : NSObject
+@interface MSALCacheConfig : NSObject <NSCopying>
 
 /*!
     The keychain sharing group to use for the token cache.

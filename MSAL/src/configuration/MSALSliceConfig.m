@@ -59,4 +59,14 @@
     return dict;
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSString *dc = [_dc copyWithZone:zone];
+    NSString *slice = [_slice copyWithZone:zone];
+    MSALSliceConfig *config = [[MSALSliceConfig alloc] initWithSlice:slice dc:dc];
+    return config;
+}
+
 @end

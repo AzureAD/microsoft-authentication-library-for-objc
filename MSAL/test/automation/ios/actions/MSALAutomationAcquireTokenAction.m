@@ -86,13 +86,18 @@
     NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:testRequest.extraScopes];
     NSUUID *correlationId = [NSUUID new];
     
-    NSError *claimsError;
-    MSALClaimsRequest *claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
-    if (claimsError)
+    MSALClaimsRequest *claimsRequest = nil;
+    
+    if (testRequest.claims.length)
     {
-        MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];
-        completionBlock(result);
-        return;
+        NSError *claimsError;
+        claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
+        if (claimsError)
+        {
+            MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];
+            completionBlock(result);
+            return;
+        }
     }
     
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
@@ -159,7 +164,7 @@
         parameters.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
-    
+        
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
          MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];

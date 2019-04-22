@@ -49,21 +49,12 @@
 - (NSTimeInterval)retryInterval { return MSIDHttpRequest.retryIntervalSetting; }
 - (void)setRetryInterval:(NSTimeInterval)retryInterval { MSIDHttpRequest.retryIntervalSetting = retryInterval; }
 
-- (NSTimeInterval)timeoutIntervalForResource
-{
-    return MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForResource;
-}
-- (void)setTimeoutIntervalForResource:(NSTimeInterval)timeoutIntervalForResource
-{
-    MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForResource = timeoutIntervalForResource;
-}
-
 - (NSTimeInterval)timeoutIntervalForRequest {
-    return MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForRequest;
+    return MSIDHttpRequest.requestTimeoutInterval;
 }
 - (void)setTimeoutIntervalForRequest:(NSTimeInterval)timeoutIntervalForRequest
 {
-    MSIDURLSessionManager.defaultManager.configuration.timeoutIntervalForRequest = timeoutIntervalForRequest;
+    MSIDHttpRequest.requestTimeoutInterval = timeoutIntervalForRequest;
 }
 
 @end

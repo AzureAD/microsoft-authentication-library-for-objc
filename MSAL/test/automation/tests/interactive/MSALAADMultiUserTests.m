@@ -139,13 +139,18 @@
     XCUIElement *signIn = self.testApp.staticTexts[@"Sign in with another account"];
     [self waitForElement:signIn];
     [signIn msidTap];
+    
+    XCUIElement *otherAccount = self.testApp.staticTexts[@"Use another account"];
+    [self waitForElement:otherAccount];
+    [otherAccount msidTap];
 
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];
     [self aadEnterEmail];
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:NO];
-    [self assertErrorCode:MSALInternalErrorMismatchedUser];
+    [self assertErrorCode:MSALErrorInternal];
+    [self assertInternalErrorCode:MSALInternalErrorMismatchedUser];
 }
 
 @end
