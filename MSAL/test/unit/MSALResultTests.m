@@ -155,7 +155,7 @@
     XCTAssertNil(result.account.allTenantProfiles);
 }
 
-// TODO: Seems mac cache has a bug which cause the following UT to fail. Will investigate.
+// TODO: Make it applicable to Mac when Mac cache is complete
 #if TARGET_OS_IPHONE
 - (void)testMSALResultWithTokenResult_whenIdTokensInCache_shouldConstructTenantProfiles
 {

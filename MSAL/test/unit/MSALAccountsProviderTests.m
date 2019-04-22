@@ -505,62 +505,7 @@
 - (void)testAllAccounts_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    // first user logged in 1 home tenant and 2 guest tenants
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
-                                             clientId:@"client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"oid"
-                                             tenantId:@"tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid"
-                                             clientId:@"different_client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"guest_oid"
-                                             tenantId:@"guest_tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/guest2_tid"
-                                            clientId:@"client_id"
-                                                 upn:@"user@contoso.com"
-                                                name:@"contoso_user"
-                                                 uid:@"uid"
-                                                utid:@"tid"
-                                                 oid:@"guest2_oid"
-                                            tenantId:@"guest2_tid"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    // second user logged in 1 home tenant and 1 guest tenant
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid2"
-                                            clientId:@"client_id"
-                                                 upn:@"user@fabricant.com"
-                                                name:@"fabricant_user"
-                                                 uid:@"uid2"
-                                                utid:@"tid2"
-                                                 oid:@"oid2"
-                                            tenantId:@"tid2"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid2"
-                                             clientId:@"client_id"
-                                                  upn:@"user@fabricant.com"
-                                                 name:@"fabricant_user"
-                                                  uid:@"uid2"
-                                                 utid:@"tid2"
-                                                  oid:@"guest_oid2"
-                                             tenantId:@"guest_tid2"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
+    [self setupMixedAccountsInCache];
     
     NSError *error;
     NSArray<MSALAccount *> *allAccounts = [provider allAccounts:&error];
@@ -618,62 +563,7 @@
 - (void)testAccountForHomeAccountId_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    // first user logged in 1 home tenant and 2 guest tenants
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
-                                             clientId:@"client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"oid"
-                                             tenantId:@"tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid"
-                                             clientId:@"different_client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"guest_oid"
-                                             tenantId:@"guest_tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/guest2_tid"
-                                            clientId:@"client_id"
-                                                 upn:@"user@contoso.com"
-                                                name:@"contoso_user"
-                                                 uid:@"uid"
-                                                utid:@"tid"
-                                                 oid:@"guest2_oid"
-                                            tenantId:@"guest2_tid"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    // second user logged in 1 home tenant and 1 guest tenant
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid2"
-                                            clientId:@"client_id"
-                                                 upn:@"user@fabricant.com"
-                                                name:@"fabricant_user"
-                                                 uid:@"uid2"
-                                                utid:@"tid2"
-                                                 oid:@"oid2"
-                                            tenantId:@"tid2"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid2"
-                                             clientId:@"client_id"
-                                                  upn:@"user@fabricant.com"
-                                                 name:@"fabricant_user"
-                                                  uid:@"uid2"
-                                                 utid:@"tid2"
-                                                  oid:@"guest_oid2"
-                                             tenantId:@"guest_tid2"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
+    [self setupMixedAccountsInCache];
     
     NSError *error;
     MSALAccount *account = [provider accountForHomeAccountId:@"uid.tid" error:&error];
@@ -709,62 +599,7 @@
 - (void)testAccountForUsername_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    // first user logged in 1 home tenant and 2 guest tenants
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
-                                             clientId:@"client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"oid"
-                                             tenantId:@"tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid"
-                                             clientId:@"different_client_id"
-                                                  upn:@"user@contoso.com"
-                                                 name:@"contoso_user"
-                                                  uid:@"uid"
-                                                 utid:@"tid"
-                                                  oid:@"guest_oid"
-                                             tenantId:@"guest_tid"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
-    
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/guest2_tid"
-                                            clientId:@"client_id"
-                                                 upn:@"user@contoso.com"
-                                                name:@"contoso_user"
-                                                 uid:@"uid"
-                                                utid:@"tid"
-                                                 oid:@"guest2_oid"
-                                            tenantId:@"guest2_tid"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    // second user logged in 1 home tenant and 1 guest tenant
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid2"
-                                            clientId:@"client_id"
-                                                 upn:@"user@fabricant.com"
-                                                name:@"fabricant_user"
-                                                 uid:@"uid2"
-                                                utid:@"tid2"
-                                                 oid:@"oid2"
-                                            tenantId:@"tid2"
-                                            familyId:nil
-                                       cacheAccessor:legacyCache];
-    
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid2"
-                                             clientId:@"client_id"
-                                                  upn:@"user@fabricant.com"
-                                                 name:@"fabricant_user"
-                                                  uid:@"uid2"
-                                                 utid:@"tid2"
-                                                  oid:@"guest_oid2"
-                                             tenantId:@"guest_tid2"
-                                             familyId:nil
-                                        cacheAccessor:defaultCache];
+    [self setupMixedAccountsInCache];
     
     NSError *error;
     MSALAccount *account = [provider accountForUsername:@"user@contoso.com" error:&error];
@@ -913,6 +748,66 @@
                              }];
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
+}
+
+- (void)setupMixedAccountsInCache
+{
+    // first user logged in 1 home tenant and 2 guest tenants
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+                                             clientId:@"client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"contoso_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"oid"
+                                             tenantId:@"tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid"
+                                             clientId:@"different_client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"contoso_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"guest_oid"
+                                             tenantId:@"guest_tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/guest2_tid"
+                                            clientId:@"client_id"
+                                                 upn:@"user@contoso.com"
+                                                name:@"contoso_user"
+                                                 uid:@"uid"
+                                                utid:@"tid"
+                                                 oid:@"guest2_oid"
+                                            tenantId:@"guest2_tid"
+                                            familyId:nil
+                                       cacheAccessor:legacyCache];
+    
+    // second user logged in 1 home tenant and 1 guest tenant
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid2"
+                                            clientId:@"client_id"
+                                                 upn:@"user@fabricant.com"
+                                                name:@"fabricant_user"
+                                                 uid:@"uid2"
+                                                utid:@"tid2"
+                                                 oid:@"oid2"
+                                            tenantId:@"tid2"
+                                            familyId:nil
+                                       cacheAccessor:legacyCache];
+    
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid2"
+                                             clientId:@"client_id"
+                                                  upn:@"user@fabricant.com"
+                                                 name:@"fabricant_user"
+                                                  uid:@"uid2"
+                                                 utid:@"tid2"
+                                                  oid:@"guest_oid2"
+                                             tenantId:@"guest_tid2"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
 }
 
 @end
