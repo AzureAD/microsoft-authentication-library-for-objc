@@ -46,7 +46,7 @@
     self.consentTitle = @"Yes";
     self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderMSA;
     configurationRequest.appVersion = MSIDAppVersionV1;
     configurationRequest.accountFeatures = @[];
@@ -154,7 +154,7 @@
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
-    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:NO];
+    [self acceptMSSTSConsentIfNecessary:@"Continue" embeddedWebView:NO];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];

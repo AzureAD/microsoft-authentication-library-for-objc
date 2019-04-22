@@ -47,7 +47,7 @@
     
     self.testEnvironment = self.class.confProvider.wwEnvironment;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     [self loadTestConfiguration:configurationRequest];
 }
@@ -357,7 +357,7 @@
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
     [self loadTestConfiguration:configurationRequest];
@@ -387,7 +387,7 @@
     request.testAccount = self.primaryAccount;
     request.loginHint = self.primaryAccount.username;
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.accountFeatures = @[MSIDTestAccountFeatureMDMEnabled];
     [self loadTestConfiguration:configurationRequest];
