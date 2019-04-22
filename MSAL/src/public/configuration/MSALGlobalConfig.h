@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALGlobalConfig : NSObject
 
-/*! Network configuration, , refer to MSALHTTPConfig.h for more detail */
+/*! Network configuration, refer to MSALHTTPConfig.h for more detail */
 @property (class, readonly) MSALHTTPConfig *httpConfig;
 /*! Telemetry configurations, refer to MSALTelemetryConfig.h for more detail */
 @property (class, readonly) MSALTelemetryConfig *telemetryConfig;
