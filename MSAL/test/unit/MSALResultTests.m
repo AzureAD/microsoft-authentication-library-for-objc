@@ -36,16 +36,45 @@
 #import "MSALAuthority.h"
 #import "MSALAccount.h"
 #import "MSALAccountId.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDLegacyTokenCacheAccessor.h"
+#import "MSIDTestCacheUtil.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDTestIdTokenUtil.h"
+#import "MSIDAccessToken.h"
+#if TARGET_OS_IPHONE
+#import "MSIDKeychainTokenCache.h"
+#else
+#import "MSIDMacTokenCache.h"
+#endif
 
 @interface MSALResultTests : MSALTestCase
 
 @end
 
 @implementation MSALResultTests
+{
+    MSIDDefaultTokenCacheAccessor *defaultCache;
+    MSIDLegacyTokenCacheAccessor *legacyCache;
+}
 
 - (void)setUp
 {
     [super setUp];
+    
+    id<MSIDTokenCacheDataSource> dataSource = nil;
+    
+#if TARGET_OS_IPHONE
+    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+#else
+    dataSource = MSIDMacTokenCache.defaultCache;
+#endif
+    
+    legacyCache = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource
+                                                       otherCacheAccessors:@[]];
+    defaultCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyCache]];
+    
+    [defaultCache clearWithContext:nil error:nil];
 }
 
 - (void)tearDown
@@ -126,6 +155,113 @@
     XCTAssertNil(result.account.allTenantProfiles);
 }
 
-//TODOJZ: init result with cache
+// TODO: Seems mac cache has a bug which cause the following UT to fail. Will investigate.
+#if TARGET_OS_IPHONE
+- (void)testMSALResultWithTokenResult_whenIdTokensInCache_shouldConstructTenantProfiles
+{
+    //Store some accounts to cache
+    // first user logged in 1 home tenant and 2 guest tenants
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+                                             clientId:@"client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"contoso_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"oid"
+                                             tenantId:@"tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid"
+                                             clientId:@"different_client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"contoso_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"guest_oid"
+                                             tenantId:@"guest_tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/guest2_tid"
+                                            clientId:@"client_id"
+                                                 upn:@"user@contoso.com"
+                                                name:@"contoso_user"
+                                                 uid:@"uid"
+                                                utid:@"tid"
+                                                 oid:@"guest2_oid"
+                                            tenantId:@"guest2_tid"
+                                            familyId:nil
+                                       cacheAccessor:legacyCache];
+    
+    // second user logged in 1 home tenant and 1 guest tenant
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid2"
+                                            clientId:@"client_id"
+                                                 upn:@"user@fabricant.com"
+                                                name:@"fabricant_user"
+                                                 uid:@"uid2"
+                                                utid:@"tid2"
+                                                 oid:@"oid2"
+                                            tenantId:@"tid2"
+                                            familyId:nil
+                                       cacheAccessor:legacyCache];
+    
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/guest_tid2"
+                                             clientId:@"client_id"
+                                                  upn:@"user@fabricant.com"
+                                                 name:@"fabricant_user"
+                                                  uid:@"uid2"
+                                                 utid:@"tid2"
+                                                  oid:@"guest_oid2"
+                                             tenantId:@"guest_tid2"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    MSIDTokenResult *tokenResult = [MSIDTokenResult new];
+    tokenResult.rawIdToken = [MSIDTestIdTokenUtil idTokenWithName:@"contoso_user" preferredUsername:@"user@contoso.com" oid:@"uid" tenantId:@"tid"];
+    tokenResult.accessToken = [MSIDAccessToken new];
+    tokenResult.accessToken.clientId = @"client_id";
+    __auto_type authority = [@"https://login.microsoftonline.com/tid" authority];
+    tokenResult.authority = authority;
+    MSIDAccount *account = [MSIDAccount new];
+    account.authority = authority;
+    account.localAccountId = @"uid";
+    account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    tokenResult.account = account;
+    
+    // Construct MSAL result from MSID result
+    NSError *error = nil;
+    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult tokenCache:defaultCache error:&error];
+    
+    // Verify account
+    MSALAccount *resultAccount = result.account;
+    XCTAssertNotNil(resultAccount);
+    
+    XCTAssertEqualObjects(resultAccount.username, @"user@contoso.com");
+    XCTAssertEqualObjects(resultAccount.homeAccountId.identifier, @"uid.tid");
+    XCTAssertEqualObjects(resultAccount.name, @"contoso_user");
+    XCTAssertEqualObjects(resultAccount.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(resultAccount.lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    
+    // expect 3 tenant profiles
+    XCTAssertEqual(resultAccount.tenantProfiles.count, 3);
+    
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[0].userObjectId, @"oid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[0].tenantId, @"tid");
+    XCTAssertTrue(resultAccount.tenantProfiles[0].claims.count > 0);
+    
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[1].userObjectId, @"guest_oid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[1].tenantId, @"guest_tid");
+    // this tenant profile belongs to another client id, so we do not expose all claims
+    XCTAssertNil(resultAccount.tenantProfiles[1].claims);
+    
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[2].userObjectId, @"guest2_oid");
+    XCTAssertEqualObjects(resultAccount.tenantProfiles[2].tenantId, @"guest2_tid");
+    XCTAssertTrue(resultAccount.tenantProfiles[0].claims.count > 0);
+}
+#endif
 
 @end
