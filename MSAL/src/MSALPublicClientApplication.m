@@ -324,7 +324,7 @@
     }];
 }
 
-#pragma SafariViewController Support
+#pragma mark - SafariViewController Support
 
 #if TARGET_OS_IPHONE
 + (BOOL)handleMSALResponse:(NSURL *)response
@@ -681,7 +681,6 @@
                       completionBlock:completionBlock];
 }
 
-#pragma mark -
 #pragma mark - private methods
 
 + (void)logOperation:(NSString *)operation
