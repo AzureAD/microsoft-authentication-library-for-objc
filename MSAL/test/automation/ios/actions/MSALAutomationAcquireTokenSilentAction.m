@@ -34,6 +34,8 @@
 #import "MSIDAutomationTestResult.h"
 #import "MSIDAutomationErrorResult.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALError.h"
+#import "MSALClaimsRequest.h"
 
 @implementation MSALAutomationAcquireTokenSilentAction
 
@@ -81,11 +83,8 @@
         {
             NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil);
 
-            NSString *errorName = MSALStringForErrorCode(MSALErrorInteractionRequired);
-
             result = [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                                  error:error
-                                                             errorName:errorName
                                                         additionalInfo:nil];
         }
 
@@ -103,6 +102,20 @@
     {
         // In case we want to pass a different authority to silent call, we can use "silent authority" parameter
         silentAuthority = [MSALAuthority authorityWithURL:[NSURL URLWithString:testRequest.acquireTokenAuthority] error:nil];
+    }
+    
+    MSALClaimsRequest *claimsRequest = nil;
+    
+    if (testRequest.claims.length)
+    {
+        NSError *claimsError;
+        claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
+        if (claimsError)
+        {
+            MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];
+            completionBlock(result);
+            return;
+        }
     }
     
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:[scopes array] account:account];

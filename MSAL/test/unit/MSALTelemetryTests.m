@@ -39,6 +39,7 @@
 #import "MSIDTelemetryUIEvent.h"
 #import "MSIDTelemetryBrokerEvent.h"
 #import "MSIDTelemetryAuthorityValidationEvent.h"
+#import "MSALTelemetryConfig+Internal.h"
 
 @interface MSALTelemetryDefaultTests : MSALTestCase
 
@@ -53,17 +54,17 @@
 {
     [super setUp];
     
-    self.observer = [MSALTestTelemetryEventsObserver new];
+    self.dispatcher = [MSALTelemetryTestDispatcher new];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:NO];
+    [MSALTelemetryConfig.sharedInstance addDispatcher:self.dispatcher setTelemetryOnFailure:NO];
     
-    __weak MSALTelemetryDefaultTests *weakSelf = self;
-    [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
+    __weak MSALTelemetryTests *weakSelf = self;
+    [self.dispatcher setDispatcherCallback:^(NSArray<NSDictionary<NSString *, NSString *> *> *event)
      {
          weakSelf.receivedEvents = events;
      }];
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALTelemetryConfig.sharedInstance.piiEnabled = NO;
 }
 
 - (void)tearDown
@@ -75,13 +76,14 @@
     [MSALTelemetry sharedInstance].piiEnabled = NO;
     [[MSALTelemetry sharedInstance] removeAllObservers];
     self.receivedEvents = nil;
+    MSALTelemetryConfig.sharedInstance.piiEnabled = NO;
 }
 
 #pragma mark - Telemetry Pii Rules
 
 - (void)testTelemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALTelemetryConfig.sharedInstance.piiEnabled = NO;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
@@ -98,7 +100,7 @@
 
 - (void)testTelemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALTelemetryConfig.sharedInstance.piiEnabled = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];

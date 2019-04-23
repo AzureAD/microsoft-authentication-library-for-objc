@@ -29,6 +29,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class WKWebView;
+
 /*!
  Token parameters to be used in interactive flow.
  */
@@ -67,6 +69,9 @@ NS_ASSUME_NONNULL_BEGIN
                     gauranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+
+@property (nonatomic, nullable) WKWebView *customWebview;
+@property (nonatomic) MSALWebviewType webviewType;
 
 @end
 

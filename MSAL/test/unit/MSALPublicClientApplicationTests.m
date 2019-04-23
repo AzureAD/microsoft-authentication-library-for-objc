@@ -64,6 +64,9 @@
 #import "MSALRedirectUri.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDTestURLResponse+Util.h"
+#import "MSALSliceConfig.h"
+#import "MSALCacheConfig.h"
+#import "MSALB2CAuthority.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -125,7 +128,9 @@
     
     XCTAssertNil(application);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorInvalidParameter);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
     XCTAssertNotNil(error.userInfo);
     XCTAssertNotNil(error.userInfo[MSALErrorDescriptionKey]);
     XCTAssertTrue([error.userInfo[MSALErrorDescriptionKey] containsString:@"clientId"]);
@@ -208,7 +213,9 @@
     
     XCTAssertNil(application);
     XCTAssertNotNil(error);
-    XCTAssertEqual(error.code, MSALErrorRedirectSchemeNotRegistered);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorRedirectSchemeNotRegistered);
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
@@ -353,12 +360,13 @@
 - (void)testAcquireTokenScopes
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
-    NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.sliceParameters = @{ @"slice" : @"myslice" };
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
@@ -379,17 +387,17 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
-         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
+         XCTAssertTrue(params.extraAuthorizeURLQueryParameters.count == 0);
          XCTAssertNil(params.loginHint);
          XCTAssertEqualObjects(params.logComponent, @"MSAL");
          XCTAssertNotNil(params.correlationId);
          
          completionBlock(nil, nil);
      }];
-
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
-    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     [application acquireTokenForScopes:@[@"fakescope"]
                        completionBlock:^(MSALResult *result, NSError *error)
      {
@@ -403,17 +411,103 @@
     application = nil;
 }
 
+#pragma mark - Known authorities
+
+- (void)testAcquireToken_whenKnownAADAuthority_shouldValidate
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         
+         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertTrue(params.validateAuthority);
+         completionBlock(nil, nil);
+     }];
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
+- (void)testAcquireToken_whenKnownB2CAuthority_shouldNotValidate
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2?policyId=queryParam"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         
+         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://myb2c.authority.com/mypath/mypath2/mypolicy/mypolicy2");
+         completionBlock(nil, nil);
+     }];
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
+                             loginHint:@"fakeuser@contoso.com"
+                       completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
 #pragma mark - acquireToken using Login Hint
 
 - (void)testAcquireScopesLoginHint
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
     NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -434,17 +528,19 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));;
          XCTAssertNotNil(params.correlationId);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
-         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
+         XCTAssertTrue(params.extraAuthorizeURLQueryParameters.count == 0);
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -459,13 +555,14 @@
 - (void)testAcquireScopesLoginHintBehaviorEQPs
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
-    NSError *error = nil;
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -486,7 +583,7 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -496,7 +593,9 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                              loginHint:@"fakeuser@contoso.com"
@@ -513,13 +612,14 @@
 {
     [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
-    NSError *error = nil;
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -542,7 +642,7 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
@@ -553,7 +653,9 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
@@ -575,12 +677,14 @@
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
     NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -608,9 +712,9 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          XCTAssertNotNil(params.correlationId);
-         XCTAssertNil(params.extraAuthorizeURLQueryParameters);
+         XCTAssertTrue(params.extraAuthorizeURLQueryParameters.count == 0);
          XCTAssertNil(params.loginHint);
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypePromptIfNecessary);
@@ -620,7 +724,9 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
@@ -634,13 +740,14 @@
 - (void)testAcquireScopesUserUiBehaviorEQP
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
-    NSError *error = nil;
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    NSError *error = nil;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -668,7 +775,7 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          XCTAssertNotNil(params.correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -679,7 +786,9 @@
          completionBlock(nil, nil);
      }];
 
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                                account:account
@@ -696,12 +805,14 @@
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
     NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -731,7 +842,7 @@
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
          XCTAssertEqualObjects(params.redirectUri, UNIT_TEST_DEFAULT_REDIRECT_URI);
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          XCTAssertEqualObjects(params.correlationId, correlationId);
          XCTAssertEqualObjects(params.extraAuthorizeURLQueryParameters, (@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }));
          XCTAssertNil(params.loginHint);
@@ -743,7 +854,9 @@
      }];
     
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
-    application.brokerAvailability = MSALBrokeredAvailabilityNone;
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
     
     [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
                   extraScopesToConsent:@[@"fakescope3"]
@@ -767,12 +880,14 @@
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
     NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -790,7 +905,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority, [@"https://login.microsoftonline.com/1234-5678-90abcdefg" msalAuthority].msidAuthority);
          
@@ -825,12 +940,14 @@
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
     NSError *error = nil;
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -848,7 +965,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
@@ -888,11 +1005,13 @@
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -910,7 +1029,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
@@ -947,11 +1066,13 @@
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/custom_guest_tenant" msalAuthority];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -969,7 +1090,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1006,11 +1127,13 @@
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/custom_guest_tenant" msalAuthority];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -1028,7 +1151,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
          
@@ -1066,11 +1189,13 @@
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                          authority:authority
-                                                                              error:&error];
-    application.component = @"unittests";
-    application.sliceParameters = @{ @"slice" : @"myslice" };
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
@@ -1090,7 +1215,7 @@
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
-         XCTAssertEqualObjects(params.extraURLQueryParameters, @{ @"slice" : @"myslice" });
+         XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
          
@@ -1303,6 +1428,8 @@
 
 #pragma mark - allAccountsFilteredByAuthority
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 - (void)testAllAccountsFilteredByAuthority_when2AccountExists_shouldReturnAccountsFilteredByAuthority
 {
     [self msalStoreTokenResponseInCacheWithAuthority:@"https://login.microsoftonline.com/common"];
@@ -1360,6 +1487,7 @@
     
     [self waitForExpectationsWithTimeout:1 handler:nil];
 }
+#pragma clang diagnostic pop
 
 #pragma mark - loadAccountForHomeAccountId
 

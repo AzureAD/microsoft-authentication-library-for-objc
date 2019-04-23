@@ -29,6 +29,8 @@
 #import "MSALTestAppTelemetryEventsObserver.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "MSALTelemetry.h"
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALTelemetryConfig.h>
 
 @interface MSALTestAppTelemetryViewController ()
 {
@@ -80,12 +82,12 @@
          [self refresh];
      }];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:observer setTelemetryOnFailure:NO aggregationRequired:NO];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:observer setTelemetryOnFailure:NO aggregationRequired:NO];
 }
 
 - (void)stopTracking
 {
-    [[MSALTelemetry sharedInstance] removeAllObservers];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
 }
 
 #pragma mark - UI Lifecycle

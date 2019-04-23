@@ -28,64 +28,48 @@
 #import "MSIDTelemetry+Internal.h"
 #import "MSALAggregatedDispatcher.h"
 #import "MSALTelemetryEventsObservingProxy.h"
+#import "MSALGlobalConfig.h"
+#import "MSALTelemetryConfig.h"
 
 @implementation MSALTelemetry
 
-- (id)initInternal
-{
-    return [super init];
-}
-
 + (MSALTelemetry *)sharedInstance
 {
-    static dispatch_once_t once;
-    static MSALTelemetry *singleton = nil;
-    
-    dispatch_once(&once, ^{
-        singleton = [[MSALTelemetry alloc] initInternal];
+    static MSALTelemetry *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
     });
-    
-    return singleton;
+    return sharedInstance;
 }
 
 - (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
     setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
       aggregationRequired:(BOOL)aggregationRequired
 {
-    if (!observer) return;
-    
-    __auto_type proxyObserver = [[MSALTelemetryEventsObservingProxy alloc] initWithObserver:observer];
-    id<MSIDTelemetryDispatcher> dispatcher;
-    if (aggregationRequired)
-    {
-        dispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
-    }
-    else
-    {
-        dispatcher = [[MSALDefaultDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
-    }
-    
-    [[MSIDTelemetry sharedInstance] addDispatcher:dispatcher];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:observer
+                                  setTelemetryOnFailure:setTelemetryOnFailure
+                                    aggregationRequired:aggregationRequired];
 }
 
 - (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer
 {
-    [[MSIDTelemetry sharedInstance] removeDispatcherByObserver:observer];
+    [MSALGlobalConfig.telemetryConfig removeObserver:observer];
 }
 
 - (void)removeAllObservers
 {
-    [[MSIDTelemetry sharedInstance] removeAllDispatchers];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
 }
 
 - (BOOL)piiEnabled
 {
-    return [[MSIDTelemetry sharedInstance] piiEnabled];
+    return MSALGlobalConfig.telemetryConfig.piiEnabled;
 }
 
 - (void)setPiiEnabled:(BOOL)piiEnabled
 {
-    [[MSIDTelemetry sharedInstance] setPiiEnabled:piiEnabled];
+    MSALGlobalConfig.telemetryConfig.piiEnabled = piiEnabled;
 }
 
 @end

@@ -37,13 +37,13 @@
                                       responseUrl:(NSString *)responseAuthority
                                             query:(NSString *)query;
 
-+ (MSIDTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
++ (MSIDTestURLResponse *)rtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
                                         user:(MSALAccount *)user
                                       claims:(NSString *)decodedClaims;
 
-+ (MSIDTestURLResponse *)errorRtResponseForScopes:(MSALScopes *)scopes
++ (MSIDTestURLResponse *)errorRtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                         authority:(NSString *)authority
                                          tenantId:(NSString *)tid
                                           account:(MSALAccount *)account
@@ -56,13 +56,13 @@
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
-                                   scopes:(MSALScopes *)scopes
+                                   scopes:(NSOrderedSet<NSString *> *)scopes
                                    claims:(NSString *)claims;
 
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
-                                   scopes:(MSALScopes *)scopes
+                                   scopes:(NSOrderedSet<NSString *> *)scopes
                                clientInfo:(NSDictionary *)clientInfo
                                    claims:(NSString *)claims;
 

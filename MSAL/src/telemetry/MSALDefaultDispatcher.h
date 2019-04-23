@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSIDDefaultDispatcher.h"
+#import "MSALTelemetryConfig.h"
 
 @class MSALTelemetryEventsObservingProxy;
 

@@ -1,3 +1,13 @@
+## [0.4.0] - 2019-04-25
+### Added
+- Updated MSAL Public API surface to be more extensible and intuitive
+- Added support for custom B2C domains
+- Improved MSAL error handling
+
+## [0.3.0] - 2019-04-22
+### Added
+- Added broker support to MSAL iOS SDK
+
 ## [0.2.3] - 2019-02-12
 ### Fixed
 - Fix issue when authorization code cannot be read due to a dummy fragment in response URL for B2C (#456)

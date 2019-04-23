@@ -39,6 +39,7 @@
 #import "MSIDTelemetryUIEvent.h"
 #import "MSIDTelemetryBrokerEvent.h"
 #import "MSIDTelemetryAuthorityValidationEvent.h"
+#import "MSALGlobalConfig.h"
 
 @interface MSALTelemetryDefaultTests : MSALTestCase
 
@@ -55,7 +56,7 @@
     
     self.observer = [MSALTestTelemetryEventsObserver new];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:NO];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:NO];
     
     __weak MSALTelemetryDefaultTests *weakSelf = self;
     [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
@@ -63,7 +64,7 @@
          weakSelf.receivedEvents = events;
      }];
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
 }
 
 - (void)tearDown
@@ -72,8 +73,8 @@
     
     self.observer = nil;
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
-    [[MSALTelemetry sharedInstance] removeAllObservers];
+    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
     self.receivedEvents = nil;
 }
 
@@ -81,7 +82,7 @@
 
 - (void)testTelemetryPiiRules_whenPiiEnabledNo_shouldDeletePiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
@@ -98,7 +99,7 @@
 
 - (void)testTelemetryPiiRules_whenPiiEnabledYes_shouldHashPiiFields
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSString *eventName = @"test event";
     MSIDTelemetryBaseEvent *event = [[MSIDTelemetryBaseEvent alloc] initWithName:eventName context:nil];
@@ -140,7 +141,7 @@
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
-    [[MSALTelemetry sharedInstance] removeObserver:self.observer];
+    [MSALGlobalConfig.telemetryConfig removeObserver:self.observer];
     
     [[MSIDTelemetry sharedInstance] flush:requestId];
     
@@ -159,7 +160,7 @@
 
 - (void)testFlush_whenThereAre2EventsAndObserverIsSet_shouldSendEvents
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID *correlationId = [NSUUID UUID];
     __auto_type context = [MSIDTestContext new];
@@ -187,8 +188,8 @@
 
 - (void)testFlush_whenThereAre2EventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldFilterEvents
 {
-    [[MSALTelemetry sharedInstance] removeAllObservers];
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID *correlationId = [NSUUID UUID];
     __auto_type context = [MSIDTestContext new];
@@ -212,8 +213,8 @@
 
 - (void)testFlush_whenThereIs1NonErrorEventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldNotSendEvents
 {
-    [[MSALTelemetry sharedInstance] removeAllObservers];
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     __auto_type context = [MSIDTestContext new];

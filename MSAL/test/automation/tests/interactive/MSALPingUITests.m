@@ -44,7 +44,7 @@
 
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderPing;
     [self loadTestConfiguration:configurationRequest];
 }

@@ -39,6 +39,7 @@
 #import "MSIDTelemetryUIEvent.h"
 #import "MSIDTelemetryBrokerEvent.h"
 #import "MSIDTelemetryAuthorityValidationEvent.h"
+#import "MSALGlobalConfig.h"
 
 @interface MSALTelemetryAggregatedTests : MSALTestCase
 
@@ -57,7 +58,7 @@
     
     self.observer = [MSALTestTelemetryEventsObserver new];
     
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:YES];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:YES];
     
     __weak MSALTelemetryAggregatedTests *weakSelf = self;
     [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
@@ -65,7 +66,7 @@
          weakSelf.receivedEvents = events;
      }];
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
     
     self.requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
@@ -81,8 +82,8 @@
     
     self.observer = nil;
     
-    [MSALTelemetry sharedInstance].piiEnabled = NO;
-    [[MSALTelemetry sharedInstance] removeAllObservers];
+    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
     self.receivedEvents = nil;
 }
 
@@ -345,7 +346,7 @@
 
 - (void)testFlush_whenThereAreTwoUiEvents_shouldSendAggregatedEvent
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = YES;
     // UI event #1
     __auto_type eventName = @"UI event";
     __auto_type event = [[MSIDTelemetryUIEvent alloc] initWithName:eventName context:self.context];
@@ -478,7 +479,7 @@
 
 - (void)testFlush_whenThereAreTwoAuthorityValidationEvents_shouldSendAggregatedEvent
 {
-    [MSALTelemetry sharedInstance].piiEnabled = YES;
+    MSALGlobalConfig.telemetryConfig.piiEnabled = YES;
     // Authority validation event #1
     __auto_type eventName = @"Authority validation event";
     __auto_type event = [[MSIDTelemetryAuthorityValidationEvent alloc] initWithName:eventName context:self.context];
@@ -526,7 +527,7 @@
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
-    [[MSALTelemetry sharedInstance] removeObserver:self.observer];
+    [MSALGlobalConfig.telemetryConfig removeObserver:self.observer];
     
     [[MSIDTelemetry sharedInstance] flush:requestId];
     
@@ -535,8 +536,8 @@
 
 - (void)testFlush_whenThereAre2EventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldFilterEvents
 {
-    [[MSALTelemetry sharedInstance] removeAllObservers];
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:YES];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:YES];
     // HTTP event
     [[MSIDTelemetry sharedInstance] startEvent:self.requestId eventName:@"httpEvent"];
     MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:self.context];
@@ -566,8 +567,8 @@
 
 - (void)testFlush_whenThereIs1NonErrorEventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldNotSendEvents
 {
-    [[MSALTelemetry sharedInstance] removeAllObservers];
-    [[MSALTelemetry sharedInstance] addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:YES];
+    [MSALGlobalConfig.telemetryConfig removeAllObservers];
+    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:YES];
     // HTTP event
     [[MSIDTelemetry sharedInstance] startEvent:self.requestId eventName:@"httpEvent"];
     MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:self.context];

@@ -43,7 +43,7 @@
     self.testEnvironment = self.class.confProvider.wwEnvironment;
     
     // Load multiple accounts conf
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderWW;
     configurationRequest.needsMultipleUsers = YES;
     // TODO: no other app returns multiple accounts
@@ -73,7 +73,7 @@
 
     // 3. Try silent and expect failure
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
 }
 
 - (void)testRemoveAADAccount_whenMultipleAccountsInCache_andConvergedApp
@@ -119,7 +119,7 @@
 
     // 4. Try silent and expect failure for the first account
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
     [self closeResultView];
 
     // 5. Expect silent to still work for the second account

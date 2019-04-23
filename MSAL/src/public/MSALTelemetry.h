@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import "MSALTelemetryConfig.h"
 #import <Foundation/Foundation.h>
 
 @protocol MSALTelemetryEventsObserving;
@@ -42,12 +43,12 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Get a singleton instance of MSALTelemetry.
  */
-+ (MSALTelemetry *)sharedInstance;
++ (nonnull MSALTelemetry *)sharedInstance DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
 
 /*!
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
-@property (nonatomic) BOOL piiEnabled;
+@property (nonatomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
 
 /*!
  Registers the observer object for receiving telemetry events.
@@ -61,19 +62,21 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
     setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
-      aggregationRequired:(BOOL)aggregationRequired;
+      aggregationRequired:(BOOL)aggregationRequired DEPRECATED_MSG_ATTRIBUTE("use [MSALGlobalConfig.telemetryConfig addEventsObserver:setTelemetryOnFailure:aggregationRequired:] instead");
+
 
 /*!
  Remove a telemetry observer added for receiving telemetry events.
  
  @param observer An instance of MSALTelemetryEventsObserving implementation added to the observers before.
  */
-- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer;
+- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer DEPRECATED_MSG_ATTRIBUTE("use [MSALGlobalConfig.telemetryConfig removeObserver:] instead");
 
 /*!
  Remove all telemetry observers added to the observers collection.
  */
-- (void)removeAllObservers;
+- (void)removeAllObservers DEPRECATED_MSG_ATTRIBUTE("use [MSALGlobalConfig.telemetryConfig removeAllObservers] instead");
+
 
 @end
 
