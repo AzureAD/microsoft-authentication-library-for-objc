@@ -103,6 +103,7 @@
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
+                                                       validateFormat:NO
                                                             rawTenant:tenantId
                                                               context:nil
                                                                 error:&authorityError];
