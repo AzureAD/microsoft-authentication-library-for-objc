@@ -67,6 +67,7 @@ static NSString * const defaultScope = @"User.Read";
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
     self.selectedScopes = @[defaultScope];
+    self.validateAuthority.selectedSegment = self.settings.validateAuthority ? 0 : 1;
 }
 
 - (void)populateProfiles
@@ -185,10 +186,22 @@ static NSString * const defaultScope = @"User.Read";
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    if (self.validateAuthority.selectedSegment == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    
+    if (!application)
+    {
+        NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
+        [self.resultView setString:resultText];
+        return;
+    }
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
@@ -238,10 +251,15 @@ static NSString * const defaultScope = @"User.Read";
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    if (self.validateAuthority.selectedSegment == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)
     {
@@ -249,8 +267,6 @@ static NSString * const defaultScope = @"User.Read";
         [self.resultView setString:resultText];
         return;
     }
-    
-//    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
     
     __block BOOL fBlockHit = NO;
     
@@ -317,18 +333,22 @@ static NSString * const defaultScope = @"User.Read";
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    if (self.validateAuthority.selectedSegment == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [self.resultView setString:resultText];
         return;
     }
-    
-//    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
     
     __block BOOL fBlockHit = NO;
     

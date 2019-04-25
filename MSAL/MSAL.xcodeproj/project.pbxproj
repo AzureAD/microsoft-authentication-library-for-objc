@@ -115,8 +115,7 @@
 		1E394C442123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E394C432123812700CC1616 /* MSALTestAppB2CAuthorityViewController.m */; };
 		1E4522AD22581B8A00D27CA7 /* MSALScopesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E4522AC22581B8A00D27CA7 /* MSALScopesViewController.m */; };
 		1E4FD39E2121F2910069BCF6 /* MSALTestAppSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D61A64A81E5AABC50086D120 /* MSALTestAppSettingsViewController.m */; };
-		1E614BDE22558D8300EBF62F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BDD22558D8300EBF62F /* AppDelegate.m */; };
-		1E614BE122558D8300EBF62F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BE022558D8300EBF62F /* ViewController.m */; };
+		1E614BDE22558D8300EBF62F /* MSALAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BDD22558D8300EBF62F /* MSALAppDelegate.m */; };
 		1E614BE322558D8300EBF62F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E614BE222558D8300EBF62F /* Assets.xcassets */; };
 		1E614BE622558D8300EBF62F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E614BE422558D8300EBF62F /* Main.storyboard */; };
 		1E614BE922558D8300EBF62F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E614BE822558D8300EBF62F /* main.m */; };
@@ -849,10 +848,8 @@
 		1E4522AB22581B8A00D27CA7 /* MSALScopesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALScopesViewController.h; sourceTree = "<group>"; };
 		1E4522AC22581B8A00D27CA7 /* MSALScopesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALScopesViewController.m; sourceTree = "<group>"; };
 		1E614BDA22558D8300EBF62F /* MSAL Test App (Mac).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MSAL Test App (Mac).app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E614BDC22558D8300EBF62F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		1E614BDD22558D8300EBF62F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		1E614BDF22558D8300EBF62F /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		1E614BE022558D8300EBF62F /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		1E614BDC22558D8300EBF62F /* MSALAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAppDelegate.h; sourceTree = "<group>"; };
+		1E614BDD22558D8300EBF62F /* MSALAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAppDelegate.m; sourceTree = "<group>"; };
 		1E614BE222558D8300EBF62F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1E614BE522558D8300EBF62F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1E614BE722558D8300EBF62F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1572,10 +1569,8 @@
 		D61A648B1E5AA7C60086D120 /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				1E614BDC22558D8300EBF62F /* AppDelegate.h */,
-				1E614BDD22558D8300EBF62F /* AppDelegate.m */,
-				1E614BDF22558D8300EBF62F /* ViewController.h */,
-				1E614BE022558D8300EBF62F /* ViewController.m */,
+				1E614BDC22558D8300EBF62F /* MSALAppDelegate.h */,
+				1E614BDD22558D8300EBF62F /* MSALAppDelegate.m */,
 				1E614BE222558D8300EBF62F /* Assets.xcassets */,
 				1E614BE422558D8300EBF62F /* Main.storyboard */,
 				1E614BE722558D8300EBF62F /* Info.plist */,
@@ -2230,7 +2225,7 @@
 /* Begin PBXNativeTarget section */
 		04A6B57A226921890035C7C2 /* MSAL (iOS Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E5DA6712272673500B7B816 /* Build configuration list */;
+			buildConfigurationList = 1E5DA69A2272722400B7B816 /* Build configuration list */;
 			buildPhases = (
 				04A6B5BA226937330035C7C2 /* Headers */,
 				04A6B577226921890035C7C2 /* Sources */,
@@ -2248,7 +2243,7 @@
 		};
 		04A6B59B2269286F0035C7C2 /* MSAL (Mac Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E5DA6722272673500B7B816 /* Build configuration list */;
+			buildConfigurationList = 1E5DA69B2272722400B7B816 /* Build configuration list */;
 			buildPhases = (
 				04A6B5982269286F0035C7C2 /* Headers */,
 				04A6B5992269286F0035C7C2 /* Sources */,
@@ -2872,11 +2867,10 @@
 			files = (
 				1E8B0031225E94A3006BB8BD /* MSALCacheViewController.m in Sources */,
 				1E1A2E042256D12F001009ED /* MSALTestAppSettings.m in Sources */,
-				1E614BE122558D8300EBF62F /* ViewController.m in Sources */,
 				1EC12C112255DB9200339572 /* MSALAcquireTokenViewController.m in Sources */,
 				1E4522AD22581B8A00D27CA7 /* MSALScopesViewController.m in Sources */,
 				1E614BE922558D8300EBF62F /* main.m in Sources */,
-				1E614BDE22558D8300EBF62F /* AppDelegate.m in Sources */,
+				1E614BDE22558D8300EBF62F /* MSALAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3246,7 +3240,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		1E5DA6672272673400B7B816 /* Debug */ = {
+		1E5DA690227271BF00B7B816 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -3256,7 +3250,7 @@
 			};
 			name = Debug;
 		};
-		1E5DA6682272673400B7B816 /* Release */ = {
+		1E5DA691227271BF00B7B816 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -3265,7 +3259,7 @@
 			};
 			name = Release;
 		};
-		1E5DA6692272673400B7B816 /* Debug */ = {
+		1E5DA692227271BF00B7B816 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
@@ -3275,7 +3269,7 @@
 			};
 			name = Debug;
 		};
-		1E5DA66A2272673400B7B816 /* Release */ = {
+		1E5DA693227271BF00B7B816 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
@@ -3877,6 +3871,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1E5DA69A2272722400B7B816 /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E5DA690227271BF00B7B816 /* Debug */,
+				1E5DA691227271BF00B7B816 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E5DA69B2272722400B7B816 /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E5DA692227271BF00B7B816 /* Debug */,
+				1E5DA693227271BF00B7B816 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		1E614BEB22558D8300EBF62F /* Build configuration list for PBXNativeTarget "MSAL Test App (Mac)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -3886,24 +3898,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-        04A6B581226921890035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Library)" */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                04A6B582226921890035C7C2 /* Debug */,
-                04A6B583226921890035C7C2 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
-        04A6B5A22269286F0035C7C2 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                04A6B5A32269286F0035C7C2 /* Debug */,
-                04A6B5A42269286F0035C7C2 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
 		962E37B91E720C5D00DE71FE /* Build configuration list for PBXNativeTarget "MSAL Test Automation (iOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

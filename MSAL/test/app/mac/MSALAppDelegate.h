@@ -27,7 +27,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface ViewController : NSViewController
+@interface MSALAppDelegate : NSObject <NSApplicationDelegate>
 
 @end
 

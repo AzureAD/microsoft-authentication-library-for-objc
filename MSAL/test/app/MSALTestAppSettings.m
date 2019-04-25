@@ -111,9 +111,7 @@ static NSDictionary *s_currentProfile = nil;
     [s_profiles addEntriesFromDictionary:s_additionalProfiles];
     
     NSMutableArray *titles = [[NSMutableArray alloc] init];
-    [s_profiles enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        [titles addObject:(NSString *)key];
-    }];
+    [titles addObjectsFromArray:[s_profiles allKeys]];
     
     s_profileTitles = titles;
 }
