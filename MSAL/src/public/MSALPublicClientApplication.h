@@ -53,7 +53,7 @@
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
-@property BOOL validateAuthority;
+@property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("MSALPublicClientApplicationConfig.knownAuthorities instead");
 
 /*! The authority the application will use to obtain tokens */
 @property (readonly, nonnull) MSALAuthority *authority;
@@ -84,6 +84,10 @@
 
 /*!
  Initialize a MSALPublicClientApplication with a given configuration
+ 
+ Note, it is important to configure your MSALPublicClientApplicationConfig object before calling MSALPublicClientApplication's initializer.
+ MSALPublicClientApplication makes a copy of the configuration object you provide on initialization.
+ Once configured, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
  
  @param  config       Configuration for PublicClientApplication
  @param  error        The error that occurred creating the application object, if any (optional)

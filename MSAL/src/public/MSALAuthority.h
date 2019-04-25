@@ -29,7 +29,7 @@
 
 @protocol MSIDRequestContext;
 
-@interface MSALAuthority : NSObject
+@interface MSALAuthority : NSObject <NSCopying>
 
 NS_ASSUME_NONNULL_BEGIN
 

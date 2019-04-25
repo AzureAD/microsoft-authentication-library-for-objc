@@ -66,7 +66,7 @@ static NSSet *s_recoverableErrorCode;
                                    // Interactive flow
                                    @(MSIDErrorAuthorizationFailed) : @(MSALInternalErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
-                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALInternalErrorSessionCanceled),
+                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorUserCanceled),
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
                                    @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALInternalErrorInteractiveSessionAlreadyRunning),
                                    @(MSIDErrorNoMainViewController) : @(MSALInternalErrorNoViewController),
@@ -158,7 +158,7 @@ static NSSet *s_recoverableErrorCode;
     if (mappedDomain == MSALErrorDomain)
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
-        if (!mappedCode)
+        if (mappedCode == nil)
         {
             MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
@@ -204,7 +204,7 @@ static NSSet *s_recoverableErrorCode;
     }
 
     return [NSError errorWithDomain:mappedDomain ? : domain
-                               code:mappedCode ? mappedCode.integerValue : code
+                               code:(mappedCode != nil) ? mappedCode.integerValue : code
                            userInfo:msalUserInfo];
 }
 

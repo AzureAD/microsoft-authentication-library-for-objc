@@ -29,7 +29,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALExtraQueryParameters : NSObject
+@interface MSALExtraQueryParameters : NSObject <NSCopying>
 
 @property NSMutableDictionary<NSString *, NSString *> *extraURLQueryParameters;
 @property NSMutableDictionary<NSString *, NSString *> *extraTokenURLParameters;

@@ -40,7 +40,7 @@
 {
     [super setUp];
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderBlackForest;
     configurationRequest.needsMultipleUsers = NO;
     [self loadTestConfiguration:configurationRequest];

@@ -36,7 +36,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALPublicClientApplicationConfig : NSObject
+@interface MSALPublicClientApplicationConfig : NSObject <NSCopying>
 
 /*! The client ID of the application, this should come from the app developer portal. */
 @property NSString *clientId;
@@ -53,15 +53,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property NSArray<MSALAuthority *> *knownAuthorities;
 
-/*!
- When set to YES (default), MSAL will compare the application's authority against well-known URLs
- templates representing well-formed authorities. It is useful when the authority is obtained at
- run time to prevent MSAL from displaying authentication prompts from malicious pages.
- 
- Authorities that are in knownAuthorities will not be validated regardless of this setting.
- */
-@property BOOL validateAuthority;
-
 /*! Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
@@ -75,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property double tokenExpirationBuffer;
 
 /*! slice configuration for testing. */
-@property(nullable) MSALSliceConfig *sliceConfig;
+@property (nullable) MSALSliceConfig *sliceConfig;
 
 /*! Cache configurations, refer to MSALCacheConfig.h for more detail */
 @property (readonly) MSALCacheConfig *cacheConfig;

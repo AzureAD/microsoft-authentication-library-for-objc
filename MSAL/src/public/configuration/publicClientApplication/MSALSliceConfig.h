@@ -29,7 +29,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALSliceConfig : NSObject
+@interface MSALSliceConfig : NSObject <NSCopying>
 
 @property NSString *slice;
 @property NSString *dc;

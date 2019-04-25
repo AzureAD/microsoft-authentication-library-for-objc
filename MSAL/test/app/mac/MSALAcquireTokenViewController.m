@@ -250,7 +250,7 @@ static NSString * const defaultScope = @"User.Read";
         return;
     }
     
-    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
+//    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
     
     __block BOOL fBlockHit = NO;
     
@@ -328,7 +328,7 @@ static NSString * const defaultScope = @"User.Read";
         return;
     }
     
-    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
+//    application.validateAuthority = [self.validateAuthority selectedSegment] == 0;
     
     __block BOOL fBlockHit = NO;
     

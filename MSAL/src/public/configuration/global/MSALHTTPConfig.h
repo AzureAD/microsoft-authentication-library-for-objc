@@ -42,17 +42,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSTimeInterval retryInterval;
 
 /*!
- The maximum amount of time that a resource request should be allowed to take.
- visit https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration/1408259-timeoutintervalforrequest?language=objc
- for more detail.
- */
-@property NSTimeInterval timeoutIntervalForResource; // In miliseconds
-/*!
  The timeout interval to use when waiting for additional data.
  visit https://developer.apple.com/documentation/foundation/nsurlsessionconfiguration/1408153-timeoutintervalforresource?language=objc
  for more detail.
  */
-@property NSTimeInterval timeoutIntervalForRequest;  // In miliseconds
+@property NSTimeInterval timeoutIntervalForRequest;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

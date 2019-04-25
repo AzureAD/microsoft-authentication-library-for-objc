@@ -43,4 +43,13 @@
     return self;
 }
 
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSURL *url = [_url copyWithZone:zone];
+    MSALRedirectUri *redirectUri = [[MSALRedirectUri alloc] initWithRedirectUri:url brokerCapable:_brokerCapable];
+    return redirectUri;
+}
+
 @end
