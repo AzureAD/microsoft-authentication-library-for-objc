@@ -36,7 +36,6 @@
 @interface MSALResult (Internal)
 
 + (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                           tokenCache:(MSIDDefaultTokenCacheAccessor *)cache
                                 error:(NSError **)error;
 
 + (MSALResult *)resultWithAccessToken:(NSString *)accessToken

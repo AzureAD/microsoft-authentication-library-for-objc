@@ -88,8 +88,8 @@
         userInfo.homeObjectId = account.homeAccountId.objectId;
         userInfo.homeTenantId = account.homeAccountId.tenantId;
         userInfo.environment = account.environment;
-        userInfo.objectId = account.allTenantProfiles[0].userObjectId;
-        userInfo.tenantId = account.allTenantProfiles[0].tenantId;
+        userInfo.objectId = account.tenantProfiles[0].userObjectId;
+        userInfo.tenantId = account.tenantProfiles[0].tenantId;
         [items addObject:userInfo];
     }
 

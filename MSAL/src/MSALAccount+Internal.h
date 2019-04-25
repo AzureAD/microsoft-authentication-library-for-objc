@@ -39,7 +39,7 @@
 @property (nonatomic) MSALAccountId *homeAccountId;
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *tenantProfiles;
+@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
 
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
@@ -59,19 +59,19 @@
  @param  environment         Host part of the authority string
  @param  tenantProfiles      All tenant profiles associated to this account
  */
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-        tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+- (instancetype)initWithUsername:(NSString *)username
+                            name:(NSString *)name
+                   homeAccountId:(NSString *)homeAccountId
+                  localAccountId:(NSString *)localAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
  @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 

@@ -44,12 +44,12 @@
 
 @implementation MSALAccount
 
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-        tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+- (instancetype)initWithUsername:(NSString *)username
+                            name:(NSString *)name
+                   homeAccountId:(NSString *)homeAccountId
+                  localAccountId:(NSString *)localAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
     self = [super init];
 
@@ -78,15 +78,15 @@
         
         if (tenantProfiles.count > 0)
         {
-            _tenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+            self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
         }
     }
 
     return self;
 }
 
-- (id)initWithMSIDAccount:(MSIDAccount *)account
-      createTenantProfile:(BOOL)createTenantProfile
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account
+                createTenantProfile:(BOOL)createTenantProfile
 {
     NSError *error;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
@@ -118,13 +118,13 @@
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(NSZone *)zone
+- (instancetype)copyWithZone:(NSZone *)zone
 {
     MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
     account.username = [self.username copyWithZone:zone];
     account.name = [self.name copyWithZone:zone];
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.tenantProfiles = [[NSMutableArray alloc] initWithArray:self.tenantProfiles copyItems:YES];
+    account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
     account.environment = [self.environment copyWithZone:zone];
     return account;
 }
@@ -205,9 +205,9 @@
 
 #pragma mark - Tenant profiles
 
-- (NSArray<MSALTenantProfile *> *)allTenantProfiles
+- (NSArray<MSALTenantProfile *> *)tenantProfiles
 {
-    return self.tenantProfiles;
+    return self.mTenantProfiles;
 }
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
@@ -216,11 +216,11 @@
     
     if (self.tenantProfiles)
     {
-        [self.tenantProfiles addObjectsFromArray:tenantProfiles];
+        [self.mTenantProfiles addObjectsFromArray:tenantProfiles];
     }
     else
     {
-        self.tenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+        self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
     }
 }
 

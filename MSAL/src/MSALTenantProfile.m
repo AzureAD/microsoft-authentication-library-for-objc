@@ -54,7 +54,7 @@
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(NSZone *)zone
+- (instancetype)copyWithZone:(NSZone *)zone
 {
     MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
     tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];

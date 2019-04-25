@@ -841,7 +841,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         }
 
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result tokenCache:_tokenCache error:&resultError];
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
 }
@@ -964,7 +964,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         }
 
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result tokenCache:_tokenCache error:&resultError];
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
 }

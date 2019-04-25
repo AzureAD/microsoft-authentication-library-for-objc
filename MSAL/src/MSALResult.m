@@ -79,7 +79,6 @@
 }
 
 + (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                           tokenCache:(MSIDDefaultTokenCacheAccessor *)cache
                                 error:(NSError **)error
 {
     if (!tokenResult)
@@ -100,27 +99,7 @@
     }
     
     NSString *tenantId = claims.realm;
-
-    MSALAccount *account;
-    if (cache)
-    {
-        MSALAccountsProvider *accountProvider = [[MSALAccountsProvider alloc] initWithTokenCache:cache clientId:tokenResult.accessToken.clientId];
-        
-        if (accountProvider)
-        {
-            NSError *localError;
-            account = [accountProvider accountForHomeAccountId:resultAccount.accountIdentifier.homeAccountId error:&localError];
-            
-            if (localError)
-            {
-                MSID_LOG_WARN(nil, @"Failed to retrieve account from account provider!");
-            }
-        }
-    }
-    else
-    {
-        account = [[MSALAccount alloc] initWithMSIDAccount:resultAccount createTenantProfile:NO];
-    }
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:resultAccount createTenantProfile:NO];
 
     NSError *authorityError = nil;
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url

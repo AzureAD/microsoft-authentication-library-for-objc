@@ -176,7 +176,7 @@ static NSDictionary *s_userInfoKeyMapping;
     if (userInfo[MSIDInvalidTokenResultKey])
     {
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] tokenCache:nil error:&resultError];
+        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
 
         if (!msalResult)
         {

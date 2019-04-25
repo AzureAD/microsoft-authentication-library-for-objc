@@ -36,11 +36,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readwrite) BOOL isHomeTenant;
 @property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 
-- (id)initWithUserObjectId:(NSString *)userObjectId
-                  tenantId:(NSString *)tenantId
-                 authority:(MSALAuthority *)authority
-              isHomeTenant:(BOOL)isHomeTenant
-                    claims:(nullable NSDictionary *)claims;
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(nullable NSDictionary *)claims;
 
 @end
 

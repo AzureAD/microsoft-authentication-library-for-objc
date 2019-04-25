@@ -51,7 +51,7 @@
 /*!
  Array of all tenants which are logged in for this account.
  */
-@property (readonly, nullable) NSArray<MSALTenantProfile *> *allTenantProfiles;
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
 
