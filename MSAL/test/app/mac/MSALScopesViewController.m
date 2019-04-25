@@ -44,11 +44,7 @@
     self.scopesView.dataSource = self;
     [self.scopesView setAllowsMultipleSelection: YES];
     self.scopesList = [[NSMutableArray alloc] init];
-    
-    [[MSALTestAppSettings availableScopes] enumerateObjectsUsingBlock:^(NSString *obj, NSUInteger idex, BOOL *stop){
-        [self.scopesList addObject:obj];
-    }];
-    
+    [self.scopesList addObjectsFromArray:[MSALTestAppSettings availableScopes]];
     [self.scopesView reloadData];
 }
 

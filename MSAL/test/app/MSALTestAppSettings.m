@@ -59,7 +59,7 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 static NSArray<NSString *> *s_authorityTypes = nil;
 
-static NSDictionary* s_additionalProfiles = nil;
+static NSDictionary *s_additionalProfiles = nil;
 static NSMutableDictionary *s_profiles = nil;
 static NSArray* s_profileTitles = nil;
 static NSUInteger s_currentProfileIdx = 0;
@@ -108,9 +108,7 @@ static NSDictionary *s_currentProfile = nil;
     
     s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, nil];
     s_additionalProfiles = _additionalProfiles();
-    [s_additionalProfiles enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
-        [s_profiles setObject:obj forKey:key];
-    }];
+    [s_profiles addEntriesFromDictionary:s_additionalProfiles];
     
     NSMutableArray *titles = [[NSMutableArray alloc] init];
     [s_profiles enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
