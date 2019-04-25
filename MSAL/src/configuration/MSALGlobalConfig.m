@@ -34,7 +34,7 @@
 
 #if TARGET_OS_IPHONE
 static MSALWebviewType s_webviewType = MSALWebviewTypeDefault;
-static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
+static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityNone;
 #else
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
