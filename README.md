@@ -274,8 +274,6 @@ MSAL Objective-C is designed to support smooth migration from ADAL Objective-C l
 Our [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki) is intended to document common patterns, error handling and debugging, functionality (e.g. logging, telemetry), and active bugs.
 You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki)
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
-
 
 ## Community Help and Support
 
