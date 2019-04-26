@@ -25,41 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSIDConstants.h"
+#import "MSALHTTPConfig+Internal.h"
+#import "MSIDURLSessionManager.h"
+#import "MSIDHttpRequest.h"
 
-NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior)
+@implementation MSALHTTPConfig
+
++ (instancetype)sharedInstance
 {
-    switch (behavior)
-    {
-            STRING_CASE(MSALSelectAccount);
-            STRING_CASE(MSALForceLogin);
-            STRING_CASE(MSALForceConsent);
-            STRING_CASE(MSALPromptIfNecessary);
-    }
+    static MSALHTTPConfig *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
     
-    @throw @"Unrecognized MSALUIBehavior";
+    return sharedInstance;
 }
 
-MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior)
+
+- (NSInteger)retryCount { return MSIDHttpRequest.retryCountSetting; }
+- (void)setRetryCount:(NSInteger)retryCount { MSIDHttpRequest.retryCountSetting = retryCount; }
+
+- (NSTimeInterval)retryInterval { return MSIDHttpRequest.retryIntervalSetting; }
+- (void)setRetryInterval:(NSTimeInterval)retryInterval { MSIDHttpRequest.retryIntervalSetting = retryInterval; }
+
+- (NSTimeInterval)timeoutIntervalForRequest {
+    return MSIDHttpRequest.requestTimeoutInterval;
+}
+- (void)setTimeoutIntervalForRequest:(NSTimeInterval)timeoutIntervalForRequest
 {
-    switch (behavior)
-    {
-        case MSALForceLogin : return MSIDPromptTypeLogin;
-        case MSALForceConsent : return MSIDPromptTypeConsent;
-        case MSALSelectAccount : return MSIDPromptTypeSelectAccount;
-        case MSALPromptIfNecessary : return MSIDPromptTypePromptIfNecessary;
-        default : return MSIDPromptTypeDefault;
-    }
+    MSIDHttpRequest.requestTimeoutInterval = timeoutIntervalForRequest;
 }
 
-NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior)
-{
-    switch (behavior)
-    {
-        case MSALForceLogin : return @"login";
-        case MSALForceConsent : return @"consent";
-        case MSALSelectAccount : return @"select_account";
-        case MSALPromptIfNecessary : return @"";
-    }
-}
+@end

@@ -95,8 +95,8 @@
 
     [self assertAuthUIAppearsUsingEmbeddedWebView:request.usesEmbeddedWebView];
     [self closeAuthUIUsingWebViewType:request.webViewType passedInWebView:request.usePassedWebView];
-
-    [self assertErrorCode:request.usePassedWebView ? @"MSALErrorSessionCanceled" : @"MSALErrorUserCanceled"];
+    
+    [self assertErrorCode:MSALErrorUserCanceled];
     [self closeResultView];
 }
 
@@ -136,9 +136,9 @@
 
     NSPredicate *accountPredicate = [NSPredicate predicateWithFormat:@"label CONTAINS[c] %@", accountTitle];
 
-    XCUIElement *element = [[self.testApp.staticTexts containingPredicate:accountPredicate] elementBoundByIndex:0];
+    XCUIElement *element = [[self.testApp.webViews.otherElements matchingPredicate:accountPredicate] elementBoundByIndex:0];
     XCTAssertNotNil(element);
-
+    
     [element msidTap];
 }
 

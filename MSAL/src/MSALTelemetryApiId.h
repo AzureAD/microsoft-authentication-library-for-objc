@@ -27,13 +27,15 @@ typedef NS_ENUM(NSInteger, MSALTelemetryApiId)
 {
     MSALTelemetryApiIdAcquire = 160,
     MSALTelemetryApiIdAcquireWithHint = 161,
-    MSALTelemetryApiIdAcquireWithHintBehaviorAndParameters = 162,
-    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndCorrelationId = 163,
-    MSALTelemetryApiIdAcquireWithUserBehaviorAndParameters = 164,
-    MSALTelemetryApiIdAcquireWithUserBehaviorParametersAuthorityAndCorrelationId = 165,
-    MSALTelemetryApiIdAcquireWithHintBehaviorParametersAuthorityAndClaimsAndCorrelationId = 166,
+    MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters = 162,
+    MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId = 163,
+    MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters = 164,
+    MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId = 165,
+    MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndClaimsAndCorrelationId = 166,
+    MSALTelemetryApiIdAcquireWithTokenParameters = 167,
     MSALTelemetryApiIdAcquireSilentWithUser = 30,
     MSALTelemetryApiIdAcquireSilentWithUserAndAuthority = 31,
-    MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId = 32
+    MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId = 32,
+    MSALTelemetryApiIdAcquireSilentWithTokenParameters = 33
     
 };

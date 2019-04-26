@@ -35,6 +35,8 @@
 #import "MSIDAutomationActionConstants.h"
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationPassedInWebViewController.h"
+#import "MSALInteractiveTokenParameters.h"
+#import "MSALClaimsRequest.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -83,52 +85,36 @@
     NSOrderedSet *scopes = [NSOrderedSet msidOrderedSetFromString:testRequest.requestScopes];
     NSOrderedSet *extraScopes = [NSOrderedSet msidOrderedSetFromString:testRequest.extraScopes];
     NSUUID *correlationId = [NSUUID new];
-    NSString *claims = testRequest.claims;
+    
+    MSALClaimsRequest *claimsRequest = nil;
+    
+    if (testRequest.claims.length)
+    {
+        NSError *claimsError;
+        claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:testRequest.claims error:&claimsError];
+        if (claimsError)
+        {
+            MSIDAutomationTestResult *result = [self testResultWithMSALError:claimsError];
+            completionBlock(result);
+            return;
+        }
+    }
+    
     NSDictionary *extraQueryParameters = testRequest.extraQueryParameters;
 
-    MSALUIBehavior uiBehavior = MSALUIBehaviorDefault;
+    MSALPromptType promptType = MSALPromptTypeDefault;
 
     if ([testRequest.promptBehavior isEqualToString:@"force"])
     {
-        uiBehavior = MSALForceLogin;
+        promptType = MSALPromptTypeLogin;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"consent"])
     {
-        uiBehavior = MSALForceConsent;
+        promptType = MSALPromptTypeConsent;
     }
     else if ([testRequest.promptBehavior isEqualToString:@"prompt_if_necessary"])
     {
-        uiBehavior = MSALPromptIfNecessary;
-    }
-
-    MSIDWebviewType webviewSelection = testRequest.webViewType;
-
-    switch (webviewSelection) {
-        case MSIDWebviewTypeWKWebView:
-            application.webviewType = MSALWebviewTypeWKWebView;
-            break;
-
-        case MSIDWebviewTypeDefault:
-            application.webviewType = MSALWebviewTypeDefault;
-            break;
-
-        case MSIDWebviewTypeSafariViewController:
-            application.webviewType = MSALWebviewTypeSafariViewController;
-            break;
-
-        case MSIDWebviewTypeAuthenticationSession:
-            application.webviewType = MSALWebviewTypeAuthenticationSession;
-            break;
-
-        default:
-            break;
-    }
-
-    if (testRequest.usePassedWebView)
-    {
-        application.webviewType = MSALWebviewTypeWKWebView;
-        application.customWebview = containerController.passedinWebView;
-        [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
+        promptType = MSALPromptTypePromptIfNecessary;
     }
 
     MSALAuthority *acquireTokenAuthority = nil;
@@ -138,38 +124,52 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:testRequest.acquireTokenAuthority];
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
-
-    if (account)
-    {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                   account:account
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                    claims:claims
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error)
-         {
-             MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-             completionBlock(testResult);
-         }];
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
+    parameters.extraScopesToConsent = extraScopes.array;
+    parameters.account = account;
+    parameters.loginHint = testRequest.loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claimsRequest = claimsRequest;
+    parameters.authority = acquireTokenAuthority;
+    parameters.correlationId = correlationId;
+    
+    MSIDWebviewType webviewSelection = testRequest.webViewType;
+    
+    switch (webviewSelection) {
+        case MSIDWebviewTypeWKWebView:
+            parameters.webviewType = MSALWebviewTypeWKWebView;
+            break;
+            
+        case MSIDWebviewTypeDefault:
+            parameters.webviewType = MSALWebviewTypeDefault;
+            break;
+            
+        case MSIDWebviewTypeSafariViewController:
+            parameters.webviewType = MSALWebviewTypeSafariViewController;
+            break;
+            
+        case MSIDWebviewTypeAuthenticationSession:
+            parameters.webviewType = MSALWebviewTypeAuthenticationSession;
+            break;
+            
+        default:
+            break;
     }
-    else
+    
+    if (testRequest.usePassedWebView)
     {
-        [application acquireTokenForScopes:scopes.array
-                      extraScopesToConsent:extraScopes.array
-                                 loginHint:testRequest.loginHint
-                                uiBehavior:uiBehavior
-                      extraQueryParameters:extraQueryParameters
-                                 authority:acquireTokenAuthority
-                             correlationId:correlationId
-                           completionBlock:^(MSALResult *result, NSError *error) {
-
-                               MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-                               completionBlock(testResult);
-                           }];
+        parameters.webviewType = MSALWebviewTypeWKWebView;
+        parameters.customWebview = containerController.passedinWebView;
+        [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
+        
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+     {
+         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+         completionBlock(testResult);
+     }];
 }
 
 @end

@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestAppLogViewController.h"
-#import "MSALLogger.h"
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALLoggerConfig.h>
+
 
 @interface MSALTestAppLogViewController ()
 
@@ -59,8 +61,8 @@ static NSAttributedString* s_attrNewLine = nil;
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     
-    [[MSALLogger sharedLogger] setPiiLoggingEnabled:YES];
-    [[MSALLogger sharedLogger] setCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
+    MSALGlobalConfig.loggerConfig.piiEnabled = YES;
+    [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII)
     {
         (void)level;
         if (!containsPII)
@@ -89,7 +91,7 @@ static NSAttributedString* s_attrNewLine = nil;
         });
     }];
     
-    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
+    MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
     
     return self;
 }

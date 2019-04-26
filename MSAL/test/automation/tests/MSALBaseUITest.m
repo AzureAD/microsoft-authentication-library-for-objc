@@ -105,11 +105,16 @@ static MSIDTestConfigurationProvider *s_confProvider;
     XCTAssertTrue(result);
 }
 
-- (void)assertErrorCode:(NSString *)expectedErrorCode
+- (void)assertErrorCode:(NSInteger)expectedErrorCode
 {
     MSIDAutomationErrorResult *result = [self automationErrorResult];
-    NSString *actualErrorCode = result.errorName;
-    XCTAssertEqualObjects(expectedErrorCode, actualErrorCode);
+    XCTAssertEqual(expectedErrorCode, result.errorCode);
+}
+
+- (void)assertInternalErrorCode:(NSInteger)internalErrorCode
+{
+    MSIDAutomationErrorResult *result = [self automationErrorResult];
+    XCTAssertEqual(internalErrorCode, [result.errorUserInfo[MSALInternalErrorCodeKey] integerValue]);
 }
 
 - (void)assertErrorDescription:(NSString *)errorDescription

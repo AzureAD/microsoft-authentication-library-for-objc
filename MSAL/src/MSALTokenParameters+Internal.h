@@ -25,13 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALUIBehavior_Internal_h
-#define MSALUIBehavior_Internal_h
+#import "MSALTokenParameters.h"
 
-#import "MSIDConstants.h"
 
-extern NSString *MSALStringForMSALUIBehavior(MSALUIBehavior behavior);
-extern MSIDPromptType MSIDPromptTypeForBehavior(MSALUIBehavior behavior);
-extern NSString *MSALParameterStringForBehavior(MSALUIBehavior behavior);
+NS_ASSUME_NONNULL_BEGIN
 
-#endif /* MSALUIBehavior_Internal_h */
+@interface MSALTokenParameters ()
+
+/*!
+ Initialize a MSALTokenParameters with scopes.
+ 
+ @param scopes  Permissions you want included in the access token received
+ in the result in the completionBlock. Not all scopes are
+ gauranteed to be included in the access token returned.
+ */
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+
+@end
+
+NS_ASSUME_NONNULL_END
