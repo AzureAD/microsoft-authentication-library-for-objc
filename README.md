@@ -98,7 +98,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 ## Configuring MSAL
 
 ### Adding MSAL to your project
-1. Register your app in the [Azure portal](https://aka.ms/AppRegistrationsPreview)
+1. Register your app in the [Azure portal](https://aka.ms/MobileAppReg)
 2. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
 <key>CFBundleURLTypes</key>
@@ -120,8 +120,6 @@ You can also use Git Submodule or check out the latest release and use as framew
 </array>
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
-
-Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
 
 4. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
 
@@ -207,6 +205,7 @@ Objective-C
         }
     }];
 ```
+> Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
 
 ### Silently Acquiring an Updated Token
 Swift
