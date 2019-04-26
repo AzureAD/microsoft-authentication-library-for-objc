@@ -35,11 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  The minimum log level for messages to be passed onto the log callback.
  */
-@property (nonatomic) MSALLogLevel logLevel;
+@property (atomic) MSALLogLevel logLevel;
 /*!
  MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
-@property (nonatomic) BOOL piiEnabled;
+@property (atomic) BOOL piiEnabled;
 
 /*!
  Sets the callback block to send MSAL log messages to.
