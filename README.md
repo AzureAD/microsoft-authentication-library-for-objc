@@ -1,8 +1,8 @@
 Microsoft Authentication Library Preview for iOS
 =====================================
 
-| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios)| [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [Support](README.md#community-help-and-support)
-| --- | --- | --- | --- |
+| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [Support](README.md#community-help-and-support) 
+| --- | --- | --- |
 
 The MSAL library preview gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
@@ -99,13 +99,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 ### Adding MSAL to your project
 1. Register your app in the [Azure portal](https://aka.ms/AppRegistrationsPreview)
-2. Clone the repository
-```
-    git clone https://github.com/AzureAD/microsoft-authentication-library-for-objc.git
-```
-3. Add `MSAL/MSAL.xcodeproj` to your Project or Workspace
-4. Add `MSAL.framework` to your Application's "Embedded Binaries" and "Linked Frameworks and Library Section"
-5. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+2. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -117,7 +111,7 @@ You can also use Git Submodule or check out the latest release and use as framew
     </dict>
 </array>
 ```
-6. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+3. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 ```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
@@ -129,11 +123,11 @@ See more info about configuring redirect uri for MSAL in our [Wiki](https://gith
 
 Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
 
-7. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
+4. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
 
 ![](Images/keychain_example.png)
 
-8. To handle a callback, add the following to `appDelegate`:
+5. To handle a callback, add the following to `appDelegate`:
 
 Swift
 ```swift
