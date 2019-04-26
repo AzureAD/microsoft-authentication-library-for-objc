@@ -77,7 +77,7 @@ You can use [CocoaPods](http://cocoapods.org/) to install `MSAL` by adding it to
 ```
 use_frameworks!
  
-target 'MSALiOS' do
+target 'your-target-here' do
 	pod 'MSAL'
 end
 ```
@@ -105,7 +105,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 ```
 3. Add `MSAL/MSAL.xcodeproj` to your Project or Workspace
 4. Add `MSAL.framework` to your Application's "Embedded Binaries" and "Linked Frameworks and Library Section"
-5. Add your application's redirect URI scheme to your `info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+5. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -122,7 +122,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 <key>LSApplicationQueriesSchemes</key>
 <array>
     <string>msauth</string>
-	<string>msauthv2</string>
+    <string>msauthv2</string>
 </array>
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
