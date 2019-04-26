@@ -74,7 +74,8 @@
 #import "MSIDIntuneEnrollmentIdsCache.h"
 #import "MSALPublicClientStatusNotifications.h"
 #import "MSIDNotifications.h"
-#import "MSALInteractiveTokenParameters.h"
+#import "MSALTokenParameters+Internal.h"
+#import "MSALInteractiveTokenParameters+Internal.h"
 #import "MSALSilentTokenParameters.h"
 #import "MSALSliceConfig.h"
 #import "MSALGlobalConfig.h"
@@ -394,27 +395,20 @@
                       authority:parameters.authority
                     webviewType:parameters.webviewType
                   customWebview:parameters.customWebview
+               parentController:parameters.internalParentController
+              presentationStyle:parameters.internalPresentationStyle
                   correlationId:parameters.correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithTokenParameters
+                          apiId:parameters.telemetryApiId
                 completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:nil
-                        account:nil
-                      loginHint:nil
-                     promptType:MSALPromptTypeDefault
-           extraQueryParameters:nil
-                  claimsRequest:nil
-                      authority:nil
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquire
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquire;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 #pragma mark - Login Hint
@@ -423,19 +417,11 @@
                     loginHint:(NSString *)loginHint
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:nil
-                        account:nil
-                      loginHint:loginHint
-                     promptType:MSALPromptTypeDefault
-           extraQueryParameters:nil
-                  claimsRequest:nil
-                      authority:nil
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithHint
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.loginHint = loginHint;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHint;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -444,19 +430,13 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:nil
-                        account:nil
-                      loginHint:loginHint
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:nil
-                      authority:nil
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.loginHint = loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -468,19 +448,16 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:extraScopesToConsent
-                        account:nil
-                      loginHint:loginHint
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:nil
-                      authority:authority
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.extraScopesToConsent = extraScopesToConsent;
+    parameters.loginHint = loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
@@ -493,19 +470,17 @@
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:extraScopesToConsent
-                        account:nil
-                      loginHint:loginHint
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:claimsRequest
-                      authority:authority
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndClaimsAndCorrelationId
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.extraScopesToConsent = extraScopesToConsent;
+    parameters.loginHint = loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claimsRequest = claimsRequest;
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndClaimsAndCorrelationId;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 #pragma mark - Account
@@ -514,20 +489,11 @@
                       account:(MSALAccount *)account
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:nil
-                        account:account
-                      loginHint:nil
-                     promptType:MSALPromptTypeDefault
-           extraQueryParameters:nil
-                  claimsRequest:nil
-                      authority:nil
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.account = account;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
     
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -536,19 +502,13 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:nil
-                        account:account
-                      loginHint:nil
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:nil
-                      authority:nil
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:nil
-                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.account = account;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
+    
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -560,20 +520,16 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:extraScopesToConsent
-                        account:account
-                      loginHint:nil
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:nil
-                      authority:authority
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.extraScopesToConsent = extraScopesToConsent;
+    parameters.account = account;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId;
     
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
@@ -586,20 +542,17 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenForScopes:scopes
-           extraScopesToConsent:extraScopesToConsent
-                        account:account
-                      loginHint:nil
-                     promptType:promptType
-           extraQueryParameters:extraQueryParameters
-                  claimsRequest:claimsRequest
-                      authority:authority
-                    webviewType:MSALGlobalConfig.defaultWebviewType
-                  customWebview:nil
-                  correlationId:correlationId
-                          apiId:MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId
-                completionBlock:completionBlock];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    parameters.extraScopesToConsent = extraScopesToConsent;
+    parameters.account = account;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claimsRequest = claimsRequest;
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId;
     
+    [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
 #pragma mark - Silent
@@ -613,7 +566,7 @@
                         claimsRequest:parameters.claimsRequest
                          forceRefresh:parameters.forceRefresh
                         correlationId:parameters.correlationId
-                                apiId:MSALTelemetryApiIdAcquireSilentWithTokenParameters
+                                apiId:parameters.telemetryApiId
                       completionBlock:completionBlock];
 }
 
@@ -621,14 +574,10 @@
                             account:(MSALAccount *)account
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenSilentForScopes:scopes
-                              account:account
-                            authority:nil
-                        claimsRequest:nil
-                         forceRefresh:NO
-                        correlationId:nil
-                                apiId:MSALTelemetryApiIdAcquireSilentWithUser
-                      completionBlock:completionBlock];
+    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUser;
+    
+    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -636,14 +585,11 @@
                           authority:(MSALAuthority *)authority
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenSilentForScopes:scopes
-                              account:account
-                            authority:authority
-                        claimsRequest:nil
-                         forceRefresh:NO
-                        correlationId:nil
-                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAndAuthority
-                      completionBlock:completionBlock];
+    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.authority = authority;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAndAuthority;
+    
+    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -653,14 +599,13 @@
                       correlationId:(NSUUID *)correlationId
                     completionBlock:(MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenSilentForScopes:scopes
-                              account:account
-                            authority:authority
-                        claimsRequest:nil
-                         forceRefresh:forceRefresh
-                        correlationId:correlationId
-                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
-                      completionBlock:completionBlock];
+    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.authority = authority;
+    parameters.forceRefresh = forceRefresh;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId;
+    
+    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
 }
 
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
@@ -671,14 +616,14 @@
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
-    [self acquireTokenSilentForScopes:scopes
-                              account:account
-                            authority:authority
-                        claimsRequest:claimsRequest
-                         forceRefresh:forceRefresh
-                        correlationId:correlationId
-                                apiId:MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId
-                      completionBlock:completionBlock];
+    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.authority = authority;
+    parameters.claimsRequest = claimsRequest;
+    parameters.forceRefresh = forceRefresh;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAuthorityClaimsForceRefreshAndCorrelationId;
+    
+    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
 }
 
 #pragma mark - private methods
@@ -714,6 +659,8 @@
                     authority:(MSALAuthority *)authority
                   webviewType:(MSALWebviewType)webviewType
                 customWebview:(WKWebView *)customWebview
+             parentController:(id)parentController
+            presentationStyle:(NSInteger)presentationStyle
                 correlationId:(NSUUID *)correlationId
                         apiId:(MSALTelemetryApiId)apiId
               completionBlock:(MSALCompletionBlock)completionBlock
@@ -792,6 +739,11 @@
     {
         params.validateAuthority = NO;
     }
+    
+#if TARGET_OS_IPHONE
+    params.parentViewController = parentController;
+    params.presentationType = presentationStyle;
+#endif
     
     // Configure webview
     NSError *msidWebviewError = nil;

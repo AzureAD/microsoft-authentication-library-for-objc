@@ -70,6 +70,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
 
+#if TARGET_OS_IPHONE
+/*!
+ Modal presentation type for displaying authentication web content.
+ */
+@property (nullable, weak, nonatomic) UIViewController *parentViewController;
+@property (nonatomic) UIModalPresentationStyle presentationStyle;
+#endif
+
+/*!
+ A specific prompt type for the interactive authentication flow.
+ By default, it will be set to MSALGlobalConfig.defaultWebviewType.
+ */
 @property (nonatomic, nullable) WKWebView *customWebview;
 @property (nonatomic) MSALWebviewType webviewType;
 

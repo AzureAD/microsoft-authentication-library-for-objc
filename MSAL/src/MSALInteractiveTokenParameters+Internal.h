@@ -25,24 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenParameters.h"
+#import "MSALInteractiveTokenParameters.h"
 #import "MSALTelemetryApiId.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALInteractiveTokenParameters ()
 
-@interface MSALTokenParameters ()
-
-/*!
- Initialize a MSALTokenParameters with scopes.
- 
- @param scopes  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
-
-@property MSALTelemetryApiId telemetryApiId;
+- (id)internalParentController;
+- (NSInteger)internalPresentationStyle;
 
 @end
-
-NS_ASSUME_NONNULL_END
