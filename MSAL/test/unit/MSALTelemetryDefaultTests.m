@@ -29,7 +29,6 @@
 #import "MSALTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSIDTelemetryEventStrings.h"
-#import "MSALTestTelemetryEventsObserver.h"
 #import "XCTestCase+HelperMethods.h"
 #import "NSData+MSIDExtensions.h"
 #import "MSIDTestContext.h"
@@ -40,11 +39,11 @@
 #import "MSIDTelemetryBrokerEvent.h"
 #import "MSIDTelemetryAuthorityValidationEvent.h"
 #import "MSALGlobalConfig.h"
+#import "MSALTelemetryConfig.h"
 
 @interface MSALTelemetryDefaultTests : MSALTestCase
 
 @property (nonatomic) NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
-@property (nonatomic) MSALTestTelemetryEventsObserver *observer;
 
 @end
 
@@ -54,27 +53,21 @@
 {
     [super setUp];
     
-    self.observer = [MSALTestTelemetryEventsObserver new];
-    
-    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:NO aggregationRequired:NO];
-    
-    __weak MSALTelemetryDefaultTests *weakSelf = self;
-    [self.observer setEventsReceivedBlock:^(NSArray<NSDictionary<NSString *,NSString *> *> *events)
-     {
-         weakSelf.receivedEvents = events;
-     }];
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
+    {
+        self.receivedEvents = events;
+    };
     
     MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
+    MSIDTelemetry.sharedInstance.notifyOnFailureOnly = NO;
+    MSALGlobalConfig.telemetryConfig.aggregationRequired = NO;
 }
 
 - (void)tearDown
 {
     [super tearDown];
     
-    self.observer = nil;
-    
-    MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
-    [MSALGlobalConfig.telemetryConfig removeAllObservers];
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = nil;
     self.receivedEvents = nil;
 }
 
@@ -125,9 +118,9 @@
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
-    
+
     [[MSIDTelemetry sharedInstance] flush:requestId];
-    
+
     NSDictionary *dictionary = [self getEventPropertiesByEventName:eventName];
     XCTAssertNotNil(dictionary);
     XCTAssertNil([dictionary objectForKey:MSID_TELEMETRY_KEY_USER_ID]);
@@ -141,20 +134,20 @@
     [event setProperty:MSID_TELEMETRY_KEY_USER_ID value:@"id1234"];
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:eventName];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:event];
-    [MSALGlobalConfig.telemetryConfig removeObserver:self.observer];
-    
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = nil;
+
     [[MSIDTelemetry sharedInstance] flush:requestId];
-    
+
     XCTAssertNil(self.receivedEvents);
 }
 
 - (void)testFlush_whenThereIsNoEventAndObserverIsSet_shouldNotSendEvents
 {
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
-    
+
     // Flush without adding any additional events
     [[MSIDTelemetry sharedInstance] flush:requestId];
-    
+
     XCTAssertNil(self.receivedEvents);
 }
 
@@ -176,9 +169,9 @@
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId
                                         event:[[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:context]];
-    
+
     [[MSIDTelemetry sharedInstance] flush:requestId];
-    
+
     // Verify results: there should be 3 events (default, API, HTTP)
     XCTAssertEqual([self.receivedEvents count], 3);
     [self assertDefaultEvent:self.receivedEvents[0] piiEnabled:YES];
@@ -188,8 +181,7 @@
 
 - (void)testFlush_whenThereAre2EventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldFilterEvents
 {
-    [MSALGlobalConfig.telemetryConfig removeAllObservers];
-    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID *correlationId = [NSUUID UUID];
     __auto_type context = [MSIDTestContext new];
@@ -213,8 +205,7 @@
 
 - (void)testFlush_whenThereIs1NonErrorEventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldNotSendEvents
 {
-    [MSALGlobalConfig.telemetryConfig removeAllObservers];
-    [MSALGlobalConfig.telemetryConfig addEventsObserver:self.observer setTelemetryOnFailure:YES aggregationRequired:NO];
+    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = YES;
     NSString *requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     NSUUID* correlationId = [NSUUID UUID];
     __auto_type context = [MSIDTestContext new];
@@ -224,9 +215,9 @@
     [[MSIDTelemetry sharedInstance] startEvent:requestId eventName:@"httpEvent"];
     MSIDTelemetryHttpEvent *httpEvent = [[MSIDTelemetryHttpEvent alloc] initWithName:@"httpEvent" context:context];
     [[MSIDTelemetry sharedInstance] stopEvent:requestId event:httpEvent];
-    
+
     [[MSIDTelemetry sharedInstance] flush:requestId];
-    
+
     XCTAssertNil(self.receivedEvents);
 }
 

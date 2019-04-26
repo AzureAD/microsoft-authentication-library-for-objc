@@ -22,31 +22,14 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetryEventsObservingProxy.h"
-#import "MSALTelemetryEventsObserving.h"
-
-@interface MSALTelemetryEventsObservingProxy()
-
-@property (nonatomic, weak) id<MSALTelemetryEventsObserving> observer;
-
-@end
 
 @implementation MSALTelemetryEventsObservingProxy
 
-- (id)initWithObserver:(id<MSALTelemetryEventsObserving>)observer
-{
-    self = [super init];
-    if (self)
-    {
-        _observer = observer;
-    }
-    return self;
-}
-
-#pragma mark - MSALTelemetryEventsObserving
+#pragma mark - MSIDTelemetryEventsObserving
 
 - (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events
 {
-    [self.observer onEventsReceived:events];
+    if (self.telemetryCallback != nil) self.telemetryCallback(events);
 }
 
 @end

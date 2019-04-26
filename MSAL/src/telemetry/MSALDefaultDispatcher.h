@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALDefaultDispatcher : MSIDDefaultDispatcher
 
-- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer;
 
 @end
 

@@ -22,12 +22,6 @@
 // THE SOFTWARE.
 
 #import "MSALTelemetry.h"
-#import "MSIDTelemetryEventInterface.h"
-#import "MSALDefaultDispatcher.h"
-#import "MSIDTelemetry.h"
-#import "MSIDTelemetry+Internal.h"
-#import "MSALAggregatedDispatcher.h"
-#import "MSALTelemetryEventsObservingProxy.h"
 #import "MSALGlobalConfig.h"
 #import "MSALTelemetryConfig.h"
 
@@ -43,25 +37,6 @@
     return sharedInstance;
 }
 
-- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
-    setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
-      aggregationRequired:(BOOL)aggregationRequired
-{
-    [MSALGlobalConfig.telemetryConfig addEventsObserver:observer
-                                  setTelemetryOnFailure:setTelemetryOnFailure
-                                    aggregationRequired:aggregationRequired];
-}
-
-- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer
-{
-    [MSALGlobalConfig.telemetryConfig removeObserver:observer];
-}
-
-- (void)removeAllObservers
-{
-    [MSALGlobalConfig.telemetryConfig removeAllObservers];
-}
-
 - (BOOL)piiEnabled
 {
     return MSALGlobalConfig.telemetryConfig.piiEnabled;
@@ -70,6 +45,36 @@
 - (void)setPiiEnabled:(BOOL)piiEnabled
 {
     MSALGlobalConfig.telemetryConfig.piiEnabled = piiEnabled;
+}
+
+- (BOOL)notifyOnFailureOnly
+{
+    return MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly;
+}
+
+- (void)setNotifyOnFailureOnly:(BOOL)notifyOnFailureOnly
+{
+    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = notifyOnFailureOnly;
+}
+
+- (BOOL)aggregationRequired
+{
+    return MSALGlobalConfig.telemetryConfig.aggregationRequired;
+}
+
+- (void)setAggregationRequired:(BOOL)aggregationRequired
+{
+    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = aggregationRequired;
+}
+
+- (MSALTelemetryCallback)telemetryCallback
+{
+    return MSALGlobalConfig.telemetryConfig.telemetryCallback;
+}
+
+- (void)setTelemetryCallback:(MSALTelemetryCallback)telemetryCallback
+{
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = telemetryCallback;
 }
 
 @end

@@ -26,8 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@protocol MSALTelemetryEventsObserving;
+#import "MSALDefinitions.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -36,33 +35,24 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
-@property BOOL piiEnabled;
+@property (atomic) BOOL piiEnabled;
 
 /*!
- Registers the observer object for receiving telemetry events.
- 
- @param observer                An instance of MSALTelemetryEventsObserving implementation.
- @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
+ If set YES, telemetry events are only dispatched when errors occurred;
  If set NO, MSAL will dispatch all events.
- @param aggregationRequired     If set NO, all telemetry events collected by MSAL will be dispatched;
- If set YES, MSAL will dispatch only one event for each acquire token call,
- where the event is a brief summary (but with far less details) of all telemetry events for that acquire token call.
  */
-- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
-    setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
-      aggregationRequired:(BOOL)aggregationRequired;
+@property (atomic) BOOL notifyOnFailureOnly;
 
 /*!
- Remove a telemetry observer added for receiving telemetry events.
- 
- @param observer An instance of MSALTelemetryEventsObserving implementation added to the observers before.
+ If set NO, all telemetry events collected by MSAL will be dispatched;
+ If set YES, MSAL will dispatch only one event for each acquire token call.
  */
-- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer;
+@property (atomic) BOOL aggregationRequired;
 
 /*!
- Remove all telemetry observers added to the observers collection.
+ Invoked when telemetry data is received.
  */
-- (void)removeAllObservers;
+@property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

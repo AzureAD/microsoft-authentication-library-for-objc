@@ -35,9 +35,9 @@
 
 @implementation MSALAggregatedDispatcher
 
-- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
+- (instancetype)initWithProxyObserver:(MSALTelemetryEventsObservingProxy *)observer
 {
-    self = [super initWithObserver:observer setTelemetryOnFailure:setTelemetryOnFailure];
+    self = [super initWithObserver:observer];
     if (self)
     {
         _proxyObserver = observer;
@@ -47,9 +47,9 @@
 
 #pragma mark - MSIDTelemetryDispatcher
 
-- (BOOL)containsObserver:(id<MSALTelemetryEventsObserving>)observer
+- (BOOL)containsObserver:(id)observer
 {
-    if (self.proxyObserver) return self.proxyObserver.observer == observer;
+    if (self.proxyObserver) return self.proxyObserver == observer;
     
     return [super containsObserver:observer];
 }

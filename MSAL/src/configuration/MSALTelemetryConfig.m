@@ -33,6 +33,12 @@
 #import "MSALTelemetryEventsObservingProxy.h"
 #import "MSALAggregatedDispatcher.h"
 
+@interface MSALTelemetryConfig()
+
+@property (nonatomic) MSALTelemetryEventsObservingProxy *proxyObserver;
+
+@end
+
 @implementation MSALTelemetryConfig
 
 + (instancetype)sharedInstance
@@ -41,43 +47,57 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[self.class alloc] init];
+        [sharedInstance initDispatchers];
     });
     
     return sharedInstance;
 }
 
-- (BOOL)piiEnabled { return MSIDTelemetry.sharedInstance.piiEnabled; }
-
-- (void)setPiiEnabled:(BOOL)piiEnabled { [[MSIDTelemetry sharedInstance] setPiiEnabled:piiEnabled]; }
-
-- (void)addEventsObserver:(id<MSALTelemetryEventsObserving>)observer
-    setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
-      aggregationRequired:(BOOL)aggregationRequired
+- (BOOL)piiEnabled
 {
-    if (!observer) return;
-    
-    __auto_type proxyObserver = [[MSALTelemetryEventsObservingProxy alloc] initWithObserver:observer];
-    id<MSIDTelemetryDispatcher> dispatcher;
-    if (aggregationRequired)
-    {
-        dispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
-    }
-    else
-    {
-        dispatcher = [[MSALDefaultDispatcher alloc] initWithProxyObserver:proxyObserver setTelemetryOnFailure:setTelemetryOnFailure];
-    }
-    
-    [[MSIDTelemetry sharedInstance] addDispatcher:dispatcher];
+    return MSIDTelemetry.sharedInstance.piiEnabled;
 }
 
-- (void)removeObserver:(id<MSALTelemetryEventsObserving>)observer
+- (void)setPiiEnabled:(BOOL)piiEnabled
 {
-    [[MSIDTelemetry sharedInstance] removeDispatcherByObserver:observer];
+    MSIDTelemetry.sharedInstance.piiEnabled = piiEnabled;
 }
 
-- (void)removeAllObservers
+- (BOOL)notifyOnFailureOnly
 {
-    [[MSIDTelemetry sharedInstance] removeAllDispatchers];
+    return MSIDTelemetry.sharedInstance.notifyOnFailureOnly;
+}
+
+- (void)setNotifyOnFailureOnly:(BOOL)notifyOnFailureOnly
+{
+    MSIDTelemetry.sharedInstance.notifyOnFailureOnly = notifyOnFailureOnly;
+}
+
+#pragma mark - Private
+
+- (void)initDispatchers
+{
+    __auto_type defaultProxyObserver = [MSALTelemetryEventsObservingProxy new];
+    defaultProxyObserver.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
+    {
+        if (self.aggregationRequired) return;
+        
+        if (self.telemetryCallback != nil) self.telemetryCallback(events);
+        
+    };
+    __auto_type defaultDispatcher = [[MSALDefaultDispatcher alloc] initWithProxyObserver:defaultProxyObserver];
+    
+    __auto_type aggregatedProxyObserver = [MSALTelemetryEventsObservingProxy new];
+    aggregatedProxyObserver.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
+    {
+        if (!self.aggregationRequired) return;
+        
+        if (self.telemetryCallback != nil) self.telemetryCallback(events);
+    };
+    __auto_type aggregatedDispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:aggregatedProxyObserver];
+    
+    [[MSIDTelemetry sharedInstance] addDispatcher:aggregatedDispatcher];
+    [[MSIDTelemetry sharedInstance] addDispatcher:defaultDispatcher];
 }
 
 @end
