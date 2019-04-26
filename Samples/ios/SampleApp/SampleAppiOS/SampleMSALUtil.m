@@ -77,9 +77,10 @@
 - (MSALPublicClientApplication *)createClientApplication
 {
     // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
-    // go to the Microsoft App Portal (TODO: Name? Link?) to register your own applications with their own client
+    // go to the Microsoft App Portal to register your own applications with their own client
     // IDs.
-    return [[MSALPublicClientApplication alloc] initWithClientId:CLIENT_ID error:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
+    return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
 }
 
 - (NSString *)currentAccountIdentifer
