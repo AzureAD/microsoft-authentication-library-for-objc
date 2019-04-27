@@ -25,14 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#ifndef MSALConstants_h
-#define MSALConstants_h
+#ifndef MSALDefinitions_h
+#define MSALDefinitions_h
 
 @class MSALResult;
 @class MSALAccount;
 
-typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
-typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+
+/*! Levels of logging. Defines the priority of the logged message */
+typedef NS_ENUM(NSInteger, MSALLogLevel)
+{
+    MSALLogLevelNothing,
+    MSALLogLevelError,
+    MSALLogLevelWarning,
+    MSALLogLevelInfo,
+    MSALLogLevelVerbose,
+    MSALLogLevelLast = MSALLogLevelVerbose,
+};
+
 
 typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
@@ -65,28 +75,47 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
 };
 
 
-typedef NS_ENUM(NSUInteger, MSALUIBehavior) {
+typedef NS_ENUM(NSUInteger, MSALPromptType)
+{
     /*!
      If no user is specified the authentication webview will present a list of users currently
      signed in for the user to select among.
      */
-    MSALSelectAccount,
+    MSALPromptTypeSelectAccount,
 
     /*!
      Require the user to authenticate in the webview
      */
-    MSALForceLogin,
+    MSALPromptTypeLogin,
     /*!
      Require the user to consent to the current set of scopes for the request.
      */
-    MSALForceConsent,
+    MSALPromptTypeConsent,
     /*!
      The SSO experience will be determined by the presence of cookies in the webview and account type.
      User won't be prompted unless necessary.
      If multiple users are signed in, select account experience will be presented.
      */
-    MSALPromptIfNecessary,
-    MSALUIBehaviorDefault = MSALSelectAccount,
+    MSALPromptTypePromptIfNecessary,
+    MSALPromptTypeDefault = MSALPromptTypeSelectAccount,
 };
+
+typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
+
+
+/*!
+ The LogCallback block for the MSAL logger
+ 
+ @param  level           The level of the log message
+ @param  message         The message being logged
+ @param  containsPII     If the message might contain Personally Identifiable Information (PII)
+ this will be true. Log messages possibly containing PII will not be
+ sent to the callback unless PIllLoggingEnabled is set to YES on the
+ logger.
+ 
+ */
+typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
+
 
 #endif /* MSALConstants_h */

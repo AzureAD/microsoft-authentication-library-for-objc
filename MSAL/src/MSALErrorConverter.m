@@ -26,12 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "MSALErrorConverter+Internal.h"
-#import "MSALError_Internal.h"
 #import "MSALResult+Internal.h"
+#import "MSALError.h"
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
 static NSDictionary *s_userInfoKeyMapping;
+static NSSet *s_recoverableErrorCode;
 
 @implementation MSALErrorConverter
 
@@ -49,57 +50,58 @@ static NSDictionary *s_userInfoKeyMapping;
                                    // General
                                    @(MSIDErrorInternal) : @(MSALErrorInternal),
                                    @(MSIDErrorInvalidInternalParameter) : @(MSALErrorInternal),
-                                   @(MSIDErrorInvalidDeveloperParameter) :@(MSALErrorInvalidParameter),
+                                   @(MSIDErrorInvalidDeveloperParameter) :@(MSALInternalErrorInvalidParameter),
                                    @(MSIDErrorUnsupportedFunctionality): @(MSALErrorInternal),
-                                   @(MSIDErrorMissingAccountParameter): @(MSALErrorAccountRequired),
+                                   @(MSIDErrorMissingAccountParameter): @(MSALInternalErrorAccountRequired),
                                    @(MSIDErrorInteractionRequired): @(MSALErrorInteractionRequired),
-                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALErrorNonHttpsRedirect),
-                                   @(MSIDErrorMismatchedAccount): @(MSALErrorMismatchedUser),
+                                   @(MSIDErrorServerNonHttpsRedirect) : @(MSALInternalErrorNonHttpsRedirect),
+                                   @(MSIDErrorMismatchedAccount): @(MSALInternalErrorMismatchedUser),
+                                   @(MSIDErrorRedirectSchemeNotRegistered): @(MSALInternalErrorRedirectSchemeNotRegistered),
 
                                    // Cache
                                    @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
-                                   @(MSIDErrorAuthorityValidation) : @(MSALErrorFailedAuthorityValidation),
+                                   @(MSIDErrorAuthorityValidation) : @(MSALInternalErrorFailedAuthorityValidation),
                                    // Interactive flow
-                                   @(MSIDErrorAuthorizationFailed) : @(MSALErrorAuthorizationFailed),
+                                   @(MSIDErrorAuthorizationFailed) : @(MSALInternalErrorAuthorizationFailed),
                                    @(MSIDErrorUserCancel) : @(MSALErrorUserCanceled),
-                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorSessionCanceled),
+                                   @(MSIDErrorSessionCanceledProgrammatically) : @(MSALErrorUserCanceled),
                                    @(MSIDErrorInteractiveSessionStartFailure) : @(MSALErrorInternal),
-                                   @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALErrorInteractiveSessionAlreadyRunning),
-                                   @(MSIDErrorNoMainViewController) : @(MSALErrorNoViewController),
-                                   @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALErrorAttemptToOpenURLFromExtension),
-                                   @(MSIDErrorUINotSupportedInExtension): @(MSALErrorUINotSupportedInExtension),
+                                   @(MSIDErrorInteractiveSessionAlreadyRunning) : @(MSALInternalErrorInteractiveSessionAlreadyRunning),
+                                   @(MSIDErrorNoMainViewController) : @(MSALInternalErrorNoViewController),
+                                   @(MSIDErrorAttemptToOpenURLFromExtension): @(MSALInternalErrorAttemptToOpenURLFromExtension),
+                                   @(MSIDErrorUINotSupportedInExtension): @(MSALInternalErrorUINotSupportedInExtension),
 
                                    // Broker errors
-                                   @(MSIDErrorBrokerResponseNotReceived): @(MSALErrorBrokerResponseNotReceived),
-                                   @(MSIDErrorBrokerNoResumeStateFound): @(MSALErrorBrokerNoResumeStateFound),
-                                   @(MSIDErrorBrokerBadResumeStateFound): @(MSALErrorBrokerBadResumeStateFound),
-                                   @(MSIDErrorBrokerMismatchedResumeState): @(MSALErrorBrokerMismatchedResumeState),
-                                   @(MSIDErrorBrokerResponseHashMissing): @(MSALErrorBrokerResponseHashMissing),
-                                   @(MSIDErrorBrokerCorruptedResponse): @(MSALErrorBrokerCorruptedResponse),
-                                   @(MSIDErrorBrokerResponseDecryptionFailed): @(MSALErrorBrokerResponseDecryptionFailed),
-                                   @(MSIDErrorBrokerResponseHashMismatch): @(MSALErrorBrokerResponseHashMismatch),
-                                   @(MSIDErrorBrokerKeyFailedToCreate): @(MSALErrorBrokerKeyFailedToCreate),
-                                   @(MSIDErrorBrokerKeyNotFound): @(MSALErrorBrokerKeyNotFound),
+                                   @(MSIDErrorBrokerResponseNotReceived): @(MSALInternalErrorBrokerResponseNotReceived),
+                                   @(MSIDErrorBrokerNoResumeStateFound): @(MSALInternalErrorBrokerNoResumeStateFound),
+                                   @(MSIDErrorBrokerBadResumeStateFound): @(MSALInternalErrorBrokerBadResumeStateFound),
+                                   @(MSIDErrorBrokerMismatchedResumeState): @(MSALInternalErrorBrokerMismatchedResumeState),
+                                   @(MSIDErrorBrokerResponseHashMissing): @(MSALInternalErrorBrokerResponseHashMissing),
+                                   @(MSIDErrorBrokerCorruptedResponse): @(MSALInternalErrorBrokerCorruptedResponse),
+                                   @(MSIDErrorBrokerResponseDecryptionFailed): @(MSALInternalErrorBrokerResponseDecryptionFailed),
+                                   @(MSIDErrorBrokerResponseHashMismatch): @(MSALInternalErrorBrokerResponseHashMismatch),
+                                   @(MSIDErrorBrokerKeyFailedToCreate): @(MSALInternalErrorBrokerKeyFailedToCreate),
+                                   @(MSIDErrorBrokerKeyNotFound): @(MSALInternalErrorBrokerKeyNotFound),
                                    @(MSIDErrorWorkplaceJoinRequired): @(MSALErrorWorkplaceJoinRequired),
-                                   @(MSIDErrorBrokerUnknown): @(MSALErrorBrokerUnknown),
+                                   @(MSIDErrorBrokerUnknown): @(MSALInternalErrorBrokerUnknown),
 
                                    // Oauth2 errors
-                                   @(MSIDErrorServerOauth) : @(MSALErrorAuthorizationFailed),
-                                   @(MSIDErrorServerInvalidResponse) : @(MSALErrorInvalidResponse),
+                                   @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
+                                   @(MSIDErrorServerInvalidResponse) : @(MSALInternalErrorInvalidResponse),
                                    // We don't support this error code in MSAL. This error
                                    // exists specifically for ADAL.
                                    @(MSIDErrorServerRefreshTokenRejected) : @(MSALErrorInternal),
-                                   @(MSIDErrorServerInvalidRequest) :@(MSALErrorInvalidRequest),
-                                   @(MSIDErrorServerInvalidClient) : @(MSALErrorInvalidClient),
-                                   @(MSIDErrorServerInvalidGrant) : @(MSALErrorInvalidGrant),
-                                   @(MSIDErrorServerInvalidScope) : @(MSALErrorInvalidScope),
-                                   @(MSIDErrorServerUnauthorizedClient): @(MSALErrorUnauthorizedClient),
+                                   @(MSIDErrorServerInvalidRequest) :@(MSALInternalErrorInvalidRequest),
+                                   @(MSIDErrorServerInvalidClient) : @(MSALInternalErrorInvalidClient),
+                                   @(MSIDErrorServerInvalidGrant) : @(MSALInternalErrorInvalidGrant),
+                                   @(MSIDErrorServerInvalidScope) : @(MSALInternalErrorInvalidScope),
+                                   @(MSIDErrorServerUnauthorizedClient): @(MSALInternalErrorUnauthorizedClient),
                                    @(MSIDErrorServerDeclinedScopes): @(MSALErrorServerDeclinedScopes),
-                                   @(MSIDErrorServerInvalidState) : @(MSALErrorInvalidState),
+                                   @(MSIDErrorServerInvalidState) : @(MSALInternalErrorInvalidState),
                                    @(MSIDErrorServerProtectionPoliciesRequired) : @(MSALErrorServerProtectionPoliciesRequired),
-                                   @(MSIDErrorServerUnhandledResponse) : @(MSALErrorUnhandledResponse)
+                                   @(MSIDErrorServerUnhandledResponse) : @(MSALInternalErrorUnhandledResponse)
                                    }
                            };
     
@@ -116,6 +118,8 @@ static NSDictionary *s_userInfoKeyMapping;
                              MSIDBrokerVersionKey: MSALBrokerVersionKey,
                              MSIDHomeAccountIdkey: MSALHomeAccountIdKey
                              };
+    
+    s_recoverableErrorCode = [[NSSet alloc] initWithObjects:@(MSALErrorWorkplaceJoinRequired), @(MSALErrorInteractionRequired), @(MSALErrorServerDeclinedScopes), @(MSALErrorServerProtectionPoliciesRequired), @(MSALErrorUserCanceled), nil];
 }
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
@@ -150,12 +154,19 @@ static NSDictionary *s_userInfoKeyMapping;
     // Map errorCode
     // errorCode mapping is needed only if domain is mapped to MSALErrorDomain
     NSNumber *mappedCode = nil;
+    NSNumber *internalCode = nil;
     if (mappedDomain == MSALErrorDomain)
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (mappedCode == nil)
         {
             MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
+            mappedCode = @(MSALErrorInternal);
+        }
+        
+        if (![s_recoverableErrorCode containsObject:mappedCode])
+        {
+            internalCode = mappedCode;
             mappedCode = @(MSALErrorInternal);
         }
     }
@@ -171,7 +182,8 @@ static NSDictionary *s_userInfoKeyMapping;
     msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     msalUserInfo[MSALOAuthErrorKey] = oauthError;
     msalUserInfo[MSALOAuthSubErrorKey] = subError;
-    msalUserInfo[NSUnderlyingErrorKey]  = underlyingError;
+    msalUserInfo[NSUnderlyingErrorKey] = underlyingError;
+    msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
     if (userInfo[MSIDInvalidTokenResultKey])
     {

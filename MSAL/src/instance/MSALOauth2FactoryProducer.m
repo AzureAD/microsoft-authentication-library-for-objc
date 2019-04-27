@@ -40,11 +40,7 @@
 {
     if (!authority)
     {
-        if (error)
-        {
-            *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
-            MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
-        }
+        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
 
         return nil;
     }

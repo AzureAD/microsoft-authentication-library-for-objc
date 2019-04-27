@@ -33,16 +33,22 @@
 @implementation MSALB2CAuthority
 
 - (instancetype)initWithURL:(NSURL *)url
-                    context:(id<MSIDRequestContext>)context
                       error:(NSError **)error
 {
-    self = [super initWithURL:url context:context error:error];
+    return [self initWithURL:url validateFormat:NO error:error];
+}
+
+- (instancetype)initWithURL:(NSURL *)url
+             validateFormat:(BOOL)validateFormat
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url error:error];
     if (self)
     {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url context:context error:error];
+        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url validateFormat:validateFormat context:nil  error:error];
         if (!self.msidAuthority) return nil;
     }
-
+    
     return self;
 }
 

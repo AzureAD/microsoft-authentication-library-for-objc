@@ -32,6 +32,7 @@
 #import "MSIDB2CAuthority.h"
 #import "MSALADFSAuthority.h"
 #import "MSIDADFSAuthority.h"
+#import "MSALB2CAuthority_Internal.h"
 
 @implementation MSALAuthorityFactory
 
@@ -39,38 +40,34 @@
                             context:(id<MSIDRequestContext>)context
                               error:(NSError **)error
 {
-    return [self authorityFromUrl:url rawTenant:nil context:context error:error];
+    return [self authorityFromUrl:url validateFormat:YES rawTenant:nil context:context error:error];
 }
 
 + (MSALAuthority *)authorityFromUrl:(NSURL *)url
+                     validateFormat:(BOOL)validateFormat
                           rawTenant:(NSString *)rawTenant
                             context:(id<MSIDRequestContext>)context
                               error:(NSError **)error
 {
     if ([MSIDB2CAuthority isAuthorityFormatValid:url context:context error:nil])
     {
-        __auto_type b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:url context:context error:nil];
+        __auto_type b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:url validateFormat:validateFormat error:nil];
         if (b2cAuthority) return b2cAuthority;
     }
     
     if ([MSIDADFSAuthority isAuthorityFormatValid:url context:context error:nil])
     {
-        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url context:context error:nil];
+        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url error:nil];
         if (adfsAuthority) return adfsAuthority;
     }
     
     if ([MSIDAADAuthority isAuthorityFormatValid:url context:context error:nil])
     {
-        __auto_type aadAuthority = [[MSALAADAuthority alloc] initWithURL:url rawTenant:rawTenant context:context error:nil];
+        __auto_type aadAuthority = [[MSALAADAuthority alloc] initWithURL:url rawTenant:rawTenant error:nil];
         if (aadAuthority) return aadAuthority;
     }
     
-    if (error)
-    {
-        *error = MSIDCreateError(MSALErrorDomain, MSALErrorInvalidParameter, @"Provided authority url is not a valid authority.", nil, nil, nil, nil, nil);
-        
-        MSID_LOG_ERROR(context, @"Provided authority url is not a valid authority.");
-    }
+    MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is not a valid authority.", nil);
     
     return nil;
 }

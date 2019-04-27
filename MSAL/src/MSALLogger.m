@@ -26,71 +26,50 @@
 //------------------------------------------------------------------------------
 
 #import "MSALLogger.h"
+#import "MSALGlobalConfig.h"
+#import "MSALLoggerConfig.h"
 
 @implementation MSALLogger
-{
-    MSALLogCallback _callback;
-}
 
 #pragma mark - Callback
 
 + (MSALLogger *)sharedLogger
 {
-    static dispatch_once_t once;
-    static MSALLogger *s_logger;
-    
-    dispatch_once(&once, ^{
-        s_logger = [MSALLogger new];
-        
-        [[MSIDLogger sharedLogger] setCallback:^(MSIDLogLevel level, NSString *message, BOOL containsPII) {
-            
-            if (s_logger->_callback)
-            {
-                s_logger->_callback((MSALLogLevel)level, message, containsPII);
-            }
-            
-        }];
+    static MSALLogger *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
     });
-    
-    return s_logger;
+    return sharedInstance;
 }
 
 - (void)setCallback:(MSALLogCallback)callback
 {
-    static dispatch_once_t once;
-    
-    if (self->_callback != nil)
-    {
-        @throw @"MSAL logging callback can only be set once per process and should never changed once set.";
-    }
-    
-    dispatch_once(&once, ^{
-        self->_callback = callback;
-    });
+    [MSALGlobalConfig.loggerConfig setLogCallback:callback];
 }
 
 #pragma mark - Pii logging
 
 - (void)setPiiLoggingEnabled:(BOOL)PiiLoggingEnabled
 {
-    [MSIDLogger sharedLogger].PiiLoggingEnabled = PiiLoggingEnabled;
+    MSALGlobalConfig.loggerConfig.piiEnabled = PiiLoggingEnabled;
 }
 
 - (BOOL)PiiLoggingEnabled
 {
-    return [MSIDLogger sharedLogger].PiiLoggingEnabled;
+    return MSALGlobalConfig.loggerConfig.piiEnabled;
 }
 
 #pragma mark - Level
 
 - (void)setLevel:(MSALLogLevel)level
 {
-    [MSIDLogger sharedLogger].level = (MSIDLogLevel)level;
+    MSALGlobalConfig.loggerConfig.logLevel = level;
 }
 
 - (MSALLogLevel)level
 {
-    return (MSALLogLevel)[MSIDLogger sharedLogger].level;
+    return MSALGlobalConfig.loggerConfig.logLevel;
 }
 
 @end

@@ -30,7 +30,7 @@
 
 typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
 
-@interface MSALTestAppTelemetryDispatcher : NSObject <MSALDispatcher>
+@interface MSALTestAppTelemetryDispatcher : NSObject <MSALTelemetryDispatcher>
 
 @property (nonatomic, copy) DispatcherCallback dispatcherCallback;
 

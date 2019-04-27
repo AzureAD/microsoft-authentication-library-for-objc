@@ -29,7 +29,7 @@
 
 @protocol MSIDRequestContext;
 
-@interface MSALAuthority : NSObject
+@interface MSALAuthority : NSObject <NSCopying>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -40,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
 NS_ASSUME_NONNULL_END
 
 @end
