@@ -57,16 +57,6 @@
     MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = notifyOnFailureOnly;
 }
 
-- (BOOL)aggregationRequired
-{
-    return MSALGlobalConfig.telemetryConfig.aggregationRequired;
-}
-
-- (void)setAggregationRequired:(BOOL)aggregationRequired
-{
-    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = aggregationRequired;
-}
-
 - (MSALTelemetryCallback)telemetryCallback
 {
     return MSALGlobalConfig.telemetryConfig.telemetryCallback;

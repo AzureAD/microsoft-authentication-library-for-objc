@@ -44,12 +44,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic) BOOL notifyOnFailureOnly;
 
 /*!
- If set NO, all telemetry events collected by MSAL will be dispatched;
- If set YES, MSAL will dispatch only one event for each acquire token call.
- */
-@property (atomic) BOOL aggregationRequired;
-
-/*!
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback;

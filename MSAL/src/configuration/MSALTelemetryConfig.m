@@ -77,27 +77,14 @@
 
 - (void)initDispatchers
 {
-    __auto_type defaultProxyObserver = [MSALTelemetryEventsObservingProxy new];
-    defaultProxyObserver.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
-    {
-        if (self.aggregationRequired) return;
-        
-        if (self.telemetryCallback != nil) self.telemetryCallback(events);
-        
-    };
-    __auto_type defaultDispatcher = [[MSALDefaultDispatcher alloc] initWithProxyObserver:defaultProxyObserver];
-    
     __auto_type aggregatedProxyObserver = [MSALTelemetryEventsObservingProxy new];
     aggregatedProxyObserver.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
     {
-        if (!self.aggregationRequired) return;
-        
         if (self.telemetryCallback != nil) self.telemetryCallback(events);
     };
     __auto_type aggregatedDispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:aggregatedProxyObserver];
     
     [[MSIDTelemetry sharedInstance] addDispatcher:aggregatedDispatcher];
-    [[MSIDTelemetry sharedInstance] addDispatcher:defaultDispatcher];
 }
 
 @end

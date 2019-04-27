@@ -62,7 +62,6 @@
     
     MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
     MSIDTelemetry.sharedInstance.notifyOnFailureOnly = NO;
-    MSALGlobalConfig.telemetryConfig.aggregationRequired = YES;
     
     self.requestId = [[MSIDTelemetry sharedInstance] generateRequestId];
     
