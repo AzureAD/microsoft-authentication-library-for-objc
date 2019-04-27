@@ -67,6 +67,7 @@
 #import "MSALSliceConfig.h"
 #import "MSALCacheConfig.h"
 #import "MSALB2CAuthority.h"
+#import "MSALAccountId+Internal.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -491,6 +492,98 @@
          XCTAssertNil(result);
          XCTAssertNotNil(error);
      }];
+}
+
+- (void)testAcquireTokenSilent_whenKnownB2CAuthority_shouldNotValidate
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signup-signin"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/tfp/utid/B2C_1_signup-signin");
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccount *account = [MSALAccount new];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
+    [account setValue:accountId forKey:@"homeAccountId"];
+    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        
+                                 XCTAssertNil(result);
+                                 XCTAssertNotNil(error);
+    }];
+}
+
+- (void)testAcquireTokenSilent_whenNoTfpAuthority_shouldNotValidate
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://contoso.b2clogin.com/contoso.onmicrosoft.com/nontfp_path/B2C_1_signup-signin"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/contoso.onmicrosoft.com/nontfp_path/B2C_1_signup-signin");
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccount *account = [MSALAccount new];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
+    [account setValue:accountId forKey:@"homeAccountId"];
+    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                 
+                                 XCTAssertNil(result);
+                                 XCTAssertNotNil(error);
+                             }];
 }
 
 #pragma mark - acquireToken using Login Hint

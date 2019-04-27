@@ -59,10 +59,10 @@ class SampleMSALAuthentication {
 fileprivate extension SampleMSALAuthentication {
     func createClientApplication() throws -> MSALPublicClientApplication {
         // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
-        // go to the Microsoft App Portal (TODO: Name? Link?) to register your own applications with their own client
-        // IDs.
+        // go to the Microsoft App Portal to register your own applications with their own client IDs.
+        let config = MSALPublicClientApplicationConfig(clientId: kClientId)
         do {
-            return try MSALPublicClientApplication(clientId: kClientId)
+            return try MSALPublicClientApplication(configuration: config)
         } catch let error as NSError {
             throw SampleAppError.PublicClientApplicationCreation(error)
         }
