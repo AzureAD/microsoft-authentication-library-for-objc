@@ -140,9 +140,7 @@
     [self waitForElement:signIn];
     [signIn msidTap];
     
-    XCUIElement *otherAccount = self.testApp.staticTexts[@"Use another account"];
-    [self waitForElement:otherAccount];
-    [otherAccount msidTap];
+    [self selectAccountWithTitle:@"Use another account"];
 
     self.primaryAccount = self.testConfiguration.accounts[1];
     [self loadPasswordForAccount:self.primaryAccount];

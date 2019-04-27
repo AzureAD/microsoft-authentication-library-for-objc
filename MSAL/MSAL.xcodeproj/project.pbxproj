@@ -281,6 +281,10 @@
 		B221CEDE20C0AC60002F5E94 /* MSALAccountId.m in Sources */ = {isa = PBXBuildFile; fileRef = B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */; };
 		B221CEEB20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
 		B221CEEC20C0AF0B002F5E94 /* MSALAccountId+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */; };
+		B2472CA3226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
+		B2472CA4226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
+		B2472CA5226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
+		B2472CA6226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
 		B256121B217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */; };
 		B25A39D921C4C49D00213A62 /* MSALAutomationExpireATAction.m in Sources */ = {isa = PBXBuildFile; fileRef = B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */; };
@@ -945,6 +949,7 @@
 		B221CED920C0AC60002F5E94 /* MSALAccountId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAccountId.h; sourceTree = "<group>"; };
 		B221CEDA20C0AC60002F5E94 /* MSALAccountId.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountId.m; sourceTree = "<group>"; };
 		B221CEEA20C0AF0B002F5E94 /* MSALAccountId+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALAccountId+Internal.h"; sourceTree = "<group>"; };
+		B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALB2CAuthority_Internal.h; sourceTree = "<group>"; };
 		B256121A217EA44900999876 /* MSALOauth2FactoryProducerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2FactoryProducerTests.m; sourceTree = "<group>"; };
 		B25A39D721C4C49D00213A62 /* MSALAutomationExpireATAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAutomationExpireATAction.h; sourceTree = "<group>"; };
 		B25A39D821C4C49D00213A62 /* MSALAutomationExpireATAction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAutomationExpireATAction.m; sourceTree = "<group>"; };
@@ -1275,6 +1280,7 @@
 				23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */,
 				94E876CB1E492D6000FB96ED /* MSALAuthority.m */,
 				23A68A7320F5386A0071E435 /* MSALAADAuthority.m */,
+				B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */,
 				23A68A7920F538B90071E435 /* MSALB2CAuthority.m */,
 				23A68A7F20F538DE0071E435 /* MSALADFSAuthority.m */,
 				23A68A8B20F57A440071E435 /* MSALAuthorityFactory.h */,
@@ -1978,6 +1984,7 @@
 				04A6B5ED226937C90035C7C2 /* MSALADFSAuthority.h in Headers */,
 				B273D0B1226E858A005A7BB4 /* MSALErrorConverter.h in Headers */,
 				04A6B605226938180035C7C2 /* MSALError.h in Headers */,
+				B2472CA6226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */,
 				04A6B611226938370035C7C2 /* MSALAuthorityFactory.h in Headers */,
 				04A6B5DF226937AC0035C7C2 /* MSALAccountsProvider.h in Headers */,
 				04A6B5F4226937DE0035C7C2 /* MSALAuthority.h in Headers */,
@@ -2051,6 +2058,7 @@
 				B273D075226E84D6005A7BB4 /* MSALTelemetryConfig.h in Headers */,
 				04A6B5F8226937F10035C7C2 /* MSALTelemetry.h in Headers */,
 				04A6B604226938180035C7C2 /* MSALError.h in Headers */,
+				B2472CA5226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */,
 				B273D081226E850D005A7BB4 /* MSALTokenParameters.h in Headers */,
 				B273D0AB226E8580005A7BB4 /* MSALTelemetryApiId.h in Headers */,
 				04A6B610226938360035C7C2 /* MSALAuthorityFactory.h in Headers */,
@@ -2118,6 +2126,7 @@
 				B273D093226E854D005A7BB4 /* MSALDefaultDispatcher.h in Headers */,
 				96CF95182268FD0400D97374 /* MSALCacheConfig.h in Headers */,
 				96CF95242268FD0500D97374 /* MSALAADAuthority.h in Headers */,
+				B2472CA3226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */,
 				B273D0C1226E85A7005A7BB4 /* MSALGlobalConfig+Internal.h in Headers */,
 				232D69002240A3FF00594BBD /* MSALTokenParameters+Internal.h in Headers */,
 				B273D0C7226E85C2005A7BB4 /* MSALCacheConfig+Internal.h in Headers */,
@@ -2178,6 +2187,7 @@
 				B273D0B9226E859F005A7BB4 /* MSALPublicClientApplicationConfig+Internal.h in Headers */,
 				B273D0C6226E85C1005A7BB4 /* MSALCacheConfig+Internal.h in Headers */,
 				96B5E6F32256D197002232F9 /* MSALExtraQueryParameters.h in Headers */,
+				B2472CA4226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */,
 				B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */,
 				232D616B22498EDF00260C42 /* MSALJsonSerializable.h in Headers */,
 				23576D412252C07700D6F7BA /* MSALClaimsRequest+Internal.h in Headers */,

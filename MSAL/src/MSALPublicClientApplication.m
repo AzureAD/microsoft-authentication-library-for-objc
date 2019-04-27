@@ -902,13 +902,34 @@
 {
     
     MSIDAuthority *msidAuthority = authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    
+    BOOL shouldValidate = _validateAuthority;
+    
+    if (shouldValidate && [self shouldDisableValidationForAuthority:msidAuthority])
+    {
+        shouldValidate = NO;
+    }
 
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
      */
-    msidAuthority = [MSIDAuthorityFactory authorityFromUrl:msidAuthority.url rawTenant:account.homeAccountId.tenantId context:nil error:nil];
-
+    NSError *authorityError = nil;
+    msidAuthority = [MSIDAuthorityFactory authorityWithRawTenant:account.homeAccountId.tenantId msidAuthority:msidAuthority context:nil error:&authorityError];
+    
+    if (!msidAuthority)
+    {
+        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+        
+        if (completionBlock)
+        {
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
+    
     NSOrderedSet *requestScopes = [[NSOrderedSet alloc] initWithArray:scopes copyItems:YES];
     NSOrderedSet *requestOIDCScopes = [self.class defaultOIDCScopes];
     NSString *requestTelemetryId = [NSString stringWithFormat:@"%ld", (long)apiId];
@@ -933,19 +954,13 @@
 
     // Set optional params
     params.accountIdentifier = account.lookupAccountIdentifier;
-    params.validateAuthority = _validateAuthority;
+    params.validateAuthority = shouldValidate;
     params.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     params.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     params.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
     params.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     params.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     params.claimsRequest = claimsRequest.msidClaimsRequest;
-    
-    if (params.validateAuthority
-        && [self shouldDisableValidationForAuthority:msidAuthority])
-    {
-        params.validateAuthority = NO;
-    }
     
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, params,
              @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
