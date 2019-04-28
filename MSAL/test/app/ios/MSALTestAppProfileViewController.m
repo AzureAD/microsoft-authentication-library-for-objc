@@ -72,29 +72,18 @@
 
 - (NSString *)labelForRow:(NSInteger)row
 {
-    NSArray *keys = [_profiles allKeys];
-    return keys[row];
+    return [MSALTestAppSettings profileTitleForIndex:row];
 }
 
 - (void)rowSelected:(NSInteger)row
 {
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSString* profile = [[_profiles allKeys] objectAtIndex:row];
-    settings.profile = [_profiles objectForKey:profile];
+    [settings setCurrentProfile:row];
 }
 
 + (NSString *)currentTitle
 {
-    NSDictionary* currentProfile = [[MSALTestAppSettings settings] profile];
-    NSArray *profiles = [[MSALTestAppSettings profiles] allKeysForObject:currentProfile];
-    if (profiles.count != 0)
-    {
-        return [profiles firstObject];
-    }
-    else
-    {
-        return [[[MSALTestAppSettings profiles] allKeys] objectAtIndex:0];
-    }
+    return [MSALTestAppSettings currentProfileName];
 }
 
 @end
