@@ -29,13 +29,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ScopesDelegate <NSObject>
-- (void)setScopes:(NSMutableArray *)scopes;
+@protocol MSALScopesDelegate <NSObject>
+- (void)setScopes:(NSArray *)scopes;
 @end
 
 @interface MSALScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
 
-@property (weak) id<ScopesDelegate> delegate;
+@property (weak) id<MSALScopesDelegate> delegate;
 
 @end
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
         <plugIn identifier="com.apple.WebKit2IBPlugin" version="14460.31"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -763,6 +764,9 @@
                                                         </items>
                                                     </menu>
                                                 </popUpButtonCell>
+                                                <connections>
+                                                    <action selector="selectedProfileChanged:" target="TI1-y4-O1V" id="qiU-fX-JTY"/>
+                                                </connections>
                                             </popUpButton>
                                         </subviews>
                                         <visibilityPriorities>
@@ -1100,7 +1104,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
                                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="x3g-AR-BEb">
                                                     <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
-                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <textView importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="t7N-kO-jh7">
                                                             <rect key="frame" x="0.0" y="0.0" width="994" height="200"/>
@@ -1237,17 +1241,17 @@
                     </view>
                     <connections>
                         <outlet property="acquireTokenView" destination="6dY-tk-HbQ" id="dKa-LT-gli"/>
-                        <outlet property="clientId" destination="VQl-D5-bNc" id="52h-xC-pBL"/>
-                        <outlet property="extraQueryParamsField" destination="9mu-r9-E8E" id="HdX-8g-g5k"/>
-                        <outlet property="loginHintField" destination="CW3-L0-q8K" id="9PB-3J-E87"/>
-                        <outlet property="profiles" destination="nIL-x4-uuN" id="lYZ-SE-cvR"/>
-                        <outlet property="promptBehavior" destination="ato-Jb-i4X" id="1sO-Kv-uuC"/>
-                        <outlet property="redirectUri" destination="0fw-W9-f9B" id="cNm-P4-6uJ"/>
-                        <outlet property="resultView" destination="t7N-kO-jh7" id="rGn-BP-fOg"/>
-                        <outlet property="scopesLabel" destination="YEu-y5-rbc" id="N2t-BX-bBo"/>
-                        <outlet property="validateAuthority" destination="X17-0b-omW" id="oXZ-Oc-PRD"/>
+                        <outlet property="clientIdTextField" destination="VQl-D5-bNc" id="52h-xC-pBL"/>
+                        <outlet property="extraQueryParamsTextField" destination="9mu-r9-E8E" id="HdX-8g-g5k"/>
+                        <outlet property="loginHintTextField" destination="CW3-L0-q8K" id="9PB-3J-E87"/>
+                        <outlet property="profilesPopUp" destination="nIL-x4-uuN" id="lYZ-SE-cvR"/>
+                        <outlet property="promptSegment" destination="ato-Jb-i4X" id="1sO-Kv-uuC"/>
+                        <outlet property="redirectUriTextField" destination="0fw-W9-f9B" id="cNm-P4-6uJ"/>
+                        <outlet property="resultTextView" destination="t7N-kO-jh7" id="rGn-BP-fOg"/>
+                        <outlet property="scopesTextField" destination="YEu-y5-rbc" id="N2t-BX-bBo"/>
+                        <outlet property="validateAuthoritySegment" destination="X17-0b-omW" id="oXZ-Oc-PRD"/>
                         <outlet property="webView" destination="OPe-Ph-gNT" id="kx6-3U-Mw0"/>
-                        <outlet property="webViewType" destination="Z8m-x5-sYy" id="Eib-PX-ouH"/>
+                        <outlet property="webViewSegment" destination="Z8m-x5-sYy" id="Eib-PX-ouH"/>
                     </connections>
                 </viewController>
                 <customObject id="0Yd-60-GE9" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -1291,7 +1295,7 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="430" height="565"/>
                                                 <clipView key="contentView" id="oyy-gY-gNa">
                                                     <rect key="frame" x="1" y="0.0" width="428" height="564"/>
-                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="Uyn-TP-cCj" viewBased="YES" id="RLv-sX-YPS">
                                                             <rect key="frame" x="0.0" y="0.0" width="428" height="541"/>

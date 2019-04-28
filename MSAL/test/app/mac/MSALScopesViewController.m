@@ -93,11 +93,7 @@
 {
     NSIndexSet *indexes = [self.scopesView selectedRowIndexes];
     NSMutableArray *selectedScopes = [[NSMutableArray alloc] init];
-    
-    [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop){
-        [selectedScopes addObject:[self.scopesList objectAtIndex:idx]];
-    }];
-    
+    [selectedScopes addObjectsFromArray:[self.scopesList objectsAtIndexes:indexes]];
     [self.delegate setScopes:selectedScopes];
     [self dismissViewController:self];
 }

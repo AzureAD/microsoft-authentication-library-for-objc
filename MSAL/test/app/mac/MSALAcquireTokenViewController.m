@@ -41,16 +41,16 @@ static NSString * const defaultScope = @"User.Read";
 
 @interface MSALAcquireTokenViewController ()
 
-@property (weak) IBOutlet NSPopUpButton *profiles;
-@property (weak) IBOutlet NSTextField *clientId;
-@property (weak) IBOutlet NSTextField *redirectUri;
-@property (weak) IBOutlet NSTextField *scopesLabel;
-@property (weak) IBOutlet NSSegmentedControl *promptBehavior;
-@property (weak) IBOutlet NSTextField *loginHintField;
-@property (weak) IBOutlet NSTextView *resultView;
-@property (weak) IBOutlet NSTextField *extraQueryParamsField;
-@property (weak) IBOutlet NSSegmentedControl *webViewType;
-@property (weak) IBOutlet NSSegmentedControl *validateAuthority;
+@property (weak) IBOutlet NSPopUpButton *profilesPopUp;
+@property (weak) IBOutlet NSTextField *clientIdTextField;
+@property (weak) IBOutlet NSTextField *redirectUriTextField;
+@property (weak) IBOutlet NSTextField *scopesTextField;
+@property (weak) IBOutlet NSSegmentedControl *promptSegment;
+@property (weak) IBOutlet NSTextField *loginHintTextField;
+@property (weak) IBOutlet NSTextView *resultTextView;
+@property (weak) IBOutlet NSTextField *extraQueryParamsTextField;
+@property (weak) IBOutlet NSSegmentedControl *webViewSegment;
+@property (weak) IBOutlet NSSegmentedControl *validateAuthoritySegment;
 @property (weak) IBOutlet NSStackView *acquireTokenView;
 @property (weak) IBOutlet WKWebView *webView;
 
@@ -67,28 +67,23 @@ static NSString * const defaultScope = @"User.Read";
     self.settings = [MSALTestAppSettings settings];
     [self populateProfiles];
     self.selectedScopes = @[defaultScope];
-    self.validateAuthority.selectedSegment = self.settings.validateAuthority ? 0 : 1;
+    self.validateAuthoritySegment.selectedSegment = self.settings.validateAuthority ? 0 : 1;
 }
 
 - (void)populateProfiles
 {
-    [self.profiles removeAllItems];
-    [self.profiles setTarget:self];
-    [self.profiles setAction:@selector(selectedProfileChanged:)];
-    [[MSALTestAppSettings profiles] enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
-        [self.profiles addItemWithTitle:key];
-    }];
-    
-    [self.profiles selectItemWithTitle:[MSALTestAppSettings currentProfileName]];
-    self.clientId.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
-    self.redirectUri.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
+    [self.profilesPopUp removeAllItems];
+    [self.profilesPopUp addItemsWithTitles:[[MSALTestAppSettings profiles] allKeys]];
+    [self.profilesPopUp selectItemWithTitle:[MSALTestAppSettings currentProfileName]];
+    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
+    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
 }
 
 - (IBAction)selectedProfileChanged:(id)sender
 {
-    [self.settings setCurrentProfile:[self.profiles indexOfSelectedItem]];
-    self.clientId.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
-    self.redirectUri.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
+    [self.settings setCurrentProfile:[self.profilesPopUp indexOfSelectedItem]];
+    self.clientIdTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:clientId];
+    self.redirectUriTextField.stringValue = [[MSALTestAppSettings currentProfile] objectForKey:redirectUri];
 }
 
 - (void)prepareForSegue:(NSStoryboardSegue *)segue sender:(id)sender
@@ -100,17 +95,17 @@ static NSString * const defaultScope = @"User.Read";
     }
 }
 
-- (void)setScopes:(NSMutableArray *)scopes
+- (void)setScopes:(NSArray *)scopes
 {
     if ([scopes count])
     {
         NSString *selectedScopes = [scopes componentsJoinedByString:@","];
-        [self.scopesLabel setStringValue:selectedScopes];
+        [self.scopesTextField setStringValue:selectedScopes];
         self.selectedScopes = scopes;
     }
     else
     {
-        [self.scopesLabel setStringValue:defaultScope];
+        [self.scopesTextField setStringValue:defaultScope];
         self.selectedScopes = @[defaultScope];
     }
 }
@@ -120,7 +115,7 @@ static NSString * const defaultScope = @"User.Read";
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
                             [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
     
-    [self.resultView setString:resultText];
+    [self.resultTextView setString:resultText];
     
     NSLog(@"%@", resultText);
 }
@@ -128,13 +123,13 @@ static NSString * const defaultScope = @"User.Read";
 - (void)updateResultViewError:(NSError *)error
 {
     NSString *resultText = [NSString stringWithFormat:@"%@", error];
-    [self.resultView setString:resultText];
+    [self.resultTextView setString:resultText];
     NSLog(@"%@", resultText);
 }
 
 - (MSALPromptType)promptType
 {
-    NSString *promptType = [self.promptBehavior labelForSegment:[self.promptBehavior selectedSegment]];
+    NSString *promptType = [self.promptSegment labelForSegment:[self.promptSegment selectedSegment]];
     
     if ([promptType isEqualToString:@"Select"])
         return MSALPromptTypeSelectAccount;
@@ -148,7 +143,7 @@ static NSString * const defaultScope = @"User.Read";
 
 - (BOOL)passedInWebview
 {
-    NSString* webViewType = [self.webViewType labelForSegment:[self.webViewType selectedSegment]];
+    NSString* webViewType = [self.webViewSegment labelForSegment:[self.webViewSegment selectedSegment]];
     
     if ([webViewType isEqualToString:@"MSAL"])
     {
@@ -189,7 +184,7 @@ static NSString * const defaultScope = @"User.Read";
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
-    if (self.validateAuthority.selectedSegment == 1)
+    if (self.validateAuthoritySegment.selectedSegment == 1)
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
@@ -199,7 +194,7 @@ static NSString * const defaultScope = @"User.Read";
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultView setString:resultText];
+        [self.resultTextView setString:resultText];
         return;
     }
     
@@ -207,64 +202,61 @@ static NSString * const defaultScope = @"User.Read";
     
     if (result)
     {
-        [self.resultView setString:@"Successfully cleared cache."];
+        [self.resultTextView setString:@"Successfully cleared cache."];
         settings.currentAccount = nil;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
     }
     else
     {
-        [self.resultView setString:[NSString stringWithFormat:@"Failed to clear cache, error = %@", error]];
+        [self.resultTextView setString:[NSString stringWithFormat:@"Failed to clear cache, error = %@", error]];
     }
 }
 
 - (IBAction)clearCookies:(id)sender
 {
-    NSHTTPCookieStorage* cookieStore = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-    NSArray* cookies = cookieStore.cookies;
-    for (NSHTTPCookie* cookie in cookies)
-    {
-        [cookieStore deleteCookie:cookie];
-    }
-    
-    [_resultView setString:[NSString stringWithFormat:@"Cleared %lu cookies.", (unsigned long)cookies.count]];
-    
     // Clear WKWebView cookies
     if (@available(macOS 10.11, *)) {
         NSSet *allTypes = [WKWebsiteDataStore allWebsiteDataTypes];
         [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:allTypes
                                                    modifiedSince:[NSDate dateWithTimeIntervalSince1970:0]
                                                completionHandler:^{}];
+        
+        [_resultTextView setString:[NSString stringWithFormat:@"Successfully Cleared cookies."]];
     }
+}
+
+- (MSALPublicClientApplication *)createPublicClientApplication:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
+    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
+    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
+    MSALAuthority *authority = [self.settings authority];
+    
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    if (self.validateAuthoritySegment.selectedSegment == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:error];
+    
+    return application;
 }
 
 - (IBAction)acquireTokenInteractive:(id)sender
 {
     (void)sender;
     
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    MSALAuthority *authority = [settings authority];
-    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsField stringValue]];
-    
     NSError *error = nil;
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
     
-    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri
-                                                                                                     authority:authority];
-    if (self.validateAuthority.selectedSegment == 1)
-    {
-        pcaConfig.knownAuthorities = @[pcaConfig.authority];
-    }
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
-    
-    if (!application)
+    if (!application || error)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultView setString:resultText];
+        [self.resultTextView setString:resultText];
         return;
     }
     
@@ -304,9 +296,10 @@ static NSString * const defaultScope = @"User.Read";
         [self.webView setHidden:NO];
     }
     
+    NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes];
-    parameters.loginHint = [self.loginHintField stringValue];
-    parameters.account = settings.currentAccount;
+    parameters.loginHint = [self.loginHintTextField stringValue];
+    parameters.account = self.settings.currentAccount;
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
@@ -318,43 +311,26 @@ static NSString * const defaultScope = @"User.Read";
 {
     (void)sender;
     
-    MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    
-    if (!settings.currentAccount)
+    if (!self.settings.currentAccount)
     {
         [self showAlert:@"Error!" informativeText:@"User needs to be selected for acquire token silent call"];
         return;
     }
     
-    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
-    NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
-    NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
-    __auto_type authority = [settings authority];
-    
     NSError *error = nil;
-    
-    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
-                                                                                                   redirectUri:redirectUri
-                                                                                                     authority:authority];
-    if (self.validateAuthority.selectedSegment == 1)
-    {
-        pcaConfig.knownAuthorities = @[pcaConfig.authority];
-    }
-    
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
-    
-    if (!application)
+    MSALPublicClientApplication *application = [self createPublicClientApplication:&error];
+    if (!application || error)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
-        [self.resultView setString:resultText];
+        [self.resultTextView setString:resultText];
         return;
     }
     
     __block BOOL fBlockHit = NO;
     
-    __auto_type account = settings.currentAccount;
+    __auto_type account = self.settings.currentAccount;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:self.selectedScopes account:account];
-    parameters.authority = settings.authority;
+    parameters.authority = self.settings.authority;
     
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
