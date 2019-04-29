@@ -25,27 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppDelegate.h"
+#import "MSALAppDelegate.h"
 
-@interface MSALTestAppDelegate ()
+@interface MSALAppDelegate ()
 
-@property (weak) IBOutlet NSWindow *window;
 @end
 
-@implementation MSALTestAppDelegate
+@implementation MSALAppDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-    (void)aNotification;
 }
 
 
-- (void)applicationWillTerminate:(NSNotification *)aNotification
-{
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
     // Insert code here to tear down your application
-    (void)aNotification;
 }
-
 
 @end

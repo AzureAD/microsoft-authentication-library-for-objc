@@ -25,37 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
-@class MSALAuthority;
-
-extern NSString* MSALTestAppCacheChangeNotification;
-
-@interface MSALTestAppSettings : NSObject
-
-#define MSAL_APP_CLIENT_ID @"clientId"
-#define MSAL_APP_PROFILE @"currentProfile"
-#define MSAL_APP_REDIRECT_URI @"redirectUri"
-
-@property (nonatomic) MSALAuthority *authority;
-@property (nonatomic) MSALAccount *currentAccount;
-@property (nonatomic) NSString *loginHint;
-@property (nonatomic) BOOL validateAuthority;
-@property (nonatomic, readonly) NSSet<NSString *> *scopes;
-
-+ (MSALTestAppSettings*)settings;
-+ (NSArray<NSString *> *)aadAuthorities;
-+ (NSArray<NSString *> *)b2cAuthorities;
-+ (NSArray<NSString *> *)authorityTypes;
-+ (NSArray<NSString *> *)availableScopes;
-
-+ (NSDictionary *)profiles;
-+ (NSString *)currentProfileName;
-+ (NSDictionary *)currentProfile;
-+ (NSString *)profileTitleForIndex:(NSUInteger)index;
-- (void)setCurrentProfile:(NSUInteger)index;
-
-- (BOOL)addScope:(NSString *)scope;
-- (BOOL)removeScope:(NSString *)scope;
+@interface MSALAppDelegate : NSObject <NSApplicationDelegate>
 
 @end
+
