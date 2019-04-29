@@ -124,7 +124,6 @@
                                                           clientId:self.clientId
                                                           familyId:familyId
                                                  accountIdentifier:nil
-                                                 loadIdTokenClaims:YES
                                                            context:nil
                                                              error:&msidError];
     
@@ -175,7 +174,6 @@
                                                           clientId:self.clientId
                                                           familyId:familyId
                                                  accountIdentifier:accountIdentifier
-                                                 loadIdTokenClaims:YES
                                                            context:nil
                                                              error:&msidError];
     

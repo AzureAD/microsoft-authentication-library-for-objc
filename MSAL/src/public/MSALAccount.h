@@ -49,7 +49,15 @@
 @property (readonly, nonnull) NSString *environment;
 
 /*!
- Array of all tenants which are logged in for this account.
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acqure token interactive/silent call.
  */
 @property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 

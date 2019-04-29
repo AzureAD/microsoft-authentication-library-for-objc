@@ -229,7 +229,6 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                              clientId:nil
                                                              familyId:nil
                                                     accountIdentifier:nil
-                                                    loadIdTokenClaims:YES
                                                               context:nil
                                                                 error:nil]];
 

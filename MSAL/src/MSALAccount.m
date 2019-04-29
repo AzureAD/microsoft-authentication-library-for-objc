@@ -89,6 +89,7 @@
                 createTenantProfile:(BOOL)createTenantProfile
 {
     NSError *error;
+    // TODO: use the new msid authority factory which fixes a bug when handling B2C authority
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
     if (error || !authority)
     {
@@ -105,7 +106,10 @@
                                                                               isHomeTenant:account.isHomeTenantAccount
                                                                                     claims:account.idTokenClaims.jsonDictionary];
         
-        tenantProfiles = @[tenantProfile];
+        if (tenantProfile)
+        {
+            tenantProfiles = @[tenantProfile];
+        }
     }
     
     return [self initWithUsername:account.username
@@ -214,7 +218,7 @@
 {
     if (tenantProfiles.count <= 0) return;
     
-    if (self.tenantProfiles)
+    if (self.mTenantProfiles)
     {
         [self.mTenantProfiles addObjectsFromArray:tenantProfiles];
     }
