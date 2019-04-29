@@ -25,10 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Cocoa/Cocoa.h>
+#import "MSALHTTPConfig+Internal.h"
+#import "MSIDURLSessionManager.h"
+#import "MSIDHttpRequest.h"
 
-@interface MSALTestAppDelegate : NSObject <NSApplicationDelegate>
+@implementation MSALHTTPConfig
 
++ (instancetype)sharedInstance
+{
+    static MSALHTTPConfig *sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self.class alloc] init];
+    });
+    
+    return sharedInstance;
+}
+
+
+- (NSInteger)retryCount { return MSIDHttpRequest.retryCountSetting; }
+- (void)setRetryCount:(NSInteger)retryCount { MSIDHttpRequest.retryCountSetting = retryCount; }
+
+- (NSTimeInterval)retryInterval { return MSIDHttpRequest.retryIntervalSetting; }
+- (void)setRetryInterval:(NSTimeInterval)retryInterval { MSIDHttpRequest.retryIntervalSetting = retryInterval; }
+
+- (NSTimeInterval)timeoutIntervalForRequest {
+    return MSIDHttpRequest.requestTimeoutInterval;
+}
+- (void)setTimeoutIntervalForRequest:(NSTimeInterval)timeoutIntervalForRequest
+{
+    MSIDHttpRequest.requestTimeoutInterval = timeoutIntervalForRequest;
+}
 
 @end
-

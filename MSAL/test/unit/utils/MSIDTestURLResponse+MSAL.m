@@ -143,7 +143,7 @@
     return oidcResponse;
 }
 
-+ (MSIDTestURLResponse *)rtResponseForScopes:(MSALScopes *)scopes
++ (MSIDTestURLResponse *)rtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
                                         user:(MSALAccount *)user
@@ -182,7 +182,7 @@
     return tokenResponse;
 }
 
-+ (MSIDTestURLResponse *)errorRtResponseForScopes:(MSALScopes *)scopes
++ (MSIDTestURLResponse *)errorRtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                         authority:(NSString *)authority
                                          tenantId:(NSString *)tid
                                           account:(MSALAccount *)account
@@ -221,7 +221,7 @@
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
-                                   scopes:(MSALScopes *)scopes
+                                   scopes:(NSOrderedSet<NSString *> *)scopes
                                    claims:(NSString *)claims
 {
     return [self authCodeResponse:authcode
@@ -235,7 +235,7 @@
 + (MSIDTestURLResponse *)authCodeResponse:(NSString *)authcode
                                 authority:(NSString *)authority
                                     query:(NSString *)query
-                                   scopes:(MSALScopes *)scopes
+                                   scopes:(NSOrderedSet<NSString *> *)scopes
                                clientInfo:(NSDictionary *)clientInfo
                                    claims:(NSString *)claims
 {
@@ -305,7 +305,7 @@
 
 + (NSDictionary *)defaultQueryParameters
 {
-    return @{MSID_VERSION_KEY:MSIDVersion.sdkVersion, UT_SLICE_PARAMS_DICT};
+    return @{MSID_VERSION_KEY:MSIDVersion.sdkVersion};
 }
 
 @end

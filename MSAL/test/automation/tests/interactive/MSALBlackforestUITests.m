@@ -40,7 +40,7 @@
 {
     [super setUp];
 
-    MSIDTestAutomationConfigurationRequest *configurationRequest = [MSIDTestAutomationConfigurationRequest new];
+    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
     configurationRequest.accountProvider = MSIDTestAccountProviderBlackForest;
     configurationRequest.needsMultipleUsers = NO;
     [self loadTestConfiguration:configurationRequest];
@@ -73,7 +73,7 @@
     request.acquireTokenAuthority = request.configurationAuthority;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
     [self closeResultView];
 
     // 4. Run silent with correct authority
@@ -108,7 +108,7 @@
     request.homeAccountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:@"MSALErrorInteractionRequired"];
+    [self assertErrorCode:MSALErrorInteractionRequired];
     [self closeResultView];
 
     // 4. Run silent with correct authority

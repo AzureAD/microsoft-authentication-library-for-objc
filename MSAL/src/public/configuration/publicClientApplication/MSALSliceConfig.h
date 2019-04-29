@@ -25,27 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppDelegate.h"
+#import <Foundation/Foundation.h>
 
-@interface MSALTestAppDelegate ()
+NS_ASSUME_NONNULL_BEGIN
 
-@property (weak) IBOutlet NSWindow *window;
-@end
+@interface MSALSliceConfig : NSObject <NSCopying>
 
-@implementation MSALTestAppDelegate
+@property NSString *slice;
+@property NSString *dc;
 
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
-    // Insert code here to initialize your application
-    (void)aNotification;
-}
+@property (readonly) NSDictionary *sliceDictionary;
 
+- (nullable instancetype)initWithSlice:(nullable NSString *)slice dc:(nullable NSString *)dc NS_DESIGNATED_INITIALIZER;
 
-- (void)applicationWillTerminate:(NSNotification *)aNotification
-{
-    // Insert code here to tear down your application
-    (void)aNotification;
-}
++ (nullable instancetype)configWithSlice:(nullable NSString *)slice dc:(nullable NSString *)dc;
 
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
+
+NS_ASSUME_NONNULL_END

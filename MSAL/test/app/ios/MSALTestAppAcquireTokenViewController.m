@@ -39,10 +39,13 @@
 #import "MSALTestAppAuthorityTypeViewController.h"
 #import "MSALTestAppProfileViewController.h"
 #import "MSALResult.h"
-#import "MSALLogger.h"
-#import "MSALConstants.h"
+#import "MSALDefinitions.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALAuthority.h"
+#import <MSAL/MSALGlobalConfig.h>
+#import <MSAL/MSALLoggerConfig.h>
+#import "MSALHTTPConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -480,7 +483,7 @@
     (void)sender;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
@@ -488,18 +491,22 @@
 
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    if (_validateAuthority.selectedSegmentIndex == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+    
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
-    
-    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     
@@ -536,20 +543,19 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:MSALTestAppCacheChangeNotification object:self];
         });
     };
+
     
-    application.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
-    application.customWebview = nil;
-    
-    if (application.webviewType == MSALWebviewTypeWKWebView &&
-        _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
+    parameters.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    if (parameters.webviewType == MSALWebviewTypeWKWebView
+        && _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
-        application.customWebview = _webView;
+        parameters.customWebview = _webView;
         
         [_acquireSettingsView setHidden:YES];
         [_authView setHidden:NO];
     }
-    
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
+        
     parameters.loginHint = _loginHintField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptType];
@@ -580,25 +586,29 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    
+    if (_validateAuthority.selectedSegmentIndex == 1)
+    {
+        pcaConfig.knownAuthorities = @[pcaConfig.authority];
+    }
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     if (!application)
     {
         NSString *resultText = [NSString stringWithFormat:@"Failed to create PublicClientApplication:\n%@", error];
         [_resultView setText:resultText];
         return;
     }
-    
-    application.validateAuthority = (_validateAuthority.selectedSegmentIndex == 0);
     
     __block BOOL fBlockHit = NO;
     _acquireSilentButton.enabled = NO;
@@ -645,16 +655,18 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig
+                                                                                                    error:&error];
     
     BOOL result = [application.tokenCache clearWithContext:nil error:&error];
     
@@ -772,17 +784,18 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
     
     NSError *error = nil;
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:clientId
-                                                                                           authority:authority
-                                                                                         redirectUri:redirectUri
-                                                                                               error:&error];
+    MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                   redirectUri:redirectUri
+                                                                                                     authority:authority];
+
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)
     {
@@ -790,30 +803,28 @@
         return;
     }
 
-    [application allAccountsFilteredByAuthority:^(NSArray<MSALAccount *> *accounts, NSError *error) {
+    NSArray<MSALAccount *> *accounts = [application allAccounts:nil];
 
-        NSUInteger existingUserCount = [accounts count];
-        NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
-
-        if (existingUserCount != requiredUserCount)
-        {
-            _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
-            return;
-        }
-
-        [[MSALTestAppTelemetryViewController sharedController] stopTracking];
-        [[MSALLogger sharedLogger] setLevel:MSALLogLevelNothing];
-
-        if ([MSALStressTestHelper runStressTestWithType:type application:application])
-        {
-            _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
-        }
-        else
-        {
-            _resultView.text = @"Cannot start test, because other test is currently running!";
-        }
-
-    }];
+    NSUInteger existingUserCount = [accounts count];
+    NSUInteger requiredUserCount = [MSALStressTestHelper numberOfUsersNeededForTestType:type];
+    
+    if (existingUserCount != requiredUserCount)
+    {
+        _resultView.text = [NSString stringWithFormat:@"Wrong number of users in cache (existing %ld, required %ld)", (unsigned long)existingUserCount, (unsigned long)requiredUserCount];
+        return;
+    }
+    
+    [[MSALTestAppTelemetryViewController sharedController] stopTracking];
+    MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelNothing;
+    
+    if ([MSALStressTestHelper runStressTestWithType:type application:application])
+    {
+        _resultView.text = [NSString stringWithFormat:@"Started running a stress test at %@", [NSDate date]];
+    }
+    else
+    {
+        _resultView.text = @"Cannot start test, because other test is currently running!";
+    }
 }
 
 - (void)stopStressTest
@@ -823,7 +834,7 @@
     _resultView.text = [NSString stringWithFormat:@"Stopped the currently running stress test at %@", [NSDate date]];
     
     [[MSALTestAppTelemetryViewController sharedController] startTracking];
-    [[MSALLogger sharedLogger] setLevel:MSALLogLevelVerbose];
+    MSALGlobalConfig.loggerConfig.logLevel = MSALLogLevelVerbose;
 }
 
 @end

@@ -29,7 +29,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALRedirectUri : NSObject
+@interface MSALRedirectUri : NSObject <NSCopying>
 
 /* Redirect URI that will be used for network requests */
 @property (nonatomic, readonly) NSURL *url;

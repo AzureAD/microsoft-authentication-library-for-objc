@@ -695,7 +695,7 @@
     // Add mock network response for instance discovery
     NSError *error;
     NSString *authorityStr = @"https://login.microsoftonline.com/tid";
-    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:authorityStr] context:nil error:&error];
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:authorityStr] error:&error];
     XCTAssertNil(error);
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authorityStr];
     [discoveryResponse->_requestHeaders removeObjectForKey:MSID_OAUTH2_CORRELATION_ID_REQUEST_VALUE];

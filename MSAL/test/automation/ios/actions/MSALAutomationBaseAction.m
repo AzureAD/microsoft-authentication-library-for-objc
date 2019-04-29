@@ -40,6 +40,7 @@
 #import "MSALAccount.h"
 #import "MSALAccount+Internal.h"
 #import "MSALTenantProfile.h"
+#import "MSALSliceConfig.h"
 
 @implementation MSALAutomationBaseAction
 
@@ -92,16 +93,21 @@
         NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
         authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
     }
-
-    MSALPublicClientApplication *clientApplication =
-    [[MSALPublicClientApplication alloc] initWithClientId:parameters.clientId
-                                                authority:authority
-                                              redirectUri:parameters.redirectUri
-                                                    error:error];
-
-    clientApplication.validateAuthority = validateAuthority;
-    clientApplication.sliceParameters = parameters.sliceParameters;
-
+    
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:parameters.clientId
+                                                                                                redirectUri:parameters.redirectUri
+                                                                                                  authority:authority];
+    
+    if (!validateAuthority)
+    {
+        config.knownAuthorities = @[config.authority];
+    }
+    
+    config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:parameters.sliceParameters[@"slice"] dc:parameters.sliceParameters[@"dc"]];
+    
+    MSALPublicClientApplication *clientApplication = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
+  
     return clientApplication;
 }
 
@@ -125,10 +131,8 @@
 
 - (MSIDAutomationTestResult *)testResultWithMSALError:(NSError *)error
 {
-    NSString *errorName = MSALStringForErrorCode(error.code);
     return [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                        error:error
-                                                   errorName:errorName
                                               additionalInfo:nil];
 }
 
