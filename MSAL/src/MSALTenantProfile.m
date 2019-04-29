@@ -25,41 +25,44 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
+#import "MSALAuthority.h"
+#import "MSALAuthorityFactory.h"
 
-@class MSALAccountId;
-@class MSALTenantProfile;
-@class MSALPublicClientApplication;
+@implementation MSALTenantProfile
 
-@interface MSALAccount : NSObject <NSCopying>
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(NSDictionary *)claims
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _userObjectId = userObjectId;
+        _tenantId = tenantId;
+        _authority = authority;
+        _isHomeTenant = isHomeTenant;
+        _claims = claims;
+    }
+    
+    return self;
+}
 
-/*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
- */
-@property (readonly, nullable) NSString *username;
+#pragma mark - NSCopying
 
-/*!
- Unique identifier of the account in the home directory.
- */
-@property (readonly, nullable) MSALAccountId *homeAccountId;
-
-/*!
- Host part of the authority string used for authentication.
- */
-@property (readonly, nonnull) NSString *environment;
-
-/*!
- Array of all tenants for which a token has been requested by the client.
- 
- Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
- -allAccounts:
- -accountForHomeAccountId:error:
- -accountForUsername:error:
- -allAccountsFilteredByAuthority:
- 
- The field will be nil in other scenarios. E.g., account returned as part of the result of an acqure token interactive/silent call.
- */
-@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
+- (instancetype)copyWithZone:(NSZone *)zone
+{
+    MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
+    tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
+    tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
+    tenantProfile->_authority = [MSALAuthorityFactory authorityFromUrl:_authority.url context:nil error:nil];
+    tenantProfile->_isHomeTenant = _isHomeTenant;
+    tenantProfile->_claims = [[NSDictionary alloc] initWithDictionary:_claims copyItems:YES];
+    return tenantProfile;
+}
 
 @end
-

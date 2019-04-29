@@ -36,23 +36,20 @@
 #import "MSIDAccount.h"
 #import "MSALAccountId+Internal.h"
 #import "MSIDAuthority.h"
-
-@interface MSALAccount ()
-
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-
-@end
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
+#import "MSALPublicClientApplication+Internal.h"
+#import "MSALAuthorityFactory.h"
+#import "MSALAccountsProvider.h"
 
 @implementation MSALAccount
 
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-              tenantId:(NSString *)tenantId
+- (instancetype)initWithUsername:(NSString *)username
+                            name:(NSString *)name
+                   homeAccountId:(NSString *)homeAccountId
+                  localAccountId:(NSString *)localAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
     self = [super init];
 
@@ -76,36 +73,62 @@
         _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
                                                                  objectId:uid
                                                                  tenantId:utid];
-        
-        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
-                                                                  objectId:localAccountId
-                                                                  tenantId:tenantId];
 
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+        
+        if (tenantProfiles.count > 0)
+        {
+            self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+        }
     }
 
     return self;
 }
 
-- (id)initWithMSIDAccount:(MSIDAccount *)account
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account
+                createTenantProfile:(BOOL)createTenantProfile
 {
+    NSError *error;
+    // TODO: use the new msid authority factory which fixes a bug when handling B2C authority
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
+    if (error || !authority)
+    {
+        MSID_LOG_ERROR(nil, @"Failed to create msal authority from msid authority!");
+        return nil;
+    }
+    
+    NSArray *tenantProfiles;
+    if (createTenantProfile)
+    {
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
+                                                                                  tenantId:account.tenantId
+                                                                                 authority:authority
+                                                                              isHomeTenant:account.isHomeTenantAccount
+                                                                                    claims:account.idTokenClaims.jsonDictionary];
+        
+        if (tenantProfile)
+        {
+            tenantProfiles = @[tenantProfile];
+        }
+    }
+    
     return [self initWithUsername:account.username
                              name:account.name
                     homeAccountId:account.accountIdentifier.homeAccountId
                    localAccountId:account.localAccountId
                       environment:account.authority.environment
-                         tenantId:account.authority.url.msidTenant];
+                   tenantProfiles:tenantProfiles];
 }
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(NSZone *)zone
+- (instancetype)copyWithZone:(NSZone *)zone
 {
     MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
     account.username = [self.username copyWithZone:zone];
     account.name = [self.name copyWithZone:zone];
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.localAccountId = [self.localAccountId copyWithZone:zone];
+    account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
     account.environment = [self.environment copyWithZone:zone];
     return account;
 }
@@ -182,6 +205,27 @@
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
 
     return result;
+}
+
+#pragma mark - Tenant profiles
+
+- (NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    return self.mTenantProfiles;
+}
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    if (tenantProfiles.count <= 0) return;
+    
+    if (self.mTenantProfiles)
+    {
+        [self.mTenantProfiles addObjectsFromArray:tenantProfiles];
+    }
+    else
+    {
+        self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+    }
 }
 
 @end

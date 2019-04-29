@@ -25,41 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+@class MSALAuthority;
 
-@class MSALAccountId;
-@class MSALTenantProfile;
-@class MSALPublicClientApplication;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAccount : NSObject <NSCopying>
+@interface MSALTenantProfile : NSObject <NSCopying>
 
-/*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
- */
-@property (readonly, nullable) NSString *username;
-
-/*!
- Unique identifier of the account in the home directory.
- */
-@property (readonly, nullable) MSALAccountId *homeAccountId;
-
-/*!
- Host part of the authority string used for authentication.
- */
-@property (readonly, nonnull) NSString *environment;
-
-/*!
- Array of all tenants for which a token has been requested by the client.
- 
- Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
- -allAccounts:
- -accountForHomeAccountId:error:
- -accountForUsername:error:
- -allAccountsFilteredByAuthority:
- 
- The field will be nil in other scenarios. E.g., account returned as part of the result of an acqure token interactive/silent call.
- */
-@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
+@property (readonly, nullable) MSALAuthority *authority;
+@property (readonly, nullable) NSString *userObjectId;
+@property (readonly, nullable) NSString *tenantId;
+@property (readonly) BOOL isHomeTenant;
+@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
 
 @end
 
+NS_ASSUME_NONNULL_END
