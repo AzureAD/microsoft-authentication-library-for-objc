@@ -61,7 +61,9 @@
 #import "MSALAccountId.h"
 #import "MSIDAuthorityFactory.h"
 #import "MSALErrorConverter.h"
+#if TARGET_OS_IPHONE
 #import "MSIDBrokerInteractiveController.h"
+#endif
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
 #import "MSALRedirectUri.h"
