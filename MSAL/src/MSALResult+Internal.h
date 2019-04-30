@@ -31,6 +31,7 @@
 @class MSIDIdToken;
 @class MSIDClientInfo;
 @class MSIDTokenResult;
+@class MSIDDefaultTokenCacheAccessor;
 
 @interface MSALResult (Internal)
 

@@ -30,6 +30,8 @@
 @class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
 @class MSALAuthority;
+@class MSIDAccount;
+@class MSIDIdTokenClaims;
 
 @interface MSALAccountsProvider : NSObject
 
