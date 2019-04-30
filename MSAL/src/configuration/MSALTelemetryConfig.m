@@ -78,9 +78,9 @@
 - (void)initDispatchers
 {
     __auto_type aggregatedProxyObserver = [MSALTelemetryEventsObservingProxy new];
-    aggregatedProxyObserver.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> * events)
+    aggregatedProxyObserver.telemetryCallback = ^(NSDictionary<NSString *, NSString *> *event)
     {
-        if (self.telemetryCallback != nil) self.telemetryCallback(events);
+        if (self.telemetryCallback != nil) self.telemetryCallback(event);
     };
     __auto_type aggregatedDispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:aggregatedProxyObserver];
     

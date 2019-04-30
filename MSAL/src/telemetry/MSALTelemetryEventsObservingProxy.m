@@ -29,7 +29,11 @@
 
 - (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events
 {
-    if (self.telemetryCallback != nil) self.telemetryCallback(events);
+    NSDictionary<NSString *, NSString *> *aggregatedEvent = [events firstObject];
+    
+    if (!aggregatedEvent) return;
+    
+    if (self.telemetryCallback != nil) self.telemetryCallback(aggregatedEvent);
 }
 
 @end

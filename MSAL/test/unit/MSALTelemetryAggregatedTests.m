@@ -43,7 +43,7 @@
 
 @interface MSALTelemetryAggregatedTests : MSALTestCase
 
-@property (nonatomic) NSArray<NSDictionary<NSString *, NSString *> *> *receivedEvents;
+@property (nonatomic) NSDictionary<NSString *, NSString *> *receivedEvent;
 @property (nonatomic) NSString *requestId;
 @property (nonatomic) MSIDTestContext *context;
 
@@ -55,9 +55,9 @@
 {
     [super setUp];
     
-    MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSDictionary<NSString *, NSString *> *event)
     {
-        self.receivedEvents = events;
+        self.receivedEvent = event;
     };
     
     MSALGlobalConfig.telemetryConfig.piiEnabled = NO;
@@ -76,7 +76,7 @@
     [super tearDown];
     
     MSALGlobalConfig.telemetryConfig.telemetryCallback = nil;
-    self.receivedEvents = nil;
+    self.receivedEvent = nil;
 }
 
 #pragma mark - flush aggregated
@@ -90,9 +90,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -129,9 +128,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -163,9 +161,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -207,9 +204,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 16);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -243,9 +239,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -282,9 +277,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -316,9 +310,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -355,9 +348,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 14);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -389,9 +381,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 8);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -423,9 +414,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 9);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -452,9 +442,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 7);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -488,9 +477,8 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNotNil(self.receivedEvents);
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    XCTAssertNotNil(self.receivedEvent);
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 13);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -523,7 +511,7 @@
     
     [[MSIDTelemetry sharedInstance] flush:requestId];
     
-    XCTAssertNil(self.receivedEvents);
+    XCTAssertNil(self.receivedEvent);
 }
 
 - (void)testFlush_whenThereAre2EventsAndObserverIsSetAndSetTelemetryOnFailureYes_shouldFilterEvents
@@ -537,8 +525,7 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertEqual(self.receivedEvents.count, 1);
-    NSDictionary *eventInfo = self.receivedEvents.firstObject;
+    NSDictionary *eventInfo = self.receivedEvent;
 #if TARGET_OS_IPHONE
     XCTAssertEqual(eventInfo.count, 10);
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
@@ -566,7 +553,7 @@
     
     [[MSIDTelemetry sharedInstance] flush:self.requestId];
     
-    XCTAssertNil(self.receivedEvents);
+    XCTAssertNil(self.receivedEvent);
 }
 
 @end

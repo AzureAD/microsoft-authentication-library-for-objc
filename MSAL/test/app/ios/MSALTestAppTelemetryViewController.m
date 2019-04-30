@@ -73,9 +73,9 @@
 
 - (void)startTracking
 {
-    MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSArray<NSDictionary<NSString *, NSString *> *> *events)
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = ^(NSDictionary<NSString *, NSString *> *event)
     {
-        [_telemetryEvents addObjectsFromArray:events];
+        [_telemetryEvents addObject:event];
         [self refresh];
     };
 }
