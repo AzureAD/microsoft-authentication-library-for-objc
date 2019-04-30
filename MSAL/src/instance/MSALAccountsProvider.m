@@ -37,6 +37,12 @@
 #import "MSIDConfiguration.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDConstants.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDB2CAuthority.h"
+#import "MSIDADFSAuthority.h"
+#import "MSIDIdTokenClaims.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDIdToken.h"
 
 @interface MSALAccountsProvider()
 
@@ -95,64 +101,13 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error 
 {
-    NSError *msidError = nil;
-
-    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
-    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
-
-    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:homeAccountId];
-    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
-                                                          clientId:self.clientId
-                                                          familyId:familyId
-                                                 accountIdentifier:accountIdentifier
-                                                           context:nil
-                                                             error:&msidError];
-    
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-
-    if ([msidAccounts count])
-    {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
-        return msalAccount;
-    }
-
-    return nil;
+    return [self accountForHomeAccountId:homeAccountId username:nil error:error];
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    NSError *msidError = nil;
-
-    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
-    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
-
-    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:nil];
-
-    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
-                                                          clientId:self.clientId
-                                                          familyId:familyId
-                                                 accountIdentifier:accountIdentifier
-                                                           context:nil
-                                                             error:&msidError];
-    
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-    
-    if ([msidAccounts count])
-    {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccounts[0]];
-        return msalAccount;
-    }
-    
-    return nil;
+    return [self accountForHomeAccountId:nil username:username error:error];
 }
 
 #pragma mark - Private
@@ -178,19 +133,71 @@
         return nil;
     }
     
+    return [self msalAccountsFromMSIDAccounts:msidAccounts];
+}
+
+- (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
+{
     NSMutableSet *msalAccounts = [NSMutableSet new];
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount];
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
+        if (!msalAccount) continue;
         
-        if (msalAccount)
+        MSALAccount *existAccount = [msalAccounts member:msalAccount];
+        if (!existAccount)
         {
             [msalAccounts addObject:msalAccount];
+        }
+        else
+        {
+            [existAccount addTenantProfiles:msalAccount.tenantProfiles];
         }
     }
     
     return [msalAccounts allObjects];
+}
+
+- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
+                                username:(NSString *)username
+                                   error:(NSError * __autoreleasing *)error
+{
+    NSError *msidError = nil;
+    
+    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
+    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
+    
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+    
+    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
+                                                          clientId:self.clientId
+                                                          familyId:familyId
+                                                 accountIdentifier:accountIdentifier
+                                                           context:nil
+                                                             error:&msidError];
+    
+    if (msidError)
+    {
+        *error = msidError;
+        return nil;
+    }
+    
+    if ([msidAccounts count])
+    {
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts];
+        if (msalAccounts.count == 1)
+        {
+            return msalAccounts[0];
+        }
+        else if (msalAccounts.count > 1)
+        {
+            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].homeAccountId == msalAccounts[1].homeAccountId ? @"YES" : @"NO", msalAccounts[0].username == msalAccounts[1].username ? @"YES" : @"NO");
+            return msalAccounts[0];
+        }
+    }
+    
+    return nil;
 }
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem

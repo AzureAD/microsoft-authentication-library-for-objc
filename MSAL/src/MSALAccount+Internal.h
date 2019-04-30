@@ -32,19 +32,16 @@
 @class MSIDClientInfo;
 @class MSIDAccount;
 @class MSALAccountId;
+@class MSIDIdTokenClaims;
 
 @interface MSALAccount ()
 
+@property (nonatomic) MSALAccountId *homeAccountId;
+@property (nonatomic) NSString *username;
+@property (nonatomic) NSString *environment;
+@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-
-/* TODO: These properties will be public once we agree on having an account per tenant.
-   For now, will keep them here.
- */
-
-/*!
- Account identifier for the target tenant
- */
-@property (nonatomic) MSALAccountId *localAccountId;
 
 /*!
  The displayable name of the account. Can be nil if not returned by the service.
@@ -60,19 +57,22 @@
  @param  homeAccountId       Unique identifier of the account in the home directory
  @param  localAccountId      Unique identifier of the account in the signed in directory.
  @param  environment         Host part of the authority string
- @param  tenantId            An identifier for the tenant that the account was acquired from
+ @param  tenantProfiles      All tenant profiles associated to this account
  */
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-              tenantId:(NSString *)tenantId;
+- (instancetype)initWithUsername:(NSString *)username
+                            name:(NSString *)name
+                   homeAccountId:(NSString *)homeAccountId
+                  localAccountId:(NSString *)localAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
+ @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account;
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 @end
