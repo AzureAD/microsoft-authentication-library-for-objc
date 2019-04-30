@@ -54,12 +54,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (atomic) BOOL notifyOnFailureOnly DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly instead");
 
 /*!
- If set NO, all telemetry events collected by MSAL will be dispatched;
- If set YES, MSAL will dispatch only one event for each acquire token call.
- */
-@property (atomic) BOOL aggregationRequired DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.aggregationRequired instead");
-
-/*!
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.telemetryCallback instead");
