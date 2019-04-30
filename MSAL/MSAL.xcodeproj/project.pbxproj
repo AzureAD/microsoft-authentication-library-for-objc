@@ -2235,7 +2235,7 @@
 /* Begin PBXNativeTarget section */
 		04A6B57A226921890035C7C2 /* MSAL (iOS Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E5DA69A2272722400B7B816 /* Build configuration list */;
+			buildConfigurationList = 1E5DA69A2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Library)" */;
 			buildPhases = (
 				04A6B5BA226937330035C7C2 /* Headers */,
 				04A6B577226921890035C7C2 /* Sources */,
@@ -2253,7 +2253,7 @@
 		};
 		04A6B59B2269286F0035C7C2 /* MSAL (Mac Static Library) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1E5DA69B2272722400B7B816 /* Build configuration list */;
+			buildConfigurationList = 1E5DA69B2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */;
 			buildPhases = (
 				04A6B5982269286F0035C7C2 /* Headers */,
 				04A6B5992269286F0035C7C2 /* Sources */,
@@ -2482,8 +2482,12 @@
 					};
 					1E614BD922558D8300EBF62F = {
 						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 0;
+							};
 							com.apple.Sandbox = {
 								enabled = 1;
 							};
@@ -3321,12 +3325,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -3347,6 +3351,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
@@ -3385,12 +3390,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -3408,6 +3413,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
@@ -3881,7 +3887,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1E5DA69A2272722400B7B816 /* Build configuration list */ = {
+		1E5DA69A2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (iOS Static Library)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E5DA690227271BF00B7B816 /* Debug */,
@@ -3890,7 +3896,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1E5DA69B2272722400B7B816 /* Build configuration list */ = {
+		1E5DA69B2272722400B7B816 /* Build configuration list for PBXNativeTarget "MSAL (Mac Static Library)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1E5DA692227271BF00B7B816 /* Debug */,
