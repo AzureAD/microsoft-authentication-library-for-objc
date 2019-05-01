@@ -328,7 +328,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         return YES;
     }
 
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response error:nil])
     {
         return YES;
     }
