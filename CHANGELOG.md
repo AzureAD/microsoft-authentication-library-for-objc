@@ -1,3 +1,7 @@
+## [0.4.1] - 2019-05-02
+### Fixed
+- Removed linked frameworks from static library targets
+
 ## [0.4.0] - 2019-04-25
 ### Added
 - Updated MSAL Public API surface to be more extensible and intuitive
