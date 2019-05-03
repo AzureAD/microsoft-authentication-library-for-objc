@@ -790,7 +790,7 @@
     
     // Set optional params
     msidParams.accountIdentifier = parameters.account.lookupAccountIdentifier;
-    msidParams.validateAuthority = _validateAuthority;
+    msidParams.validateAuthority = shouldValidate;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     msidParams.extraURLQueryParameters = self.internalConfig.extraQueryParameters.extraURLQueryParameters;
@@ -808,6 +808,7 @@
                     @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                     "                                                  account:%@\n"
                     "                                                authority:%@\n"
+                    "                                        validateAuthority:%@\n"
                     "                                             forceRefresh:%@\n"
                     "                                            correlationId:%@\n"
                     "                                             capabilities:%@\n"
@@ -815,6 +816,7 @@
                     _PII_NULLIFY(parameters.scopes),
                     _PII_NULLIFY(parameters.account),
                     _PII_NULLIFY(parameters.authority),
+                    shouldValidate ? @"Yes" : @"No",
                     parameters.forceRefresh ? @"Yes" : @"No",
                     parameters.correlationId,
                     self.internalConfig.clientApplicationCapabilities,
@@ -824,6 +826,7 @@
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                  "                                                  account:%@\n"
                  "                                                authority:%@\n"
+                 "                                        validateAuthority:%@\n"
                  "                                             forceRefresh:%@\n"
                  "                                            correlationId:%@\n"
                  "                                             capabilities:%@\n"
@@ -831,6 +834,7 @@
                  parameters.scopes,
                  parameters.account,
                  parameters.authority,
+                 shouldValidate ? @"Yes" : @"No",
                  parameters.forceRefresh ? @"Yes" : @"No",
                  parameters.correlationId,
                  self.internalConfig.clientApplicationCapabilities,
