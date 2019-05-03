@@ -25,36 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALB2CAuthority.h"
-#import "MSALAuthority_Internal.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAuthority+Internal.h"
+#import "MSALCacheViewController.h"
 
-@implementation MSALB2CAuthority
+@interface MSALCacheViewController ()
 
-- (instancetype)initWithURL:(NSURL *)url
-                      error:(NSError **)error
-{
-    return [self initWithURL:url validateFormat:NO error:error];
-}
+@end
 
-- (instancetype)initWithURL:(NSURL *)url
-             validateFormat:(BOOL)validateFormat
-                      error:(NSError **)error
-{
-    self = [super initWithURL:url error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url validateFormat:validateFormat context:nil  error:error];
-        if (!self.msidAuthority) return nil;
-    }
-    
-    return self;
-}
+@implementation MSALCacheViewController
 
-- (NSURL *)url
-{
-    return self.msidAuthority.url;
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do view setup here.
 }
 
 @end

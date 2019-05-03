@@ -25,27 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppDelegate.h"
+#import "MSALB2CAuthority.h"
 
-@interface MSALTestAppDelegate ()
+@interface MSALB2CAuthority()
 
-@property (weak) IBOutlet NSWindow *window;
-@end
-
-@implementation MSALTestAppDelegate
-
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
-{
-    // Insert code here to initialize your application
-    (void)aNotification;
-}
-
-
-- (void)applicationWillTerminate:(NSNotification *)aNotification
-{
-    // Insert code here to tear down your application
-    (void)aNotification;
-}
-
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                      validateFormat:(BOOL)validateFormat
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end

@@ -25,36 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALB2CAuthority.h"
-#import "MSALAuthority_Internal.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAuthority+Internal.h"
+@class MSALAuthority;
 
-@implementation MSALB2CAuthority
+NS_ASSUME_NONNULL_BEGIN
 
-- (instancetype)initWithURL:(NSURL *)url
-                      error:(NSError **)error
-{
-    return [self initWithURL:url validateFormat:NO error:error];
-}
+@interface MSALTenantProfile ()
 
-- (instancetype)initWithURL:(NSURL *)url
-             validateFormat:(BOOL)validateFormat
-                      error:(NSError **)error
-{
-    self = [super initWithURL:url error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url validateFormat:validateFormat context:nil  error:error];
-        if (!self.msidAuthority) return nil;
-    }
-    
-    return self;
-}
+@property (readwrite, nullable) NSString *userObjectId;
+@property (readwrite, nullable) NSString *tenantId;
+@property (readwrite) BOOL isHomeTenant;
+@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 
-- (NSURL *)url
-{
-    return self.msidAuthority.url;
-}
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(nullable NSDictionary *)claims;
 
 @end
+
+NS_ASSUME_NONNULL_END

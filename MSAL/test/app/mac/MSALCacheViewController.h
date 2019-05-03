@@ -27,8 +27,10 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface MSALTestAppDelegate : NSObject <NSApplicationDelegate>
+NS_ASSUME_NONNULL_BEGIN
 
+@interface MSALCacheViewController : NSViewController
 
 @end
 
+NS_ASSUME_NONNULL_END

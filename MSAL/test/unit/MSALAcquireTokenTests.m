@@ -75,6 +75,7 @@
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDVersion.h"
 #import "MSIDConstants.h"
+#import "MSALTenantProfile.h"
 #import "MSALClaimsRequest.h"
 
 @interface MSALAcquireTokenTests : MSALTestCase
@@ -285,7 +286,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
@@ -354,7 +355,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     // Add AT & RT.
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
@@ -1066,7 +1067,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1137,7 +1138,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1209,7 +1210,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
 
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1269,7 +1270,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
 
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1342,7 +1343,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1494,7 +1495,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -1596,7 +1597,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
@@ -1685,7 +1686,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
@@ -1752,7 +1753,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
                                      account:account
@@ -1813,7 +1814,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
@@ -1898,7 +1899,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
@@ -1982,7 +1983,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes
@@ -2049,7 +2050,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     
@@ -2120,7 +2121,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     configuration.clientId = UNIT_TEST_CLIENT_ID;
@@ -2207,7 +2208,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     // Add AT, RT & FRT
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
@@ -2297,7 +2298,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     
@@ -2386,7 +2387,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     MSIDConfiguration *configuration = [MSIDTestConfiguration v2DefaultConfiguration];
     
@@ -2495,7 +2496,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenForScopes:@[@"fakescope"]
                   extraScopesToConsent:nil

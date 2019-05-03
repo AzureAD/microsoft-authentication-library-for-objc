@@ -483,7 +483,7 @@
     (void)sender;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
@@ -586,7 +586,7 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
@@ -655,7 +655,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
@@ -784,7 +784,7 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
