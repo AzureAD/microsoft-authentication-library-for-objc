@@ -39,6 +39,7 @@
 #import "MSIDAutomationSuccessResult.h"
 #import "MSALAccount.h"
 #import "MSALAccount+Internal.h"
+#import "MSALTenantProfile.h"
 #import "MSALSliceConfig.h"
 
 @implementation MSALAutomationBaseAction
@@ -146,11 +147,11 @@
     NSInteger expiresOn = [msalResult.expiresOn timeIntervalSince1970];
 
     MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
-    userInfo.objectId = msalResult.account.localAccountId.objectId;
+    userInfo.objectId = msalResult.tenantProfile.userObjectId;
     userInfo.tenantId = msalResult.tenantId;
     userInfo.username = msalResult.account.username;
     userInfo.homeAccountId = msalResult.account.homeAccountId.identifier;
-    userInfo.localAccountId = msalResult.account.localAccountId.identifier;
+    userInfo.localAccountId = msalResult.tenantProfile.userObjectId;
     userInfo.homeObjectId = msalResult.account.homeAccountId.objectId;
     userInfo.homeTenantId = msalResult.account.homeAccountId.tenantId;
     userInfo.environment = msalResult.account.environment;

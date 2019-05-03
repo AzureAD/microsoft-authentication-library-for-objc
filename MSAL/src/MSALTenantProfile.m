@@ -25,36 +25,44 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALB2CAuthority.h"
-#import "MSALAuthority_Internal.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAuthority+Internal.h"
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
+#import "MSALAuthority.h"
+#import "MSALAuthorityFactory.h"
 
-@implementation MSALB2CAuthority
+@implementation MSALTenantProfile
 
-- (instancetype)initWithURL:(NSURL *)url
-                      error:(NSError **)error
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(NSDictionary *)claims
 {
-    return [self initWithURL:url validateFormat:NO error:error];
-}
-
-- (instancetype)initWithURL:(NSURL *)url
-             validateFormat:(BOOL)validateFormat
-                      error:(NSError **)error
-{
-    self = [super initWithURL:url error:error];
+    self = [super init];
+    
     if (self)
     {
-        self.msidAuthority = [[MSIDB2CAuthority alloc] initWithURL:url validateFormat:validateFormat context:nil  error:error];
-        if (!self.msidAuthority) return nil;
+        _userObjectId = userObjectId;
+        _tenantId = tenantId;
+        _authority = authority;
+        _isHomeTenant = isHomeTenant;
+        _claims = claims;
     }
     
     return self;
 }
 
-- (NSURL *)url
+#pragma mark - NSCopying
+
+- (instancetype)copyWithZone:(NSZone *)zone
 {
-    return self.msidAuthority.url;
+    MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
+    tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
+    tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
+    tenantProfile->_authority = [MSALAuthorityFactory authorityFromUrl:_authority.url context:nil error:nil];
+    tenantProfile->_isHomeTenant = _isHomeTenant;
+    tenantProfile->_claims = [[NSDictionary alloc] initWithDictionary:_claims copyItems:YES];
+    return tenantProfile;
 }
 
 @end

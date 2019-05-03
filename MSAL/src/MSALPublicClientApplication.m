@@ -452,7 +452,7 @@
     msidParams.validateAuthority = _validateAuthority;
     
     if (msidParams.validateAuthority
-        && [self shouldDisableValidationForAuthority:requestAuthority])
+        && [self shouldExcludeValidationForAuthority:requestAuthority])
     {
         msidParams.validateAuthority = NO;
     }
@@ -740,20 +740,35 @@
 - (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
                          completionBlock:(MSALCompletionBlock)completionBlock
 {
-//    [self acquireTokenSilentForScopes:parameters.scopes
-//                              account:parameters.account
-//                            authority:parameters.authority
-//                        claimsRequest:parameters.claimsRequest
-//                         forceRefresh:parameters.forceRefresh
-//                        correlationId:parameters.correlationId
-//                                apiId:parameters.telemetryApiId
-//                      completionBlock:completionBlock];
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    
+    BOOL shouldValidate = _validateAuthority;
+    
+    if (shouldValidate && [self shouldExcludeValidationForAuthority:requestAuthority])
+    {
+        shouldValidate = NO;
+    }
+    
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
      */
-    requestAuthority = [MSIDAuthorityFactory authorityFromUrl:requestAuthority.url rawTenant:parameters.account.homeAccountId.tenantId context:nil error:nil];
+    NSError *authorityError = nil;
+    requestAuthority = [MSIDAuthorityFactory authorityWithRawTenant:parameters.account.homeAccountId.tenantId
+                                                      msidAuthority:requestAuthority context:nil error:&authorityError];
+    
+    if (!requestAuthority)
+    {
+        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+        
+        if (completionBlock)
+        {
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
     
     NSError *msidError = nil;
     
@@ -784,7 +799,7 @@
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
     if (msidParams.validateAuthority
-        && [self shouldDisableValidationForAuthority:requestAuthority])
+        && [self shouldExcludeValidationForAuthority:requestAuthority])
     {
         msidParams.validateAuthority = NO;
     }
@@ -994,7 +1009,7 @@
 
 @implementation MSALPublicClientApplication (Internal)
 
-- (BOOL)shouldDisableValidationForAuthority:(MSIDAuthority *)authority
+- (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
 {
     if (self.internalConfig.knownAuthorities)
     {

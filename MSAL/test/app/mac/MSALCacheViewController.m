@@ -25,16 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTestAppTelemetryDispatcher.h"
+#import "MSALCacheViewController.h"
 
-@implementation MSALTestAppTelemetryDispatcher
+@interface MSALCacheViewController ()
 
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
-{
-    if (_dispatcherCallback)
-    {
-        _dispatcherCallback(events);
-    }
+@end
+
+@implementation MSALCacheViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do view setup here.
 }
 
 @end

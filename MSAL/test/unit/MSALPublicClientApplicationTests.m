@@ -64,9 +64,11 @@
 #import "MSALRedirectUri.h"
 #import "MSIDAppMetadataCacheItem.h"
 #import "MSIDTestURLResponse+Util.h"
+#import "MSALTenantProfile.h"
 #import "MSALSliceConfig.h"
 #import "MSALCacheConfig.h"
 #import "MSALB2CAuthority.h"
+#import "MSALAccountId+Internal.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -493,6 +495,98 @@
      }];
 }
 
+- (void)testAcquireTokenSilent_whenKnownB2CAuthority_shouldNotValidate
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signup-signin"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/tfp/utid/B2C_1_signup-signin");
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccount *account = [MSALAccount new];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
+    [account setValue:accountId forKey:@"homeAccountId"];
+    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        
+                                 XCTAssertNil(result);
+                                 XCTAssertNotNil(error);
+    }];
+}
+
+- (void)testAcquireTokenSilent_whenNoTfpAuthority_shouldNotValidate
+{
+    NSURL *authorityURL = [NSURL URLWithString:@"https://contoso.b2clogin.com/contoso.onmicrosoft.com/nontfp_path/B2C_1_signup-signin"];
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:b2cAuthority];
+    config.knownAuthorities = @[b2cAuthority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+#if TARGET_OS_IPHONE
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+#endif
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertNotNil(params);
+         
+         XCTAssertFalse(params.validateAuthority);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/contoso.onmicrosoft.com/nontfp_path/B2C_1_signup-signin");
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccount *account = [MSALAccount new];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
+    [account setValue:accountId forKey:@"homeAccountId"];
+    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                 
+                                 XCTAssertNil(result);
+                                 XCTAssertNotNil(error);
+                             }];
+}
+
 #pragma mark - acquireToken using Login Hint
 
 - (void)testAcquireScopesLoginHint
@@ -694,7 +788,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -757,7 +851,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -824,7 +918,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
                               class:[MSIDLocalInteractiveController class]
@@ -925,7 +1019,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -987,7 +1081,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1049,7 +1143,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1110,7 +1204,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1171,7 +1265,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"custom_guest_tenant"];
+                                                  tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1236,7 +1330,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     authority = [@"https://login.microsoft.com/common" msalAuthority];
     
@@ -1292,6 +1386,8 @@
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
+    XCTAssertEqual(account.tenantProfiles.count, 1);
+    XCTAssertTrue(account.tenantProfiles[0].isHomeTenant);
 }
 
 - (void)testAllAccounts_when2AccountExists_shouldReturn2Accounts
@@ -1303,19 +1399,30 @@
     application.tokenCache = self.tokenCacheAccessor;
     
     NSError *error = nil;
-    NSArray *accounts = [application allAccounts:&error];
+    NSArray<MSALAccount *> *accounts = [application allAccounts:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(accounts);
     XCTAssertEqual([accounts count], 2);
     
-    MSALAccount *account = accounts[0];
+    MSALAccount *account;
+    MSALAccount *account2;
+    if ([@"login.microsoftonline.com" isEqualToString:accounts[0].environment])
+    {
+        account = accounts[0];
+        account2 = accounts[1];
+    }
+    else
+    {
+        account = accounts[1];
+        account2 = accounts[0];
+    }
+
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"myuid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"utid");
     
-    MSALAccount *account2 = accounts[1];
     XCTAssertEqualObjects(account2.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account2.environment, @"example.com");
     XCTAssertEqualObjects(account2.homeAccountId.identifier, @"myuid.utid");
@@ -1653,7 +1760,7 @@
     
     MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
                                                                configuration:[self msalDefaultConfiguration]];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
     
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
     
@@ -1700,7 +1807,7 @@
 
     MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:msidResponse
                                                                configuration:configuration];
-    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
 
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
 
@@ -1755,7 +1862,7 @@
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
-                                                        tenantId:@"1234-5678-90abcdefg"];
+                                                  tenantProfiles:nil];
     
     NSError *error;
     BOOL result = [application removeAccount:account error:&error];
@@ -1862,7 +1969,7 @@
 
 - (MSIDAADV2TokenResponse *)msalDefaultTokenResponseWithAuthority:(NSString *)authorityString familyId:(NSString *)familyId
 {
-    NSDictionary* idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com"};
+    NSDictionary* idTokenClaims = @{ @"home_oid" : @"myuid", @"preferred_username": @"fakeuser@contoso.com", @"tid": @"utid"};
     NSDictionary* clientInfoClaims = @{ @"uid" : @"myuid", @"utid" : @"utid"};
     
     NSString *rawIdToken = [NSString stringWithFormat:@"fakeheader.%@.fakesignature",

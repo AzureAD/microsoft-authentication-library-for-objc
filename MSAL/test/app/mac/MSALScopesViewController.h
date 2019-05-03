@@ -25,17 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTelemetryTestDispatcher.h"
+#import <Cocoa/Cocoa.h>
 
-@implementation MSALTelemetryTestDispatcher
+NS_ASSUME_NONNULL_BEGIN
 
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events
-{
-    if (_dispatcherCallback)
-    {
-        _dispatcherCallback(events);
-    }
-}
+@protocol MSALScopesDelegate <NSObject>
+- (void)setScopes:(NSArray *)scopes;
+@end
 
+@interface MSALScopesViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate, NSWindowDelegate>
+
+@property (weak) id<MSALScopesDelegate> delegate;
 
 @end
+
+NS_ASSUME_NONNULL_END

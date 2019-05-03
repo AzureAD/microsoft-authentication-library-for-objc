@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,27 +17,29 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSALTelemetryDefaultEvent.h"
+#import "MSALAppDelegate.h"
 
-@implementation MSALTelemetryDefaultEvent
+@interface MSALAppDelegate ()
 
-- (id)initWithName:(NSString *)eventName
-           context:(id<MSIDRequestContext>)context
-{
-    if (!(self = [super initWithName:eventName context:context]))
-    {
-        return nil;
-    }
-    
-    [self addDefaultProperties];
-    
-    return self;
+@end
+
+@implementation MSALAppDelegate
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    // Insert code here to initialize your application
+}
+
+
+- (void)applicationWillTerminate:(NSNotification *)aNotification {
+    // Insert code here to tear down your application
 }
 
 @end

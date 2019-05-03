@@ -25,13 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALTelemetry.h"
+@class MSALAuthority;
 
-typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *event);
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALTelemetryTestDispatcher : NSObject <MSALTelemetryDispatcher>
+@interface MSALTenantProfile ()
 
-@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
+@property (readwrite, nullable) NSString *userObjectId;
+@property (readwrite, nullable) NSString *tenantId;
+@property (readwrite) BOOL isHomeTenant;
+@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
+
+- (instancetype)initWithUserObjectId:(NSString *)userObjectId
+                            tenantId:(NSString *)tenantId
+                           authority:(MSALAuthority *)authority
+                        isHomeTenant:(BOOL)isHomeTenant
+                              claims:(nullable NSDictionary *)claims;
 
 @end
+
+NS_ASSUME_NONNULL_END

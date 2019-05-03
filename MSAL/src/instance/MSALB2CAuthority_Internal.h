@@ -25,13 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
-#import "MSALTelemetry.h"
+#import "MSALB2CAuthority.h"
 
-typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
+@interface MSALB2CAuthority()
 
-@interface MSALTestAppTelemetryDispatcher : NSObject <MSALTelemetryDispatcher>
-
-@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
+- (nullable instancetype)initWithURL:(nonnull NSURL *)url
+                      validateFormat:(BOOL)validateFormat
+                               error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
 @end
