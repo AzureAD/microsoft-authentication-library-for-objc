@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #if TARGET_OS_IPHONE
 /*!
- Modal presentation type for displaying authentication web content.
+ Modal presentation style for displaying authentication web content.
  */
 @property (nullable, weak, nonatomic) UIViewController *parentViewController;
 @property (nonatomic) UIModalPresentationStyle presentationStyle;
@@ -82,8 +82,13 @@ NS_ASSUME_NONNULL_BEGIN
  A specific prompt type for the interactive authentication flow.
  By default, it will be set to MSALGlobalConfig.defaultWebviewType.
  */
-@property (nonatomic, nullable) WKWebView *customWebview;
 @property (nonatomic) MSALWebviewType webviewType;
+/*!
+ For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
+ Web content will be rendered onto this view.
+ Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
+ */
+@property (nonatomic, nullable) WKWebView *customWebview;
 
 @end
 
