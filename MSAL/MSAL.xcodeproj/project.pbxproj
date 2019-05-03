@@ -924,7 +924,6 @@
 		96B5E6F12256D197002232F9 /* MSALExtraQueryParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALExtraQueryParameters.m; sourceTree = "<group>"; };
 		96CFA0081E6E3454003BFCDC /* MSALTestAppScopesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTestAppScopesViewController.h; sourceTree = "<group>"; };
 		96CFA0091E6E3454003BFCDC /* MSALTestAppScopesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppScopesViewController.m; sourceTree = "<group>"; };
-		96D3F8A12272820D00DD3440 /* MSALInteractiveTokenParameters+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALInteractiveTokenParameters+Internal.h"; sourceTree = "<group>"; };
 		96D9A5431E4AB1DC00674A85 /* MSALTelemetry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSALTelemetry.h; sourceTree = "<group>"; };
 		96D9A5471E4AB22900674A85 /* MSALTelemetry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALTelemetry.m; sourceTree = "<group>"; };
 		B203459221AF77FB00B221AA /* MSALRedirectUri.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALRedirectUri.h; sourceTree = "<group>"; };
@@ -1637,7 +1636,6 @@
 				B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */,
 				B28BBD322211DC7D00F51723 /* MSALPublicClientStatusNotifications.m */,
 				232D68FF2240A3FF00594BBD /* MSALTokenParameters+Internal.h */,
-				96D3F8A12272820D00DD3440 /* MSALInteractiveTokenParameters+Internal.h */,
 				232D68C9223DB00500594BBD /* MSALTokenParameters.m */,
 				232D68DB223DBA0700594BBD /* MSALInteractiveTokenParameters.m */,
 				232D68D5223DB8C200594BBD /* MSALSilentTokenParameters.m */,

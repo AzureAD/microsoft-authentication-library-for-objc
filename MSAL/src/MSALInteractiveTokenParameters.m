@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALInteractiveTokenParameters.h"
-#import "MSALInteractiveTokenParameters+Internal.h"
 #import "MSALTokenParameters+Internal.h"
 #import "MSALGlobalConfig.h"
 
