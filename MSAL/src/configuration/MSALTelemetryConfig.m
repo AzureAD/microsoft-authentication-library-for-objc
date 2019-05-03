@@ -27,11 +27,10 @@
 
 #import "MSALTelemetryConfig+Internal.h"
 #import "MSIDTelemetryEventInterface.h"
-#import "MSALDefaultDispatcher.h"
 #import "MSIDTelemetry.h"
 #import "MSIDTelemetry+Internal.h"
 #import "MSALTelemetryEventsObservingProxy.h"
-#import "MSALAggregatedDispatcher.h"
+#import "MSIDAggregatedDispatcher.h"
 
 @interface MSALTelemetryConfig()
 
@@ -82,7 +81,7 @@
     {
         if (self.telemetryCallback != nil) self.telemetryCallback(event);
     };
-    __auto_type aggregatedDispatcher = [[MSALAggregatedDispatcher alloc] initWithProxyObserver:aggregatedProxyObserver];
+    __auto_type aggregatedDispatcher = [[MSIDAggregatedDispatcher alloc] initWithObserver:aggregatedProxyObserver];
     
     [[MSIDTelemetry sharedInstance] addDispatcher:aggregatedDispatcher];
 }
