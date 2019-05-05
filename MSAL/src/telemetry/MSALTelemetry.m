@@ -37,22 +37,6 @@
     return sharedInstance;
 }
 
-- (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
-setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
-{
-    [MSALGlobalConfig.telemetryConfig addDispatcher:dispatcher setTelemetryOnFailure:setTelemetryOnFailure];
-}
-
-- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
-{
-    [MSALGlobalConfig.telemetryConfig removeDispatcher:dispatcher];
-}
-
-- (void)removeAllDispatchers
-{
-    [MSALGlobalConfig.telemetryConfig removeAllDispatchers];
-}
-
 - (BOOL)piiEnabled
 {
     return MSALGlobalConfig.telemetryConfig.piiEnabled;
@@ -61,6 +45,26 @@ setTelemetryOnFailure:(BOOL)setTelemetryOnFailure
 - (void)setPiiEnabled:(BOOL)piiEnabled
 {
     MSALGlobalConfig.telemetryConfig.piiEnabled = piiEnabled;
+}
+
+- (BOOL)notifyOnFailureOnly
+{
+    return MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly;
+}
+
+- (void)setNotifyOnFailureOnly:(BOOL)notifyOnFailureOnly
+{
+    MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly = notifyOnFailureOnly;
+}
+
+- (MSALTelemetryCallback)telemetryCallback
+{
+    return MSALGlobalConfig.telemetryConfig.telemetryCallback;
+}
+
+- (void)setTelemetryCallback:(MSALTelemetryCallback)telemetryCallback
+{
+    MSALGlobalConfig.telemetryConfig.telemetryCallback = telemetryCallback;
 }
 
 @end

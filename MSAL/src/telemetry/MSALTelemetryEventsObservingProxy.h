@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,21 +15,21 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSALTelemetry.h"
+#import "MSIDTelemetryEventsObserving.h"
 
-typedef void(^DispatcherCallback)(NSArray<NSDictionary<NSString *, NSString *> *> *events);
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALTestAppTelemetryDispatcher : NSObject <MSALTelemetryDispatcher>
+@interface MSALTelemetryEventsObservingProxy : NSObject <MSIDTelemetryEventsObserving>
 
-@property (nonatomic, copy) DispatcherCallback dispatcherCallback;
+@property (nonatomic, copy, nullable) MSALTelemetryCallback telemetryCallback;
 
 @end
+
+NS_ASSUME_NONNULL_END
