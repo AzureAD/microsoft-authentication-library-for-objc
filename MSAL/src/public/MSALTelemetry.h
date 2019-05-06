@@ -34,8 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALTelemetry : NSObject
 
-- (instancetype _Nullable)init NS_UNAVAILABLE;
-+ (instancetype _Nullable)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 /*!
  Get a singleton instance of MSALTelemetry.
