@@ -21,11 +21,6 @@
 ### Added
 - Added broker support to MSAL iOS SDK
 
-## [0.3.0] - 2019-04-22
-### Added
--Added broker support to MSAL iOS SDK
->>>>>>> origin/hotfix/0.3.1
-
 ## [0.2.3] - 2019-02-12
 ### Fixed
 - Fix issue when authorization code cannot be read due to a dummy fragment in response URL for B2C (#456)
