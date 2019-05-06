@@ -45,22 +45,4 @@
     return self;
 }
 
-- (id)internalParentController
-{
-#if TARGET_OS_IPHONE
-    return _parentViewController;
-#else
-    return nil;
-#endif
-}
-
-- (NSInteger)internalPresentationStyle
-{
-#if TARGET_OS_IPHONE
-    return _presentationStyle;
-#else
-    return 0;
-#endif
-}
-
 @end
