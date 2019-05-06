@@ -30,6 +30,7 @@
 #import "MSIDADFSAuthority.h"
 #import "MSIDAuthority+Internal.h"
 #import "MSALAuthority_Internal.h"
+#import "MSALErrorConverter.h"
 
 @implementation MSALADFSAuthority
 
@@ -41,7 +42,8 @@
 #ifdef ADFS_NOT_YET_SUPPORTED
     if (error)
     {
-        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"AD FS authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"AD FS authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     }
     return nil;
 #else

@@ -797,13 +797,7 @@
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
-    
-    if (msidParams.validateAuthority
-        && [self shouldExcludeValidationForAuthority:requestAuthority])
-    {
-        msidParams.validateAuthority = NO;
-    }
-    
+
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
                     @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                     "                                                  account:%@\n"

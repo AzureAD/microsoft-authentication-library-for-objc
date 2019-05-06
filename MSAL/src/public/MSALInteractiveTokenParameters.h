@@ -79,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
 /*!
- A specific prompt type for the interactive authentication flow.
+ A specific webView type for the interactive authentication flow.
  By default, it will be set to MSALGlobalConfig.defaultWebviewType.
  */
 @property (nonatomic) MSALWebviewType webviewType;
