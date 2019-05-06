@@ -31,12 +31,16 @@
 
 @implementation MSALInteractiveTokenParameters
 
+@synthesize telemetryApiId;
+
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
 {
     self = [super initWithScopes:scopes];
     if (self)
     {
-        _webviewType = MSALGlobalConfig.defaultWebviewType;
+        self.webviewType = MSALGlobalConfig.defaultWebviewType;
+        self.promptType = MSALPromptTypeDefault;
+        self.telemetryApiId = MSALTelemetryApiIdAcquireWithTokenParameters;
     }
     return self;
 }

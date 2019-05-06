@@ -53,6 +53,7 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALResult.h>
 #import <MSAL/MSALAccount.h>
 #import <MSAL/MSALAccountId.h>
+#import <MSAL/MSALTelemetry.h>
 #import <MSAL/MSALAuthority.h>
 #import <MSAL/MSALAADAuthority.h>
 #import <MSAL/MSALB2CAuthority.h>

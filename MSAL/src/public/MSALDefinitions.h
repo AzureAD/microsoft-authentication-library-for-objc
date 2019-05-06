@@ -117,5 +117,11 @@ typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable a
  */
 typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
 
+/*!
+ MSAL telemetry callback.
+ 
+ @param event Aggregated telemetry event.
+ */
+typedef void(^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
 
 #endif /* MSALConstants_h */
