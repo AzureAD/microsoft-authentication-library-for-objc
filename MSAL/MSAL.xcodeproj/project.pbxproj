@@ -90,17 +90,6 @@
 		04A6B6152269383D0035C7C2 /* MSALOauth2FactoryProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = B28BDA8C217E9EAB003E5670 /* MSALOauth2FactoryProducer.h */; };
 		04A6B6162269383F0035C7C2 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
 		04A6B6172269383F0035C7C2 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
-		04A6B618226938590035C7C2 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		04A6B619226938650035C7C2 /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DFC20E1590200200E6F /* SecurityInterface.framework */; };
-		04A6B61A226938690035C7C2 /* GSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DFA20E158E700200E6F /* GSS.framework */; };
-		04A6B61B2269386F0035C7C2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
-		04A6B61C226938730035C7C2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DF520E1579000200E6F /* WebKit.framework */; };
-		04A6B61D226938790035C7C2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2063B1FC510FB00755A51 /* IOKit.framework */; };
-		04A6B61E2269387C0035C7C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
-		04A6B61F2269387F0035C7C2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
-		04A6B620226938830035C7C2 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
-		04A6B621226938870035C7C2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
-		04A6B6222269388B0035C7C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
 		04A6B623226938D20035C7C2 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206251FC50A4D00755A51 /* libIdentityCore.a */; };
 		04A6B624226938EA0035C7C2 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
 		04A6B625226939500035C7C2 /* MSIDTestURLResponse+MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = 23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */; };
@@ -1148,11 +1137,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04A6B624226938EA0035C7C2 /* libIdentityCore.a in Frameworks */,
-				04A6B61B2269386F0035C7C2 /* WebKit.framework in Frameworks */,
-				04A6B6222269388B0035C7C2 /* Security.framework in Frameworks */,
-				04A6B621226938870035C7C2 /* UIKit.framework in Frameworks */,
-				04A6B618226938590035C7C2 /* AuthenticationServices.framework in Frameworks */,
-				04A6B620226938830035C7C2 /* SafariServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1161,12 +1145,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04A6B623226938D20035C7C2 /* libIdentityCore.a in Frameworks */,
-				04A6B61A226938690035C7C2 /* GSS.framework in Frameworks */,
-				04A6B61E2269387C0035C7C2 /* Security.framework in Frameworks */,
-				04A6B61F2269387F0035C7C2 /* Cocoa.framework in Frameworks */,
-				04A6B619226938650035C7C2 /* SecurityInterface.framework in Frameworks */,
-				04A6B61C226938730035C7C2 /* WebKit.framework in Frameworks */,
-				04A6B61D226938790035C7C2 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
