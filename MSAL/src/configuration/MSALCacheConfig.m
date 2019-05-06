@@ -67,7 +67,7 @@
 - (BOOL)enableKeychainSharing
 {
 #if TARGET_OS_IPHONE
-    return [_keychainSharingGroup isEqualToString:[[NSBundle mainBundle] bundleIdentifier]];
+    return ![_keychainSharingGroup isEqualToString:[[NSBundle mainBundle] bundleIdentifier]];
 #else
     return NO;
 #endif
