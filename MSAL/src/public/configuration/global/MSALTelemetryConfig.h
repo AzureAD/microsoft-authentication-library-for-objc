@@ -26,24 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-
-/*!
- @protocol MSALTelemetryDispatcher
- 
- Developer should implement it in order to receive telemetry events.
- 
- Usage: an instance of MSALTelemetryDispatcher implementation is required when registerring dispatcher for MSALTelemetry.
- */
-@protocol MSALTelemetryDispatcher <NSObject>
-
-/*!
- Callback function that will be called by MSAL when telemetry events are flushed.
- @param events events is represented by an array of dictionary of key-value pair of event property name/value.
- */
-- (void)dispatchEvent:(nonnull NSArray<NSDictionary<NSString *, NSString *> *> *)events;
-
-@end
+#import "MSALDefinitions.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -52,26 +35,18 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
-@property BOOL piiEnabled;
+@property (atomic) BOOL piiEnabled;
 
 /*!
- Register a telemetry dispatcher for receiving telemetry events.
- @param dispatcher              An instance of MSALTelemetryDispatcher implementation.
- @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
- If set NO, MSAL will dispatch will dispatch all events.
+ If set YES, telemetry events are only dispatched when errors occurred;
+ If set NO, MSAL will dispatch all events.
  */
-- (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+@property (atomic) BOOL notifyOnFailureOnly;
 
 /*!
- Remove a telemetry dispatcher added for receiving telemetry events.
- @param dispatcher An instance of MSALTelemetryDispatcher implementation added to the dispatches before.
+ Invoked when telemetry data is received.
  */
-- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher;
-
-/*!
- Remove all telemetry dispatchers added to the dispatchers collection.
- */
-- (void)removeAllDispatchers;
+@property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

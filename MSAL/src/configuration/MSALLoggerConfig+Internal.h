@@ -31,6 +31,6 @@
 
 + (instancetype)sharedInstance;
 
-@property MSALLogCallback callback;
+@property (nonatomic, copy) MSALLogCallback callback;
 
 @end
