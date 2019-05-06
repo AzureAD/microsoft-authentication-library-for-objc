@@ -64,6 +64,32 @@
 #endif
 }
 
+- (BOOL)enableKeychainSharing
+{
+#if TARGET_OS_IPHONE
+    return [_keychainSharingGroup isEqualToString:[[NSBundle mainBundle] bundleIdentifier]];
+#else
+    return NO;
+#endif
+}
+
+- (void)setEnableKeychainSharing:(BOOL)enableKeychainSharing
+{
+#if TARGET_OS_IPHONE
+    if (enableKeychainSharing && [_keychainSharingGroup isEqualToString:[[NSBundle mainBundle] bundleIdentifier]])
+    {
+        _keychainSharingGroup = MSIDKeychainTokenCache.defaultKeychainGroup;
+    }
+    else
+    {
+        _keychainSharingGroup = [[NSBundle mainBundle] bundleIdentifier];
+    }
+#else
+    // TODO: add mac support
+#endif
+}
+
+
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone

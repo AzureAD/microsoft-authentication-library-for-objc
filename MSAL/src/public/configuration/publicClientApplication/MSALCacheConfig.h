@@ -37,6 +37,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property NSString *keychainSharingGroup;
 
+/*!
+    Enable or disable keychain sharing group.
+ 
+    If enabled, keychainSharingGroup will be set to the default value,
+    which is com.microsoft.adalcache.
+ 
+    Disabling this will set the keychainSharingGroup to the
+    app's bundle ID; a unique value to this app and thus,
+    prevent sharing of the keychain with other applications.
+ */
+@property BOOL enableKeychainSharing;
+
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
