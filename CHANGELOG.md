@@ -1,3 +1,7 @@
+## [0.4.2] - 2019-05-06
+### Fixed
+- Applying 0.3.1 hotfix changes to latest 0.4.x release
+
 ## [0.4.1] - 2019-05-02
 ### Fixed
 - Removed linked frameworks from static library targets
@@ -8,9 +12,14 @@
 - Added support for custom B2C domains
 - Improved MSAL error handling
 
+## [0.3.1] - 2019-05-06
+### Fixed
+- Better error handling in CBA cancellation flows
+- Don't read corrupted refresh tokens from cache
+
 ## [0.3.0] - 2019-04-22
 ### Added
-- Added broker support to MSAL iOS SDK
+-Added broker support to MSAL iOS SDK
 
 ## [0.2.3] - 2019-02-12
 ### Fixed
