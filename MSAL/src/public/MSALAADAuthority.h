@@ -28,6 +28,22 @@
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
+typedef NS_ENUM(NSInteger, MSALAudienceType)
+{
+    MSALAzureADAndPersonalMicrosoftAccountAudience,
+    MSALAzureADMultipleOrgsAudience,
+    MSALAzureADMyOrgOnlyAudience,
+    MSALPersonalMicrosoftAccountAudience
+};
+
+typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
+{
+    MSALAzurePublicCloudInstance,
+    MSALAzureChinaCloudInstance,
+    MSALAzureGermanyCloudInstance,
+    MSALAzureUsGovernmentCloudInstance
+};
+
 @interface MSALAADAuthority : MSALAuthority
 
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
@@ -36,5 +52,10 @@
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                            rawTenant:(nullable NSString *)rawTenant
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
+
+- (nullable instancetype)initWithCloudInstance:(MSALAzureCloudInstance)cloudInstance
+                                  audienceType:(MSALAudienceType)audienceType
+                                     rawTenant:(nullable NSString *)rawTenant
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end
