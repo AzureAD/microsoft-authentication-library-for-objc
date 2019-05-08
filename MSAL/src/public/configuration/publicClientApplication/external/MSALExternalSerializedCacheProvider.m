@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,35 +15,39 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALExternalSerializedCacheProvider.h"
 
-@class MSALExternalCacheProvider;
-@class MSALExternalSerializedCacheProvider;
+@implementation MSALExternalSerializedCacheProvider
 
-NS_ASSUME_NONNULL_BEGIN
+- (instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
+                           delegate:(id<MSALExternalSerializedCacheProviderDelegate>)delegate
+                              error:(NSError **)error
+{
+    self = [super init];
+    
+    if (self)
+    {
+        // TODO
+    }
+    
+    return self;
+}
 
-@interface MSALCacheConfig : NSObject <NSCopying>
+- (nullable NSArray<NSString *> *)refreshTokensWithError:(NSError **)error
+{
+    return nil;
+}
 
-/*!
-    The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
- */
-@property NSString *keychainSharingGroup;
-@property (nonatomic) NSArray<MSALExternalCacheProvider *> *externalCacheProviders;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
+- (BOOL)updateWithData:(nullable NSData *)data
+                 error:(NSError * _Nullable * _Nullable)error
+{
+    return NO;
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

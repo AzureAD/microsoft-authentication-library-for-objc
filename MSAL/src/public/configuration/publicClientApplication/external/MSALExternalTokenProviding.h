@@ -27,24 +27,12 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALExternalCacheProvider;
-@class MSALExternalSerializedCacheProvider;
-
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALCacheConfig : NSObject <NSCopying>
+@protocol MSALExternalTokenProviding <NSObject>
 
-/*!
-    The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
- */
-@property NSString *keychainSharingGroup;
-@property (nonatomic) NSArray<MSALExternalCacheProvider *> *externalCacheProviders;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
+// TODO: this interface will likely change
+- (nullable NSArray<NSString *> *)refreshTokensWithError:(NSError **)error;
 
 @end
 

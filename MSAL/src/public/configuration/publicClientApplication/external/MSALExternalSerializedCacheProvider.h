@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,34 +15,44 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import "MSALExternalTokenProviding.h"
 
-@class MSALExternalCacheProvider;
 @class MSALExternalSerializedCacheProvider;
+
+@protocol MSALExternalSerializedCacheProviderDelegate <NSObject>
+
+- (void)willAccessCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
+- (void)didAccessCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
+- (void)willWriteCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
+- (void)didWriteCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
+
+@end
+
+typedef NS_ENUM(NSInteger, MSALSerializedCacheFormat)
+{
+    MSALLegacyADALCacheFormat
+};
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALCacheConfig : NSObject <NSCopying>
+@interface MSALExternalSerializedCacheProvider : NSObject <MSALExternalTokenProviding>
 
-/*!
-    The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
- */
-@property NSString *keychainSharingGroup;
-@property (nonatomic) NSArray<MSALExternalCacheProvider *> *externalCacheProviders;
+@property (nonatomic, readonly) NSData *serializedData;
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
+                           delegate:(id<MSALExternalSerializedCacheProviderDelegate>)delegate
+                              error:(NSError **)error;
 
-+ (NSString *)defaultKeychainSharingGroup;
+- (BOOL)updateWithData:(nullable NSData *)data
+                 error:(NSError * _Nullable * _Nullable)error;
+
 
 @end
 
