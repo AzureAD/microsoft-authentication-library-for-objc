@@ -21,15 +21,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSIDTelemetryDispatcher.h"
-#import "MSALTelemetryConfig.h"
+#import "MSALTelemetryEventsObservingProxy.h"
 
-@interface MSALDefaultDispatcher : NSObject <MSIDTelemetryDispatcher>
+@implementation MSALTelemetryEventsObservingProxy
 
-+ (instancetype)new __attribute__((unavailable("new is unavailable, use initWithDispatcher instead.")));
-- (instancetype)init __attribute__((unavailable("init is unavailable, use initWithDispatcher instead.")));
+#pragma mark - MSIDTelemetryEventsObserving
 
-- (id)initWithDispatcher:(id<MSALTelemetryDispatcher>)dispatcher
-   setTelemetryOnFailure:(BOOL)setTelemetryOnFailure;
+- (void)onEventsReceived:(NSArray<NSDictionary<NSString *, NSString *> *> *)events
+{
+    NSDictionary<NSString *, NSString *> *aggregatedEvent = [events firstObject];
+    
+    if (!aggregatedEvent) return;
+    
+    if (self.telemetryCallback != nil) self.telemetryCallback(aggregatedEvent);
+}
 
 @end

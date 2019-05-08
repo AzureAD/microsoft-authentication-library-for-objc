@@ -21,48 +21,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALTelemetryConfig.h"
+#import <Foundation/Foundation.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 /*!
  @class MSALTelemetry
  
  The central class for MSAL telemetry.
  
- Usage: Get a singleton instance of MSALTelemetry; register a dispatcher for receiving telemetry events.
+ Usage: Get a singleton instance of MSALTelemetry; register an observer for receiving telemetry events.
  */
 @interface MSALTelemetry : NSObject
 
-+ (nonnull instancetype)new __attribute__((unavailable("new is unavailable, use sharedInstance instead.")));
-- (nonnull instancetype)init __attribute__((unavailable("init is unavailable, use sharedInstance instead.")));
+- (instancetype _Nullable)init NS_UNAVAILABLE;
++ (instancetype _Nullable)new NS_UNAVAILABLE;
 
 /*!
  Get a singleton instance of MSALTelemetry.
  */
-+ (nonnull MSALTelemetry *)sharedInstance  DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
++ (nonnull MSALTelemetry *)sharedInstance DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
 
 /*!
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
-@property (nonatomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
+@property (atomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
 
 /*!
- Register a telemetry dispatcher for receiving telemetry events.
- @param dispatcher              An instance of MSALTelemetryDispatcher implementation.
- @param setTelemetryOnFailure   If set YES, telemetry events are only dispatched when errors occurred;
-                                If set NO, MSAL will dispatch will dispatch all events.
+ If set YES, telemetry events are only dispatched when errors occurred;
+ If set NO, MSAL will dispatch all events.
  */
-- (void)addDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher
-setTelemetryOnFailure:(BOOL)setTelemetryOnFailure DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig addDispatcher:setTelemetryOnFailure: instead");
+@property (atomic) BOOL notifyOnFailureOnly DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly instead");
 
 /*!
- Remove a telemetry dispatcher added for receiving telemetry events.
- @param dispatcher An instance of MSALTelemetryDispatcher implementation added to the dispatches before.
+ Invoked when telemetry data is received.
  */
-- (void)removeDispatcher:(nonnull id<MSALTelemetryDispatcher>)dispatcher DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig removeDispatcher: instead");
+@property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.telemetryCallback instead");
 
-/*!
- Remove all telemetry dispatchers added to the dispatchers collection.
- */
-- (void)removeAllDispatchers DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig removeDispatcher: instead");
 
 @end
+
+NS_ASSUME_NONNULL_END
