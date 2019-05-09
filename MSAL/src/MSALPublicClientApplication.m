@@ -341,7 +341,7 @@
         return YES;
     }
 
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response error:nil])
     {
         return YES;
     }
