@@ -72,6 +72,17 @@
     
     if (![NSString msidIsStringNilOrBlank:rawTenant])
     {
+        if (audienceType != MSALAzureADMyOrgOnlyAudience)
+        {
+            if (error)
+            {
+                NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            }
+            
+            return nil;
+        }
+        
         NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:rawTenant];
         return [self initWithURL:aadURL rawTenant:nil error:error];
     }
@@ -89,7 +100,7 @@
         return nil;
     }
     
-    // TODO: rename msidURLWithEnvironment
+    // TODO: rename msidURLWithEnvironment, will be addressed separately
     NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:audienceString];
     return [self initWithURL:aadURL rawTenant:nil error:error];
 }
