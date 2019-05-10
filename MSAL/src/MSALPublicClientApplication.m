@@ -857,7 +857,7 @@
 
     NSError *requestError = nil;
 
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
+    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:requestAuthority.url context:nil error:&requestError];
 
     if (!oauth2Factory)
     {
@@ -990,7 +990,7 @@
     };
 
     NSError *requestError = nil;
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
+    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:msidAuthority.url context:nil error:&requestError];
 
     if (!oauth2Factory)
     {
