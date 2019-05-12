@@ -43,11 +43,14 @@
 #import "MSIDIdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSALExternalCacheProvider.h"
+#import "MSALExternalAccount.h"
 
 @interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nullable, nonatomic) NSString *clientId;
+@property (nullable, nonatomic) MSALExternalCacheProvider *externalProvider;
 
 @end
 
@@ -58,12 +61,22 @@
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                           clientId:(NSString *)clientId
 {
+    return [self initWithTokenCache:tokenCache
+                           clientId:clientId
+                   externalProvider:nil];
+}
+
+- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                          clientId:(NSString *)clientId
+                  externalProvider:(MSALExternalCacheProvider *)externalCacheProvider
+{
     self = [super init];
 
     if (self)
     {
         _tokenCache = tokenCache;
         _clientId = clientId;
+        _externalProvider = externalCacheProvider;
     }
 
     return self;
@@ -133,10 +146,12 @@
         return nil;
     }
     
-    return [self msalAccountsFromMSIDAccounts:msidAccounts];
+    NSArray *allAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts addExternal:YES];
+    return allAccounts;
 }
 
 - (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
+                                             addExternal:(BOOL)addExternal
 {
     NSMutableSet *msalAccounts = [NSMutableSet new];
     
@@ -145,18 +160,60 @@
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
-        MSALAccount *existAccount = [msalAccounts member:msalAccount];
-        if (!existAccount)
-        {
-            [msalAccounts addObject:msalAccount];
-        }
-        else
-        {
-            [existAccount addTenantProfiles:msalAccount.tenantProfiles];
-        }
+        [self addMSALAccount:msalAccount toSet:msalAccounts];
+    }
+    
+    if (!addExternal)
+    {
+        return [msalAccounts allObjects];
+    }
+    
+    NSArray *externalAccounts = [self allExternalAccounts];
+    
+    for (id<MSALExternalAccount> externalAccount in externalAccounts)
+    {
+        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount];
+        if (!msalAccount) continue;
+        
+        [self addMSALAccount:msalAccount toSet:msalAccounts];
     }
     
     return [msalAccounts allObjects];
+}
+
+- (void)addMSALAccount:(MSALAccount *)account toSet:(NSMutableSet *)allAccountsSet
+{
+    MSALAccount *existingAccount = [allAccountsSet member:account];
+    
+    if (!existingAccount)
+    {
+        [allAccountsSet addObject:account];
+    }
+    else
+    {
+        [existingAccount addTenantProfiles:account.tenantProfiles];
+    }
+}
+
+- (NSArray<id<MSALExternalAccount>> *)allExternalAccounts
+{
+    NSMutableArray *allExternalAccounts = [NSMutableArray new];
+    
+    if (self.externalProvider.accountProvider)
+    {
+        NSError *externalError = nil;
+        NSArray *externalAccounts = [self.externalProvider.accountProvider accountsForClientId:self.clientId error:&externalError];
+        
+        if (externalError)
+        {
+            MSID_LOG_WARN(nil, @"Failed to read external accounts for client ID %@, error %@/%ld", self.clientId, externalError.domain, (long)externalError.code);
+            return nil;
+        }
+        
+        [allExternalAccounts addObjectsFromArray:externalAccounts];
+    }
+    
+    return allExternalAccounts;
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
@@ -185,7 +242,7 @@
     
     if ([msidAccounts count])
     {
-        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts];
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts addExternal:YES];
         if (msalAccounts.count == 1)
         {
             return msalAccounts[0];

@@ -27,13 +27,15 @@
 
 
 #import <Foundation/Foundation.h>
+#import "MSALExternalAccount.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol MSALExternalAccountProviding <NSObject>
 
-- (BOOL)saveAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
-- (nullable NSArray<MSALAccount *> *)accountsForClientId:(NSString *)clientId error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)updateAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<id<MSALExternalAccount>> *)accountsForClientId:(NSString *)clientId error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

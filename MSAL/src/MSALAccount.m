@@ -41,6 +41,8 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALAuthorityFactory.h"
 #import "MSALAccountsProvider.h"
+#import "MSALExternalAccount.h"
+#import "MSALAuthority_Internal.h"
 
 @implementation MSALAccount
 
@@ -118,6 +120,32 @@
                    localAccountId:account.localAccountId
                       environment:account.authority.environment
                    tenantProfiles:tenantProfiles];
+}
+
+- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount
+{
+    NSError *error = nil;
+    
+    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:externalAccount.authorityURL context:nil error:&error];
+    
+    if (error || !authority)
+    {
+        MSID_LOG_ERROR(nil, @"Failed to create msal authority from external provided authority!");
+        return nil;
+    }
+    
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:externalAccount.localAccountId
+                                                                              tenantId:externalAccount.tenantId
+                                                                             authority:authority
+                                                                          isHomeTenant:NO
+                                                                                claims:externalAccount.accountClaims];
+    
+    return [self initWithUsername:externalAccount.username
+                             name:nil
+                    homeAccountId:externalAccount.homeAccountId
+                   localAccountId:externalAccount.localAccountId
+                      environment:authority.msidAuthority.environment
+                   tenantProfiles:@[tenantProfile]];
 }
 
 #pragma mark - NSCopying

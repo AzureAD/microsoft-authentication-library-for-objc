@@ -21,33 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#import <Foundation/Foundation.h>
 #import "MSALExternalSerializedCacheProvider.h"
+#import "MSIDTokenCacheDataSource.h"
 
-@implementation MSALExternalSerializedCacheProvider
+NS_ASSUME_NONNULL_BEGIN
 
-- (instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
-                           delegate:(id<MSALExternalSerializedCacheProviderDelegate>)delegate
-                              error:(NSError **)error
-{
-    self = [super init];
-    
-    if (self)
-    {
-        // TODO
-    }
-    
-    return self;
-}
+@interface MSALExternalSerializedCacheProvider (Internal)
 
-- (nullable NSArray<NSString *> *)refreshTokensWithError:(NSError **)error
-{
-    return nil;
-}
-
-- (BOOL)updateWithData:(nullable NSData *)data
-                 error:(NSError * _Nullable * _Nullable)error
-{
-    return NO;
-}
+- (id<MSIDTokenCacheDataSource>)msidTokenCacheDataSource;
 
 @end
+
+NS_ASSUME_NONNULL_END

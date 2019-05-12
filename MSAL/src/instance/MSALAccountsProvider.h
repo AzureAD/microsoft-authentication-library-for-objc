@@ -32,11 +32,19 @@
 @class MSALAuthority;
 @class MSIDAccount;
 @class MSIDIdTokenClaims;
+@class MSALExternalCacheProvider;
 
 @interface MSALAccountsProvider : NSObject
 
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                           clientId:(NSString *)clientId;
+
+- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                          clientId:(NSString *)clientId
+                  externalProvider:(MSALExternalCacheProvider *)externalCacheProvider NS_DESIGNATED_INITIALIZER;
 
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
                        completionBlock:(MSALAccountsCompletionBlock)completionBlock;

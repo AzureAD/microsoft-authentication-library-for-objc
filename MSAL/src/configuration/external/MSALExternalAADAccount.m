@@ -21,21 +21,72 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
-#import "MSALExternalAccountProviding.h"
-#import "MSALExternalSerializedCacheProvider.h"
+#import "MSALExternalAADAccount.h"
+#import "MSALAccount.h"
+#import "MSALAccountId.h"
+#import "MSALTenantProfile.h"
+#import "MSALAuthority.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALExternalAADAccount()
 
-@interface MSALExternalCacheProvider : NSObject <NSCopying>
-
-@property (nonatomic, nullable, readonly) id<MSALExternalAccountProviding> accountProvider;
-@property (nonatomic, nullable, readonly) MSALExternalSerializedCacheProvider *serializedCacheProvider;
-
-- (instancetype)initWithAccountProvider:(nullable id<MSALExternalAccountProviding>)accountProvider
-                          cacheProvider:(nullable MSALExternalSerializedCacheProvider *)serializedCacheProvider
-                                  error:(NSError **)error;
+@property (nonatomic) MSALAccount *account;
+@property (nonatomic) MSALTenantProfile *tenantProfile;
 
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation MSALExternalAADAccount
+
+#pragma mark - Init
+
+- (instancetype)initWithAccount:(MSALAccount *)account
+                  tenantProfile:(MSALTenantProfile *)tenantProfile
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _account = account;
+        _tenantProfile = tenantProfile;
+    }
+    
+    return self;
+}
+
+#pragma mark - MSALExternalAccount
+
+- (NSString *)homeAccountId
+{
+    return self.account.homeAccountId.identifier;
+}
+
+- (NSString *)localAccountId
+{
+    return self.tenantProfile.userObjectId;
+}
+
+- (NSString *)username
+{
+    return self.account.username;
+}
+
+- (NSURL *)authorityURL
+{
+    return self.tenantProfile.authority.url;
+}
+
+- (NSString *)tenantId
+{
+    return self.tenantProfile.tenantId;
+}
+
+- (MSALExternalAccountType)externalAccountType
+{
+    return MSALExternalAccountTypeAAD;
+}
+
+- (NSDictionary *)accountClaims
+{
+    return self.tenantProfile.claims;
+}
+
+@end

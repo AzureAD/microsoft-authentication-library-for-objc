@@ -21,17 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <UIKit/UIKit.h>
-#import "MSALExternalTokenProviding.h"
+#import <Foundation/Foundation.h>
 
-@class MSALExternalSerializedCacheProvider;
+NS_ASSUME_NONNULL_BEGIN
+
+@protocol MSALExternalSerializedCacheProvider;
 
 @protocol MSALExternalSerializedCacheProviderDelegate <NSObject>
 
-- (void)willAccessCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
-- (void)didAccessCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
-- (void)willWriteCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
-- (void)didWriteCache:(nonnull MSALExternalSerializedCacheProvider *)cache;
+- (void)willAccessCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
+- (void)didAccessCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
+- (void)willWriteCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
+- (void)didWriteCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
 
 @end
 
@@ -40,18 +41,17 @@ typedef NS_ENUM(NSInteger, MSALSerializedCacheFormat)
     MSALLegacyADALCacheFormat
 };
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALExternalSerializedCacheProvider : NSObject <NSCopying>
 
-@interface MSALExternalSerializedCacheProvider : NSObject <MSALExternalTokenProviding>
+@property (nonatomic, readonly) MSALSerializedCacheFormat cacheFormat;
+@property (nonatomic, nonnull, readonly) id<MSALExternalSerializedCacheProviderDelegate> delegate;
 
-@property (nonatomic, readonly) NSData *serializedData;
+- (nullable NSData *)serializeDataWithError:(NSError * _Nullable * _Nullable)error;
+- (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError * _Nullable * _Nullable)error;
 
-- (instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
-                           delegate:(id<MSALExternalSerializedCacheProviderDelegate>)delegate
-                              error:(NSError **)error;
-
-- (BOOL)updateWithData:(nullable NSData *)data
-                 error:(NSError * _Nullable * _Nullable)error;
+- (nullable instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
+                                    delegate:(nonnull id<MSALExternalSerializedCacheProviderDelegate>)delegate
+                                       error:(NSError * _Nullable * _Nullable)error;
 
 
 @end

@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -17,35 +15,28 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
 
-@class MSALExternalCacheProvider;
-@class MSALExternalSerializedCacheProvider;
+typedef NS_ENUM(NSInteger, MSALExternalAccountType)
+{
+    MSALExternalAccountTypeAAD
+};
 
-NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALCacheConfig : NSObject <NSCopying>
+@protocol MSALExternalAccount <NSObject>
 
-/*!
-    The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
- */
-@property NSString *keychainSharingGroup;
-@property (nonatomic) MSALExternalCacheProvider *externalCacheProvider;
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
+@property (nonatomic, readonly) NSString *homeAccountId;
+@property (nonatomic, readonly) NSString *username;
+@property (nonatomic, readonly) NSURL *authorityURL;
+@property (nonatomic, readonly) NSString *localAccountId;
+@property (nonatomic, readonly) NSString *tenantId;
+@property (nonatomic, readonly) NSDictionary *accountClaims;
+@property (nonatomic, readonly) MSALExternalAccountType externalAccountType;
 
 @end
-
-NS_ASSUME_NONNULL_END

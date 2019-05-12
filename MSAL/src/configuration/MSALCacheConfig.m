@@ -27,6 +27,7 @@
 
 
 #import "MSALCacheConfig.h"
+#import "MSALExternalCacheProvider.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
@@ -69,7 +70,9 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     NSString *keychainSharingGroup = [_keychainSharingGroup copyWithZone:zone];
-    return [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+    MSALCacheConfig *copiedConfig = [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+    copiedConfig->_externalCacheProvider = [self.externalCacheProvider copyWithZone:zone];
+    return copiedConfig;
 }
 
 @end
