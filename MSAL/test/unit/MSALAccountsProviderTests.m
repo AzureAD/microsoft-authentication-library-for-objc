@@ -125,7 +125,6 @@
     XCTAssertEqual(allAccounts.count, 1);
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"simple_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
@@ -156,7 +155,6 @@
     XCTAssertEqual(allAccounts.count, 1);
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"simple_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
@@ -212,7 +210,6 @@
     XCTAssertEqual(allAccounts.count, 1);
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"simple_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
@@ -268,7 +265,6 @@
     XCTAssertEqual(allAccounts.count, 1);
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"simple_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
@@ -347,7 +343,6 @@
     // verify first account
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"contoso_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     
@@ -372,7 +367,6 @@
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
-    XCTAssertEqualObjects(allAccounts[1].name, @"fabricant_user");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
     
@@ -459,7 +453,6 @@
     // verify first account
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"contoso_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     
@@ -484,7 +477,6 @@
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
-    XCTAssertEqualObjects(allAccounts[1].name, @"fabricant_user");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
     
@@ -516,7 +508,6 @@
     // verify first account
     XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(allAccounts[0].name, @"contoso_user");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     
@@ -542,7 +533,6 @@
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
-    XCTAssertEqualObjects(allAccounts[1].name, @"fabricant_user");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
     
@@ -572,7 +562,6 @@
     
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(account.name, @"contoso_user");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
     
@@ -608,7 +597,6 @@
     
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
-    XCTAssertEqualObjects(account.name, @"contoso_user");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
     
@@ -721,7 +709,6 @@
                                  // verify first account
                                  XCTAssertEqualObjects(accounts[0].username, @"user@contoso.com");
                                  XCTAssertEqualObjects(accounts[0].homeAccountId.identifier, @"uid.tid");
-                                 XCTAssertEqualObjects(accounts[0].name, @"contoso_user");
                                  XCTAssertEqualObjects(accounts[0].environment, @"login.microsoftonline.com");
                                  XCTAssertEqualObjects(accounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
                                  

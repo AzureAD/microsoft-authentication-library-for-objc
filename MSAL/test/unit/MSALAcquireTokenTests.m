@@ -282,9 +282,7 @@
                                                                            familyId:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -351,9 +349,7 @@
                                                                            familyId:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1063,9 +1059,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1134,9 +1128,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1206,9 +1198,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
 
@@ -1266,9 +1256,7 @@
 
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
 
@@ -1339,9 +1327,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1491,9 +1477,7 @@
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1593,9 +1577,7 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1682,9 +1664,7 @@
     application.tokenCache = self.tokenCache;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
@@ -1749,9 +1729,7 @@
     application.tokenCache = self.tokenCache;
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
@@ -1810,9 +1788,7 @@
     // Add mock response for refresh token grant, claims should be in the request body
     NSString *expectedClaims =  @"{\"access_token\":{\"xms_cc\":{\"values\":[\"cp1\",\"llt\"]}}}";
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1895,9 +1871,7 @@
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     NSString *expectedClaims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true},\"xms_cc\":{\"values\":[\"llt\"]}}}";
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1979,9 +1953,7 @@
     NSString *claims = @"{\"access_token\":{\"polids\":{\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"],\"essential\":true}}}";
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2046,9 +2018,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2117,9 +2087,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2204,9 +2172,7 @@
                                                                            familyId:@"1"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2294,9 +2260,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2383,9 +2347,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2492,9 +2454,7 @@
     
     application.webviewType = MSALWebviewTypeWKWebView;
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
-                                                            name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     

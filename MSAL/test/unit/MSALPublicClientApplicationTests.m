@@ -784,9 +784,7 @@
     XCTAssertNil(error);
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -847,9 +845,7 @@
     XCTAssertNil(error);
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -914,9 +910,7 @@
     __block NSUUID *correlationId = [NSUUID new];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1015,9 +1009,7 @@
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1077,9 +1069,7 @@
     authority = [@"https://login.microsoft.com/common" msalAuthority];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1139,9 +1129,7 @@
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1200,9 +1188,7 @@
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1261,9 +1247,7 @@
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1326,9 +1310,7 @@
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1858,9 +1840,7 @@
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                            name:@"name"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     

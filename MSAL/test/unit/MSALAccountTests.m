@@ -85,7 +85,6 @@
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
-    XCTAssertEqualObjects(account.name, @"User");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqual(account.tenantProfiles.count, 1);
     XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"localoid");
@@ -125,7 +124,6 @@
     XCTAssertNotNil(account);
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
-    XCTAssertEqualObjects(account.name, @"User");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertNil(account.tenantProfiles);
 }
@@ -218,9 +216,7 @@
                                                                           isHomeTenant:YES
                                                                                 claims:@{@"key" : @"value"}];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                            name:@"name"
                                                    homeAccountId:@"1.2"
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
@@ -243,9 +239,7 @@
                                                                           isHomeTenant:YES
                                                                                 claims:@{@"key" : @"value"}];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                            name:@"name"
                                                    homeAccountId:@"1.2"
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
@@ -278,9 +272,7 @@
                                                                                  claims:@{@"key2" : @"value2"}];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                            name:@"name"
                                                    homeAccountId:@"1.2"
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile, tenantProfile2]];
     XCTAssertNotNil(account);
@@ -296,7 +288,6 @@
     XCTAssertEqualObjects(account.homeAccountId.tenantId, account2.homeAccountId.tenantId);
     XCTAssertEqualObjects(account.environment, account2.environment);
     XCTAssertEqualObjects(account.username, account2.username);
-    XCTAssertEqualObjects(account.name, account2.name);
     
     // tenantProfiles should be deep copied and have different pointers
     XCTAssertNotEqual(account.tenantProfiles, account2.tenantProfiles);
@@ -326,10 +317,8 @@
 - (void)testEquals_whenEqual_shouldReturnTrue
 {
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
-                                                                 name:@"name"
-                                                        homeAccountId:@"1.2"
-                                                       localAccountId:@"2.3"
-                                                          environment:@"login.microsoftonline.com"
+                                                   homeAccountId:@"1.2"
+                                                     environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
     XCTAssertNotNil(account);
