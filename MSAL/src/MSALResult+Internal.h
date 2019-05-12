@@ -46,6 +46,7 @@
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
-                            authority:(MSALAuthority *)authority;
+                            authority:(MSALAuthority *)authority
+                        correlationId:(NSUUID *)correlationId;
 
 @end
