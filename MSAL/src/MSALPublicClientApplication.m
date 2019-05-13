@@ -420,20 +420,7 @@
         return;
     }
     
-    // Configure optional parameters
-    BOOL accountHintPresent = (![NSString msidIsStringNilOrBlank:parameters.loginHint] || parameters.account);
-    
-    // Select account experience is undefined if user identity is passed (login_hint or account)
-    // Therefore, if there's user identity, we don't pass select account prompt type
-    if (accountHintPresent && parameters.promptType == MSALPromptTypeSelectAccount)
-    {
-        msidParams.promptType = MSIDPromptTypePromptIfNecessary;
-    }
-    else
-    {
-        msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
-    }
-    
+    msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
     msidParams.extraAuthorizeURLQueryParameters = parameters.extraQueryParameters;
     msidParams.accountIdentifier = parameters.account.lookupAccountIdentifier;
