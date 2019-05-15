@@ -87,16 +87,10 @@
         return [self initWithURL:aadURL rawTenant:nil error:error];
     }
     
-    NSString *audienceString = [self audienceFromType:audienceType];
+    NSString *audienceString = [self audienceFromType:audienceType error:error];
     
     if (!audienceString)
     {
-        if (error)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
-            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        }
-        
         return nil;
     }
     
@@ -123,8 +117,10 @@
     }
 }
 
-- (NSString *)audienceFromType:(MSALAudienceType)audienceType
+- (NSString *)audienceFromType:(MSALAudienceType)audienceType error:(NSError **)error
 {
+    NSError *msidError = nil;
+    
     switch (audienceType) {
         case MSALAzureADAndPersonalMicrosoftAccountAudience:
         {
@@ -136,7 +132,8 @@
         }
         case MSALAzureADMyOrgOnlyAudience:
         {
-            return nil;
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);;
+            break;
         }
         case MSALPersonalMicrosoftAccountAudience:
         {
@@ -144,8 +141,18 @@
         }
             
         default:
-            return nil;
+        {
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+            break;
+        }
     }
+    
+    if (msidError && error)
+    {
+        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    }
+    
+    return nil;
 }
 
 - (NSURL *)url

@@ -60,6 +60,7 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqual(error.code, MSALErrorInternal);
     XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
 }
 
 - (void)testInitWithCloudInstanceAudienceAndTenant_whenCloudInstancePublic_audienceMyOrg_andNilTenant_shouldReturnError
@@ -75,6 +76,7 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
     XCTAssertEqual(error.code, MSALErrorInternal);
     XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.");
 }
 
 - (void)testInitWithCloudInstanceAudienceAndTenant_whenCloudInstancePublic_audienceMyOrg_andNonNilTenant_shouldReturnAuthority
