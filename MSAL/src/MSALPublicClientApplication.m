@@ -92,7 +92,6 @@
     NSString *_defaultKeychainGroup;
 }
 
-@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 
 @end
@@ -244,6 +243,9 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
 #endif
+    
+    self.metadataCache = [[MSIDMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
     _configuration = config;
@@ -867,6 +869,7 @@
 
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
                                                                                                           defaultAccessor:_tokenCache
+                                                                                                         metadataAccessor:_metadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
 
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:params tokenRequestProvider:tokenRequestProvider error:&requestError];
@@ -1000,6 +1003,7 @@
 
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
                                                                                                           defaultAccessor:_tokenCache
+                                                                                                         metadataAccessor:_metadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
 
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:params forceRefresh:forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
@@ -1066,6 +1070,9 @@
         MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
         MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
     }
+    
+    //TODO
+    //self.metadataCache clearAuthorityMapForAccount:account.lookupAccountIdentifier error:&msidError];
 
     return result;
 }
