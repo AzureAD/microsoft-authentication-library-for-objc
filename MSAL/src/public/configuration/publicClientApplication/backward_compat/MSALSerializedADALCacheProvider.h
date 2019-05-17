@@ -22,14 +22,30 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MSALExternalSerializedCacheProvider.h"
-#import "MSIDTokenCacheDataSource.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALExternalSerializedCacheProvider (Internal)
+@class MSALSerializedADALCacheProvider;
 
-- (id<MSIDTokenCacheDataSource>)msidTokenCacheDataSource;
+@protocol MSALSerializedADALCacheProviderDelegate <NSObject>
+
+- (void)willAccessCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+- (void)didAccessCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+- (void)willWriteCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+- (void)didWriteCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+
+@end
+
+@interface MSALSerializedADALCacheProvider : NSObject <NSCopying>
+
+@property (nonatomic, nonnull, readonly) id<MSALSerializedADALCacheProviderDelegate> delegate;
+
+- (nullable NSData *)serializeDataWithError:(NSError * _Nullable * _Nullable)error;
+- (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError * _Nullable * _Nullable)error;
+
+- (nullable instancetype)initWithDelegate:(nonnull id<MSALSerializedADALCacheProviderDelegate>)delegate
+                                    error:(NSError * _Nullable * _Nullable)error;
+
 
 @end
 

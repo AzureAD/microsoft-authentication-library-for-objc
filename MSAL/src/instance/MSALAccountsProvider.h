@@ -32,7 +32,7 @@
 @class MSALAuthority;
 @class MSIDAccount;
 @class MSIDIdTokenClaims;
-@class MSALExternalCacheProvider;
+@class MSALExternalAccountHandler;
 
 @interface MSALAccountsProvider : NSObject
 
@@ -44,7 +44,7 @@
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                           clientId:(NSString *)clientId
-                  externalProvider:(MSALExternalCacheProvider *)externalCacheProvider NS_DESIGNATED_INITIALIZER;
+           externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider NS_DESIGNATED_INITIALIZER;
 
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
                        completionBlock:(MSALAccountsCompletionBlock)completionBlock;

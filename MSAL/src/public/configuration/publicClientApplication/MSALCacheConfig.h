@@ -27,8 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALExternalCacheProvider;
-@class MSALExternalSerializedCacheProvider;
+@protocol MSALExternalAccountProviding;
+@class MSALSerializedADALCacheProvider;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -39,7 +39,9 @@ NS_ASSUME_NONNULL_BEGIN
     The default value is com.microsoft.adalcache.
  */
 @property NSString *keychainSharingGroup;
-@property (nonatomic) MSALExternalCacheProvider *externalCacheProvider;
+@property (nonatomic, nullable, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nullable, readonly) MSALSerializedADALCacheProvider *serializedADALCache;
+
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

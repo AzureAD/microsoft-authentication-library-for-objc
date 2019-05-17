@@ -21,41 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalSerializedCacheProvider.h"
+#import "MSALSerializedADALCacheProvider.h"
 #import "MSIDMacTokenCache.h"
 #import "MSALErrorConverter.h"
-#import "MSALExternalSerializedCacheProvider+Internal.h"
+#import "MSALSerializedADALCacheProvider+Internal.h"
 
-@interface MSALExternalSerializedCacheProvider()
+@interface MSALSerializedADALCacheProvider()
 
-@property (nonatomic, readwrite) MSALSerializedCacheFormat cacheFormat;
-@property (nonatomic, nonnull, readwrite) id<MSALExternalSerializedCacheProviderDelegate> delegate;
+@property (nonatomic, nonnull, readwrite) id<MSALSerializedADALCacheProviderDelegate> delegate;
 @property (nonatomic, readwrite) id<MSIDTokenCacheDataSource> tokenCacheDatasource;
 
 @end
 
-@implementation MSALExternalSerializedCacheProvider
+@implementation MSALSerializedADALCacheProvider
 
-- (instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
-                           delegate:(id<MSALExternalSerializedCacheProviderDelegate>)delegate
-                              error:(NSError **)error
+- (instancetype)initWithDelegate:(id<MSALSerializedADALCacheProviderDelegate>)delegate
+                           error:(NSError **)error
 {
     self = [super init];
     
     if (self)
     {
-        if (cacheFormat != MSALLegacyADALCacheFormat)
-        {
-            if (error)
-            {
-                NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported serialized cache format", nil, nil, nil, nil, nil);
-                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            }
-            
-            return nil;
-        }
-        
-        _cacheFormat = cacheFormat;
         _delegate = delegate;
         
         // Init datasource
@@ -81,7 +67,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    MSALExternalSerializedCacheProvider *copiedCacheProvider = [[MSALExternalSerializedCacheProvider alloc] initWithCacheFormat:self.cacheFormat delegate:self.delegate error:nil];
+    MSALSerializedADALCacheProvider *copiedCacheProvider = [[MSALSerializedADALCacheProvider alloc] initWithDelegate:self.delegate error:nil];
     return copiedCacheProvider;
 }
 

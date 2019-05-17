@@ -43,14 +43,14 @@
 #import "MSIDIdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
-#import "MSALExternalCacheProvider.h"
 #import "MSALExternalAccount.h"
+#import "MSALExternalAccountHandler.h"
 
 @interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nullable, nonatomic) NSString *clientId;
-@property (nullable, nonatomic) MSALExternalCacheProvider *externalProvider;
+@property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
 
 @end
 
@@ -63,12 +63,12 @@
 {
     return [self initWithTokenCache:tokenCache
                            clientId:clientId
-                   externalProvider:nil];
+            externalAccountProvider:nil];
 }
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                           clientId:(NSString *)clientId
-                  externalProvider:(MSALExternalCacheProvider *)externalCacheProvider
+           externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider
 {
     self = [super init];
 
@@ -76,7 +76,7 @@
     {
         _tokenCache = tokenCache;
         _clientId = clientId;
-        _externalProvider = externalCacheProvider;
+        _externalAccountProvider = externalAccountProvider;
     }
 
     return self;
@@ -168,7 +168,7 @@
         return [msalAccounts allObjects];
     }
     
-    NSArray *externalAccounts = [self allExternalAccounts];
+    NSArray *externalAccounts = [self.externalAccountProvider allExternalAccountsForClientId:self.clientId];
     
     for (id<MSALExternalAccount> externalAccount in externalAccounts)
     {
@@ -193,27 +193,6 @@
     {
         [existingAccount addTenantProfiles:account.tenantProfiles];
     }
-}
-
-- (NSArray<id<MSALExternalAccount>> *)allExternalAccounts
-{
-    NSMutableArray *allExternalAccounts = [NSMutableArray new];
-    
-    if (self.externalProvider.accountProvider)
-    {
-        NSError *externalError = nil;
-        NSArray *externalAccounts = [self.externalProvider.accountProvider accountsForClientId:self.clientId error:&externalError];
-        
-        if (externalError)
-        {
-            MSID_LOG_WARN(nil, @"Failed to read external accounts for client ID %@, error %@/%ld", self.clientId, externalError.domain, (long)externalError.code);
-            return nil;
-        }
-        
-        [allExternalAccounts addObjectsFromArray:externalAccounts];
-    }
-    
-    return allExternalAccounts;
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId

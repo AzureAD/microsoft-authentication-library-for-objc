@@ -86,8 +86,8 @@
 #import "MSIDAADAuthority.h"
 #import "MSALCacheConfig.h"
 #import "MSALClaimsRequest+Internal.h"
-#import "MSALExternalCacheProvider+Internal.h"
-#import "MSALExternalSerializedCacheProvider+Internal.h"
+#import "MSALExternalAccountHandler.h"
+#import "MSALSerializedADALCacheProvider+Internal.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -97,6 +97,7 @@
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
+@property (nonatomic) MSALExternalAccountHandler *externalAccountHandler;
 
 @end
 
@@ -235,7 +236,7 @@
     
     NSMutableArray *legacyAccessors = [NSMutableArray new];
     
-    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.externalCacheProvider.serializedCacheProvider.msidTokenCacheDataSource;
+    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
     
     if (externalDataSource)
     {
@@ -268,6 +269,11 @@
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     
+    if (_internalConfig.cacheConfig.externalAccountProvider)
+    {
+        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProvider:_internalConfig.cacheConfig.externalAccountProvider];
+    }
+    
     return self;
 }
 
@@ -294,11 +300,9 @@
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    MSALExternalCacheProvider *externalProvider = self.internalConfig.cacheConfig.externalCacheProvider;
-    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
-                                                                    externalProvider:externalProvider];
+                                                             externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
     NSArray *accounts = [request allAccounts:&msidError];
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
@@ -309,11 +313,9 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
-    MSALExternalCacheProvider *externalProvider = self.internalConfig.cacheConfig.externalCacheProvider;
-    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
-                                                                    externalProvider:externalProvider];
+                                                             externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
     MSALAccount *account = [request accountForHomeAccountId:homeAccountId error:&msidError];
 
@@ -325,11 +327,9 @@
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
-    MSALExternalCacheProvider *externalProvider = self.internalConfig.cacheConfig.externalCacheProvider;
-    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
-                                                                    externalProvider:externalProvider];
+                                                             externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
     MSALAccount *account = [request accountForUsername:username error:&msidError];
 
@@ -340,11 +340,9 @@
 
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
-    MSALExternalCacheProvider *externalProvider = self.internalConfig.cacheConfig.externalCacheProvider;
-    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
-                                                                    externalProvider:externalProvider];
+                                                             externalAccountProvider:self.externalAccountHandler];
 
     [request allAccountsFilteredByAuthority:self.internalConfig.authority
                             completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
@@ -606,9 +604,9 @@
         NSError *resultError = nil;
         MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
         
-        if (msalResult)
+        if (msalResult && self.externalAccountHandler)
         {
-            [self.internalConfig.cacheConfig.externalCacheProvider updateExternalAccountProviderWithResult:msalResult];
+            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
         }
         
         block(msalResult, resultError);
@@ -812,7 +810,7 @@
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
                                                                           oidcScopes:[self.class defaultOIDCScopes]
                                                                        correlationId:parameters.correlationId
-                                                                      telemetryApiId:[NSString stringWithFormat:@"%lu", parameters.telemetryApiId]
+                                                                          telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                                                                error:&msidError];
     
     if (!msidParams)
@@ -906,9 +904,9 @@
         NSError *resultError = nil;
         MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
         
-        if (msalResult)
+        if (msalResult && self.externalAccountHandler)
         {
-            [self.internalConfig.cacheConfig.externalCacheProvider updateExternalAccountProviderWithResult:msalResult];
+            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
         }
         
         block(msalResult, resultError);
@@ -1038,9 +1036,9 @@
         MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
     }
     
-    if (self.internalConfig.cacheConfig.externalCacheProvider)
+    if (self.externalAccountHandler)
     {
-        result &= [self.internalConfig.cacheConfig.externalCacheProvider removeAccountFromExternalProvider:account error:error];
+        result &= [self.externalAccountHandler removeAccountFromExternalProvider:account error:error];
     }
 
     return result;

@@ -23,36 +23,22 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MSALExternalAccountProviding;
+@class MSALResult;
+@class MSALAccount;
+@protocol MSALExternalAccount;
+
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol MSALExternalSerializedCacheProvider;
+@interface MSALExternalAccountHandler : NSObject
 
-@protocol MSALExternalSerializedCacheProviderDelegate <NSObject>
+@property (nonatomic, nonnull, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
 
-- (void)willAccessCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
-- (void)didAccessCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
-- (void)willWriteCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
-- (void)didWriteCache:(nonnull id<MSALExternalSerializedCacheProvider>)cache;
+- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider;
 
-@end
-
-typedef NS_ENUM(NSInteger, MSALSerializedCacheFormat)
-{
-    MSALLegacyADALCacheFormat
-};
-
-@interface MSALExternalSerializedCacheProvider : NSObject <NSCopying>
-
-@property (nonatomic, readonly) MSALSerializedCacheFormat cacheFormat;
-@property (nonatomic, nonnull, readonly) id<MSALExternalSerializedCacheProviderDelegate> delegate;
-
-- (nullable NSData *)serializeDataWithError:(NSError * _Nullable * _Nullable)error;
-- (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError * _Nullable * _Nullable)error;
-
-- (nullable instancetype)initWithCacheFormat:(MSALSerializedCacheFormat)cacheFormat
-                                    delegate:(nonnull id<MSALExternalSerializedCacheProviderDelegate>)delegate
-                                       error:(NSError * _Nullable * _Nullable)error;
-
+- (void)updateExternalAccountProviderWithResult:(MSALResult *)result;
+- (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error;
+- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsForClientId:(NSString *)clientId;
 
 @end
 

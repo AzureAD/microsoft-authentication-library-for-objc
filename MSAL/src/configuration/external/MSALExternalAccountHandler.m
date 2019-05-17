@@ -21,56 +21,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalCacheProvider.h"
-#import "MSALExternalCacheProvider+Internal.h"
-#import "MSALErrorConverter.h"
-#import "MSIDMacTokenCache.h"
-#import "MSALAccount.h"
-#import "MSALExternalAADAccount.h"
+#import "MSALExternalAccountHandler.h"
+#import "MSALExternalAccountProviding.h"
 #import "MSALTenantProfile.h"
+#import "MSALAccount.h"
 #import "MSALAADAuthority.h"
+#import "MSALExternalAADAccount.h"
 #import "MSALResult.h"
 
-@interface MSALExternalCacheProvider()
+@interface MSALExternalAccountHandler()
 
-@property (nonatomic, nullable, readwrite) id<MSALExternalAccountProviding> accountProvider;
-@property (nonatomic, nullable, readwrite) MSALExternalSerializedCacheProvider *cacheProvider;
+@property (nonatomic, nonnull, readwrite) id<MSALExternalAccountProviding> externalAccountProvider;
 
 @end
 
-@implementation MSALExternalCacheProvider
+@implementation MSALExternalAccountHandler
 
 #pragma mark - Init
 
-- (instancetype)initWithAccountProvider:(nullable id<MSALExternalAccountProviding>)accountProvider
-                          cacheProvider:(nullable MSALExternalSerializedCacheProvider *)serializedCacheProvider
-                                  error:(NSError **)error
+- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
 {
     self = [super init];
     
     if (self)
     {
-        _accountProvider = accountProvider;
-        _serializedCacheProvider = serializedCacheProvider;
+        _externalAccountProvider = externalAccountProvider;
     }
     
     return self;
 }
 
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone
-{
-    MSALExternalSerializedCacheProvider *copiedCacheProvider = [self.cacheProvider copyWithZone:zone];
-    MSALExternalCacheProvider *copiedProvider = [[self.class alloc] initWithAccountProvider:self.accountProvider cacheProvider:copiedCacheProvider error:nil];
-    return copiedProvider;
-}
-
-#pragma mark - Internal
+#pragma mark - Accounts
 
 - (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error
 {
-    if (!self.accountProvider)
+    if (!self.externalAccountProvider)
     {
         return YES;
     }
@@ -83,7 +68,7 @@
             
             NSError *removalError = nil;
             
-            BOOL result = [self.accountProvider removeAccount:externalAADAccount error:&removalError];
+            BOOL result = [self.externalAccountProvider removeAccount:externalAADAccount error:&removalError];
             
             if (!result)
             {
@@ -104,19 +89,40 @@
 
 - (void)updateExternalAccountProviderWithResult:(MSALResult *)result
 {
-    if (self.accountProvider && [result.authority isKindOfClass:[MSALAADAuthority class]])
+    if (self.externalAccountProvider && [result.authority isKindOfClass:[MSALAADAuthority class]])
     {
         MSALExternalAADAccount *externalAADAccount = [[MSALExternalAADAccount alloc] initWithAccount:result.account
                                                                                        tenantProfile:result.tenantProfile];
         
         NSError *updateError = nil;
-        BOOL result = [self.accountProvider updateAccount:externalAADAccount error:&updateError];
+        BOOL result = [self.externalAccountProvider updateAccount:externalAADAccount error:&updateError];
         
         if (!result)
         {
             MSID_LOG_WARN(nil, @"Failed to update account with error %ld, %@", (long)updateError.code, updateError.domain);
         }
     }
+}
+
+- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsForClientId:(NSString *)clientId
+{
+    NSMutableArray *allExternalAccounts = [NSMutableArray new];
+    
+    if (self.externalAccountProvider)
+    {
+        NSError *externalError = nil;
+        NSArray *externalAccounts = [self.externalAccountProvider accountsForClientId:clientId error:&externalError];
+        
+        if (externalError)
+        {
+            MSID_LOG_WARN(nil, @"Failed to read external accounts for client ID %@, error %@/%ld", clientId, externalError.domain, (long)externalError.code);
+            return nil;
+        }
+        
+        [allExternalAccounts addObjectsFromArray:externalAccounts];
+    }
+    
+    return allExternalAccounts;
 }
 
 @end
