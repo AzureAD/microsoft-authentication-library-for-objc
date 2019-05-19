@@ -104,6 +104,7 @@
     MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:resultAccount createTenantProfile:NO];
 
     NSError *authorityError = nil;
+    // TODO: remove me!
     MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
                                                        validateFormat:NO
                                                             rawTenant:tenantId
@@ -120,11 +121,12 @@
         return nil;
     }
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:claims.objectId
-                                                                              tenantId:claims.realm
-                                                                             authority:authority
-                                                                          isHomeTenant:resultAccount.isHomeTenantAccount
-                                                                                claims:claims.jsonDictionary];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithLocalAccountId:resultAccount.localAccountId
+                                                                                tenantId:resultAccount.realm
+                                                                             environment:resultAccount.environment
+                                                                     isHomeTenantProfile:resultAccount.isHomeTenantAccount
+                                                                                  claims:claims.jsonDictionary];
+
 
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken
                              expiresOn:tokenResult.accessToken.expiresOn

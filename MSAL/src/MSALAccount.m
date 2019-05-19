@@ -88,24 +88,15 @@
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account
                 createTenantProfile:(BOOL)createTenantProfile
 {
-    NSError *error;
-    // TODO: use the new msid authority factory which fixes a bug when handling B2C authority
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
-    if (error || !authority)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to create msal authority from msid authority!");
-        return nil;
-    }
-    
-    NSArray *tenantProfiles;
+    NSArray *tenantProfiles = nil;
     if (createTenantProfile)
     {
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
-                                                                                  tenantId:account.tenantId
-                                                                                 authority:authority
-                                                                              isHomeTenant:account.isHomeTenantAccount
-                                                                                    claims:account.idTokenClaims.jsonDictionary];
-        
+        NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithLocalAccountId:account.localAccountId
+                                                                                    tenantId:account.realm
+                                                                                 environment:account.environment
+                                                                         isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                      claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];
@@ -116,7 +107,7 @@
                              name:account.name
                     homeAccountId:account.accountIdentifier.homeAccountId
                    localAccountId:account.localAccountId
-                      environment:account.authority.environment
+                      environment:account.environment
                    tenantProfiles:tenantProfiles];
 }
 

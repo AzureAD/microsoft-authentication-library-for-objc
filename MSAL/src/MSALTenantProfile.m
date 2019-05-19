@@ -27,25 +27,25 @@
 
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
-#import "MSALAuthority.h"
-#import "MSALAuthorityFactory.h"
+#import "MSALAccountId+Internal.h"
 
 @implementation MSALTenantProfile
 
-- (instancetype)initWithUserObjectId:(NSString *)userObjectId
-                            tenantId:(NSString *)tenantId
-                           authority:(MSALAuthority *)authority
-                        isHomeTenant:(BOOL)isHomeTenant
-                              claims:(NSDictionary *)claims
+- (instancetype)initWithLocalAccountId:(NSString *)localAccountId
+                              tenantId:(NSString *)tenantId
+                           environment:(NSString *)environment
+                   isHomeTenantProfile:(BOOL)isHomeTenantProfile
+                                claims:(NSDictionary *)claims
 {
     self = [super init];
     
     if (self)
     {
-        _userObjectId = userObjectId;
-        _tenantId = tenantId;
-        _authority = authority;
-        _isHomeTenant = isHomeTenant;
+        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
+                                                                  objectId:_claims[@"oid"]
+                                                                  tenantId:tenantId];
+        _environment = environment;
+        _isHomeTenantProfile = isHomeTenantProfile;
         _claims = claims;
     }
     
@@ -57,10 +57,9 @@
 - (instancetype)copyWithZone:(NSZone *)zone
 {
     MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
-    tenantProfile->_userObjectId = [_userObjectId copyWithZone:zone];
-    tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
-    tenantProfile->_authority = [MSALAuthorityFactory authorityFromUrl:_authority.url context:nil error:nil];
-    tenantProfile->_isHomeTenant = _isHomeTenant;
+    tenantProfile->_localAccountId = [_localAccountId copyWithZone:zone];
+    tenantProfile->_environment = [_environment copyWithZone:zone];
+    tenantProfile->_isHomeTenantProfile = _isHomeTenantProfile;
     tenantProfile->_claims = [[NSDictionary alloc] initWithDictionary:_claims copyItems:YES];
     return tenantProfile;
 }

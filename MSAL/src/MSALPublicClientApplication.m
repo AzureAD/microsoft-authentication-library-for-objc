@@ -86,6 +86,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSALCacheConfig.h"
 #import "MSALClaimsRequest+Internal.h"
+#import "NSURL+MSIDAADUtils.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -971,7 +972,8 @@
     // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
     // Therefore, we update app metadata to not have family id for this app after signout
 
-    NSURL *authorityURL = [NSURL msidURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
+    // TODO: move this logic to AAD specific place
+    NSURL *authorityURL = [NSURL msidAADURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
     MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
 
     BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
