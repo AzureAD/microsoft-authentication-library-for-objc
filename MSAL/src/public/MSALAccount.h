@@ -34,7 +34,9 @@
 @interface MSALAccount : NSObject <NSCopying>
 
 /*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string including special characters such as @, /, or whitespace.
+ Mostly maps to UserPrincipleName(UPN) in case of AAD.
+ Can be nil if not returned from the service.
  */
 @property (readonly, nullable) NSString *username;
 
@@ -57,7 +59,7 @@
  -accountForUsername:error:
  -allAccountsFilteredByAuthority:
  
- The field will be nil in other scenarios. E.g., account returned as part of the result of an acqure token interactive/silent call.
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
 @property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
