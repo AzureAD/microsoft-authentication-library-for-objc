@@ -85,6 +85,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSALCacheConfig.h"
 #import "MSALClaimsRequest+Internal.h"
+#import "MSIDMetadataCacheAccessor.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -92,6 +93,8 @@
     NSString *_defaultKeychainGroup;
 }
 
+@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nonatomic) MSIDMetadataCacheAccessor *metadataCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 
 @end
