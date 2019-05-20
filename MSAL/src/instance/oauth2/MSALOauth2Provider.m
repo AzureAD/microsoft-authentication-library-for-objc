@@ -29,9 +29,10 @@
 #import "MSIDOauth2Factory.h"
 #import "MSIDTokenResult.h"
 #import "MSALOauth2Provider+Internal.h"
-#import "MSALAuthorityFactory.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAuthority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALOauth2Authority.h"
 
 @implementation MSALOauth2Provider
 
@@ -54,7 +55,7 @@
 {
     NSError *authorityError = nil;
     
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url context:nil error:&authorityError];
+    MSALAuthority *authority = [[MSALOauth2Authority alloc] initWithURL:tokenResult.authority.url error:error];
     
     if (!authority)
     {
