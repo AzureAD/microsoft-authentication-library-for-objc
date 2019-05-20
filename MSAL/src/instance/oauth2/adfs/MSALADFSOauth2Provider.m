@@ -25,12 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2Factory.h"
+#import "MSALADFSOauth2Provider.h"
+#import "MSALResult+Internal.h"
+#import "MSIDAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSIDTokenResult.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation MSALADFSOauth2Provider
 
-@interface MSALADFSOauth2Factory : MSALOauth2Factory
+#pragma mark - Public
+
+- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error
+{
+    NSError *authorityError = nil;
+    
+    MSALADFSAuthority *adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:tokenResult.authority.url error:&authorityError];
+    
+    if (!adfsAuthority)
+    {
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        
+        if (error) *error = authorityError;
+        
+        return nil;
+    }
+    
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:adfsAuthority error:error];
+}
+
+#pragma mark - Protected
+
+- (void)initDerivedProperties
+{
+    NSAssert(NO, @"ADFS still unimplemented! Implement me.");
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

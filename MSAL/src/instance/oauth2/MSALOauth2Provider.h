@@ -25,44 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2FactoryProducer.h"
-#import "MSALB2CAuthority.h"
-#import "MSALAADAuthority.h"
-#import "MSALADFSAuthority.h"
-#import "MSALB2COauth2Factory.h"
-#import "MSALAADOauth2Factory.h"
-#import "MSALADFSAuthority.h"
+#import <Foundation/Foundation.h>
 
-@implementation MSALOauth2FactoryProducer
+NS_ASSUME_NONNULL_BEGIN
 
-+ (MSALOauth2Factory *)oauthFactoryForAuthority:(MSALAuthority *)authority
-                                        context:(id<MSIDRequestContext>)context
-                                          error:(NSError **)error
-{
-    if (!authority)
-    {
-        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
-        
-        return nil;
-    }
-    
-    if ([authority isKindOfClass:[MSALB2CAuthority class]])
-    {
-        return [MSALB2COauth2Factory new];
-    }
-    else if ([authority isKindOfClass:[MSALAADAuthority class]])
-    {
-        return [MSALAADOauth2Factory new];
-    }
-    else if ([authority isKindOfClass:[MSALADFSAuthority class]])
-    {
-        NSAssert(NO, @"ADFS not implemented in MSAL yet");
-        return nil;
-    }
-    
-    // Create base factory for everything else, but in future we might want to further separate this out
-    // (e.g. ADFS, Google, Oauth2 etc...)
-    return [MSALOauth2Factory new];
-}
+@class MSIDOauth2Factory;
+@class MSIDTokenResult;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSALAccount;
+
+@interface MSALOauth2Provider : NSObject
+
+@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
+
+- (nullable MSALResult *)resultWithTokenResult:(nonnull MSIDTokenResult *)tokenResult
+                                         error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)removeAdditionalAccountInfo:(nonnull MSALAccount *)account
+                           clientId:(nonnull NSString *)clientId
+                         tokenCache:(nonnull MSIDDefaultTokenCacheAccessor *)tokenCache
+                              error:(NSError * _Nullable * _Nullable)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

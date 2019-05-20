@@ -25,43 +25,44 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALB2COauth2Factory.h"
-#import "MSALOauth2Factory+Internal.h"
-#import "MSIDB2COauth2Factory.h"
-#import "MSALResult+Internal.h"
-#import "MSIDAuthority.h"
-#import "MSALB2CAuthority_Internal.h"
-#import "MSIDTokenResult.h"
+#import "MSALOauth2ProviderFactory.h"
+#import "MSALB2CAuthority.h"
+#import "MSALAADAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSALB2COauth2Provider.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALADFSAuthority.h"
 
-@implementation MSALB2COauth2Factory
+@implementation MSALOauth2ProviderFactory
 
-#pragma mark - Public
-
-- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                                error:(NSError **)error
++ (MSALOauth2Provider *)oauthProviderForAuthority:(MSALAuthority *)authority
+                                          context:(id<MSIDRequestContext>)context
+                                            error:(NSError **)error
 {
-    NSError *authorityError = nil;
-    
-    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:tokenResult.authority.url validateFormat:NO error:&authorityError];
-    
-    if (!b2cAuthority)
+    if (!authority)
     {
-        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
-        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
-        
-        if (error) *error = authorityError;
+        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
         
         return nil;
     }
     
-    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
-}
-
-#pragma mark - Protected
-
-- (void)initDerivedProperties
-{
-    self.msidOauth2Factory = [MSIDB2COauth2Factory new];
+    if ([authority isKindOfClass:[MSALB2CAuthority class]])
+    {
+        return [MSALB2COauth2Provider new];
+    }
+    else if ([authority isKindOfClass:[MSALAADAuthority class]])
+    {
+        return [MSALAADOauth2Provider new];
+    }
+    else if ([authority isKindOfClass:[MSALADFSAuthority class]])
+    {
+        NSAssert(NO, @"ADFS not implemented in MSAL yet");
+        return nil;
+    }
+    
+    // Create base factory for everything else, but in future we might want to further separate this out
+    // (e.g. ADFS, Google, Oauth2 etc...)
+    return [MSALOauth2Provider new];
 }
 
 @end

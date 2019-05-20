@@ -25,20 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2Factory.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDOauth2Factory;
+@class MSALAuthority;
+@class MSALOauth2Provider;
 
-#ifndef MSALOauth2BaseFactory_Internal_h
-#define MSALOauth2BaseFactory_Internal_h
+@interface MSALOauth2ProviderFactory : NSObject
 
-@interface MSALOauth2Factory()
-
-@property (nonatomic, nonnull, readwrite) MSIDOauth2Factory *msidOauth2Factory;
-
-- (void)initDerivedProperties;
++ (nullable MSALOauth2Provider *)oauthProviderForAuthority:(nonnull MSALAuthority *)authority
+                                                   context:(nullable id<MSIDRequestContext>)context
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end
-
-
-#endif /* MSALOauth2BaseFactory_Internal_h */

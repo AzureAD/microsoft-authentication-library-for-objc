@@ -25,15 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAADOauth2Factory.h"
+#import "MSALAADOauth2Provider.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALOauth2Factory+Internal.h"
+#import "MSALOauth2Provider+Internal.h"
 #import "MSALResult+Internal.h"
 #import "MSIDAuthority.h"
 #import "MSALAADAuthority.h"
 #import "MSIDTokenResult.h"
+#import "NSURL+MSIDAADUtils.h"
+#import "MSALAccount.h"
+#import "MSALAccountId.h"
+#import "MSIDAADAuthority.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
 
-@implementation MSALAADOauth2Factory
+@implementation MSALAADOauth2Provider
 
 #pragma mark - Public
 
@@ -55,6 +60,39 @@
     }
     
     return [MSALResult resultWithMSIDTokenResult:tokenResult authority:aadAuthority error:error];
+}
+
+- (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
+                           clientId:(NSString *)clientId
+                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                              error:(NSError **)error
+{
+    // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
+    // Therefore, we update app metadata to not have family id for this app after signout
+    
+    NSURL *authorityURL = [NSURL msidAADURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
+    MSIDAADAuthority *aadAuthority = [[MSIDAADAuthority alloc] initWithURL:authorityURL rawTenant:nil context:nil error:nil];
+    
+    NSError *metadataError = nil;
+    BOOL metadataResult = [tokenCache updateAppMetadataWithFamilyId:@""
+                                                           clientId:clientId
+                                                          authority:aadAuthority
+                                                            context:nil
+                                                              error:&metadataError];
+    
+    if (!metadataResult)
+    {
+        if (error)
+        {
+            *error = metadataError;
+        }
+        
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
+        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
+        return NO;
+    }
+    
+    return YES;
 }
 
 #pragma mark - Protected

@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2Factory.h"
+#import "MSALOauth2Provider.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAADOauth2Factory : MSALOauth2Factory
+@interface MSALADFSOauth2Provider : MSALOauth2Provider
 
 @end
 

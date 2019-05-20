@@ -25,19 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALOauth2Provider.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MSIDOauth2Factory;
-@class MSIDTokenResult;
-
-@interface MSALOauth2Factory : NSObject
-
-@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
-
-- (nullable MSALResult *)resultWithTokenResult:(nonnull MSIDTokenResult *)tokenResult
-                                         error:(NSError * _Nullable * _Nullable)error;
+@interface MSALAADOauth2Provider : MSALOauth2Provider
 
 @end
 

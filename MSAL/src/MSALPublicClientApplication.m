@@ -44,7 +44,7 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALOauth2FactoryProducer.h"
+#import "MSALOauth2ProviderFactory.h"
 #import "MSALWebviewType_Internal.h"
 #import "MSIDAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
@@ -87,7 +87,7 @@
 #import "MSALCacheConfig.h"
 #import "MSALClaimsRequest+Internal.h"
 #import "NSURL+MSIDAADUtils.h"
-#import "MSALOauth2Factory.h"
+#import "MSALOauth2Provider.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -97,7 +97,7 @@
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
-@property (nonatomic) MSALOauth2Factory *msalOauth2Factory;
+@property (nonatomic) MSALOauth2Provider *msalOauth2Provider;
 
 @end
 
@@ -521,7 +521,7 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Factory:self.msalOauth2Factory];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
         
         if ([NSThread isMainThread])
@@ -538,15 +538,15 @@
     
     NSError *requestError = nil;
     
-    self.msalOauth2Factory = [MSALOauth2FactoryProducer oauthFactoryForAuthority:self.internalConfig.authority context:nil error:&requestError];
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:self.internalConfig.authority context:nil error:&requestError];
     
-    if (!self.msalOauth2Factory)
+    if (!self.msalOauth2Provider)
     {
         block(nil, requestError);
         return;
     }
     
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Factory.msidOauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
@@ -567,7 +567,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Factory resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
 }
@@ -826,21 +826,21 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Factory:self.msalOauth2Factory];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
         completionBlock(result, msalError);
     };
     
     NSError *requestError = nil;
-    self.msalOauth2Factory = [MSALOauth2FactoryProducer oauthFactoryForAuthority:self.internalConfig.authority context:nil error:&requestError];
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:self.internalConfig.authority context:nil error:&requestError];
     
-    if (!self.msalOauth2Factory)
+    if (!self.msalOauth2Provider)
     {
         block(nil, requestError);
         return;
     }
     
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Factory.msidOauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
@@ -861,7 +861,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [self.msalOauth2Factory resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
     
@@ -969,28 +969,11 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return NO;
     }
-
-    NSError *metadataError = nil;
-    // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
-    // Therefore, we update app metadata to not have family id for this app after signout
-
-    // TODO: move this logic to AAD specific place
-    NSURL *authorityURL = [NSURL msidAADURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
-
-    BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
-                                                                clientId:self.internalConfig.clientId
-                                                               authority:authority
-                                                                 context:nil
-                                                                   error:&metadataError];
-
-    if (!metadataResult)
-    {
-        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
-        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
-    }
-
-    return result;
+    
+    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
+                                                       clientId:self.clientId
+                                                     tokenCache:self.tokenCache
+                                                          error:error];
 }
 
 @end
