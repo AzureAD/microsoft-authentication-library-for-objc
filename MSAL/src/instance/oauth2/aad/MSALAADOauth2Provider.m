@@ -37,6 +37,7 @@
 #import "MSALAccountId.h"
 #import "MSIDAADAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSALErrorConverter.h"
 
 @implementation MSALAADOauth2Provider
 
@@ -93,6 +94,22 @@
     }
     
     return YES;
+}
+
+- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+                             requestAuthority:(MSIDAuthority *)requestAuthority
+                                        error:(__unused NSError **)error
+{
+    // TODO: after authority->issuer cache is ready, this should always lookup cached issuer instead
+    
+    /*
+     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+     if authority is a common, organizations or consumers authority.
+     */
+    return [[MSIDAADAuthority alloc] initWithURL:requestAuthority.url
+                                       rawTenant:account.homeAccountId.tenantId
+                                         context:nil
+                                           error:error];
 }
 
 #pragma mark - Protected

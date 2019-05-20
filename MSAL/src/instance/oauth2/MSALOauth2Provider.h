@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSIDTokenResult;
 @class MSIDDefaultTokenCacheAccessor;
 @class MSALAccount;
+@class MSIDAuthority;
 
 @interface MSALOauth2Provider : NSObject
 
@@ -45,6 +46,10 @@ NS_ASSUME_NONNULL_BEGIN
                            clientId:(nonnull NSString *)clientId
                          tokenCache:(nonnull MSIDDefaultTokenCacheAccessor *)tokenCache
                               error:(NSError * _Nullable * _Nullable)error;
+
+- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(nonnull MSALAccount *)account
+                                      requestAuthority:(nonnull MSIDAuthority *)requestAuthority
+                                                 error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

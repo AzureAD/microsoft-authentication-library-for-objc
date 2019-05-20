@@ -77,6 +77,14 @@
     return YES;
 }
 
+- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+                             requestAuthority:(MSIDAuthority *)requestAuthority
+                                        error:(__unused NSError **)error
+{
+    // TODO: after authority->issuer cache is ready, this should always lookup cached issuer instead
+    return requestAuthority;
+}
+
 #pragma mark - Protected
 
 - (void)initDerivedProperties

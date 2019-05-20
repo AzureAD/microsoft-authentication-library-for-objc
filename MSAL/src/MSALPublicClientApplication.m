@@ -744,8 +744,9 @@
      if authority is a common, organizations or consumers authority.
      */
     NSError *authorityError = nil;
-    requestAuthority = [MSIDAuthorityFactory authorityWithRawTenant:parameters.account.homeAccountId.tenantId
-                                                      msidAuthority:requestAuthority context:nil error:&authorityError];
+    requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
+                                                          requestAuthority:requestAuthority
+                                                                     error:&authorityError];
     
     if (!requestAuthority)
     {

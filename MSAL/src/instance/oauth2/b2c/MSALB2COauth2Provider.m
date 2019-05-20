@@ -32,6 +32,9 @@
 #import "MSIDAuthority.h"
 #import "MSALB2CAuthority_Internal.h"
 #import "MSIDTokenResult.h"
+#import "MSIDB2CAuthority.h"
+#import "MSALAccount.h"
+#import "MSALAccountId.h"
 
 @implementation MSALB2COauth2Provider
 
@@ -55,6 +58,30 @@
     }
     
     return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
+}
+
+- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+                             requestAuthority:(MSIDAuthority *)requestAuthority
+                                        error:(__unused NSError **)error
+{
+    /*
+     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+     if authority is a common, organizations or consumers authority.
+     */
+    MSIDB2CAuthority *b2cAuthority = [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
+                                                                 rawTenant:account.homeAccountId.tenantId
+                                                                   context:nil
+                                                                     error:error];
+    
+    if (b2cAuthority)
+    {
+        return b2cAuthority;
+    }
+    
+    return [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
+                                  validateFormat:NO
+                                         context:nil
+                                           error:error];
 }
 
 #pragma mark - Protected
