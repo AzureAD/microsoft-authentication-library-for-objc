@@ -1186,7 +1186,7 @@
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
-         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -1247,7 +1247,7 @@
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
-         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/custom_guest_tenant");
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
          XCTAssertFalse(obj.forceRefresh);
          
