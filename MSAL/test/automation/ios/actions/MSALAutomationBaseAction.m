@@ -147,11 +147,11 @@
     NSInteger expiresOn = [msalResult.expiresOn timeIntervalSince1970];
 
     MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
-    userInfo.objectId = msalResult.tenantProfile.userObjectId;
-    userInfo.tenantId = msalResult.tenantId;
+    userInfo.objectId = msalResult.tenantProfile.localAccountId;
+    userInfo.tenantId = msalResult.tenantProfile.tenantId;
     userInfo.username = msalResult.account.username;
     userInfo.homeAccountId = msalResult.account.homeAccountId.identifier;
-    userInfo.localAccountId = msalResult.tenantProfile.userObjectId;
+    userInfo.localAccountId = msalResult.tenantProfile.localAccountId;
     userInfo.homeObjectId = msalResult.account.homeAccountId.objectId;
     userInfo.homeTenantId = msalResult.account.homeAccountId.tenantId;
     userInfo.environment = msalResult.account.environment;

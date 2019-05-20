@@ -86,6 +86,11 @@
     return requestAuthority;
 }
 
+- (BOOL)isSupportedAuthority:(__unused MSIDAuthority *)authority
+{
+    return YES;
+}
+
 #pragma mark - Protected
 
 - (void)initDerivedProperties

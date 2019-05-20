@@ -84,11 +84,11 @@
         MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
         userInfo.username = account.username;
         userInfo.homeAccountId = account.homeAccountId.identifier;
-        userInfo.localAccountId = account.tenantProfiles[0].userObjectId;
+        userInfo.localAccountId = account.tenantProfiles[0].localAccountId;
         userInfo.homeObjectId = account.homeAccountId.objectId;
         userInfo.homeTenantId = account.homeAccountId.tenantId;
         userInfo.environment = account.environment;
-        userInfo.objectId = account.tenantProfiles[0].userObjectId;
+        userInfo.objectId = account.tenantProfiles[0].localAccountId;
         userInfo.tenantId = account.tenantProfiles[0].tenantId;
         [items addObject:userInfo];
     }

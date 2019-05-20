@@ -27,6 +27,7 @@
 
 #import "MSALResult+Automation.h"
 #import "MSALUser+Automation.h"
+#import "MSALTenantProfile.h"
 
 @implementation MSALResult (Automation)
 
@@ -34,7 +35,7 @@
 {
     return @{@"access_token" : self.accessToken,
              @"scopes" : self.scopes,
-             @"tenantId" : (self.tenantId) ? self.tenantId : @"",
+             @"tenantId" : (self.tenantProfile.tenantId) ? self.tenantProfile.tenantId : @"",
              @"expires_on" : [NSString stringWithFormat:@"%f", self.expiresOn.timeIntervalSince1970],
              @"id_token" : self.idToken ? self.idToken : @"",
              @"user" : self.account ? [self.account itemAsDictionary] : @"",

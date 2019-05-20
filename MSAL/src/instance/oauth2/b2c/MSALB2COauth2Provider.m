@@ -84,6 +84,11 @@
                                            error:error];
 }
 
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
+{
+    return [authority isKindOfClass:[MSIDB2CAuthority class]];
+}
+
 #pragma mark - Protected
 
 - (void)initDerivedProperties

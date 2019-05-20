@@ -30,6 +30,7 @@
 #import "MSIDAuthority.h"
 #import "MSALADFSAuthority.h"
 #import "MSIDTokenResult.h"
+#import "MSIDADFSAuthority.h"
 
 @implementation MSALADFSOauth2Provider
 
@@ -53,6 +54,11 @@
     }
     
     return [MSALResult resultWithMSIDTokenResult:tokenResult authority:adfsAuthority error:error];
+}
+
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
+{
+    return [authority isKindOfClass:[MSIDADFSAuthority class]];
 }
 
 #pragma mark - Protected

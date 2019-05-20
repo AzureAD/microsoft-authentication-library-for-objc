@@ -254,6 +254,18 @@
     _internalConfig = [config copy];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    NSError *oauthProviderError = nil;
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority context:nil error:&oauthProviderError];
+    
+    if (!self.msalOauth2Provider)
+    {
+        if (error)
+        {
+            *error = oauthProviderError;
+        }
+        
+        return nil;
+    }
     
     return self;
 }
@@ -389,7 +401,19 @@
                    completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
-
+    
+    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    {
+        if (completionBlock)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
+    
     NSError *msidError = nil;
     
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
@@ -536,20 +560,11 @@
         }
     };
     
-    NSError *requestError = nil;
-    
-    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:self.internalConfig.authority context:nil error:&requestError];
-    
-    if (!self.msalOauth2Provider)
-    {
-        block(nil, requestError);
-        return;
-    }
-    
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
+    NSError *requestError = nil;
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
     
     if (!controller)
@@ -732,6 +747,20 @@
 {
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     
+    // This is meant to avoid developer error, when they configure PCA with e.g. AAD authority, but pass B2C authority here
+    // Authority type in PCA and parameters should match
+    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    {
+        if (completionBlock)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
+    
     BOOL shouldValidate = _validateAuthority;
     
     if (shouldValidate && [self shouldExcludeValidationForAuthority:requestAuthority])
@@ -832,19 +861,11 @@
         completionBlock(result, msalError);
     };
     
-    NSError *requestError = nil;
-    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:self.internalConfig.authority context:nil error:&requestError];
-    
-    if (!self.msalOauth2Provider)
-    {
-        block(nil, requestError);
-        return;
-    }
-    
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
+    NSError *requestError = nil;
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
     
     if (!requestController)

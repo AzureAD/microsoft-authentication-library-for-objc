@@ -51,6 +51,8 @@ NS_ASSUME_NONNULL_BEGIN
                                       requestAuthority:(nonnull MSIDAuthority *)requestAuthority
                                                  error:(NSError * _Nullable * _Nullable)error;
 
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
+
 @end
 
 NS_ASSUME_NONNULL_END
