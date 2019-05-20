@@ -916,25 +916,25 @@
         shouldValidate = NO;
     }
 
-    /*
-     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-     if authority is a common, organizations or consumers authority.
-     */
-    NSError *authorityError = nil;
-    msidAuthority = [MSIDAuthorityFactory authorityWithRawTenant:account.homeAccountId.tenantId msidAuthority:msidAuthority context:nil error:&authorityError];
-    
-    if (!msidAuthority)
-    {
-        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
-        
-        if (completionBlock)
-        {
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
-            completionBlock(nil, msalError);
-        }
-        
-        return;
-    }
+//    /*
+//     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+//     if authority is a common, organizations or consumers authority.
+//     */
+//    NSError *authorityError = nil;
+//    msidAuthority = [MSIDAuthorityFactory authorityWithRawTenant:account.homeAccountId.tenantId msidAuthority:msidAuthority context:nil error:&authorityError];
+//    
+//    if (!msidAuthority)
+//    {
+//        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+//        
+//        if (completionBlock)
+//        {
+//            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
+//            completionBlock(nil, msalError);
+//        }
+//        
+//        return;
+//    }
     
     NSOrderedSet *requestScopes = [[NSOrderedSet alloc] initWithArray:scopes copyItems:YES];
     NSOrderedSet *requestOIDCScopes = [self.class defaultOIDCScopes];
