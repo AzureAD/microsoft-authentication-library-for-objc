@@ -41,12 +41,28 @@
 @property (readonly, nullable) NSString *username;
 
 /*!
- Unique identifier of the account in the home directory.
+ Unique identifier of the account in the home tenant.
+ This can be used later to retrieve accounts and tokens silently from MSAL.
  */
 @property (readonly, nullable) MSALAccountId *homeAccountId;
 
 /*!
- Host part of the authority string used for authentication.
+ Host part of the authority string used for authentication based on the issuer identifier.
+ Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed.
+ If a host doesn't support multiple tenants, there'll be one MSALAccount with one tenant profile per host returned.
+ 
+ e.g. if app accesses following tenants: Contoso.com and MyOrg.com in the Public AAD cloud, there'll be following information returned:
+ 
+MSALAccount
+- environment of "login.microsoftonline.com"
+- homeAccountId based on the GUID of "MyOrg.com"
+- tenantProfiles
+    - tenantProfile[0]
+        - localAccountId based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+        - claims for the id token issued by MyOrg.com
+    - tenantProfile[1]
+        - localAccountId based on account identifiers from "Contoso.com"
+        - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
 

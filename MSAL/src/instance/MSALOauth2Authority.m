@@ -25,15 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALOauth2Authority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALErrorConverter.h"
 
-@class MSALAuthority;
-@class MSALOauth2Factory;
+@implementation MSALOauth2Authority
 
-@interface MSALOauth2FactoryProducer : NSObject
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url error:nil];
+    
+    if (self)
+    {
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+    }
+    
+    return nil;
+}
 
-+ (nullable MSALOauth2Factory *)oauthFactoryForAuthority:(nonnull MSALAuthority *)authority
-                                                 context:(nullable id<MSIDRequestContext>)context
-                                                   error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (NSURL *)url
+{
+    return nil;
+}
 
 @end

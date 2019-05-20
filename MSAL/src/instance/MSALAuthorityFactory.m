@@ -32,7 +32,9 @@
 #import "MSIDB2CAuthority.h"
 #import "MSALADFSAuthority.h"
 #import "MSIDADFSAuthority.h"
+#import "MSALOauth2Authority.h"
 #import "MSALB2CAuthority_Internal.h"
+#import "MSALAuthority_Internal.h"
 
 @implementation MSALAuthorityFactory
 
@@ -67,9 +69,7 @@
         if (aadAuthority) return aadAuthority;
     }
     
-    MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is not a valid authority.", nil);
-    
-    return nil;
+    return [[MSALOauth2Authority alloc] initWithURL:url error:error];
 }
 
 @end

@@ -27,13 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAuthority;
-@class MSALOauth2Factory;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALOauth2FactoryProducer : NSObject
+@class MSIDOauth2Factory;
+@class MSIDTokenResult;
 
-+ (nullable MSALOauth2Factory *)oauthFactoryForAuthority:(nonnull MSALAuthority *)authority
-                                                 context:(nullable id<MSIDRequestContext>)context
-                                                   error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+@interface MSALOauth2Factory : NSObject
+
+@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
+
+- (nullable MSALResult *)resultWithTokenResult:(nonnull MSIDTokenResult *)tokenResult
+                                         error:(NSError * _Nullable * _Nullable)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

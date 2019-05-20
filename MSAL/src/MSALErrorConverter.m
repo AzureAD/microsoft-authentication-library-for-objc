@@ -28,6 +28,7 @@
 #import "MSALErrorConverter+Internal.h"
 #import "MSALResult+Internal.h"
 #import "MSALError.h"
+#import "MSALOauth2Factory.h"
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
@@ -124,6 +125,11 @@ static NSSet *s_recoverableErrorCode;
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
 {
+    return [self msalErrorFromMsidError:msidError msalOauth2Factory:nil];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError msalOauth2Factory:(MSALOauth2Factory *)oauth2Factory
+{
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
                 errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
@@ -131,7 +137,8 @@ static NSSet *s_recoverableErrorCode;
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
                    correlationId:msidError.userInfo[MSIDCorrelationIdKey]
-                        userInfo:msidError.userInfo];
+                        userInfo:msidError.userInfo
+               msalOauth2Factory:oauth2Factory];
 }
 
 + (NSError *)errorWithDomain:(NSString *)domain
@@ -142,6 +149,7 @@ static NSSet *s_recoverableErrorCode;
              underlyingError:(NSError *)underlyingError
                correlationId:(NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
+           msalOauth2Factory:(MSALOauth2Factory *)oauth2Factory
 {
     if ([NSString msidIsStringNilOrBlank:domain])
     {
@@ -185,10 +193,10 @@ static NSSet *s_recoverableErrorCode;
     msalUserInfo[NSUnderlyingErrorKey] = underlyingError;
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
-    if (userInfo[MSIDInvalidTokenResultKey])
+    if (userInfo[MSIDInvalidTokenResultKey] && oauth2Factory)
     {
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+        MSALResult *msalResult = [oauth2Factory resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
 
         if (!msalResult)
         {

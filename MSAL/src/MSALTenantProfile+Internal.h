@@ -26,14 +26,14 @@
 //------------------------------------------------------------------------------
 
 @class MSALAuthority;
-@class MSALAccountId;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile ()
 
-@property (readwrite, nullable) MSALAccountId *localAccountId;
+@property (readwrite, nullable) NSString *localAccountId;
 @property (readwrite, nullable) NSString *environment;
+@property (readwrite, nullable) NSString *tenantId;
 @property (readwrite) BOOL isHomeTenantProfile;
 @property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 

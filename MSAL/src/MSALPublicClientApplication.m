@@ -87,6 +87,7 @@
 #import "MSALCacheConfig.h"
 #import "MSALClaimsRequest+Internal.h"
 #import "NSURL+MSIDAADUtils.h"
+#import "MSALOauth2Factory.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -96,6 +97,7 @@
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
+@property (nonatomic) MSALOauth2Factory *msalOauth2Factory;
 
 @end
 
@@ -519,7 +521,7 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Factory:self.msalOauth2Factory];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
         
         if ([NSThread isMainThread])
@@ -536,15 +538,15 @@
     
     NSError *requestError = nil;
     
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
+    self.msalOauth2Factory = [MSALOauth2FactoryProducer oauthFactoryForAuthority:self.internalConfig.authority context:nil error:&requestError];
     
-    if (!oauth2Factory)
+    if (!self.msalOauth2Factory)
     {
         block(nil, requestError);
         return;
     }
     
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Factory.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
@@ -565,7 +567,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Factory resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
 }
@@ -824,21 +826,21 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Factory:self.msalOauth2Factory];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
         completionBlock(result, msalError);
     };
     
     NSError *requestError = nil;
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
+    self.msalOauth2Factory = [MSALOauth2FactoryProducer oauthFactoryForAuthority:self.internalConfig.authority context:nil error:&requestError];
     
-    if (!oauth2Factory)
+    if (!self.msalOauth2Factory)
     {
         block(nil, requestError);
         return;
     }
     
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Factory.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
@@ -859,7 +861,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Factory resultWithTokenResult:result error:&resultError];
         block(msalResult, resultError);
     }];
     

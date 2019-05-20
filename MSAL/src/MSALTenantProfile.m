@@ -27,7 +27,6 @@
 
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
-#import "MSALAccountId+Internal.h"
 
 @implementation MSALTenantProfile
 
@@ -41,9 +40,8 @@
     
     if (self)
     {
-        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
-                                                                  objectId:_claims[@"oid"]
-                                                                  tenantId:tenantId];
+        _localAccountId = localAccountId;
+        _tenantId = tenantId;
         _environment = environment;
         _isHomeTenantProfile = isHomeTenantProfile;
         _claims = claims;
@@ -58,6 +56,7 @@
 {
     MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
     tenantProfile->_localAccountId = [_localAccountId copyWithZone:zone];
+    tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
     tenantProfile->_environment = [_environment copyWithZone:zone];
     tenantProfile->_isHomeTenantProfile = _isHomeTenantProfile;
     tenantProfile->_claims = [[NSDictionary alloc] initWithDictionary:_claims copyItems:YES];

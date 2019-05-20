@@ -26,33 +26,43 @@
 //------------------------------------------------------------------------------
 
 #import "MSALOauth2FactoryProducer.h"
-#import "MSIDOauth2Factory.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAADAuthority.h"
-#import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDB2COauth2Factory.h"
+#import "MSALB2CAuthority.h"
+#import "MSALAADAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSALB2COauth2Factory.h"
+#import "MSALAADOauth2Factory.h"
+#import "MSALADFSAuthority.h"
 
 @implementation MSALOauth2FactoryProducer
 
-+ (MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(NSURL *)authority
-                                             context:(id<MSIDRequestContext>)context
-                                               error:(NSError **)error
++ (MSALOauth2Factory *)oauthFactoryForAuthority:(MSALAuthority *)authority
+                                        context:(id<MSIDRequestContext>)context
+                                          error:(NSError **)error
 {
     if (!authority)
     {
         MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
-
+        
         return nil;
     }
-
-    if ([MSIDB2CAuthority isAuthorityFormatValid:authority context:context error:nil])
+    
+    if ([authority isKindOfClass:[MSALB2CAuthority class]])
     {
-        return [MSIDB2COauth2Factory new];
+        return [MSALB2COauth2Factory new];
     }
-
-    // Create AAD v2 factory for everything else, but in future we might want to further separate this out
+    else if ([authority isKindOfClass:[MSALAADAuthority class]])
+    {
+        return [MSALAADOauth2Factory new];
+    }
+    else if ([authority isKindOfClass:[MSALADFSAuthority class]])
+    {
+        NSAssert(NO, @"ADFS not implemented in MSAL yet");
+        return nil;
+    }
+    
+    // Create base factory for everything else, but in future we might want to further separate this out
     // (e.g. ADFS, Google, Oauth2 etc...)
-    return [MSIDAADV2Oauth2Factory new];
+    return [MSALOauth2Factory new];
 }
 
 @end

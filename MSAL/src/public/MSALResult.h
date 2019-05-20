@@ -51,7 +51,7 @@
 /*!
     An identifier for the tenant that the token was acquired from. This property will be nil if tenant information is not returned by the service.
  */
-@property (readonly, nullable) NSString *tenantId;
+@property (readonly, nullable) NSString *tenantId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantId instead");
 
 /*!
  The raw id token if it's returned by the service or nil if no id token is returned.
@@ -69,9 +69,9 @@
 @property (readonly, nonnull) MSALAccount *account;
 
 /*!
-    The unique id of the user.
+    The unique id of the account.
  */
-@property (readonly, nullable) NSString *uniqueId;
+@property (readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.localAccountId.identifier instead");
 
 /*!
     The scope values returned from the service.
@@ -81,7 +81,7 @@
 /*!
  Represents the authority used for getting the token from STS and caching it.
  This authority should be used for subsequent silent requests.
- It will be different from the authority provided by developer for sovereign cloud scenarios.
+ It might be different from the authority provided by developer (e.g. for sovereign cloud scenarios).
  */
 @property (readonly, nonnull) MSALAuthority *authority;
 

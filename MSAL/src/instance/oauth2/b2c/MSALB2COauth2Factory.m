@@ -25,15 +25,43 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALB2COauth2Factory.h"
+#import "MSALOauth2Factory+Internal.h"
+#import "MSIDB2COauth2Factory.h"
+#import "MSALResult+Internal.h"
+#import "MSIDAuthority.h"
+#import "MSALB2CAuthority_Internal.h"
+#import "MSIDTokenResult.h"
 
-@class MSALAuthority;
-@class MSALOauth2Factory;
+@implementation MSALB2COauth2Factory
 
-@interface MSALOauth2FactoryProducer : NSObject
+#pragma mark - Public
 
-+ (nullable MSALOauth2Factory *)oauthFactoryForAuthority:(nonnull MSALAuthority *)authority
-                                                 context:(nullable id<MSIDRequestContext>)context
-                                                   error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error
+{
+    NSError *authorityError = nil;
+    
+    MSALB2CAuthority *b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:tokenResult.authority.url validateFormat:NO error:&authorityError];
+    
+    if (!b2cAuthority)
+    {
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        
+        if (error) *error = authorityError;
+        
+        return nil;
+    }
+    
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
+}
+
+#pragma mark - Protected
+
+- (void)initDerivedProperties
+{
+    self.msidOauth2Factory = [MSIDB2COauth2Factory new];
+}
 
 @end

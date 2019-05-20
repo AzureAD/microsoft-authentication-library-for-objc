@@ -32,8 +32,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile : NSObject <NSCopying>
 
-@property (readonly, nullable) MSALAccountId *localAccountId;
+@property (readonly, nullable) NSString *localAccountId;
 @property (readonly, nullable) NSString *environment;
+@property (readonly, nullable) NSString *tenantId;
 @property (readonly) BOOL isHomeTenantProfile;
 @property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
 
