@@ -68,18 +68,9 @@
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
      */
-    MSIDB2CAuthority *b2cAuthority = [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
-                                                                 rawTenant:account.homeAccountId.tenantId
-                                                                   context:nil
-                                                                     error:error];
-    
-    if (b2cAuthority)
-    {
-        return b2cAuthority;
-    }
-    
     return [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
                                   validateFormat:NO
+                                       rawTenant:account.homeAccountId.tenantId
                                          context:nil
                                            error:error];
 }
