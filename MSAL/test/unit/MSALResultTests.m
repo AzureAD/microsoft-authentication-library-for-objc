@@ -97,9 +97,9 @@
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
-    XCTAssertEqual(error.code, MSIDErrorInvalidDeveloperParameter);
+    XCTAssertEqual(error.code, MSIDErrorInternal);
     XCTAssertNotNil(error.userInfo);
-    XCTAssertEqualObjects(error.userInfo[MSIDErrorDescriptionKey], @"Provided authority url is not a valid authority.");
+    XCTAssertEqualObjects(error.userInfo[MSIDErrorDescriptionKey], @"Nil authority in the result provided");
 }
 
 - (void)testMSALResultWithTokenResult_whenValidTokenResult_shouldReturnCorrectAttributes

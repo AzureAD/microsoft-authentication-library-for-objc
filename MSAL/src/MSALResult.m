@@ -97,6 +97,12 @@
         return nil;
     }
     
+    if (!authority)
+    {
+        MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil authority in the result provided", nil);
+        return nil;
+    }
+    
     MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithLocalAccountId:tokenResult.account.localAccountId
                                                                                 tenantId:tokenResult.account.realm
                                                                              environment:tokenResult.account.environment

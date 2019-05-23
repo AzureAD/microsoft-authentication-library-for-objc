@@ -76,6 +76,7 @@
     XCTAssertTrue([factory isKindOfClass:[MSALAADOauth2Provider class]]);
 }
 
+#ifndef ADFS_NOT_YET_SUPPORTED
 - (void)testOauth2FactoryForAuthority_whenADFSAuthority_shouldReturnAADV2FactoryNilError
 {
     NSError *error = nil;
@@ -88,5 +89,6 @@
     XCTAssertNil(error);
     XCTAssertTrue([factory isKindOfClass:[MSALADFSOauth2Provider class]]);
 }
+#endif
 
 @end
