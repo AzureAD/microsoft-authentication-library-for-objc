@@ -225,6 +225,7 @@
     profileRequest.extraScopes = profileRequest.requestScopes;
     profileRequest.testAccount = self.primaryAccount;
     profileRequest.usePassedWebView = YES;
+    profileRequest.loginHint = self.primaryAccount.username;
     profileRequest.requestIDP = @"Microsoft";
     profileRequest.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"profile"]];
     profileRequest.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"profile"]];
