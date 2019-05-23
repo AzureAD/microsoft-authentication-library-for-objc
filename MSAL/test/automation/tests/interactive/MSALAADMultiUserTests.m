@@ -135,10 +135,6 @@
     NSDictionary *config = [self configWithTestRequest:request];
 
     [self acquireToken:config];
-
-    XCUIElement *signIn = self.testApp.staticTexts[@"Sign in with another account"];
-    [self waitForElement:signIn];
-    [signIn msidTap];
     
     [self selectAccountWithTitle:@"Use another account"];
 

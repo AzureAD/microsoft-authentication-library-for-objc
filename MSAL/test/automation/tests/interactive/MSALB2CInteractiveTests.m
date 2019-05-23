@@ -153,7 +153,6 @@
     // 3. Run UI appeared step
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
     request.homeAccountIdentifier = homeAccountId;
-
     // 4. Run silent login
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
