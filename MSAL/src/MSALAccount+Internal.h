@@ -43,6 +43,12 @@
 
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
+- (instancetype)initWithUsername:(NSString *)username
+                   homeAccountId:(MSALAccountId *)homeAccountId
+                  localAccountId:(NSString *)localAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account

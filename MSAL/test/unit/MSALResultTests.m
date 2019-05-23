@@ -36,6 +36,9 @@
 #import "MSALAuthority.h"
 #import "MSALAccount.h"
 #import "MSALAccountId.h"
+#import "MSALResult+Internal.h"
+#import "MSALAADAuthority.h"
+#import "MSALAuthority_Internal.h"
 
 @interface MSALResultTests : MSALTestCase
 
@@ -58,7 +61,8 @@
     MSIDTokenResult *tokenResult = nil;
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://my.issuer.com/contoso.com"] error:nil];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -72,7 +76,8 @@
     MSIDTokenResult *tokenResult = [MSIDTokenResult new];
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALAADAuthority *authority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://my.issuer.com/contoso.com"] error:nil];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -87,7 +92,8 @@
     tokenResult.rawIdToken = @"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJ0ZW5hbnRfaWQifQ.t3T_3W7IcUfkjxTEUlM4beC1KccZJG7JaCJvTLjYg6M";
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALAADAuthority *authority = nil;
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:authority error:&error];
     
     XCTAssertNil(result);
     XCTAssertEqualObjects(error.domain, @"MSIDErrorDomain");
@@ -98,28 +104,35 @@
 
 - (void)testMSALResultWithTokenResult_whenValidTokenResult_shouldReturnCorrectAttributes
 {
+    MSALAADAuthority *msalAuthority = [[MSALAADAuthority alloc] initWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tenant_id"] error:nil];
+    
     MSIDTokenResult *tokenResult = [MSIDTokenResult new];
     tokenResult.rawIdToken = @"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJ0ZW5hbnRfaWQifQ.t3T_3W7IcUfkjxTEUlM4beC1KccZJG7JaCJvTLjYg6M";
     NSError *claimsError = nil;
     MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
     __auto_type authority = [@"https://login.microsoftonline.com/tenant_id" authority];
-    tokenResult.authority = authority;
+    tokenResult.authority = msalAuthority.msidAuthority;
     MSIDAccount *account = [MSIDAccount new];
-    account.authority = authority;
+    account.environment = authority.environment;
+    account.realm = authority.realm;
     account.localAccountId = @"local account id";
     account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"uid.tenant_id"];
     tokenResult.account = account;
     tokenResult.correlationId = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000001"];
     
     NSError *error = nil;
-    MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
+    MSALResult *result = [MSALResult resultWithMSIDTokenResult:tokenResult authority:msalAuthority error:&error];
     
     XCTAssertNotNil(result);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     XCTAssertEqualObjects(result.tenantId, claims.realm);
     XCTAssertEqual(result.uniqueId, @"local account id");
+#pragma clang diagnostic pop
     XCTAssertNotNil(result.tenantProfile);
-    XCTAssertEqualObjects(result.tenantProfile.authority.url, authority.url);
-    XCTAssertEqual(result.tenantProfile.isHomeTenant, YES);
+    XCTAssertEqualObjects(result.tenantProfile.environment, authority.environment);
+    XCTAssertEqualObjects(result.tenantProfile.tenantId, authority.realm);
+    XCTAssertEqual(result.tenantProfile.isHomeTenantProfile, YES);
     XCTAssertEqualObjects(result.tenantProfile.tenantId, @"tenant_id");
     XCTAssertNotNil(result.tenantProfile.claims);
     XCTAssertNotNil(result.account);

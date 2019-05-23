@@ -180,7 +180,7 @@
                                                               refreshToken:refreshToken
                                                                    idToken:response.idToken
                                                                    account:account
-                                                                 authority:accessToken.authority
+                                                                 authority:authority
                                                              correlationId:[NSUUID UUID]
                                                              tokenResponse:response];
 
