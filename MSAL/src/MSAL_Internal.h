@@ -26,8 +26,13 @@
 //------------------------------------------------------------------------------
 
 #define MSAL_VER_HIGH       0
+<<<<<<< HEAD
 #define MSAL_VER_LOW        4
 #define MSAL_VER_PATCH      3
+=======
+#define MSAL_VER_LOW        5
+#define MSAL_VER_PATCH      0
+>>>>>>> origin/release/0.5.0
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)

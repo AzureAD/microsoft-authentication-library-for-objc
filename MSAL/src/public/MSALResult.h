@@ -85,4 +85,9 @@
  */
 @property (readonly, nonnull) MSALAuthority *authority;
 
+/*!
+ The correlation ID of the request.
+ */
+@property (readonly, nonnull) NSUUID *correlationId;
+
 @end

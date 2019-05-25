@@ -35,6 +35,6 @@
 @property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
-- (BOOL)shouldDisableValidationForAuthority:(nonnull MSIDAuthority *)authority;
+- (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;
 
 @end
