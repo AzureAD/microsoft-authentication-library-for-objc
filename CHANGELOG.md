@@ -1,3 +1,7 @@
+## [0.4.3] - 2019-05-24
+### Updated
+- Updated to newer v2 broker protocol version
+
 ## [0.4.2] - 2019-05-06
 ### Fixed
 - Applying 0.3.1 hotfix changes to latest 0.4.x release
@@ -11,6 +15,10 @@
 - Updated MSAL Public API surface to be more extensible and intuitive
 - Added support for custom B2C domains
 - Improved MSAL error handling
+
+## [0.3.2] - 2019-05-24
+### Updated
+- Updated to newer v2 broker protocol version
 
 ## [0.3.1] - 2019-05-06
 ### Fixed
