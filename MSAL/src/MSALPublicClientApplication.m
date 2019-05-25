@@ -88,6 +88,7 @@
 #import "MSALClaimsRequest+Internal.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
+#import "MSIDExternalCacheSeeder.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -98,6 +99,7 @@
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSALExternalAccountHandler *externalAccountHandler;
+@property (nonatomic) MSIDExternalCacheSeeder *externalCacheSeeder;
 
 @end
 
@@ -220,7 +222,7 @@
         
         return nil;
     }
-
+    
     NSError *msidError = nil;
     MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirectUri
                                                                                     clientId:config.clientId
@@ -234,23 +236,12 @@
     
     config.verifiedRedirectUri = msalRedirectUri;
     
-    NSMutableArray *legacyAccessors = [NSMutableArray new];
-    
-    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
-    
-    if (externalDataSource)
-    {
-        MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
-        [legacyAccessors addObject:legacyAccessor];
-    }
-    
 #if TARGET_OS_IPHONE
     // Optional Paramater
     MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     NSMutableArray *otherAccessors = [[NSMutableArray alloc] initWithObjects:legacyAccessor, nil];
-    [otherAccessors addObjectsFromArray:legacyAccessors];
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     
@@ -258,6 +249,17 @@
 #else
     
     __auto_type dataSource = MSIDMacTokenCache.defaultCache; // TODO: replace with keychain cache
+    
+    NSMutableArray *legacyAccessors = [NSMutableArray new];
+    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
+    if (externalDataSource)
+    {
+        MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
+        _externalCacheSeeder = [MSIDExternalCacheSeeder new];
+        _externalCacheSeeder.externalLegacyAccessor = legacyAccessor;
+        _externalCacheSeeder.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+        [legacyAccessors addObject:legacyAccessor];
+    }
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
     self.tokenCache = defaultAccessor;
@@ -276,6 +278,7 @@
     
     return self;
 }
+
 
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
@@ -586,6 +589,7 @@
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
+    controller.externalCacheSeeder = self.externalCacheSeeder;
     
     if (!controller)
     {
@@ -886,6 +890,7 @@
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+    requestController.externalCacheSeeder = self.externalCacheSeeder;
     
     if (!requestController)
     {
