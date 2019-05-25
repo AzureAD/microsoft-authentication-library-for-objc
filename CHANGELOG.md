@@ -1,3 +1,7 @@
+## [0.4.3] - 2019-05-24
+### Updated
+- Updated to newer v2 broker protocol version
+
 ## [0.4.2] - 2019-05-06
 ### Fixed
 - Applying 0.3.1 hotfix changes to latest 0.4.x release
@@ -12,6 +16,10 @@
 - Added support for custom B2C domains
 - Improved MSAL error handling
 
+## [0.3.2] - 2019-05-24
+### Updated
+- Updated to newer v2 broker protocol version
+
 ## [0.3.1] - 2019-05-06
 ### Fixed
 - Better error handling in CBA cancellation flows
@@ -19,7 +27,11 @@
 
 ## [0.3.0] - 2019-04-22
 ### Added
+<<<<<<< HEAD
 -Added broker support to MSAL iOS SDK
+=======
+- Added broker support to MSAL iOS SDK
+>>>>>>> origin/hotfix/0.4.3
 
 ## [0.2.3] - 2019-02-12
 ### Fixed
