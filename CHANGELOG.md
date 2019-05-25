@@ -1,3 +1,7 @@
+## [0.3.2] - 2019-05-24
+### Updated
+- Updated to newer v2 broker protocol version
+
 ## [0.3.1] - 2019-05-06
 ### Fixed
 - Better error handling in CBA cancellation flows
