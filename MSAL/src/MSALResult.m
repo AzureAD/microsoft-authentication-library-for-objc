@@ -103,11 +103,11 @@
         return nil;
     }
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithLocalAccountId:tokenResult.account.localAccountId
-                                                                                tenantId:tokenResult.account.realm
-                                                                             environment:tokenResult.account.environment
-                                                                     isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
-                                                                                  claims:claims.jsonDictionary];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:tokenResult.account.localAccountId
+                                                                                 tenantId:tokenResult.account.realm
+                                                                              environment:tokenResult.account.environment
+                                                                      isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
+                                                                                   claims:claims.jsonDictionary];
     
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
@@ -116,7 +116,7 @@
                          tenantProfile:tenantProfile
                                account:[[MSALAccount alloc] initWithMSIDAccount:tokenResult.account createTenantProfile:NO]
                                idToken:tokenResult.rawIdToken
-                              uniqueId:tenantProfile.localAccountId
+                              uniqueId:tenantProfile.tenantProfileId
                                 scopes:[tokenResult.accessToken.scopes array]
                              authority:authority
                          correlationId:tokenResult.correlationId];

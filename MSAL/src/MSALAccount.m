@@ -75,11 +75,11 @@
     if (createTenantProfile)
     {
         NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithLocalAccountId:account.localAccountId
-                                                                                    tenantId:account.realm
-                                                                                 environment:account.environment
-                                                                         isHomeTenantProfile:account.isHomeTenantAccount
-                                                                                      claims:allClaims];
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:account.localAccountId
+                                                                                     tenantId:account.realm
+                                                                                  environment:account.environment
+                                                                          isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                       claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];

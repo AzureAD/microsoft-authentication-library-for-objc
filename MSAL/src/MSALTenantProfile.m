@@ -30,17 +30,17 @@
 
 @implementation MSALTenantProfile
 
-- (instancetype)initWithLocalAccountId:(NSString *)localAccountId
-                              tenantId:(NSString *)tenantId
-                           environment:(NSString *)environment
-                   isHomeTenantProfile:(BOOL)isHomeTenantProfile
-                                claims:(NSDictionary *)claims
+- (instancetype)initWithTenantProfileId:(nonnull NSString *)tenantProfileId
+                               tenantId:(nonnull NSString *)tenantId
+                            environment:(nonnull NSString *)environment
+                    isHomeTenantProfile:(BOOL)isHomeTenantProfile
+                                 claims:(nullable NSDictionary *)claims
 {
     self = [super init];
     
     if (self)
     {
-        _localAccountId = localAccountId;
+        _tenantProfileId = tenantProfileId;
         _tenantId = tenantId;
         _environment = environment;
         _isHomeTenantProfile = isHomeTenantProfile;
@@ -55,7 +55,7 @@
 - (instancetype)copyWithZone:(NSZone *)zone
 {
     MSALTenantProfile *tenantProfile = [[self.class allocWithZone:zone] init];
-    tenantProfile->_localAccountId = [_localAccountId copyWithZone:zone];
+    tenantProfile->_tenantProfileId = [_tenantProfileId copyWithZone:zone];
     tenantProfile->_tenantId = [_tenantId copyWithZone:zone];
     tenantProfile->_environment = [_environment copyWithZone:zone];
     tenantProfile->_isHomeTenantProfile = _isHomeTenantProfile;
