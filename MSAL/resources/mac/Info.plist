@@ -15,11 +15,7 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-<<<<<<< HEAD
 	<string>0.4.3</string>
-=======
-	<string>0.5.0</string>
->>>>>>> origin/release/0.5.0
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSHumanReadableCopyright</key>
