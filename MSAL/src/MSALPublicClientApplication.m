@@ -59,7 +59,6 @@
 #import "MSIDDefaultTokenRequestProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALErrorConverter.h"
 #if TARGET_OS_IPHONE
 #import "MSIDBrokerInteractiveController.h"

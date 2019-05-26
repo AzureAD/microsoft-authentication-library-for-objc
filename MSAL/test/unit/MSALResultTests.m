@@ -110,7 +110,7 @@
     tokenResult.rawIdToken = @"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJ0ZW5hbnRfaWQifQ.t3T_3W7IcUfkjxTEUlM4beC1KccZJG7JaCJvTLjYg6M";
     NSError *claimsError = nil;
     MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
-    __auto_type authority = [@"https://login.microsoftonline.com/tenant_id" authority];
+    __auto_type authority = [@"https://login.microsoftonline.com/tenant_id" aadAuthority];
     tokenResult.authority = msalAuthority.msidAuthority;
     MSIDAccount *account = [MSIDAccount new];
     account.environment = authority.environment;

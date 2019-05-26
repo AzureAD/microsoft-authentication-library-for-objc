@@ -27,7 +27,6 @@
 
 #import "MSALAutomationBaseAction.h"
 #import <MSAL/MSAL.h>
-#import "MSALAuthorityFactory.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -91,7 +90,7 @@
     if (parameters.configurationAuthority)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
-        authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
     
     

@@ -32,7 +32,7 @@
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDConfiguration.h"
-#import "MSIDAuthorityFactory.h"
+#import "NSString+MSIDTestUtil.h"
 #import "MSIDTokenResponse.h"
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
@@ -171,7 +171,7 @@
                                                                      foci:nil
                                                              extExpiresIn:nil];
 
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/common" aadAuthority];
     MSIDConfiguration *conf = [[MSIDConfiguration alloc] initWithAuthority:authority redirectUri:nil clientId:@"myclient" target:@"test.scope"];
 
     MSIDAADV2Oauth2Factory *factory = [MSIDAADV2Oauth2Factory new];

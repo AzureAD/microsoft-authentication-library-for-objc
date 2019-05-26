@@ -36,12 +36,10 @@
 #import "MSALAuthority.h"
 #import "MSIDAuthority.h"
 #import "MSIDAccountIdentifier.h"
-#import "MSALAuthorityFactory.h"
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccountsProvider.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 

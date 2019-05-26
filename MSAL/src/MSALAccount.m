@@ -39,7 +39,6 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALAuthorityFactory.h"
 #import "MSALAccountsProvider.h"
 
 @implementation MSALAccount

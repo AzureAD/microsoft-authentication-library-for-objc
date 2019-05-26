@@ -36,7 +36,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALAuthority.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
+#import "NSString+MSIDTestUtil.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDTestURLResponse+MSAL.h"
@@ -190,10 +190,9 @@
 - (void)testAllAccounts_whenDefaultAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    NSURL *authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:authorityUrl.absoluteString
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:authority.url.absoluteString
                                              clientId:@"different_client_id"
                                                   upn:@"user@contoso.com"
                                                  name:@"simple_user"
@@ -246,10 +245,9 @@
 - (void)testAllAccounts_whenLegacyAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    NSURL *authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:authorityUrl.absoluteString
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:authority.url.absoluteString
                                             clientId:@"different_client_id"
                                                  upn:@"user@contoso.com"
                                                 name:@"simple_user"

@@ -50,11 +50,10 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDMacTokenCache.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSIDTestURLResponse.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDDeviceId.h"
-#import "MSIDAuthorityFactory.h"
+#import "NSString+MSIDTestUtil.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDLocalInteractiveController.h"
@@ -1807,7 +1806,7 @@
     application.tokenCache = self.tokenCacheAccessor;
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:@"myclient" authority:configuration.authority context:nil error:nil];
 
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:authorityUrl] context:nil error:nil];
+    MSIDAuthority *authority = [authorityUrl aadAuthority];
 
     configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                      redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
@@ -2011,7 +2010,7 @@
 
 - (MSIDConfiguration *)msalDefaultConfiguration
 {
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/common" aadAuthority];
     
     return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI
@@ -2021,7 +2020,7 @@
 
 - (MSIDConfiguration *)msalDefaultConfigurationWithAuthority:(NSString *)authorityString
 {
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:[NSURL URLWithString:authorityString] context:nil error:nil];
+    MSIDAuthority *authority = [authorityString aadAuthority];
     
     return [[MSIDConfiguration alloc] initWithAuthority:authority
                                             redirectUri:UNIT_TEST_DEFAULT_REDIRECT_URI

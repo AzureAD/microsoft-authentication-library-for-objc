@@ -29,7 +29,6 @@
 #import "MSALTestAppSettings.h"
 #import "MSALAuthority.h"
 #import "MSIDAuthority.h"
-#import "MSALAuthorityFactory.h"
 #import "MSALAuthority_Internal.h"
 
 @interface MSALTestAppAuthorityViewController ()
@@ -159,7 +158,8 @@
     }
     else
     {
-        MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:[NSURL URLWithString:_authorities[row - 1]] context:nil error:nil];
+        NSURL *authorityURL = [NSURL URLWithString:_authorities[row - 1]];
+        MSALAuthority *authority = [MSALAuthority authorityWithURL:authorityURL error:nil];
         settings.authority = authority;
     }
 }
