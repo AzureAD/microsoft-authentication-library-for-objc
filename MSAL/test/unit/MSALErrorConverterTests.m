@@ -37,6 +37,7 @@
 #import "MSIDAccessToken.h"
 #import "MSIDRefreshToken.h"
 #import "MSALResult.h"
+#import "MSALAADOauth2Provider.h"
 
 @interface MSALErrorConverterTests : XCTestCase
 
@@ -68,7 +69,8 @@
                                                     subError:nil
                                              underlyingError:nil
                                                correlationId:nil
-                                                    userInfo:nil];
+                                                    userInfo:nil
+                                          msalOauth2Provider:nil];
     XCTAssertNil(msalError);
 }
 
@@ -91,7 +93,8 @@
                                                correlationId:correlationId
                                                     userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
-                                                               @"additional_user_info": @"unmapped_userinfo"}];
+                                                               @"additional_user_info": @"unmapped_userinfo"}
+                                          msalOauth2Provider:nil];
     
     NSString *expectedErrorDomain = NSOSStatusErrorDomain;
     XCTAssertNotNil(msalError);
@@ -131,7 +134,8 @@
                                                     userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
                                                                @"additional_user_info": @"unmapped_userinfo",
-                                                               MSIDInvalidTokenResultKey : [self testTokenResult]}];
+                                                               MSIDInvalidTokenResultKey : [self testTokenResult]}
+                                          msalOauth2Provider:[MSALAADOauth2Provider new]];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     NSInteger expectedErrorCode = MSALErrorInteractionRequired;
@@ -213,7 +217,8 @@
                                                         subError:nil
                                                  underlyingError:nil
                                                    correlationId:nil
-                                                        userInfo:nil];
+                                                        userInfo:nil
+                                              msalOauth2Provider:nil];
             
             XCTAssertNotEqual(error.code, errorCode);
             XCTAssertNotEqualObjects(error.domain, domain);
@@ -231,7 +236,8 @@
                                                     subError:nil
                                              underlyingError:nil
                                                correlationId:nil
-                                                    userInfo:nil];
+                                                    userInfo:nil
+                                          msalOauth2Provider:nil];
     
     XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
     XCTAssertEqual(msalError.code, MSALErrorInternal);
@@ -247,7 +253,8 @@
                                                     subError:nil
                                              underlyingError:nil
                                                correlationId:nil
-                                                    userInfo:nil];
+                                                    userInfo:nil
+                                          msalOauth2Provider:nil];
     
     XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
     XCTAssertEqual(msalError.code, MSIDErrorUserCancel);

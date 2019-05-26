@@ -132,34 +132,6 @@
     XCTAssertNil(account.tenantProfiles);
 }
 
-- (void)testInitWithMSIDAccount_whenInvalidAccountWithoutAuthority_shouldReturnNil
-{
-    MSIDAccount *msidAccount = [MSIDAccount new];
-    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
-    msidAccount.username = @"user@contoso.com";
-    msidAccount.name = @"User";
-    msidAccount.localAccountId = @"localoid";
-    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
-                                        @"utid" : @"tid"
-                                        };
-    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
-    msidAccount.clientInfo = clientInfo;
-    
-    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
-                                         @"oid" : @"ff9feb5a"
-                                         };
-    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
-    XCTAssertNotNil(idTokenClaims);
-    msidAccount.idTokenClaims = idTokenClaims;
-    
-    msidAccount.environment = nil;
-    msidAccount.realm = nil;
-    
-    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
-    
-    XCTAssertNil(account);
-}
-
 - (void)testAddTenantProfiles_whenAddValidTenantProfiles_shouldAddIt
 {
     // Create MSAL account 1
@@ -262,7 +234,7 @@
 
     XCTAssertEqual(account.tenantProfiles.count, 1);
     XCTAssertEqualObjects(account.tenantProfiles[0].localAccountId, @"1");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"2");
+    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
 }
 
 - (void)testCopy_whenValidAccount_shouldDeepCopy
@@ -315,16 +287,12 @@
     
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[0].localAccountId, account2.tenantProfiles[0].localAccountId);
-    XCTAssertNotEqual(account.tenantProfiles[0].environment, account2.tenantProfiles[0].environment);
-    XCTAssertNotEqual(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[0].environment, account2.tenantProfiles[0].environment);
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenantProfile, account2.tenantProfiles[0].isHomeTenantProfile);
     
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[1].localAccountId, account2.tenantProfiles[1].localAccountId);
-    XCTAssertNotEqual(account.tenantProfiles[1].environment, account2.tenantProfiles[1].environment);
-    XCTAssertNotEqual(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqualObjects(account.tenantProfiles[1].environment, account2.tenantProfiles[1].environment);
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenantProfile, account2.tenantProfiles[1].isHomeTenantProfile);

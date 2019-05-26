@@ -27,6 +27,8 @@
 
 #import "MSALErrorConverter.h"
 
+@class MSALOauth2Provider;
+
 @interface MSALErrorConverter (Internal)
 
 + (NSError *)errorWithDomain:(NSString *)domain
@@ -36,6 +38,7 @@
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
                correlationId:(NSUUID *)correlationId
-                    userInfo:(NSDictionary *)userInfo;
+                    userInfo:(NSDictionary *)userInfo
+          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider;
 
 @end

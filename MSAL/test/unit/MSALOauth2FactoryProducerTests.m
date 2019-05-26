@@ -77,6 +77,10 @@
 }
 
 #ifndef ADFS_NOT_YET_SUPPORTED
+#define ADFS_NOT_YET_SUPPORTED
+#endif
+
+#ifndef ADFS_NOT_YET_SUPPORTED
 - (void)testOauth2FactoryForAuthority_whenADFSAuthority_shouldReturnAADV2FactoryNilError
 {
     NSError *error = nil;
