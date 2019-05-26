@@ -58,10 +58,10 @@ MSALAccount
 - homeAccountId based on the GUID of "MyOrg.com"
 - tenantProfiles
     - tenantProfile[0]
-        - localAccountId based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+        - tenantProfileId based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
         - claims for the id token issued by MyOrg.com
     - tenantProfile[1]
-        - localAccountId based on account identifiers from "Contoso.com"
+        - tenantProfileId based on account identifiers from "Contoso.com"
         - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
