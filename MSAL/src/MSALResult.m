@@ -111,7 +111,7 @@
     
     if (tokenResult.account.isHomeTenantAccount)
     {
-        account.claims = claims.jsonDictionary;
+        account.accountClaims = claims.jsonDictionary;
     }
     
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken

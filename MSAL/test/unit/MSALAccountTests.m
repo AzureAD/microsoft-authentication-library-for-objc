@@ -89,6 +89,8 @@
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertNil(account.accountClaims);
     XCTAssertEqual(account.tenantProfiles.count, 1);
     XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"localoid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
@@ -130,6 +132,8 @@
     XCTAssertEqualObjects(account.homeAccountId.objectId, @"uid");
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertNil(account.accountClaims);
     XCTAssertNil(account.tenantProfiles);
 }
 
@@ -139,6 +143,7 @@
     MSIDAccount *msidAccount = [MSIDAccount new];
     msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
     msidAccount.username = @"user@contoso.com";
+    msidAccount.accountType = MSIDAccountTypeMSSTS;
     msidAccount.name = @"User";
     msidAccount.localAccountId = @"guest_oid";
     __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/guest_tid"];
@@ -199,7 +204,6 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
@@ -226,7 +230,6 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile]];
     XCTAssertNotNil(account);
@@ -263,7 +266,6 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"3"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:@[tenantProfile, tenantProfile2]];
     XCTAssertNotNil(account);
@@ -279,6 +281,8 @@
     XCTAssertEqualObjects(account.homeAccountId.tenantId, account2.homeAccountId.tenantId);
     XCTAssertEqualObjects(account.environment, account2.environment);
     XCTAssertEqualObjects(account.username, account2.username);
+    XCTAssertEqualObjects(account.identifier, account2.identifier);
+    XCTAssertEqualObjects(account.accountClaims, account2.accountClaims);
     
     // tenantProfiles should be deep copied and have different pointers
     XCTAssertNotEqual(account.tenantProfiles, account2.tenantProfiles);
@@ -310,7 +314,6 @@
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
                                                         homeAccountId:accountId
-                                                       localAccountId:@"2.3"
                                                           environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     

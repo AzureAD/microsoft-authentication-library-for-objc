@@ -69,6 +69,8 @@
 #import "MSALB2CAuthority.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALAccount+MultiTenantAccount.h"
+#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccount+Internal.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -527,10 +529,8 @@
          completionBlock(nil, nil);
      }];
     
-    MSALAccount *account = [MSALAccount new];
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
-    [account setValue:accountId forKey:@"homeAccountId"];
-    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -573,10 +573,8 @@
          completionBlock(nil, nil);
      }];
     
-    MSALAccount *account = [MSALAccount new];
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
-    [account setValue:accountId forKey:@"homeAccountId"];
-    [account setValue:@"myb2c.authority.com" forKey:@"environment"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"myb2c.authority.com" tenantProfiles:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -787,7 +785,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -851,7 +848,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -919,7 +915,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1021,7 +1016,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1084,7 +1078,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1147,7 +1140,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1209,7 +1201,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1271,7 +1262,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1337,7 +1327,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1617,7 +1606,8 @@
     NSString *homeAccountId = @"myuid.utid";
     
     NSError *error;
-    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
+    __auto_type account = [application accountForParameters:parameters error:&error];
     
     XCTAssertNil(error);
     XCTAssertNotNil(account);
@@ -1638,7 +1628,8 @@
     NSString *homeAccountId = @"other_uid.other_utid";
     
     NSError *error;
-    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
+    __auto_type account = [application accountForParameters:parameters error:&error];
     
     XCTAssertNil(error);
     XCTAssertNil(account);
@@ -1678,7 +1669,8 @@
     application.tokenCache = self.tokenCacheAccessor;
 
     NSString *homeAccountId = @"myuid.utid";
-    __auto_type account = [application accountForHomeAccountId:homeAccountId error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
+    __auto_type account = [application accountForParameters:parameters error:&error];
 
     XCTAssertNil(error);
     XCTAssertNotNil(account);
@@ -1870,7 +1862,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1885,7 +1876,8 @@
 {
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     
-    MSALAccount *account = [MSALAccount new];
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid" objectId:@"uid" tenantId:@"utid"];
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:nil homeAccountId:accountId environment:@"contoso.com" tenantProfiles:nil];
     
     [MSIDTestSwizzle instanceMethod:@selector(clearCacheForAccount:authority:clientId:familyId:context:error:)
                               class:[MSIDDefaultTokenCacheAccessor class]

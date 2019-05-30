@@ -154,6 +154,7 @@
         if (!existAccount)
         {
             [msalAccounts addObject:msalAccount];
+            existAccount = msalAccount;
         }
         else
         {
@@ -162,7 +163,7 @@
         
         if (msidAccount.isHomeTenantAccount)
         {
-            existAccount.claims = msidAccount.idTokenClaims.jsonDictionary;
+            existAccount.accountClaims = msidAccount.idTokenClaims.jsonDictionary;
         }
     }
     

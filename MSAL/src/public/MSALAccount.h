@@ -80,5 +80,8 @@ MSALAccount
 */
 @property (readonly, nullable) NSDictionary<NSString *, NSString *> *accountClaims;
 
++ (nonnull instancetype)new NS_UNAVAILABLE;
+- (nonnull instancetype)init NS_UNAVAILABLE;
+
 @end
 

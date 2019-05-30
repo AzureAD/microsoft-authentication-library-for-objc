@@ -130,6 +130,8 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
@@ -161,6 +163,8 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
@@ -215,6 +219,8 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertNil(allAccounts[0].accountClaims);
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
@@ -271,6 +277,8 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertNil(allAccounts[0].accountClaims);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
@@ -349,6 +357,8 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
@@ -385,6 +395,8 @@
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
+    XCTAssertEqualObjects(allAccounts[1].identifier, @"uid2.tid2");
+    XCTAssertTrue(allAccounts[1].accountClaims.count > 0);
     
     // expect 2 tenant profiles
     XCTAssertEqual(allAccounts[1].tenantProfiles.count, 2);
@@ -518,6 +530,8 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
@@ -555,6 +569,8 @@
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
+    XCTAssertEqualObjects(allAccounts[1].identifier, @"uid2.tid2");
+    XCTAssertTrue(allAccounts[1].accountClaims.count > 0);
     
     // expect 2 tenant profiles
     XCTAssertEqual(allAccounts[1].tenantProfiles.count, 2);
@@ -594,6 +610,8 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
@@ -670,6 +688,8 @@
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(account.tenantProfiles.count, 3);
@@ -709,7 +729,8 @@
     [self setupMixedAccountsInCache];
     
     NSError *error;
-    MSALAccount *account = [provider accountForUsername:@"user@contoso.com" error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
+    MSALAccount *account = [provider accountForParameters:parameters error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(account);
     
@@ -717,6 +738,8 @@
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(account.tenantProfiles.count, 3);

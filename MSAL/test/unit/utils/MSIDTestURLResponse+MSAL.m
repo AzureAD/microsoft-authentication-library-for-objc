@@ -146,6 +146,7 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
+                                         uid:(NSString *)uid
                                         user:(MSALAccount *)user
                                       claims:(NSString *)claims
 {
@@ -173,7 +174,7 @@
                                                                                             oid:nil
                                                                                        tenantId:tid],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.accountClaims[@"oid"], @"utid" : tid} msidBase64UrlJson],
+                                             @"client_info" : [@{ @"uid" : uid, @"utid" : tid} msidBase64UrlJson],
                                              @"scope": [scopes msidToString]
                                              } ];
     

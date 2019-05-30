@@ -40,13 +40,12 @@
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
 @property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
-@property (nonatomic) NSDictionary<NSString *, NSString *> *claims;
+@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
 - (instancetype)initWithUsername:(NSString *)username
                    homeAccountId:(MSALAccountId *)homeAccountId
-                  localAccountId:(NSString *)localAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 

@@ -45,7 +45,6 @@
 
 - (instancetype)initWithUsername:(NSString *)username
                    homeAccountId:(MSALAccountId *)homeAccountId
-                  localAccountId:(NSString *)localAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
@@ -93,7 +92,6 @@
     
     return [self initWithUsername:account.username
                     homeAccountId:homeAccountId
-                   localAccountId:account.localAccountId
                       environment:account.environment
                    tenantProfiles:tenantProfiles];
 }
@@ -102,13 +100,13 @@
 
 - (instancetype)copyWithZone:(NSZone *)zone
 {
-    MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
-    account.username = [self.username copyWithZone:zone];
-    account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
-    account.environment = [self.environment copyWithZone:zone];
-    account.identifier = [self.identifier copyWithZone:zone];
-    account.claims = [self.claims copyWithZone:zone];
+    NSString *username = [self.username copyWithZone:zone];
+    MSALAccountId *homeAccountId = [self.homeAccountId copyWithZone:zone];
+    NSString *environment = [self.environment copyWithZone:zone];
+    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
+    
+    MSALAccount *account = [[MSALAccount allocWithZone:zone] initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
+    account.accountClaims = [self.accountClaims copyWithZone:zone];
     return account;
 }
 
