@@ -16,6 +16,10 @@
 - Added support for custom B2C domains
 - Improved MSAL error handling
 
+## [0.3.3] - 2019-05-29
+### Updated
+- Ignore cached fields in JSON if they contains "null"
+
 ## [0.3.2] - 2019-05-24
 ### Updated
 - Updated to newer v2 broker protocol version
