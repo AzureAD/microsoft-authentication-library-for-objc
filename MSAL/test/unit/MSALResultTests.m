@@ -109,6 +109,7 @@
     account.localAccountId = @"local account id";
     account.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"legacy.id" homeAccountId:@"uid.tenant_id"];
     tokenResult.account = account;
+    tokenResult.correlationId = [[NSUUID alloc] initWithUUIDString:@"00000000-0000-0000-0000-000000000001"];
     
     NSError *error = nil;
     MSALResult *result = [MSALResult resultWithTokenResult:tokenResult error:&error];
@@ -124,6 +125,7 @@
     XCTAssertNotNil(result.account);
     XCTAssertEqualObjects(result.account.homeAccountId.identifier, @"uid.tenant_id");
     XCTAssertNil(result.account.tenantProfiles);
+    XCTAssertEqualObjects(tokenResult.correlationId.UUIDString, @"00000000-0000-0000-0000-000000000001");
 }
 
 @end

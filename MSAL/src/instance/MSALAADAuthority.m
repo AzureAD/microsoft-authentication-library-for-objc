@@ -28,6 +28,7 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADAuthority.h"
+#import "MSALErrorConverter.h"
 
 @implementation MSALAADAuthority
 
@@ -49,6 +50,109 @@
     }
     
     return self;
+}
+
+- (instancetype)initWithCloudInstance:(MSALAzureCloudInstance)cloudInstance
+                         audienceType:(MSALAudienceType)audienceType
+                            rawTenant:(NSString *)rawTenant
+                                error:(NSError **)error
+{
+    NSString *environment = [self environmentFromCloudInstance:cloudInstance];
+    
+    if (!environment)
+    {
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAzureCloudInstance provided", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+        
+        return nil;
+    }
+    
+    if (![NSString msidIsStringNilOrBlank:rawTenant])
+    {
+        if (audienceType != MSALAzureADMyOrgOnlyAudience)
+        {
+            if (error)
+            {
+                NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            }
+            
+            return nil;
+        }
+        
+        NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:rawTenant];
+        return [self initWithURL:aadURL rawTenant:nil error:error];
+    }
+    
+    NSString *audienceString = [self audienceFromType:audienceType error:error];
+    
+    if (!audienceString)
+    {
+        return nil;
+    }
+    
+    // TODO: rename msidURLWithEnvironment, will be addressed separately
+    NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:audienceString];
+    return [self initWithURL:aadURL rawTenant:nil error:error];
+}
+
+// https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud#azure-ad-authentication-endpoints
+- (NSString *)environmentFromCloudInstance:(MSALAzureCloudInstance)cloudInstance
+{
+    switch (cloudInstance) {
+        case MSALAzurePublicCloudInstance:
+            return @"login.microsoftonline.com";
+        case MSALAzureChinaCloudInstance:
+            return @"login.chinacloudapi.cn";
+        case MSALAzureGermanyCloudInstance:
+            return @"login.microsoftonline.de";
+        case MSALAzureUsGovernmentCloudInstance:
+            return @"login.microsoftonline.us";
+            
+        default:
+            return nil;
+    }
+}
+
+- (NSString *)audienceFromType:(MSALAudienceType)audienceType error:(NSError **)error
+{
+    NSError *msidError = nil;
+    
+    switch (audienceType) {
+        case MSALAzureADAndPersonalMicrosoftAccountAudience:
+        {
+            return @"common";
+        }
+        case MSALAzureADMultipleOrgsAudience:
+        {
+            return @"organizations";
+        }
+        case MSALAzureADMyOrgOnlyAudience:
+        {
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);;
+            break;
+        }
+        case MSALPersonalMicrosoftAccountAudience:
+        {
+            return @"consumers";
+        }
+            
+        default:
+        {
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+            break;
+        }
+    }
+    
+    if (msidError && error)
+    {
+        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    }
+    
+    return nil;
 }
 
 - (NSURL *)url
