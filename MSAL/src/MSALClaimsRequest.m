@@ -130,7 +130,9 @@
 
 - (void)commonInit
 {
-    _jsonSerializer = [MSIDJsonSerializer new];
+    MSIDJsonSerializer *jsonSerializer = [MSIDJsonSerializer new];
+    jsonSerializer.normalizeJSON = NO;
+    _jsonSerializer = jsonSerializer;
 }
 
 - (MSIDClaimsRequestTarget)msidTargetFromTarget:(MSALClaimsRequestTarget)target
