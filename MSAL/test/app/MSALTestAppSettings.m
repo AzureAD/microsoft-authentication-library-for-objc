@@ -175,6 +175,9 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)readFromDefaults
 {
+    s_currentProfileIdx = 0;
+    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
+    
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {
@@ -182,16 +185,11 @@ static NSDictionary *s_currentProfile = nil;
     }
     
     NSString* currentProfile = [settings objectForKey:MSAL_APP_PROFILE];
-    if (!currentProfile)
-    {
-        s_currentProfileIdx = 0;
-    }
-    else
+    if (currentProfile)
     {
         s_currentProfileIdx = [s_profileTitles indexOfObject:currentProfile];
+        s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     }
-    
-    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     
     NSString *authorityString = [settings objectForKey:@"authority"];
     if (authorityString)

@@ -2517,6 +2517,9 @@
 						CreatedOnToolsVersion = 10.1;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 0;
+							};
 							com.apple.Sandbox = {
 								enabled = 1;
 							};
@@ -3385,6 +3388,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
@@ -3446,6 +3450,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
