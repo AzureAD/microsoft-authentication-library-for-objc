@@ -37,7 +37,9 @@
     if (self)
     {
         _msidAdditionalInfo = [MSIDIndividualClaimRequestAdditionalInfo new];
-        _jsonSerializer = [MSIDJsonSerializer new];
+        MSIDJsonSerializer *jsonSerializer = [MSIDJsonSerializer new];
+        jsonSerializer.normalizeJSON = NO;
+        _jsonSerializer = jsonSerializer;
     }
     return self;
 }
