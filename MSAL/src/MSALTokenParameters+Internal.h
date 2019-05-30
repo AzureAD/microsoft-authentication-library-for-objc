@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTokenParameters.h"
-
+#import "MSALTelemetryApiId.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -40,6 +40,8 @@ NS_ASSUME_NONNULL_BEGIN
  gauranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+
+@property MSALTelemetryApiId telemetryApiId;
 
 @end
 

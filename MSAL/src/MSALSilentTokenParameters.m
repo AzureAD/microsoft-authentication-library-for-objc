@@ -30,6 +30,8 @@
 
 @implementation MSALSilentTokenParameters
 
+@synthesize telemetryApiId;
+
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
                        account:(MSALAccount *)account
 {
@@ -37,6 +39,7 @@
     if (self)
     {
         self.account = account;
+        self.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithTokenParameters;
     }
     return self;
 }

@@ -450,6 +450,8 @@
 		B28BDA8F217E9EAB003E5670 /* MSALOauth2FactoryProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = B28BDA8C217E9EAB003E5670 /* MSALOauth2FactoryProducer.h */; };
 		B28BDA90217E9EAB003E5670 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
 		B28BDA91217E9EAB003E5670 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
+		B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */; };
+		B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */; };
 		B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B29E2AC421238E0000B170ED /* SafariServices.framework */; };
 		B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
@@ -1001,6 +1003,7 @@
 		B28BBD322211DC7D00F51723 /* MSALPublicClientStatusNotifications.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientStatusNotifications.m; sourceTree = "<group>"; };
 		B28BDA8C217E9EAB003E5670 /* MSALOauth2FactoryProducer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALOauth2FactoryProducer.h; sourceTree = "<group>"; };
 		B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALOauth2FactoryProducer.m; sourceTree = "<group>"; };
+		B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAADAuthorityTests.m; sourceTree = "<group>"; };
 		B29E2AC421238E0000B170ED /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
 		B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALNonUnifiedADALCoexistenceCacheTests.m; sourceTree = "<group>"; };
 		B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultiAppiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1739,6 +1742,7 @@
 				609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */,
 				232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */,
 				B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */,
+				B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -3048,6 +3052,7 @@
 				232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
 				B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
 				D6B58A541EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */,
+				B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3060,6 +3065,7 @@
 				D69ADB401E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */,
 				D62746DA1E9B5F1E00EFCE99 /* MSALAccountTests.m in Sources */,
 				B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */,
+				B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 				D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				232D6193224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
