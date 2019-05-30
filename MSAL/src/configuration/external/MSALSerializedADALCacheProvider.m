@@ -26,10 +26,10 @@
 #import "MSALErrorConverter.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
 
-@interface MSALSerializedADALCacheProvider()
+@interface MSALSerializedADALCacheProvider() <MSIDMacTokenCacheDelegate>
 
 @property (nonatomic, nonnull, readwrite) id<MSALSerializedADALCacheProviderDelegate> delegate;
-@property (nonatomic, readwrite) id<MSIDTokenCacheDataSource> tokenCacheDatasource;
+@property (nonatomic, readwrite) MSIDMacTokenCache *macTokenCache;
 
 @end
 
@@ -44,23 +44,23 @@
     {
         _delegate = delegate;
         
-        // Init datasource
-        MSIDMacTokenCache *macTokenCache = [MSIDMacTokenCache new];
-       // macTokenCache.delegate = self; // TODO
-        self.tokenCacheDatasource = macTokenCache;
+        // Init datasource.
+        _macTokenCache = [MSIDMacTokenCache new];
+        _macTokenCache.delegate = self;
     }
     
     return self;
 }
 
-- (nullable NSData *)serializeDataWithError:(NSError * _Nullable * _Nullable)error
+- (nullable NSData *)serializeDataWithError:(NSError **)error
 {
-    return nil;
+    // TODO: error.
+    return [self.macTokenCache serialize];
 }
 
-- (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError * _Nullable * _Nullable)error
+- (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError **)error
 {
-    return NO;
+    return [self.macTokenCache deserialize:serializedData error:error];
 }
 
 #pragma mark - NSCopying
@@ -75,7 +75,29 @@
 
 - (id<MSIDTokenCacheDataSource>)msidTokenCacheDataSource
 {
-    return self.tokenCacheDatasource;
+    return self.macTokenCache;
+}
+
+#pragma mark - MSIDMacTokenCacheDelegate
+
+- (void)willAccessCache:(MSIDMacTokenCache *)cache
+{
+    [self.delegate willAccessCache:self];
+}
+
+- (void)didAccessCache:(MSIDMacTokenCache *)cache
+{
+    [self.delegate didAccessCache:self];
+}
+
+- (void)willWriteCache:(MSIDMacTokenCache *)cache
+{
+    [self.delegate willWriteCache:self];
+}
+
+- (void)didWriteCache:(MSIDMacTokenCache *)cache
+{
+    [self.delegate didWriteCache:self];
 }
 
 @end
