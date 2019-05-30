@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property NSString *keychainSharingGroup;
 @property (nonatomic, nullable, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
-@property (nonatomic, nullable, readonly) MSALSerializedADALCacheProvider *serializedADALCache;
+@property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
 
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
