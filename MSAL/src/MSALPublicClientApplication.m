@@ -589,7 +589,9 @@
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
+#if TARGET_OS_OSX
     controller.externalCacheSeeder = self.externalCacheSeeder;
+#endif
     
     if (!controller)
     {
@@ -890,7 +892,9 @@
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
+#if TARGET_OS_OSX
     requestController.externalCacheSeeder = self.externalCacheSeeder;
+#endif
     
     if (!requestController)
     {
