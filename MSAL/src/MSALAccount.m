@@ -56,6 +56,7 @@
         _username = username;
         _environment = environment;
         _homeAccountId = homeAccountId;
+        _identifier = homeAccountId.identifier;
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
         if (tenantProfiles.count > 0)
@@ -74,11 +75,12 @@
     if (createTenantProfile)
     {
         NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:account.localAccountId
-                                                                                     tenantId:account.realm
-                                                                                  environment:account.environment
-                                                                          isHomeTenantProfile:account.isHomeTenantAccount
-                                                                                       claims:allClaims];
+        
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:account.localAccountId
+                                                                                tenantId:account.realm
+                                                                             environment:account.environment
+                                                                     isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                  claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];
@@ -105,6 +107,8 @@
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
     account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
     account.environment = [self.environment copyWithZone:zone];
+    account.identifier = [self.identifier copyWithZone:zone];
+    account.claims = [self.claims copyWithZone:zone];
     return account;
 }
 
@@ -131,6 +135,7 @@
     hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
+    hash = hash * 31 + self.identifier.hash;
     return hash;
 }
 
@@ -142,7 +147,7 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-
+    result &= (!self.identifier && !user.identifier) || [self.identifier isEqualToString:user.identifier];
     return result;
 }
 

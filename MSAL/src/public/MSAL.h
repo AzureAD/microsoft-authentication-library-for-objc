@@ -70,3 +70,4 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALLogger.h>
 #import <MSAL/MSALTelemetry.h>
 #import <MSAL/MSALTenantProfile.h>
+#import <MSAL/MSALAccount+MultiTenantAccount.h>

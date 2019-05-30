@@ -43,6 +43,7 @@
 #import "MSIDIdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALAccountsProvider()
 
@@ -98,16 +99,13 @@
     return [self allAccountsForAuthority:nil error:error];
 }
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error 
+- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
+                                error:(NSError **)error
 {
-    return [self accountForHomeAccountId:homeAccountId username:nil error:error];
-}
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error
-{
-    return [self accountForHomeAccountId:nil username:username error:error];
+    return [self accountForHomeAccountId:parameters.identifier
+                                username:parameters.username
+                         tenantProfileId:parameters.tenantProfileIdentifier
+                                   error:error];
 }
 
 #pragma mark - Private
@@ -133,15 +131,22 @@
         return nil;
     }
     
-    return [self msalAccountsFromMSIDAccounts:msidAccounts];
+    return [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:nil];
 }
 
 - (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
+                                         tenantProfileId:(NSString *)tenantProfileId
 {
     NSMutableSet *msalAccounts = [NSMutableSet new];
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
+        if (![NSString msidIsStringNilOrBlank:tenantProfileId]
+            && ![tenantProfileId isEqualToString:msidAccount.localAccountId])
+        {
+            continue;
+        }
+        
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
@@ -152,7 +157,12 @@
         }
         else
         {
-            [existAccount addTenantProfiles:msalAccount.tenantProfiles];
+            [existAccount addTenantProfiles:msalAccount.mTenantProfiles];
+        }
+        
+        if (msidAccount.isHomeTenantAccount)
+        {
+            existAccount.claims = msidAccount.idTokenClaims.jsonDictionary;
         }
     }
     
@@ -161,6 +171,7 @@
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                 username:(NSString *)username
+                         tenantProfileId:(NSString *)tenantProfileId
                                    error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
@@ -185,7 +196,7 @@
     
     if ([msidAccounts count])
     {
-        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts];
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:tenantProfileId];
         if (msalAccounts.count == 1)
         {
             return msalAccounts[0];

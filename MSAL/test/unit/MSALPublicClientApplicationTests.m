@@ -68,6 +68,7 @@
 #import "MSALCacheConfig.h"
 #import "MSALB2CAuthority.h"
 #import "MSALAccountId+Internal.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 

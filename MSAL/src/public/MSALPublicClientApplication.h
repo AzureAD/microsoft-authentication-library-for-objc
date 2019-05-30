@@ -38,6 +38,7 @@
 @class MSALSilentTokenParameters;
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -218,7 +219,26 @@
                     not interested in the specific error pass in nil.
  */
 - (nullable MSALAccount *)accountForHomeAccountId:(nonnull NSString *)homeAccountId
-                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication accountForIdentifier:error:] instead");
+
+/*!
+ Returns account for for the given account identifier (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (nullable MSALAccount *)accountForIdentifier:(nonnull NSString *)identifier
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+/*!
+ Returns account for for the given account identifier (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+ not interested in the specific error pass in nil.
+ */
+- (nullable MSALAccount *)accountForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
 
 /*!
  Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)

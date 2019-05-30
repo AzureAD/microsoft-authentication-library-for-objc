@@ -101,20 +101,27 @@
         return nil;
     }
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:tokenResult.account.localAccountId
-                                                                                 tenantId:tokenResult.account.realm
-                                                                              environment:tokenResult.account.environment
-                                                                      isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
-                                                                                   claims:claims.jsonDictionary];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:tokenResult.account.localAccountId
+                                                                            tenantId:tokenResult.account.realm
+                                                                         environment:tokenResult.account.environment
+                                                                 isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
+                                                                              claims:claims.jsonDictionary];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:tokenResult.account createTenantProfile:NO];
+    
+    if (tokenResult.account.isHomeTenantAccount)
+    {
+        account.claims = claims.jsonDictionary;
+    }
     
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
                          tenantProfile:tenantProfile
-                               account:[[MSALAccount alloc] initWithMSIDAccount:tokenResult.account createTenantProfile:NO]
+                               account:account
                                idToken:tokenResult.rawIdToken
-                              uniqueId:tenantProfile.tenantProfileId
+                              uniqueId:tenantProfile.identifier
                                 scopes:[tokenResult.accessToken.scopes array]
                              authority:authority
                          correlationId:tokenResult.correlationId];

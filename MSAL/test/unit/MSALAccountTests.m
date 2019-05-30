@@ -39,6 +39,7 @@
 #import "MSALAccount+Internal.h"
 #import "MSALAuthority.h"
 #import "MSALAccountId+Internal.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALUserTests : MSALTestCase
 
@@ -89,7 +90,7 @@
     XCTAssertEqualObjects(account.homeAccountId.tenantId, @"tid");
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqual(account.tenantProfiles.count, 1);
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantProfileId, @"localoid");
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"localoid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenantProfile, YES);
     XCTAssertEqualObjects(account.tenantProfiles[0].environment, authority.environment);
@@ -176,10 +177,10 @@
     [account addTenantProfiles:account2.tenantProfiles];
     
     XCTAssertEqual(account.tenantProfiles.count, 2);
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantProfileId, @"guest_oid");
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"guest_oid");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"guest_tid");
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenantProfile, NO);
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantProfileId, @"oid");
+    XCTAssertEqualObjects(account.tenantProfiles[1].identifier, @"oid");
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"tid");
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenantProfile, YES);
 }
@@ -189,11 +190,11 @@
     MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid"]
                                                          error:nil];
     XCTAssertNotNil(authority);
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:@"1"
-                                                                                 tenantId:@"2"
-                                                                              environment:@"login.microsoftonline.com"
-                                                                      isHomeTenantProfile:YES
-                                                                                   claims:@{@"key" : @"value"}];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:@"1"
+                                                                            tenantId:@"2"
+                                                                         environment:@"login.microsoftonline.com"
+                                                                 isHomeTenantProfile:YES
+                                                                              claims:@{@"key" : @"value"}];
     
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
@@ -206,7 +207,7 @@
     [account addTenantProfiles:nil];
     
     XCTAssertEqual(account.tenantProfiles.count, 1);
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantProfileId, @"1");
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"1");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"2");
 }
 
@@ -216,11 +217,11 @@
                                                          error:nil];
     XCTAssertNotNil(authority);
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:@"1"
-                                                                                 tenantId:@"tid"
-                                                                              environment:@"login.microsoftonline.com"
-                                                                      isHomeTenantProfile:YES
-                                                                                   claims:@{@"key" : @"value"}];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:@"1"
+                                                                            tenantId:@"tid"
+                                                                         environment:@"login.microsoftonline.com"
+                                                                 isHomeTenantProfile:YES
+                                                                              claims:@{@"key" : @"value"}];
     
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
@@ -233,7 +234,7 @@
     [account addTenantProfiles:[NSArray new]];
 
     XCTAssertEqual(account.tenantProfiles.count, 1);
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantProfileId, @"1");
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"1");
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
 }
 
@@ -243,21 +244,21 @@
                                                          error:nil];
     XCTAssertNotNil(authority);
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:@"oid"
-                                                                                 tenantId:@"tid"
-                                                                              environment:@"login.microsoftonline.com"
-                                                                      isHomeTenantProfile:YES
-                                                                                   claims:@{@"key" : @"value"}];
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:@"oid"
+                                                                            tenantId:@"tid"
+                                                                         environment:@"login.microsoftonline.com"
+                                                                 isHomeTenantProfile:YES
+                                                                              claims:@{@"key" : @"value"}];
     
     authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid2"]
                                           error:nil];
     XCTAssertNotNil(authority);
     
-    MSALTenantProfile *tenantProfile2 = [[MSALTenantProfile alloc] initWithTenantProfileId:@"oid2"
-                                                                                  tenantId:@"tid2"
-                                                                               environment:@"login.microsoftonline.com"
-                                                                       isHomeTenantProfile:YES
-                                                                                    claims:@{@"key" : @"value"}];
+    MSALTenantProfile *tenantProfile2 = [[MSALTenantProfile alloc] initWithIdentifier:@"oid2"
+                                                                             tenantId:@"tid2"
+                                                                          environment:@"login.microsoftonline.com"
+                                                                  isHomeTenantProfile:YES
+                                                                               claims:@{@"key" : @"value"}];
     
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"displayableID"
@@ -286,13 +287,13 @@
     XCTAssertNotEqual(account.tenantProfiles[1], account2.tenantProfiles[1]);
     
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantProfileId, account2.tenantProfiles[0].tenantProfileId);
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, account2.tenantProfiles[0].identifier);
     XCTAssertEqualObjects(account.tenantProfiles[0].environment, account2.tenantProfiles[0].environment);
     XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, account2.tenantProfiles[0].tenantId);
     XCTAssertEqual(account.tenantProfiles[0].isHomeTenantProfile, account2.tenantProfiles[0].isHomeTenantProfile);
     
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantProfileId, account2.tenantProfiles[1].tenantProfileId);
+    XCTAssertEqualObjects(account.tenantProfiles[1].identifier, account2.tenantProfiles[1].identifier);
     XCTAssertEqualObjects(account.tenantProfiles[1].environment, account2.tenantProfiles[1].environment);
     XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, account2.tenantProfiles[1].tenantId);
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenantProfile, account2.tenantProfiles[1].isHomeTenantProfile);

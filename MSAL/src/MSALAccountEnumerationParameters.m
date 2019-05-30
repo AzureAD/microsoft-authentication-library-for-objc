@@ -25,19 +25,54 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import "MSALAccountEnumerationParameters.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALAccountEnumerationParameters()
 
-@interface MSALTenantProfile : NSObject <NSCopying>
-
-@property (readonly, nullable) NSString *identifier;
-@property (readonly, nullable) NSString *environment;
-@property (readonly, nullable) NSString *tenantId;
-@property (readonly) BOOL isHomeTenantProfile;
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+@property (nonatomic, readwrite, nullable) NSString *identifier;
+@property (nonatomic, readwrite, nullable) NSString *tenantProfileIdentifier;
+@property (nonatomic, readwrite, nullable) NSString *username;
 
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation MSALAccountEnumerationParameters
+
+- (instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                          username:(nonnull NSString *)username
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+        _username = username;
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _tenantProfileIdentifier = tenantProfileIdentifier;
+    }
+    
+    return self;
+}
+
+@end

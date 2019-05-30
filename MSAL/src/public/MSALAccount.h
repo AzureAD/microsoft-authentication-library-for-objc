@@ -41,10 +41,16 @@
 @property (readonly, nullable) NSString *username;
 
 /*!
+ Unique identifier for the account.
+ Save this for account lookups from cache at a later point.
+ */
+@property (readonly, nullable) NSString *identifier;
+
+/*!
  Unique identifier of the account in the home tenant.
  This can be used later to retrieve accounts and tokens silently from MSAL.
  */
-@property (readonly, nullable) MSALAccountId *homeAccountId;
+@property (readonly, nullable) MSALAccountId *homeAccountId DEPRECATED_MSG_ATTRIBUTE("Use MSALAccount.identifier property instead");
 
 /*!
  Host part of the authority string used for authentication based on the issuer identifier.
@@ -55,29 +61,24 @@
  
 MSALAccount
 - environment of "login.microsoftonline.com"
-- homeAccountId based on the GUID of "MyOrg.com"
+- identifier based on the GUID of "MyOrg.com"
+- accountClaims for the "MyOrg.com"
 - tenantProfiles
     - tenantProfile[0]
-        - tenantProfileId based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+        - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
         - claims for the id token issued by MyOrg.com
     - tenantProfile[1]
-        - tenantProfileId based on account identifiers from "Contoso.com"
+        - identifier based on account identifiers from "Contoso.com"
         - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
 
 /*!
- Array of all tenants for which a token has been requested by the client.
- 
- Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
- -allAccounts:
- -accountForHomeAccountId:error:
- -accountForUsername:error:
- -allAccountsFilteredByAuthority:
- 
- The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
- */
-@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
+ ID token claims for the account.
+ Can be used to read additional information about the account, e.g. name
+ Will only be returned if there has been an id token issued for the client Id for the account's source tenant.
+*/
+@property (readonly, nullable) NSDictionary<NSString *, NSString *> *accountClaims;
 
 @end
 

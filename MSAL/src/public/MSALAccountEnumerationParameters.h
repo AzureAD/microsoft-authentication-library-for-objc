@@ -25,19 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALAccountEnumerationParameters : NSObject
 
-@interface MSALTenantProfile : NSObject <NSCopying>
+/*!
+ Unique identifier for the account.
+ */
+@property (nonatomic, readonly, nullable) NSString *identifier;
 
-@property (readonly, nullable) NSString *identifier;
-@property (readonly, nullable) NSString *environment;
-@property (readonly, nullable) NSString *tenantId;
-@property (readonly) BOOL isHomeTenantProfile;
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+/*!
+ Unique identifier for the tenant profile.
+ */
+@property (nonatomic, readonly, nullable) NSString *tenantProfileIdentifier;
+
+/*!
+ Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
+ */
+@property (nonatomic, readonly, nullable) NSString *username;
+
+- (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
+
+- (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                                  username:(nonnull NSString *)username;
+
+- (nonnull instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier;
 
 @end
-
-NS_ASSUME_NONNULL_END

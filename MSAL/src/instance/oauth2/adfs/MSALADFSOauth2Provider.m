@@ -31,6 +31,7 @@
 #import "MSALADFSAuthority.h"
 #import "MSIDTokenResult.h"
 #import "MSIDADFSAuthority.h"
+#import "MSALAccount+Internal.h"
 
 @implementation MSALADFSOauth2Provider
 

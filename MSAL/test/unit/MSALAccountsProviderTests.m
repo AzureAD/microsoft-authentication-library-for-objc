@@ -44,6 +44,8 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDConstants.h"
 #import "MSIDTestCacheUtil.h"
+#import "MSALAccount+MultiTenantAccount.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -130,7 +132,7 @@
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantProfileId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
 }
@@ -161,7 +163,7 @@
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantProfileId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
 }
@@ -216,7 +218,7 @@
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantProfileId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertNil(allAccounts[0].tenantProfiles[0].claims);
 }
@@ -271,7 +273,7 @@
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantProfileId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertNil(allAccounts[0].tenantProfiles[0].claims);
 }
@@ -411,7 +413,7 @@
 {
     for (MSALTenantProfile *tenantProfile in allProfiles)
     {
-        if ([tenantProfile.tenantProfileId isEqualToString:localAccountId])
+        if ([tenantProfile.identifier isEqualToString:localAccountId])
         {
             return [allProfiles indexOfObject:tenantProfile];
         }
@@ -433,7 +435,7 @@
     
     XCTAssertEqualObjects(profile.tenantId, tenantId);
     XCTAssertEqualObjects(profile.environment, environment);
-    XCTAssertEqualObjects(profile.tenantProfileId, localAccountId);
+    XCTAssertEqualObjects(profile.identifier, localAccountId);
     
     if (hasClaims)
     {
@@ -659,7 +661,8 @@
     [self setupMixedAccountsInCache];
     
     NSError *error;
-    MSALAccount *account = [provider accountForHomeAccountId:@"uid.tid" error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"uid.tid"];
+    MSALAccount *account = [provider accountForParameters:parameters error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(account);
     

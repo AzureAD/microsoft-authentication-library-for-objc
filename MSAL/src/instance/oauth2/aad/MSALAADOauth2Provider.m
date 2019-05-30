@@ -38,6 +38,8 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALErrorConverter.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALAADOauth2Provider
 
@@ -71,7 +73,7 @@
     // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
     // Therefore, we update app metadata to not have family id for this app after signout
     
-    NSURL *authorityURL = [NSURL msidAADURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
+    NSURL *authorityURL = [NSURL msidAADURLWithEnvironment:account.environment tenant:account.lookupAccountIdentifier.utid];
     MSIDAADAuthority *aadAuthority = [[MSIDAADAuthority alloc] initWithURL:authorityURL rawTenant:nil context:nil error:nil];
     
     NSError *metadataError = nil;
@@ -107,7 +109,7 @@
      if authority is a common, organizations or consumers authority.
      */
     return [[MSIDAADAuthority alloc] initWithURL:requestAuthority.url
-                                       rawTenant:account.homeAccountId.tenantId
+                                       rawTenant:account.lookupAccountIdentifier.utid
                                          context:nil
                                            error:error];
 }

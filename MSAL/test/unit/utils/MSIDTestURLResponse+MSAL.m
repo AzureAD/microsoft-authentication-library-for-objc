@@ -171,9 +171,9 @@
                                              @"id_token" : [MSIDTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.username
                                                                                             oid:nil
-                                                                                       tenantId:tid ? tid : user.homeAccountId.objectId],
+                                                                                       tenantId:tid],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson],
+                                             @"client_info" : [@{ @"uid" : user.accountClaims[@"oid"], @"utid" : tid} msidBase64UrlJson],
                                              @"scope": [scopes msidToString]
                                              } ];
     

@@ -25,19 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import "MSALAccount.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class MSALTenantProfile;
 
-@interface MSALTenantProfile : NSObject <NSCopying>
+@interface MSALAccount (MultiTenantAccount)
 
-@property (readonly, nullable) NSString *identifier;
-@property (readonly, nullable) NSString *environment;
-@property (readonly, nullable) NSString *tenantId;
-@property (readonly) BOOL isHomeTenantProfile;
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+/*!
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
+ */
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
-
-NS_ASSUME_NONNULL_END
