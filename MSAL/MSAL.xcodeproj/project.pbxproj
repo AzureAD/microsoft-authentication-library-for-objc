@@ -90,17 +90,6 @@
 		04A6B6152269383D0035C7C2 /* MSALOauth2FactoryProducer.h in Headers */ = {isa = PBXBuildFile; fileRef = B28BDA8C217E9EAB003E5670 /* MSALOauth2FactoryProducer.h */; };
 		04A6B6162269383F0035C7C2 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
 		04A6B6172269383F0035C7C2 /* MSALOauth2FactoryProducer.m in Sources */ = {isa = PBXBuildFile; fileRef = B28BDA8D217E9EAB003E5670 /* MSALOauth2FactoryProducer.m */; };
-		04A6B618226938590035C7C2 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 963C89A6214BA1760051AFEE /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		04A6B619226938650035C7C2 /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DFC20E1590200200E6F /* SecurityInterface.framework */; };
-		04A6B61A226938690035C7C2 /* GSS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DFA20E158E700200E6F /* GSS.framework */; };
-		04A6B61B2269386F0035C7C2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
-		04A6B61C226938730035C7C2 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DF520E1579000200E6F /* WebKit.framework */; };
-		04A6B61D226938790035C7C2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2063B1FC510FB00755A51 /* IOKit.framework */; };
-		04A6B61E2269387C0035C7C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
-		04A6B61F2269387F0035C7C2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206351FC510A400755A51 /* Cocoa.framework */; };
-		04A6B620226938830035C7C2 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206331FC5109400755A51 /* SafariServices.framework */; };
-		04A6B621226938870035C7C2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206311FC5108000755A51 /* UIKit.framework */; };
-		04A6B6222269388B0035C7C2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A2062F1FC5106F00755A51 /* Security.framework */; };
 		04A6B623226938D20035C7C2 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206251FC50A4D00755A51 /* libIdentityCore.a */; };
 		04A6B624226938EA0035C7C2 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
 		04A6B625226939500035C7C2 /* MSIDTestURLResponse+MSAL.h in Headers */ = {isa = PBXBuildFile; fileRef = 23F32F051FF4787600B2905E /* MSIDTestURLResponse+MSAL.h */; };
@@ -480,6 +469,8 @@
 		B29A56BF228266E20023F5E6 /* MSALSharedAccountCacheProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B29A56BD228266E20023F5E6 /* MSALSharedAccountCacheProvider.h */; };
 		B29A56C122826EE00023F5E6 /* MSALSerializedADALCacheProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B29A56B8228266B40023F5E6 /* MSALSerializedADALCacheProvider.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B29A56C222826EE20023F5E6 /* MSALSerializedADALCacheProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56B9228266B40023F5E6 /* MSALSerializedADALCacheProvider.m */; };
+		B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */; };
+		B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */; };
 		B29E2AC321238DFC00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
 		B29E2AC521238E0000B170ED /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B29E2AC421238E0000B170ED /* SafariServices.framework */; };
 		B29E2ADB21238F7F00B170ED /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96902DEC20E1574F00200E6F /* WebKit.framework */; };
@@ -1042,6 +1033,7 @@
 		B29A56B9228266B40023F5E6 /* MSALSerializedADALCacheProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALSerializedADALCacheProvider.m; sourceTree = "<group>"; };
 		B29A56BD228266E20023F5E6 /* MSALSharedAccountCacheProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALSharedAccountCacheProvider.h; sourceTree = "<group>"; };
 		B29A56BE228266E20023F5E6 /* MSALSharedAccountCacheProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALSharedAccountCacheProvider.m; sourceTree = "<group>"; };
+		B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALAADAuthorityTests.m; sourceTree = "<group>"; };
 		B29E2AC421238E0000B170ED /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/SafariServices.framework; sourceTree = DEVELOPER_DIR; };
 		B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALNonUnifiedADALCoexistenceCacheTests.m; sourceTree = "<group>"; };
 		B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultiAppiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1178,11 +1170,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04A6B624226938EA0035C7C2 /* libIdentityCore.a in Frameworks */,
-				04A6B61B2269386F0035C7C2 /* WebKit.framework in Frameworks */,
-				04A6B6222269388B0035C7C2 /* Security.framework in Frameworks */,
-				04A6B621226938870035C7C2 /* UIKit.framework in Frameworks */,
-				04A6B618226938590035C7C2 /* AuthenticationServices.framework in Frameworks */,
-				04A6B620226938830035C7C2 /* SafariServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1191,12 +1178,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				04A6B623226938D20035C7C2 /* libIdentityCore.a in Frameworks */,
-				04A6B61A226938690035C7C2 /* GSS.framework in Frameworks */,
-				04A6B61E2269387C0035C7C2 /* Security.framework in Frameworks */,
-				04A6B61F2269387F0035C7C2 /* Cocoa.framework in Frameworks */,
-				04A6B619226938650035C7C2 /* SecurityInterface.framework in Frameworks */,
-				04A6B61C226938730035C7C2 /* WebKit.framework in Frameworks */,
-				04A6B61D226938790035C7C2 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1826,6 +1807,7 @@
 				609AF9322256BD0C00E2978D /* MSALAccountsProviderTests.m */,
 				232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */,
 				B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */,
+				B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -2541,6 +2523,9 @@
 						CreatedOnToolsVersion = 10.1;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.Keychain = {
+								enabled = 0;
+							};
 							com.apple.Sandbox = {
 								enabled = 1;
 							};
@@ -3151,6 +3136,7 @@
 				232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
 				B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
 				D6B58A541EB2C4A8000B3A5F /* MSALAcquireTokenTests.m in Sources */,
+				B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3163,6 +3149,7 @@
 				D69ADB401E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */,
 				D62746DA1E9B5F1E00EFCE99 /* MSALAccountTests.m in Sources */,
 				B256121C217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */,
+				B29A56D62283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,
 				D69ADB381E516F9B00952049 /* MSALTestCase.m in Sources */,
 				04D32CD11FD8AFF3000B123E /* MSALErrorConverterTests.m in Sources */,
 				232D6193224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,
@@ -3407,6 +3394,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
@@ -3468,6 +3456,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALMacTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
 			};
