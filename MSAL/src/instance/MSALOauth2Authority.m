@@ -25,14 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALOauth2Authority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALErrorConverter.h"
 
-@class MSIDTokenResult;
+@implementation MSALOauth2Authority
 
-@interface MSALResult (Internal)
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url error:nil];
+    
+    if (self)
+    {
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+    }
+    
+    return nil;
+}
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
+- (NSURL *)url
+{
+    return nil;
+}
 
 @end

@@ -26,10 +26,14 @@
 //------------------------------------------------------------------------------
 
 #import <XCTest/XCTest.h>
-#import "MSALOauth2FactoryProducer.h"
+#import "MSALOauth2ProviderFactory.h"
 #import "MSIDOauth2Factory.h"
-#import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDB2COauth2Factory.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALB2COauth2Provider.h"
+#import "MSALAADAuthority.h"
+#import "MSALB2CAuthority.h"
+#import "MSALADFSOauth2Provider.h"
+#import "MSALADFSAuthority.h"
 
 @interface MSALOauth2FactoryProducerTests : XCTestCase
 
@@ -40,10 +44,11 @@
 - (void)testOauth2FactoryForAuthority_whenNilAuthority_shouldReturnNilAndError
 {
     NSError *error = nil;
-    NSURL *authorityURL = nil;
-    MSIDOauth2Factory *factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:authorityURL context:nil error:&error];
+    MSALAuthority *authority = nil;
+    
+    MSALOauth2Provider *provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority context:nil error:&error];
 
-    XCTAssertNil(factory);
+    XCTAssertNil(provider);
     XCTAssertNotNil(error);
 }
 
@@ -51,33 +56,43 @@
 {
     NSError *error = nil;
     NSURL *authorityURL = [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/contoso.com/B2C_1_Signin"];
-    MSIDOauth2Factory *factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:authorityURL context:nil error:&error];
+    MSALB2CAuthority *authorityObj = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
+    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj context:nil error:&error];
 
     XCTAssertNotNil(factory);
     XCTAssertNil(error);
-    XCTAssertTrue([factory isKindOfClass:[MSIDB2COauth2Factory class]]);
+    XCTAssertTrue([factory isKindOfClass:[MSALB2COauth2Provider class]]);
 }
 
 - (void)testOauth2FactoryForAuthority_whenAADAuthority_shouldReturnAADV2FactoryNilError
 {
     NSError *error = nil;
     NSURL *authorityURL = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com/"];
-    MSIDOauth2Factory *factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:authorityURL context:nil error:&error];
+    MSALAADAuthority *authorityObj = [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
+    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj context:nil error:&error];
 
     XCTAssertNotNil(factory);
     XCTAssertNil(error);
-    XCTAssertTrue([factory isKindOfClass:[MSIDAADV2Oauth2Factory class]]);
+    XCTAssertTrue([factory isKindOfClass:[MSALAADOauth2Provider class]]);
 }
 
+#ifndef ADFS_NOT_YET_SUPPORTED
+#define ADFS_NOT_YET_SUPPORTED
+#endif
+
+#ifndef ADFS_NOT_YET_SUPPORTED
 - (void)testOauth2FactoryForAuthority_whenADFSAuthority_shouldReturnAADV2FactoryNilError
 {
     NSError *error = nil;
     NSURL *authorityURL = [NSURL URLWithString:@"https://contoso.com/adfs"];
-    MSIDOauth2Factory *factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:authorityURL context:nil error:&error];
-
+    
+    MSALADFSAuthority *authorityObj = [[MSALADFSAuthority alloc] initWithURL:authorityURL error:nil];
+    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj context:nil error:&error];
+    
     XCTAssertNotNil(factory);
     XCTAssertNil(error);
-    XCTAssertTrue([factory isKindOfClass:[MSIDAADV2Oauth2Factory class]]);
+    XCTAssertTrue([factory isKindOfClass:[MSALADFSOauth2Provider class]]);
 }
+#endif
 
 @end

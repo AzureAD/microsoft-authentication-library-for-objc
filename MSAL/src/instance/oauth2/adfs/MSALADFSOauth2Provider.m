@@ -25,14 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALADFSOauth2Provider.h"
+#import "MSALResult+Internal.h"
+#import "MSIDAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSIDTokenResult.h"
+#import "MSIDADFSAuthority.h"
 
-@class MSIDTokenResult;
+@implementation MSALADFSOauth2Provider
 
-@interface MSALResult (Internal)
+#pragma mark - Public
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
+- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error
+{
+    NSError *authorityError = nil;
+    
+    MSALADFSAuthority *adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:tokenResult.authority.url error:&authorityError];
+    
+    if (!adfsAuthority)
+    {
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        
+        if (error) *error = authorityError;
+        
+        return nil;
+    }
+    
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:adfsAuthority error:error];
+}
+
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
+{
+    return [authority isKindOfClass:[MSIDADFSAuthority class]];
+}
+
+#pragma mark - Protected
+
+- (void)initOauth2Factory
+{
+    NSAssert(NO, @"ADFS still unimplemented! Implement me.");
+}
 
 @end

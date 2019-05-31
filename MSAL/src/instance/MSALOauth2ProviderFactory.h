@@ -25,14 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDTokenResult;
+@class MSALAuthority;
+@class MSALOauth2Provider;
 
-@interface MSALResult (Internal)
+@interface MSALOauth2ProviderFactory : NSObject
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
++ (nullable MSALOauth2Provider *)oauthProviderForAuthority:(nonnull MSALAuthority *)authority
+                                                   context:(nullable id<MSIDRequestContext>)context
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end

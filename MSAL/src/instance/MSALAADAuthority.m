@@ -29,6 +29,7 @@
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADAuthority.h"
 #import "MSALErrorConverter.h"
+#import "NSURL+MSIDAADUtils.h"
 
 @implementation MSALAADAuthority
 
@@ -70,6 +71,28 @@
         return nil;
     }
     
+    return [self initWithEnvironment:environment
+                        audienceType:audienceType
+                           rawTenant:rawTenant
+                               error:error];
+}
+
+- (instancetype)initWithEnvironment:(NSString *)environment
+                       audienceType:(MSALAudienceType)audienceType
+                          rawTenant:(NSString *)rawTenant
+                              error:(NSError **)error
+{
+    if ([NSString msidIsStringNilOrBlank:environment])
+    {
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid environment provided", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+        
+        return nil;
+    }
+    
     if (![NSString msidIsStringNilOrBlank:rawTenant])
     {
         if (audienceType != MSALAzureADMyOrgOnlyAudience)
@@ -83,7 +106,7 @@
             return nil;
         }
         
-        NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:rawTenant];
+        NSURL *aadURL = [NSURL msidAADURLWithEnvironment:environment tenant:rawTenant];
         return [self initWithURL:aadURL rawTenant:nil error:error];
     }
     
@@ -94,8 +117,7 @@
         return nil;
     }
     
-    // TODO: rename msidURLWithEnvironment, will be addressed separately
-    NSURL *aadURL = [NSURL msidURLWithEnvironment:environment tenant:audienceString];
+    NSURL *aadURL = [NSURL msidAADURLWithEnvironment:environment tenant:audienceString];
     return [self initWithURL:aadURL rawTenant:nil error:error];
 }
 

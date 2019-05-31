@@ -25,14 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALOauth2Provider.h"
 
-@class MSIDTokenResult;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALResult (Internal)
-
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
+@interface MSALAADOauth2Provider : MSALOauth2Provider
 
 @end
+
+NS_ASSUME_NONNULL_END

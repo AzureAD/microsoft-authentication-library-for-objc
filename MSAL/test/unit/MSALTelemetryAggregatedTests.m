@@ -355,7 +355,7 @@
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.application_version"]);
 #else
-    XCTAssertEqual(eventInfo.count, 12);
+    XCTAssertEqual(eventInfo.count, 13);
 #endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertNotNil(eventInfo[@"msal.request_id"]);
@@ -484,7 +484,7 @@
     XCTAssertNotNil(eventInfo[@"msal.x_client_dm"]);
     XCTAssertNotNil(eventInfo[@"msal.application_version"]);
 #else
-    XCTAssertEqual(eventInfo.count, 11);
+    XCTAssertEqual(eventInfo.count, 12);
 #endif
     XCTAssertEqualObjects(eventInfo[@"msal.correlation_id"], @"00000000-0000-0000-0000-000000000001");
     XCTAssertEqualObjects(eventInfo[@"msal.authority_validation_status"], @"1");

@@ -25,14 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import "MSALOauth2Provider.h"
 
-@class MSIDTokenResult;
+@class MSIDOauth2Factory;
 
-@interface MSALResult (Internal)
+#ifndef MSALOauth2BaseFactory_Internal_h
+#define MSALOauth2BaseFactory_Internal_h
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
+@interface MSALOauth2Provider()
+
+@property (nonatomic, nonnull, readwrite) MSIDOauth2Factory *msidOauth2Factory;
 
 @end
+
+
+#endif /* MSALOauth2BaseFactory_Internal_h */

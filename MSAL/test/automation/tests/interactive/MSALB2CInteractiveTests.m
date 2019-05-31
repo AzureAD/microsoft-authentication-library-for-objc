@@ -153,7 +153,6 @@
     // 3. Run UI appeared step
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
     request.homeAccountIdentifier = homeAccountId;
-
     // 4. Run silent login
     request.testAccount = nil;
     [self runSharedSilentAADLoginWithTestRequest:request];
@@ -225,6 +224,7 @@
     profileRequest.extraScopes = profileRequest.requestScopes;
     profileRequest.testAccount = self.primaryAccount;
     profileRequest.usePassedWebView = YES;
+    profileRequest.loginHint = self.primaryAccount.username;
     profileRequest.requestIDP = @"Microsoft";
     profileRequest.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"profile"]];
     profileRequest.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"profile"]];

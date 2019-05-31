@@ -25,14 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALResult.h"
+#import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class MSIDOauth2Factory;
 @class MSIDTokenResult;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSALAccount;
+@class MSIDAuthority;
 
-@interface MSALResult (Internal)
+@interface MSALOauth2Provider : NSObject
 
-+ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
-                                authority:(MSALAuthority *)authority
-                                    error:(NSError **)error;
+@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
+
+- (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                         error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
+                           clientId:(NSString *)clientId
+                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                              error:(NSError * _Nullable * _Nullable)error;
+
+- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
+                                      requestAuthority:(MSIDAuthority *)requestAuthority
+                                                 error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
 
 @end
+
+NS_ASSUME_NONNULL_END
