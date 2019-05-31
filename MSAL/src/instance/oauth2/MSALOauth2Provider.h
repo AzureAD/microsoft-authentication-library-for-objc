@@ -39,16 +39,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
 
-- (nullable MSALResult *)resultWithTokenResult:(nonnull MSIDTokenResult *)tokenResult
+- (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                          error:(NSError * _Nullable * _Nullable)error;
 
-- (BOOL)removeAdditionalAccountInfo:(nonnull MSALAccount *)account
-                           clientId:(nonnull NSString *)clientId
-                         tokenCache:(nonnull MSIDDefaultTokenCacheAccessor *)tokenCache
+- (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
+                           clientId:(NSString *)clientId
+                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                               error:(NSError * _Nullable * _Nullable)error;
 
-- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(nonnull MSALAccount *)account
-                                      requestAuthority:(nonnull MSIDAuthority *)requestAuthority
+- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
+                                      requestAuthority:(MSIDAuthority *)requestAuthority
                                                  error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;

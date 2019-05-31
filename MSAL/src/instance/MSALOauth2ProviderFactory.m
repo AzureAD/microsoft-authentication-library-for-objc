@@ -56,13 +56,16 @@
     }
     else if ([authority isKindOfClass:[MSALADFSAuthority class]])
     {
-        NSAssert(NO, @"ADFS not implemented in MSAL yet");
+        MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"ADFS authority is not yet supported.", nil);
         return nil;
     }
+
+    MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"Provided authority is not yet supported.", nil);
+    return nil;
     
-    // Create base factory for everything else, but in future we might want to further separate this out
+    // In the future, create base factory for everything else, but in future we might want to further separate this out
     // (e.g. ADFS, Google, Oauth2 etc...)
-    return [MSALOauth2Provider new];
+    // return [MSALOauth2Provider new];
 }
 
 @end

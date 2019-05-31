@@ -44,7 +44,7 @@
     
     if (self)
     {
-        [self initDerivedProperties];
+        [self initOauth2Factory];
     }
     
     return self;
@@ -93,7 +93,7 @@
 
 #pragma mark - Protected
 
-- (void)initDerivedProperties
+- (void)initOauth2Factory
 {
     self.msidOauth2Factory = [MSIDOauth2Factory new];
 }

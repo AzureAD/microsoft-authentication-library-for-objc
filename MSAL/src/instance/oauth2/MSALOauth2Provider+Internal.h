@@ -36,8 +36,6 @@
 
 @property (nonatomic, nonnull, readwrite) MSIDOauth2Factory *msidOauth2Factory;
 
-- (void)initDerivedProperties;
-
 @end
 
 
