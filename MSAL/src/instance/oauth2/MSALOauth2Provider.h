@@ -25,23 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenParameters.h"
-#import "MSALTelemetryApiId.h"
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALTokenParameters ()
+@class MSIDOauth2Factory;
+@class MSIDTokenResult;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSALAccount;
+@class MSIDAuthority;
 
-/*!
- Initialize a MSALTokenParameters with scopes.
- 
- @param scopes  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+@interface MSALOauth2Provider : NSObject
 
-@property MSALTelemetryApiId telemetryApiId;
+@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
+
+- (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                         error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
+                           clientId:(NSString *)clientId
+                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                              error:(NSError * _Nullable * _Nullable)error;
+
+- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
+                                      requestAuthority:(MSIDAuthority *)requestAuthority
+                                                 error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
 
 @end
 

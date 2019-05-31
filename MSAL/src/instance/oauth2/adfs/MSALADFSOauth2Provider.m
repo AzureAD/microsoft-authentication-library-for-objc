@@ -25,24 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenParameters.h"
-#import "MSALTelemetryApiId.h"
+#import "MSALADFSOauth2Provider.h"
+#import "MSALResult+Internal.h"
+#import "MSIDAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSIDTokenResult.h"
+#import "MSIDADFSAuthority.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation MSALADFSOauth2Provider
 
-@interface MSALTokenParameters ()
+#pragma mark - Public
 
-/*!
- Initialize a MSALTokenParameters with scopes.
- 
- @param scopes  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error
+{
+    NSError *authorityError = nil;
+    
+    MSALADFSAuthority *adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:tokenResult.authority.url error:&authorityError];
+    
+    if (!adfsAuthority)
+    {
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        
+        if (error) *error = authorityError;
+        
+        return nil;
+    }
+    
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:adfsAuthority error:error];
+}
 
-@property MSALTelemetryApiId telemetryApiId;
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
+{
+    return [authority isKindOfClass:[MSIDADFSAuthority class]];
+}
+
+#pragma mark - Protected
+
+- (void)initOauth2Factory
+{
+    NSAssert(NO, @"ADFS still unimplemented! Implement me.");
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

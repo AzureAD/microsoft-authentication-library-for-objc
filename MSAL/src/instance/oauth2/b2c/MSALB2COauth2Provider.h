@@ -25,20 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALOauth2Provider.h"
 
-@class MSALAuthority;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAuthorityFactory : NSObject
-
-+ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
-                                     context:(nullable id<MSIDRequestContext>)context
-                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
-+ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
-                              validateFormat:(BOOL)validateFormat
-                                   rawTenant:(nullable NSString *)rawTenant
-                                     context:(nullable id<MSIDRequestContext>)context
-                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+@interface MSALB2COauth2Provider : MSALOauth2Provider
 
 @end
+
+NS_ASSUME_NONNULL_END

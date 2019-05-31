@@ -25,43 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
+#import "MSALOauth2ProviderFactory.h"
+#import "MSALB2CAuthority.h"
+#import "MSALAADAuthority.h"
 #import "MSALADFSAuthority.h"
-#import "MSALAuthority_Internal.h"
-#import "MSIDADFSAuthority.h"
-#import "MSIDAuthority+Internal.h"
-#import "MSALAuthority_Internal.h"
-#import "MSALErrorConverter.h"
+#import "MSALB2COauth2Provider.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALADFSAuthority.h"
 
-@implementation MSALADFSAuthority
+@implementation MSALOauth2ProviderFactory
 
-#define ADFS_NOT_YET_SUPPORTED
-
-- (instancetype)initWithURL:(NSURL *)url
-                      error:(NSError **)error
++ (MSALOauth2Provider *)oauthProviderForAuthority:(MSALAuthority *)authority
+                                          context:(id<MSIDRequestContext>)context
+                                            error:(NSError **)error
 {
-#ifdef ADFS_NOT_YET_SUPPORTED
-    if (error)
+    if (!authority)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"AD FS authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
-        *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-    }
-    return nil;
-#else
-    self = [super initWithURL:url error:error];
-    if (self)
-    {
-        self.msidAuthority = [[MSIDADFSAuthority alloc] initWithURL:url context:nil error:error];
-        if (!self.msidAuthority) return nil;
+        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
+        
+        return nil;
     }
     
-    return self;
-#endif
-}
+    if ([authority isKindOfClass:[MSALB2CAuthority class]])
+    {
+        return [MSALB2COauth2Provider new];
+    }
+    else if ([authority isKindOfClass:[MSALAADAuthority class]])
+    {
+        return [MSALAADOauth2Provider new];
+    }
+    else if ([authority isKindOfClass:[MSALADFSAuthority class]])
+    {
+        MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"ADFS authority is not yet supported.", nil);
+        return nil;
+    }
 
-- (NSURL *)url
-{
-    return self.msidAuthority.url;
+    MSIDFillAndLogError(error, MSIDErrorUnsupportedFunctionality, @"Provided authority is not yet supported.", nil);
+    return nil;
+    
+    // In the future, create base factory for everything else, but in future we might want to further separate this out
+    // (e.g. ADFS, Google, Oauth2 etc...)
+    // return [MSALOauth2Provider new];
 }
-
 
 @end

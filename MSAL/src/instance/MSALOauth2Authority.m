@@ -25,24 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenParameters.h"
-#import "MSALTelemetryApiId.h"
+#import "MSALOauth2Authority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALErrorConverter.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation MSALOauth2Authority
 
-@interface MSALTokenParameters ()
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError **)error
+{
+    self = [super initWithURL:url error:nil];
+    
+    if (self)
+    {
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+    }
+    
+    return nil;
+}
 
-/*!
- Initialize a MSALTokenParameters with scopes.
- 
- @param scopes  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
-
-@property MSALTelemetryApiId telemetryApiId;
+- (NSURL *)url
+{
+    return nil;
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

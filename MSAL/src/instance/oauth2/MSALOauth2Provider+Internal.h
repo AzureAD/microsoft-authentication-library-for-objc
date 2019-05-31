@@ -25,24 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALTokenParameters.h"
-#import "MSALTelemetryApiId.h"
+#import "MSALOauth2Provider.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class MSIDOauth2Factory;
 
-@interface MSALTokenParameters ()
+#ifndef MSALOauth2BaseFactory_Internal_h
+#define MSALOauth2BaseFactory_Internal_h
 
-/*!
- Initialize a MSALTokenParameters with scopes.
- 
- @param scopes  Permissions you want included in the access token received
- in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
- */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+@interface MSALOauth2Provider()
 
-@property MSALTelemetryApiId telemetryApiId;
+@property (nonatomic, nonnull, readwrite) MSIDOauth2Factory *msidOauth2Factory;
 
 @end
 
-NS_ASSUME_NONNULL_END
+
+#endif /* MSALOauth2BaseFactory_Internal_h */

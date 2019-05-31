@@ -40,7 +40,6 @@
 #import "MSALAccountId.h"
 #import "MSIDBaseToken.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSALTestUtil.h"

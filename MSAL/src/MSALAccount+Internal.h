@@ -43,25 +43,8 @@
 
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
-/*!
- The displayable name of the account. Can be nil if not returned by the service.
- */
-@property (nonatomic) NSString *name;
-
-
-/*!
- Initialize an MSALAccount with given information
-
- @param  username            The username value in UserPrincipleName(UPN) format
- @param  name                The given name of the user
- @param  homeAccountId       Unique identifier of the account in the home directory
- @param  localAccountId      Unique identifier of the account in the signed in directory.
- @param  environment         Host part of the authority string
- @param  tenantProfiles      All tenant profiles associated to this account
- */
 - (instancetype)initWithUsername:(NSString *)username
-                            name:(NSString *)name
-                   homeAccountId:(NSString *)homeAccountId
+                   homeAccountId:(MSALAccountId *)homeAccountId
                   localAccountId:(NSString *)localAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;

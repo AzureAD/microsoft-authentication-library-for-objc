@@ -25,14 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import <MSAL/MSAL.h>
 
-@class MSIDOauth2Factory;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALOauth2FactoryProducer : NSObject
-
-+ (nullable MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(nonnull NSURL *)authority
-                                                      context:(nullable id<MSIDRequestContext>)context
-                                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+@interface MSALOauth2Authority : MSALAuthority
 
 @end
+
+NS_ASSUME_NONNULL_END

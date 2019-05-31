@@ -34,17 +34,35 @@
 @interface MSALAccount : NSObject <NSCopying>
 
 /*!
- The displayable value in UserPrincipleName(UPN) format. Can be nil if not returned from the service.
+ Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string including special characters such as @, /, or whitespace.
+ Mostly maps to UserPrincipleName(UPN) in case of AAD.
+ Can be nil if not returned from the service.
  */
 @property (readonly, nullable) NSString *username;
 
 /*!
- Unique identifier of the account in the home directory.
+ Unique identifier of the account in the home tenant.
+ This can be used later to retrieve accounts and tokens silently from MSAL.
  */
 @property (readonly, nullable) MSALAccountId *homeAccountId;
 
 /*!
- Host part of the authority string used for authentication.
+ Host part of the authority string used for authentication based on the issuer identifier.
+ Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed.
+ If a host doesn't support multiple tenants, there'll be one MSALAccount with one tenant profile per host returned.
+ 
+ e.g. if app accesses following tenants: Contoso.com and MyOrg.com in the Public AAD cloud, there'll be following information returned:
+ 
+MSALAccount
+- environment of "login.microsoftonline.com"
+- homeAccountId based on the GUID of "MyOrg.com"
+- tenantProfiles
+    - tenantProfile[0]
+        - tenantProfileId based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+        - claims for the id token issued by MyOrg.com
+    - tenantProfile[1]
+        - tenantProfileId based on account identifiers from "Contoso.com"
+        - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
 
@@ -57,7 +75,7 @@
  -accountForUsername:error:
  -allAccountsFilteredByAuthority:
  
- The field will be nil in other scenarios. E.g., account returned as part of the result of an acqure token interactive/silent call.
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
 @property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 

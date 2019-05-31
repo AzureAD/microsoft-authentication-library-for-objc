@@ -31,7 +31,7 @@
 @property (nonatomic, readonly, nonnull) NSString *identifier;
 
 /*!
- Object id of the account in the directory
+ Object id of the account in the tenant
  */
 @property (nonatomic, readonly, nullable) NSString *objectId;
 

@@ -39,14 +39,12 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALAuthorityFactory.h"
 #import "MSALAccountsProvider.h"
 
 @implementation MSALAccount
 
 - (instancetype)initWithUsername:(NSString *)username
-                            name:(NSString *)name
-                   homeAccountId:(NSString *)homeAccountId
+                   homeAccountId:(MSALAccountId *)homeAccountId
                   localAccountId:(NSString *)localAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
@@ -56,25 +54,9 @@
     if (self)
     {
         _username = username;
-        _name = name;
         _environment = environment;
-
-        NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
-
-        NSString *uid = nil;
-        NSString *utid = nil;
-
-        if ([accountIdComponents count] == 2)
-        {
-            uid = accountIdComponents[0];
-            utid = accountIdComponents[1];
-        }
-
-        _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
-                                                                 objectId:uid
-                                                                 tenantId:utid];
-
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+        _homeAccountId = homeAccountId;
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
         if (tenantProfiles.count > 0)
         {
@@ -88,35 +70,29 @@
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account
                 createTenantProfile:(BOOL)createTenantProfile
 {
-    NSError *error;
-    // TODO: use the new msid authority factory which fixes a bug when handling B2C authority
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
-    if (error || !authority)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to create msal authority from msid authority!");
-        return nil;
-    }
-    
-    NSArray *tenantProfiles;
+    NSArray *tenantProfiles = nil;
     if (createTenantProfile)
     {
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
-                                                                                  tenantId:account.tenantId
-                                                                                 authority:authority
-                                                                              isHomeTenant:account.isHomeTenantAccount
-                                                                                    claims:account.idTokenClaims.jsonDictionary];
-        
+        NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:account.localAccountId
+                                                                                     tenantId:account.realm
+                                                                                  environment:account.environment
+                                                                          isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                       claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];
         }
     }
     
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:account.accountIdentifier.homeAccountId
+                                                                           objectId:account.accountIdentifier.uid
+                                                                           tenantId:account.accountIdentifier.utid];
+    
     return [self initWithUsername:account.username
-                             name:account.name
-                    homeAccountId:account.accountIdentifier.homeAccountId
+                    homeAccountId:homeAccountId
                    localAccountId:account.localAccountId
-                      environment:account.authority.environment
+                      environment:account.environment
                    tenantProfiles:tenantProfiles];
 }
 
@@ -126,7 +102,6 @@
 {
     MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
     account.username = [self.username copyWithZone:zone];
-    account.name = [self.name copyWithZone:zone];
     account.homeAccountId = [self.homeAccountId copyWithZone:zone];
     account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
     account.environment = [self.environment copyWithZone:zone];
@@ -149,42 +124,6 @@
     
     return [self isEqualToUser:(MSALAccount *)object];
 }
-
-/*
- TODO: this is correct implementation, but we can't use it until we agree on the public API changes
-- (NSUInteger)hash
-{
-    NSUInteger hash = 0;
-    hash = hash * 31 + self.username.hash;
-    hash = hash * 31 + self.name.hash;
-    hash = hash * 31 + self.homeAccountId.hash;
-    hash = hash * 31 + self.localAccountId.hash;
-    hash = hash * 31 + self.environment.hash;
-    hash = hash * 31 + self.tenantId.hash;
-    hash = hash * 31 + self.uid.hash;
-    hash = hash * 31 + self.utid.hash;
-    return hash;
-}
-
-- (BOOL)isEqualToUser:(MSALAccount *)user
-{
-    if (!user) return NO;
-    
-    BOOL result = YES;
-    result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
-    result &= (!self.name && !user.name) || [self.name isEqualToString:user.name];
-    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId isEqualToString:user.homeAccountId];
-    result &= (!self.localAccountId && !user.localAccountId) || [self.localAccountId isEqualToString:user.localAccountId];
-    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-    result &= (!self.tenantId && !user.tenantId) || [self.tenantId isEqualToString:user.tenantId];
-    result &= (!self.uid && !user.uid) || [self.uid isEqualToString:user.uid];
-    result &= (!self.utid && !user.utid) || [self.utid isEqualToString:user.utid];
-    
-    return result;
-}*/
-
-/* TODO: this is a temporary solution that maintains previous MSAL behavior of having one account per environment.
-   This is a temporary solution to test the overall app and will be removed once we agree on the public API changes. */
 
 - (NSUInteger)hash
 {
