@@ -121,7 +121,7 @@
 
 #pragma mark - Protected
 
-- (void)initDerivedProperties
+- (void)initOauth2Factory
 {
     self.msidOauth2Factory = [MSIDAADV2Oauth2Factory new];
 }

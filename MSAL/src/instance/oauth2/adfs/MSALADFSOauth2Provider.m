@@ -64,7 +64,7 @@
 
 #pragma mark - Protected
 
-- (void)initDerivedProperties
+- (void)initOauth2Factory
 {
     NSAssert(NO, @"ADFS still unimplemented! Implement me.");
 }
