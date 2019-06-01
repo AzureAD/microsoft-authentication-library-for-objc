@@ -31,10 +31,6 @@
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
-#if TARGET_OS_IPHONE
-#import "MSIDKeychainTokenCache.h"
-#import "MSIDCertAuthHandler+iOS.h"
-#endif
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -60,9 +56,6 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
 #import "MSALErrorConverter.h"
-#if TARGET_OS_IPHONE
-#import "MSIDBrokerInteractiveController.h"
-#endif
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
 #import "MSALRedirectUri.h"
@@ -88,6 +81,13 @@
 #import "NSURL+MSIDAADUtils.h"
 #import "MSALOauth2Provider.h"
 
+#if TARGET_OS_IPHONE
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDCertAuthHandler+iOS.h"
+#import "MSIDBrokerInteractiveController.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
+#endif
+
 @interface MSALPublicClientApplication()
 {
     WKWebView *_customWebview;
@@ -96,6 +96,7 @@
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
+@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nonatomic) MSALOauth2Provider *msalOauth2Provider;
 
 @end
@@ -247,6 +248,9 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
 #endif
+    
+    _accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
     _configuration = config;
@@ -560,7 +564,8 @@
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
-                                                                                                          defaultAccessor:_tokenCache
+                                                                                                          defaultAccessor:self.tokenCache
+                                                                                                  accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     NSError *requestError = nil;
@@ -861,7 +866,8 @@
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
-                                                                                                          defaultAccessor:_tokenCache
+                                                                                                          defaultAccessor:self.tokenCache
+                                                                                                  accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     NSError *requestError = nil;
@@ -988,6 +994,13 @@
     if (!result)
     {
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
+    }
+    
+    if (![self.accountMetadataCache clearForHomeAccountId:account.homeAccountId.identifier
+                                                 clientId:self.internalConfig.clientId
+                                                  context:nil error:error])
+    {
         return NO;
     }
     
