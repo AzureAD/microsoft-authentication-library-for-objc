@@ -44,6 +44,7 @@
     if (self)
     {
         _identifier = accountIdentifier;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;
@@ -58,6 +59,7 @@
     {
         _identifier = accountIdentifier;
         _username = username;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;
@@ -70,6 +72,7 @@
     if (self)
     {
         _tenantProfileIdentifier = tenantProfileIdentifier;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;

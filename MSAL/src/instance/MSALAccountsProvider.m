@@ -46,6 +46,7 @@
 #import "MSALExternalAccount.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALAccountsProvider()
 
@@ -83,58 +84,88 @@
     return self;
 }
 
-#pragma mark - Accounts
-
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-{
-    [authority.msidAuthority resolveAndValidate:NO
-                              userPrincipalName:nil
-                                        context:nil
-                                completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
-                                    
-                                    if (error)
-                                    {
-                                        completionBlock(nil, error);
-                                        return;
-                                    }
-                                    
-                                    NSError *accountsError = nil;
-                                    NSArray *accounts = [self allAccountsForAuthority:authority.msidAuthority error:&accountsError];
-                                    completionBlock(accounts, accountsError);
-                                }];
-}
-
-#pragma mark - Accounts sync
+#pragma mark - Convenience
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    return [self allAccountsForAuthority:nil error:error];
+    return [self accountsForParameters:nil authority:nil error:error];
+}
+
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                            error:(NSError * __autoreleasing *)error
+{
+    return [self accountsForParameters:parameters authority:nil error:error];
 }
 
 - (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
-                                error:(NSError **)error
+                                error:(NSError * __autoreleasing *)error
 {
-    return [self accountForHomeAccountId:parameters.identifier
-                                username:parameters.username
-                         tenantProfileId:parameters.tenantProfileIdentifier
-                                   error:error];
+    NSError *internalError = nil;
+    NSArray<MSALAccount *> *accounts = [self accountsForParameters:parameters authority:nil error:&internalError];
+    
+    if (!accounts && error)
+    {
+        // TODO: log error
+        return nil;
+    }
+    
+    if (internalError)
+    {
+        if (error)
+        {
+            *error = [MSALErrorConverter msalErrorFromMsidError:internalError];
+        }
+        return nil;
+    }
+    
+    if ([accounts count])
+    {
+        if (accounts.count == 1)
+        {
+            return accounts[0];
+        }
+        else if (accounts.count > 1)
+        {
+            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", accounts[0].environment == accounts[1].environment ? @"YES" : @"NO", accounts[0].homeAccountId == accounts[1].homeAccountId ? @"YES" : @"NO", accounts[0].username == accounts[1].username ? @"YES" : @"NO");
+            return accounts[0];
+        }
+    }
+    
+    return nil;
 }
 
-#pragma mark - Private
+#pragma mark - Filtering
 
-- (NSArray <MSALAccount *> *)allAccountsForAuthority:(MSIDAuthority *)authority
-                                               error:(NSError * __autoreleasing *)error
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                        authority:(MSIDAuthority *)authority
+                                            error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
-
-    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
-    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
-
+    
+    NSString *queryClientId = nil;
+    NSString *queryFamilyId = nil;
+    
+    if (!parameters || parameters.needsAssociatedRefreshToken)
+    {
+        MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
+        NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
+        
+        queryClientId = self.clientId;
+        queryFamilyId = familyId;
+    }
+    
+    MSIDAccountIdentifier *queryAccountIdentifier = nil;
+    
+    if (![NSString msidIsStringNilOrBlank:parameters.identifier]
+        || ![NSString msidIsStringNilOrBlank:parameters.username])
+    {
+        queryAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:parameters.username homeAccountId:parameters.identifier];
+    }
+    
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:authority
-                                                          clientId:self.clientId
-                                                          familyId:familyId
-                                                 accountIdentifier:nil
+                                                          clientId:queryClientId
+                                                          familyId:queryFamilyId
+                                                 accountIdentifier:queryAccountIdentifier
                                                            context:nil
                                                              error:&msidError];
     
@@ -144,46 +175,56 @@
         return nil;
     }
     
-    return [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:nil addExternal:YES];
+    if (![NSString msidIsStringNilOrBlank:parameters.tenantProfileIdentifier])
+    {
+        NSMutableArray *filteredAccounts = [NSMutableArray new];
+        
+        for (MSIDAccount *account in msidAccounts)
+        {
+            if ([account.localAccountId isEqualToString:parameters.tenantProfileIdentifier])
+            {
+                [filteredAccounts addObject:account.localAccountId];
+            }
+        }
+        
+        msidAccounts = filteredAccounts;
+    }
+    
+    NSArray *externalAccounts = nil;
+    
+    if (self.externalAccountProvider)
+    {
+        externalAccounts = [self.externalAccountProvider allExternalAccountsWithParameters:parameters];
+    }
+    
+    return [self msalAccountsFromMSIDAccounts:msidAccounts externalAccounts:externalAccounts];
 }
 
+#pragma mark - Internal
+
 - (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
-                                         tenantProfileId:(NSString *)tenantProfileId
-                                             addExternal:(BOOL)addExternal
+                                        externalAccounts:(NSArray *)externalAccounts
 {
-    NSMutableSet *msalAccounts = [NSMutableSet new];
+    NSMutableSet *resultAccounts = [NSMutableSet new];
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
-        if (![NSString msidIsStringNilOrBlank:tenantProfileId]
-            && ![tenantProfileId isEqualToString:msidAccount.localAccountId])
-        {
-            continue;
-        }
-        
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
         NSDictionary *accountClaims = msidAccount.isHomeTenantAccount ? msidAccount.idTokenClaims.jsonDictionary : nil;
-        [self addMSALAccount:msalAccount toSet:msalAccounts claims:accountClaims];
+        [self addMSALAccount:msalAccount toSet:resultAccounts claims:accountClaims];
     }
-    
-    if (!addExternal)
-    {
-        return [msalAccounts allObjects];
-    }
-    
-    NSArray *externalAccounts = [self.externalAccountProvider allExternalAccountsForClientId:self.clientId];
     
     for (id<MSALExternalAccount> externalAccount in externalAccounts)
     {
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount];
         if (!msalAccount) continue;
         
-        [self addMSALAccount:msalAccount toSet:msalAccounts claims:externalAccount.accountClaims];
+        [self addMSALAccount:msalAccount toSet:resultAccounts claims:externalAccount.accountClaims];
     }
     
-    return [msalAccounts allObjects];
+    return [resultAccounts allObjects];
 }
 
 - (void)addMSALAccount:(MSALAccount *)account toSet:(NSMutableSet *)allAccountsSet claims:(NSDictionary *)accountClaims
@@ -206,49 +247,29 @@
     }
 }
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                username:(NSString *)username
-                         tenantProfileId:(NSString *)tenantProfileId
-                                   error:(NSError * __autoreleasing *)error
-{
-    NSError *msidError = nil;
-    
-    MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
-    NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
-    
-    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
-    
-    NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:nil
-                                                          clientId:self.clientId
-                                                          familyId:familyId
-                                                 accountIdentifier:accountIdentifier
-                                                           context:nil
-                                                             error:&msidError];
-    
-    if (msidError)
-    {
-        *error = msidError;
-        return nil;
-    }
-    
-    if ([msidAccounts count])
-    {
-        // TODO: this looks wrong
-        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:tenantProfileId addExternal:YES];
+#pragma mark - Authority (deprecated)
 
-        if (msalAccounts.count == 1)
-        {
-            return msalAccounts[0];
-        }
-        else if (msalAccounts.count > 1)
-        {
-            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].homeAccountId == msalAccounts[1].homeAccountId ? @"YES" : @"NO", msalAccounts[0].username == msalAccounts[1].username ? @"YES" : @"NO");
-            return msalAccounts[0];
-        }
-    }
-    
-    return nil;
+- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
+                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
+{
+    [authority.msidAuthority resolveAndValidate:NO
+                              userPrincipalName:nil
+                                        context:nil
+                                completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
+                                    
+                                    if (error)
+                                    {
+                                        completionBlock(nil, error);
+                                        return;
+                                    }
+                                    
+                                    NSError *accountsError = nil;
+                                    NSArray *accounts = [self accountsForParameters:nil authority:authority.msidAuthority error:&accountsError];
+                                    completionBlock(accounts, accountsError);
+                                }];
 }
+
+#pragma mark - App metadata
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem
 {

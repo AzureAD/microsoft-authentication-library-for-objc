@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalCacheProvider.h"
+#import "MSALExternalAccountProviding.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALSharedAccountCacheProvider : MSALExternalCacheProvider
+@interface MSALSharedAccountCacheProvider : NSObject <MSALExternalAccountProviding>
 
 - (instancetype)initWithSharedAccountGroup:(NSString *)sharedGroup
                                      error:(NSError **)error;

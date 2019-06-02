@@ -26,7 +26,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALAccount.h"
 #import "MSALAADAuthority.h"
-#import "MSALExternalAADAccount.h"
+#import "MSALExternalAccountImpl.h"
 #import "MSALResult.h"
 #import "MSALAccount+MultiTenantAccount.h"
 
@@ -63,7 +63,7 @@
     
     for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
     {
-        MSALExternalAADAccount *externalAADAccount = [[MSALExternalAADAccount alloc] initWithAccount:account tenantProfile:tenantProfile];
+        MSALExternalAccountImpl *externalAADAccount = [[MSALExternalAccountImpl alloc] initWithAccount:account tenantProfile:tenantProfile];
         
         NSError *removalError = nil;
         
@@ -89,8 +89,8 @@
 {
     if (self.externalAccountProvider && [result.authority isKindOfClass:[MSALAADAuthority class]])
     {
-        MSALExternalAADAccount *externalAADAccount = [[MSALExternalAADAccount alloc] initWithAccount:result.account
-                                                                                       tenantProfile:result.tenantProfile];
+        MSALExternalAccountImpl *externalAADAccount = [[MSALExternalAccountImpl alloc] initWithAccount:result.account
+                                                                                         tenantProfile:result.tenantProfile];
         
         NSError *updateError = nil;
         BOOL result = [self.externalAccountProvider updateAccount:externalAADAccount error:&updateError];
@@ -102,18 +102,19 @@
     }
 }
 
-- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsForClientId:(NSString *)clientId
+- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
 {
     NSMutableArray *allExternalAccounts = [NSMutableArray new];
     
     if (self.externalAccountProvider)
     {
         NSError *externalError = nil;
-        NSArray *externalAccounts = [self.externalAccountProvider accountsForClientId:clientId error:&externalError];
+        NSArray *externalAccounts = [self.externalAccountProvider accountsWithParameters:parameters error:&externalError];
         
         if (externalError)
         {
-            MSID_LOG_WARN(nil, @"Failed to read external accounts for client ID %@, error %@/%ld", clientId, externalError.domain, (long)externalError.code);
+            // TODO: implement description method for MSALAccountEnumerationParameters
+            MSID_LOG_WARN(nil, @"Failed to read external accounts for parameters %@, error %@/%ld", parameters, externalError.domain, (long)externalError.code);
             return nil;
         }
         

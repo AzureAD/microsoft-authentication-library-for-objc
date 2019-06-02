@@ -21,15 +21,62 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <Foundation/Foundation.h>
-#import "MSALExternalAccount.h"
+#import "MSALExternalAccountImpl.h"
+#import "MSALAccount.h"
+#import "MSALAccountId.h"
+#import "MSALTenantProfile.h"
+#import "MSALAuthority.h"
 
-@class MSALAccount;
-@class MSALTenantProfile;
+@interface MSALExternalAccountImpl()
 
-@interface MSALExternalAADAccount : NSObject <MSALExternalAccount>
+@property (nonatomic) MSALAccount *account;
+@property (nonatomic) MSALTenantProfile *tenantProfile;
+
+@end
+
+@implementation MSALExternalAccountImpl
+
+#pragma mark - Init
 
 - (instancetype)initWithAccount:(MSALAccount *)account
-                  tenantProfile:(MSALTenantProfile *)tenantProfile;
+                  tenantProfile:(MSALTenantProfile *)tenantProfile
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _account = account;
+        _tenantProfile = tenantProfile;
+    }
+    
+    return self;
+}
+
+#pragma mark - MSALExternalAccount
+
+- (NSString *)environment
+{
+    return self.account.environment;
+}
+
+- (NSString *)identifier
+{
+    return self.account.identifier;
+}
+
+- (NSString *)username
+{
+    return self.account.username;
+}
+
+- (NSDictionary *)accountClaims
+{
+    return self.tenantProfile.claims;
+}
+
+- (BOOL)matchesAccountEnumerationParameters:(MSALAccountEnumerationParameters *)accountEnumerationParameters
+{
+    return NO; // TODO: is this one necessary?
+}
 
 @end

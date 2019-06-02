@@ -27,6 +27,7 @@
 @class MSALResult;
 @class MSALAccount;
 @protocol MSALExternalAccount;
+@class MSALAccountEnumerationParameters;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -38,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateExternalAccountProviderWithResult:(MSALResult *)result;
 - (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error;
-- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsForClientId:(NSString *)clientId;
+- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters;
 
 @end
 

@@ -22,21 +22,10 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
+#import <MSAL/MSAL.h>
 
-typedef NS_ENUM(NSInteger, MSALExternalAccountType)
-{
-    MSALExternalAccountTypeAAD
-};
+@protocol MSALExternalAccount <MSALAccount>
 
-
-@protocol MSALExternalAccount <NSObject>
-
-@property (nonatomic, readonly) NSString *homeAccountId;
-@property (nonatomic, readonly) NSString *username;
-@property (nonatomic, readonly) NSURL *authorityURL;
-@property (nonatomic, readonly) NSString *localAccountId;
-@property (nonatomic, readonly) NSString *tenantId;
-@property (nonatomic, readonly) NSDictionary *accountClaims;
-@property (nonatomic, readonly) MSALExternalAccountType externalAccountType;
+- (BOOL)matchesAccountEnumerationParameters:(MSALAccountEnumerationParameters *)accountEnumerationParameters;
 
 @end

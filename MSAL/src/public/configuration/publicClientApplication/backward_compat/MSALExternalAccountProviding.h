@@ -28,6 +28,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSALExternalAccount.h"
+#import <MSAL/MSAL.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,7 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)updateAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)removeAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
-- (nullable NSArray<id<MSALExternalAccount>> *)accountsForClientId:(NSString *)clientId error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<id<MSALExternalAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+                                                                error:(NSError * _Nullable * _Nullable)error;
 
 @end
 
