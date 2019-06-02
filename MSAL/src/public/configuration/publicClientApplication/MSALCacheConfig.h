@@ -39,8 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
     The default value is com.microsoft.adalcache.
  */
 @property NSString *keychainSharingGroup;
-@property (nonatomic, nullable, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
-@property (nonatomic, nullable, readonly) MSALSerializedADALCacheProvider *serializedADALCache;
+@property (nonatomic, nullable) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
 
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
