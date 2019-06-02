@@ -54,15 +54,15 @@
 
 /*!
  Host part of the authority string used for authentication based on the issuer identifier.
- Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed.
- If a host doesn't support multiple tenants, there'll be one MSALAccount with one tenant profile per host returned.
+ Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed (see MSALAccount+MultiTenantAccount.h header)
+ If a host doesn't support multiple tenants, there'll be one MSALAccount with accountClaims returned.
  
  e.g. if app accesses following tenants: Contoso.com and MyOrg.com in the Public AAD cloud, there'll be following information returned:
  
 MSALAccount
 - environment of "login.microsoftonline.com"
 - identifier based on the GUID of "MyOrg.com"
-- accountClaims for the "MyOrg.com"
+- accountClaims from the id token for the "MyOrg.com"
 - tenantProfiles
     - tenantProfile[0]
         - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
