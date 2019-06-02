@@ -39,6 +39,7 @@
 #import "MSALResult+Internal.h"
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALResultTests : MSALTestCase
 
@@ -136,7 +137,7 @@
     XCTAssertEqualObjects(result.tenantProfile.tenantId, @"tenant_id");
     XCTAssertNotNil(result.tenantProfile.claims);
     XCTAssertNotNil(result.account);
-    XCTAssertEqualObjects(result.account.homeAccountId.identifier, @"uid.tenant_id");
+    XCTAssertEqualObjects(result.account.identifier, @"uid.tenant_id");
     XCTAssertNil(result.account.tenantProfiles);
     XCTAssertEqualObjects(tokenResult.correlationId.UUIDString, @"00000000-0000-0000-0000-000000000001");
 }

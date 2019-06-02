@@ -149,7 +149,7 @@
          XCTAssertNotNil(result);
 
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
-         XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
+         XCTAssertEqualObjects(result.account.identifier, userIdentifier);
          [expectation fulfill];
      }];
 
@@ -176,7 +176,7 @@
                            XCTAssertNotNil(result);
 
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
-                           XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
+                           XCTAssertEqualObjects(result.account.identifier, userIdentifier);
                            [expectation fulfill];
     }];
 

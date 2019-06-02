@@ -87,6 +87,7 @@
 #import "MSALClaimsRequest+Internal.h"
 #import "NSURL+MSIDAADUtils.h"
 #import "MSALOauth2Provider.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -304,13 +305,35 @@
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                    error:(NSError * __autoreleasing *)error
 {
+    return [self accountForIdentifier:homeAccountId error:error];
+}
+
+- (MSALAccount *)accountForIdentifier:(NSString *)identifier
+                                error:(NSError **)error
+{
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId];
     NSError *msidError = nil;
-    MSALAccount *account = [request accountForHomeAccountId:homeAccountId error:&msidError];
-
+    
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:identifier];
+    
+    MSALAccount *account = [request accountForParameters:parameters error:&msidError];
+    
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    return account;
+}
 
+- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
+                                error:(NSError **)error
+{
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                            clientId:self.internalConfig.clientId];
+    NSError *msidError = nil;
+    MSALAccount *account = [request accountForParameters:parameters error:&msidError];
+    
+    if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
     return account;
 }
 
@@ -320,7 +343,8 @@
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId];
     NSError *msidError = nil;
-    MSALAccount *account = [request accountForUsername:username error:&msidError];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:username];
+    MSALAccount *account = [request accountForParameters:parameters error:&msidError];
 
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
 
