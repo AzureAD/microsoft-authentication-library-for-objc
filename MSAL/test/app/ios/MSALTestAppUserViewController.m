@@ -29,7 +29,6 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALAccount.h"
 
 @interface MSALTestAppUserViewController ()

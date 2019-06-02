@@ -625,7 +625,8 @@
 
 /*!
     Removes all tokens from the cache for this application for the provided account
-    User will need to enter his credentials again after calling this API
+    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
+    User might need to enter his credentials again after calling this API
  
     @param  account    The account to remove from the cache
  */

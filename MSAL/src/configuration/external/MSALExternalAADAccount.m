@@ -61,7 +61,7 @@
 
 - (NSString *)localAccountId
 {
-    return self.tenantProfile.userObjectId;
+    return self.tenantProfile.tenantProfileId;
 }
 
 - (NSString *)username

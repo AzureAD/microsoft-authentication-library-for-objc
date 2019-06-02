@@ -44,7 +44,7 @@
 #import "MSALAADAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSALOauth2FactoryProducer.h"
+#import "MSALOauth2ProviderFactory.h"
 #import "MSALWebviewType_Internal.h"
 #import "MSIDAuthority.h"
 #import "MSIDAADV2Oauth2Factory.h"
@@ -59,7 +59,6 @@
 #import "MSIDDefaultTokenRequestProvider.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALErrorConverter.h"
 #if TARGET_OS_IPHONE
 #import "MSIDBrokerInteractiveController.h"
@@ -88,6 +87,8 @@
 #import "MSALClaimsRequest+Internal.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
+#import "NSURL+MSIDAADUtils.h"
+#import "MSALOauth2Provider.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -98,6 +99,7 @@
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSALExternalAccountHandler *externalAccountHandler;
+@property (nonatomic) MSALOauth2Provider *msalOauth2Provider;
 
 @end
 
@@ -268,6 +270,18 @@
     _internalConfig = [config copy];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    NSError *oauthProviderError = nil;
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority context:nil error:&oauthProviderError];
+    
+    if (!self.msalOauth2Provider)
+    {
+        if (error)
+        {
+            *error = oauthProviderError;
+        }
+        
+        return nil;
+    }
     
     if (_internalConfig.cacheConfig.externalAccountProvider)
     {
@@ -366,7 +380,7 @@
         return YES;
     }
 
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response error:nil])
     {
         return YES;
     }
@@ -411,7 +425,19 @@
                    completionBlock:(MSALCompletionBlock)completionBlock
 {
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
-
+    
+    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    {
+        if (completionBlock)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
+    
     NSError *msidError = nil;
     
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
@@ -445,20 +471,7 @@
         return;
     }
     
-    // Configure optional parameters
-    BOOL accountHintPresent = (![NSString msidIsStringNilOrBlank:parameters.loginHint] || parameters.account);
-    
-    // Select account experience is undefined if user identity is passed (login_hint or account)
-    // Therefore, if there's user identity, we don't pass select account prompt type
-    if (accountHintPresent && parameters.promptType == MSALPromptTypeSelectAccount)
-    {
-        msidParams.promptType = MSIDPromptTypePromptIfNecessary;
-    }
-    else
-    {
-        msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
-    }
-    
+    msidParams.promptType = MSIDPromptTypeForPromptType(parameters.promptType);
     msidParams.loginHint = parameters.loginHint;
     msidParams.extraAuthorizeURLQueryParameters = parameters.extraQueryParameters;
     msidParams.accountIdentifier = parameters.account.lookupAccountIdentifier;
@@ -556,7 +569,7 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
         
         if ([NSThread isMainThread])
@@ -571,20 +584,11 @@
         }
     };
     
-    NSError *requestError = nil;
-    
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
-    
-    if (!oauth2Factory)
-    {
-        block(nil, requestError);
-        return;
-    }
-    
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
+    NSError *requestError = nil;
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
     
     if (!controller)
@@ -602,7 +606,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         
         if (msalResult && self.externalAccountHandler)
         {
@@ -773,6 +777,20 @@
 {
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     
+    // This is meant to avoid developer error, when they configure PCA with e.g. AAD authority, but pass B2C authority here
+    // Authority type in PCA and parameters should match
+    if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
+    {
+        if (completionBlock)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+        }
+        
+        return;
+    }
+    
     BOOL shouldValidate = _validateAuthority;
     
     if (shouldValidate && [self shouldExcludeValidationForAuthority:requestAuthority])
@@ -785,8 +803,9 @@
      if authority is a common, organizations or consumers authority.
      */
     NSError *authorityError = nil;
-    requestAuthority = [MSIDAuthorityFactory authorityWithRawTenant:parameters.account.homeAccountId.tenantId
-                                                      msidAuthority:requestAuthority context:nil error:&authorityError];
+    requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
+                                                          requestAuthority:requestAuthority
+                                                                     error:&authorityError];
     
     if (!requestAuthority)
     {
@@ -867,24 +886,16 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
         completionBlock(result, msalError);
     };
     
-    NSError *requestError = nil;
-    MSIDOauth2Factory *oauth2Factory = [MSALOauth2FactoryProducer msidOauth2FactoryForAuthority:self.internalConfig.authority.url context:nil error:&requestError];
-    
-    if (!oauth2Factory)
-    {
-        block(nil, requestError);
-        return;
-    }
-    
-    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:oauth2Factory
+    MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:_tokenCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
+    NSError *requestError = nil;
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
     
     if (!requestController)
@@ -902,7 +913,7 @@
         }
         
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:result error:&resultError];
+        MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         
         if (msalResult && self.externalAccountHandler)
         {
@@ -1016,32 +1027,16 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return NO;
     }
-
-    NSError *metadataError = nil;
-    // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
-    // Therefore, we update app metadata to not have family id for this app after signout
-
-    NSURL *authorityURL = [NSURL msidURLWithEnvironment:account.environment tenant:account.homeAccountId.tenantId];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityURL context:nil error:nil];
-
-    BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
-                                                                clientId:self.internalConfig.clientId
-                                                               authority:authority
-                                                                 context:nil
-                                                                   error:&metadataError];
-
-    if (!metadataResult)
-    {
-        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %ld, %@", (long)metadataError.code, metadataError.domain);
-        MSID_LOG_WARN(nil, @"Failed to update app metadata when removing account %@", metadataError);
-    }
     
     if (self.externalAccountHandler)
     {
         result &= [self.externalAccountHandler removeAccountFromExternalProvider:account error:error];
     }
-
-    return result;
+    
+    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
+                                                       clientId:self.clientId
+                                                     tokenCache:self.tokenCache
+                                                          error:error];
 }
 
 @end

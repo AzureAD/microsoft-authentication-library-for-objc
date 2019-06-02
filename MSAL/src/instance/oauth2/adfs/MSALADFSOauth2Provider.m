@@ -25,70 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALIndividualClaimRequestAdditionalInfo+Internal.h"
-#import "MSIDIndividualClaimRequestAdditionalInfo.h"
-#import "MSIDJsonSerializer.h"
+#import "MSALADFSOauth2Provider.h"
+#import "MSALResult+Internal.h"
+#import "MSIDAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSIDTokenResult.h"
+#import "MSIDADFSAuthority.h"
 
-@implementation MSALIndividualClaimRequestAdditionalInfo
+@implementation MSALADFSOauth2Provider
 
-- (instancetype)init
+#pragma mark - Public
+
+- (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                error:(NSError **)error
 {
-    self = [super init];
-    if (self)
-    {
-        _msidAdditionalInfo = [MSIDIndividualClaimRequestAdditionalInfo new];
-        MSIDJsonSerializer *jsonSerializer = [MSIDJsonSerializer new];
-        jsonSerializer.normalizeJSON = NO;
-        _jsonSerializer = jsonSerializer;
-    }
-    return self;
-}
-
-- (NSString *)description
-{
-    return [self.msidAdditionalInfo description];
-}
-
-- (instancetype)initWithMsidIndividualClaimRequestAdditionalInfo:(MSIDIndividualClaimRequestAdditionalInfo *)msidAdditionalInfo
-{
-    if (!msidAdditionalInfo) return nil;
+    NSError *authorityError = nil;
     
-    self = [super init];
-    if (self)
+    MSALADFSAuthority *adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:tokenResult.authority.url error:&authorityError];
+    
+    if (!adfsAuthority)
     {
-        _msidAdditionalInfo = msidAdditionalInfo;
+        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
+        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        
+        if (error) *error = authorityError;
+        
+        return nil;
     }
-    return self;
+    
+    return [MSALResult resultWithMSIDTokenResult:tokenResult authority:adfsAuthority error:error];
 }
 
-- (void)setEssential:(NSNumber *)essential
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
 {
-    self.msidAdditionalInfo.essential = essential;
+    return [authority isKindOfClass:[MSIDADFSAuthority class]];
 }
 
-- (NSNumber *)essential
-{
-    return self.msidAdditionalInfo.essential;
-}
+#pragma mark - Protected
 
-- (void)setValue:(id)value
+- (void)initOauth2Factory
 {
-    self.msidAdditionalInfo.value = value;
-}
-
-- (id)value
-{
-    return self.msidAdditionalInfo.value;
-}
-
-- (void)setValues:(NSArray *)values
-{
-    self.msidAdditionalInfo.values = values;
-}
-
-- (NSArray *)values
-{
-    return self.msidAdditionalInfo.values;
+    NSAssert(NO, @"ADFS still unimplemented! Implement me.");
 }
 
 @end

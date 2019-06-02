@@ -27,25 +27,12 @@
 
 #import "MSALResult.h"
 
-@class MSIDAccessToken;
-@class MSIDIdToken;
-@class MSIDClientInfo;
 @class MSIDTokenResult;
-@class MSIDDefaultTokenCacheAccessor;
 
 @interface MSALResult (Internal)
 
-+ (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                                error:(NSError **)error;
-
-+ (MSALResult *)resultWithAccessToken:(NSString *)accessToken
-                            expiresOn:(NSDate *)expiresOn
-              isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
-                             tenantId:(NSString *)tenantId
-                              account:(MSALAccount *)account
-                              idToken:(NSString *)idToken
-                             uniqueId:(NSString *)uniqueId
-                               scopes:(NSArray<NSString *> *)scopes
-                            authority:(MSALAuthority *)authority;
++ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
+                                authority:(MSALAuthority *)authority
+                                    error:(NSError **)error;
 
 @end

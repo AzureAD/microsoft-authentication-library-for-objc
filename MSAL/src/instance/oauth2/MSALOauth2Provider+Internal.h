@@ -25,39 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccount.h"
+#import "MSALOauth2Provider.h"
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
-@class MSIDAccount;
-@class MSALAccountId;
-@class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
+@class MSIDOauth2Factory;
 
-@interface MSALAccount ()
+#ifndef MSALOauth2BaseFactory_Internal_h
+#define MSALOauth2BaseFactory_Internal_h
 
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+@interface MSALOauth2Provider()
 
-@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                  localAccountId:(NSString *)localAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
-
-/*!
- Initialize an MSALAccount with MSIDAccount
- @param  account             MSID account
- @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
- */
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
-
-- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+@property (nonatomic, nonnull, readwrite) MSIDOauth2Factory *msidOauth2Factory;
 
 @end
+
+
+#endif /* MSALOauth2BaseFactory_Internal_h */

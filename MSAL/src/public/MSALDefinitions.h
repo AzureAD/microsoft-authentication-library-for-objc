@@ -97,7 +97,7 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
      If multiple users are signed in, select account experience will be presented.
      */
     MSALPromptTypePromptIfNecessary,
-    MSALPromptTypeDefault = MSALPromptTypeSelectAccount,
+    MSALPromptTypeDefault = MSALPromptTypePromptIfNecessary,
 };
 
 typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);

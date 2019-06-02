@@ -25,70 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALIndividualClaimRequestAdditionalInfo+Internal.h"
-#import "MSIDIndividualClaimRequestAdditionalInfo.h"
-#import "MSIDJsonSerializer.h"
+#import "MSALOauth2Authority.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALErrorConverter.h"
 
-@implementation MSALIndividualClaimRequestAdditionalInfo
+@implementation MSALOauth2Authority
 
-- (instancetype)init
+- (instancetype)initWithURL:(NSURL *)url
+                      error:(NSError **)error
 {
-    self = [super init];
-    if (self)
-    {
-        _msidAdditionalInfo = [MSIDIndividualClaimRequestAdditionalInfo new];
-        MSIDJsonSerializer *jsonSerializer = [MSIDJsonSerializer new];
-        jsonSerializer.normalizeJSON = NO;
-        _jsonSerializer = jsonSerializer;
-    }
-    return self;
-}
-
-- (NSString *)description
-{
-    return [self.msidAdditionalInfo description];
-}
-
-- (instancetype)initWithMsidIndividualClaimRequestAdditionalInfo:(MSIDIndividualClaimRequestAdditionalInfo *)msidAdditionalInfo
-{
-    if (!msidAdditionalInfo) return nil;
+    self = [super initWithURL:url error:nil];
     
-    self = [super init];
     if (self)
     {
-        _msidAdditionalInfo = msidAdditionalInfo;
+        if (error)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
     }
-    return self;
+    
+    return nil;
 }
 
-- (void)setEssential:(NSNumber *)essential
+- (NSURL *)url
 {
-    self.msidAdditionalInfo.essential = essential;
-}
-
-- (NSNumber *)essential
-{
-    return self.msidAdditionalInfo.essential;
-}
-
-- (void)setValue:(id)value
-{
-    self.msidAdditionalInfo.value = value;
-}
-
-- (id)value
-{
-    return self.msidAdditionalInfo.value;
-}
-
-- (void)setValues:(NSArray *)values
-{
-    self.msidAdditionalInfo.values = values;
-}
-
-- (NSArray *)values
-{
-    return self.msidAdditionalInfo.values;
+    return nil;
 }
 
 @end

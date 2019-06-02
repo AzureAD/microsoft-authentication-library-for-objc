@@ -25,39 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccount.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
-@class MSIDAccount;
-@class MSALAccountId;
-@class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAccount ()
+@class MSIDOauth2Factory;
+@class MSIDTokenResult;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSALAccount;
+@class MSIDAuthority;
 
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+@interface MSALOauth2Provider : NSObject
 
-@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
+@property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
 
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                  localAccountId:(NSString *)localAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+- (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
+                                         error:(NSError * _Nullable * _Nullable)error;
 
-/*!
- Initialize an MSALAccount with MSIDAccount
- @param  account             MSID account
- @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
- */
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
+- (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
+                           clientId:(NSString *)clientId
+                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                              error:(NSError * _Nullable * _Nullable)error;
 
-- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
+                                      requestAuthority:(MSIDAuthority *)requestAuthority
+                                                 error:(NSError * _Nullable * _Nullable)error;
+
+- (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
 
 @end
+
+NS_ASSUME_NONNULL_END
