@@ -286,7 +286,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -310,7 +309,7 @@
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
     
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:nil account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse errorRtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" account:account errorCode:@"invalid_grant" errorDescription:@"Refresh token revoked" subError:@"unauthorized_client" claims:nil refreshToken:nil];
     [MSIDTestURLSession addResponses:@[tokenResponse]];
     
     // Acquire a token silently for a scope that does not exist in cache
@@ -356,7 +355,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -380,7 +378,7 @@
     
     // Set up the network responses for OIDC discovery and the RT response
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"mail.read", @"openid", @"profile", @"offline_access"]];
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
     json[@"access_token"] = @"i am an updated access token!";
     json[@"scope"] = [expectedScopes msidToString];
@@ -1065,7 +1063,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1086,7 +1083,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:504 headerFields:@{}];
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
@@ -1138,7 +1135,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1159,7 +1155,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:504 headerFields:@{}];
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
@@ -1212,7 +1208,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
 
@@ -1274,7 +1269,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
 
@@ -1294,7 +1288,8 @@
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:nil];
 
@@ -1349,7 +1344,6 @@
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1370,7 +1364,7 @@
     [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse]];
     
     // Set up two 504 network responses
-    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:nil user:account claims:nil];
+    MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:504 headerFields:@{}];
     [MSIDTestURLSession addResponse:tokenResponse]; //Add the responsce twice because retry will happen
     [MSIDTestURLSession addResponse:tokenResponse];
@@ -1502,7 +1496,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -1604,14 +1597,14 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:claims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -1693,7 +1686,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
@@ -1760,7 +1752,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
@@ -1821,14 +1812,14 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *responseJson = [[response jsonDictionary] mutableCopy];
@@ -1906,14 +1897,14 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:expectedClaims];
     NSMutableDictionary *json = [[response jsonDictionary] mutableCopy];
@@ -1990,7 +1981,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2057,7 +2047,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2078,7 +2067,8 @@
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:nil];
     [tokenResponse setResponseURL:@"https://someresponseurl.com" code:200 headerFields:@{}];
@@ -2128,7 +2118,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2149,7 +2138,8 @@
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:nil];
     
@@ -2215,7 +2205,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2305,7 +2294,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2335,7 +2323,8 @@
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:nil];
     
@@ -2394,7 +2383,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
@@ -2415,7 +2403,8 @@
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
                                                                         authority:authority
-                                                                         tenantId:nil
+                                                                         tenantId:@"1234-5678-90abcdefg"
+                                                                              uid:@"1"
                                                                              user:account
                                                                            claims:nil];
     
@@ -2503,7 +2492,6 @@
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
-                                                  localAccountId:@"1"
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     

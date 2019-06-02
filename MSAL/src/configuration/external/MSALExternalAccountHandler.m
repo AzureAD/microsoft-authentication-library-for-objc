@@ -28,6 +28,7 @@
 #import "MSALAADAuthority.h"
 #import "MSALExternalAADAccount.h"
 #import "MSALResult.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALExternalAccountHandler()
 
@@ -62,25 +63,22 @@
     
     for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
     {
-        if ([tenantProfile.authority isKindOfClass:[MSALAADAuthority class]])
+        MSALExternalAADAccount *externalAADAccount = [[MSALExternalAADAccount alloc] initWithAccount:account tenantProfile:tenantProfile];
+        
+        NSError *removalError = nil;
+        
+        BOOL result = [self.externalAccountProvider removeAccount:externalAADAccount error:&removalError];
+        
+        if (!result)
         {
-            MSALExternalAADAccount *externalAADAccount = [[MSALExternalAADAccount alloc] initWithAccount:account tenantProfile:tenantProfile];
+            MSID_LOG_WARN(nil, @"Failed to remove external account with error %ld, %@", (long)removalError.code, removalError.domain);
             
-            NSError *removalError = nil;
-            
-            BOOL result = [self.externalAccountProvider removeAccount:externalAADAccount error:&removalError];
-            
-            if (!result)
+            if (error)
             {
-                MSID_LOG_WARN(nil, @"Failed to remove external account with error %ld, %@", (long)removalError.code, removalError.domain);
-                
-                if (error)
-                {
-                    *error = removalError;
-                }
-                
-                return NO;
+                *error = removalError;
             }
+            
+            return NO;
         }
     }
     

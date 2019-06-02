@@ -25,39 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccount.h"
+#import <Foundation/Foundation.h>
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
-@class MSIDAccount;
-@class MSALAccountId;
-@class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
-
-@interface MSALAccount ()
-
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
-@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
-@property (nonatomic) NSString *identifier;
-@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+@interface MSALAccountEnumerationParameters : NSObject
 
 /*!
- Initialize an MSALAccount with MSIDAccount
- @param  account             MSID account
- @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
+ Unique identifier for the account.
  */
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
+@property (nonatomic, readonly, nullable) NSString *identifier;
 
-- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+/*!
+ Unique identifier for the tenant profile.
+ */
+@property (nonatomic, readonly, nullable) NSString *tenantProfileIdentifier;
+
+/*!
+ Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
+ */
+@property (nonatomic, readonly, nullable) NSString *username;
+
+- (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
+
+- (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                                  username:(nonnull NSString *)username;
+
+- (nonnull instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier;
 
 @end

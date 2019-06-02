@@ -45,6 +45,7 @@
 #import "MSIDIdToken.h"
 #import "MSALExternalAccount.h"
 #import "MSALExternalAccountHandler.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALAccountsProvider()
 
@@ -111,16 +112,13 @@
     return [self allAccountsForAuthority:nil error:error];
 }
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error 
+- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
+                                error:(NSError **)error
 {
-    return [self accountForHomeAccountId:homeAccountId username:nil error:error];
-}
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error
-{
-    return [self accountForHomeAccountId:nil username:username error:error];
+    return [self accountForHomeAccountId:parameters.identifier
+                                username:parameters.username
+                         tenantProfileId:parameters.tenantProfileIdentifier
+                                   error:error];
 }
 
 #pragma mark - Private
@@ -146,21 +144,28 @@
         return nil;
     }
     
-    NSArray *allAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts addExternal:YES];
-    return allAccounts;
+    return [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:nil addExternal:YES];
 }
 
 - (NSArray<MSALAccount *> *)msalAccountsFromMSIDAccounts:(NSArray *)msidAccounts
+                                         tenantProfileId:(NSString *)tenantProfileId
                                              addExternal:(BOOL)addExternal
 {
     NSMutableSet *msalAccounts = [NSMutableSet new];
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
+        if (![NSString msidIsStringNilOrBlank:tenantProfileId]
+            && ![tenantProfileId isEqualToString:msidAccount.localAccountId])
+        {
+            continue;
+        }
+        
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         
-        [self addMSALAccount:msalAccount toSet:msalAccounts];
+        NSDictionary *accountClaims = msidAccount.isHomeTenantAccount ? msidAccount.idTokenClaims.jsonDictionary : nil;
+        [self addMSALAccount:msalAccount toSet:msalAccounts claims:accountClaims];
     }
     
     if (!addExternal)
@@ -175,28 +180,35 @@
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount];
         if (!msalAccount) continue;
         
-        [self addMSALAccount:msalAccount toSet:msalAccounts];
+        [self addMSALAccount:msalAccount toSet:msalAccounts claims:externalAccount.accountClaims];
     }
     
     return [msalAccounts allObjects];
 }
 
-- (void)addMSALAccount:(MSALAccount *)account toSet:(NSMutableSet *)allAccountsSet
+- (void)addMSALAccount:(MSALAccount *)account toSet:(NSMutableSet *)allAccountsSet claims:(NSDictionary *)accountClaims
 {
     MSALAccount *existingAccount = [allAccountsSet member:account];
     
     if (!existingAccount)
     {
         [allAccountsSet addObject:account];
+        existingAccount = account;
     }
     else
     {
-        [existingAccount addTenantProfiles:account.tenantProfiles];
+        [existingAccount addTenantProfiles:account.mTenantProfiles];
+    }
+    
+    if (accountClaims)
+    {
+        existingAccount.accountClaims = accountClaims;
     }
 }
 
 - (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
                                 username:(NSString *)username
+                         tenantProfileId:(NSString *)tenantProfileId
                                    error:(NSError * __autoreleasing *)error
 {
     NSError *msidError = nil;
@@ -221,7 +233,9 @@
     
     if ([msidAccounts count])
     {
-        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts addExternal:YES];
+        // TODO: this looks wrong
+        NSArray<MSALAccount *> *msalAccounts = [self msalAccountsFromMSIDAccounts:msidAccounts tenantProfileId:tenantProfileId addExternal:YES];
+
         if (msalAccounts.count == 1)
         {
             return msalAccounts[0];

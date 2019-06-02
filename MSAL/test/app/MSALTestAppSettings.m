@@ -169,7 +169,7 @@ static NSDictionary *s_currentProfile = nil;
         return nil;
     }
     
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
     return account;
 }
 
@@ -241,7 +241,7 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)setCurrentAccount:(MSALAccount *)currentAccount
 {
-    [self setValue:currentAccount.homeAccountId.identifier forKey:@"currentHomeAccountId"];
+    [self setValue:currentAccount.identifier forKey:@"currentHomeAccountId"];
     _currentAccount = currentAccount;
 }
 

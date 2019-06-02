@@ -56,12 +56,12 @@
 
 - (NSString *)homeAccountId
 {
-    return self.account.homeAccountId.identifier;
+    return self.account.identifier;
 }
 
 - (NSString *)localAccountId
 {
-    return self.tenantProfile.tenantProfileId;
+    return self.tenantProfile.identifier;
 }
 
 - (NSString *)username
@@ -71,7 +71,7 @@
 
 - (NSURL *)authorityURL
 {
-    return self.tenantProfile.authority.url;
+    return nil; // TODO
 }
 
 - (NSString *)tenantId

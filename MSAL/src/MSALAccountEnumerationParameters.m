@@ -25,39 +25,54 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAccount.h"
+#import "MSALAccountEnumerationParameters.h"
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
-@class MSIDAccount;
-@class MSALAccountId;
-@class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
+@interface MSALAccountEnumerationParameters()
 
-@interface MSALAccount ()
+@property (nonatomic, readwrite, nullable) NSString *identifier;
+@property (nonatomic, readwrite, nullable) NSString *tenantProfileIdentifier;
+@property (nonatomic, readwrite, nullable) NSString *username;
 
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
-@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
-@property (nonatomic) NSString *identifier;
-@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
+@end
 
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+@implementation MSALAccountEnumerationParameters
 
-/*!
- Initialize an MSALAccount with MSIDAccount
- @param  account             MSID account
- @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
- */
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
+- (instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+    }
+    
+    return self;
+}
 
-- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+- (instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                          username:(nonnull NSString *)username
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+        _username = username;
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _tenantProfileIdentifier = tenantProfileIdentifier;
+    }
+    
+    return self;
+}
 
 @end

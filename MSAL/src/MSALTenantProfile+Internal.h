@@ -31,17 +31,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile ()
 
-@property (readwrite, nullable) NSString *tenantProfileId;
+@property (readwrite, nullable) NSString *identifier;
 @property (readwrite, nullable) NSString *environment;
 @property (readwrite, nullable) NSString *tenantId;
 @property (readwrite) BOOL isHomeTenantProfile;
 @property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
 
-- (instancetype)initWithTenantProfileId:(nonnull NSString *)tenantProfileId
-                               tenantId:(nonnull NSString *)tenantId
-                            environment:(nonnull NSString *)environment
-                    isHomeTenantProfile:(BOOL)isHomeTenantProfile
-                                 claims:(nullable NSDictionary *)claims;
+- (instancetype)initWithIdentifier:(nonnull NSString *)identifier
+                          tenantId:(nonnull NSString *)tenantId
+                       environment:(nonnull NSString *)environment
+               isHomeTenantProfile:(BOOL)isHomeTenantProfile
+                            claims:(nullable NSDictionary *)claims;
 
 @end
 

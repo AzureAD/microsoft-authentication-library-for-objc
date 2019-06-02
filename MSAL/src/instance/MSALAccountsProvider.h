@@ -33,6 +33,7 @@
 @class MSIDAccount;
 @class MSIDIdTokenClaims;
 @class MSALExternalAccountHandler;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALAccountsProvider : NSObject
 
@@ -51,10 +52,7 @@
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
+- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
+                                error:(NSError * __autoreleasing *)error;
 
 @end

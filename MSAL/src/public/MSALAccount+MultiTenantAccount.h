@@ -27,37 +27,21 @@
 
 #import "MSALAccount.h"
 
-@class MSIDAccountIdentifier;
-@class MSIDAADV2IdTokenClaims;
-@class MSIDClientInfo;
-@class MSIDAccount;
-@class MSALAccountId;
-@class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
+@class MSALTenantProfile;
 
-@interface MSALAccount ()
-
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
-@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
-@property (nonatomic) NSString *identifier;
-@property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
-
-- (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(MSALAccountId *)homeAccountId
-                     environment:(NSString *)environment
-                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+@interface MSALAccount (MultiTenantAccount)
 
 /*!
- Initialize an MSALAccount with MSIDAccount
- @param  account             MSID account
- @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
-- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
-
-- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
