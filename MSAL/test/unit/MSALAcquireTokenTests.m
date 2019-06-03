@@ -92,7 +92,7 @@
 {
     [super setUp];
     
-    id<MSIDTokenCacheDataSource> dataSource;
+    id<MSIDExtendedTokenCacheDataSource> dataSource;
 #if TARGET_OS_IPHONE
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
 #else

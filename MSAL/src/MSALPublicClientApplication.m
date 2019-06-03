@@ -260,8 +260,7 @@
     self.tokenCache = defaultAccessor;
 #else
     
-    __auto_type dataSource = MSIDMacTokenCache.defaultCache; // TODO: replace with keychain cache
-    
+    id<MSIDExtendedTokenCacheDataSource> dataSource = nil; // TODO: replace with keychain cache
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
     self.tokenCache = defaultAccessor;
 #endif

@@ -22,8 +22,17 @@
 // THE SOFTWARE.
 
 #import "MSALSharedAccountCacheProvider.h"
+#import "MSIDKeychainTokenCache.h"
+
+@interface MSALSharedAccountCacheProvider()
+
+@property (nonatomic) MSIDKeychainTokenCache *keychainTokenCache;
+
+@end
 
 @implementation MSALSharedAccountCacheProvider
+
+#pragma mark - Init
 
 - (instancetype)initWithSharedAccountGroup:(NSString *)sharedGroup
                                      error:(NSError **)error
@@ -32,10 +41,30 @@
     
     if (self)
     {
-        // TODO
+        self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:sharedGroup];
     }
     
     return self;
+}
+
+#pragma mark - MSALExternalAccountProviding
+
+- (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
+{
+    return YES;
+}
+
+- (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
+{
+    return YES;
+}
+
+- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+                                                        error:(NSError * _Nullable * _Nullable)error
+{
+    
+    
+    return nil;
 }
 
 @end
