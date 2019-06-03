@@ -43,10 +43,10 @@
 #import "MSIDIdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
-#import "MSALExternalAccount.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
+#import "MSALTenantProfile.h"
 
 @interface MSALAccountsProvider()
 
@@ -103,18 +103,9 @@
     NSError *internalError = nil;
     NSArray<MSALAccount *> *accounts = [self accountsForParameters:parameters authority:nil error:&internalError];
     
-    if (!accounts && error)
-    {
-        // TODO: log error
-        return nil;
-    }
-    
     if (internalError)
     {
-        if (error)
-        {
-            *error = [MSALErrorConverter msalErrorFromMsidError:internalError];
-        }
+        if (error) *error = internalError;
         return nil;
     }
     
@@ -171,7 +162,10 @@
     
     if (msidError)
     {
-        *error = msidError;
+        if (error)
+        {
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
         return nil;
     }
     
@@ -216,12 +210,18 @@
         [self addMSALAccount:msalAccount toSet:resultAccounts claims:accountClaims];
     }
     
-    for (id<MSALExternalAccount> externalAccount in externalAccounts)
+    for (MSALAccount *externalAccount in externalAccounts)
     {
-        MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount];
-        if (!msalAccount) continue;
+        BOOL isHomeTenantAccount = NO;
         
-        [self addMSALAccount:msalAccount toSet:resultAccounts claims:externalAccount.accountClaims];
+        if ([externalAccount.mTenantProfiles count])
+        {
+            MSALTenantProfile *tenantProfile = externalAccount.mTenantProfiles[0];
+            isHomeTenantAccount = tenantProfile.isHomeTenantProfile;
+        }
+        
+        NSDictionary *accountClaims = isHomeTenantAccount ? externalAccount.accountClaims : nil;
+        [self addMSALAccount:externalAccount toSet:resultAccounts claims:accountClaims];
     }
     
     return [resultAccounts allObjects];
@@ -250,7 +250,7 @@
 #pragma mark - Authority (deprecated)
 
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
+                       completionBlock:(MSALAccountsCompletionBlock)completionBlock
 {
     [authority.msidAuthority resolveAndValidate:NO
                               userPrincipalName:nil
@@ -259,7 +259,8 @@
                                     
                                     if (error)
                                     {
-                                        completionBlock(nil, error);
+                                        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:error];
+                                        completionBlock(nil, msalError);
                                         return;
                                     }
                                     

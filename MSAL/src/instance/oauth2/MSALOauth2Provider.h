@@ -34,6 +34,8 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSIDDefaultTokenCacheAccessor;
 @class MSALAccount;
 @class MSIDAuthority;
+@class MSALTenantProfile;
+@class MSALAccountId;
 
 @interface MSALOauth2Provider : NSObject
 
@@ -52,6 +54,11 @@ NS_ASSUME_NONNULL_BEGIN
                                                  error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
+
+- (nullable MSALTenantProfile *)tenantProfileWithClaims:(NSDictionary *)claims
+                                          homeAccountId:(MSALAccountId *)homeAccountId
+                                            environment:(NSString *)environment
+                                                  error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

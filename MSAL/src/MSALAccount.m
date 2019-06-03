@@ -40,8 +40,8 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALAccountsProvider.h"
-#import "MSALExternalAccount.h"
 #import "MSALAuthority_Internal.h"
+#import "MSALOauth2Provider.h"
 
 @implementation MSALAccount
 
@@ -98,30 +98,32 @@
                    tenantProfiles:tenantProfiles];
 }
 
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {
-    /*
-    NSError *error = nil;
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:externalAccount.identifier
+                                                                           objectId:nil
+                                                                           tenantId:nil];
     
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:externalAccount.authorityURL context:nil error:&error];
+    NSError *tenantProfileError = nil;
+    MSALTenantProfile *tenantProfile = [oauthProvider tenantProfileWithClaims:externalAccount.accountClaims
+                                                                homeAccountId:homeAccountId
+                                                                  environment:externalAccount.environment
+                                                                        error:&tenantProfileError];
     
-    if (error || !authority)
+    if (tenantProfileError)
     {
-        MSID_LOG_ERROR(nil, @"Failed to create msal authority from external provided authority!");
-        return nil;
+        MSID_LOG_WARN(nil, @"Failed to create tenant profile with error code %ld, domain %@", tenantProfileError.code, tenantProfileError.domain);
     }
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:externalAccount.localAccountId
-                                                                              tenantId:externalAccount.tenantId
-                                                                             authority:authority
-                                                                          isHomeTenant:NO
-                                                                                claims:externalAccount.accountClaims];
+    NSArray *tenantProfiles = tenantProfile ? @[tenantProfile] : nil;
     
-    return [self initWithUsername:externalAccount.username
-                    homeAccountId:externalAccount.homeAccountId
-                      environment:authority.msidAuthority.environment
-                   tenantProfiles:@[tenantProfile]];*/
-    return nil; // TODO
+    MSALAccount *account = [self initWithUsername:externalAccount.username
+                                    homeAccountId:homeAccountId
+                                      environment:externalAccount.environment
+                                   tenantProfiles:tenantProfiles];
+    
+    return account;
 }
 
 #pragma mark - NSCopying

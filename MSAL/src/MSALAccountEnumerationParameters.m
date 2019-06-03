@@ -78,4 +78,11 @@
     return self;
 }
 
+#pragma mark - Description
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, needs associated refresh token %d", self.identifier, self.username, self.tenantProfileIdentifier, self.needsAssociatedRefreshToken];
+}
+
 @end

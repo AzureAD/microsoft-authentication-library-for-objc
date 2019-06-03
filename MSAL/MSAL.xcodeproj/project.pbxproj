@@ -299,14 +299,8 @@
 		B25F1BBB1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BBA1EC3DB3200474D1B /* MSIDTokenCacheItem+Automation.m */; };
 		B25F1BC11EC3DD3200474D1B /* MSALUser+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */; };
 		B25F1BC41EC3E44500474D1B /* MSALResult+Automation.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */; };
-		B2659C63228626A500F5A0C3 /* MSALExternalAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C61228626A500F5A0C3 /* MSALExternalAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B2659C7C2287BBE400F5A0C3 /* MSALExternalAccountImpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C7A2287BBE400F5A0C3 /* MSALExternalAccountImpl.h */; };
-		B2659C7D2287BBE400F5A0C3 /* MSALExternalAccountImpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C7A2287BBE400F5A0C3 /* MSALExternalAccountImpl.h */; };
-		B2659C7E2287BBE400F5A0C3 /* MSALExternalAccountImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = B2659C7B2287BBE400F5A0C3 /* MSALExternalAccountImpl.m */; };
-		B2659C7F2287BBE400F5A0C3 /* MSALExternalAccountImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = B2659C7B2287BBE400F5A0C3 /* MSALExternalAccountImpl.m */; };
 		B2659C872287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C862287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h */; };
 		B2659C882287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C862287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h */; };
-		B2659C892287D38E00F5A0C3 /* MSALExternalAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B2659C61228626A500F5A0C3 /* MSALExternalAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B267569D228F335E000F01D7 /* MSALExternalAccountHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = B267569B228F335E000F01D7 /* MSALExternalAccountHandler.h */; };
 		B267569E228F335E000F01D7 /* MSALExternalAccountHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = B267569B228F335E000F01D7 /* MSALExternalAccountHandler.h */; };
 		B267569F228F335E000F01D7 /* MSALExternalAccountHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B267569C228F335E000F01D7 /* MSALExternalAccountHandler.m */; };
@@ -1028,9 +1022,6 @@
 		B25F1BC01EC3DD3200474D1B /* MSALUser+Automation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSALUser+Automation.m"; sourceTree = "<group>"; };
 		B25F1BC21EC3E44500474D1B /* MSALResult+Automation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSALResult+Automation.h"; sourceTree = "<group>"; };
 		B25F1BC31EC3E44500474D1B /* MSALResult+Automation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSALResult+Automation.m"; sourceTree = "<group>"; };
-		B2659C61228626A500F5A0C3 /* MSALExternalAccount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALExternalAccount.h; sourceTree = "<group>"; };
-		B2659C7A2287BBE400F5A0C3 /* MSALExternalAccountImpl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALExternalAccountImpl.h; sourceTree = "<group>"; };
-		B2659C7B2287BBE400F5A0C3 /* MSALExternalAccountImpl.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALExternalAccountImpl.m; sourceTree = "<group>"; };
 		B2659C862287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALSerializedADALCacheProvider+Internal.h"; sourceTree = "<group>"; };
 		B267569B228F335E000F01D7 /* MSALExternalAccountHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALExternalAccountHandler.h; sourceTree = "<group>"; };
 		B267569C228F335E000F01D7 /* MSALExternalAccountHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALExternalAccountHandler.m; sourceTree = "<group>"; };
@@ -1495,8 +1486,6 @@
 			children = (
 				B29A56B9228266B40023F5E6 /* MSALSerializedADALCacheProvider.m */,
 				B2659C862287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h */,
-				B2659C7A2287BBE400F5A0C3 /* MSALExternalAccountImpl.h */,
-				B2659C7B2287BBE400F5A0C3 /* MSALExternalAccountImpl.m */,
 				B267569B228F335E000F01D7 /* MSALExternalAccountHandler.h */,
 				B267569C228F335E000F01D7 /* MSALExternalAccountHandler.m */,
 			);
@@ -1547,7 +1536,6 @@
 			isa = PBXGroup;
 			children = (
 				B29A56BC228266BB0023F5E6 /* ios */,
-				B2659C61228626A500F5A0C3 /* MSALExternalAccount.h */,
 				B29A56A4228262770023F5E6 /* MSALExternalAccountProviding.h */,
 				B29A56B8228266B40023F5E6 /* MSALSerializedADALCacheProvider.h */,
 			);
@@ -2202,7 +2190,6 @@
 			files = (
 				96CF952A2268FD0500D97374 /* MSALPublicClientStatusNotifications.h in Headers */,
 				96CF95292268FD0500D97374 /* MSALRedirectUri.h in Headers */,
-				B2659C7C2287BBE400F5A0C3 /* MSALExternalAccountImpl.h in Headers */,
 				B273D0AF226E8587005A7BB4 /* MSALErrorConverter+Internal.h in Headers */,
 				B26756D022921C6D000F01D7 /* MSALADFSOauth2Provider.h in Headers */,
 				1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */,
@@ -2246,7 +2233,6 @@
 				B26756CA22921C5B000F01D7 /* MSALB2COauth2Provider.h in Headers */,
 				96CF95172268FD0400D97374 /* MSALSliceConfig.h in Headers */,
 				96CF95192268FD0400D97374 /* MSALTelemetryConfig.h in Headers */,
-				B2659C892287D38E00F5A0C3 /* MSALExternalAccount.h in Headers */,
 				96CF95282268FD0500D97374 /* MSALTelemetry.h in Headers */,
 				B273D0A9226E857F005A7BB4 /* MSALTelemetryApiId.h in Headers */,
 				B273D0CC226E85C8005A7BB4 /* MSALHTTPConfig+Internal.h in Headers */,
@@ -2297,7 +2283,6 @@
 				9682A630218290FE00E37E63 /* MSALDefinitions.h in Headers */,
 				D65A6FA91E3FF3D900C69FBA /* MSALError.h in Headers */,
 				D65A6FAB1E3FF3D900C69FBA /* MSALPublicClientApplication.h in Headers */,
-				B2659C63228626A500F5A0C3 /* MSALExternalAccount.h in Headers */,
 				D65A6FAC1E3FF3D900C69FBA /* MSALResult.h in Headers */,
 				B273D0B0226E8587005A7BB4 /* MSALErrorConverter+Internal.h in Headers */,
 				D65A6FAD1E3FF3D900C69FBA /* MSALAccount.h in Headers */,
@@ -2327,7 +2312,6 @@
 				232D615D22485B4600260C42 /* MSALIndividualClaimRequest.h in Headers */,
 				B203459521AF77FB00B221AA /* MSALRedirectUri.h in Headers */,
 				D62746D31E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h in Headers */,
-				B2659C7D2287BBE400F5A0C3 /* MSALExternalAccountImpl.h in Headers */,
 				B273D0B9226E859F005A7BB4 /* MSALPublicClientApplicationConfig+Internal.h in Headers */,
 				B273D0C6226E85C1005A7BB4 /* MSALCacheConfig+Internal.h in Headers */,
 				B26756BF22921A71000F01D7 /* MSALOauth2Provider.h in Headers */,
@@ -3145,7 +3129,6 @@
 				B29A56C222826EE20023F5E6 /* MSALSerializedADALCacheProvider.m in Sources */,
 				B21E07B3210E542C007E3A3C /* MSALRedirectUriVerifier.m in Sources */,
 				96B5E6EE2256D180002232F9 /* MSALSliceConfig.m in Sources */,
-				B2659C7E2287BBE400F5A0C3 /* MSALExternalAccountImpl.m in Sources */,
 				B2A3C28B2145FD0F0082525C /* MSALAccountsProvider.m in Sources */,
 				232D68D8223DB8C200594BBD /* MSALSilentTokenParameters.m in Sources */,
 			);
@@ -3160,7 +3143,6 @@
 				96B5E6DD2256D15A002232F9 /* MSALHTTPConfig.m in Sources */,
 				9627C7B022542EDC0028A859 /* MSALPublicClientApplicationConfig.m in Sources */,
 				D65A6FA31E3FF3D900C69FBA /* MSALAccount.m in Sources */,
-				B2659C7F2287BBE400F5A0C3 /* MSALExternalAccountImpl.m in Sources */,
 				B26756DC22922375000F01D7 /* MSALOauth2Authority.m in Sources */,
 				96B5E6E92256D174002232F9 /* MSALLoggerConfig.m in Sources */,
 				D61F5BCB1E59359900912CB8 /* MSALFramework.m in Sources */,

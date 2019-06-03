@@ -286,7 +286,7 @@
     
     if (_internalConfig.cacheConfig.externalAccountProvider)
     {
-        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProvider:_internalConfig.cacheConfig.externalAccountProvider];
+        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProvider:_internalConfig.cacheConfig.externalAccountProvider oauth2Provider:self.msalOauth2Provider];
     }
     
     return self;

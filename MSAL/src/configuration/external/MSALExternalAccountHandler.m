@@ -26,13 +26,16 @@
 #import "MSALTenantProfile.h"
 #import "MSALAccount.h"
 #import "MSALAADAuthority.h"
-#import "MSALExternalAccountImpl.h"
 #import "MSALResult.h"
 #import "MSALAccount+MultiTenantAccount.h"
+#import "MSALOauth2Provider.h"
+#import "MSALAccount+Internal.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALExternalAccountHandler()
 
 @property (nonatomic, nonnull, readwrite) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nonnull, readwrite) MSALOauth2Provider *oauth2Provider;
 
 @end
 
@@ -41,12 +44,14 @@
 #pragma mark - Init
 
 - (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
+                                 oauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
     self = [super init];
     
     if (self)
     {
         _externalAccountProvider = externalAccountProvider;
+        _oauth2Provider = oauth2Provider;
     }
     
     return self;
@@ -61,39 +66,39 @@
         return YES;
     }
     
-    for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
+    NSError *removalError = nil;
+    BOOL result = [self.externalAccountProvider removeAccount:account error:&removalError];
+    
+    if (!result)
     {
-        MSALExternalAccountImpl *externalAADAccount = [[MSALExternalAccountImpl alloc] initWithAccount:account tenantProfile:tenantProfile];
-        
-        NSError *removalError = nil;
-        
-        BOOL result = [self.externalAccountProvider removeAccount:externalAADAccount error:&removalError];
-        
-        if (!result)
+        if (error)
         {
-            MSID_LOG_WARN(nil, @"Failed to remove external account with error %ld, %@", (long)removalError.code, removalError.domain);
-            
-            if (error)
-            {
-                *error = removalError;
-            }
-            
-            return NO;
+            *error = [MSALErrorConverter msalErrorFromMsidError:removalError];
         }
+        
+        return NO;
     }
     
+    // TODO: remove tenant profiles?
     return YES;
 }
 
 - (void)updateExternalAccountProviderWithResult:(MSALResult *)result
 {
-    if (self.externalAccountProvider && [result.authority isKindOfClass:[MSALAADAuthority class]])
+    if (self.externalAccountProvider)
     {
-        MSALExternalAccountImpl *externalAADAccount = [[MSALExternalAccountImpl alloc] initWithAccount:result.account
-                                                                                         tenantProfile:result.tenantProfile];
-        
         NSError *updateError = nil;
-        BOOL result = [self.externalAccountProvider updateAccount:externalAADAccount error:&updateError];
+        MSALAccount *copiedAccount = [result.account copy];
+        
+        if (result.tenantProfile)
+        {
+            NSMutableArray *tenantProfiles = [NSMutableArray new];
+            [tenantProfiles addObjectsFromArray:copiedAccount.tenantProfiles];
+            [tenantProfiles addObject:result.tenantProfile];
+            copiedAccount.mTenantProfiles = tenantProfiles;
+        }
+        
+        BOOL result = [self.externalAccountProvider updateAccount:copiedAccount error:&updateError];
         
         if (!result)
         {
@@ -102,7 +107,7 @@
     }
 }
 
-- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
 {
     NSMutableArray *allExternalAccounts = [NSMutableArray new];
     
@@ -113,12 +118,20 @@
         
         if (externalError)
         {
-            // TODO: implement description method for MSALAccountEnumerationParameters
-            MSID_LOG_WARN(nil, @"Failed to read external accounts for parameters %@, error %@/%ld", parameters, externalError.domain, (long)externalError.code);
+            MSID_LOG_WARN(nil, @"Failed to read external accounts with error %@/%ld", externalError.domain, (long)externalError.code);
+            MSID_LOG_WARN_PII(nil, @"Failed to read external accounts with parameters %@ with error %@/%ld", parameters, externalError.domain, (long)externalError.code);
             return nil;
         }
         
-        [allExternalAccounts addObjectsFromArray:externalAccounts];
+        for (id<MSALAccount> externalAccount in externalAccounts)
+        {
+            MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSALExternalAccount:externalAccount oauth2Provider:self.oauth2Provider];
+            
+            if (msalAccount)
+            {
+                [allExternalAccounts addObject:msalAccount];
+            }
+        }
     }
     
     return allExternalAccounts;

@@ -33,6 +33,8 @@
 #import "MSIDAuthority.h"
 #import "MSALAuthority_Internal.h"
 #import "MSALOauth2Authority.h"
+#import "MSIDIdTokenClaims.h"
+#import "MSALTenantProfile+Internal.h"
 
 @implementation MSALOauth2Provider
 
@@ -89,6 +91,25 @@
 - (BOOL)isSupportedAuthority:(__unused MSIDAuthority *)authority
 {
     return YES;
+}
+
+- (MSALTenantProfile *)tenantProfileWithClaims:(NSDictionary *)claims
+                                 homeAccountId:(__unused MSALAccountId *)homeAccountId
+                                   environment:(NSString *)environment
+                                         error:(NSError **)error
+{
+    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:claims error:error];
+    
+    if (!idTokenClaims)
+    {
+        return nil;
+    }
+    
+    return [[MSALTenantProfile alloc] initWithIdentifier:idTokenClaims.uniqueId
+                                                tenantId:idTokenClaims.realm
+                                             environment:environment
+                                     isHomeTenantProfile:YES
+                                                  claims:claims];
 }
 
 #pragma mark - Protected

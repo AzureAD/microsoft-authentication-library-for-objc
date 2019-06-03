@@ -27,6 +27,8 @@
 
 @class MSALAuthority;
 
+#import "MSALTenantProfile.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile ()
