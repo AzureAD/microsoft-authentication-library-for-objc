@@ -35,6 +35,7 @@
 #import "MSIDB2CAuthority.h"
 #import "MSALAccount.h"
 #import "MSALAccountId.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 
 @implementation MSALB2COauth2Provider
 
@@ -60,10 +61,30 @@
     return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
 }
 
-- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+- (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
-                                        error:(__unused NSError **)error
+                                        error:(NSError **)error
 {
+    NSError *localError;
+    NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
+                                               homeAccountId:account.homeAccountId.identifier
+                                                    clientId:self.clientId
+                                                     context:nil
+                                                       error:&localError];
+    if (cachedURL)
+    {
+        return [[MSIDB2CAuthority alloc] initWithURL:cachedURL
+                                      validateFormat:NO
+                                           rawTenant:nil
+                                             context:nil
+                                               error:error];
+    }
+    
+    if (localError)
+    {
+        MSID_LOG_WARN(nil, @"error accessing accountMetadataCache - %@", localError);
+    }
+    
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.

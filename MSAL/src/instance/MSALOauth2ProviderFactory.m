@@ -36,6 +36,9 @@
 @implementation MSALOauth2ProviderFactory
 
 + (MSALOauth2Provider *)oauthProviderForAuthority:(MSALAuthority *)authority
+                                         clientId:(NSString *)clientId
+                                       tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                             accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                                           context:(id<MSIDRequestContext>)context
                                             error:(NSError **)error
 {
@@ -48,11 +51,11 @@
     
     if ([authority isKindOfClass:[MSALB2CAuthority class]])
     {
-        return [MSALB2COauth2Provider new];
+        return [[MSALB2COauth2Provider alloc] initWithClientId:clientId tokenCache:tokenCache accountMetadataCache:accountMetadataCache];
     }
     else if ([authority isKindOfClass:[MSALAADAuthority class]])
     {
-        return [MSALAADOauth2Provider new];
+        return [[MSALAADOauth2Provider alloc] initWithClientId:clientId tokenCache:tokenCache accountMetadataCache:accountMetadataCache];
     }
     else if ([authority isKindOfClass:[MSALADFSAuthority class]])
     {

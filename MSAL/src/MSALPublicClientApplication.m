@@ -258,7 +258,12 @@
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     NSError *oauthProviderError = nil;
-    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority context:nil error:&oauthProviderError];
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority
+                                                                          clientId:config.clientId
+                                                                        tokenCache:_tokenCache
+                                                              accountMetadataCache:_accountMetadataCache
+                                                                           context:nil
+                                                                             error:&oauthProviderError];
     
     if (!self.msalOauth2Provider)
     {
@@ -1005,8 +1010,6 @@
     }
     
     return [self.msalOauth2Provider removeAdditionalAccountInfo:account
-                                                       clientId:self.clientId
-                                                     tokenCache:self.tokenCache
                                                           error:error];
 }
 

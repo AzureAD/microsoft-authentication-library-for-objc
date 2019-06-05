@@ -38,15 +38,19 @@
 
 #pragma mark - Public
 
-- (instancetype)init
+- (instancetype)initWithClientId:(NSString *)clientId
+                      tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+            accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
+
 {
     self = [super init];
-    
     if (self)
     {
         [self initOauth2Factory];
+        _clientId = clientId;
+        _accountMetadataCache = accountMetadataCache;
+        _tokenCache = tokenCache;
     }
-    
     return self;
 }
 
@@ -71,16 +75,14 @@
 }
 
 - (BOOL)removeAdditionalAccountInfo:(__unused MSALAccount *)account
-                           clientId:(__unused NSString *)clientId
-                         tokenCache:(__unused MSIDDefaultTokenCacheAccessor *)tokenCache
                               error:(NSError **)error
 {
     return YES;
 }
 
-- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+- (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
-                                        error:(__unused NSError **)error
+                                        error:(NSError * _Nullable __autoreleasing *)error
 {
     // TODO: after authority->issuer cache is ready, this should always lookup cached issuer instead
     return requestAuthority;
