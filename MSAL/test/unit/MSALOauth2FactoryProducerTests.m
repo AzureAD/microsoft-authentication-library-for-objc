@@ -46,7 +46,7 @@
     NSError *error = nil;
     MSALAuthority *authority = nil;
     
-    MSALOauth2Provider *provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority context:nil error:&error];
+    MSALOauth2Provider *provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority clientId:@"someClientId" tokenCache:nil accountMetadataCache:nil  context:nil error:&error];
 
     XCTAssertNil(provider);
     XCTAssertNotNil(error);
@@ -57,7 +57,7 @@
     NSError *error = nil;
     NSURL *authorityURL = [NSURL URLWithString:@"https://login.microsoftonline.com/tfp/contoso.com/B2C_1_Signin"];
     MSALB2CAuthority *authorityObj = [[MSALB2CAuthority alloc] initWithURL:authorityURL error:nil];
-    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj context:nil error:&error];
+    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj clientId:@"someClientId" tokenCache:nil accountMetadataCache:nil  context:nil error:&error];
 
     XCTAssertNotNil(factory);
     XCTAssertNil(error);
@@ -69,7 +69,7 @@
     NSError *error = nil;
     NSURL *authorityURL = [NSURL URLWithString:@"https://login.microsoftonline.com/contoso.com/"];
     MSALAADAuthority *authorityObj = [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
-    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj context:nil error:&error];
+    MSALOauth2Provider *factory = [MSALOauth2ProviderFactory oauthProviderForAuthority:authorityObj clientId:@"someClientId" tokenCache:nil accountMetadataCache:nil  context:nil error:&error];
 
     XCTAssertNotNil(factory);
     XCTAssertNil(error);

@@ -47,8 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithClientId:(NSString *)clientId
-                      tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-            accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
+                      tokenCache:(nullable MSIDDefaultTokenCacheAccessor *)tokenCache
+            accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
 
 - (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                          error:(NSError * _Nullable * _Nullable)error;
