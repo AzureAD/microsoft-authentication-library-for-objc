@@ -36,6 +36,8 @@
 #import "MSALAccount.h"
 #import "MSALAccountId.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSALAccount+Internal.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALB2COauth2Provider
 
@@ -91,7 +93,7 @@
      */
     return [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
                                   validateFormat:NO
-                                       rawTenant:account.homeAccountId.tenantId
+                                       rawTenant:account.lookupAccountIdentifier.utid
                                          context:nil
                                            error:error];
 }

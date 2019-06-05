@@ -25,39 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import "MSALAccount.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class MSALTenantProfile;
 
-@interface MSALTenantProfile : NSObject <NSCopying>
+@interface MSALAccount (MultiTenantAccount)
 
 /*!
- Unique identifier for the tenant profile.
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
-@property (readonly, nullable) NSString *identifier;
-
-/*!
- Host part of the authority.
- */
-@property (readonly, nullable) NSString *environment;
-
-/*!
- Identifier for the directory where account is locally represented
- */
-@property (readonly, nullable) NSString *tenantId;
-
-/*!
- Indicator if this tenant profile represents account's home tenant.
- If an admin deletes this account from the tenant, it prevents this account from accessing anything in any tenant with the Microsoft Identity Platform.
- */
-@property (readonly) BOOL isHomeTenantProfile;
-
-/*!
- ID token claims for the account in the specified tenant. 
-*/
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
-
-NS_ASSUME_NONNULL_END

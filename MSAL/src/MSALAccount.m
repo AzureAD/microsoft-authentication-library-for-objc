@@ -45,7 +45,6 @@
 
 - (instancetype)initWithUsername:(NSString *)username
                    homeAccountId:(MSALAccountId *)homeAccountId
-                  localAccountId:(NSString *)localAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
@@ -56,6 +55,7 @@
         _username = username;
         _environment = environment;
         _homeAccountId = homeAccountId;
+        _identifier = homeAccountId.identifier;
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
         if (tenantProfiles.count > 0)
@@ -74,11 +74,12 @@
     if (createTenantProfile)
     {
         NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithTenantProfileId:account.localAccountId
-                                                                                     tenantId:account.realm
-                                                                                  environment:account.environment
-                                                                          isHomeTenantProfile:account.isHomeTenantAccount
-                                                                                       claims:allClaims];
+        
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:account.localAccountId
+                                                                                tenantId:account.realm
+                                                                             environment:account.environment
+                                                                     isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                  claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];
@@ -91,7 +92,6 @@
     
     return [self initWithUsername:account.username
                     homeAccountId:homeAccountId
-                   localAccountId:account.localAccountId
                       environment:account.environment
                    tenantProfiles:tenantProfiles];
 }
@@ -100,11 +100,13 @@
 
 - (instancetype)copyWithZone:(NSZone *)zone
 {
-    MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
-    account.username = [self.username copyWithZone:zone];
-    account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
-    account.environment = [self.environment copyWithZone:zone];
+    NSString *username = [self.username copyWithZone:zone];
+    MSALAccountId *homeAccountId = [self.homeAccountId copyWithZone:zone];
+    NSString *environment = [self.environment copyWithZone:zone];
+    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
+    
+    MSALAccount *account = [[MSALAccount allocWithZone:zone] initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
+    account.accountClaims = [self.accountClaims copyWithZone:zone];
     return account;
 }
 
@@ -131,6 +133,7 @@
     hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
+    hash = hash * 31 + self.identifier.hash;
     return hash;
 }
 
@@ -142,7 +145,7 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-
+    result &= (!self.identifier && !user.identifier) || [self.identifier isEqualToString:user.identifier];
     return result;
 }
 

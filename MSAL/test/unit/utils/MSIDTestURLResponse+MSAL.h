@@ -40,8 +40,9 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
+                                         uid:(NSString *)uid
                                         user:(MSALAccount *)user
-                                      claims:(NSString *)decodedClaims;
+                                      claims:(NSString *)claims;
 
 + (MSIDTestURLResponse *)errorRtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                         authority:(NSString *)authority

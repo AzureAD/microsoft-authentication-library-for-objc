@@ -25,39 +25,54 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import "MSALAccountEnumerationParameters.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALAccountEnumerationParameters()
 
-@interface MSALTenantProfile : NSObject <NSCopying>
-
-/*!
- Unique identifier for the tenant profile.
- */
-@property (readonly, nullable) NSString *identifier;
-
-/*!
- Host part of the authority.
- */
-@property (readonly, nullable) NSString *environment;
-
-/*!
- Identifier for the directory where account is locally represented
- */
-@property (readonly, nullable) NSString *tenantId;
-
-/*!
- Indicator if this tenant profile represents account's home tenant.
- If an admin deletes this account from the tenant, it prevents this account from accessing anything in any tenant with the Microsoft Identity Platform.
- */
-@property (readonly) BOOL isHomeTenantProfile;
-
-/*!
- ID token claims for the account in the specified tenant. 
-*/
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+@property (nonatomic, readwrite, nullable) NSString *identifier;
+@property (nonatomic, readwrite, nullable) NSString *tenantProfileIdentifier;
+@property (nonatomic, readwrite, nullable) NSString *username;
 
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation MSALAccountEnumerationParameters
+
+- (instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                          username:(nonnull NSString *)username
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _identifier = accountIdentifier;
+        _username = username;
+    }
+    
+    return self;
+}
+
+- (instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _tenantProfileIdentifier = tenantProfileIdentifier;
+    }
+    
+    return self;
+}
+
+@end

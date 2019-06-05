@@ -25,39 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
-@class MSALAccountId;
+#import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALAccountEnumerationParameters : NSObject
 
-@interface MSALTenantProfile : NSObject <NSCopying>
+/*!
+ Unique identifier for the account.
+ */
+@property (nonatomic, readonly, nullable) NSString *identifier;
 
 /*!
  Unique identifier for the tenant profile.
  */
-@property (readonly, nullable) NSString *identifier;
+@property (nonatomic, readonly, nullable) NSString *tenantProfileIdentifier;
 
 /*!
- Host part of the authority.
+ Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
  */
-@property (readonly, nullable) NSString *environment;
+@property (nonatomic, readonly, nullable) NSString *username;
 
-/*!
- Identifier for the directory where account is locally represented
- */
-@property (readonly, nullable) NSString *tenantId;
+- (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
 
-/*!
- Indicator if this tenant profile represents account's home tenant.
- If an admin deletes this account from the tenant, it prevents this account from accessing anything in any tenant with the Microsoft Identity Platform.
- */
-@property (readonly) BOOL isHomeTenantProfile;
+- (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
+                                  username:(nonnull NSString *)username;
 
-/*!
- ID token claims for the account in the specified tenant. 
-*/
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+- (nonnull instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier;
 
 @end
-
-NS_ASSUME_NONNULL_END
