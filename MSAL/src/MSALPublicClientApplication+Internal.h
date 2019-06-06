@@ -28,11 +28,13 @@
 #import "MSALPublicClientApplication.h"
 
 @class MSIDDefaultTokenCacheAccessor;
+@class MSIDAccountMetadataCacheAccessor;
 @class MSIDAuthority;
 
 @interface MSALPublicClientApplication (Internal)
 
 @property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nonatomic, nonnull) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;

@@ -67,35 +67,21 @@
                              requestAuthority:(MSIDAuthority *)requestAuthority
                                         error:(NSError **)error
 {
-    NSError *localError;
-    NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
-                                               homeAccountId:account.homeAccountId.identifier
-                                                    clientId:self.clientId
-                                                     context:nil
-                                                       error:&localError];
-    if (cachedURL)
+    if (self.accountMetadataCache)
     {
-        return [[MSIDB2CAuthority alloc] initWithURL:cachedURL
+        NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
+                                                        homeAccountId:account.homeAccountId.identifier
+                                                             clientId:self.clientId
+                                                              context:nil
+                                                                error:error];
+        if (!cachedURL) return requestAuthority;
+        return [[MSIDB2CAuthority alloc] initWithURL:cachedURL?:requestAuthority.url
                                       validateFormat:NO
                                            rawTenant:nil
                                              context:nil
                                                error:error];
     }
-    
-    if (localError)
-    {
-        MSID_LOG_WARN(nil, @"error accessing accountMetadataCache - %@", localError);
-    }
-    
-    /*
-     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-     if authority is a common, organizations or consumers authority.
-     */
-    return [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
-                                  validateFormat:NO
-                                       rawTenant:account.lookupAccountIdentifier.utid
-                                         context:nil
-                                           error:error];
+    return requestAuthority;
 }
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority

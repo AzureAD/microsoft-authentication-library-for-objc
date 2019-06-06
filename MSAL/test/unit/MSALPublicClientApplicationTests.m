@@ -71,6 +71,7 @@
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALAccount+Internal.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -87,6 +88,7 @@
 
 @property (nonatomic) MSIDClientInfo *clientInfo;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
+@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
 @end
 
@@ -99,7 +101,7 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
-    id<MSIDTokenCacheDataSource> dataSource = nil;
+    id<MSIDTokenCacheDataSource, MSIDMetadataCacheDataSource> dataSource = nil;
     
 #if TARGET_OS_IPHONE
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
@@ -109,6 +111,9 @@
     
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
+    
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    [self.accountMetadataCache clearWithContext:nil error:nil];
     
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -525,7 +530,7 @@
          XCTAssertNotNil(params);
          
          XCTAssertFalse(params.validateAuthority);
-         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/tfp/utid/B2C_1_signup-signin");
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://contoso.b2clogin.com/tfp/contoso.onmicrosoft.com/B2C_1_signup-signin");
          completionBlock(nil, nil);
      }];
     
@@ -1019,6 +1024,11 @@
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
+    application.accountMetadataCache = self.accountMetadataCache;
+    // Save account metadata authority map from common to the specific tenant id.
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+    
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
                              completionBlock:^(MSALResult *result, NSError *error)
@@ -1072,14 +1082,21 @@
          completionBlock(nil, nil);
      }];
     
-    authority = [@"https://login.microsoft.com/common" msalAuthority];
-    
     MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountId
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
+    
+    // Save account metadata authority map from common to the specific tenant id.
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoft.com/1234-5678-90abcdefg"]
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
+                                    homeAccountId:@"1.1234-5678-90abcdefg"
+                                         clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+    
+    application.accountMetadataCache = self.accountMetadataCache;
+    
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1142,6 +1159,11 @@
                                                    homeAccountId:accountId
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
+    
+    application.accountMetadataCache = self.accountMetadataCache;
+    // Save account metadata authority map from common to the specific tenant id.
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1309,7 +1331,7 @@
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
-         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoft.com/1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
          
          XCTAssertTrue(obj.forceRefresh);
          
@@ -1329,8 +1351,11 @@
                                                    homeAccountId:accountId
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
-    
-    authority = [@"https://login.microsoft.com/common" msalAuthority];
+
+    application.accountMetadataCache = self.accountMetadataCache;
+    // Save account metadata authority map from common to the specific tenant id.
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1812,6 +1837,8 @@
 
     XCTAssertEqualObjects([application allAccounts:nil][0], msalAccount);
 
+    application.accountMetadataCache = self.accountMetadataCache;
+    
     // 3. Remove account
     NSError *error = nil;
     result = [application removeAccount:msalAccount error:&error];
@@ -1838,6 +1865,12 @@
     // That means FOCI wasn't used by the app although present
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token silent"];
 
+    // Save account metadata authority map from common to the specific tenant id.
+    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authorityUrl]
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
+                                    homeAccountId:account.accountIdentifier.homeAccountId
+                                         clientId:@"myclient" context:nil error:nil];
+    
     [application acquireTokenSilentForScopes:@[@"fakescope1"]
                                      account:msalAccount
                              completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {

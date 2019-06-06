@@ -466,7 +466,7 @@
                                                        clientId:self.internalConfig.clientId
                                                          scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
                                                      oidcScopes:[self.class defaultOIDCScopes]
-                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc] initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
+                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%lu", parameters.telemetryApiId]
                                         supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
