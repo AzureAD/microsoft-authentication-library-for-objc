@@ -109,11 +109,13 @@
                                                               context:nil
                                                                 error:error];
         
-        if (!cachedURL) return requestAuthority;
-        return [[MSIDAADAuthority alloc] initWithURL:cachedURL
-                                           rawTenant:nil
-                                             context:nil
-                                               error:error];
+        MSIDAuthority *cachedAuthority = cachedURL ?
+        [[MSIDAADAuthority alloc] initWithURL:cachedURL rawTenant:nil context:nil error:error] :
+        requestAuthority;
+        
+        MSID_LOG_INFO(nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        
+        return cachedAuthority;
     }
     return requestAuthority;
 }

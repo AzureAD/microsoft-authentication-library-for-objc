@@ -81,13 +81,15 @@
 #import "NSURL+MSIDAADUtils.h"
 #import "MSALOauth2Provider.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
-#import "MSIDAccountMetadataCacheAccessor.h"
+
 #endif
+
 
 @interface MSALPublicClientApplication()
 {
@@ -95,10 +97,7 @@
     NSString *_defaultKeychainGroup;
 }
 
-@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
-@property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
-@property (nonatomic) MSALOauth2Provider *msalOauth2Provider;
 
 @end
 
@@ -1026,7 +1025,7 @@
         return NO;
     }
     
-    if (![self.accountMetadataCache clearForHomeAccountId:account.homeAccountId.identifier
+    if (![self.accountMetadataCache clearForHomeAccountId:account.identifier
                                                  clientId:self.internalConfig.clientId
                                                   context:nil error:error])
     {
@@ -1036,11 +1035,6 @@
     return [self.msalOauth2Provider removeAdditionalAccountInfo:account
                                                           error:error];
 }
-
-@end
-
-
-@implementation MSALPublicClientApplication (Internal)
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
 {

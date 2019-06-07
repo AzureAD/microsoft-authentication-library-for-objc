@@ -158,6 +158,7 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
+//    application.accountMetadataCache = self.accountMetadataCache;
     application.webviewType = MSALWebviewTypeWKWebView;
     
     // Add authorities to cache
@@ -195,7 +196,12 @@
     
     // Now test that we're able to retrieve cache successfully back
     XCTestExpectation *silentExpectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    
+//
+//    // Save account metadata authority map from common to the specific tenant id.
+//    [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tfp/1234-5678-90abcdefg/b2c_1_policy"]
+//                                    forRequestURL:authority.url
+//                                    homeAccountId:resultAccount.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+//
     [application acquireTokenSilentForScopes:@[@"fakeb2cscopes"]
                                      account:resultAccount
                              completionBlock:^(MSALResult *result, NSError *error) {

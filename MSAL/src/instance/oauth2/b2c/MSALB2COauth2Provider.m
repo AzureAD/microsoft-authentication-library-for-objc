@@ -74,12 +74,14 @@
                                                              clientId:self.clientId
                                                               context:nil
                                                                 error:error];
-        if (!cachedURL) return requestAuthority;
-        return [[MSIDB2CAuthority alloc] initWithURL:cachedURL?:requestAuthority.url
-                                      validateFormat:NO
-                                           rawTenant:nil
-                                             context:nil
-                                               error:error];
+        
+        MSIDAuthority *cachedAuthority =
+        [[MSIDB2CAuthority alloc] initWithURL:cachedURL?:requestAuthority.url
+                               validateFormat:NO rawTenant:nil context:nil error:error];
+        
+        MSID_LOG_INFO(nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        
+        return cachedAuthority;
     }
     return requestAuthority;
 }
