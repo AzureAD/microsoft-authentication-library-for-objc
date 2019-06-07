@@ -61,6 +61,7 @@
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
+                        correlationId:(NSUUID *)correlationId
 {
     MSALResult *result = [MSALResult new];
     
@@ -74,6 +75,7 @@
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
     result->_authority = authority;
+    result->_correlationId = correlationId;
     
     return result;
 }
@@ -133,7 +135,8 @@
                                idToken:tokenResult.rawIdToken
                               uniqueId:resultAccount.localAccountId
                                 scopes:[tokenResult.accessToken.scopes array]
-                             authority:authority];
+                             authority:authority
+                         correlationId:tokenResult.correlationId];
 }
 
 @end
