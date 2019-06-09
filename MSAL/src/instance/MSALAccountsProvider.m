@@ -204,7 +204,7 @@
         }
         else if (msalAccounts.count > 1)
         {
-            MSID_LOG_WARN(nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].homeAccountId == msalAccounts[1].homeAccountId ? @"YES" : @"NO", msalAccounts[0].username == msalAccounts[1].username ? @"YES" : @"NO");
+            MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", msalAccounts[0].environment == msalAccounts[1].environment ? @"YES" : @"NO", msalAccounts[0].homeAccountId == msalAccounts[1].homeAccountId ? @"YES" : @"NO", msalAccounts[0].username == msalAccounts[1].username ? @"YES" : @"NO");
             return msalAccounts[0];
         }
     }
@@ -221,7 +221,7 @@
 
     if (error)
     {
-        MSID_LOG_WARN(nil, @"Failed to retrieve app metadata items with error code %ld, %@", (long)error.code, error.domain);
+        MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"Failed to retrieve app metadata items with error code %ld, %@", (long)error.code, error.domain);
         return nil;
     }
 

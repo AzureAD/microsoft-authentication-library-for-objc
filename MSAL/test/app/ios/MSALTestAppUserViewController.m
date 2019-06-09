@@ -80,7 +80,7 @@
     
     if (!application)
     {
-        MSID_LOG_ERROR(nil, @"Failed to create public client application: %@", error);
+        MSID_LOG_WITH_CONTEXT(MSIDLogLevelError, nil, @"Failed to create public client application: %@", error);
         return;
     }
 
