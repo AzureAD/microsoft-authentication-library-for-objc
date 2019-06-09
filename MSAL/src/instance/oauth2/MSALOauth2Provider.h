@@ -36,22 +36,31 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSIDAuthority;
 @class MSALTenantProfile;
 @class MSALAccountId;
+@class MSIDAccountMetadataCacheAccessor;
 
 @interface MSALOauth2Provider : NSObject
 
 @property (nonatomic, readonly) MSIDOauth2Factory *msidOauth2Factory;
+@property (nonatomic, readonly) NSString *clientId;
+@property (nonatomic, readonly) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
+@property (nonatomic, readonly) MSIDDefaultTokenCacheAccessor *tokenCache;
+
+- (nonnull instancetype)init NS_UNAVAILABLE;
++ (nonnull instancetype)new NS_UNAVAILABLE;
+
+- (instancetype)initWithClientId:(NSString *)clientId
+                      tokenCache:(nullable MSIDDefaultTokenCacheAccessor *)tokenCache
+            accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
 
 - (nullable MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
                                          error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
-                           clientId:(NSString *)clientId
-                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                               error:(NSError * _Nullable * _Nullable)error;
 
-- (nullable MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
-                                      requestAuthority:(MSIDAuthority *)requestAuthority
-                                                 error:(NSError * _Nullable * _Nullable)error;
+- (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
+                             requestAuthority:(MSIDAuthority *)requestAuthority
+                                        error:(NSError **)error;
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;
 

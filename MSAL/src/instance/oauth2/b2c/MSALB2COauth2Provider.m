@@ -35,6 +35,7 @@
 #import "MSIDB2CAuthority.h"
 #import "MSALAccount.h"
 #import "MSALAccountId.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDB2CIdTokenClaims.h"
@@ -64,19 +65,27 @@
     return [MSALResult resultWithMSIDTokenResult:tokenResult authority:b2cAuthority error:error];
 }
 
-- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+- (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
-                                        error:(__unused NSError **)error
+                                        error:(NSError **)error
 {
-    /*
-     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-     if authority is a common, organizations or consumers authority.
-     */
-    return [[MSIDB2CAuthority alloc] initWithURL:requestAuthority.url
-                                  validateFormat:NO
-                                       rawTenant:account.lookupAccountIdentifier.utid
-                                         context:nil
-                                           error:error];
+    if (self.accountMetadataCache)
+    {
+        NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
+                                                        homeAccountId:account.homeAccountId.identifier
+                                                             clientId:self.clientId
+                                                              context:nil
+                                                                error:error];
+        
+        MSIDAuthority *cachedAuthority =
+        [[MSIDB2CAuthority alloc] initWithURL:cachedURL?:requestAuthority.url
+                               validateFormat:NO rawTenant:nil context:nil error:error];
+        
+        MSID_LOG_INFO(nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        
+        return cachedAuthority;
+    }
+    return requestAuthority;
 }
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority

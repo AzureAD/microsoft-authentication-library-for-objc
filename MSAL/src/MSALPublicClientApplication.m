@@ -31,10 +31,6 @@
 
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
-#if TARGET_OS_IPHONE
-#import "MSIDKeychainTokenCache.h"
-#import "MSIDCertAuthHandler+iOS.h"
-#endif
 #import "MSIDMacTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -60,9 +56,6 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSALAccountId.h"
 #import "MSALErrorConverter.h"
-#if TARGET_OS_IPHONE
-#import "MSIDBrokerInteractiveController.h"
-#endif
 #import "MSIDDefaultBrokerResponseHandler.h"
 #import "MSIDDefaultTokenResponseValidator.h"
 #import "MSALRedirectUri.h"
@@ -90,6 +83,15 @@
 #import "NSURL+MSIDAADUtils.h"
 #import "MSALOauth2Provider.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
+
+#if TARGET_OS_IPHONE
+#import "MSIDKeychainTokenCache.h"
+#import "MSIDCertAuthHandler+iOS.h"
+#import "MSIDBrokerInteractiveController.h"
+
+#endif
+
 
 @interface MSALPublicClientApplication()
 {
@@ -97,10 +99,7 @@
     NSString *_defaultKeychainGroup;
 }
 
-@property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
-@property (nonatomic) MSALExternalAccountHandler *externalAccountHandler;
-@property (nonatomic) MSALOauth2Provider *msalOauth2Provider;
 
 @end
 
@@ -264,6 +263,9 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
     self.tokenCache = defaultAccessor;
 #endif
+    
+    _accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
     _configuration = config;
@@ -271,7 +273,12 @@
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     NSError *oauthProviderError = nil;
-    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority context:nil error:&oauthProviderError];
+    self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority
+                                                                          clientId:config.clientId
+                                                                        tokenCache:_tokenCache
+                                                              accountMetadataCache:_accountMetadataCache
+                                                                           context:nil
+                                                                             error:&oauthProviderError];
     
     if (!self.msalOauth2Provider)
     {
@@ -481,7 +488,7 @@
                                                        clientId:self.internalConfig.clientId
                                                          scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
                                                      oidcScopes:[self.class defaultOIDCScopes]
-                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc] initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
+                                           extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                         supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
@@ -608,7 +615,8 @@
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
-                                                                                                          defaultAccessor:_tokenCache
+                                                                                                          defaultAccessor:self.tokenCache
+                                                                                                  accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     NSError *requestError = nil;
@@ -915,7 +923,8 @@
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
-                                                                                                          defaultAccessor:_tokenCache
+                                                                                                          defaultAccessor:self.tokenCache
+                                                                                                  accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
     
     NSError *requestError = nil;
@@ -1055,17 +1064,17 @@
     {
         result &= [self.externalAccountHandler removeAccountFromExternalProvider:account error:error];
     }
+
+    if (![self.accountMetadataCache clearForHomeAccountId:account.identifier
+                                                 clientId:self.internalConfig.clientId
+                                                  context:nil error:error])
+    {
+        return NO;
+    }
     
     return [self.msalOauth2Provider removeAdditionalAccountInfo:account
-                                                       clientId:self.clientId
-                                                     tokenCache:self.tokenCache
                                                           error:error];
 }
-
-@end
-
-
-@implementation MSALPublicClientApplication (Internal)
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
 {

@@ -38,6 +38,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALErrorConverter.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAADV2IdTokenClaims.h"
@@ -68,8 +69,6 @@
 }
 
 - (BOOL)removeAdditionalAccountInfo:(MSALAccount *)account
-                           clientId:(NSString *)clientId
-                         tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                               error:(NSError **)error
 {
     // If we remove account, we want this app to be also disassociated from foci token, so that user cannot sign in silently again after signing out
@@ -79,11 +78,11 @@
     MSIDAADAuthority *aadAuthority = [[MSIDAADAuthority alloc] initWithURL:authorityURL rawTenant:nil context:nil error:nil];
     
     NSError *metadataError = nil;
-    BOOL metadataResult = [tokenCache updateAppMetadataWithFamilyId:@""
-                                                           clientId:clientId
-                                                          authority:aadAuthority
-                                                            context:nil
-                                                              error:&metadataError];
+    BOOL metadataResult = [self.tokenCache updateAppMetadataWithFamilyId:@""
+                                                                clientId:self.clientId
+                                                               authority:aadAuthority
+                                                                 context:nil
+                                                                   error:&metadataError];
     
     if (!metadataResult)
     {
@@ -100,20 +99,27 @@
     return YES;
 }
 
-- (MSIDAuthority *)issuerAuthorityWithAccount:(__unused MSALAccount *)account
+- (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
-                                        error:(__unused NSError **)error
+                                        error:(NSError **)error
 {
-    // TODO: after authority->issuer cache is ready, this should always lookup cached issuer instead
-    
-    /*
-     In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-     if authority is a common, organizations or consumers authority.
-     */
-    return [[MSIDAADAuthority alloc] initWithURL:requestAuthority.url
-                                       rawTenant:account.lookupAccountIdentifier.utid
-                                         context:nil
-                                           error:error];
+    if (self.accountMetadataCache)
+    {
+        NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
+                                                        homeAccountId:account.homeAccountId.identifier
+                                                             clientId:self.clientId
+                                                              context:nil
+                                                                error:error];
+        
+        MSIDAuthority *cachedAuthority = cachedURL ?
+        [[MSIDAADAuthority alloc] initWithURL:cachedURL rawTenant:nil context:nil error:error] :
+        requestAuthority;
+        
+        MSID_LOG_INFO(nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        
+        return cachedAuthority;
+    }
+    return requestAuthority;
 }
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority

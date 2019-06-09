@@ -135,7 +135,9 @@
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
                                                                @"additional_user_info": @"unmapped_userinfo",
                                                                MSIDInvalidTokenResultKey : [self testTokenResult]}
-                                          msalOauth2Provider:[MSALAADOauth2Provider new]];
+                                          msalOauth2Provider:[[MSALAADOauth2Provider alloc] initWithClientId:@"someClientId"
+                                                                                                  tokenCache:nil
+                                                                                        accountMetadataCache:nil]];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     NSInteger expectedErrorCode = MSALErrorInteractionRequired;
