@@ -84,6 +84,7 @@
 #import "MSALOauth2Provider.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSIDExtendedTokenCacheDataSource.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"

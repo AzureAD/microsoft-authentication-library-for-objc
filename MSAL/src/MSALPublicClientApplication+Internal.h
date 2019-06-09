@@ -38,7 +38,7 @@
 @property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic, nonnull) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nonatomic, nonnull) MSALOauth2Provider *msalOauth2Provider;
-@property (nonatomic) MSALExternalAccountHandler *externalAccountHandler;
+@property (nonatomic, nullable) MSALExternalAccountHandler *externalAccountHandler;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;

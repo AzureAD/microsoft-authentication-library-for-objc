@@ -71,14 +71,11 @@
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALAccount+Internal.h"
-<<<<<<< HEAD
 #import "MSIDLegacyTokenCacheAccessor.h"
-
-=======
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDTestCacheDataSource.h"
 #import "MSALOauth2ProviderFactory.h"
->>>>>>> origin/dev
+
 @interface MSALFakeInteractiveRequest : NSObject
 
 @property NSString *state;
@@ -93,15 +90,8 @@
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
 @property (nonatomic) MSIDClientInfo *clientInfo;
-<<<<<<< HEAD
-@property (nonatomic) id<MSIDCacheAccessor> tokenCacheAccessor;
-#if TARGET_OS_IPHONE
-@property (nonatomic) MSIDDefaultTokenCacheAccessor *defaultTokenCacheAccesor;
-#endif
-=======
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
->>>>>>> origin/dev
 
 @end
 
@@ -114,30 +104,17 @@
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
     
-<<<<<<< HEAD
-=======
-    id<MSIDTokenCacheDataSource, MSIDMetadataCacheDataSource> dataSource = nil;
-    
->>>>>>> origin/dev
 #if TARGET_OS_IPHONE
     id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    self.defaultTokenCacheAccesor = self.tokenCacheAccessor;
-#else
-<<<<<<< HEAD
-    self.tokenCacheAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDMacTokenCache.defaultCache otherCacheAccessors:nil];
-#endif
-=======
-    dataSource = [MSIDTestCacheDataSource new];
-#endif
-    
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    [self.tokenCacheAccessor clearWithContext:nil error:nil];
-    
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    [self.accountMetadataCache clearWithContext:nil error:nil];
+#else
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new] otherCacheAccessors:nil];
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]];
+#endif
     
->>>>>>> origin/dev
+    [self.tokenCacheAccessor clearWithContext:nil error:nil];
+
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
@@ -1435,7 +1412,7 @@
     NSError *error = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:&error];
     XCTAssertNil(error);
-    application.tokenCache = self.defaultTokenCacheAccesor;
+    application.tokenCache = self.tokenCacheAccessor;
     
     // Make sure no users are showing up in the cache
     NSArray *accounts = [application allAccounts:&error];
@@ -1450,7 +1427,7 @@
     
     NSString *clientId = UNIT_TEST_CLIENT_ID;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:clientId error:nil];
-    application.tokenCache = self.defaultTokenCacheAccesor;
+    application.tokenCache = self.tokenCacheAccessor;
     
     NSError *error = nil;
     NSArray *accounts = [application allAccounts:&error];
@@ -1523,15 +1500,9 @@
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
     
     NSString *clientId = @"myclient";
-<<<<<<< HEAD
 
-    [self.defaultTokenCacheAccesor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
-
-=======
-    
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
-    
->>>>>>> origin/dev
+
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -1565,15 +1536,9 @@
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
     
     NSString *clientId = @"myclient";
-<<<<<<< HEAD
 
-    [self.defaultTokenCacheAccesor updateAppMetadataWithFamilyId:@"" clientId:clientId authority:configuration.authority context:nil error:nil];
-
-=======
-    
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"" clientId:clientId authority:configuration.authority context:nil error:nil];
-    
->>>>>>> origin/dev
+
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -1603,13 +1568,8 @@
                                                                context:nil
                                                                  error:&error];
     XCTAssertTrue(result);
-<<<<<<< HEAD
-    XCTAssertEqual([[self.defaultTokenCacheAccesor allTokensWithContext:nil error:nil] count], 3);
-
-=======
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 3);
-    
->>>>>>> origin/dev
+
     NSString *clientId = @"myclient";
     
     // Retrieve cache for a different clientId
@@ -1753,15 +1713,9 @@
     appMetadata.clientId = clientId;
     appMetadata.environment = @"login.microsoftonline.com";
     appMetadata.familyId = @"1";
-<<<<<<< HEAD
 
-    [self.defaultTokenCacheAccesor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
-
-=======
-    
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:clientId authority:configuration.authority context:nil error:nil];
-    
->>>>>>> origin/dev
+
     // Retrieve cache for a different clientId
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -1852,7 +1806,7 @@
 - (void)testRemoveAccount_whenAccountExists_shouldRemoveAccount
 {
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
-    application.tokenCache = self.defaultTokenCacheAccesor;
+    application.tokenCache = self.tokenCacheAccessor;
     
     // Make sure no users are showing up in the cache
     XCTAssertEqual([application allAccounts:nil].count, 0);
@@ -1893,26 +1847,16 @@
                                                                  error:nil];
     
     XCTAssertTrue(result);
-<<<<<<< HEAD
-    XCTAssertEqual([[self.defaultTokenCacheAccesor allTokensWithContext:nil error:nil] count], 4);
-
-=======
     XCTAssertEqual([[self.tokenCacheAccessor allTokensWithContext:nil error:nil] count], 4);
-    
->>>>>>> origin/dev
+
     // 2. Create PublicClientApplication for a different app
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"msalmyclient"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:@"myclient" error:nil];
     application.tokenCache = self.tokenCacheAccessor;
-<<<<<<< HEAD
-    [self.defaultTokenCacheAccesor updateAppMetadataWithFamilyId:@"1" clientId:@"myclient" authority:configuration.authority context:nil error:nil];
-
-=======
     [self.tokenCacheAccessor updateAppMetadataWithFamilyId:@"1" clientId:@"myclient" authority:configuration.authority context:nil error:nil];
-    
->>>>>>> origin/dev
+
     MSIDAuthority *authority = [authorityUrl aadAuthority];
     
     configuration = [[MSIDConfiguration alloc] initWithAuthority:authority
@@ -1937,7 +1881,7 @@
     XCTAssertEqual([application allAccounts:nil].count, 0);
     
     // 5. Make sure account and FOCI tokens are still in cache
-    MSIDAccount *cachedAccount = [self.defaultTokenCacheAccesor getAccountForIdentifier:account.accountIdentifier authority:authority context:nil error:nil];
+    MSIDAccount *cachedAccount = [self.tokenCacheAccessor getAccountForIdentifier:account.accountIdentifier authority:authority context:nil error:nil];
     XCTAssertNotNil(cachedAccount);
     
     MSIDRefreshToken *fociToken = [self.tokenCacheAccessor getRefreshTokenWithAccount:account.accountIdentifier familyId:@"1" configuration:configuration context:nil error:nil];

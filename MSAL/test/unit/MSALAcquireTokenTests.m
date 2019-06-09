@@ -94,11 +94,7 @@
 {
     [super setUp];
     
-<<<<<<< HEAD
     id<MSIDExtendedTokenCacheDataSource> dataSource;
-=======
-    id<MSIDTokenCacheDataSource, MSIDMetadataCacheDataSource> dataSource;
->>>>>>> origin/dev
 #if TARGET_OS_IPHONE
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
 #else
@@ -109,7 +105,6 @@
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
-    [self.accountMetadataCache clearWithContext:nil error:nil];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
