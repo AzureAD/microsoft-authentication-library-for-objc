@@ -244,7 +244,7 @@
     
     self.tokenCache = defaultAccessor;
 #else
-    __auto_type dataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
+    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
