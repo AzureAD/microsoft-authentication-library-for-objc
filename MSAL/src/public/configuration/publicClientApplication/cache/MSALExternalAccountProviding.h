@@ -1,3 +1,5 @@
+//------------------------------------------------------------------------------
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -15,56 +17,27 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
 
-#import "MSALSharedAccountCacheProvider.h"
-#import "MSIDKeychainTokenCache.h"
 
-@interface MSALSharedAccountCacheProvider()
+#import <Foundation/Foundation.h>
+#import <MSAL/MSAL.h>
 
-@property (nonatomic) MSIDKeychainTokenCache *keychainTokenCache;
+NS_ASSUME_NONNULL_BEGIN
 
-@end
+@protocol MSALExternalAccountProviding <NSObject>
 
-@implementation MSALSharedAccountCacheProvider
-
-#pragma mark - Init
-
-- (instancetype)initWithSharedAccountGroup:(NSString *)sharedGroup
-                                     error:(NSError **)error
-{
-    self = [super init];
-    
-    if (self)
-    {
-        self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:sharedGroup];
-    }
-    
-    return self;
-}
-
-#pragma mark - MSALExternalAccountProviding
-
-- (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
-{
-    return YES;
-}
-
-- (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
-{
-    return YES;
-}
-
+- (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
-                                                        error:(NSError * _Nullable * _Nullable)error
-{
-    
-    
-    return nil;
-}
+                                                        error:(NSError * _Nullable * _Nullable)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

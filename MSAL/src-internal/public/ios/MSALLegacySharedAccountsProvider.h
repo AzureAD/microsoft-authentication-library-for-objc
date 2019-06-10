@@ -25,10 +25,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALSharedAccountCacheProvider : NSObject <MSALExternalAccountProviding>
+@interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
 
-- (instancetype)initWithSharedAccountGroup:(NSString *)sharedGroup
-                                     error:(NSError **)error;
+- (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
+                                serviceIdentifier:(NSString *)serviceIdentifier
+                                supportedVersions:(NSArray *)supportedVersions
+                                            error:(NSError **)error;
 
 @end
 
