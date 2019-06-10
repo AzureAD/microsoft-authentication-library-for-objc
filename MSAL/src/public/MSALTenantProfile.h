@@ -26,15 +26,36 @@
 //------------------------------------------------------------------------------
 
 @class MSALAuthority;
+@class MSALAccountId;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTenantProfile : NSObject <NSCopying>
 
-@property (readonly, nullable) MSALAuthority *authority;
-@property (readonly, nullable) NSString *userObjectId;
+/*!
+ Unique identifier for the tenant profile.
+ */
+@property (readonly, nullable) NSString *identifier;
+
+/*!
+ Host part of the authority.
+ */
+@property (readonly, nullable) NSString *environment;
+
+/*!
+ Identifier for the directory where account is locally represented
+ */
 @property (readonly, nullable) NSString *tenantId;
-@property (readonly) BOOL isHomeTenant;
+
+/*!
+ Indicator if this tenant profile represents account's home tenant.
+ If an admin deletes this account from the tenant, it prevents this account from accessing anything in any tenant with the Microsoft Identity Platform.
+ */
+@property (readonly) BOOL isHomeTenantProfile;
+
+/*!
+ ID token claims for the account in the specified tenant. 
+*/
 @property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
 
 @end

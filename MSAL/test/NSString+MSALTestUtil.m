@@ -26,15 +26,13 @@
 //------------------------------------------------------------------------------
 
 #import "NSString+MSALTestUtil.h"
-#import "MSALAuthorityFactory.h"
 
 @implementation NSString (MSALTestUtil)
 
 - (MSALAuthority *)msalAuthority
 {
     __auto_type authorityUrl = [[NSURL alloc] initWithString:self];
-    __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
-    
+    __auto_type authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];    
     return authority;
 }
 

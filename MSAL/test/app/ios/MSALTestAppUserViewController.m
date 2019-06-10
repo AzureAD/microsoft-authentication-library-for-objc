@@ -29,7 +29,6 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALAccount.h"
 
 @interface MSALTestAppUserViewController ()
@@ -135,11 +134,11 @@
         return 0;
     }
     
-    NSString *currentAccountId = currentAccount.homeAccountId.identifier;
+    NSString *currentAccountId = currentAccount.identifier;
     
     for (NSInteger i = 0; i < _accounts.count; i++)
     {
-        if ([currentAccountId isEqualToString:_accounts[i].homeAccountId.identifier])
+        if ([currentAccountId isEqualToString:_accounts[i].identifier])
         {
             return i + 1;
         }

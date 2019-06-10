@@ -133,7 +133,7 @@ static NSString * const defaultScope = @"User.Read";
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
     
     [self.resultTextView setString:resultText];
     

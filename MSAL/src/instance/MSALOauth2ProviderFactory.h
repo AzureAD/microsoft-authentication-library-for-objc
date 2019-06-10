@@ -27,12 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSIDOauth2Factory;
+@class MSALAuthority;
+@class MSALOauth2Provider;
+@class MSIDDefaultTokenCacheAccessor;
+@class MSIDAccountMetadataCacheAccessor;
 
-@interface MSALOauth2FactoryProducer : NSObject
+@interface MSALOauth2ProviderFactory : NSObject
 
-+ (nullable MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(nonnull NSURL *)authority
-                                                      context:(nullable id<MSIDRequestContext>)context
-                                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
++ (nullable MSALOauth2Provider *)oauthProviderForAuthority:(nonnull MSALAuthority *)authority
+                                                  clientId:(nonnull NSString *)clientId
+                                                tokenCache:(nullable MSIDDefaultTokenCacheAccessor *)tokenCache
+                                      accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache
+                                                   context:(nullable id<MSIDRequestContext>)context
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 @end
