@@ -119,7 +119,7 @@
     
     if (msidError)
     {
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelError, nil, @"Failed to serialize claims request to json string. Error %@", MSID_PII_LOG_MASKABLE(msidError));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Failed to serialize claims request to json string. Error %@", MSID_PII_LOG_MASKABLE(msidError));
     }
     
     return result;

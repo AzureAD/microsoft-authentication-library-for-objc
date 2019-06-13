@@ -55,7 +55,7 @@
     
     if (!aadAuthority)
     {
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
         
         if (error) *error = authorityError;
         
@@ -88,7 +88,7 @@
             *error = metadataError;
         }
         
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelWarning,nil, @"Failed to update app metadata when removing account %@", MSID_PII_LOG_MASKABLE(metadataError));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning,nil, @"Failed to update app metadata when removing account %@", MSID_PII_LOG_MASKABLE(metadataError));
         return NO;
     }
     
@@ -111,7 +111,7 @@
         [[MSIDAADAuthority alloc] initWithURL:cachedURL rawTenant:nil context:nil error:error] :
         requestAuthority;
         
-        MSID_LOG_WITH_CONTEXT(MSIDLogLevelInfo, nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
         
         return cachedAuthority;
     }

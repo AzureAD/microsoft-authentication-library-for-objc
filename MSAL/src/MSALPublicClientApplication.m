@@ -126,8 +126,8 @@
 - (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.internalConfig.sliceConfig.sliceDictionary; }
 - (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
 {
-    if (!sliceParameters) MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"setting slice parameter with nil object.");
-    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"slice parameter does not contain slice nor dc");
+    if (!sliceParameters) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"setting slice parameter with nil object.");
+    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"slice parameter does not contain slice nor dc");
     
     self.internalConfig.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
 }
@@ -394,7 +394,7 @@
 
     if ([NSString msidIsStringNilOrBlank:sourceApplication])
     {
-        MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
         // TODO: add a link to Wiki describing why broker is necessary
         return NO;
     }
@@ -522,7 +522,7 @@
     msidParams.customWebview = parameters.customWebview ?: self.customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
-    MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelInfo, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                     @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
                     "                                     extraScopesToConsent:%@\n"
                     "                                                  account:%@\n"
@@ -785,7 +785,7 @@
     
     if (!requestAuthority)
     {
-        MSID_LOG_WITH_CONTEXT(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
         
         if (completionBlock)
         {
@@ -824,7 +824,7 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
-    MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelInfo, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                  "                                                  account:%@\n"
                  "                                                authority:%@\n"
@@ -945,13 +945,13 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msidTokenHash];
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 

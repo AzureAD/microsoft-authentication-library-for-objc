@@ -46,7 +46,7 @@
     
     if (!adfsAuthority)
     {
-        MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
         
         if (error) *error = authorityError;
         

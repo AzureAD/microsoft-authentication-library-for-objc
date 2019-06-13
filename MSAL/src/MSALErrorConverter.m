@@ -168,7 +168,7 @@ static NSSet *s_recoverableErrorCode;
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (mappedCode == nil)
         {
-            MSID_LOG_WITH_CONTEXT(MSIDLogLevelWarning,nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
         }
         
@@ -200,7 +200,7 @@ static NSSet *s_recoverableErrorCode;
 
         if (!msalResult)
         {
-            MSID_LOG_WITH_CONTEXT_PII(MSIDLogLevelWarning, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", MSID_PII_LOG_MASKABLE(resultError));
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", MSID_PII_LOG_MASKABLE(resultError));
         }
         else
         {
