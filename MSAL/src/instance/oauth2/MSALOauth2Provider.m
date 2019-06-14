@@ -63,8 +63,7 @@
     
     if (!authority)
     {
-        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
-        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
         
         if (error) *error = authorityError;
         

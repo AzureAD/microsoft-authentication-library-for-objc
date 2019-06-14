@@ -126,8 +126,8 @@
 - (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.internalConfig.sliceConfig.sliceDictionary; }
 - (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
 {
-    if (!sliceParameters) MSID_LOG_WARN(nil, @"setting slice parameter with nil object.");
-    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WARN(nil, @"slice parameter does not contain slice nor dc");
+    if (!sliceParameters) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"setting slice parameter with nil object.");
+    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"slice parameter does not contain slice nor dc");
     
     self.internalConfig.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
 }
@@ -394,7 +394,7 @@
 
     if ([NSString msidIsStringNilOrBlank:sourceApplication])
     {
-        MSID_LOG_WARN(nil, @"Application doesn't integrate with broker correctly");
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
         // TODO: add a link to Wiki describing why broker is necessary
         return NO;
     }
@@ -522,33 +522,7 @@
     msidParams.customWebview = parameters.customWebview ?: self.customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
-    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
-                    @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
-                    "                                     extraScopesToConsent:%@\n"
-                    "                                                  account:%@\n"
-                    "                                                loginHint:%@\n"
-                    "                                               promptType:%@\n"
-                    "                                     extraQueryParameters:%@\n"
-                    "                                                authority:%@\n"
-                    "                                              webviewType:%@\n"
-                    "                                            customWebview:%@\n"
-                    "                                            correlationId:%@\n"
-                    "                                             capabilities:%@\n"
-                    "                                            claimsRequest:%@]",
-                    _PII_NULLIFY(parameters.scopes),
-                    _PII_NULLIFY(parameters.extraScopesToConsent),
-                    _PII_NULLIFY(parameters.account.homeAccountId),
-                    _PII_NULLIFY(parameters.loginHint),
-                    MSALStringForPromptType(parameters.promptType),
-                    parameters.extraQueryParameters,
-                    _PII_NULLIFY(parameters.authority),
-                    MSALStringForMSALWebviewType(parameters.webviewType),
-                    parameters.customWebview ? @"Yes" : @"No",
-                    parameters.correlationId,
-                    self.internalConfig.clientApplicationCapabilities,
-                    parameters.claimsRequest);
-    
-    MSID_LOG_PII(MSIDLogLevelInfo, nil, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                     @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
                     "                                     extraScopesToConsent:%@\n"
                     "                                                  account:%@\n"
@@ -563,8 +537,8 @@
                     "                                            claimsRequest:%@]",
                     parameters.scopes,
                     parameters.extraScopesToConsent,
-                    parameters.account.homeAccountId,
-                    parameters.loginHint,
+                    MSID_PII_LOG_MASKABLE(parameters.account.homeAccountId),
+                    MSID_PII_LOG_EMAIL(parameters.loginHint),
                     MSALStringForPromptType(parameters.promptType),
                     parameters.extraQueryParameters,
                     parameters.authority,
@@ -811,7 +785,7 @@
     
     if (!requestAuthority)
     {
-        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
         
         if (completionBlock)
         {
@@ -849,26 +823,8 @@
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
-
-    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
-                    @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                    "                                                  account:%@\n"
-                    "                                                authority:%@\n"
-                    "                                        validateAuthority:%@\n"
-                    "                                             forceRefresh:%@\n"
-                    "                                            correlationId:%@\n"
-                    "                                             capabilities:%@\n"
-                    "                                            claimsRequest:%@]",
-                    _PII_NULLIFY(parameters.scopes),
-                    _PII_NULLIFY(parameters.account),
-                    _PII_NULLIFY(parameters.authority),
-                    shouldValidate ? @"Yes" : @"No",
-                    parameters.forceRefresh ? @"Yes" : @"No",
-                    parameters.correlationId,
-                    self.internalConfig.clientApplicationCapabilities,
-                    parameters.claimsRequest);
     
-    MSID_LOG_PII(MSIDLogLevelInfo, nil, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                  "                                                  account:%@\n"
                  "                                                authority:%@\n"
@@ -878,7 +834,7 @@
                  "                                             capabilities:%@\n"
                  "                                            claimsRequest:%@]",
                  parameters.scopes,
-                 parameters.account,
+                 MSID_PII_LOG_EMAIL(parameters.account),
                  parameters.authority,
                  shouldValidate ? @"Yes" : @"No",
                  parameters.forceRefresh ? @"Yes" : @"No",
@@ -989,15 +945,13 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        MSID_LOG_NO_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
-        MSID_LOG_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msidTokenHash];
-        MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
-        MSID_LOG_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
