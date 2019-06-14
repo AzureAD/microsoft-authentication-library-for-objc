@@ -87,7 +87,8 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
-
+#else
+#import "MSIDMacKeychainTokenCache.h"
 #endif
 
 
@@ -243,7 +244,7 @@
     
     self.tokenCache = defaultAccessor;
 #else
-    __auto_type dataSource = MSIDMacTokenCache.defaultCache;
+    __auto_type dataSource = [MSIDMacKeychainTokenCache new]; // TODO: setup correctly with keychain group
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
