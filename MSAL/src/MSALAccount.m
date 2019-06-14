@@ -113,7 +113,7 @@
     
     if (tenantProfileError)
     {
-        MSID_LOG_WARN(nil, @"Failed to create tenant profile with error code %ld, domain %@", tenantProfileError.code, tenantProfileError.domain);
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to create tenant profile with error code %ld, domain %@", tenantProfileError.code, tenantProfileError.domain);
     }
     
     NSArray *tenantProfiles = tenantProfile ? @[tenantProfile] : nil;

@@ -102,7 +102,7 @@
         
         if (!result)
         {
-            MSID_LOG_WARN(nil, @"Failed to update account with error %ld, %@", (long)updateError.code, updateError.domain);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil,  @"Failed to update account with error %@", MSID_PII_LOG_MASKABLE(updateError));
         }
     }
 }
@@ -118,8 +118,7 @@
         
         if (externalError)
         {
-            MSID_LOG_WARN(nil, @"Failed to read external accounts with error %@/%ld", externalError.domain, (long)externalError.code);
-            MSID_LOG_WARN_PII(nil, @"Failed to read external accounts with parameters %@ with error %@/%ld", parameters, externalError.domain, (long)externalError.code);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to read external accounts with parameters %@ with error %@", MSID_PII_LOG_MASKABLE(parameters), MSID_PII_LOG_MASKABLE(externalError));
             return nil;
         }
         

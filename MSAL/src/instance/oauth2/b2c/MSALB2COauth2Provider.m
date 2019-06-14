@@ -54,8 +54,7 @@
     
     if (!b2cAuthority)
     {
-        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
-        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Invalid authority, error %@", MSID_PII_LOG_MASKABLE(authorityError));
         
         if (error) *error = authorityError;
         
@@ -81,7 +80,7 @@
         [[MSIDB2CAuthority alloc] initWithURL:cachedURL?:requestAuthority.url
                                validateFormat:NO rawTenant:nil context:nil error:error];
         
-        MSID_LOG_INFO(nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, cachedAuthority.url);
         
         return cachedAuthority;
     }

@@ -103,7 +103,6 @@
     
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
-    
 #if TARGET_OS_IPHONE
     id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
@@ -1915,7 +1914,6 @@
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
-
 
 #endif
 
