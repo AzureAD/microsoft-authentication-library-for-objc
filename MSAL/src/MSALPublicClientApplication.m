@@ -813,7 +813,8 @@
 - (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
                          completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    MSIDAuthority *requestAuthority = providedAuthority;
     
     // This is meant to avoid developer error, when they configure PCA with e.g. AAD authority, but pass B2C authority here
     // Authority type in PCA and parameters should match
@@ -885,6 +886,7 @@
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
+    msidParams.providedAuthority = providedAuthority;
 
     MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
                     @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
