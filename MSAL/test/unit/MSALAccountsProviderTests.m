@@ -58,7 +58,7 @@
 }
 
 - (void)setUp {
-    id<MSIDTokenCacheDataSource> dataSource = nil;
+    id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     
 #if TARGET_OS_IPHONE
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
