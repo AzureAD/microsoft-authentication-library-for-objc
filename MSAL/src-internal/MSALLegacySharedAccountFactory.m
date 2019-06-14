@@ -35,22 +35,22 @@
     
     if (!accountType)
     {
-        MSID_LOG_INFO(nil, @"No account type available");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"No account type available");
         return nil;
     }
     
     if ([accountType isEqualToString:@"ADAL"])
     {
-        MSID_LOG_INFO(nil, @"Initializing ADAL account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing ADAL account type");
         return [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     else if ([accountType isEqualToString:@"MSA"])
     {
-        MSID_LOG_INFO(nil, @"Initializing MSA account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
         return [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     
-    MSID_LOG_INFO(nil, @"Unknown account type found %@", accountType);
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);
     return nil;
 }
 

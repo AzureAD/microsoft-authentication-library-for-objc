@@ -82,7 +82,7 @@
         
         if (!versionAccounts)
         {
-            MSID_LOG_WARN(nil, @"Failed to retrieve accounts with version %@", supportedVersion);
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to retrieve accounts with version %@", supportedVersion);
             
             if (error)
             {
@@ -141,7 +141,7 @@
         
         if (!account)
         {
-            MSID_LOG_WARN(nil, @"Failed to create account with error %@", singleAccountError);
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to create account with error %@", singleAccountError);
         }
         else if ([account matchesParameters:parameters])
         {
