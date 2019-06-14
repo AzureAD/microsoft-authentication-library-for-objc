@@ -33,7 +33,8 @@
 @class MSIDAccount;
 @class MSALAccountId;
 @class MSIDIdTokenClaims;
-@protocol MSALExternalAccount;
+@protocol MSALAccount;
+@class MSALOauth2Provider;
 
 @interface MSALAccount ()
 
@@ -41,20 +42,12 @@
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
 @property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
-
+@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
+@property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
-
-/*!
- Initialize an MSALAccount with given information
-
- @param  username            The username value in UserPrincipleName(UPN) format
- @param  homeAccountId       Unique identifier of the account in the home directory
- @param  environment         Host part of the authority string
- @param  tenantProfiles      All tenant profiles associated to this account
- */
 - (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(NSString *)homeAccountId
+                   homeAccountId:(MSALAccountId *)homeAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
@@ -64,7 +57,8 @@
  @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount;
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 

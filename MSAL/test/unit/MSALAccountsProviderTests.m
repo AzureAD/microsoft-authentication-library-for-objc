@@ -36,7 +36,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALAuthority.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
+#import "NSString+MSIDTestUtil.h"
 #import "MSIDTestURLSession.h"
 #import "MSIDTestURLResponse+Util.h"
 #import "MSIDTestURLResponse+MSAL.h"
@@ -44,6 +44,8 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "MSIDConstants.h"
 #import "MSIDTestCacheUtil.h"
+#import "MSALAccount+MultiTenantAccount.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -56,7 +58,7 @@
 }
 
 - (void)setUp {
-    id<MSIDTokenCacheDataSource> dataSource = nil;
+    id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     
 #if TARGET_OS_IPHONE
     dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
@@ -128,8 +130,11 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
 }
@@ -158,8 +163,11 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
 }
@@ -188,10 +196,9 @@
 - (void)testAllAccounts_whenDefaultAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    NSURL *authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:authorityUrl.absoluteString
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:authority.url.absoluteString
                                              clientId:@"different_client_id"
                                                   upn:@"user@contoso.com"
                                                  name:@"simple_user"
@@ -212,9 +219,12 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertNil(allAccounts[0].accountClaims);
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertNil(allAccounts[0].tenantProfiles[0].claims);
 }
@@ -243,10 +253,9 @@
 - (void)testAllAccounts_whenLegacyAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
     
-    NSURL *authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/tid"];
-    MSIDAuthority *authority = [MSIDAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+    MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
-    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:authorityUrl.absoluteString
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:authority.url.absoluteString
                                             clientId:@"different_client_id"
                                                  upn:@"user@contoso.com"
                                                 name:@"simple_user"
@@ -268,8 +277,11 @@
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertNil(allAccounts[0].accountClaims);
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
     XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
     XCTAssertNil(allAccounts[0].tenantProfiles[0].claims);
 }
@@ -345,43 +357,106 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
+    NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"oid"];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].userObjectId, @"guest_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].tenantId, @"guest_tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[1].claims.count > 0);
+    [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                              tenantId:@"tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].userObjectId, @"guest2_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].tenantId, @"guest2_tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[2].claims.count > 0);
+    NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                              tenantId:@"guest_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
+    
+    NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest2_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                              tenantId:@"guest2_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest2_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
+    XCTAssertEqualObjects(allAccounts[1].identifier, @"uid2.tid2");
+    XCTAssertTrue(allAccounts[1].accountClaims.count > 0);
     
     // expect 2 tenant profiles
     XCTAssertEqual(allAccounts[1].tenantProfiles.count, 2);
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].userObjectId, @"oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].tenantId, @"tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[0].claims.count > 0);
+    // Since tenant profiles operate using a set, there's no guarantee regarding returned order
+    NSInteger a2firstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"oid2"];
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].userObjectId, @"guest_oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].tenantId, @"guest_tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[1].claims.count > 0);
+    [self verifyTenantProfileWithIndex:a2firstProfileIndex
+                              tenantId:@"tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
+
+    NSInteger a2secondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"guest_oid2"];
+    [self verifyTenantProfileWithIndex:a2secondProfileIndex
+                              tenantId:@"guest_tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
+}
+
+- (NSInteger)indexOfTenantProfileInArray:(NSArray *)allProfiles
+                           localAccountId:(NSString *)localAccountId
+{
+    for (MSALTenantProfile *tenantProfile in allProfiles)
+    {
+        if ([tenantProfile.identifier isEqualToString:localAccountId])
+        {
+            return [allProfiles indexOfObject:tenantProfile];
+        }
+    }
+    
+    return -1;
+}
+
+- (void)verifyTenantProfileWithIndex:(NSInteger)index
+                            tenantId:(NSString *)tenantId
+                         environment:(NSString *)environment
+                      localAccountId:(NSString *)localAccountId
+                         allProfiles:(NSArray *)allProfiles
+                           hasClaims:(BOOL)hasClaims
+{
+    XCTAssertTrue(index != -1);
+    
+    MSALTenantProfile *profile = allProfiles[index];
+    
+    XCTAssertEqualObjects(profile.tenantId, tenantId);
+    XCTAssertEqualObjects(profile.environment, environment);
+    XCTAssertEqualObjects(profile.identifier, localAccountId);
+    
+    if (hasClaims)
+    {
+        XCTAssertTrue(profile.claims.count > 0);
+    }
+    else
+    {
+        XCTAssertNil(profile.claims);
+    }
 }
 
 - (void)testAllAccounts_whenMultipleLegacyAccountsInCache_shouldReturnThem {
@@ -455,43 +530,68 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].userObjectId, @"oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].tenantId, @"tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[1].claims.count > 0);
+    NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"oid"];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].userObjectId, @"guest_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].tenantId, @"guest_tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[2].claims.count > 0);
+    [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                              tenantId:@"tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"guest2_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"guest2_tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
+    
+    NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                              tenantId:@"guest_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
+    
+    NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest2_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                              tenantId:@"guest2_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest2_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
     XCTAssertEqualObjects(allAccounts[1].homeAccountId.identifier, @"uid2.tid2");
     XCTAssertEqualObjects(allAccounts[1].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[1].lookupAccountIdentifier.homeAccountId, @"uid2.tid2");
+    XCTAssertEqualObjects(allAccounts[1].identifier, @"uid2.tid2");
+    XCTAssertTrue(allAccounts[1].accountClaims.count > 0);
     
     // expect 2 tenant profiles
     XCTAssertEqual(allAccounts[1].tenantProfiles.count, 2);
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].userObjectId, @"oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].tenantId, @"tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[1].claims.count > 0);
+    NSInteger a2FirstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"guest_oid2"];
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].userObjectId, @"guest_oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].tenantId, @"guest_tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[0].claims.count > 0);
+    [self verifyTenantProfileWithIndex:a2FirstProfileIndex
+                              tenantId:@"guest_tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
+    
+    NSInteger a2SecondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"oid2"];
+    
+    [self verifyTenantProfileWithIndex:a2SecondProfileIndex
+                              tenantId:@"tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
 }
 
 - (void)testAllAccounts_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
@@ -510,25 +610,39 @@
     XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(allAccounts[0].tenantProfiles.count, 3);
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].userObjectId, @"oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
+    NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"oid"];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].userObjectId, @"guest_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[1].tenantId, @"guest_tid");
-    // this tenant profile belongs to another client id, so we do not expose all claims
-    XCTAssertNil(allAccounts[0].tenantProfiles[1].claims);
+    [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                              tenantId:@"tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].userObjectId, @"guest2_oid");
-    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[2].tenantId, @"guest2_tid");
-    XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
+    
+    NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                              tenantId:@"guest_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:NO];
+    
+    NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:allAccounts[0].tenantProfiles localAccountId:@"guest2_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                              tenantId:@"guest2_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest2_oid"
+                           allProfiles:allAccounts[0].tenantProfiles
+                             hasClaims:YES];
     
     // verify second account
     XCTAssertEqualObjects(allAccounts[1].username, @"user@fabricant.com");
@@ -539,15 +653,24 @@
     // expect 2 tenant profiles
     XCTAssertEqual(allAccounts[1].tenantProfiles.count, 2);
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].userObjectId, @"oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[0].tenantId, @"tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[1].claims.count > 0);
+    NSInteger a2FirstProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"oid2"];
     
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].userObjectId, @"guest_oid2");
-    XCTAssertEqualObjects(allAccounts[1].tenantProfiles[1].tenantId, @"guest_tid2");
-    XCTAssertTrue(allAccounts[1].tenantProfiles[1].claims.count > 0);
+    [self verifyTenantProfileWithIndex:a2FirstProfileIndex
+                              tenantId:@"tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
+    
+    
+    NSInteger a2SecondProfileIndex = [self indexOfTenantProfileInArray:allAccounts[1].tenantProfiles localAccountId:@"guest_oid2"];
+    
+    [self verifyTenantProfileWithIndex:a2SecondProfileIndex
+                              tenantId:@"guest_tid2"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid2"
+                           allProfiles:allAccounts[1].tenantProfiles
+                             hasClaims:YES];
 }
 
 - (void)testAccountForHomeAccountId_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
@@ -556,7 +679,8 @@
     [self setupMixedAccountsInCache];
     
     NSError *error;
-    MSALAccount *account = [provider accountForHomeAccountId:@"uid.tid" error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"uid.tid"];
+    MSALAccount *account = [provider accountForParameters:parameters error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(account);
     
@@ -564,25 +688,39 @@
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(account.tenantProfiles.count, 3);
     
-    XCTAssertEqualObjects(account.tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"oid");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
-    XCTAssertTrue(account.tenantProfiles[0].claims.count > 0);
+    NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"oid"];
     
-    XCTAssertEqualObjects(account.tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-    XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, @"guest_oid");
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"guest_tid");
-    // this tenant profile belongs to another client id, so we do not expose all claims
-    XCTAssertNil(account.tenantProfiles[1].claims);
+    [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                              tenantId:@"tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:YES];
     
-    XCTAssertEqualObjects(account.tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-    XCTAssertEqualObjects(account.tenantProfiles[2].userObjectId, @"guest2_oid");
-    XCTAssertEqualObjects(account.tenantProfiles[2].tenantId, @"guest2_tid");
-    XCTAssertTrue(account.tenantProfiles[0].claims.count > 0);
+    
+    NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"guest_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                              tenantId:@"guest_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:NO];
+    
+    NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"guest2_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                              tenantId:@"guest2_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest2_oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:YES];
 }
 
 - (void)testAccountForUsername_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
@@ -591,7 +729,8 @@
     [self setupMixedAccountsInCache];
     
     NSError *error;
-    MSALAccount *account = [provider accountForUsername:@"user@contoso.com" error:&error];
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
+    MSALAccount *account = [provider accountForParameters:parameters error:&error];
     XCTAssertNil(error);
     XCTAssertNotNil(account);
     
@@ -599,25 +738,39 @@
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"uid.tid");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqualObjects(account.identifier, @"uid.tid");
+    XCTAssertTrue(account.accountClaims.count > 0);
     
     // expect 3 tenant profiles
     XCTAssertEqual(account.tenantProfiles.count, 3);
     
-    XCTAssertEqualObjects(account.tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-    XCTAssertEqualObjects(account.tenantProfiles[0].userObjectId, @"oid");
-    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"tid");
-    XCTAssertTrue(account.tenantProfiles[0].claims.count > 0);
+    NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"oid"];
     
-    XCTAssertEqualObjects(account.tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-    XCTAssertEqualObjects(account.tenantProfiles[1].userObjectId, @"guest_oid");
-    XCTAssertEqualObjects(account.tenantProfiles[1].tenantId, @"guest_tid");
-    // this tenant profile belongs to another client id, so we do not expose all claims
-    XCTAssertNil(account.tenantProfiles[1].claims);
+    [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                              tenantId:@"tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:YES];
     
-    XCTAssertEqualObjects(account.tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-    XCTAssertEqualObjects(account.tenantProfiles[2].userObjectId, @"guest2_oid");
-    XCTAssertEqualObjects(account.tenantProfiles[2].tenantId, @"guest2_tid");
-    XCTAssertTrue(account.tenantProfiles[0].claims.count > 0);
+    
+    NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"guest_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                              tenantId:@"guest_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest_oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:NO];
+    
+    NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:account.tenantProfiles localAccountId:@"guest2_oid"];
+    
+    [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                              tenantId:@"guest2_tid"
+                           environment:@"login.microsoftonline.com"
+                        localAccountId:@"guest2_oid"
+                           allProfiles:account.tenantProfiles
+                             hasClaims:YES];
 }
 
 - (void)testAllAccountsFilteredByAuthority_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
@@ -715,21 +868,33 @@
                                  // expect 3 tenant profiles
                                  XCTAssertEqual(accounts[0].tenantProfiles.count, 3);
                                  
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[0].authority.url.absoluteString, @"https://login.microsoftonline.com/tid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[0].userObjectId, @"oid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[0].tenantId, @"tid");
-                                 XCTAssertTrue(accounts[0].tenantProfiles[0].claims.count > 0);
+                                 NSInteger a1FirstProfileIndex = [self indexOfTenantProfileInArray:accounts[0].tenantProfiles localAccountId:@"oid"];
                                  
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[1].authority.url.absoluteString, @"https://login.microsoftonline.com/guest_tid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[1].userObjectId, @"guest_oid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[1].tenantId, @"guest_tid");
-                                 // this tenant profile belongs to another client id, so we do not expose all claims
-                                 XCTAssertNil(accounts[0].tenantProfiles[1].claims);
+                                 [self verifyTenantProfileWithIndex:a1FirstProfileIndex
+                                                           tenantId:@"tid"
+                                                        environment:@"login.microsoftonline.com"
+                                                     localAccountId:@"oid"
+                                                        allProfiles:accounts[0].tenantProfiles
+                                                          hasClaims:YES];
                                  
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[2].authority.url.absoluteString, @"https://login.microsoftonline.com/guest2_tid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[2].userObjectId, @"guest2_oid");
-                                 XCTAssertEqualObjects(accounts[0].tenantProfiles[2].tenantId, @"guest2_tid");
-                                 XCTAssertTrue(accounts[0].tenantProfiles[0].claims.count > 0);
+                                 
+                                 NSInteger a1SecondProfileIndex = [self indexOfTenantProfileInArray:accounts[0].tenantProfiles localAccountId:@"guest_oid"];
+                                 
+                                 [self verifyTenantProfileWithIndex:a1SecondProfileIndex
+                                                           tenantId:@"guest_tid"
+                                                        environment:@"login.microsoftonline.com"
+                                                     localAccountId:@"guest_oid"
+                                                        allProfiles:accounts[0].tenantProfiles
+                                                          hasClaims:NO];
+                                 
+                                 NSInteger a1ThirdProfileIndex = [self indexOfTenantProfileInArray:accounts[0].tenantProfiles localAccountId:@"guest2_oid"];
+                                 
+                                 [self verifyTenantProfileWithIndex:a1ThirdProfileIndex
+                                                           tenantId:@"guest2_tid"
+                                                        environment:@"login.microsoftonline.com"
+                                                     localAccountId:@"guest2_oid"
+                                                        allProfiles:accounts[0].tenantProfiles
+                                                          hasClaims:YES];
                                  
                                  [expectation fulfill];
                              }];

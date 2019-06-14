@@ -27,7 +27,14 @@
 
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
-#import "MSALAuthorityFactory.h"
+#import "MSIDB2CAuthority.h"
+#import "MSIDADFSAuthority.h"
+#import "MSIDAADAuthority.h"
+#import "MSALAADAuthority.h"
+#import "MSALADFSAuthority.h"
+#import "MSALB2CAuthority.h"
+#import "MSALOauth2Authority.h"
+#import "MSALB2CAuthority_Internal.h"
 
 @implementation MSALAuthority
 
@@ -40,9 +47,25 @@
 + (MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                               error:(NSError * _Nullable __autoreleasing * _Nullable)error
 {
-    return [MSALAuthorityFactory authorityFromUrl:url
-                                          context:nil
-                                            error:error];
+    if ([MSIDB2CAuthority isAuthorityFormatValid:url context:nil error:nil])
+    {
+        __auto_type b2cAuthority = [[MSALB2CAuthority alloc] initWithURL:url validateFormat:YES error:nil];
+        if (b2cAuthority) return b2cAuthority;
+    }
+    
+    if ([MSIDADFSAuthority isAuthorityFormatValid:url context:nil error:nil])
+    {
+        __auto_type adfsAuthority = [[MSALADFSAuthority alloc] initWithURL:url error:nil];
+        if (adfsAuthority) return adfsAuthority;
+    }
+    
+    if ([MSIDAADAuthority isAuthorityFormatValid:url context:nil error:nil])
+    {
+        __auto_type aadAuthority = [[MSALAADAuthority alloc] initWithURL:url rawTenant:nil error:nil];
+        if (aadAuthority) return aadAuthority;
+    }
+    
+    return [[MSALOauth2Authority alloc] initWithURL:url error:error];
 }
 
 #pragma mark - NSCopying

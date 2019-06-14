@@ -21,72 +21,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalAADAccount.h"
-#import "MSALAccount.h"
-#import "MSALAccountId.h"
-#import "MSALTenantProfile.h"
-#import "MSALAuthority.h"
+#import "MSALExternalAccountProviding.h"
 
-@interface MSALExternalAADAccount()
+NS_ASSUME_NONNULL_BEGIN
 
-@property (nonatomic) MSALAccount *account;
-@property (nonatomic) MSALTenantProfile *tenantProfile;
+@interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
 
-@end
-
-@implementation MSALExternalAADAccount
-
-#pragma mark - Init
-
-- (instancetype)initWithAccount:(MSALAccount *)account
-                  tenantProfile:(MSALTenantProfile *)tenantProfile
-{
-    self = [super init];
-    
-    if (self)
-    {
-        _account = account;
-        _tenantProfile = tenantProfile;
-    }
-    
-    return self;
-}
-
-#pragma mark - MSALExternalAccount
-
-- (NSString *)homeAccountId
-{
-    return self.account.homeAccountId.identifier;
-}
-
-- (NSString *)localAccountId
-{
-    return self.tenantProfile.userObjectId;
-}
-
-- (NSString *)username
-{
-    return self.account.username;
-}
-
-- (NSURL *)authorityURL
-{
-    return self.tenantProfile.authority.url;
-}
-
-- (NSString *)tenantId
-{
-    return self.tenantProfile.tenantId;
-}
-
-- (MSALExternalAccountType)externalAccountType
-{
-    return MSALExternalAccountTypeAAD;
-}
-
-- (NSDictionary *)accountClaims
-{
-    return self.tenantProfile.claims;
-}
+- (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
+                                serviceIdentifier:(NSString *)serviceIdentifier
+                                supportedVersions:(NSArray *)supportedVersions
+                                            error:(NSError **)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

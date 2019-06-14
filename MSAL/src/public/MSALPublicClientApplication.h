@@ -38,6 +38,7 @@
 @class MSALSilentTokenParameters;
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -212,13 +213,33 @@
 - (nullable NSArray <MSALAccount *> *)allAccounts:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
+ Returns account for the given home identifier (received from an account object returned in a previous acquireToken call)
 
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 - (nullable MSALAccount *)accountForHomeAccountId:(nonnull NSString *)homeAccountId
-                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication accountForIdentifier:error:] instead");
+
+/*!
+ Returns account for the given account identifier (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (nullable MSALAccount *)accountForIdentifier:(nonnull NSString *)identifier
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+/*!
+ Returns account for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+// TODO: this one should return multiple accounts?
+- (nullable MSALAccount *)accountForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
 
 /*!
  Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
@@ -625,7 +646,8 @@
 
 /*!
     Removes all tokens from the cache for this application for the provided account
-    User will need to enter his credentials again after calling this API
+    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
+    User might need to enter his credentials again after calling this API
  
     @param  account    The account to remove from the cache
  */

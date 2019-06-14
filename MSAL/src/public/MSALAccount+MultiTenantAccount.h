@@ -25,29 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALAccount.h"
 
-@protocol MSALExternalAccountProviding;
-@class MSALSerializedADALCacheProvider;
+@class MSALTenantProfile;
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface MSALCacheConfig : NSObject <NSCopying>
+@interface MSALAccount (MultiTenantAccount)
 
 /*!
-    The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
-@property NSString *keychainSharingGroup;
-@property (nonatomic, nullable, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
-@property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
-
-
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
 @end
-
-NS_ASSUME_NONNULL_END

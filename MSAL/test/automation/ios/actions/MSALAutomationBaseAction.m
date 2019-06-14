@@ -27,7 +27,6 @@
 
 #import "MSALAutomationBaseAction.h"
 #import <MSAL/MSAL.h>
-#import "MSALAuthorityFactory.h"
 #import "MSIDAutomationTestRequest.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -91,7 +90,7 @@
     if (parameters.configurationAuthority)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:parameters.configurationAuthority];
-        authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
     
     
@@ -119,7 +118,7 @@
 
     if (accountIdentifier)
     {
-        return [application accountForHomeAccountId:accountIdentifier error:error];
+        return [application accountForIdentifier:accountIdentifier error:error];
     }
     else if (parameters.legacyAccountIdentifier)
     {
@@ -147,11 +146,11 @@
     NSInteger expiresOn = [msalResult.expiresOn timeIntervalSince1970];
 
     MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
-    userInfo.objectId = msalResult.tenantProfile.userObjectId;
-    userInfo.tenantId = msalResult.tenantId;
+    userInfo.objectId = msalResult.tenantProfile.claims[@"oid"];
+    userInfo.tenantId = msalResult.tenantProfile.tenantId;
     userInfo.username = msalResult.account.username;
     userInfo.homeAccountId = msalResult.account.homeAccountId.identifier;
-    userInfo.localAccountId = msalResult.tenantProfile.userObjectId;
+    userInfo.localAccountId = msalResult.tenantProfile.identifier;
     userInfo.homeObjectId = msalResult.account.homeAccountId.objectId;
     userInfo.homeTenantId = msalResult.account.homeAccountId.tenantId;
     userInfo.environment = msalResult.account.environment;

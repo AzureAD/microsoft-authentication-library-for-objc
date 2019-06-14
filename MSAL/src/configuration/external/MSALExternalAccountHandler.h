@@ -27,18 +27,22 @@
 @class MSALResult;
 @class MSALAccount;
 @protocol MSALExternalAccount;
+@class MSALAccountEnumerationParameters;
+@class MSALOauth2Provider;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALExternalAccountHandler : NSObject
 
 @property (nonatomic, nonnull, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nonnull, readonly) MSALOauth2Provider *oauth2Provider;
 
-- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider;
+- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
+                                 oauth2Provider:(MSALOauth2Provider *)oauth2Provider;
 
 - (void)updateExternalAccountProviderWithResult:(MSALResult *)result;
 - (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error;
-- (NSArray<id<MSALExternalAccount>> *)allExternalAccountsForClientId:(NSString *)clientId;
+- (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters;
 
 @end
 

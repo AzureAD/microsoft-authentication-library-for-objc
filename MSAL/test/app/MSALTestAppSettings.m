@@ -24,7 +24,6 @@
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
 #import "MSALAccountId.h"
-#import "MSALAuthorityFactory.h"
 #import "MSIDAuthority.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
@@ -170,7 +169,7 @@ static NSDictionary *s_currentProfile = nil;
         return nil;
     }
     
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
     return account;
 }
 
@@ -196,7 +195,7 @@ static NSDictionary *s_currentProfile = nil;
     if (authorityString)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
         _authority = authority;
     }
     
@@ -242,7 +241,7 @@ static NSDictionary *s_currentProfile = nil;
 
 - (void)setCurrentAccount:(MSALAccount *)currentAccount
 {
-    [self setValue:currentAccount.homeAccountId.identifier forKey:@"currentHomeAccountId"];
+    [self setValue:currentAccount.identifier forKey:@"currentHomeAccountId"];
     _currentAccount = currentAccount;
 }
 

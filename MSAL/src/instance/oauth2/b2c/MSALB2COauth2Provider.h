@@ -25,34 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2FactoryProducer.h"
-#import "MSIDOauth2Factory.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAADAuthority.h"
-#import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDB2COauth2Factory.h"
+#import "MSALOauth2Provider.h"
 
-@implementation MSALOauth2FactoryProducer
+NS_ASSUME_NONNULL_BEGIN
 
-+ (MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(NSURL *)authority
-                                             context:(id<MSIDRequestContext>)context
-                                               error:(NSError **)error
-{
-    if (!authority)
-    {
-        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
-
-        return nil;
-    }
-
-    if ([MSIDB2CAuthority isAuthorityFormatValid:authority context:context error:nil])
-    {
-        return [MSIDB2COauth2Factory new];
-    }
-
-    // Create AAD v2 factory for everything else, but in future we might want to further separate this out
-    // (e.g. ADFS, Google, Oauth2 etc...)
-    return [MSIDAADV2Oauth2Factory new];
-}
+@interface MSALB2COauth2Provider : MSALOauth2Provider
 
 @end
+
+NS_ASSUME_NONNULL_END

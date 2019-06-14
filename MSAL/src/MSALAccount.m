@@ -39,15 +39,14 @@
 #import "MSALTenantProfile.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
-#import "MSALAuthorityFactory.h"
 #import "MSALAccountsProvider.h"
-#import "MSALExternalAccount.h"
 #import "MSALAuthority_Internal.h"
+#import "MSALOauth2Provider.h"
 
 @implementation MSALAccount
 
 - (instancetype)initWithUsername:(NSString *)username
-                   homeAccountId:(NSString *)homeAccountId
+                   homeAccountId:(MSALAccountId *)homeAccountId
                      environment:(NSString *)environment
                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
@@ -57,23 +56,9 @@
     {
         _username = username;
         _environment = environment;
-
-        NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
-
-        NSString *uid = nil;
-        NSString *utid = nil;
-
-        if ([accountIdComponents count] == 2)
-        {
-            uid = accountIdComponents[0];
-            utid = accountIdComponents[1];
-        }
-
-        _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
-                                                                 objectId:uid
-                                                                 tenantId:utid];
-
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+        _homeAccountId = homeAccountId;
+        _identifier = homeAccountId.identifier;
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
         if (tenantProfiles.count > 0)
         {
@@ -87,69 +72,71 @@
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account
                 createTenantProfile:(BOOL)createTenantProfile
 {
-    NSError *error;
-    // TODO: use the new msid authority factory which fixes a bug when handling B2C authority
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:account.authority.url context:nil error:&error];
-    if (error || !authority)
-    {
-        MSID_LOG_ERROR(nil, @"Failed to create msal authority from msid authority!");
-        return nil;
-    }
-    
-    NSArray *tenantProfiles;
+    NSArray *tenantProfiles = nil;
     if (createTenantProfile)
     {
-        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:account.localAccountId
-                                                                                  tenantId:account.tenantId
-                                                                                 authority:authority
-                                                                              isHomeTenant:account.isHomeTenantAccount
-                                                                                    claims:account.idTokenClaims.jsonDictionary];
+        NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
         
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:account.localAccountId
+                                                                                tenantId:account.realm
+                                                                             environment:account.environment
+                                                                     isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                  claims:allClaims];
         if (tenantProfile)
         {
             tenantProfiles = @[tenantProfile];
         }
     }
     
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:account.accountIdentifier.homeAccountId
+                                                                           objectId:account.accountIdentifier.uid
+                                                                           tenantId:account.accountIdentifier.utid];
+    
     return [self initWithUsername:account.username
-                    homeAccountId:account.accountIdentifier.homeAccountId
-                      environment:account.authority.environment
+                    homeAccountId:homeAccountId
+                      environment:account.environment
                    tenantProfiles:tenantProfiles];
 }
 
-- (instancetype)initWithMSALExternalAccount:(id<MSALExternalAccount>)externalAccount
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {
-    NSError *error = nil;
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:externalAccount.identifier
+                                                                           objectId:nil
+                                                                           tenantId:nil];
     
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:externalAccount.authorityURL context:nil error:&error];
+    NSError *tenantProfileError = nil;
+    MSALTenantProfile *tenantProfile = [oauthProvider tenantProfileWithClaims:externalAccount.accountClaims
+                                                                homeAccountId:homeAccountId
+                                                                  environment:externalAccount.environment
+                                                                        error:&tenantProfileError];
     
-    if (error || !authority)
+    if (tenantProfileError)
     {
-        MSID_LOG_ERROR(nil, @"Failed to create msal authority from external provided authority!");
-        return nil;
+        MSID_LOG_WARN(nil, @"Failed to create tenant profile with error code %ld, domain %@", tenantProfileError.code, tenantProfileError.domain);
     }
     
-    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithUserObjectId:externalAccount.localAccountId
-                                                                              tenantId:externalAccount.tenantId
-                                                                             authority:authority
-                                                                          isHomeTenant:NO
-                                                                                claims:externalAccount.accountClaims];
+    NSArray *tenantProfiles = tenantProfile ? @[tenantProfile] : nil;
     
-    return [self initWithUsername:externalAccount.username
-                    homeAccountId:externalAccount.homeAccountId
-                      environment:authority.msidAuthority.environment
-                   tenantProfiles:@[tenantProfile]];
+    MSALAccount *account = [self initWithUsername:externalAccount.username
+                                    homeAccountId:homeAccountId
+                                      environment:externalAccount.environment
+                                   tenantProfiles:tenantProfiles];
+    
+    return account;
 }
 
 #pragma mark - NSCopying
 
 - (instancetype)copyWithZone:(NSZone *)zone
 {
-    MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
-    account.username = [self.username copyWithZone:zone];
-    account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.mTenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
-    account.environment = [self.environment copyWithZone:zone];
+    NSString *username = [self.username copyWithZone:zone];
+    MSALAccountId *homeAccountId = [self.homeAccountId copyWithZone:zone];
+    NSString *environment = [self.environment copyWithZone:zone];
+    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
+    
+    MSALAccount *account = [[MSALAccount allocWithZone:zone] initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
+    account.accountClaims = [self.accountClaims copyWithZone:zone];
     return account;
 }
 
@@ -176,6 +163,7 @@
     hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
+    hash = hash * 31 + self.identifier.hash;
     return hash;
 }
 
@@ -187,7 +175,7 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-
+    result &= (!self.identifier && !user.identifier) || [self.identifier isEqualToString:user.identifier];
     return result;
 }
 

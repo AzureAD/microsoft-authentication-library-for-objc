@@ -25,20 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
+
 #import <Foundation/Foundation.h>
+#import <MSAL/MSAL.h>
 
-@class MSALAuthority;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAuthorityFactory : NSObject
+@protocol MSALExternalAccountProviding <NSObject>
 
-+ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
-                                     context:(nullable id<MSIDRequestContext>)context
-                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
-+ (nullable MSALAuthority *)authorityFromUrl:(nonnull NSURL *)url
-                              validateFormat:(BOOL)validateFormat
-                                   rawTenant:(nullable NSString *)rawTenant
-                                     context:(nullable id<MSIDRequestContext>)context
-                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+                                                        error:(NSError * _Nullable * _Nullable)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

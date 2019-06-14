@@ -21,15 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalCacheProvider.h"
+#import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@class MSIDJsonObject;
+@class MSALLegacySharedAccount;
 
-@interface MSALSharedAccountCacheProvider : MSALExternalCacheProvider
+@interface MSALLegacySharedAccountFactory : NSObject
 
-- (instancetype)initWithSharedAccountGroup:(NSString *)sharedGroup
-                                     error:(NSError **)error;
++ (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 
 @end
-
-NS_ASSUME_NONNULL_END

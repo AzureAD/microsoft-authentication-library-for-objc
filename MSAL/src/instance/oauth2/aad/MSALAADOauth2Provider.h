@@ -25,17 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-
-#import <Foundation/Foundation.h>
-#import "MSALExternalAccount.h"
+#import "MSALOauth2Provider.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol MSALExternalAccountProviding <NSObject>
-
-- (BOOL)updateAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
-- (BOOL)removeAccount:(id<MSALExternalAccount>)account error:(NSError * _Nullable * _Nullable)error;
-- (nullable NSArray<id<MSALExternalAccount>> *)accountsForClientId:(NSString *)clientId error:(NSError * _Nullable * _Nullable)error;
+@interface MSALAADOauth2Provider : MSALOauth2Provider
 
 @end
 

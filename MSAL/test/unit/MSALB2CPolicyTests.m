@@ -40,7 +40,6 @@
 #import "MSALAccountId.h"
 #import "MSIDBaseToken.h"
 #import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSIDB2CAuthority.h"
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSALTestUtil.h"
@@ -150,7 +149,7 @@
          XCTAssertNotNil(result);
 
          NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_1_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
-         XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
+         XCTAssertEqualObjects(result.account.identifier, userIdentifier);
          [expectation fulfill];
      }];
 
@@ -177,7 +176,7 @@
                            XCTAssertNotNil(result);
 
                            NSString *userIdentifier = [NSString stringWithFormat:@"1-b2c_2_policy.%@", [MSIDTestIdTokenUtil defaultTenantId]];
-                           XCTAssertEqualObjects(result.account.homeAccountId.identifier, userIdentifier);
+                           XCTAssertEqualObjects(result.account.identifier, userIdentifier);
                            [expectation fulfill];
     }];
 
