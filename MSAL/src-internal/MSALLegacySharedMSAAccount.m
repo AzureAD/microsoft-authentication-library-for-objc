@@ -27,6 +27,7 @@
 #import "MSIDConstants.h"
 #import "MSIDAccountIdentifier.h"
 #import "NSString+MSALAccountIdenfiers.h"
+#import "MSALAccountEnumerationParameters.h"
 
 static NSString *kMSAAccountType = @"MSA";
 
@@ -86,6 +87,25 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     }
     
     return self;
+}
+
+#pragma mark - Match
+
+- (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
+{
+    BOOL matchResult = YES;
+    
+    if (parameters.identifier)
+    {
+        matchResult &= [self.identifier isEqualToString:parameters.identifier];
+    }
+    
+    if (parameters.username)
+    {
+        matchResult &= [self.username isEqualToString:parameters.username];
+    }
+    
+    return matchResult;
 }
 
 @end

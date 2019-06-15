@@ -26,12 +26,15 @@
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSALAccountEnumerationParameters.h"
 
 static NSString *kADALAccountType = @"ADAL";
 
 @interface MSALLegacySharedADALAccount()
 
 @property (nonatomic) MSIDAADAuthority *authority;
+@property (nonatomic) NSString *objectId;
+@property (nonatomic) NSString *tenantId;
 
 @end
 
@@ -83,24 +86,24 @@ static NSString *kADALAccountType = @"ADAL";
         
         _environment = [_authority cacheEnvironmentWithContext:nil];
         
-        NSString *objectId = [jsonDictionary msidStringObjectForKey:@"oid"];
-        NSString *tenantId = [jsonDictionary msidStringObjectForKey:@"tenantId"];
+        _objectId = [jsonDictionary msidStringObjectForKey:@"oid"];
+        _tenantId = [jsonDictionary msidStringObjectForKey:@"tenantId"];
         
         if (_authority.tenant.type == MSIDAADTenantTypeCommon)
         {
-            _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:objectId utid:tenantId];
+            _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:_objectId utid:_tenantId];
         }
         
         NSMutableDictionary *claims = [NSMutableDictionary new];
         
-        if (![NSString msidIsStringNilOrBlank:objectId])
+        if (![NSString msidIsStringNilOrBlank:_objectId])
         {
-            claims[@"oid"] = objectId;
+            claims[@"oid"] = _objectId;
         }
         
-        if (![NSString msidIsStringNilOrBlank:tenantId])
+        if (![NSString msidIsStringNilOrBlank:_tenantId])
         {
-            claims[@"tid"] = tenantId;
+            claims[@"tid"] = _tenantId;
         }
         
         NSString *displayName = [jsonDictionary msidStringObjectForKey:@"displayName"];
@@ -113,10 +116,34 @@ static NSString *kADALAccountType = @"ADAL";
         _username = [jsonDictionary msidStringObjectForKey:@"username"];
         _accountClaims = claims;
         
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(objectId), tenantId, MSID_PII_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(_objectId), _tenantId, MSID_PII_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
+}
+
+#pragma mark - Match
+
+- (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
+{
+    BOOL matchResult = YES;
+    
+    if (parameters.identifier)
+    {
+        matchResult &= [self.identifier isEqualToString:parameters.identifier];
+    }
+    
+    if (parameters.username)
+    {
+        matchResult &= [self.username isEqualToString:parameters.username];
+    }
+    
+    if (parameters.tenantProfileIdentifier)
+    {
+        matchResult &= [self.objectId isEqualToString:parameters.tenantProfileIdentifier];
+    }
+    
+    return matchResult;
 }
 
 @end

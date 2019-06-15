@@ -24,6 +24,7 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALLegacySharedAccount()
 
@@ -69,6 +70,19 @@
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
 {
+    if (parameters.needsAssociatedRefreshToken)
+    {
+        NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        NSString *signinStatus = _signinStatusDictionary[appIdentifier];
+        
+        if (![signinStatus isEqualToString:@"SignedIn"])
+        {
+            return NO;
+        }
+        
+        return YES;
+    }
+    
     return YES;
 }
 
