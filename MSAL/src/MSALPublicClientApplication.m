@@ -238,31 +238,28 @@
     
     config.verifiedRedirectUri = msalRedirectUri;
     
-    NSMutableArray *legacyAccessors = [NSMutableArray new];
+#if TARGET_OS_IPHONE
+    // Optional Paramater
+    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
+    
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
+    self.tokenCache = defaultAccessor;
+#else
+    
+    NSArray *otherAccessors = nil;
     
     id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
     
     if (externalDataSource)
     {
         MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
-        [legacyAccessors addObject:legacyAccessor];
+        otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
     }
     
-#if TARGET_OS_IPHONE
-    // Optional Paramater
-    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
-    
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    NSMutableArray *otherAccessors = [[NSMutableArray alloc] initWithObjects:legacyAccessor, nil];
-    [otherAccessors addObjectsFromArray:legacyAccessors];
-    
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
-    
-    self.tokenCache = defaultAccessor;
-#else
-    
     id<MSIDExtendedTokenCacheDataSource> dataSource = [MSIDMacKeychainTokenCache new]; //TODO: setup correctly with keychain group
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     self.tokenCache = defaultAccessor;
 #endif
     
@@ -292,9 +289,9 @@
         return nil;
     }
     
-    if (_internalConfig.cacheConfig.externalAccountProvider)
+    if ([_internalConfig.cacheConfig.externalAccountProviders count])
     {
-        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProvider:_internalConfig.cacheConfig.externalAccountProvider oauth2Provider:self.msalOauth2Provider];
+        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProviders:_internalConfig.cacheConfig.externalAccountProviders oauth2Provider:self.msalOauth2Provider];
     }
     
     return self;
@@ -356,17 +353,17 @@
     return account;
 }
 
-- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
-                                error:(NSError **)error
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                            error:(NSError **)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId];
     NSError *msidError = nil;
-    MSALAccount *account = [request accountForParameters:parameters error:&msidError];
+    NSArray *accounts = [request accountsForParameters:parameters error:&msidError];
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
-    return account;
+    return accounts;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
@@ -617,7 +614,13 @@
         
         if (msalResult && self.externalAccountHandler)
         {
-            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
+            NSError *updateError = nil;
+            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
+            
+            if (!updateResult)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
+            }
         }
         
         block(msalResult, resultError);
@@ -907,7 +910,13 @@
         
         if (msalResult && self.externalAccountHandler)
         {
-            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
+            NSError *updateError = nil;
+            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
+            
+            if (!updateResult)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
+            }
         }
         
         block(msalResult, resultError);
@@ -1018,7 +1027,7 @@
     
     if (self.externalAccountHandler)
     {
-        result &= [self.externalAccountHandler removeAccountFromExternalProvider:account error:error];
+        result &= [self.externalAccountHandler removeAccount:account error:error];
     }
 
     if (![self.accountMetadataCache clearForHomeAccountId:account.identifier

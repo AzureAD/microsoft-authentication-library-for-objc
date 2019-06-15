@@ -32,6 +32,12 @@
 #import "MSIDKeychainTokenCache.h"
 #endif
 
+@interface MSALCacheConfig()
+
+@property (nonatomic, readwrite) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
+
+@end
+
 @implementation MSALCacheConfig
   
 - (instancetype)initWithKeychainSharingGroup:(NSString *)keychainSharingGroup
@@ -70,9 +76,24 @@
 {
     NSString *keychainSharingGroup = [_keychainSharingGroup copyWithZone:zone];
     MSALCacheConfig *copiedConfig = [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
-    copiedConfig->_externalAccountProvider = _externalAccountProvider;
-    copiedConfig->_serializedADALCache = _serializedADALCache; // TODO: copy?
+    copiedConfig->_externalAccountProviders = [[NSArray alloc] initWithArray:_externalAccountProviders copyItems:NO];
+#if !TARGET_OS_IPHONE
+    copiedConfig->_serializedADALCache = _serializedADALCache;'
+#endif
     return copiedConfig;
+}
+
+- (void)addExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
+{
+    if (!externalAccountProvider)
+    {
+        return;
+    }
+    
+    NSMutableArray *newExternalProviders = [NSMutableArray new];
+    [newExternalProviders addObjectsFromArray:self.externalAccountProviders];
+    [newExternalProviders addObject:externalAccountProvider];
+    self.externalAccountProviders = newExternalProviders;
 }
 
 @end

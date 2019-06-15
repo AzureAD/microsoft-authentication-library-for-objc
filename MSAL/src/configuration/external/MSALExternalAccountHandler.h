@@ -34,15 +34,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALExternalAccountHandler : NSObject
 
-@property (nonatomic, nonnull, readonly) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nonnull, readonly) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
 @property (nonatomic, nonnull, readonly) MSALOauth2Provider *oauth2Provider;
 
-- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
-                                 oauth2Provider:(MSALOauth2Provider *)oauth2Provider;
+- (nullable instancetype)initWithExternalAccountProviders:(NSArray<id<MSALExternalAccountProviding>> *)externalAccountProviders
+                                           oauth2Provider:(MSALOauth2Provider *)oauth2Provider;
 
-- (void)updateExternalAccountProviderWithResult:(MSALResult *)result;
-- (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error;
-- (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters;
+- (BOOL)updateWithResult:(MSALResult *)result error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters;
 
 @end
 

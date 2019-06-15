@@ -231,14 +231,13 @@
                                          error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns account for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
+ Returns accounts for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
  
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
-// TODO: this one should return multiple accounts?
-- (nullable MSALAccount *)accountForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
-                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (nullable NSArray<MSALAccount *> *)accountsForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 
 /*!

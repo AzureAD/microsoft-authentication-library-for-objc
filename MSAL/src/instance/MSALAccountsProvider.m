@@ -88,7 +88,7 @@
 
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
-    return [self accountsForParameters:nil authority:nil error:error];
+    return [self accountsForParameters:[MSALAccountEnumerationParameters new] authority:nil error:error];
 }
 
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters

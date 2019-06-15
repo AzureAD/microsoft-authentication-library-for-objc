@@ -34,7 +34,7 @@
 
 @interface MSALExternalAccountHandler()
 
-@property (nonatomic, nonnull, readwrite) id<MSALExternalAccountProviding> externalAccountProvider;
+@property (nonatomic, nonnull, readwrite) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
 @property (nonatomic, nonnull, readwrite) MSALOauth2Provider *oauth2Provider;
 
 @end
@@ -43,14 +43,20 @@
 
 #pragma mark - Init
 
-- (instancetype)initWithExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
-                                 oauth2Provider:(MSALOauth2Provider *)oauth2Provider
+- (instancetype)initWithExternalAccountProviders:(NSArray<id<MSALExternalAccountProviding>> *)externalAccountProviders
+                                  oauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
+    if (![externalAccountProviders count])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"No external account providers found");
+        return nil;
+    }
+    
     self = [super init];
     
     if (self)
     {
-        _externalAccountProvider = externalAccountProvider;
+        _externalAccountProviders = externalAccountProviders;
         _oauth2Provider = oauth2Provider;
     }
     
@@ -59,62 +65,74 @@
 
 #pragma mark - Accounts
 
-- (BOOL)removeAccountFromExternalProvider:(MSALAccount *)account error:(NSError **)error
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError **)error
 {
-    if (!self.externalAccountProvider)
+    for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
+        NSError *removalError = nil;
+        BOOL result = [provider removeAccount:account error:&removalError];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to remove external account with error %@", MSID_PII_LOG_MASKABLE(removalError));
+            
+            if (error)
+            {
+                *error = [MSALErrorConverter msalErrorFromMsidError:removalError];
+            }
+            
+            return NO;
+        }
+        
+        // TODO: remove tenant profiles?
         return YES;
     }
     
-    NSError *removalError = nil;
-    BOOL result = [self.externalAccountProvider removeAccount:account error:&removalError];
-    
-    if (!result)
-    {
-        if (error)
-        {
-            *error = [MSALErrorConverter msalErrorFromMsidError:removalError];
-        }
-        
-        return NO;
-    }
-    
-    // TODO: remove tenant profiles?
     return YES;
 }
 
-- (void)updateExternalAccountProviderWithResult:(MSALResult *)result
+- (BOOL)updateWithResult:(MSALResult *)result error:(NSError **)error
 {
-    if (self.externalAccountProvider)
+    NSError *updateError = nil;
+    MSALAccount *copiedAccount = [result.account copy];
+    
+    if (result.tenantProfile)
     {
-        NSError *updateError = nil;
-        MSALAccount *copiedAccount = [result.account copy];
-        
-        if (result.tenantProfile)
-        {
-            NSMutableArray *tenantProfiles = [NSMutableArray new];
-            [tenantProfiles addObjectsFromArray:copiedAccount.tenantProfiles];
-            [tenantProfiles addObject:result.tenantProfile];
-            copiedAccount.mTenantProfiles = tenantProfiles;
-        }
-        
-        BOOL result = [self.externalAccountProvider updateAccount:copiedAccount error:&updateError];
+        NSMutableArray *tenantProfiles = [NSMutableArray new];
+        [tenantProfiles addObjectsFromArray:copiedAccount.tenantProfiles];
+        [tenantProfiles addObject:result.tenantProfile];
+        copiedAccount.mTenantProfiles = tenantProfiles;
+    }
+    
+    for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
+    {
+        // TODO: update tenant profiles?
+        BOOL result = [provider updateAccount:copiedAccount error:&updateError];
         
         if (!result)
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil,  @"Failed to update account with error %@", MSID_PII_LOG_MASKABLE(updateError));
+            
+            if (error)
+            {
+                *error = updateError;
+            }
+            
+            return NO;
         }
     }
+    
+    return YES;
 }
 
 - (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
 {
     NSMutableArray *allExternalAccounts = [NSMutableArray new];
     
-    if (self.externalAccountProvider)
+    for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
         NSError *externalError = nil;
-        NSArray *externalAccounts = [self.externalAccountProvider accountsWithParameters:parameters error:&externalError];
+        NSArray *externalAccounts = [provider accountsWithParameters:parameters error:&externalError];
         
         if (externalError)
         {
