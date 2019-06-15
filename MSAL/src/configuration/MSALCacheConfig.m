@@ -78,7 +78,7 @@
     MSALCacheConfig *copiedConfig = [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
     copiedConfig->_externalAccountProviders = [[NSArray alloc] initWithArray:_externalAccountProviders copyItems:NO];
 #if !TARGET_OS_IPHONE
-    copiedConfig->_serializedADALCache = _serializedADALCache;'
+    copiedConfig->_serializedADALCache = _serializedADALCache;
 #endif
     return copiedConfig;
 }

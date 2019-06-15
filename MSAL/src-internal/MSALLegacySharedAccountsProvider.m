@@ -41,6 +41,7 @@
 
 #pragma mark - Init
 
+// TODO: update this API
 - (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
                                 serviceIdentifier:(NSString *)serviceIdentifier
                                 supportedVersions:(NSArray *)supportedVersions
@@ -60,13 +61,23 @@
 
 #pragma mark - MSALExternalAccountProviding
 
+// Should this one be tenant specific? Make surw we send tenant specific account here.
 - (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
 {
+    // Read JSON object
+    // Find the one with same oid
+    // Update fields if necessary (only update the ones we understand + signin state)
+    // Should we go through all supported versions here?
+    // Don't touch MSA!????
     return YES;
 }
 
+// Pass tenant profiles here?
 - (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error
 {
+    // Read JSON object
+    // Find the one with same oid
+    // Update fields if necessary (only update the signin state)
     return YES;
 }
 
