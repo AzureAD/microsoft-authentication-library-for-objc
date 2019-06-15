@@ -35,6 +35,8 @@ static NSString *kMSAAccountType = @"MSA";
 
 @end
 
+static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
+
 @implementation MSALLegacySharedMSAAccount
 
 #pragma mark - Init
@@ -55,7 +57,7 @@ static NSString *kMSAAccountType = @"MSA";
             return nil;
         }
         
-        _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY] rawTenant:nil context:nil error:error];
+        _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:kDefaultCacheAuthority] rawTenant:nil context:nil error:error];
 
         _environment = _authority.environment;
         NSString *cid = [jsonDictionary msidStringObjectForKey:@"cid"];

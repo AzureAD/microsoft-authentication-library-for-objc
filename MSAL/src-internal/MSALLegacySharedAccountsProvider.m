@@ -70,61 +70,68 @@
     return YES;
 }
 
+#pragma mark - Read
+
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
     NSMutableSet *allAccounts = [NSMutableSet new];
+    NSTimeInterval lastWrite = [[NSDate distantPast] timeIntervalSince1970];
     
     for (NSString *supportedVersion in self.supportedVersions)
     {
         NSError *versionError = nil;
-        NSArray *versionAccounts = [self accountsWithVersion:supportedVersion parameters:parameters error:&versionError];
+        MSIDJsonObject *jsonObject = [self jsonObjectWithIdentifier:supportedVersion error:&versionError];
         
-        if (!versionAccounts)
+        if (!jsonObject)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to retrieve accounts with version %@", supportedVersion);
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to retrieve accounts with version %@, error %@", supportedVersion, MSID_PII_LOG_MASKABLE(versionError));
             
-            if (error)
+            if (error && versionError)
             {
                 *error = versionError;
             }
         }
         else
         {
-            [allAccounts addObjectsFromArray:versionAccounts];
+            NSDictionary *jsonDictionary = [jsonObject jsonDictionary];
+            NSNumber *lastWriteForVersion = [jsonDictionary msidObjectForKey:@"lastWriteTimestamp" ofClass:[NSNumber class]];
+            
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with version %@, last write time stamp %@", supportedVersion, lastWriteForVersion);
+            
+            if ([lastWriteForVersion floatValue] > lastWrite)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Accounts with version %@ are latest", supportedVersion);
+                
+                NSArray *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&versionError];
+                
+                if (!accounts)
+                {
+                    MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Failed to deserialize accounts with version %@, error %@", supportedVersion, MSID_PII_LOG_MASKABLE(versionError));
+                    continue;
+                }
+                
+                lastWrite = [lastWriteForVersion floatValue];
+                [allAccounts addObjectsFromArray:accounts];
+            }
+            else
+            {
+                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Older accounts dictionary found with version %@, skipping...", supportedVersion);
+            }
         }
     }
     
-    return [allAccounts allObjects];
+    NSArray *results = [allAccounts allObjects];
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"Finished reading external accounts with results %@", MSID_PII_LOG_MASKABLE(results));
+    
+    return results;
 }
 
-- (nullable NSArray<id<MSALAccount>> *)accountsWithVersion:(NSString *)accountsVersion
-                                                parameters:(MSALAccountEnumerationParameters *)parameters
-                                                     error:(NSError **)error
+- (nullable NSArray<id<MSALAccount>> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
+                                               withParameters:(MSALAccountEnumerationParameters *)parameters
+                                                        error:(NSError **)error
 {
-    MSIDCacheKey *cacheKey = [[MSIDCacheKey alloc] initWithAccount:accountsVersion service:self.serviceIdentifier generic:nil type:nil];
-    NSError *readError = nil;
-    NSArray<MSIDJsonObject *> *jsonAccounts = [self.keychainTokenCache jsonObjectsWithKey:cacheKey
-                                                                               serializer:[MSIDCacheItemJsonSerializer new]
-                                                                                  context:nil
-                                                                                    error:&readError];
-    
-    if (readError)
-    {
-        if (error)
-        {
-            *error = readError;
-        }
-        
-        return nil;
-    }
-    
-    if ([jsonAccounts count] != 1)
-    {
-        return nil;
-    }
-    
-    NSDictionary *jsonDictionary = [jsonAccounts[0] jsonDictionary];
     NSMutableArray *resultAccounts = [NSMutableArray new];
     
     for (NSString *accountId in [jsonDictionary allKeys])
@@ -141,15 +148,60 @@
         
         if (!account)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to create account with error %@", singleAccountError);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create account with error %@", MSID_PII_LOG_MASKABLE(singleAccountError));
+            continue;
         }
-        else if ([account matchesParameters:parameters])
+        
+        if ([account matchesParameters:parameters])
         {
             [resultAccounts addObject:account];
         }
     }
     
     return resultAccounts;
+}
+
+#pragma mark - Keychain read
+
+- (nullable MSIDJsonObject *)jsonObjectWithIdentifier:(NSString *)accountsVersionIdentifier
+                                                error:(NSError **)error
+{
+    MSIDCacheKey *cacheKey = [[MSIDCacheKey alloc] initWithAccount:accountsVersionIdentifier
+                                                           service:self.serviceIdentifier
+                                                           generic:nil
+                                                              type:nil];
+    
+    NSError *readError = nil;
+    NSArray<MSIDJsonObject *> *jsonAccounts = [self.keychainTokenCache jsonObjectsWithKey:cacheKey
+                                                                               serializer:[MSIDCacheItemJsonSerializer new]
+                                                                                  context:nil
+                                                                                    error:&readError];
+    
+    if (readError)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Failed to read external accounts with error %@", MSID_PII_LOG_MASKABLE(readError));
+        
+        if (error)
+        {
+            *error = readError;
+        }
+        
+        return nil;
+    }
+    
+    if ([jsonAccounts count] != 1)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Ambigious query for external accounts, found multiple accounts.");
+        
+        if (error)
+        {
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
+        }
+        
+        return nil;
+    }
+    
+    return jsonAccounts[0];
 }
 
 @end
