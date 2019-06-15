@@ -48,6 +48,8 @@
         if ([NSString msidIsStringNilOrBlank:_accountType]
             || [NSString msidIsStringNilOrBlank:_accountIdentifier])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Missing account type or identifier (account type = %@, account identifier = %@)", _accountType, _accountIdentifier);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected shared account found without type or identifier", nil, nil, nil, nil, nil);
@@ -57,6 +59,7 @@
         }
         
         _signinStatusDictionary = [jsonDictionary msidObjectForKey:@"signInStatus" ofClass:[NSDictionary class]];
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created sign in status dictionary %@", MSID_PII_LOG_MASKABLE(_signinStatusDictionary));
     }
     
     return self;

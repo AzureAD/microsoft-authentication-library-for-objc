@@ -26,6 +26,7 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDConstants.h"
 #import "MSIDAccountIdentifier.h"
+#import "NSString+MSALAccountIdenfiers.h"
 
 static NSString *kMSAAccountType = @"MSA";
 
@@ -59,12 +60,14 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         
         _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:kDefaultCacheAuthority] rawTenant:nil context:nil error:error];
 
-        _environment = _authority.environment;
+        _environment = [_authority cacheEnvironmentWithContext:nil];
         NSString *cid = [jsonDictionary msidStringObjectForKey:@"cid"];
-        NSString *uid = [[self class] cidAsGUID:cid];
+        NSString *uid = [cid msalStringAsGUID];
         
         if ([NSString msidIsStringNilOrBlank:uid])
         {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Unable to read cid from MSA account, cid %@", cid);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected identifier found for MSA account", nil, nil, nil, nil, nil);
@@ -77,42 +80,12 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         _username = [jsonDictionary msidStringObjectForKey:@"email"];
         
         _accountClaims = @{@"tid": MSID_DEFAULT_MSA_TENANTID,
-                           @"oid": _identifier,
-                           @"preferred_username": _username};
+                           @"oid": _identifier};
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external MSA account with identifier %@, object Id %@, tenant Id %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(cid), MSID_DEFAULT_MSA_TENANTID, MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
-}
-
-+ (NSString *)cidAsGUID:(NSString *)cid
-{
-    if (cid.length != 16)
-    {
-        return nil;
-    }
-    
-    NSUUID *uuid = [[NSUUID alloc] initWithUUIDBytes:[[self guidDataFromString:cid] bytes]];
-    return uuid.UUIDString.lowercaseString;
-}
-
-+ (NSData *)guidDataFromString:(NSString *)cidString
-{
-    NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
-    unsigned char b;
-    char chars[3] = {'\0','\0','\0'};
-    for (int i=0; i < [cidString length]/2; i++)
-    {
-        chars[0] = [cidString characterAtIndex:i*2];
-        chars[1] = [cidString characterAtIndex:i*2+1];
-        b = strtol(chars, NULL, 16);
-        
-        if ([result length] > 8+i)
-        {
-            [result replaceBytesInRange:NSMakeRange(8+i, 1) withBytes:&b length:1];
-        }
-    }
-    
-    return result;
 }
 
 @end

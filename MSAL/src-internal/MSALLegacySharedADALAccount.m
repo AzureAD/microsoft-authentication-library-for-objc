@@ -45,8 +45,12 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (self)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creatin external account from ADAL account");
+        
         if (![self.accountType isEqualToString:kADALAccountType])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", self.accountType);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil);
@@ -56,14 +60,28 @@ static NSString *kADALAccountType = @"ADAL";
         }
         
         NSString *authEndpoint = [jsonDictionary msidStringObjectForKey:@"authEndpointUrl"];
+        
+        if (!authEndpoint)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to read AAD authority. Nil authority provided");
+            
+            if (error)
+            {
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil);
+            }
+            
+            return nil;
+        }
+        
         _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:authEndpoint] rawTenant:nil context:nil error:error];
         
         if (!_authority)
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create AAD authority. Wrong authority provided %@", authEndpoint);
             return nil;
         }
         
-        _environment = _authority.environment;
+        _environment = [_authority cacheEnvironmentWithContext:nil];
         
         NSString *objectId = [jsonDictionary msidStringObjectForKey:@"oid"];
         NSString *tenantId = [jsonDictionary msidStringObjectForKey:@"tenantId"];
@@ -93,13 +111,9 @@ static NSString *kADALAccountType = @"ADAL";
         }
         
         _username = [jsonDictionary msidStringObjectForKey:@"username"];
-        
-        if (![NSString msidIsStringNilOrBlank:_username])
-        {
-            claims[@"upn"] = _username;
-        }
-        
         _accountClaims = claims;
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(objectId), tenantId, MSID_PII_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
