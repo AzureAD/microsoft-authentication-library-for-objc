@@ -22,19 +22,24 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
+#import "MSALLegacySharedAccount.h"
 
 @class MSIDJsonObject;
-@class MSALLegacySharedAccount;
-@protocol MSALAccount;
+@class MSALAccount;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALLegacySharedAccountFactory : NSObject
 
 + (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary
                                                           error:(NSError * _Nullable * _Nullable)error;
 
-+ (nullable MSALLegacySharedAccount *)accountsWithMSALAccount:(nonnull id<MSALAccount>)account
-                                                       claims:(nonnull NSDictionary *)claims
-                                              applicationName:(nonnull NSString *)applicationName
-                                                        error:(NSError * _Nullable * _Nullable )error;
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull MSALAccount *)account
+                                                      claims:(nonnull NSDictionary *)claims
+                                             applicationName:(nonnull NSString *)applicationName
+                                              accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                                       error:(NSError * _Nullable * _Nullable )error;
+
++ (nullable MSALAccountEnumerationParameters *)parametersForAccount:(nonnull MSALAccount *)account
+                                                             claims:(nonnull NSDictionary *)claims;
 
 @end

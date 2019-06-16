@@ -27,6 +27,7 @@
 #import "MSALLegacySharedADALAccount.h"
 #import "MSALLegacySharedMSAAccount.h"
 #import "MSIDConstants.h"
+#import <MSAL/MSAL.h>
 
 @implementation MSALLegacySharedAccountFactory
 
@@ -55,23 +56,57 @@
     return nil;
 }
 
-+ (nullable MSALLegacySharedAccount *)accountsWithMSALAccount:(id<MSALAccount>)account
-                                                       claims:(NSDictionary *)claims
-                                              applicationName:(NSString *)applicationName
-                                                        error:(NSError **)error
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull MSALAccount *)account
+                                                      claims:(nonnull NSDictionary *)claims
+                                             applicationName:(nonnull NSString *)applicationName
+                                              accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                                       error:(NSError * _Nullable * _Nullable )error
 {
-    if ([claims[@"tid"] isEqualToString:MSID_DEFAULT_MSA_TENANTID]) // TODO: check by uid instead?
+    if ([self isMSAAccount:account])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
-        return [[MSALLegacySharedMSAAccount alloc] initWithMSALAccount:account accountClaims:claims applicationName:applicationName error:error];
+        return [[MSALLegacySharedMSAAccount alloc] initWithMSALAccount:account
+                                                         accountClaims:claims
+                                                       applicationName:applicationName
+                                                        accountVersion:accountVersion
+                                                                 error:error];
     }
     else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
-        return [[MSALLegacySharedADALAccount alloc] initWithMSALAccount:account accountClaims:claims applicationName:applicationName error:error];
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing AAD account type");
+        return [[MSALLegacySharedADALAccount alloc] initWithMSALAccount:account
+                                                          accountClaims:claims
+                                                        applicationName:applicationName
+                                                         accountVersion:accountVersion
+                                                                  error:error];
     }
     
     return nil;
+}
+
++ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull MSALAccount *)account
+                                                    claims:(nonnull NSDictionary *)claims
+{
+    if ([self isMSAAccount:account])
+    {
+        return [[MSALAccountEnumerationParameters alloc] initWithIdentifier:account.identifier];
+    }
+    else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
+    {
+        return [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:claims[@"oid"]];
+    }
+    
+    return nil;
+}
+
++ (BOOL)isMSAAccount:(MSALAccount *)account
+{
+    if ([account.homeAccountId.tenantId isEqualToString:MSID_DEFAULT_MSA_TENANTID])
+    {
+        return YES;
+    }
+    
+    return NO;
 }
 
 @end

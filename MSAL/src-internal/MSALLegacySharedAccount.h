@@ -27,6 +27,13 @@
 @class MSALAccountEnumerationParameters;
 @protocol MSALAccount;
 
+typedef NS_ENUM(NSInteger, MSALLegacySharedAccountVersion)
+{
+    MSALLegacySharedAccountVersionV1 = 1,
+    MSALLegacySharedAccountVersionV2,
+    MSALLegacySharedAccountVersionV3
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedAccount : NSObject
@@ -36,17 +43,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *accountIdentifier;
 @property (nonatomic, readonly) NSDictionary *signinStatusDictionary;
 
-- (instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
+- (nullable instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters;
 
 - (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
                      applicationName:(NSString *)appName
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                                error:(NSError * _Nullable * _Nullable)error;
 
-- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
-                      accountClaims:(NSDictionary *)claims
-                    applicationName:(NSString *)appName
-                              error:(NSError * _Nullable * _Nullable)error;
+- (nullable instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                               accountClaims:(NSDictionary *)claims
+                             applicationName:(NSString *)appName
+                              accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                       error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

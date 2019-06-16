@@ -58,12 +58,12 @@
  - identifier based on the GUID of "MyOrg.com"
  - accountClaims from the id token for the "MyOrg.com"
  - tenantProfiles
- - tenantProfile[0]
- - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
- - claims for the id token issued by MyOrg.com
+    - tenantProfile[0]
+    - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+    - claims for the id token issued by MyOrg.com
  - tenantProfile[1]
- - identifier based on account identifiers from "Contoso.com"
- - claims for the id token issued by Contoso.com
+    - identifier based on account identifiers from "Contoso.com"
+    - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
 
@@ -80,9 +80,8 @@
 
 /*!
  Unique identifier of the account in the home tenant.
- This can be used later to retrieve accounts and tokens silently from MSAL.
  */
-@property (readonly, nullable) MSALAccountId *homeAccountId DEPRECATED_MSG_ATTRIBUTE("Use MSALAccount.identifier property instead");
+@property (readonly, nullable) MSALAccountId *homeAccountId;
 
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;

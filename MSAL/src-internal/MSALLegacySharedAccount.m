@@ -72,15 +72,26 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 - (instancetype)initWithMSALAccount:(id<MSALAccount>)account
                       accountClaims:(NSDictionary *)claims
                     applicationName:(NSString *)appName
+                     accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                               error:(NSError **)error
 {
+    if (accountVersion == MSALLegacySharedAccountVersionV1)
+    {
+        return nil;
+    }
+    
     NSString *appBundleId = [[NSBundle mainBundle] bundleIdentifier];
     
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
     jsonDictionary[@"id"] = [[NSUUID UUID] UUIDString];
     jsonDictionary[@"authEndpointUrl"] = nil; // TODO
     jsonDictionary[@"environment"] = @"PROD";
-    jsonDictionary[@"originAppId"] = appBundleId; // TODO: don't write for v2
+    
+    if (accountVersion == MSALLegacySharedAccountVersionV3)
+    {
+        jsonDictionary[@"originAppId"] = appBundleId;
+    }
+    
     jsonDictionary[@"signInStatus"] = @{appBundleId : @"SignedIn"};
     jsonDictionary[@"username"] = account.username;
     jsonDictionary[@"additionalProperties"] = @{@"createdBy": appName};
@@ -112,8 +123,14 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
                      applicationName:(NSString *)appName
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                                error:(NSError **)error
 {
+    if (accountVersion == MSALLegacySharedAccountVersionV1)
+    {
+        return YES;
+    }
+    
     NSMutableDictionary *oldDictionary = [self.jsonDictionary mutableCopy];
     NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     
