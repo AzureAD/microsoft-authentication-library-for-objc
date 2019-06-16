@@ -84,7 +84,6 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
     jsonDictionary[@"id"] = [[NSUUID UUID] UUIDString];
-    jsonDictionary[@"authEndpointUrl"] = nil; // TODO
     jsonDictionary[@"environment"] = @"PROD";
     
     if (accountVersion == MSALLegacySharedAccountVersionV3)

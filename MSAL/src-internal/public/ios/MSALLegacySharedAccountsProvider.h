@@ -23,13 +23,22 @@
 
 #import "MSALExternalAccountProviding.h"
 
+typedef NS_ENUM(NSInteger, MSALLegacySharedAccountMode)
+{
+    MSALLegacySharedAccountModeReadOnly = 0,
+    MSALLegacySharedAccountModeReadWrite
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
 
+@property (nonatomic) MSALLegacySharedAccountMode sharedAccountMode;
+
 - (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
                                 serviceIdentifier:(NSString *)serviceIdentifier
                             applicationIdentifier:(NSString *)applicationIdentifier;
+
 @end
 
 NS_ASSUME_NONNULL_END

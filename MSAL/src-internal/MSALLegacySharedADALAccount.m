@@ -27,6 +27,7 @@
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSALAADAuthority.h"
 
 static NSString *kADALAccountType = @"ADAL";
 
@@ -163,6 +164,11 @@ static NSString *kADALAccountType = @"ADAL";
     jsonDictionary[@"tenantId"] = claims[@"tid"];
     jsonDictionary[@"username"] = account.username;
     jsonDictionary[@"type"] = @"ADAL";
+    MSALAADAuthority *aadAuthority = [[MSALAADAuthority alloc] initWithEnvironment:account.environment
+                                                                      audienceType:MSALAzureADMyOrgOnlyAudience
+                                                                         rawTenant:claims[@"tid"]
+                                                                             error:nil];
+    jsonDictionary[@"authEndpointUrl"] = aadAuthority.url.absoluteString;
     return jsonDictionary;
 }
 

@@ -64,6 +64,11 @@
 
 - (BOOL)updateAccount:(MSALAccount *)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
 {
+    if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
+    {
+        return YES;
+    }
+    
     MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:idTokenClaims];
     
     if (!parameters)
@@ -154,6 +159,11 @@
 // Pass tenant profiles here?
 - (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
 {
+    if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
+    {
+        return YES;
+    }
+    
     // Read JSON object
     // Find the one with same oid
     // Update fields if necessary (only update the signin state)
