@@ -156,7 +156,6 @@
     return YES;
 }
 
-// Pass tenant profiles here?
 - (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
 {
     if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
@@ -164,9 +163,63 @@
         return YES;
     }
     
-    // Read JSON object
-    // Find the one with same oid
-    // Update fields if necessary (only update the signin state)
+    NSTimeInterval writeTimeStamp = [[NSDate date] timeIntervalSince1970];
+    
+    for (int version = MSALLegacySharedAccountVersionV2; version <= MSALLegacySharedAccountVersionV3; version++)
+    {
+        NSString *versionIdentifier = [self accountVersionIdentifier:version];
+        NSError *versionError = nil;
+        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
+        
+        if (versionError)
+        {
+            NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
+            [self fillAndLogError:error withError:versionError logLine:logLine];
+            return NO;
+        }
+        
+        NSMutableDictionary *jsonDictionary = [[jsonObject jsonDictionary] mutableCopy];
+        
+        NSError *readError = nil;
+        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary fromMSALAccount:account error:&readError];
+        
+        if (!accounts)
+        {
+            NSString *logLine = [NSString stringWithFormat:@"Failed to parse accounts with version %@", versionIdentifier];
+            [self fillAndLogError:error withError:readError logLine:logLine];
+            return NO;
+        }
+        
+        for (MSALLegacySharedAccount *account in accounts)
+        {
+            NSError *updateError = nil;
+            BOOL updateResult = [account removeAccountWithApplicationName:self.applicationIdentifier
+                                                           accountVersion:version
+                                                                    error:&updateError];
+            
+            if (!updateResult)
+            {
+                NSString *logLine = [NSString stringWithFormat:@"Failed to update accounts with version %@", versionIdentifier];
+                [self fillAndLogError:error withError:updateError logLine:logLine];
+                return NO;
+            }
+            
+            jsonDictionary[account.accountIdentifier] = [account jsonDictionary];
+        }
+        
+        jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
+        writeTimeStamp += 1.0;
+        
+        BOOL saveResult = [self saveJSONDictionary:jsonDictionary
+                                           version:version
+                                             error:error];
+        
+        if (!saveResult)
+        {
+            return NO;
+        }
+    }
+    
     return YES;
 }
 
@@ -258,6 +311,35 @@
     }
     
     return resultAccounts;
+}
+
+- (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
+                                                        fromMSALAccount:(MSALAccount *)account
+                                                                  error:(NSError **)error
+{
+    NSMutableArray *allAccounts = [NSMutableArray new];
+    
+    for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
+    {
+        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:tenantProfile.claims];
+        
+        if (!parameters)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create parameters for the account");
+            
+            if (error)
+            {
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            }
+            
+            return nil;
+        }
+        
+        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:error];
+        [allAccounts addObjectsFromArray:accounts];
+    }
+    
+    return allAccounts;
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary

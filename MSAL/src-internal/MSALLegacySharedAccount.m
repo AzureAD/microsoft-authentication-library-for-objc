@@ -125,34 +125,22 @@ static NSDateFormatter *s_updateDateFormatter = nil;
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                                error:(NSError **)error
 {
-    if (accountVersion == MSALLegacySharedAccountVersionV1)
-    {
-        return YES;
-    }
-    
-    NSMutableDictionary *oldDictionary = [self.jsonDictionary mutableCopy];
-    NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    
-    if (appIdentifier)
-    {
-        NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
-        [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
-        signinDictionary[appIdentifier] = @"SignedIn";
-        oldDictionary[@"signInStatus"] = signinDictionary;
-    }
-    
-    NSDictionary *additionalAccountInfo = [self.jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
-    NSMutableDictionary *mutableAdditionalInfo = [additionalAccountInfo mutableCopy];
-    
-    mutableAdditionalInfo[@"updatedBy"] = appName;
-    mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
-    
-    oldDictionary[@"additionalProperties"] = additionalAccountInfo;
-    
-    // TODO: synchronize?
-    [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
-    _jsonDictionary = oldDictionary;
-    return YES;
+    return [self updateAccountWithMSALAccount:account
+                              applicationName:appName
+                               accountVersion:accountVersion
+                                  signinState:@"SignedIn"
+                                        error:error];
+}
+
+- (BOOL)removeAccountWithApplicationName:(NSString *)appName
+                          accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                   error:(NSError **)error
+{
+    return [self updateAccountWithMSALAccount:nil
+                              applicationName:appName
+                               accountVersion:accountVersion
+                                  signinState:@"SignedOut"
+                                        error:error];
 }
 
 - (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
@@ -165,6 +153,49 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 {
     NSAssert(NO, @"Abstract method, implement me in the subclass");
     return nil;
+}
+
+#pragma mark - Update
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                         signinState:(NSString *)signinState
+                               error:(NSError **)error
+{
+    if (accountVersion == MSALLegacySharedAccountVersionV1)
+    {
+        return YES;
+    }
+    
+    NSMutableDictionary *oldDictionary = [self.jsonDictionary mutableCopy];
+    NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+    
+    if (appIdentifier)
+    {
+        NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
+        [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
+        signinDictionary[appIdentifier] = signinState;
+        oldDictionary[@"signInStatus"] = signinDictionary;
+    }
+    
+    NSDictionary *additionalAccountInfo = [self.jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
+    NSMutableDictionary *mutableAdditionalInfo = [additionalAccountInfo mutableCopy];
+    
+    mutableAdditionalInfo[@"updatedBy"] = appName;
+    mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
+    
+    oldDictionary[@"additionalProperties"] = additionalAccountInfo;
+    
+    // TODO: synchronize?
+    
+    if (account)
+    {
+        [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
+    }
+    
+    _jsonDictionary = oldDictionary;
+    return YES;
 }
 
 #pragma mark - Helpers
