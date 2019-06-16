@@ -25,6 +25,7 @@
 
 @class MSIDJsonObject;
 @class MSALAccountEnumerationParameters;
+@protocol MSALAccount;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -37,6 +38,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters;
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                               error:(NSError * _Nullable * _Nullable)error;
+
+- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                      accountClaims:(NSDictionary *)claims
+                    applicationName:(NSString *)appName
+                              error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

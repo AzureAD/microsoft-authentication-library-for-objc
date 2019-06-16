@@ -146,4 +146,24 @@ static NSString *kADALAccountType = @"ADAL";
     return matchResult;
 }
 
+#pragma mark - Updates
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSMutableDictionary *updatedFields = [NSMutableDictionary new];
+    updatedFields[@"username"] = account.username;
+    return updatedFields;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    jsonDictionary[@"displayName"] = claims[@"name"];
+    jsonDictionary[@"oid"] = claims[@"oid"];
+    jsonDictionary[@"tenantId"] = claims[@"tid"];
+    jsonDictionary[@"username"] = account.username;
+    jsonDictionary[@"type"] = @"ADAL";
+    return jsonDictionary;
+}
+
 @end

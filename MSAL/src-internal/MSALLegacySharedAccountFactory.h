@@ -25,9 +25,16 @@
 
 @class MSIDJsonObject;
 @class MSALLegacySharedAccount;
+@protocol MSALAccount;
 
 @interface MSALLegacySharedAccountFactory : NSObject
 
-+ (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
++ (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary
+                                                          error:(NSError * _Nullable * _Nullable)error;
+
++ (nullable MSALLegacySharedAccount *)accountsWithMSALAccount:(nonnull id<MSALAccount>)account
+                                                       claims:(nonnull NSDictionary *)claims
+                                              applicationName:(nonnull NSString *)applicationName
+                                                        error:(NSError * _Nullable * _Nullable )error;
 
 @end

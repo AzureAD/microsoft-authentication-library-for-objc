@@ -31,6 +31,8 @@
 #import "MSALOauth2Provider.h"
 #import "MSALAccount+Internal.h"
 #import "MSALErrorConverter.h"
+#import "MSALResult.h"
+#import "MSALTenantProfile.h"
 
 @interface MSALExternalAccountHandler()
 
@@ -96,20 +98,11 @@
     NSError *updateError = nil;
     MSALAccount *copiedAccount = [result.account copy];
     
-    if (result.tenantProfile)
-    {
-        NSMutableArray *tenantProfiles = [NSMutableArray new];
-        [tenantProfiles addObjectsFromArray:copiedAccount.tenantProfiles];
-        [tenantProfiles addObject:result.tenantProfile];
-        copiedAccount.mTenantProfiles = tenantProfiles;
-    }
-    
     for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
-        // TODO: update tenant profiles?
-        BOOL result = [provider updateAccount:copiedAccount error:&updateError];
+        BOOL updateResult = [provider updateAccount:copiedAccount idTokenClaims:result.tenantProfile.claims error:&updateError];
         
-        if (!result)
+        if (!updateResult)
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil,  @"Failed to update account with error %@", MSID_PII_LOG_MASKABLE(updateError));
             

@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
                                 serviceIdentifier:(NSString *)serviceIdentifier
-                                supportedVersions:(NSArray *)supportedVersions
+                            applicationIdentifier:(NSString *)applicationIdentifier
                                             error:(NSError **)error;
 
 @end

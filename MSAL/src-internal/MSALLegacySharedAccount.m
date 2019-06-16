@@ -25,12 +25,15 @@
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSALAccountEnumerationParameters.h"
+#import <MSAL/MSAL.h>
 
 @interface MSALLegacySharedAccount()
 
 @property (nonatomic, readwrite) NSDictionary *jsonDictionary;
 
 @end
+
+static NSDateFormatter *s_updateDateFormatter = nil;
 
 @implementation MSALLegacySharedAccount
 
@@ -66,6 +69,25 @@
     return self;
 }
 
+- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                      accountClaims:(NSDictionary *)claims
+                    applicationName:(NSString *)appName
+                              error:(NSError **)error
+{
+    NSString *appBundleId = [[NSBundle mainBundle] bundleIdentifier];
+    
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    jsonDictionary[@"id"] = [[NSUUID UUID] UUIDString];
+    jsonDictionary[@"authEndpointUrl"] = nil; // TODO
+    jsonDictionary[@"environment"] = @"PROD";
+    jsonDictionary[@"originAppId"] = appBundleId; // TODO: don't write for v2
+    jsonDictionary[@"signInStatus"] = @{appBundleId : @"SignedIn"};
+    jsonDictionary[@"username"] = account.username;
+    jsonDictionary[@"additionalProperties"] = @{@"createdBy": appName};
+    [jsonDictionary addEntriesFromDictionary:[self claimsFromMSALAccount:account claims:claims]];
+    return [self initWithJSONDictionary:jsonDictionary error:error];
+}
+
 #pragma mark - Match
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
@@ -84,6 +106,62 @@
     }
     
     return YES;
+}
+
+#pragma mark - Update
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                               error:(NSError **)error
+{
+    NSMutableDictionary *oldDictionary = [self.jsonDictionary mutableCopy];
+    NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+    
+    if (appIdentifier)
+    {
+        NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
+        [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
+        signinDictionary[appIdentifier] = @"SignedIn";
+        oldDictionary[@"signInStatus"] = signinDictionary;
+    }
+    
+    NSDictionary *additionalAccountInfo = [self.jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
+    NSMutableDictionary *mutableAdditionalInfo = [additionalAccountInfo mutableCopy];
+    
+    mutableAdditionalInfo[@"updatedBy"] = appName;
+    mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
+    
+    oldDictionary[@"additionalProperties"] = additionalAccountInfo;
+    
+    // TODO: synchronize?
+    [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
+    _jsonDictionary = oldDictionary;
+    return YES;
+}
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
+}
+
+#pragma mark - Helpers
+
++ (NSDateFormatter *)dateFormatter
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        s_updateDateFormatter = [NSDateFormatter new];
+        [s_updateDateFormatter setDateFormat:@"%Y-%m-%dT%H:%M:%S.Z"];
+    });
+    
+    return s_updateDateFormatter;
 }
 
 @end

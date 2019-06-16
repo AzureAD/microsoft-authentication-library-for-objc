@@ -75,7 +75,7 @@
                                                                         objectId:@"objectId"
                                                                         tenantId:@"tenantId"];
     
-    MSALAccountId *accountId2 = [[MSALAccountId alloc] initWithAccountIdentifier:@"identifier"
+    MSALAccountId *accountId2 = [[MSALAccountId alloc] initWithAccountIdentifier:@"identifier2"
                                                                         objectId:@"objectId"
                                                                         tenantId:nil];
     

@@ -108,4 +108,21 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     return matchResult;
 }
 
+#pragma mark - Updates
+
+// TODO
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSMutableDictionary *updatedFields = [NSMutableDictionary new];
+    updatedFields[@"username"] = account.username;
+    return updatedFields;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    // TODO!
+    return jsonDictionary;
+}
+
 @end

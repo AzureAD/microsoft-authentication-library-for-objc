@@ -33,9 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol MSALExternalAccountProviding <NSObject>
 
-// TODO: how can I get tenant profiles?
-- (BOOL)updateAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
-- (BOOL)removeAccount:(id<MSALAccount>)account error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error;
 

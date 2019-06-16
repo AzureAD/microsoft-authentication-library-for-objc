@@ -26,6 +26,7 @@
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSALLegacySharedADALAccount.h"
 #import "MSALLegacySharedMSAAccount.h"
+#import "MSIDConstants.h"
 
 @implementation MSALLegacySharedAccountFactory
 
@@ -51,6 +52,25 @@
     }
     
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);
+    return nil;
+}
+
++ (nullable MSALLegacySharedAccount *)accountsWithMSALAccount:(id<MSALAccount>)account
+                                                       claims:(NSDictionary *)claims
+                                              applicationName:(NSString *)applicationName
+                                                        error:(NSError **)error
+{
+    if ([claims[@"tid"] isEqualToString:MSID_DEFAULT_MSA_TENANTID]) // TODO: check by uid instead?
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
+        return [[MSALLegacySharedMSAAccount alloc] initWithMSALAccount:account accountClaims:claims applicationName:applicationName error:error];
+    }
+    else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
+        return [[MSALLegacySharedADALAccount alloc] initWithMSALAccount:account accountClaims:claims applicationName:applicationName error:error];
+    }
+    
     return nil;
 }
 
