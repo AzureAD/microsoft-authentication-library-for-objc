@@ -357,7 +357,8 @@
                                             error:(NSError **)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                            clientId:self.internalConfig.clientId];
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
     NSArray *accounts = [request accountsForParameters:parameters error:&msidError];
     

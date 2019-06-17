@@ -90,11 +90,15 @@
 {
     if ([self isMSAAccount:account])
     {
-        return [[MSALAccountEnumerationParameters alloc] initWithIdentifier:account.identifier];
+        MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:account.identifier];
+        parameters.needsAssociatedRefreshToken = NO;
+        return parameters;
     }
     else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
     {
-        return [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:claims[@"oid"]];
+        MSALAccountEnumerationParameters *parameters =  [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:claims[@"oid"]];
+        parameters.needsAssociatedRefreshToken = NO;
+        return parameters;
     }
     
     return nil;

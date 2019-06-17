@@ -163,7 +163,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     mutableAdditionalInfo[@"updatedBy"] = appName;
     mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
     
-    oldDictionary[@"additionalProperties"] = additionalAccountInfo;
+    oldDictionary[@"additionalProperties"] = mutableAdditionalInfo;
     
     if (account)
     {
@@ -193,7 +193,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         s_updateDateFormatter = [NSDateFormatter new];
-        [s_updateDateFormatter setDateFormat:@"%Y-%m-%dT%H:%M:%S.Z"];
+        [s_updateDateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
     });
     
     return s_updateDateFormatter;

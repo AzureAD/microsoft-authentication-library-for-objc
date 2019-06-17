@@ -89,6 +89,15 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     return self;
 }
 
+- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                      accountClaims:(NSDictionary *)claims
+                    applicationName:(NSString *)appName
+                     accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                              error:(NSError **)error
+{
+    return nil; // Creating new MSA accounts isn't supported currently
+}
+
 #pragma mark - Match
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
@@ -105,12 +114,16 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         matchResult &= [self.username isEqualToString:parameters.username];
     }
     
-    return matchResult;
+    if (parameters.tenantProfileIdentifier)
+    {
+        return NO;
+    }
+    
+    return matchResult &= [super matchesParameters:parameters];
 }
 
 #pragma mark - Updates
 
-// TODO
 - (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
 {
     NSMutableDictionary *updatedFields = [NSMutableDictionary new];
@@ -121,7 +134,11 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
 - (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
 {
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
-    // TODO!
+    jsonDictionary[@"displayName"] = claims[@"name"] ? claims[@"name"] : account.username;
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    jsonDictionary[@"cid"] = [accountIdentifier.uid msalGUIDAsShortString];
+    jsonDictionary[@"email"] = account.username;
+    jsonDictionary[@"type"] = @"MSA";
     return jsonDictionary;
 }
 

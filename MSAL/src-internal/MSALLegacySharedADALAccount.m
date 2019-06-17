@@ -144,7 +144,7 @@ static NSString *kADALAccountType = @"ADAL";
         matchResult &= [self.objectId isEqualToString:parameters.tenantProfileIdentifier];
     }
     
-    return matchResult;
+    return matchResult &= [super matchesParameters:parameters];
 }
 
 #pragma mark - Updates
@@ -164,9 +164,13 @@ static NSString *kADALAccountType = @"ADAL";
     jsonDictionary[@"tenantId"] = claims[@"tid"];
     jsonDictionary[@"username"] = account.username;
     jsonDictionary[@"type"] = @"ADAL";
+    
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    BOOL isHomeTenant = [accountIdentifier.utid isEqualToString:claims[@"tid"]];
+    
     MSALAADAuthority *aadAuthority = [[MSALAADAuthority alloc] initWithEnvironment:account.environment
-                                                                      audienceType:MSALAzureADMyOrgOnlyAudience
-                                                                         rawTenant:claims[@"tid"]
+                                                                      audienceType:isHomeTenant ? MSALAzureADAndPersonalMicrosoftAccountAudience : MSALAzureADMyOrgOnlyAudience
+                                                                         rawTenant:isHomeTenant ? nil : claims[@"tid"]
                                                                              error:nil];
     jsonDictionary[@"authEndpointUrl"] = aadAuthority.url.absoluteString;
     return jsonDictionary;

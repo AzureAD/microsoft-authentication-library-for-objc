@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "NSString+MSALAccountIdenfiers.h"
+#import "NSString+MSIDExtensions.h"
 
 @implementation NSString (MSALAccountIdenfiers)
 
@@ -67,6 +68,37 @@
         if ([result length] > zeroFillLen+i)
         {
             [result replaceBytesInRange:NSMakeRange(zeroFillLen+i, 1) withBytes:&resultChar length:1];
+        }
+    }
+    
+    return result;
+}
+
+- (NSString *)msalGUIDAsShortString
+{
+    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:self];
+    
+    if (!uuid)
+    {
+        return nil;
+    }
+    
+    uuid_t uuidBytes;
+    [uuid getUUIDBytes:uuidBytes];
+    
+    NSUInteger dataLength = 16;
+    NSMutableString *result = [NSMutableString stringWithCapacity:dataLength*2];
+    
+    BOOL ignoreLeadingZeroes = YES;
+    for (NSUInteger i = 0; i < dataLength; i++)
+    {
+        if (!ignoreLeadingZeroes || uuidBytes[i] != 0)
+        {
+            [result appendFormat:@"%02x", uuidBytes[i]];
+        }
+        else if (uuidBytes[i] != 0)
+        {
+            ignoreLeadingZeroes = NO;
         }
     }
     

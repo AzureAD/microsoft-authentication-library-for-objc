@@ -74,7 +74,7 @@
     __block NSError *readError = nil;
     
     dispatch_sync(self.synchronizationQueue, ^{
-        results = [self accountsWithParameters:parameters error:&readError];
+        results = [self accountsWithParametersImpl:parameters error:&readError];
     });
     
     if (error && readError)
@@ -93,7 +93,7 @@
     NSMutableSet *allAccounts = [NSMutableSet new];
     NSTimeInterval lastWrite = [[NSDate distantPast] timeIntervalSince1970];
     
-    for (int version = MSALLegacySharedAccountVersionV3; version == MSALLegacySharedAccountVersionV1; version--)
+    for (int version = MSALLegacySharedAccountVersionV3; version >= MSALLegacySharedAccountVersionV1; version--)
     {
         NSString *versionIdentifier = [self accountVersionIdentifier:version];
         NSError *readError = nil;
@@ -134,6 +134,7 @@
         else
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Older accounts dictionary found with version %@, skipping...", versionIdentifier);
+            break;
         }
     }
     
@@ -184,7 +185,7 @@
     return [self updateAccount:account
                  idTokenClaims:idTokenClaims
                 tenantProfiles:nil
-                     operation:MSALLegacySharedAccountRemoveOperation
+                     operation:MSALLegacySharedAccountUpdateOperation
                          error:error];
 }
 
@@ -222,8 +223,13 @@
                                                                                                   error:&accountError];
         if (!sharedAccount)
         {
-            [self fillAndLogError:error withError:accountError logLine:@"Failed to create new account"];
-            return nil;
+            if (accountError)
+            {
+                [self fillAndLogError:error withError:accountError logLine:@"Failed to create account"];
+                return nil;
+            }
+            
+            return @[];
         }
         
         accounts = @[sharedAccount];
@@ -398,7 +404,7 @@
             jsonDictionary[sharedAccount.accountIdentifier] = [sharedAccount jsonDictionary];
         }
         
-        jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
+        jsonDictionary[@"lastWriteTimestamp"] = @((long)writeTimeStamp);
         writeTimeStamp += 1.0;
         
         NSError *saveError = nil;

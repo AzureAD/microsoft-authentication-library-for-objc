@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)msalStringAsGUID;
 - (NSData *)msalStringAsGUIDData;
+- (NSString *)msalGUIDAsShortString;
 
 @end
 
