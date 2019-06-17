@@ -33,24 +33,40 @@
         return nil;
     }
     
-    NSUUID *uuid = [[NSUUID alloc] initWithUUIDBytes:[[self msalStringAsGUIDData] bytes]];
+    NSData *guidData = [self msalStringAsGUIDData];
+    
+    if (!guidData)
+    {
+        return nil;
+    }
+    
+    NSUUID *uuid = [[NSUUID alloc] initWithUUIDBytes:[guidData bytes]];
     return uuid.UUIDString.lowercaseString;
 }
 
 - (NSData *)msalStringAsGUIDData
 {
     NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
-    unsigned char b;
     char chars[3] = {'\0','\0','\0'};
-    for (int i=0; i < [self length]/2; i++)
+    NSUInteger stringLen = [self length];
+    
+    if (stringLen > 16)
+    {
+        return nil;
+    }
+    
+    NSUInteger zeroFillLen = (16 - stringLen/2);
+    unsigned char resultChar;
+    
+    for (int i=0; i < stringLen/2; i++)
     {
         chars[0] = [self characterAtIndex:i*2];
         chars[1] = [self characterAtIndex:i*2+1];
-        b = strtol(chars, NULL, 16);
+        resultChar = strtol(chars, NULL, 16);
         
-        if ([result length] > 8+i)
+        if ([result length] > zeroFillLen+i)
         {
-            [result replaceBytesInRange:NSMakeRange(8+i, 1) withBytes:&b length:1];
+            [result replaceBytesInRange:NSMakeRange(zeroFillLen+i, 1) withBytes:&resultChar length:1];
         }
     }
     
