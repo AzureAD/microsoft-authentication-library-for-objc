@@ -26,6 +26,8 @@
 #import "MSIDAADAuthority.h"
 #import "MSIDConstants.h"
 #import "MSIDAccountIdentifier.h"
+#import "NSString+MSALAccountIdenfiers.h"
+#import "MSALAccountEnumerationParameters.h"
 
 static NSString *kMSAAccountType = @"MSA";
 
@@ -34,6 +36,8 @@ static NSString *kMSAAccountType = @"MSA";
 @property (nonatomic) MSIDAADAuthority *authority;
 
 @end
+
+static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
 
 @implementation MSALLegacySharedMSAAccount
 
@@ -55,14 +59,16 @@ static NSString *kMSAAccountType = @"MSA";
             return nil;
         }
         
-        _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY] rawTenant:nil context:nil error:error];
+        _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:kDefaultCacheAuthority] rawTenant:nil context:nil error:error];
 
-        _environment = _authority.environment;
+        _environment = [_authority cacheEnvironmentWithContext:nil];
         NSString *cid = [jsonDictionary msidStringObjectForKey:@"cid"];
-        NSString *uid = [[self class] cidAsGUID:cid];
+        NSString *uid = [cid msalStringAsGUID];
         
         if ([NSString msidIsStringNilOrBlank:uid])
         {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Unable to read cid from MSA account, cid %@", cid);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected identifier found for MSA account", nil, nil, nil, nil, nil);
@@ -75,42 +81,65 @@ static NSString *kMSAAccountType = @"MSA";
         _username = [jsonDictionary msidStringObjectForKey:@"email"];
         
         _accountClaims = @{@"tid": MSID_DEFAULT_MSA_TENANTID,
-                           @"oid": _identifier,
-                           @"preferred_username": _username};
+                           @"oid": _identifier};
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external MSA account with identifier %@, object Id %@, tenant Id %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(cid), MSID_DEFAULT_MSA_TENANTID, MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
 }
 
-+ (NSString *)cidAsGUID:(NSString *)cid
+- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                      accountClaims:(NSDictionary *)claims
+                    applicationName:(NSString *)appName
+                     accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                              error:(NSError **)error
 {
-    if (cid.length != 16)
-    {
-        return nil;
-    }
-    
-    NSUUID *uuid = [[NSUUID alloc] initWithUUIDBytes:[[self guidDataFromString:cid] bytes]];
-    return uuid.UUIDString.lowercaseString;
+    return nil; // Creating new MSA accounts isn't supported currently
 }
 
-+ (NSData *)guidDataFromString:(NSString *)cidString
+#pragma mark - Match
+
+- (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
 {
-    NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
-    unsigned char b;
-    char chars[3] = {'\0','\0','\0'};
-    for (int i=0; i < [cidString length]/2; i++)
+    BOOL matchResult = YES;
+    
+    if (parameters.identifier)
     {
-        chars[0] = [cidString characterAtIndex:i*2];
-        chars[1] = [cidString characterAtIndex:i*2+1];
-        b = strtol(chars, NULL, 16);
-        
-        if ([result length] > 8+i)
-        {
-            [result replaceBytesInRange:NSMakeRange(8+i, 1) withBytes:&b length:1];
-        }
+        matchResult &= [self.identifier isEqualToString:parameters.identifier];
     }
     
-    return result;
+    if (parameters.username)
+    {
+        matchResult &= [self.username isEqualToString:parameters.username];
+    }
+    
+    if (parameters.tenantProfileIdentifier)
+    {
+        return NO;
+    }
+    
+    return matchResult &= [super matchesParameters:parameters];
+}
+
+#pragma mark - Updates
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSMutableDictionary *updatedFields = [NSMutableDictionary new];
+    updatedFields[@"username"] = account.username;
+    return updatedFields;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    jsonDictionary[@"displayName"] = claims[@"name"] ? claims[@"name"] : account.username;
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    jsonDictionary[@"cid"] = [accountIdentifier.uid msalGUIDAsShortString];
+    jsonDictionary[@"email"] = account.username;
+    jsonDictionary[@"type"] = @"MSA";
+    return jsonDictionary;
 }
 
 @end

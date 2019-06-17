@@ -103,7 +103,6 @@
     
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
-    
 #if TARGET_OS_IPHONE
     id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
@@ -1664,10 +1663,12 @@
     
     NSError *error;
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
-    __auto_type account = [application accountForParameters:parameters error:&error];
+    __auto_type accounts = [application accountsForParameters:parameters error:&error];
     
     XCTAssertNil(error);
-    XCTAssertNotNil(account);
+    XCTAssertNotNil(accounts);
+    XCTAssertEqual([accounts count], 1);
+    MSALAccount *account = accounts[0];
     XCTAssertEqualObjects(account.username, @"fakeuser@contoso.com");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(account.homeAccountId.identifier, @"myuid.utid");
@@ -1686,10 +1687,10 @@
     
     NSError *error;
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
-    __auto_type account = [application accountForParameters:parameters error:&error];
+    __auto_type accounts = [application accountsForParameters:parameters error:&error];
     
     XCTAssertNil(error);
-    XCTAssertNil(account);
+    XCTAssertEqual([accounts count], 0);
 }
 
 - (void)testAccountWithHomeAccountId_whenFociTokenExistsForOtherClient_andAppMetadataInCache_shouldReturnAccountNoError
@@ -1727,10 +1728,11 @@
     
     NSString *homeAccountId = @"myuid.utid";
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:homeAccountId];
-    __auto_type account = [application accountForParameters:parameters error:&error];
+    __auto_type accounts = [application accountsForParameters:parameters error:&error];
     
     XCTAssertNil(error);
-    XCTAssertNotNil(account);
+    XCTAssertNotNil(accounts);
+    XCTAssertTrue([accounts count]);
 }
 
 #pragma mark - loadAccountForUsername
@@ -1915,7 +1917,6 @@
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
-
 
 #endif
 

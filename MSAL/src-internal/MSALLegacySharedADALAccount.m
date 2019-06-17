@@ -26,12 +26,16 @@
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSALAccountEnumerationParameters.h"
+#import "MSALAADAuthority.h"
 
 static NSString *kADALAccountType = @"ADAL";
 
 @interface MSALLegacySharedADALAccount()
 
 @property (nonatomic) MSIDAADAuthority *authority;
+@property (nonatomic) NSString *objectId;
+@property (nonatomic) NSString *tenantId;
 
 @end
 
@@ -45,8 +49,12 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (self)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creatin external account from ADAL account");
+        
         if (![self.accountType isEqualToString:kADALAccountType])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", self.accountType);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil);
@@ -56,33 +64,47 @@ static NSString *kADALAccountType = @"ADAL";
         }
         
         NSString *authEndpoint = [jsonDictionary msidStringObjectForKey:@"authEndpointUrl"];
+        
+        if (!authEndpoint)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to read AAD authority. Nil authority provided");
+            
+            if (error)
+            {
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil);
+            }
+            
+            return nil;
+        }
+        
         _authority = [[MSIDAADAuthority alloc] initWithURL:[NSURL URLWithString:authEndpoint] rawTenant:nil context:nil error:error];
         
         if (!_authority)
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create AAD authority. Wrong authority provided %@", authEndpoint);
             return nil;
         }
         
-        _environment = _authority.environment;
+        _environment = [_authority cacheEnvironmentWithContext:nil];
         
-        NSString *objectId = [jsonDictionary msidStringObjectForKey:@"oid"];
-        NSString *tenantId = [jsonDictionary msidStringObjectForKey:@"tenantId"];
+        _objectId = [jsonDictionary msidStringObjectForKey:@"oid"];
+        _tenantId = [jsonDictionary msidStringObjectForKey:@"tenantId"];
         
         if (_authority.tenant.type == MSIDAADTenantTypeCommon)
         {
-            _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:objectId utid:tenantId];
+            _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:_objectId utid:_tenantId];
         }
         
         NSMutableDictionary *claims = [NSMutableDictionary new];
         
-        if (![NSString msidIsStringNilOrBlank:objectId])
+        if (![NSString msidIsStringNilOrBlank:_objectId])
         {
-            claims[@"oid"] = objectId;
+            claims[@"oid"] = _objectId;
         }
         
-        if (![NSString msidIsStringNilOrBlank:tenantId])
+        if (![NSString msidIsStringNilOrBlank:_tenantId])
         {
-            claims[@"tid"] = tenantId;
+            claims[@"tid"] = _tenantId;
         }
         
         NSString *displayName = [jsonDictionary msidStringObjectForKey:@"displayName"];
@@ -93,16 +115,65 @@ static NSString *kADALAccountType = @"ADAL";
         }
         
         _username = [jsonDictionary msidStringObjectForKey:@"username"];
-        
-        if (![NSString msidIsStringNilOrBlank:_username])
-        {
-            claims[@"upn"] = _username;
-        }
-        
         _accountClaims = claims;
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external ADAL account with identifier %@, object Id %@, tenant Id %@, name %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(_objectId), _tenantId, MSID_PII_LOG_MASKABLE(displayName), MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
     
     return self;
+}
+
+#pragma mark - Match
+
+- (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
+{
+    BOOL matchResult = YES;
+    
+    if (parameters.identifier)
+    {
+        matchResult &= [self.identifier isEqualToString:parameters.identifier];
+    }
+    
+    if (parameters.username)
+    {
+        matchResult &= [self.username isEqualToString:parameters.username];
+    }
+    
+    if (parameters.tenantProfileIdentifier)
+    {
+        matchResult &= [self.objectId isEqualToString:parameters.tenantProfileIdentifier];
+    }
+    
+    return matchResult &= [super matchesParameters:parameters];
+}
+
+#pragma mark - Updates
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSMutableDictionary *updatedFields = [NSMutableDictionary new];
+    updatedFields[@"username"] = account.username;
+    return updatedFields;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    jsonDictionary[@"displayName"] = claims[@"name"];
+    jsonDictionary[@"oid"] = claims[@"oid"];
+    jsonDictionary[@"tenantId"] = claims[@"tid"];
+    jsonDictionary[@"username"] = account.username;
+    jsonDictionary[@"type"] = @"ADAL";
+    
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    BOOL isHomeTenant = [accountIdentifier.utid isEqualToString:claims[@"tid"]];
+    
+    MSALAADAuthority *aadAuthority = [[MSALAADAuthority alloc] initWithEnvironment:account.environment
+                                                                      audienceType:isHomeTenant ? MSALAzureADAndPersonalMicrosoftAccountAudience : MSALAzureADMyOrgOnlyAudience
+                                                                         rawTenant:isHomeTenant ? nil : claims[@"tid"]
+                                                                             error:nil];
+    jsonDictionary[@"authEndpointUrl"] = aadAuthority.url.absoluteString;
+    return jsonDictionary;
 }
 
 @end

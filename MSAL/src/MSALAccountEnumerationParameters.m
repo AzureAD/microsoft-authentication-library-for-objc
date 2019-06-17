@@ -37,6 +37,18 @@
 
 @implementation MSALAccountEnumerationParameters
 
+- (instancetype)init
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _needsAssociatedRefreshToken = YES;
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier
 {
     self = [super init];

@@ -91,7 +91,8 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
-
+#else
+#import "MSIDMacKeychainTokenCache.h"
 #endif
 
 
@@ -131,8 +132,8 @@
 - (NSDictionary<NSString *,NSString *> *)sliceParameters { return self.internalConfig.sliceConfig.sliceDictionary; }
 - (void)setSliceParameters:(NSDictionary<NSString *,NSString *> *)sliceParameters
 {
-    if (!sliceParameters) MSID_LOG_WARN(nil, @"setting slice parameter with nil object.");
-    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WARN(nil, @"slice parameter does not contain slice nor dc");
+    if (!sliceParameters) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"setting slice parameter with nil object.");
+    if (!sliceParameters[@"slice"] && !sliceParameters[@"dc"]) MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"slice parameter does not contain slice nor dc");
     
     self.internalConfig.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
 }
@@ -244,13 +245,11 @@
     MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    NSMutableArray *otherAccessors = [[NSMutableArray alloc] initWithObjects:legacyAccessor, nil];
-    
+    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
-    
     self.tokenCache = defaultAccessor;
 #else
-    id<MSIDExtendedTokenCacheDataSource> dataSource = nil; // TODO: replace with keychain cache
+    id<MSIDExtendedTokenCacheDataSource> dataSource = [MSIDMacKeychainTokenCache new]; //TODO: setup correctly with keychain group
     
     NSMutableArray *legacyAccessors = [NSMutableArray new];
     id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
@@ -260,7 +259,7 @@
         __auto_type defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
         _externalCacheSeeder = [[MSIDExternalAADCacheSeeder alloc] initWithDefaultAccessor:defaultAccessor
                                                                     externalLegacyAccessor:legacyAccessor];
-        [legacyAccessors addObject:legacyAccessor];
+        if (legacyAccessor) [legacyAccessors addObject:legacyAccessor];
     }
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
@@ -293,9 +292,9 @@
         return nil;
     }
     
-    if (_internalConfig.cacheConfig.externalAccountProvider)
+    if ([_internalConfig.cacheConfig.externalAccountProviders count])
     {
-        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProvider:_internalConfig.cacheConfig.externalAccountProvider oauth2Provider:self.msalOauth2Provider];
+        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProviders:_internalConfig.cacheConfig.externalAccountProviders oauth2Provider:self.msalOauth2Provider];
     }
     
     return self;
@@ -358,17 +357,18 @@
     return account;
 }
 
-- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
-                                error:(NSError **)error
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                            error:(NSError **)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
-                                                                            clientId:self.internalConfig.clientId];
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
-    MSALAccount *account = [request accountForParameters:parameters error:&msidError];
+    NSArray *accounts = [request accountsForParameters:parameters error:&msidError];
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
-    return account;
+    return accounts;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
@@ -421,7 +421,7 @@
 
     if ([NSString msidIsStringNilOrBlank:sourceApplication])
     {
-        MSID_LOG_WARN(nil, @"Application doesn't integrate with broker correctly");
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
         // TODO: add a link to Wiki describing why broker is necessary
         return NO;
     }
@@ -549,33 +549,7 @@
     msidParams.customWebview = parameters.customWebview ?: self.customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
-    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
-                    @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
-                    "                                     extraScopesToConsent:%@\n"
-                    "                                                  account:%@\n"
-                    "                                                loginHint:%@\n"
-                    "                                               promptType:%@\n"
-                    "                                     extraQueryParameters:%@\n"
-                    "                                                authority:%@\n"
-                    "                                              webviewType:%@\n"
-                    "                                            customWebview:%@\n"
-                    "                                            correlationId:%@\n"
-                    "                                             capabilities:%@\n"
-                    "                                            claimsRequest:%@]",
-                    _PII_NULLIFY(parameters.scopes),
-                    _PII_NULLIFY(parameters.extraScopesToConsent),
-                    _PII_NULLIFY(parameters.account.homeAccountId),
-                    _PII_NULLIFY(parameters.loginHint),
-                    MSALStringForPromptType(parameters.promptType),
-                    parameters.extraQueryParameters,
-                    _PII_NULLIFY(parameters.authority),
-                    MSALStringForMSALWebviewType(parameters.webviewType),
-                    parameters.customWebview ? @"Yes" : @"No",
-                    parameters.correlationId,
-                    self.internalConfig.clientApplicationCapabilities,
-                    parameters.claimsRequest);
-    
-    MSID_LOG_PII(MSIDLogLevelInfo, nil, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                     @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
                     "                                     extraScopesToConsent:%@\n"
                     "                                                  account:%@\n"
@@ -590,8 +564,8 @@
                     "                                            claimsRequest:%@]",
                     parameters.scopes,
                     parameters.extraScopesToConsent,
-                    parameters.account.homeAccountId,
-                    parameters.loginHint,
+                    MSID_PII_LOG_MASKABLE(parameters.account.homeAccountId),
+                    MSID_PII_LOG_EMAIL(parameters.loginHint),
                     MSALStringForPromptType(parameters.promptType),
                     parameters.extraQueryParameters,
                     parameters.authority,
@@ -648,7 +622,13 @@
         
         if (msalResult && self.externalAccountHandler)
         {
-            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
+            NSError *updateError = nil;
+            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
+            
+            if (!updateResult)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
+            }
         }
         
         block(msalResult, resultError);
@@ -848,7 +828,7 @@
     
     if (!requestAuthority)
     {
-        MSID_LOG_ERROR(nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
         
         if (completionBlock)
         {
@@ -887,26 +867,8 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = providedAuthority;
-
-    MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, msidParams,
-                    @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
-                    "                                                  account:%@\n"
-                    "                                                authority:%@\n"
-                    "                                        validateAuthority:%@\n"
-                    "                                             forceRefresh:%@\n"
-                    "                                            correlationId:%@\n"
-                    "                                             capabilities:%@\n"
-                    "                                            claimsRequest:%@]",
-                    _PII_NULLIFY(parameters.scopes),
-                    _PII_NULLIFY(parameters.account),
-                    _PII_NULLIFY(parameters.authority),
-                    shouldValidate ? @"Yes" : @"No",
-                    parameters.forceRefresh ? @"Yes" : @"No",
-                    parameters.correlationId,
-                    self.internalConfig.clientApplicationCapabilities,
-                    parameters.claimsRequest);
     
-    MSID_LOG_PII(MSIDLogLevelInfo, nil, msidParams,
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
                  "                                                  account:%@\n"
                  "                                                authority:%@\n"
@@ -916,7 +878,7 @@
                  "                                             capabilities:%@\n"
                  "                                            claimsRequest:%@]",
                  parameters.scopes,
-                 parameters.account,
+                 MSID_PII_LOG_EMAIL(parameters.account),
                  parameters.authority,
                  shouldValidate ? @"Yes" : @"No",
                  parameters.forceRefresh ? @"Yes" : @"No",
@@ -961,7 +923,13 @@
         
         if (msalResult && self.externalAccountHandler)
         {
-            [self.externalAccountHandler updateExternalAccountProviderWithResult:msalResult];
+            NSError *updateError = nil;
+            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
+            
+            if (!updateResult)
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
+            }
         }
         
         block(msalResult, resultError);
@@ -1036,15 +1004,13 @@
     {
         NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
         errorDescription = errorDescription ? errorDescription : @"";
-        MSID_LOG_NO_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld)", operation, error.domain, (long)error.code);
-        MSID_LOG_PII(MSIDLogLevelError, nil, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
     }
     
     if (result)
     {
         NSString *hashedAT = [result.accessToken msidTokenHash];
-        MSID_LOG_NO_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, _PII_NULLIFY(hashedAT), _PII_NULLIFY(result.scopes), result.expiresOn);
-        MSID_LOG_PII(MSIDLogLevelInfo, nil, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
     }
 }
 
@@ -1074,7 +1040,7 @@
     
     if (self.externalAccountHandler)
     {
-        result &= [self.externalAccountHandler removeAccountFromExternalProvider:account error:error];
+        result &= [self.externalAccountHandler removeAccount:account error:error];
     }
 
     if (![self.accountMetadataCache clearForHomeAccountId:account.identifier

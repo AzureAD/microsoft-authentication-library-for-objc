@@ -24,12 +24,16 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSIDJsonObject.h"
 #import "NSDictionary+MSIDExtensions.h"
+#import "MSALAccountEnumerationParameters.h"
+#import <MSAL/MSAL.h>
 
 @interface MSALLegacySharedAccount()
 
 @property (nonatomic, readwrite) NSDictionary *jsonDictionary;
 
 @end
+
+static NSDateFormatter *s_updateDateFormatter = nil;
 
 @implementation MSALLegacySharedAccount
 
@@ -48,6 +52,8 @@
         if ([NSString msidIsStringNilOrBlank:_accountType]
             || [NSString msidIsStringNilOrBlank:_accountIdentifier])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Missing account type or identifier (account type = %@, account identifier = %@)", _accountType, _accountIdentifier);
+            
             if (error)
             {
                 *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected shared account found without type or identifier", nil, nil, nil, nil, nil);
@@ -57,16 +63,140 @@
         }
         
         _signinStatusDictionary = [jsonDictionary msidObjectForKey:@"signInStatus" ofClass:[NSDictionary class]];
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created sign in status dictionary %@", MSID_PII_LOG_MASKABLE(_signinStatusDictionary));
     }
     
     return self;
+}
+
+- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
+                      accountClaims:(NSDictionary *)claims
+                    applicationName:(NSString *)appName
+                     accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                              error:(NSError **)error
+{
+    if (accountVersion == MSALLegacySharedAccountVersionV1)
+    {
+        return nil;
+    }
+    
+    NSString *appBundleId = [[NSBundle mainBundle] bundleIdentifier];
+    
+    NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
+    jsonDictionary[@"id"] = [[NSUUID UUID] UUIDString];
+    jsonDictionary[@"environment"] = @"PROD";
+    
+    if (accountVersion == MSALLegacySharedAccountVersionV3)
+    {
+        jsonDictionary[@"originAppId"] = appBundleId;
+    }
+    
+    jsonDictionary[@"signInStatus"] = @{appBundleId : @"SignedIn"};
+    jsonDictionary[@"username"] = account.username;
+    jsonDictionary[@"additionalProperties"] = @{@"createdBy": appName};
+    [jsonDictionary addEntriesFromDictionary:[self claimsFromMSALAccount:account claims:claims]];
+    return [self initWithJSONDictionary:jsonDictionary error:error];
 }
 
 #pragma mark - Match
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
 {
+    if (parameters.needsAssociatedRefreshToken)
+    {
+        NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        NSString *signinStatus = _signinStatusDictionary[appIdentifier];
+        
+        if (![signinStatus isEqualToString:@"SignedIn"])
+        {
+            return NO;
+        }
+        
+        return YES;
+    }
+    
     return YES;
+}
+
+#pragma mark - Update
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                           operation:(MSALLegacySharedAccountWriteOperation)operation
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                               error:(NSError **)error
+{
+    if (accountVersion == MSALLegacySharedAccountVersionV1)
+    {
+        return YES;
+    }
+    
+    NSMutableDictionary *oldDictionary = [self.jsonDictionary mutableCopy];
+    NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+    
+    if (appIdentifier)
+    {
+        NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
+        [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
+        
+        NSString *signinState = nil;
+        
+        switch (operation) {
+            case MSALLegacySharedAccountRemoveOperation:
+                signinState = @"SignedOut";
+                break;
+            case MSALLegacySharedAccountUpdateOperation:
+                signinState = @"SignedIn";
+                break;
+                
+            default:
+                return NO;
+        }
+        
+        signinDictionary[appIdentifier] = signinState;
+        oldDictionary[@"signInStatus"] = signinDictionary;
+    }
+    
+    NSDictionary *additionalAccountInfo = [self.jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
+    NSMutableDictionary *mutableAdditionalInfo = [additionalAccountInfo mutableCopy];
+    
+    mutableAdditionalInfo[@"updatedBy"] = appName;
+    mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
+    
+    oldDictionary[@"additionalProperties"] = mutableAdditionalInfo;
+    
+    if (account)
+    {
+        [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
+    }
+    
+    _jsonDictionary = oldDictionary;
+    return YES;
+}
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
+}
+
+#pragma mark - Helpers
+
++ (NSDateFormatter *)dateFormatter
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        s_updateDateFormatter = [NSDateFormatter new];
+        [s_updateDateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+    });
+    
+    return s_updateDateFormatter;
 }
 
 @end

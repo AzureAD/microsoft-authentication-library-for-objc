@@ -21,23 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "MSALExternalAccountProviding.h"
-
-typedef NS_ENUM(NSInteger, MSALLegacySharedAccountMode)
-{
-    MSALLegacySharedAccountModeReadOnly = 0,
-    MSALLegacySharedAccountModeReadWrite
-};
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
+@interface NSString (MSALAccountIdenfiers)
 
-@property (nonatomic) MSALLegacySharedAccountMode sharedAccountMode;
-
-- (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
-                                serviceIdentifier:(NSString *)serviceIdentifier
-                            applicationIdentifier:(NSString *)applicationIdentifier;
+- (NSString *)msalStringAsGUID;
+- (NSData *)msalStringAsGUIDData;
+- (NSString *)msalGUIDAsShortString;
 
 @end
 

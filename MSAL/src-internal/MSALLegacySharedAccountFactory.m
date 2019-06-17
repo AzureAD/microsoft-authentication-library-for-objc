@@ -26,6 +26,9 @@
 #import "NSDictionary+MSIDExtensions.h"
 #import "MSALLegacySharedADALAccount.h"
 #import "MSALLegacySharedMSAAccount.h"
+#import "MSIDConstants.h"
+#import "MSIDAccountIdentifier.h"
+#import <MSAL/MSAL.h>
 
 @implementation MSALLegacySharedAccountFactory
 
@@ -35,23 +38,82 @@
     
     if (!accountType)
     {
-        MSID_LOG_INFO(nil, @"No account type available");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"No account type available");
         return nil;
     }
     
     if ([accountType isEqualToString:@"ADAL"])
     {
-        MSID_LOG_INFO(nil, @"Initializing ADAL account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing ADAL account type");
         return [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     else if ([accountType isEqualToString:@"MSA"])
     {
-        MSID_LOG_INFO(nil, @"Initializing MSA account type");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
         return [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
     }
     
-    MSID_LOG_INFO(nil, @"Unknown account type found %@", accountType);
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);
     return nil;
+}
+
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccount>)account
+                                                      claims:(nonnull NSDictionary *)claims
+                                             applicationName:(nonnull NSString *)applicationName
+                                              accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                                       error:(NSError * _Nullable * _Nullable )error
+{
+    if ([self isMSAAccount:account])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
+        return [[MSALLegacySharedMSAAccount alloc] initWithMSALAccount:account
+                                                         accountClaims:claims
+                                                       applicationName:applicationName
+                                                        accountVersion:accountVersion
+                                                                 error:error];
+    }
+    else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing AAD account type");
+        return [[MSALLegacySharedADALAccount alloc] initWithMSALAccount:account
+                                                          accountClaims:claims
+                                                        applicationName:applicationName
+                                                         accountVersion:accountVersion
+                                                                  error:error];
+    }
+    
+    return nil;
+}
+
++ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
+                                                    claims:(nonnull NSDictionary *)claims
+{
+    if ([self isMSAAccount:account])
+    {
+        MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:account.identifier];
+        parameters.needsAssociatedRefreshToken = NO;
+        return parameters;
+    }
+    else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
+    {
+        MSALAccountEnumerationParameters *parameters =  [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:claims[@"oid"]];
+        parameters.needsAssociatedRefreshToken = NO;
+        return parameters;
+    }
+    
+    return nil;
+}
+
++ (BOOL)isMSAAccount:(id<MSALAccount>)account
+{
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    
+    if (accountIdentifier.utid && [accountIdentifier.utid isEqualToString:MSID_DEFAULT_MSA_TENANTID])
+    {
+        return YES;
+    }
+    
+    return NO;
 }
 
 @end
