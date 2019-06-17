@@ -34,6 +34,12 @@ typedef NS_ENUM(NSInteger, MSALLegacySharedAccountVersion)
     MSALLegacySharedAccountVersionV3
 };
 
+typedef NS_ENUM(NSInteger, MSALLegacySharedAccountWriteOperation)
+{
+    MSALLegacySharedAccountRemoveOperation = 0,
+    MSALLegacySharedAccountUpdateOperation
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedAccount : NSObject
@@ -48,12 +54,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
                      applicationName:(NSString *)appName
+                           operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                                error:(NSError * _Nullable * _Nullable)error;
 
-- (BOOL)removeAccountWithApplicationName:(NSString *)appName
-                          accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                                   error:(NSError * _Nullable * _Nullable)error;
 
 - (nullable instancetype)initWithMSALAccount:(id<MSALAccount>)account
                                accountClaims:(NSDictionary *)claims

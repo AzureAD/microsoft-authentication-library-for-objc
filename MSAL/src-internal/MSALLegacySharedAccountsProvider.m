@@ -60,174 +60,14 @@
 }
 
 #pragma mark - MSALExternalAccountProviding
-#pragma mark - Update
-
-- (BOOL)updateAccount:(MSALAccount *)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
-{
-    if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
-    {
-        return YES;
-    }
-    
-    MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:idTokenClaims];
-    
-    if (!parameters)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Unsupported account found, skipping update");
-        
-        if (error)
-        {
-            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil);
-        }
-        
-        return NO;
-    }
-    
-    NSTimeInterval writeTimeStamp = [[NSDate date] timeIntervalSince1970];
-    
-    for (int version = MSALLegacySharedAccountVersionV1; version <= MSALLegacySharedAccountVersionV3; version++)
-    {
-        NSString *versionIdentifier = [self accountVersionIdentifier:version];
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts with version %@", versionIdentifier);
-        
-        NSError *versionError = nil;
-        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
-        
-        if (versionError)
-        {
-            NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:versionError logLine:logLine];
-            return NO;
-        }
-        
-        if (!jsonObject)
-        {
-            jsonObject = [[MSIDJsonObject alloc] initWithJSONDictionary:[NSDictionary new] error:nil];
-        }
-        
-        NSMutableDictionary *jsonDictionary = [[jsonObject jsonDictionary] mutableCopy];
-        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary
-                                                                     forMSALAccount:account
-                                                                      idTokenClaims:idTokenClaims
-                                                                   lookupParameters:parameters
-                                                                            version:version
-                                                                              error:&versionError];
-        
-        if (!accounts)
-        {
-            NSString *logLine = [NSString stringWithFormat:@"Failed to parse accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:versionError logLine:logLine];
-            return NO;
-        }
-        
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
-        
-        for (MSALLegacySharedAccount *sharedAccount in accounts)
-        {
-            NSError *updateError = nil;
-            BOOL updateResult = [sharedAccount updateAccountWithMSALAccount:account
-                                                            applicationName:self.applicationIdentifier
-                                                             accountVersion:version
-                                                                      error:&updateError];
-            
-            if (!updateResult)
-            {
-                NSString *logLine = [NSString stringWithFormat:@"Failed to update accounts with version %@", versionIdentifier];
-                [self fillAndLogError:error withError:updateError logLine:logLine];
-                return NO;
-            }
-            
-            jsonDictionary[sharedAccount.accountIdentifier] = [sharedAccount jsonDictionary];
-        }
-        
-        jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
-        writeTimeStamp += 1.0;
-        
-        BOOL saveResult = [self saveJSONDictionary:jsonDictionary
-                                           version:version
-                                             error:error];
-        
-        if (!saveResult)
-        {
-            return NO;
-        }
-    }
-    
-    return YES;
-}
-
-- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
-{
-    if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
-    {
-        return YES;
-    }
-    
-    NSTimeInterval writeTimeStamp = [[NSDate date] timeIntervalSince1970];
-    
-    for (int version = MSALLegacySharedAccountVersionV2; version <= MSALLegacySharedAccountVersionV3; version++)
-    {
-        NSString *versionIdentifier = [self accountVersionIdentifier:version];
-        NSError *versionError = nil;
-        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
-        
-        if (versionError)
-        {
-            NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:versionError logLine:logLine];
-            return NO;
-        }
-        
-        NSMutableDictionary *jsonDictionary = [[jsonObject jsonDictionary] mutableCopy];
-        
-        NSError *readError = nil;
-        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary fromMSALAccount:account error:&readError];
-        
-        if (!accounts)
-        {
-            NSString *logLine = [NSString stringWithFormat:@"Failed to parse accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:readError logLine:logLine];
-            return NO;
-        }
-        
-        for (MSALLegacySharedAccount *account in accounts)
-        {
-            NSError *updateError = nil;
-            BOOL updateResult = [account removeAccountWithApplicationName:self.applicationIdentifier
-                                                           accountVersion:version
-                                                                    error:&updateError];
-            
-            if (!updateResult)
-            {
-                NSString *logLine = [NSString stringWithFormat:@"Failed to update accounts with version %@", versionIdentifier];
-                [self fillAndLogError:error withError:updateError logLine:logLine];
-                return NO;
-            }
-            
-            jsonDictionary[account.accountIdentifier] = [account jsonDictionary];
-        }
-        
-        jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
-        writeTimeStamp += 1.0;
-        
-        BOOL saveResult = [self saveJSONDictionary:jsonDictionary
-                                           version:version
-                                             error:error];
-        
-        if (!saveResult)
-        {
-            return NO;
-        }
-    }
-    
-    return YES;
-}
 
 #pragma mark - Read
 
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters %@", MSID_PII_LOG_MASKABLE(parameters));
+    
     NSMutableSet *allAccounts = [NSMutableSet new];
     NSTimeInterval lastWrite = [[NSDate distantPast] timeIntervalSince1970];
     
@@ -239,39 +79,39 @@
         
         if (!jsonObject)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to retrieve accounts with version %@, error %@", versionIdentifier, MSID_PII_LOG_MASKABLE(versionError));
-            
-            if (error && versionError)
+            if (versionError)
             {
-                *error = versionError;
+                NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
+                [self fillAndLogError:error withError:versionError logLine:logLine];
+                return nil;
             }
+            
+            continue;
+        }
+        
+        NSDictionary *jsonDictionary = [jsonObject jsonDictionary];
+        NSNumber *lastWriteForVersion = [jsonDictionary msidObjectForKey:@"lastWriteTimestamp" ofClass:[NSNumber class]];
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with version %@, last write time stamp %@", versionIdentifier, lastWriteForVersion);
+        
+        if ([lastWriteForVersion floatValue] > lastWrite)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Accounts with version %@ are latest", versionIdentifier);
+            
+            NSArray *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&versionError];
+            
+            if (!accounts)
+            {
+                [self fillAndLogError:error withError:versionError logLine:@"Failed to deserialize accounts"];
+                return nil;
+            }
+            
+            lastWrite = [lastWriteForVersion floatValue];
+            [allAccounts addObjectsFromArray:accounts];
         }
         else
         {
-            NSDictionary *jsonDictionary = [jsonObject jsonDictionary];
-            NSNumber *lastWriteForVersion = [jsonDictionary msidObjectForKey:@"lastWriteTimestamp" ofClass:[NSNumber class]];
-            
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with version %@, last write time stamp %@", versionIdentifier, lastWriteForVersion);
-            
-            if ([lastWriteForVersion floatValue] > lastWrite)
-            {
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Accounts with version %@ are latest", versionIdentifier);
-                
-                NSArray *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&versionError];
-                
-                if (!accounts)
-                {
-                    MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Failed to deserialize accounts with version %@, error %@", versionIdentifier, MSID_PII_LOG_MASKABLE(versionError));
-                    continue;
-                }
-                
-                lastWrite = [lastWriteForVersion floatValue];
-                [allAccounts addObjectsFromArray:accounts];
-            }
-            else
-            {
-                MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Older accounts dictionary found with version %@, skipping...", versionIdentifier);
-            }
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Older accounts dictionary found with version %@, skipping...", versionIdentifier);
         }
     }
     
@@ -313,51 +153,39 @@
     return resultAccounts;
 }
 
-- (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                        fromMSALAccount:(MSALAccount *)account
-                                                                  error:(NSError **)error
+#pragma mark - Update
+
+- (BOOL)updateAccount:(MSALAccount *)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
 {
-    NSMutableArray *allAccounts = [NSMutableArray new];
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
     
-    for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
-    {
-        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:tenantProfile.claims];
-        
-        if (!parameters)
-        {
-            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create parameters for the account");
-            
-            if (error)
-            {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
-            }
-            
-            return nil;
-        }
-        
-        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:error];
-        [allAccounts addObjectsFromArray:accounts];
-    }
-    
-    return allAccounts;
+    return [self updateAccount:account
+                 idTokenClaims:idTokenClaims
+                     operation:MSALLegacySharedAccountRemoveOperation
+                         error:error];
 }
 
-- (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                         forMSALAccount:(MSALAccount *)msalAccount
-                                                          idTokenClaims:(NSDictionary *)idTokenClaims
-                                                       lookupParameters:(MSALAccountEnumerationParameters *)parameters
-                                                                version:(MSALLegacySharedAccountVersion)version
-                                                                  error:(NSError **)error
+- (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
+                                                                     msalAccount:(MSALAccount *)msalAccount
+                                                                   idTokenClaims:(NSDictionary *)idTokenClaims
+                                                                         version:(MSALLegacySharedAccountVersion)version
+                                                                           error:(NSError **)error
 {
-    NSError *versionError = nil;
-    NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&versionError];
+    MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:msalAccount claims:idTokenClaims];
     
-    if (versionError)
+    if (!parameters)
     {
-        if (error)
-        {
-            *error = versionError;
-        }
+        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil);
+        [self fillAndLogError:error withError:parameterError logLine:@"Unsupported account found, skipping update"];
+        return nil;
+    }
+    
+    NSError *parseError = nil;
+    NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&parseError];
+    
+    if (parseError)
+    {
+        [self fillAndLogError:error withError:parseError logLine:@"Failed to parse accounts"];
         return nil;
     }
     
@@ -371,10 +199,7 @@
                                                                                                   error:&accountError];
         if (!sharedAccount)
         {
-            if (error)
-            {
-                *error = accountError;
-            }
+            [self fillAndLogError:error withError:accountError logLine:@"Failed to create new account"];
             return nil;
         }
         
@@ -384,7 +209,144 @@
     return accounts;
 }
 
-#pragma mark - Keychain read
+#pragma mark - Removal
+
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
+    return [self updateAccount:account
+                 idTokenClaims:nil
+                     operation:MSALLegacySharedAccountRemoveOperation
+                         error:error];
+}
+
+- (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
+                                                                     msalAccount:(MSALAccount *)account
+                                                                           error:(NSError **)error
+{
+    NSMutableArray *allAccounts = [NSMutableArray new];
+    
+    for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
+    {
+        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:tenantProfile.claims];
+        
+        if (!parameters)
+        {
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
+            return nil;
+        }
+        
+        NSArray<MSALLegacySharedAccount *> *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:error];
+        
+        if (!accounts)
+        {
+            return nil;
+        }
+        
+        [allAccounts addObjectsFromArray:accounts];
+    }
+    
+    return allAccounts;
+}
+
+#pragma mark - Write
+
+- (BOOL)updateAccount:(MSALAccount *)account
+        idTokenClaims:(NSDictionary *)idTokenClaims
+            operation:(MSALLegacySharedAccountWriteOperation)operation
+                error:(NSError **)error
+{
+    if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
+    {
+        return YES;
+    }
+    
+    NSTimeInterval writeTimeStamp = [[NSDate date] timeIntervalSince1970];
+    
+    for (int version = MSALLegacySharedAccountVersionV1; version <= MSALLegacySharedAccountVersionV3; version++)
+    {
+        NSString *versionIdentifier = [self accountVersionIdentifier:version];
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts with version %@", versionIdentifier);
+        
+        NSError *versionError = nil;
+        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
+        
+        if (versionError)
+        {
+            NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
+            [self fillAndLogError:error withError:versionError logLine:logLine];
+            return NO;
+        }
+        
+        if (!jsonObject)
+        {
+            jsonObject = [[MSIDJsonObject alloc] initWithJSONDictionary:[NSDictionary new] error:nil];
+        }
+        
+        NSMutableDictionary *jsonDictionary = [[jsonObject jsonDictionary] mutableCopy];
+        NSArray<MSALLegacySharedAccount *> *accounts = nil;
+        
+        if (operation == MSALLegacySharedAccountRemoveOperation)
+        {
+            accounts = [self removableAccountsFromJsonObject:jsonDictionary
+                                                 msalAccount:account
+                                                       error:&versionError];
+        }
+        else
+        {
+            accounts = [self updatableAccountsFromJsonObject:jsonDictionary
+                                                 msalAccount:account
+                                               idTokenClaims:idTokenClaims
+                                                     version:version
+                                                       error:&versionError];
+        }
+        
+        if (!accounts)
+        {
+            NSString *logLine = [NSString stringWithFormat:@"Failed to parse accounts with version %@", versionIdentifier];
+            [self fillAndLogError:error withError:versionError logLine:logLine];
+            return NO;
+        }
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
+        
+        for (MSALLegacySharedAccount *sharedAccount in accounts)
+        {
+            NSError *updateError = nil;
+            BOOL updateResult = [sharedAccount updateAccountWithMSALAccount:account
+                                                            applicationName:self.applicationIdentifier
+                                                                  operation:operation
+                                                             accountVersion:version
+                                                                      error:&updateError];
+            
+            if (!updateResult)
+            {
+                NSString *logLine = [NSString stringWithFormat:@"Failed to update accounts with version %@", versionIdentifier];
+                [self fillAndLogError:error withError:updateError logLine:logLine];
+                return NO;
+            }
+            
+            jsonDictionary[sharedAccount.accountIdentifier] = [sharedAccount jsonDictionary];
+        }
+        
+        jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
+        writeTimeStamp += 1.0;
+        
+        BOOL saveResult = [self saveJSONDictionary:jsonDictionary
+                                           version:version
+                                             error:error];
+        
+        if (!saveResult)
+        {
+            return NO;
+        }
+    }
+    
+    return YES;
+}
+
+#pragma mark - Keychain operations
 
 - (nullable MSIDJsonObject *)jsonObjectWithVersion:(MSALLegacySharedAccountVersion)version
                                              error:(NSError **)error
@@ -401,27 +363,21 @@
                                                                                   context:nil
                                                                                     error:&readError];
     
-    if (readError)
+    if (!jsonAccounts)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Failed to read external accounts with error %@, version %@", MSID_PII_LOG_MASKABLE(readError), versionIdentifier);
-        
-        if (error)
+        if (readError)
         {
-            *error = readError;
+            NSString *logLine = [NSString stringWithFormat:@"Failed to read external accounts with version %@", versionIdentifier];
+            [self fillAndLogError:error withError:readError logLine:logLine];
         }
         
         return nil;
     }
     
-    if ([jsonAccounts count] != 1)
+    if ([jsonAccounts count] > 1)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Ambigious query for external accounts, found multiple accounts.");
-        
-        if (error)
-        {
-            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
-        }
-        
+        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
+        [self fillAndLogError:error withError:readError logLine:@"Ambigious query for external accounts, found multiple accounts."];
         return nil;
     }
     

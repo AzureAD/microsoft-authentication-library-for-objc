@@ -122,45 +122,8 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
                      applicationName:(NSString *)appName
+                           operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                               error:(NSError **)error
-{
-    return [self updateAccountWithMSALAccount:account
-                              applicationName:appName
-                               accountVersion:accountVersion
-                                  signinState:@"SignedIn"
-                                        error:error];
-}
-
-- (BOOL)removeAccountWithApplicationName:(NSString *)appName
-                          accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                                   error:(NSError **)error
-{
-    return [self updateAccountWithMSALAccount:nil
-                              applicationName:appName
-                               accountVersion:accountVersion
-                                  signinState:@"SignedOut"
-                                        error:error];
-}
-
-- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
-{
-    NSAssert(NO, @"Abstract method, implement me in the subclass");
-    return nil;
-}
-
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
-{
-    NSAssert(NO, @"Abstract method, implement me in the subclass");
-    return nil;
-}
-
-#pragma mark - Update
-
-- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
-                     applicationName:(NSString *)appName
-                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                         signinState:(NSString *)signinState
                                error:(NSError **)error
 {
     if (accountVersion == MSALLegacySharedAccountVersionV1)
@@ -175,6 +138,21 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     {
         NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
         [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
+        
+        NSString *signinState = nil;
+        
+        switch (operation) {
+            case MSALLegacySharedAccountRemoveOperation:
+                signinState = @"SignedOut";
+                break;
+            case MSALLegacySharedAccountUpdateOperation:
+                signinState = @"SignedIn";
+                break;
+                
+            default:
+                return NO;
+        }
+        
         signinDictionary[appIdentifier] = signinState;
         oldDictionary[@"signInStatus"] = signinDictionary;
     }
@@ -187,8 +165,6 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     oldDictionary[@"additionalProperties"] = additionalAccountInfo;
     
-    // TODO: synchronize?
-    
     if (account)
     {
         [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
@@ -196,6 +172,18 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     _jsonDictionary = oldDictionary;
     return YES;
+}
+
+- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
+}
+
+- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    NSAssert(NO, @"Abstract method, implement me in the subclass");
+    return nil;
 }
 
 #pragma mark - Helpers
