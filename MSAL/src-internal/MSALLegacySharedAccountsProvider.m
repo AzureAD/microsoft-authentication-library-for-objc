@@ -363,7 +363,7 @@
                                                                                   context:nil
                                                                                     error:&readError];
     
-    if (!jsonAccounts)
+    if (![jsonAccounts count])
     {
         if (readError)
         {
