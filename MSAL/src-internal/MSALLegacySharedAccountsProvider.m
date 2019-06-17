@@ -30,6 +30,7 @@
 #import "MSALLegacySharedAccount.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDConstants.h"
+#import "MSALErrorConverter.h"
 
 @interface MSALLegacySharedAccountsProvider()
 
@@ -74,15 +75,15 @@
     for (int version = MSALLegacySharedAccountVersionV3; version == MSALLegacySharedAccountVersionV1; version--)
     {
         NSString *versionIdentifier = [self accountVersionIdentifier:version];
-        NSError *versionError = nil;
-        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
+        NSError *readError = nil;
+        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&readError];
         
         if (!jsonObject)
         {
-            if (versionError)
+            if (readError)
             {
                 NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
-                [self fillAndLogError:error withError:versionError logLine:logLine];
+                [self fillAndLogError:error withError:readError logLine:logLine];
                 return nil;
             }
             
@@ -98,11 +99,11 @@
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Accounts with version %@ are latest", versionIdentifier);
             
-            NSArray *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&versionError];
+            NSArray *accounts = [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:&readError];
             
             if (!accounts)
             {
-                [self fillAndLogError:error withError:versionError logLine:@"Failed to deserialize accounts"];
+                [self fillAndLogError:error withError:readError logLine:@"Failed to deserialize accounts"];
                 return nil;
             }
             
@@ -269,13 +270,13 @@
         NSString *versionIdentifier = [self accountVersionIdentifier:version];
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts with version %@", versionIdentifier);
         
-        NSError *versionError = nil;
-        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&versionError];
+        NSError *updateError = nil;
+        MSIDJsonObject *jsonObject = [self jsonObjectWithVersion:version error:&updateError];
         
-        if (versionError)
+        if (updateError)
         {
             NSString *logLine = [NSString stringWithFormat:@"Failed to retrieve accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:versionError logLine:logLine];
+            [self fillAndLogError:error withError:updateError logLine:logLine];
             return NO;
         }
         
@@ -291,7 +292,7 @@
         {
             accounts = [self removableAccountsFromJsonObject:jsonDictionary
                                                  msalAccount:account
-                                                       error:&versionError];
+                                                       error:&updateError];
         }
         else
         {
@@ -299,13 +300,13 @@
                                                  msalAccount:account
                                                idTokenClaims:idTokenClaims
                                                      version:version
-                                                       error:&versionError];
+                                                       error:&updateError];
         }
         
         if (!accounts)
         {
             NSString *logLine = [NSString stringWithFormat:@"Failed to parse accounts with version %@", versionIdentifier];
-            [self fillAndLogError:error withError:versionError logLine:logLine];
+            [self fillAndLogError:error withError:updateError logLine:logLine];
             return NO;
         }
         
@@ -333,12 +334,14 @@
         jsonDictionary[@"lastWriteTimestamp"] = @(writeTimeStamp);
         writeTimeStamp += 1.0;
         
+        NSError *saveError = nil;
         BOOL saveResult = [self saveJSONDictionary:jsonDictionary
                                            version:version
-                                             error:error];
+                                             error:&saveError];
         
         if (!saveResult)
         {
+            [self fillAndLogError:error withError:saveError logLine:@"Failed to save accounts"];
             return NO;
         }
     }
@@ -420,9 +423,9 @@
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@, error %@", logLine, MSID_PII_LOG_MASKABLE(resultError));
     
-    if (error)
+    if (error && resultError)
     {
-        *error = resultError;
+        *error = [MSALErrorConverter msalErrorFromMsidError:resultError];
     }
 }
 
