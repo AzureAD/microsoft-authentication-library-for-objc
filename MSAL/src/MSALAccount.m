@@ -42,6 +42,7 @@
 #import "MSALAccountsProvider.h"
 #import "MSALAuthority_Internal.h"
 #import "MSALOauth2Provider.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALAccount
 
@@ -101,9 +102,10 @@
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
                              oauth2Provider:(MSALOauth2Provider *)oauthProvider
 {
-    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:externalAccount.identifier
-                                                                           objectId:nil
-                                                                           tenantId:nil];
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:externalAccount.identifier];
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:accountIdentifier.homeAccountId
+                                                                           objectId:accountIdentifier.uid
+                                                                           tenantId:accountIdentifier.utid];
     
     NSError *tenantProfileError = nil;
     MSALTenantProfile *tenantProfile = [oauthProvider tenantProfileWithClaims:externalAccount.accountClaims
