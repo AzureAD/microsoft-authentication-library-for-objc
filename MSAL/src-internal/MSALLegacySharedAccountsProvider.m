@@ -37,6 +37,7 @@
 @property (nonatomic) MSIDKeychainTokenCache *keychainTokenCache;
 @property (nonatomic) NSString *serviceIdentifier;
 @property (nonatomic) NSString *applicationIdentifier;
+@property (nonatomic) dispatch_queue_t synchronizationQueue;
 
 @end
 
@@ -55,17 +56,37 @@
         self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:sharedGroup];
         self.serviceIdentifier = serviceIdentifier;
         self.applicationIdentifier = applicationIdentifier;
+        
+        NSString *queueName = [NSString stringWithFormat:@"com.microsoft.legacysharedaccountsprovider-%@", [NSUUID UUID].UUIDString];
+        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     }
     
     return self;
 }
 
 #pragma mark - MSALExternalAccountProviding
-
 #pragma mark - Read
 
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error
+{
+    __block NSArray *results = nil;
+    __block NSError *readError = nil;
+    
+    dispatch_sync(self.synchronizationQueue, ^{
+        results = [self accountsWithParameters:parameters error:&readError];
+    });
+    
+    if (error && readError)
+    {
+        *error = readError;
+    }
+    
+    return results;
+}
+
+- (nullable NSArray<id<MSALAccount>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
+                                                            error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters %@", MSID_PII_LOG_MASKABLE(parameters));
     
@@ -257,6 +278,26 @@
         idTokenClaims:(NSDictionary *)idTokenClaims
             operation:(MSALLegacySharedAccountWriteOperation)operation
                 error:(NSError **)error
+{
+    __block BOOL result = YES;
+    __block NSError *updateError = nil;
+    
+    dispatch_barrier_async(self.synchronizationQueue, ^{
+        result = [self updateAccountImpl:account idTokenClaims:idTokenClaims operation:operation error:&updateError];
+    });
+    
+    if (error && updateError)
+    {
+        *error = updateError;
+    }
+    
+    return result;
+}
+
+- (BOOL)updateAccountImpl:(MSALAccount *)account
+            idTokenClaims:(NSDictionary *)idTokenClaims
+                operation:(MSALLegacySharedAccountWriteOperation)operation
+                    error:(NSError **)error
 {
     if (self.sharedAccountMode != MSALLegacySharedAccountModeReadWrite)
     {
