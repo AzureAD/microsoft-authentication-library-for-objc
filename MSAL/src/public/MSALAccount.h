@@ -81,7 +81,7 @@
 /*!
  Unique identifier of the account in the home tenant.
  */
-@property (readonly, nullable) MSALAccountId *homeAccountId;
+@property (readonly, nullable) MSALAccountId *homeAccountId DEPRECATED_MSG_ATTRIBUTE("Use MSALAccount.identifier property instead");
 
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;

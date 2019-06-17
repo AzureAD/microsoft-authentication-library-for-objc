@@ -27,6 +27,7 @@
 #import "MSALLegacySharedADALAccount.h"
 #import "MSALLegacySharedMSAAccount.h"
 #import "MSIDConstants.h"
+#import "MSIDAccountIdentifier.h"
 #import <MSAL/MSAL.h>
 
 @implementation MSALLegacySharedAccountFactory
@@ -56,7 +57,7 @@
     return nil;
 }
 
-+ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull MSALAccount *)account
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccount>)account
                                                       claims:(nonnull NSDictionary *)claims
                                              applicationName:(nonnull NSString *)applicationName
                                               accountVersion:(MSALLegacySharedAccountVersion)accountVersion
@@ -84,7 +85,7 @@
     return nil;
 }
 
-+ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull MSALAccount *)account
++ (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
                                                     claims:(nonnull NSDictionary *)claims
 {
     if ([self isMSAAccount:account])
@@ -99,9 +100,11 @@
     return nil;
 }
 
-+ (BOOL)isMSAAccount:(MSALAccount *)account
++ (BOOL)isMSAAccount:(id<MSALAccount>)account
 {
-    if ([account.homeAccountId.tenantId isEqualToString:MSID_DEFAULT_MSA_TENANTID])
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:account.identifier];
+    
+    if (accountIdentifier.utid && [accountIdentifier.utid isEqualToString:MSID_DEFAULT_MSA_TENANTID])
     {
         return YES;
     }

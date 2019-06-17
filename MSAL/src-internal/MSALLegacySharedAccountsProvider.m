@@ -177,18 +177,19 @@
 
 #pragma mark - Update
 
-- (BOOL)updateAccount:(MSALAccount *)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
+- (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(NSError **)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
     
     return [self updateAccount:account
                  idTokenClaims:idTokenClaims
+                tenantProfiles:nil
                      operation:MSALLegacySharedAccountRemoveOperation
                          error:error];
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(MSALAccount *)msalAccount
+                                                                     msalAccount:(id<MSALAccount>)msalAccount
                                                                    idTokenClaims:(NSDictionary *)idTokenClaims
                                                                          version:(MSALLegacySharedAccountVersion)version
                                                                            error:(NSError **)error
@@ -233,22 +234,40 @@
 
 #pragma mark - Removal
 
-- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
+- (BOOL)removeAccount:(id<MSALAccount>)account
+       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
+                error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
     return [self updateAccount:account
                  idTokenClaims:nil
+                tenantProfiles:tenantProfiles
                      operation:MSALLegacySharedAccountRemoveOperation
                          error:error];
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
-                                                                     msalAccount:(MSALAccount *)account
+                                                                     msalAccount:(id<MSALAccount>)account
+                                                                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                                                                            error:(NSError **)error
 {
+    if (![tenantProfiles count])
+    {
+        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:account.accountClaims];
+        
+        if (!parameters)
+        {
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
+            return nil;
+        }
+        
+        return [self accountsFromJsonObject:jsonDictionary withParameters:parameters error:error];
+    }
+    
     NSMutableArray *allAccounts = [NSMutableArray new];
     
-    for (MSALTenantProfile *tenantProfile in account.tenantProfiles)
+    for (MSALTenantProfile *tenantProfile in tenantProfiles)
     {
         MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:tenantProfile.claims];
         
@@ -274,8 +293,9 @@
 
 #pragma mark - Write
 
-- (BOOL)updateAccount:(MSALAccount *)account
+- (BOOL)updateAccount:(id<MSALAccount>)account
         idTokenClaims:(NSDictionary *)idTokenClaims
+       tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
             operation:(MSALLegacySharedAccountWriteOperation)operation
                 error:(NSError **)error
 {
@@ -283,7 +303,11 @@
     __block NSError *updateError = nil;
     
     dispatch_barrier_async(self.synchronizationQueue, ^{
-        result = [self updateAccountImpl:account idTokenClaims:idTokenClaims operation:operation error:&updateError];
+        result = [self updateAccountImpl:account
+                           idTokenClaims:idTokenClaims
+                          tenantProfiles:tenantProfiles
+                               operation:operation
+                                   error:&updateError];
     });
     
     if (error && updateError)
@@ -294,8 +318,9 @@
     return result;
 }
 
-- (BOOL)updateAccountImpl:(MSALAccount *)account
+- (BOOL)updateAccountImpl:(id<MSALAccount>)account
             idTokenClaims:(NSDictionary *)idTokenClaims
+           tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
                 operation:(MSALLegacySharedAccountWriteOperation)operation
                     error:(NSError **)error
 {
@@ -333,6 +358,7 @@
         {
             accounts = [self removableAccountsFromJsonObject:jsonDictionary
                                                  msalAccount:account
+                                              tenantProfiles:tenantProfiles
                                                        error:&updateError];
         }
         else
