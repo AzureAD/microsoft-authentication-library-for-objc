@@ -80,6 +80,7 @@
 #import "MSALClaimsRequest+Internal.h"
 #import "MSALExternalAccountHandler.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
+#import "MSIDExternalAADCacheSeeder.h"
 #import "NSURL+MSIDAADUtils.h"
 #import "MSALOauth2Provider.h"
 #import "MSALAccountEnumerationParameters.h"
@@ -102,6 +103,7 @@
 }
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
+@property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
 
 @end
 
@@ -224,7 +226,7 @@
         
         return nil;
     }
-
+    
     NSError *msidError = nil;
     MSALRedirectUri *msalRedirectUri = [MSALRedirectUriVerifier msalRedirectUriWithCustomUri:config.redirectUri
                                                                                     clientId:config.clientId
@@ -247,19 +249,20 @@
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
     self.tokenCache = defaultAccessor;
 #else
+    id<MSIDExtendedTokenCacheDataSource> dataSource = [MSIDMacKeychainTokenCache new]; //TODO: setup correctly with keychain group
     
-    NSArray *otherAccessors = nil;
-    
+    NSMutableArray *legacyAccessors = [NSMutableArray new];
     id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
-    
     if (externalDataSource)
     {
-        MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
-        otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
+        __auto_type legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
+        __auto_type defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+        _externalCacheSeeder = [[MSIDExternalAADCacheSeeder alloc] initWithDefaultAccessor:defaultAccessor
+                                                                    externalLegacyAccessor:legacyAccessor];
+        if (legacyAccessor) [legacyAccessors addObject:legacyAccessor];
     }
     
-    id<MSIDExtendedTokenCacheDataSource> dataSource = [MSIDMacKeychainTokenCache new]; //TODO: setup correctly with keychain group
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
     self.tokenCache = defaultAccessor;
 #endif
     
@@ -296,6 +299,7 @@
     
     return self;
 }
+
 
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
@@ -592,6 +596,9 @@
                                                                                                           defaultAccessor:self.tokenCache
                                                                                                   accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
+#if TARGET_OS_OSX
+    tokenRequestProvider.externalCacheSeeder = self.externalCacheSeeder;
+#endif
     
     NSError *requestError = nil;
     id<MSIDRequestControlling> controller = [MSIDRequestControllerFactory interactiveControllerForParameters:msidParams tokenRequestProvider:tokenRequestProvider error:&requestError];
@@ -786,7 +793,8 @@
 - (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
                          completionBlock:(MSALCompletionBlock)completionBlock
 {
-    MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
+    MSIDAuthority *requestAuthority = providedAuthority;
     
     // This is meant to avoid developer error, when they configure PCA with e.g. AAD authority, but pass B2C authority here
     // Authority type in PCA and parameters should match
@@ -858,6 +866,7 @@
     msidParams.extraTokenRequestParameters = self.internalConfig.extraQueryParameters.extraTokenURLParameters;
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
+    msidParams.providedAuthority = providedAuthority;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -888,6 +897,9 @@
                                                                                                           defaultAccessor:self.tokenCache
                                                                                                   accountMetadataAccessor:self.accountMetadataCache
                                                                                                    tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
+#if TARGET_OS_OSX
+    tokenRequestProvider.externalCacheSeeder = self.externalCacheSeeder;
+#endif
     
     NSError *requestError = nil;
     id<MSIDRequestControlling> requestController = [MSIDRequestControllerFactory silentControllerForParameters:msidParams forceRefresh:parameters.forceRefresh tokenRequestProvider:tokenRequestProvider error:&requestError];
