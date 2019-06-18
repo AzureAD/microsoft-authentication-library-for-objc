@@ -101,21 +101,18 @@
     
     NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
     self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
-    
-    id<MSIDTokenCacheDataSource, MSIDMetadataCacheDataSource> dataSource = nil;
-    
+        
 #if TARGET_OS_IPHONE
-    dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
 #else
-    dataSource = [MSIDTestCacheDataSource new];
+    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new] otherCacheAccessors:nil];
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]];
 #endif
     
-    self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
-    
-    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    [self.accountMetadataCache clearWithContext:nil error:nil];
-    
+
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 }
@@ -1916,9 +1913,6 @@
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
-
-#endif
-
 - (void)testRemove_whenUserDontExist_shouldReturnTrueWithNoError
 {
     __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
@@ -1936,6 +1930,8 @@
     XCTAssertTrue(result);
     XCTAssertNil(error);
 }
+
+#endif
 
 - (void)testRemoveUser_whenKeychainError_shouldReturnNoWithError
 {

@@ -165,7 +165,7 @@ static NSDictionary *s_currentProfile = nil;
 
     if (application == nil)
     {
-        MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"failed to create application to get user: %@", error);
         return nil;
     }
     
