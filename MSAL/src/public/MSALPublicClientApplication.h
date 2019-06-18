@@ -231,7 +231,7 @@
                                          error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns accounts for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
+ Returns account for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
  
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.

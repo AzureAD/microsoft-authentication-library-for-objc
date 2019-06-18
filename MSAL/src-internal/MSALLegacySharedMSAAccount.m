@@ -95,7 +95,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
                               error:(NSError **)error
 {
-    return nil; // Creating new MSA accounts isn't supported currently
+    return nil; // Creating new MSA accounts isn't supported currently nad will be added at a later point
 }
 
 #pragma mark - Match
