@@ -619,17 +619,7 @@
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        
-        if (msalResult && self.externalAccountHandler)
-        {
-            NSError *updateError = nil;
-            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
-            
-            if (!updateResult)
-            {
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
-            }
-        }
+        [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
         block(msalResult, resultError);
     }];
@@ -920,18 +910,7 @@
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        
-        if (msalResult && self.externalAccountHandler)
-        {
-            NSError *updateError = nil;
-            BOOL updateResult = [self.externalAccountHandler updateWithResult:msalResult error:&updateError];
-            
-            if (!updateResult)
-            {
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, msidParams, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
-            }
-        }
-        
+        [self updateExternalAccountsWithResult:msalResult context:msidParams];
         block(msalResult, resultError);
     }];
     
@@ -1011,6 +990,20 @@
     {
         NSString *hashedAT = [result.accessToken msidTokenHash];
         MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+    }
+}
+
+- (void)updateExternalAccountsWithResult:(MSALResult *)result context:(id<MSIDRequestContext>)context
+{
+    if (result && self.externalAccountHandler)
+    {
+        NSError *updateError = nil;
+        BOOL updateResult = [self.externalAccountHandler updateWithResult:result error:&updateError];
+        
+        if (!updateResult)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, context, @"Failed to update external account with result %@", MSID_PII_LOG_MASKABLE(updateError));
+        }
     }
 }
 

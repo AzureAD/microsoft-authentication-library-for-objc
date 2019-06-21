@@ -49,7 +49,7 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (self)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creatin external account from ADAL account");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creating external account from ADAL account");
         
         if (![self.accountType isEqualToString:kADALAccountType])
         {
