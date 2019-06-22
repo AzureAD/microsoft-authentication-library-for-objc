@@ -100,9 +100,11 @@
     {
         if (!ignoreLeadingZeroes || uuidBytes[i] != 0)
         {
-            [result appendFormat:@"%02x", uuidBytes[i]];
+            NSString *format = ignoreLeadingZeroes ? @"%x" : @"%02x";
+            [result appendFormat:format, uuidBytes[i]];
         }
-        else if (uuidBytes[i] != 0)
+        
+        if (uuidBytes[i] != 0)
         {
             ignoreLeadingZeroes = NO;
         }

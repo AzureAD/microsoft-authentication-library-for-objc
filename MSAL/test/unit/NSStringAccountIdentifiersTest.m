@@ -34,6 +34,8 @@
 
 @implementation NSStringAccountIdentifiersTest
 
+#pragma mark - msalStringAsGUIDData
+
 - (void)testMSALStringASGUIDData_whenLongerThan16CharsString_shouldReturnNil
 {
     NSString *mylongString = @"12345678910111213141516";
@@ -86,6 +88,49 @@
     NSUUID *actualUUID = [[NSUUID alloc] initWithUUIDBytes:[guidData bytes]];
     XCTAssertNotNil(actualUUID);
     XCTAssertEqualObjects(expectedUUID, actualUUID.UUIDString);
+}
+
+#pragma mark - msalGUIDAsShortString
+
+- (void)testMSALGUIDAsShortString_whenIncorrectGUID_shouldReturnNil
+{
+    NSString *input = @"xxkidkddndnjdj";
+    NSString *output = [input msalGUIDAsShortString];
+    XCTAssertNil(output);
+}
+
+- (void)testMSALGUIDAsShortString_whenEmptyGUID_shouldReturnNil
+{
+    NSString *input = @"";
+    NSString *output = [input msalGUIDAsShortString];
+    XCTAssertNil(output);
+}
+
+- (void)testMSALGUIDAsShortString_whenOddCharsString_shouldReturnCorrectString
+{
+    NSString *expectedResult = @"188d01d";
+    NSString *input = @"00000000-0000-0000-0000-00000188D01D";
+    
+    NSString *result = [input msalGUIDAsShortString];
+    XCTAssertEqualObjects(result, expectedResult);
+}
+
+- (void)testMSALGUIDAsShortString_when16CharsString_shouldReturnCorrectString
+{
+    NSString *expectedResult = @"40c03bac188d01d1";
+    NSString *input = @"00000000-0000-0000-40C0-3BAC188D01D1";
+    
+    NSString *result = [input msalGUIDAsShortString];
+    XCTAssertEqualObjects(result, expectedResult);
+}
+
+- (void)testMSALGUIDAsShortString_when8CharsString_shouldReturnCorrectString
+{
+    NSString *expectedResult = @"188d01d1";
+    NSString *input = @"00000000-0000-0000-0000-0000188D01D1";
+    
+    NSString *result = [input msalGUIDAsShortString];
+    XCTAssertEqualObjects(result, expectedResult);
 }
 
 @end
