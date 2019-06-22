@@ -34,6 +34,48 @@
 
 @implementation NSStringAccountIdentifiersTest
 
+#pragma mark - msalStringAsGUID
+
+- (void)testMsalStringAsGUID_whenLongerThan16CharsString_shouldReturnNil
+{
+    NSString *mylongString = @"12345678910111213141516";
+    NSString *guid = [mylongString msalStringAsGUID];
+    XCTAssertNil(guid);
+}
+
+- (void)testMsalStringAsGUID_when16CharsString_shouldReturnGUIDData
+{
+    NSString *mylongString = @"40c03bac188d01d1";
+    NSString *expectedUUID = @"00000000-0000-0000-40C0-3BAC188D01D1";
+    
+    NSString *actualUUID = [mylongString msalStringAsGUID];
+    XCTAssertNotNil(actualUUID);
+    XCTAssertEqualObjects(expectedUUID.lowercaseString, actualUUID);
+}
+
+- (void)testMsalStringAsGUID_when8CharsString_shouldReturnGUIDData
+{
+    NSString *mylongString = @"188d01d1";
+    
+    NSString *actualUUID = [mylongString msalStringAsGUID];
+    XCTAssertNil(actualUUID);
+}
+
+- (void)testMsalStringAsGUID_whenOddCharsString_shouldReturnGUIDData
+{
+    NSString *mylongString = @"188d01d";
+    
+    NSString *actualUUID = [mylongString msalStringAsGUID];
+    XCTAssertNil(actualUUID);
+}
+
+- (void)testMsalStringAsGUID_whenEmptyCharsString_shouldReturnGUIDDataFilledWithZeroes
+{
+    NSString *myEmptyString = @"";
+    NSString *actualUUID = [myEmptyString msalStringAsGUID];
+    XCTAssertNil(actualUUID);
+}
+
 #pragma mark - msalStringAsGUIDData
 
 - (void)testMSALStringASGUIDData_whenLongerThan16CharsString_shouldReturnNil
