@@ -47,8 +47,6 @@
 
 - (NSData *)msalStringAsGUIDData
 {
-    NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
-    char chars[3] = {'\0','\0','\0'};
     NSUInteger stringLen = [self length];
     
     if (stringLen > 16)
@@ -56,19 +54,31 @@
         return nil;
     }
     
-    NSUInteger zeroFillLen = (16 - stringLen/2);
-    unsigned char resultChar;
+    int resultLen = (int)(stringLen+1)/2;
+    NSUInteger zeroFillLen = (16 - resultLen);
+    NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
     
-    for (int i=0; i < stringLen/2; i++)
+    char chars[3] = {'\0','\0','\0'};
+    int diff = stringLen%2 ? 2 : 1;
+    
+    for (int i = resultLen; i > 0; i--)
     {
-        chars[0] = [self characterAtIndex:i*2];
-        chars[1] = [self characterAtIndex:i*2+1];
-        resultChar = strtol(chars, NULL, 16);
+        unsigned char firstChar = '0';
         
-        if ([result length] > zeroFillLen+i)
+        int firstIndex = i*2-diff-1;
+        
+        if (firstIndex >= 0)
         {
-            [result replaceBytesInRange:NSMakeRange(zeroFillLen+i, 1) withBytes:&resultChar length:1];
+            firstChar = [self characterAtIndex:firstIndex];
         }
+        
+        unsigned char secondChar = [self characterAtIndex:i*2-diff];
+        
+        chars[0] = firstChar;
+        chars[1] = secondChar;
+        unsigned char resultChar = strtol(chars, NULL, 16);
+        
+        [result replaceBytesInRange:NSMakeRange(zeroFillLen+i-1, 1) withBytes:&resultChar];
     }
     
     return result;
