@@ -47,38 +47,34 @@
 
 - (NSData *)msalStringAsGUIDData
 {
-    NSUInteger stringLen = [self length];
+    int stringLen = (int)[self length];
     
     if (stringLen > 16)
     {
         return nil;
     }
     
-    int resultLen = (int)(stringLen+1)/2;
-    NSUInteger zeroFillLen = (16 - resultLen);
+    NSUInteger zeroFillLen = (16 - (stringLen+1)/2);
     NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
     
     char chars[3] = {'\0','\0','\0'};
-    int diff = stringLen%2 ? 2 : 1;
     
-    for (int i = resultLen; i > 0; i--)
+    for (int i = stringLen-1; i >= 0; i-=2)
     {
         unsigned char firstChar = '0';
         
-        int firstIndex = i*2-diff-1;
-        
-        if (firstIndex >= 0)
+        if (i - 1 >= 0)
         {
-            firstChar = [self characterAtIndex:firstIndex];
+            firstChar = [self characterAtIndex:i-1];
         }
         
-        unsigned char secondChar = [self characterAtIndex:i*2-diff];
+        unsigned char secondChar = [self characterAtIndex:i];
         
         chars[0] = firstChar;
         chars[1] = secondChar;
         unsigned char resultChar = strtol(chars, NULL, 16);
         
-        [result replaceBytesInRange:NSMakeRange(zeroFillLen+i-1, 1) withBytes:&resultChar];
+        [result replaceBytesInRange:NSMakeRange(zeroFillLen+i/2, 1) withBytes:&resultChar];
     }
     
     return result;
