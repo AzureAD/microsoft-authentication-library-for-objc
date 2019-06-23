@@ -1497,18 +1497,8 @@
 		B223B0C722AE27BE00FB8713 /* src-internal */ = {
 			isa = PBXGroup;
 			children = (
+				B2725EC722C04562009B454A /* ios */,
 				B223B0A922ADF61C00FB8713 /* public */,
-				B29A56BE228266E20023F5E6 /* MSALLegacySharedAccountsProvider.m */,
-				B223B0B122ADF8C500FB8713 /* MSALLegacySharedADALAccount.h */,
-				B223B0B222ADF8C500FB8713 /* MSALLegacySharedADALAccount.m */,
-				B223B0B722ADF8E600FB8713 /* MSALLegacySharedMSAAccount.h */,
-				B223B0B822ADF8E600FB8713 /* MSALLegacySharedMSAAccount.m */,
-				B223B0BD22ADFACB00FB8713 /* MSALLegacySharedAccount.h */,
-				B223B0BE22ADFACB00FB8713 /* MSALLegacySharedAccount.m */,
-				B223B0C322AE215D00FB8713 /* MSALLegacySharedAccountFactory.h */,
-				B223B0C422AE215D00FB8713 /* MSALLegacySharedAccountFactory.m */,
-				B266391922B4B84600FEB673 /* NSString+MSALAccountIdenfiers.h */,
-				B266391A22B4B84600FEB673 /* NSString+MSALAccountIdenfiers.m */,
 			);
 			path = "src-internal";
 			sourceTree = "<group>";
@@ -1605,6 +1595,24 @@
 				B2725EB822BF27FF009B454A /* MSALMockExternalAccountHandler.m */,
 			);
 			path = mocks;
+			sourceTree = "<group>";
+		};
+		B2725EC722C04562009B454A /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				B29A56BE228266E20023F5E6 /* MSALLegacySharedAccountsProvider.m */,
+				B223B0B122ADF8C500FB8713 /* MSALLegacySharedADALAccount.h */,
+				B223B0B222ADF8C500FB8713 /* MSALLegacySharedADALAccount.m */,
+				B223B0B722ADF8E600FB8713 /* MSALLegacySharedMSAAccount.h */,
+				B223B0B822ADF8E600FB8713 /* MSALLegacySharedMSAAccount.m */,
+				B223B0BD22ADFACB00FB8713 /* MSALLegacySharedAccount.h */,
+				B223B0BE22ADFACB00FB8713 /* MSALLegacySharedAccount.m */,
+				B223B0C322AE215D00FB8713 /* MSALLegacySharedAccountFactory.h */,
+				B223B0C422AE215D00FB8713 /* MSALLegacySharedAccountFactory.m */,
+				B266391922B4B84600FEB673 /* NSString+MSALAccountIdenfiers.h */,
+				B266391A22B4B84600FEB673 /* NSString+MSALAccountIdenfiers.m */,
+			);
+			path = ios;
 			sourceTree = "<group>";
 		};
 		B29A56A32282622F0023F5E6 /* cache */ = {
