@@ -31,16 +31,35 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*!
+ Use this protocol if you have external account storage in addition to MSAL account storage.
+ For example, if you find yourself in situation where on each MSAL completion block invocation you are updating accounts in your own storage,
+ it might be beneficial to instead use MSALExternalAccountProviding extensibility feature.
+ */
+
 @protocol MSALExternalAccountProviding <NSObject>
 
+/*
+ This is called when new and/or updated account is available.
+ */
 - (BOOL)updateAccount:(id<MSALAccount>)account
         idTokenClaims:(NSDictionary *)idTokenClaims
                 error:(NSError * _Nullable * _Nullable)error;
 
+/*
+ This is triggered when removal of an account is necessary.
+ It normally happens when the app calls removeAccount API in MSAL.
+ But it can also happen in other circumstances when MSAL needs to cleanup account.
+ */
 - (BOOL)removeAccount:(id<MSALAccount>)account
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error;
 
+/*
+ This is triggered when MSAL needs to enumerate account.
+ Return your accounts that match parameters.
+ MSAL will merge external accounts with its own internal storage and return a combined list of accounts that mathes specified parameters.
+ */
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParameters:(MSALAccountEnumerationParameters *)parameters
                                                         error:(NSError * _Nullable * _Nullable)error;
 

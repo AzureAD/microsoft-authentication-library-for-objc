@@ -31,10 +31,43 @@ typedef NS_ENUM(NSInteger, MSALLegacySharedAccountMode)
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*
+ Sample implementation of the MSALExternalAccountProviding protocol that can work with legacy Microsoft account storage.
+ Use it if:
+ 1. You're migrating from ADAL to MSAL and where previously relying on shared Microsoft account storage.
+    In that case, usage of this class should be temporary, until more than X% of users migrate to MSAL (X can be 95% depending on your app requirements).
+ 2. As sample code to implement your own MSALExternalAccountProviding
+ */
 @interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
 
+/*
+ Specifies if MSALLegacySharedAccountsProvider will attempt to write/remove accounts.
+ Set to MSALLegacySharedAccountModeReadWrite to attempt writing accounts
+ Default is MSALLegacySharedAccountModeReadOnly, which means MSALLegacySharedAccountsProvider will not modify external account storage
+ */
 @property (nonatomic) MSALLegacySharedAccountMode sharedAccountMode;
 
+/*
+ Initialize new instance of MSALLegacySharedAccountsProvider.
+ 
+ @param sharedGroup             Specify keychain access group from which accounts will be read.
+ @param serviceIdentifier       Specify unique account entry identifier in the keychain (each keychain entry is identifier by "account" and "service" parameters, this is the "service" part of it)
+ @param applicationIdentifier   Your application name for logging and storage purposes.
+ 
+ After initialization, set it in the MSALCacheConfig class, e.g.
+ 
+ MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.mycompany.mysso"
+                                                                                                        serviceIdentifier:@"MyAccountServiceIdentifier"
+                                                                                                    applicationIdentifier:@"MyApp"];
+ 
+ MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
+ 
+ [pcaConfig.cacheConfig addExternalAccountProvider:provider];
+ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+ 
+ */
 - (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup
                                 serviceIdentifier:(NSString *)serviceIdentifier
                             applicationIdentifier:(NSString *)applicationIdentifier;
