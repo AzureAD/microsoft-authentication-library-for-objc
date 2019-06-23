@@ -47,10 +47,17 @@
 
 - (instancetype)initWithExternalAccountProviders:(NSArray<id<MSALExternalAccountProviding>> *)externalAccountProviders
                                   oauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                                           error:(NSError **)error
 {
     if (![externalAccountProviders count])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"No external account providers found");
+        return nil;
+    }
+    
+    if (!oauth2Provider)
+    {
+        [self fillAndLogParameterError:error parameterName:@"oauth2Provider"];
         return nil;
     }
     
@@ -69,6 +76,12 @@
 
 - (BOOL)removeAccount:(MSALAccount *)account error:(NSError **)error
 {
+    if (!account)
+    {
+        [self fillAndLogParameterError:error parameterName:@"account"];
+        return nil;
+    }
+    
     for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
     {
         NSError *removalError = nil;
@@ -86,7 +99,6 @@
             return NO;
         }
         
-        // TODO: remove tenant profiles?
         return YES;
     }
     
@@ -95,6 +107,12 @@
 
 - (BOOL)updateWithResult:(MSALResult *)result error:(NSError **)error
 {
+    if (!result)
+    {
+        [self fillAndLogParameterError:error parameterName:@"result"];
+        return nil;
+    }
+    
     NSError *updateError = nil;
     MSALAccount *copiedAccount = [result.account copy];
     
@@ -108,7 +126,7 @@
             
             if (error)
             {
-                *error = updateError;
+                *error = [MSALErrorConverter msalErrorFromMsidError:updateError];
             }
             
             return NO;
@@ -118,7 +136,7 @@
     return YES;
 }
 
-- (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError **)error
 {
     NSMutableArray *allExternalAccounts = [NSMutableArray new];
     
@@ -130,6 +148,8 @@
         if (externalError)
         {
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to read external accounts with parameters %@ with error %@", MSID_PII_LOG_MASKABLE(parameters), MSID_PII_LOG_MASKABLE(externalError));
+            
+            if (error) *error = [MSALErrorConverter msalErrorFromMsidError:externalError];
             return nil;
         }
         
@@ -145,6 +165,21 @@
     }
     
     return allExternalAccounts;
+}
+
+#pragma mark - Helpers
+
+- (void)fillAndLogParameterError:(NSError **)error parameterName:(NSString *)parameterName
+{
+    NSString *errorMessage = [NSString stringWithFormat:@"Parameter missing: %@", parameterName];
+    MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@", errorMessage);
+    
+    if (error)
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, errorMessage, nil, nil, nil, nil, nil);
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        *error = msalError;
+    }
 }
 
 @end

@@ -38,11 +38,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nonnull, readonly) MSALOauth2Provider *oauth2Provider;
 
 - (nullable instancetype)initWithExternalAccountProviders:(NSArray<id<MSALExternalAccountProviding>> *)externalAccountProviders
-                                           oauth2Provider:(MSALOauth2Provider *)oauth2Provider;
+                                           oauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                                                    error:(NSError * _Nullable * _Nullable)error;
 
 - (BOOL)updateWithResult:(MSALResult *)result error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
-- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters;
+- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError * _Nullable * _Nullable)error;
 
 @end
 

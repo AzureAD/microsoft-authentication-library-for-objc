@@ -190,7 +190,14 @@
     
     if (self.externalAccountProvider)
     {
-        externalAccounts = [self.externalAccountProvider allExternalAccountsWithParameters:parameters];
+        NSError *externalError = nil;
+        externalAccounts = [self.externalAccountProvider allExternalAccountsWithParameters:parameters error:&externalError];
+        
+        if (externalError)
+        {
+            if (error) *error = externalError;
+            return nil;
+        }
     }
     
     return [self msalAccountsFromMSIDAccounts:msidAccounts externalAccounts:externalAccounts];

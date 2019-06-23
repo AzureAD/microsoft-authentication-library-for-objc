@@ -294,7 +294,11 @@
     
     if ([_internalConfig.cacheConfig.externalAccountProviders count])
     {
-        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProviders:_internalConfig.cacheConfig.externalAccountProviders oauth2Provider:self.msalOauth2Provider];
+        _externalAccountHandler = [[MSALExternalAccountHandler alloc] initWithExternalAccountProviders:_internalConfig.cacheConfig.externalAccountProviders
+                                                                                        oauth2Provider:self.msalOauth2Provider
+                                                                                                 error:error];
+        
+        if (!_externalAccountHandler) return nil;
     }
     
     return self;
