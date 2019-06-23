@@ -68,7 +68,7 @@
     return self.accountOperationResult;
 }
 
-- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters
+- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError **)error
 {
     self.allExternalAccountsInvokedCount++;
     return self.externalAccountsResult;
