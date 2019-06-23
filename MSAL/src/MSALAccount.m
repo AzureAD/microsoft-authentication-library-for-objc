@@ -165,7 +165,6 @@
     hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
-    hash = hash * 31 + self.identifier.hash;
     return hash;
 }
 
@@ -177,7 +176,6 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-    result &= (!self.identifier && !user.identifier) || [self.identifier isEqualToString:user.identifier];
     return result;
 }
 

@@ -53,6 +53,7 @@
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nullable, nonatomic) NSString *clientId;
 @property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
+@property (nullable, nonatomic) NSPredicate *homeTenantFilterPredicate;
 
 @end
 
@@ -79,6 +80,7 @@
         _tokenCache = tokenCache;
         _clientId = clientId;
         _externalAccountProvider = externalAccountProvider;
+        _homeTenantFilterPredicate = [NSPredicate predicateWithFormat:@"isHomeTenantProfile == YES"];
     }
 
     return self;
@@ -212,15 +214,14 @@
     
     for (MSALAccount *externalAccount in externalAccounts)
     {
-        BOOL isHomeTenantAccount = NO;
+        NSDictionary *accountClaims = nil;
         
         if ([externalAccount.mTenantProfiles count])
         {
-            MSALTenantProfile *tenantProfile = externalAccount.mTenantProfiles[0];
-            isHomeTenantAccount = tenantProfile.isHomeTenantProfile;
+            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.mTenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
+            if ([homeTenantProfileArray count] == 1) accountClaims = homeTenantProfileArray[0].claims;
         }
-        
-        NSDictionary *accountClaims = isHomeTenantAccount ? externalAccount.accountClaims : nil;
+    
         [self addMSALAccount:externalAccount toSet:resultAccounts claims:accountClaims];
     }
     

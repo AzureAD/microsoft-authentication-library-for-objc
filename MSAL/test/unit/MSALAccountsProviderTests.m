@@ -46,6 +46,10 @@
 #import "MSIDTestCacheUtil.h"
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSALMockExternalAccountHandler.h"
+#import "MSALAADOauth2Provider.h"
+#import "MSALAccountId+Internal.h"
+#import "MSALTenantProfile+Internal.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -992,6 +996,109 @@
                                              tenantId:@"guest_tid2"
                                              familyId:nil
                                         cacheAccessor:defaultCache];
+}
+
+#pragma mark - External accounts
+
+- (void)testAllAccounts_whenLegacyAccountInCache_andSameExternalAccountExists_shouldReturnOneMergedAccount
+{
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.tid" objectId:nil tenantId:nil];
+    MSALAccount *externalAccount = [[MSALAccount alloc] initWithUsername:@"user@contoso.com" homeAccountId:accountId environment:@"login.microsoftonline.com" tenantProfiles:nil];
+    MSALMockExternalAccountHandler *externalAccountsHandler = [[MSALMockExternalAccountHandler alloc] initMock];
+    externalAccountsHandler.externalAccountsResult = @[externalAccount];
+    
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                             clientId:@"client_id"
+                                                              externalAccountProvider:externalAccountsHandler];
+    
+    [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+                                            clientId:@"client_id"
+                                                 upn:@"user@contoso.com"
+                                                name:@"simple_user"
+                                                 uid:@"uid"
+                                                utid:@"tid"
+                                                 oid:@"oid"
+                                            tenantId:@"tid"
+                                            familyId:nil
+                                       cacheAccessor:legacyCache];
+    
+    NSError *error;
+    NSArray<MSALAccount *> *allAccounts = [provider allAccounts:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(allAccounts);
+    XCTAssertEqual(allAccounts.count, 1);
+    XCTAssertEqualObjects(allAccounts[0].username, @"user@contoso.com");
+    XCTAssertEqualObjects(allAccounts[0].homeAccountId.identifier, @"uid.tid");
+    XCTAssertEqualObjects(allAccounts[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].lookupAccountIdentifier.homeAccountId, @"uid.tid");
+    XCTAssertEqual(allAccounts[0].tenantProfiles.count, 1);
+    XCTAssertEqualObjects(allAccounts[0].identifier, @"uid.tid");
+    XCTAssertTrue(allAccounts[0].accountClaims.count > 0);
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].identifier, @"oid");
+    XCTAssertEqualObjects(allAccounts[0].tenantProfiles[0].tenantId, @"tid");
+    XCTAssertTrue(allAccounts[0].tenantProfiles[0].claims.count > 0);
+    XCTAssertNotNil([allAccounts[0] accountClaims]);
+}
+
+- (void)testAllAccounts_whenLegacyAccountInCache_andDifferentExternalAccountExists_shouldReturnTwoAccounts
+{
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid2.utid2" objectId:@"uid2" tenantId:@"utid2"];
+    
+    MSALTenantProfile *firstTenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:@"uid2"
+                                                                                 tenantId:@"utid2"
+                                                                              environment:@"login.microsoftonline.com"
+                                                                      isHomeTenantProfile:YES
+                                                                                   claims:@{@"home":@"claim"}];
+    
+    MSALTenantProfile *secondTenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:@"guestid"
+                                                                                  tenantId:@"guesttid"
+                                                                               environment:@"login.microsoftonline.com"
+                                                                       isHomeTenantProfile:NO
+                                                                                    claims:@{@"guest": @"claim"}];
+    
+    MSALAccount *externalAccount = [[MSALAccount alloc] initWithUsername:@"user2@contoso.com"
+                                                           homeAccountId:accountId
+                                                             environment:@"login.microsoftonline.com"
+                                                          tenantProfiles:@[firstTenantProfile, secondTenantProfile]];
+    
+    MSALMockExternalAccountHandler *externalAccountsHandler = [[MSALMockExternalAccountHandler alloc] initMock];
+    externalAccountsHandler.externalAccountsResult = @[externalAccount];
+    
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                             clientId:@"client_id"
+                                                              externalAccountProvider:externalAccountsHandler];
+    
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+                                             clientId:@"client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"simple_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"oid"
+                                             tenantId:@"tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    NSError *error;
+    NSArray<MSALAccount *> *allAccounts = [provider allAccounts:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(allAccounts);
+    XCTAssertEqual(allAccounts.count, 2);
+    
+    // verify first account
+    MSALAccount *firstAccount = [self accountWithIdentifier:@"uid.tid" fromArray:allAccounts];
+    XCTAssertNotNil(firstAccount);
+    XCTAssertEqualObjects(firstAccount.username, @"user@contoso.com");
+    XCTAssertEqualObjects(firstAccount.environment, @"login.microsoftonline.com");
+    
+    // verify external account
+    MSALAccount *secondAccount = [self accountWithIdentifier:@"uid2.utid2" fromArray:allAccounts];
+    XCTAssertNotNil(secondAccount);
+    XCTAssertEqualObjects(secondAccount.username, @"user2@contoso.com");
+    XCTAssertEqualObjects(secondAccount.environment, @"login.microsoftonline.com");
+    XCTAssertEqualObjects(secondAccount.accountClaims, @{@"home":@"claim"});
 }
 
 @end
