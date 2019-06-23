@@ -79,7 +79,7 @@
     if (!account)
     {
         [self fillAndLogParameterError:error parameterName:@"account"];
-        return nil;
+        return NO;
     }
     
     for (id<MSALExternalAccountProviding> provider in self.externalAccountProviders)
@@ -110,7 +110,7 @@
     if (!result)
     {
         [self fillAndLogParameterError:error parameterName:@"result"];
-        return nil;
+        return NO;
     }
     
     NSError *updateError = nil;

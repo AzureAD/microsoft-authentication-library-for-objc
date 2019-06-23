@@ -1497,8 +1497,8 @@
 		B223B0C722AE27BE00FB8713 /* src-internal */ = {
 			isa = PBXGroup;
 			children = (
-				B2725EC722C04562009B454A /* ios */,
 				B223B0A922ADF61C00FB8713 /* public */,
+				B2725EC722C04562009B454A /* ios */,
 			);
 			path = "src-internal";
 			sourceTree = "<group>";
