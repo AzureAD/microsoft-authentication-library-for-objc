@@ -346,6 +346,11 @@
 		B2725EB622BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EB422BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m */; };
 		B2725EC522BF4865009B454A /* MSALMockExternalAccountHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EB822BF27FF009B454A /* MSALMockExternalAccountHandler.m */; };
 		B2725EC622BF4865009B454A /* MSALMockExternalAccountHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EB822BF27FF009B454A /* MSALMockExternalAccountHandler.m */; };
+		B2725ECA22C04661009B454A /* MSALLegacySharedAccountTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725EC922C04661009B454A /* MSALLegacySharedAccountTests.m */; };
+		B2725ECC22C0466E009B454A /* MSALLegacySharedADALAccountTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725ECB22C0466E009B454A /* MSALLegacySharedADALAccountTests.m */; };
+		B2725ECE22C04679009B454A /* MSALLegacySharedMSAAccountTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725ECD22C04679009B454A /* MSALLegacySharedMSAAccountTests.m */; };
+		B2725ED022C04689009B454A /* MSALLegacySharedAccountFactoryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725ECF22C04689009B454A /* MSALLegacySharedAccountFactoryTests.m */; };
+		B2725ED222C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2725ED122C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m */; };
 		B273D067226E84BD005A7BB4 /* MSALPublicClientApplicationConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 9627C7AB22542EDC0028A859 /* MSALPublicClientApplicationConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B273D06E226E84BD005A7BB4 /* MSALPublicClientApplicationConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 9627C7AB22542EDC0028A859 /* MSALPublicClientApplicationConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B273D06F226E84C3005A7BB4 /* MSALGlobalConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 9626D14A225828780019417B /* MSALGlobalConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1069,6 +1074,11 @@
 		B2725EB422BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientApplicationAccountUpdateTests.m; sourceTree = "<group>"; };
 		B2725EB722BF27FF009B454A /* MSALMockExternalAccountHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALMockExternalAccountHandler.h; sourceTree = "<group>"; };
 		B2725EB822BF27FF009B454A /* MSALMockExternalAccountHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMockExternalAccountHandler.m; sourceTree = "<group>"; };
+		B2725EC922C04661009B454A /* MSALLegacySharedAccountTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLegacySharedAccountTests.m; sourceTree = "<group>"; };
+		B2725ECB22C0466E009B454A /* MSALLegacySharedADALAccountTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLegacySharedADALAccountTests.m; sourceTree = "<group>"; };
+		B2725ECD22C04679009B454A /* MSALLegacySharedMSAAccountTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLegacySharedMSAAccountTests.m; sourceTree = "<group>"; };
+		B2725ECF22C04689009B454A /* MSALLegacySharedAccountFactoryTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLegacySharedAccountFactoryTests.m; sourceTree = "<group>"; };
+		B2725ED122C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALLegacySharedAccountsProviderTests.m; sourceTree = "<group>"; };
 		B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALUnifiedADALCacheCoexistenceTests.m; sourceTree = "<group>"; };
 		B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALMultiAppCacheCoexistenceTests.m; sourceTree = "<group>"; };
 		B2734C1D21253B1B00DAB1CD /* MSALDotNetCacheCoexistenceTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALDotNetCacheCoexistenceTests.m; sourceTree = "<group>"; };
@@ -1615,6 +1625,19 @@
 			path = ios;
 			sourceTree = "<group>";
 		};
+		B2725EC822C04638009B454A /* external-cache */ = {
+			isa = PBXGroup;
+			children = (
+				B2725E7E22BD88BE009B454A /* NSStringAccountIdentifiersTest.m */,
+				B2725EC922C04661009B454A /* MSALLegacySharedAccountTests.m */,
+				B2725ECB22C0466E009B454A /* MSALLegacySharedADALAccountTests.m */,
+				B2725ECD22C04679009B454A /* MSALLegacySharedMSAAccountTests.m */,
+				B2725ECF22C04689009B454A /* MSALLegacySharedAccountFactoryTests.m */,
+				B2725ED122C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m */,
+			);
+			path = "external-cache";
+			sourceTree = "<group>";
+		};
 		B29A56A32282622F0023F5E6 /* cache */ = {
 			isa = PBXGroup;
 			children = (
@@ -1946,7 +1969,6 @@
 				232D6191224C53E500260C42 /* MSALClaimsRequestTests.m */,
 				B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */,
 				B29A56CE2283D7430023F5E6 /* MSALAADAuthorityTests.m */,
-				B2725E7E22BD88BE009B454A /* NSStringAccountIdentifiersTest.m */,
 				B2725EAB22BF2759009B454A /* MSALExternalAccountHandlerTests.m */,
 				B2725EB422BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m */,
 			);
@@ -1956,6 +1978,7 @@
 		D65A6FDC1E3FF71000C69FBA /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				B2725EC822C04638009B454A /* external-cache */,
 				D67227A01EBD111900F3422A /* unit-test-host */,
 				B21E07BF210E56DD007E3A3C /* MSALRedirectUriVerifierTests.m */,
 			);
@@ -3282,12 +3305,14 @@
 				23A169B52073325500B051F3 /* MSALPublicClientApplicationTests.m in Sources */,
 				D61F5BC01E5913BE00912CB8 /* SFSafariViewController+TestOverrides.m in Sources */,
 				D69ADB351E516F9B00952049 /* MSALTestBundle.m in Sources */,
+				B2725ED022C04689009B454A /* MSALLegacySharedAccountFactoryTests.m in Sources */,
 				D69ADB3F1E516F9B00952049 /* MSALTestURLSessionDataTask.m in Sources */,
 				B256121B217EA44900999876 /* MSALOauth2FactoryProducerTests.m in Sources */,
 				D62746D91E9B5F1E00EFCE99 /* MSALAccountTests.m in Sources */,
 				D69ADB3D1E516F9B00952049 /* MSIDTestURLSession+MSAL.m in Sources */,
 				2364C74B1FB3E5CB00835428 /* XCTestCase+HelperMethods.m in Sources */,
 				B2725EB522BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m in Sources */,
+				B2725ECC22C0466E009B454A /* MSALLegacySharedADALAccountTests.m in Sources */,
 				23F32F0C1FF4789100B2905E /* MSIDTestURLResponse+MSAL.m in Sources */,
 				B21E07C0210E56DD007E3A3C /* MSALRedirectUriVerifierTests.m in Sources */,
 				D61F5BC31E59193500912CB8 /* MSALFakeViewController.m in Sources */,
@@ -3296,10 +3321,13 @@
 				B2725EC522BF4865009B454A /* MSALMockExternalAccountHandler.m in Sources */,
 				23A169B420732F3A00B051F3 /* MSALB2CPolicyTests.m in Sources */,
 				D69ADB371E516F9B00952049 /* MSALTestCase.m in Sources */,
+				B2725ECE22C04679009B454A /* MSALLegacySharedMSAAccountTests.m in Sources */,
 				233E970B226571AB007FCE2A /* MSALTelemetryAggregatedTests.m in Sources */,
+				B2725ECA22C04661009B454A /* MSALLegacySharedAccountTests.m in Sources */,
 				23A68A9320F59E6B0071E435 /* NSString+MSALTestUtil.m in Sources */,
 				1E8FC6A3221F370C00B4D4C1 /* MSALResultTests.m in Sources */,
 				960751BB2183E82C00F2BF2F /* MSALAccountIdTests.m in Sources */,
+				B2725ED222C0469A009B454A /* MSALLegacySharedAccountsProviderTests.m in Sources */,
 				609AF9332256BD0C00E2978D /* MSALAccountsProviderTests.m in Sources */,
 				B2725EAC22BF2759009B454A /* MSALExternalAccountHandlerTests.m in Sources */,
 				232D6192224C53E500260C42 /* MSALClaimsRequestTests.m in Sources */,

@@ -131,23 +131,44 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (parameters.identifier)
     {
-        matchResult &= [self.identifier isEqualToString:parameters.identifier];
+        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= [self.username isEqualToString:parameters.username];
+        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
     {
-        matchResult &= [self.objectId isEqualToString:parameters.tenantProfileIdentifier];
+        matchResult &= ([self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
     }
     
     return matchResult &= [super matchesParameters:parameters];
 }
 
 #pragma mark - Updates
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                           operation:(MSALLegacySharedAccountWriteOperation)operation
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                               error:(NSError **)error
+{
+    BOOL result = [super updateAccountWithMSALAccount:account
+                                      applicationName:appName
+                                            operation:operation
+                                       accountVersion:accountVersion
+                                                error:error];
+    
+    if (!result)
+    {
+        return NO;
+    }
+    
+    _username = account.username;
+    return YES;
+}
 
 - (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
 {

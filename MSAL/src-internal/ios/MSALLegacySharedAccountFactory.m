@@ -36,12 +36,6 @@
 {
     NSString *accountType = [jsonDictionary msidStringObjectForKey:@"type"];
     
-    if (!accountType)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"No account type available");
-        return nil;
-    }
-    
     if ([accountType isEqualToString:@"ADAL"])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing ADAL account type");
@@ -51,6 +45,11 @@
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Initializing MSA account type");
         return [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:error];
+    }
+    
+    if (error)
+    {
+        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type found", nil, nil, nil, nil, nil);
     }
     
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);

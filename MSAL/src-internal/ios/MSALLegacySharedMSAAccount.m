@@ -81,7 +81,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         _username = [jsonDictionary msidStringObjectForKey:@"email"];
         
         _accountClaims = @{@"tid": MSID_DEFAULT_MSA_TENANTID,
-                           @"oid": _identifier};
+                           @"oid": uid};
         
         MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Created external MSA account with identifier %@, object Id %@, tenant Id %@, username %@, claims %@", MSID_PII_LOG_TRACKABLE(_identifier), MSID_PII_LOG_MASKABLE(cid), MSID_DEFAULT_MSA_TENANTID, MSID_PII_LOG_EMAIL(_username), MSID_PII_LOG_MASKABLE(_accountClaims));
     }
@@ -106,12 +106,12 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     
     if (parameters.identifier)
     {
-        matchResult &= [self.identifier isEqualToString:parameters.identifier];
+        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= [self.username isEqualToString:parameters.username];
+        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
@@ -123,6 +123,27 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
 }
 
 #pragma mark - Updates
+
+- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
+                     applicationName:(NSString *)appName
+                           operation:(MSALLegacySharedAccountWriteOperation)operation
+                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                               error:(NSError **)error
+{
+    BOOL result = [super updateAccountWithMSALAccount:account
+                                      applicationName:appName
+                                            operation:operation
+                                       accountVersion:accountVersion
+                                                error:error];
+    
+    if (!result)
+    {
+        return NO;
+    }
+    
+    _username = account.username;
+    return YES;
+}
 
 - (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
 {

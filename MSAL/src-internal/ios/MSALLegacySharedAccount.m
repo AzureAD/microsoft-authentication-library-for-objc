@@ -80,6 +80,16 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         return nil;
     }
     
+    if (!account)
+    {
+        if (error)
+        {
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected parameter - no account", nil, nil, nil, nil, nil);
+        }
+        
+        return nil;
+    }
+    
     NSString *appBundleId = [[NSBundle mainBundle] bundleIdentifier];
     
     NSMutableDictionary *jsonDictionary = [NSMutableDictionary new];
@@ -158,7 +168,8 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     }
     
     NSDictionary *additionalAccountInfo = [self.jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
-    NSMutableDictionary *mutableAdditionalInfo = [additionalAccountInfo mutableCopy];
+    NSMutableDictionary *mutableAdditionalInfo = [NSMutableDictionary new];
+    [mutableAdditionalInfo addEntriesFromDictionary:additionalAccountInfo];
     
     mutableAdditionalInfo[@"updatedBy"] = appName;
     mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
@@ -176,13 +187,11 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
 {
-    NSAssert(NO, @"Abstract method, implement me in the subclass");
     return nil;
 }
 
 - (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
 {
-    NSAssert(NO, @"Abstract method, implement me in the subclass");
     return nil;
 }
 

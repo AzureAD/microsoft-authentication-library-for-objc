@@ -17,7 +17,7 @@
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,22 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma once
+#import <XCTest/XCTest.h>
 
-#include "MSALPublicClientApplication+Internal.h"
+@interface MSALLegacySharedAccountsProviderTests : XCTestCase
 
-// Unit test client ID
-#define UNIT_TEST_CLIENT_ID                 @"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+@end
 
-// Unit test correlation ID
-#define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
+@implementation MSALLegacySharedAccountsProviderTests
 
-// Unit test redirect scheme : msal<clientId>
-#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
+- (void)setUp {
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
 
-// Unit test redirect uri : msal<clientId>://auth
-#define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+}
 
-#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"
+- (void)testExample {
+    // This is an example of a functional test case.
+    // Use XCTAssert and related functions to verify your tests produce the correct results.
+}
 
-#define UT_SLICE_PARAMS_QUERY 
+- (void)testPerformanceExample {
+    // This is an example of a performance test case.
+    [self measureBlock:^{
+        // Put the code you want to measure the time of here.
+    }];
+}
+
+@end

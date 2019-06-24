@@ -52,6 +52,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters;
 
+/*
+ Updates existing account with MSAL account fields.
+ Not thread safe.
+ */
 - (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
@@ -59,6 +63,9 @@ NS_ASSUME_NONNULL_BEGIN
                                error:(NSError * _Nullable * _Nullable)error;
 
 
+/*
+ Creates new account based on MSAL account.
+ */
 - (nullable instancetype)initWithMSALAccount:(id<MSALAccount>)account
                                accountClaims:(NSDictionary *)claims
                              applicationName:(NSString *)appName
