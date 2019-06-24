@@ -1037,7 +1037,13 @@
     
     if (self.externalAccountHandler)
     {
-        result &= [self.externalAccountHandler removeAccount:account error:error];
+        NSError *externalError = nil;
+        result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        
+        if (externalError && error)
+        {
+            *error = [MSALErrorConverter msalErrorFromMsidError:externalError];
+        }
     }
 
     if (self.accountMetadataCache && ![self.accountMetadataCache clearForHomeAccountId:account.identifier
