@@ -35,6 +35,7 @@
 #import "MSALAccountId+Internal.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDConstants.h"
+#import "MSALLegacySharedAccountTestUtil.h"
 
 @interface MSALLegacySharedAccountsProviderTests : XCTestCase
 
@@ -42,9 +43,6 @@
 @property (nonatomic) MSIDKeychainTokenCache *keychainTokenCache;
 
 @end
-
-static NSString *kDefaultTestUid = @"00000000-0000-0000-40c0-3bac188d0d10";
-static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 @implementation MSALLegacySharedAccountsProviderTests
 
@@ -91,7 +89,10 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 - (void)testAccountsWithParameters_whenMatchingAccountInOlderVersion_shouldReturnThatAccount
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"user@contoso.com" accountId:accountId objectId:nil];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId
+                                                                                                    objectId:nil
+                                                                                                    tenantId:nil
+                                                                                                    username:@"user@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
@@ -109,12 +110,24 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 {
     NSString *accountId1 = [NSUUID UUID].UUIDString;
     NSString *accountId2 = [NSUUID UUID].UUIDString;
-    NSDictionary *accountBlob1 = [self sampleADALJSONDictionaryWithUsername:@"user@CONTOSO.com" accountId:accountId1 objectId:@"oid1"];
-    NSDictionary *accountBlob2 = [self sampleADALJSONDictionaryWithUsername:@"user2@contoso.com" accountId:accountId2 objectId:@"oid2"];
+    NSDictionary *accountBlob1 = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId1
+                                                                                               objectId:@"oid1"
+                                                                                               tenantId:nil
+                                                                                               username:@"user@CONTOSO.com"];
+    
+    NSDictionary *accountBlob2 = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId2
+                                                                                               objectId:@"oid2"
+                                                                                               tenantId:nil
+                                                                                               username:@"user2@contoso.com"];
+    
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId1 : accountBlob1, accountId2 : accountBlob2};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     NSString *accountId3 = [NSUUID UUID].UUIDString;
-    NSDictionary *accountBlob3 = [self sampleADALJSONDictionaryWithUsername:@"user@CONTOSO.com" accountId:accountId3 objectId:@"oid3"];
+    NSDictionary *accountBlob3 = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId3
+                                                                                               objectId:@"oid3"
+                                                                                               tenantId:nil
+                                                                                               username:@"user@CONTOSO.com"];
+    
     NSDictionary *oldAccountsBlob = @{@"lastWriteTimestamp": @"123474848", accountId3 : accountBlob3};
     [self saveAccountsBlob:oldAccountsBlob version:@"AccountsV2"];
     
@@ -135,7 +148,10 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 - (void)testAccountsWithParameters_whenAccountsPresent_butNotMatching_shouldReturnNilAndNilError
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"user2@contoso.com" accountId:accountId objectId:nil];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId
+                                                                                                    objectId:nil
+                                                                                                    tenantId:nil
+                                                                                                    username:@"user2@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
@@ -152,7 +168,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 - (void)testAccountsWithParameters_whenCorruptSingleItem_shouldIgnoreAccount
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSMutableDictionary *singleAccountBlob = [[self sampleADALJSONDictionaryWithUsername:@"user@contoso.com" accountId:accountId objectId:nil] mutableCopy];
+    NSMutableDictionary *singleAccountBlob = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:@"user@contoso.com"] mutableCopy];
     singleAccountBlob[@"type"] = @"Unknown";
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
@@ -176,29 +192,14 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849"};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
-    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
-    
-    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
 }
 
 - (void)testUpdateAccount_whenCorruptSingleEntry_shouldAddAccount
@@ -206,34 +207,19 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSMutableDictionary *singleAccountBlob = [[self sampleADALJSONDictionaryWithUsername:@"user@contoso.com" accountId:accountId objectId:nil] mutableCopy];
+    NSMutableDictionary *singleAccountBlob = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:@"user@contoso.com"] mutableCopy];
     singleAccountBlob[@"type"] = @"Unknown";
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
-    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
-    
-    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 3);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:3];
 }
 
 - (void)testUpdateAccount_whenMatchingADALAccountsPresent_shouldUpdateAccounts
@@ -241,39 +227,28 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"old@contoso.com" accountId:accountId objectId:@"uid"];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
+
     NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
     NSString *accountIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     XCTAssertEqualObjects(v2Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedIn");
     XCTAssertEqualObjects(v2Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
     
     NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
     XCTAssertEqualObjects(v3Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedIn");
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
 - (void)testUpdateAccount_whenMatchingMSAAccountsPresent_shouldUpdateAccounts
@@ -281,39 +256,28 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleMSAJSONDictionaryWithAccountId:accountId];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionaryWithAccountId:accountId];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testMSAAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testMSAAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
     
     NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
     NSString *accountIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     XCTAssertEqualObjects(v2Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedIn");
     XCTAssertEqualObjects(v2Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
     
     NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
     XCTAssertEqualObjects(v3Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedIn");
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
 - (void)testUpdateAccount_whenNonMatchingAccountPresent_shouldAddAccount
@@ -321,34 +285,19 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"old@contoso.com" accountId:accountId objectId:@"uid2"];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid2" tenantId:nil username:@"old@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
-    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 3);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
-    
-    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 3);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
+    [self verifyBlobCountWithV1Count:1 v2Count:3 v3Count:3];
 }
 
 #pragma mark - Remove
@@ -360,29 +309,14 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849"};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
-    NSMutableDictionary *v2Blob = [[self readBlobWithVersion:@"AccountsV2"] mutableCopy];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 1);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
-    
-    NSMutableDictionary *v3Blob = [[self readBlobWithVersion:@"AccountsV3"] mutableCopy];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 1);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
+    [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:1];
 }
 
 - (void)testRemoveAccount_whenCorruptSingleEntry_shouldUpdateTimestamp
@@ -390,35 +324,22 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSMutableDictionary *singleAccountBlob = [[self sampleADALJSONDictionaryWithUsername:@"user@contoso.com" accountId:accountId objectId:nil] mutableCopy];
+    NSMutableDictionary *singleAccountBlob = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:@"user@contoso.com"] mutableCopy];
     singleAccountBlob[@"type"] = @"Unknown";
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
-    
-    NSMutableDictionary *v2Blob = [[self readBlobWithVersion:@"AccountsV2"] mutableCopy];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 1);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
+    [self verifyBlobCountWithV1Count:1 v2Count:1 v3Count:2];
     
     NSMutableDictionary *v3Blob = [[self readBlobWithVersion:@"AccountsV3"] mutableCopy];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
     XCTAssertEqualObjects(v3Blob[accountId], singleAccountBlob); // make sure we didn't touch corrupted dict
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
 - (void)testRemoveAccount_whenMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
@@ -426,39 +347,28 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"old@contoso.com" accountId:accountId objectId:@"uid"];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
     
     NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
     NSString *accountIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     XCTAssertEqualObjects(v2Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedOut");
     XCTAssertEqualObjects(v2Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
     
     NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
     XCTAssertEqualObjects(v3Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedOut");
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
 - (void)testRemoveAccount_whenTenantProfilesPassed_andMatchingAccountsPresent_shouldUpdateAccountsWithSignedOutStatus
@@ -466,12 +376,12 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"old@contoso.com" accountId:accountId objectId:@"uid"];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid" tenantId:nil username:@"old@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     MSALTenantProfile *tenantProfile1 = [[MSALTenantProfile alloc] initWithIdentifier:@"uid"
                                                                              tenantId:@"tid"
@@ -490,27 +400,16 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
-    NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
-    XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
-    XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
     
     NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
-    XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
     NSString *accountIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     XCTAssertEqualObjects(v2Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedOut");
     XCTAssertEqualObjects(v2Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
     
     NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
-    XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
-    XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
     XCTAssertEqualObjects(v3Blob[accountId][@"signInStatus"][accountIdentifier], @"SignedOut");
     XCTAssertEqualObjects(v3Blob[accountId][@"username"], @"user@contoso.com");
-    XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
 - (void)testRemoveAccount_whenNonMatchingAccountPresent_shouldOnlyUpdateTimestamps
@@ -518,35 +417,48 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     self.accountsProvider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
     
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSDictionary *singleAccountBlob = [self sampleADALJSONDictionaryWithUsername:@"old@contoso.com" accountId:accountId objectId:@"uid2"];
+    NSDictionary *singleAccountBlob = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:@"uid2" tenantId:nil username:@"old@contoso.com"];
     NSDictionary *accountsBlob = @{@"lastWriteTimestamp": @"123474849", accountId : singleAccountBlob};
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
-    MSALAccount *testAccount = [self testADALAccount];
+    MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
     NSError *error = nil;
     BOOL result = [self.accountsProvider removeAccount:testAccount tenantProfiles:nil error:&error];
     
     XCTAssertTrue(result);
     XCTAssertNil(error);
     
+    [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
+    
+    NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
+    XCTAssertEqualObjects(v2Blob[accountId], singleAccountBlob);
+    
+    NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
+    XCTAssertEqualObjects(v3Blob[accountId], singleAccountBlob);
+}
+
+#pragma mark - Asserts
+
+- (void)verifyBlobCountWithV1Count:(NSUInteger)v1BlobCount
+                           v2Count:(NSUInteger)v2BlobCount
+                           v3Count:(NSUInteger)v3BlobCount
+{
     NSDictionary *v1Blob = [self readBlobWithVersion:@"AccountsV1"];
     XCTAssertNotNil(v1Blob);
-    XCTAssertEqual([v1Blob count], 1);
+    XCTAssertEqual([v1Blob count], v1BlobCount);
     XCTAssertNotNil(v1Blob[@"lastWriteTimestamp"]);
     
     NSDictionary *v2Blob = [self readBlobWithVersion:@"AccountsV2"];
     XCTAssertNotNil(v2Blob);
-    XCTAssertEqual([v2Blob count], 2);
-    XCTAssertEqualObjects(v2Blob[accountId], singleAccountBlob);
+    XCTAssertEqual([v2Blob count], v2BlobCount);
     XCTAssertNotNil(v2Blob[@"lastWriteTimestamp"]);
     XCTAssertTrue([v2Blob[@"lastWriteTimestamp"] longValue] > [v1Blob[@"lastWriteTimestamp"] longValue]);
     
     NSDictionary *v3Blob = [self readBlobWithVersion:@"AccountsV3"];
     XCTAssertNotNil(v3Blob);
-    XCTAssertEqual([v3Blob count], 2);
+    XCTAssertEqual([v3Blob count], v3BlobCount);
     XCTAssertNotNil(v3Blob[@"lastWriteTimestamp"]);
-    XCTAssertEqualObjects(v3Blob[accountId], singleAccountBlob);
     XCTAssertTrue([v3Blob[@"lastWriteTimestamp"] longValue] > [v2Blob[@"lastWriteTimestamp"] longValue]);
 }
 
@@ -584,75 +496,6 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     
     MSIDJsonObject *jsonObject = results[0];
     return [jsonObject jsonDictionary];
-}
-
-- (MSALAccount *)testADALAccount
-{
-    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid"
-                                                                       objectId:@"uid"
-                                                                       tenantId:@"utid"];
-    
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                   homeAccountId:accountId
-                                                     environment:@"login.microsoftonline.com"
-                                                  tenantProfiles:nil];
-    
-    account.accountClaims = @{@"name": @"Contoso User",
-                              @"oid": @"uid",
-                              @"tid": @"utid"
-                              };
-    
-    return account;
-}
-
-- (MSALAccount *)testMSAAccount
-{
-    NSString *accountidentifier = [NSString stringWithFormat:@"%@.%@", kDefaultTestUid, MSID_DEFAULT_MSA_TENANTID.lowercaseString];
-    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:accountidentifier
-                                                                       objectId:kDefaultTestUid
-                                                                       tenantId:MSID_DEFAULT_MSA_TENANTID.lowercaseString];
-    
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                                   homeAccountId:accountId
-                                                     environment:@"login.microsoftonline.com"
-                                                  tenantProfiles:nil];
-    
-    account.accountClaims = @{@"name": @"Contoso User",
-                              @"oid": @"uid",
-                              @"tid": @"utid"
-                              };
-    
-    return account;
-}
-
-- (NSDictionary *)sampleADALJSONDictionaryWithUsername:(NSString *)username
-                                             accountId:(NSString *)accountId
-                                              objectId:(NSString *)objectId
-{
-    return @{@"authEndpointUrl": @"https://login.windows.net/common/oauth2/authorize",
-             @"id": accountId ?: [NSUUID UUID].UUIDString,
-             @"environment": @"PROD",
-             @"oid": objectId ?: [NSUUID UUID].UUIDString,
-             @"originAppId": @"com.myapp.app",
-             @"tenantDisplayName": @"",
-             @"type": @"ADAL",
-             @"displayName": @"myDisplayName.contoso.user",
-             @"tenantId": [NSUUID UUID].UUIDString,
-             @"username": username ?: @"user@contoso.com"
-             };
-}
-
-- (NSDictionary *)sampleMSAJSONDictionaryWithAccountId:(NSString *)accountIdentifier
-{
-    return @{@"cid": kDefaultTestCid,
-             @"email": @"user@outlook.com",
-             @"id": accountIdentifier ?: [NSUUID UUID].UUIDString,
-             @"originAppId": @"com.myapp.app",
-             @"type": @"MSA",
-             @"displayName": @"MyDisplayName",
-             @"additionalProperties": @{@"myprop1": @"myprop2"},
-             @"additionalfield1": @"additionalvalue1"
-             };
 }
 
 @end

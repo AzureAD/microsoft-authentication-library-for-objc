@@ -32,6 +32,7 @@
 #import "MSALTestBundle.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId+Internal.h"
+#import "MSALLegacySharedAccountTestUtil.h"
 
 @interface MSALLegacySharedAccountTests : XCTestCase
 
@@ -43,7 +44,7 @@
 
 - (void)testInitWithJSONDictionary_whenAccountTypeMissing_shouldReturnNilAndFillError
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     jsonDictionary[@"type"] = nil;
     
     NSError *error = nil;
@@ -57,7 +58,7 @@
 
 - (void)testInitWithJSONDictionary_whenIdentifierMissing_shouldReturnNilAndFillError
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     jsonDictionary[@"id"] = nil;
     
     NSError *error = nil;
@@ -72,7 +73,7 @@
 - (void)testInitWithJSONDictionary_whenAllMandatoryFieldsPresent_shouldReturnNotNilResultAndNilError
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:accountId] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:nil] mutableCopy];
     NSDictionary *signinStatusDict = @{@"com.microsoft.myapp": @"SignedIn",
                                        @"com.microsoft.myapp2": @"SignedOut"
                                        };
@@ -90,7 +91,7 @@
 
 - (void)testInitWithJSONDictionary_whenFieldsOfWrongType_shouldReturnNilAndFillError
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     jsonDictionary[@"type"] = [NSNull null];
     jsonDictionary[@"id"] = [NSNumber numberWithInteger:5];
     
@@ -107,7 +108,7 @@
 
 - (void)testMatchesParameters_whenNilParameters_shouldReturnYES
 {
-    NSDictionary *jsonDictionary = [self sampleJSONDictionaryWithAccountId:nil];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionary];
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = nil;
@@ -117,7 +118,7 @@
 
 - (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenNO_andAppSignedOut_shouldReturnYES
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
     NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
@@ -132,7 +133,7 @@
 
 - (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenYES_andAppSignedIn_shouldReturnYES
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
     NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier] : @"SignedIn"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
@@ -147,7 +148,7 @@
 
 - (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenYES_andAppSignedOut_shouldReturnNO
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
     NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
@@ -164,11 +165,11 @@
 
 - (void)testUpdateAccountWithMSALAccount_whenV1Account_shouldReturnYesAndNilError_andNotUpdate
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:nil] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     NSError *updateError = nil;
-    BOOL result = [account updateAccountWithMSALAccount:[self testMSALAccount]
+    BOOL result = [account updateAccountWithMSALAccount:[MSALLegacySharedAccountTestUtil testADALAccount]
                                         applicationName:@"MyApp"
                                               operation:MSALLegacySharedAccountRemoveOperation
                                          accountVersion:MSALLegacySharedAccountVersionV1
@@ -183,14 +184,14 @@
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
     NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:accountId] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:nil] mutableCopy];
     NSDictionary *signinStatusDict = @{appIdentifier : @"SignedIn"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
     
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     NSError *updateError = nil;
-    BOOL result = [account updateAccountWithMSALAccount:[self testMSALAccount]
+    BOOL result = [account updateAccountWithMSALAccount:[MSALLegacySharedAccountTestUtil testADALAccount]
                                         applicationName:@"MyApp"
                                               operation:MSALLegacySharedAccountRemoveOperation
                                          accountVersion:MSALLegacySharedAccountVersionV2
@@ -213,14 +214,14 @@
 {
     NSString *accountId = [NSUUID UUID].UUIDString;
     NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    NSMutableDictionary *jsonDictionary = [[self sampleJSONDictionaryWithAccountId:accountId] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:accountId objectId:nil tenantId:nil username:nil] mutableCopy];
     NSDictionary *signinStatusDict = @{appIdentifier : @"SignedOut"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
     
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     NSError *updateError = nil;
-    BOOL result = [account updateAccountWithMSALAccount:[self testMSALAccount]
+    BOOL result = [account updateAccountWithMSALAccount:[MSALLegacySharedAccountTestUtil testADALAccount]
                                         applicationName:@"MyApp"
                                               operation:MSALLegacySharedAccountUpdateOperation
                                          accountVersion:MSALLegacySharedAccountVersionV3
@@ -237,36 +238,6 @@
     XCTAssertNotNil(updatedAt);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
-}
-
-
-
-#pragma mark - Helpers
-
-- (MSALAccount *)testMSALAccount
-{
-    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid"
-                                                                       objectId:@"oid"
-                                                                       tenantId:@"tid"];
-    
-    return [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                   homeAccountId:accountId
-                                     environment:@"login.microsoftonline.com"
-                                  tenantProfiles:nil];
-}
-
-- (NSDictionary *)sampleJSONDictionaryWithAccountId:(NSString *)accountIdentifier
-{
-    return @{@"authEndpointURL": @"https://contoso.com/common",
-             @"id": accountIdentifier ?: [NSUUID UUID].UUIDString,
-             @"environment": @"PROD",
-             @"oid": [NSUUID UUID].UUIDString,
-             @"originAppId": @"com.myapp.app",
-             @"tenantDisplayName": @"",
-             @"type": @"ADAL",
-             @"tenantId": [NSUUID UUID].UUIDString,
-             @"username": @"user@contoso.com"
-             };
 }
 
 @end

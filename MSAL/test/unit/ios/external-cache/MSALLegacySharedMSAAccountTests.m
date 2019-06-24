@@ -31,6 +31,7 @@
 #import "MSALAccountId+Internal.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDConstants.h"
+#import "MSALLegacySharedAccountTestUtil.h"
 
 @interface MSALLegacySharedMSAAccountTests : XCTestCase
 
@@ -45,7 +46,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testInitWithJSONDictionary_whenWrongAccountType_shouldReturnNilAndError
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleMSAJSONDictionary] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary] mutableCopy];
     jsonDictionary[@"type"] = @"ADAL";
     
     NSError *error = nil;
@@ -59,7 +60,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testInitWithJSONDictionary_whenNilUID_shouldReturnNilAndFillError
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleMSAJSONDictionary] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary] mutableCopy];
     jsonDictionary[@"cid"] = nil;
     
     NSError *error = nil;
@@ -75,7 +76,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 {
     NSString *accountId = [NSUUID UUID].UUIDString.lowercaseString;
     
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionaryWithAccountId:accountId];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionaryWithAccountId:accountId];
     
     NSError *error = nil;
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:&error];
@@ -95,7 +96,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenShouldHaveAssociatedRefreshTokenYES_AndAccountSignedOut_shouldReturnNO
 {
-    NSMutableDictionary *jsonDictionary = [[self sampleMSAJSONDictionary] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary] mutableCopy];
     
     NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
@@ -110,7 +111,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenNilParameters_shouldReturnYES
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = nil;
@@ -120,7 +121,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenIdentifierNonNil_andMatchingIdentifier_shouldReturnYES
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     NSString *expectedIdentifier = [NSString stringWithFormat:@"%@.%@", kDefaultTestUid, MSID_DEFAULT_MSA_TENANTID.lowercaseString];
@@ -132,7 +133,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenIdentifierAndUsernameSet_andMatchingAllOptions_shouldReturnYES
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
@@ -145,7 +146,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenAllMatchignOptionsSet_andMatchingAllOptions_butDifferentCase_shouldReturnYES
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
@@ -158,7 +159,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenTenantProfileIdentifierNonNil_shouldReturnNO
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
@@ -170,7 +171,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParamaters_whenUsernameNonNil_andUsernameDifferent_shouldReturnNO
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
@@ -182,7 +183,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 
 - (void)testMatchesWithParameters_whenIdentifierNonNil_andIdentifierDifferent_shouldReturnNO
 {
-    NSDictionary *jsonDictionary = [self sampleMSAJSONDictionary];
+    NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary];
     
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
@@ -197,7 +198,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
 - (void)testUpdateWithMSALAccount_whenUsernameAndSigninStatusChanged_shouldUpdateUsername
 {
     NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    NSMutableDictionary *jsonDictionary = [[self sampleMSAJSONDictionary] mutableCopy];
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleMSAJSONDictionary] mutableCopy];
     NSDictionary *signinStatusDict = @{appIdentifier : @"SignedOut"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
     jsonDictionary[@"email"] = @"old@contoso.old.com";
@@ -205,7 +206,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     NSError *updateError = nil;
-    BOOL result = [account updateAccountWithMSALAccount:[self testMSALAccount]
+    BOOL result = [account updateAccountWithMSALAccount:[MSALLegacySharedAccountTestUtil testMSAAccount]
                                         applicationName:@"MyApp"
                                               operation:MSALLegacySharedAccountUpdateOperation
                                          accountVersion:MSALLegacySharedAccountVersionV3
@@ -224,38 +225,6 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects([account jsonDictionary][@"additionalfield1"], @"additionalvalue1");
     
-}
-
-#pragma mark - Helpers
-
-- (MSALAccount *)testMSALAccount
-{
-    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"uid.utid"
-                                                                       objectId:@"uid"
-                                                                       tenantId:@"utid"];
-    
-    return [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
-                                   homeAccountId:accountId
-                                     environment:@"login.microsoftonline.com"
-                                  tenantProfiles:nil];
-}
-
-- (NSDictionary *)sampleMSAJSONDictionary
-{
-    return [self sampleMSAJSONDictionaryWithAccountId:nil];
-}
-
-- (NSDictionary *)sampleMSAJSONDictionaryWithAccountId:(NSString *)accountIdentifier
-{
-    return @{@"cid": kDefaultTestCid,
-             @"email": @"user@outlook.com",
-             @"id": accountIdentifier ?: [NSUUID UUID].UUIDString,
-             @"originAppId": @"com.myapp.app",
-             @"type": @"MSA",
-             @"displayName": @"MyDisplayName",
-             @"additionalProperties": @{@"myprop1": @"myprop2"},
-             @"additionalfield1": @"additionalvalue1"
-             };
 }
 
 @end
