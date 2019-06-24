@@ -85,7 +85,7 @@
 }
 
 + (MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
-                                                    claims:(nonnull NSDictionary *)claims
+                                   tenantProfileIdentifier:(nullable NSString *)tenantProfileIdentifier
 {
     if ([self isMSAAccount:account])
     {
@@ -93,9 +93,9 @@
         parameters.needsAssociatedRefreshToken = NO;
         return parameters;
     }
-    else if (![NSString msidIsStringNilOrBlank:claims[@"oid"]])
+    else if (![NSString msidIsStringNilOrBlank:tenantProfileIdentifier])
     {
-        MSALAccountEnumerationParameters *parameters =  [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:claims[@"oid"]];
+        MSALAccountEnumerationParameters *parameters =  [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:tenantProfileIdentifier];
         parameters.needsAssociatedRefreshToken = NO;
         return parameters;
     }

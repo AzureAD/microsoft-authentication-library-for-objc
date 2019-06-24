@@ -27,6 +27,7 @@
 @class MSIDJsonObject;
 @class MSALAccount;
 @class MSALAccountEnumerationParameters;
+@class MSALTenantProfile;
 
 @interface MSALLegacySharedAccountFactory : NSObject
 
@@ -40,6 +41,6 @@
                                                        error:(NSError * _Nullable * _Nullable )error;
 
 + (nullable MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
-                                                             claims:(nonnull NSDictionary *)claims;
+                                            tenantProfileIdentifier:(nullable NSString *)tenantProfileIdentifier;
 
 @end

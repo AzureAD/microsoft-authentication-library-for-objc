@@ -195,7 +195,7 @@
                                                                          version:(MSALLegacySharedAccountVersion)version
                                                                            error:(NSError **)error
 {
-    MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:msalAccount claims:idTokenClaims];
+    MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:msalAccount tenantProfileIdentifier:idTokenClaims[@"oid"]];
     
     if (!parameters)
     {
@@ -259,7 +259,8 @@
 {
     if (![tenantProfiles count])
     {
-        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:account.accountClaims];
+        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
+                                                                                    tenantProfileIdentifier:account.accountClaims[@"oid"]];
         
         if (!parameters)
         {
@@ -275,7 +276,8 @@
     
     for (MSALTenantProfile *tenantProfile in tenantProfiles)
     {
-        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account claims:tenantProfile.claims];
+        MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
+                                                                                    tenantProfileIdentifier:tenantProfile.identifier];
         
         if (!parameters)
         {
@@ -308,7 +310,7 @@
     __block BOOL result = YES;
     __block NSError *updateError = nil;
     
-    dispatch_barrier_async(self.synchronizationQueue, ^{
+    dispatch_barrier_sync(self.synchronizationQueue, ^{
         result = [self updateAccountImpl:account
                            idTokenClaims:idTokenClaims
                           tenantProfiles:tenantProfiles
