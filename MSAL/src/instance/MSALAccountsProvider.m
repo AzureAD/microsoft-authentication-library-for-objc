@@ -195,8 +195,7 @@
         
         if (externalError)
         {
-            if (error) *error = externalError;
-            return nil;
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to read accounts from external cache with error %@. Ignoring error...", MSID_PII_LOG_MASKABLE(externalError));
         }
     }
     
