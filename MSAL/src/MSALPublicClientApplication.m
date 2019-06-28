@@ -245,7 +245,7 @@
     
     self.tokenCache = defaultAccessor;
 #else
-    __auto_type dataSource = [MSIDMacKeychainTokenCache new]; // TODO: setup correctly with keychain group
+    __auto_type dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
     
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
