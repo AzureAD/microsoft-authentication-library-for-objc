@@ -47,6 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALLegacySharedAccount : NSObject
 {
     NSString *_username;
+    NSString *_accountType;
 }
 
 @property (nonatomic, readonly) NSDictionary *jsonDictionary;

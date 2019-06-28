@@ -54,9 +54,9 @@ static NSString *kADALAccountType = @"ADAL";
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creating external account from ADAL account");
         
-        if (![self.accountType isEqualToString:kADALAccountType])
+        if (![_accountType isEqualToString:kADALAccountType])
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", self.accountType);
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", _accountType);
             
             if (error)
             {

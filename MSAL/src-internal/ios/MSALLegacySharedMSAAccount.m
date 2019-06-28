@@ -53,7 +53,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     
     if (self)
     {
-        if (![self.accountType isEqualToString:kMSAAccountType])
+        if (![_accountType isEqualToString:kMSAAccountType])
         {
             if (error)
             {
