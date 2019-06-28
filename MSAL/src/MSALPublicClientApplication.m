@@ -247,6 +247,19 @@
 #else
     __auto_type dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
     
+    if (!dataSource)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed");
+        
+        if (error)
+        {
+            NSError *devError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed", nil, nil, nil, nil, nil);
+            *error = [MSALErrorConverter msalErrorFromMsidError:devError];
+        }
+        
+        return nil;
+    }
+    
     MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     self.tokenCache = defaultAccessor;
 #endif
