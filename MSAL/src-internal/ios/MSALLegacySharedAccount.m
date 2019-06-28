@@ -30,6 +30,7 @@
 @interface MSALLegacySharedAccount()
 
 @property (nonatomic, readwrite) NSDictionary *jsonDictionary;
+@property (nonatomic, readwrite) NSString *username;
 
 @end
 
@@ -115,14 +116,12 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     if (parameters.needsAssociatedRefreshToken)
     {
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-        NSString *signinStatus = _signinStatusDictionary[appIdentifier];
+        NSString *signinStatus = [self.signinStatusDictionary msidStringObjectForKey:appIdentifier];
         
         if (![signinStatus isEqualToString:@"SignedIn"])
         {
             return NO;
         }
-        
-        return YES;
     }
     
     return YES;
@@ -147,7 +146,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     if (appIdentifier)
     {
         NSMutableDictionary *signinDictionary = [NSMutableDictionary new];
-        [signinDictionary addEntriesFromDictionary:_signinStatusDictionary];
+        [signinDictionary addEntriesFromDictionary:self.signinStatusDictionary];
         
         NSString *signinState = nil;
         
@@ -176,18 +175,14 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     oldDictionary[@"additionalProperties"] = mutableAdditionalInfo;
     
-    if (account)
+    if (account.username)
     {
-        [oldDictionary addEntriesFromDictionary:[self updatedFieldsWithAccount:account]];
+        self.username = account.username;
+        oldDictionary[@"username"] = self.username;
     }
     
-    _jsonDictionary = oldDictionary;
+    self.jsonDictionary = oldDictionary;
     return YES;
-}
-
-- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
-{
-    return nil;
 }
 
 - (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims

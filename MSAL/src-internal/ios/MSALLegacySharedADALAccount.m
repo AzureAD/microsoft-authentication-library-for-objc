@@ -36,6 +36,9 @@ static NSString *kADALAccountType = @"ADAL";
 @property (nonatomic) MSIDAADAuthority *authority;
 @property (nonatomic) NSString *objectId;
 @property (nonatomic) NSString *tenantId;
+@property (nonatomic, readwrite) NSString *environment;
+@property (nonatomic, readwrite) NSString *identifier;
+@property (nonatomic, readwrite) NSDictionary *accountClaims;
 
 @end
 
@@ -148,34 +151,6 @@ static NSString *kADALAccountType = @"ADAL";
 }
 
 #pragma mark - Updates
-
-- (BOOL)updateAccountWithMSALAccount:(id<MSALAccount>)account
-                     applicationName:(NSString *)appName
-                           operation:(MSALLegacySharedAccountWriteOperation)operation
-                      accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                               error:(NSError **)error
-{
-    BOOL result = [super updateAccountWithMSALAccount:account
-                                      applicationName:appName
-                                            operation:operation
-                                       accountVersion:accountVersion
-                                                error:error];
-    
-    if (!result)
-    {
-        return NO;
-    }
-    
-    _username = account.username;
-    return YES;
-}
-
-- (NSDictionary *)updatedFieldsWithAccount:(id<MSALAccount>)account
-{
-    NSMutableDictionary *updatedFields = [NSMutableDictionary new];
-    updatedFields[@"username"] = account.username;
-    return updatedFields;
-}
 
 - (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
 {

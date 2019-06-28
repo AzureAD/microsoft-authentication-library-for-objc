@@ -54,7 +54,7 @@
         return nil;
     }
     
-    NSUInteger zeroFillLen = (16 - (stringLen+1)/2);
+    NSUInteger zeroFillLen = (16 - (stringLen + 1) / 2);
     NSMutableData *result = [[NSMutableData alloc] initWithLength:16];
     
     char chars[3] = {'\0','\0','\0'};

@@ -27,6 +27,8 @@
 @class MSALAccountEnumerationParameters;
 @protocol MSALAccount;
 
+// Every time there's a new field added, version update is required
+// Versions are identified numerically (V1, V2, V3)
 typedef NS_ENUM(NSInteger, MSALLegacySharedAccountVersion)
 {
     MSALLegacySharedAccountVersionV1 = 1,
@@ -43,11 +45,15 @@ typedef NS_ENUM(NSInteger, MSALLegacySharedAccountWriteOperation)
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedAccount : NSObject
+{
+    NSString *_username;
+}
 
 @property (nonatomic, readonly) NSDictionary *jsonDictionary;
 @property (nonatomic, readonly) NSString *accountType;
 @property (nonatomic, readonly) NSString *accountIdentifier;
 @property (nonatomic, readonly) NSDictionary *signinStatusDictionary;
+@property (nonatomic, readonly) NSString *username;
 
 - (nullable instancetype)initWithJSONDictionary:(NSDictionary *)jsonDictionary error:(NSError * _Nullable * _Nullable)error;
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters;

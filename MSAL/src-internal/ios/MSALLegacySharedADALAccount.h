@@ -29,11 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALLegacySharedADALAccount : MSALLegacySharedAccount <MSALAccount>
 
-@property (nonatomic, readonly) NSString *environment;
-@property (nonatomic, readonly) NSString *identifier;
-@property (nonatomic, readonly) NSDictionary *accountClaims;
-@property (nonatomic, readonly) NSString *username;
-
 @end
 
 NS_ASSUME_NONNULL_END

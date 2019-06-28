@@ -98,8 +98,6 @@
             
             return NO;
         }
-        
-        return YES;
     }
     
     return YES;
