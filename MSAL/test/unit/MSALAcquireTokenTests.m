@@ -1096,7 +1096,7 @@
     [json setValue:@"-1" forKey:MSID_OAUTH2_EXPIRES_IN];
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
@@ -1235,7 +1235,7 @@
                                                                         utid:DEFAULT_TEST_UTID
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
@@ -1368,7 +1368,7 @@
                                                                         utid:DEFAULT_TEST_UTID
                                                                     familyId:nil].jsonDictionary.mutableCopy;
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
@@ -1708,7 +1708,7 @@
     
     [application setClientCapabilities:@[@"cp1"]];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
@@ -1775,7 +1775,7 @@
     
     [application setClientCapabilities:@[@"cp1"]];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                             name:@"user@contoso.com"
                                                    homeAccountId:@"1.1234-5678-90abcdefg"
                                                   localAccountId:@"1"
