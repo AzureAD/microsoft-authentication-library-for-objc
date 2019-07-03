@@ -321,7 +321,7 @@
     XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldNotOverwriteCacheConfig
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupWithBundleIdAndSharingDisabled
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -335,7 +335,7 @@
                                               redirectUri:@"mycustom.redirect://bundle_id"
                                                     error:nil];
     
-    XCTAssertEqualObjects(application.keychainGroup, MSALCacheConfig.defaultKeychainSharingGroup);
+    XCTAssertEqualObjects(application.keychainGroup, nil);
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
