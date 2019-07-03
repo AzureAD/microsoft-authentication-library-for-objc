@@ -290,7 +290,6 @@
     XCTAssertEqualObjects(application.authority, authority);
     XCTAssertEqualObjects(application.redirectUri.url.absoluteString, @"mycustom.redirect://bundle_id");
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
-    XCTAssertEqual(application.configuration.cacheConfig.enableKeychainSharing, YES);
 }
 
 - (void)testInitWithClientId_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -300,7 +299,6 @@
 
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
     XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
-    XCTAssertEqual(app.configuration.cacheConfig.enableKeychainSharing, YES);
 }
 
 - (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -311,7 +309,6 @@
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
     XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
-    XCTAssertEqual(app.configuration.cacheConfig.enableKeychainSharing, YES);
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -322,10 +319,9 @@
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
     XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
-    XCTAssertEqual(app.configuration.cacheConfig.enableKeychainSharing, YES);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupWithBundleIdAndSharingDisabled
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldNotOverwriteCacheConfig
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -339,8 +335,7 @@
                                               redirectUri:@"mycustom.redirect://bundle_id"
                                                     error:nil];
     
-    XCTAssertEqualObjects(application.keychainGroup, [[NSBundle mainBundle] bundleIdentifier]);
-    XCTAssertEqual(application.configuration.cacheConfig.enableKeychainSharing, NO);
+    XCTAssertEqualObjects(application.keychainGroup, MSALCacheConfig.defaultKeychainSharingGroup);
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
@@ -358,7 +353,6 @@
                                                     error:nil];
     
     XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
-    XCTAssertEqual(application.configuration.cacheConfig.enableKeychainSharing, YES);
 }
 #endif
 

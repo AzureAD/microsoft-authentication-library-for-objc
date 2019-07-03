@@ -268,13 +268,9 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
     
 #if TARGET_OS_IPHONE
-    if (keychainGroup)
+    if (![NSString msidIsStringNilOrBlank:keychainGroup])
     {
         config.cacheConfig.keychainSharingGroup = keychainGroup;
-    }
-    else
-    {
-        config.cacheConfig.enableKeychainSharing = NO;
     }
 #endif
     
