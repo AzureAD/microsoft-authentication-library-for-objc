@@ -1,3 +1,9 @@
+## [0.3.4] - 2019-03-07
+### Fixed
+- Improve logging for token removal scenarios
+- Use ASCII for PKCE code challenge
+- Don't return Access token if ID token/Account are missing
+
 ## [0.3.3] - 2019-05-29
 ### Updated
 - Ignore cached fields in JSON if they contains "null"
