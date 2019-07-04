@@ -88,6 +88,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
+#import <UIKit/UIKit.h>
 #else
 #import "MSIDMacKeychainTokenCache.h"
 #endif
@@ -505,6 +506,25 @@
     }
     
 #if TARGET_OS_IPHONE
+    if (@available(iOS 13.0, *))
+    {
+        if (parameters.parentViewController == nil)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+            return;
+        }
+        
+        if (parameters.parentViewController.view.window == nil)
+        {
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window!", nil, nil, nil, nil, nil);
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            completionBlock(nil, msalError);
+            return;
+        }
+    }
+    
     msidParams.parentViewController = parameters.parentViewController;
     msidParams.presentationType = parameters.presentationStyle;
 #endif

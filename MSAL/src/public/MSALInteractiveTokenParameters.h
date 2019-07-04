@@ -72,9 +72,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 #if TARGET_OS_IPHONE
 /*!
- Modal presentation style for displaying authentication web content.
+ // TODO: update commnet and verify logic with multipel windows.
+ 
+ The view controller to present from. If nil, the current topmost view controller will be used.
+ It is a required parameters on iOS 13 for presenting ASWebAuthenticationSession.
  */
 @property (nullable, weak, nonatomic) UIViewController *parentViewController;
+
+/*!
+ Modal presentation style for displaying authentication web content.
+ */
 @property (nonatomic) UIModalPresentationStyle presentationStyle;
 #endif
 

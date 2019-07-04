@@ -560,6 +560,11 @@
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
+    if (@available(iOS 13.0, *))
+    {
+        parameters.parentViewController = self;
+    }
+    
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }
 
