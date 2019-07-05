@@ -37,6 +37,18 @@
 
 @implementation MSALAccountEnumerationParameters
 
+- (instancetype)init
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _needsAssociatedRefreshToken = YES;
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier
 {
     self = [super init];
@@ -44,6 +56,7 @@
     if (self)
     {
         _identifier = accountIdentifier;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;
@@ -58,6 +71,7 @@
     {
         _identifier = accountIdentifier;
         _username = username;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;
@@ -70,9 +84,17 @@
     if (self)
     {
         _tenantProfileIdentifier = tenantProfileIdentifier;
+        _needsAssociatedRefreshToken = YES;
     }
     
     return self;
+}
+
+#pragma mark - Description
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, needs associated refresh token %d", self.identifier, self.username, self.tenantProfileIdentifier, self.needsAssociatedRefreshToken];
 }
 
 @end

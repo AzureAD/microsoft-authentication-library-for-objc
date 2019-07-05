@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -22,25 +20,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#pragma once
+#import <Foundation/Foundation.h>
 
-#include "MSALPublicClientApplication+Internal.h"
+@protocol MSALExternalAccountProviding;
+@class MSALResult;
+@class MSALAccount;
+@protocol MSALExternalAccount;
+@class MSALAccountEnumerationParameters;
+@class MSALOauth2Provider;
 
-// Unit test client ID
-#define UNIT_TEST_CLIENT_ID                 @"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+NS_ASSUME_NONNULL_BEGIN
 
-// Unit test correlation ID
-#define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
+@interface MSALExternalAccountHandler : NSObject
 
-// Unit test redirect scheme : msal<clientId>
-#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
+@property (nonatomic, nonnull, readonly) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
+@property (nonatomic, nonnull, readonly) MSALOauth2Provider *oauth2Provider;
 
-// Unit test redirect uri : msal<clientId>://auth
-#define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
+- (nullable instancetype)initWithExternalAccountProviders:(NSArray<id<MSALExternalAccountProviding>> *)externalAccountProviders
+                                           oauth2Provider:(MSALOauth2Provider *)oauth2Provider
+                                                    error:(NSError * _Nullable * _Nullable)error;
 
-#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"
+- (BOOL)updateWithResult:(MSALResult *)result error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error;
+- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError * _Nullable * _Nullable)error;
 
-#define UT_SLICE_PARAMS_QUERY 
+@end
+
+NS_ASSUME_NONNULL_END

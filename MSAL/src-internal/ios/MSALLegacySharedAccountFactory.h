@@ -1,5 +1,3 @@
-//------------------------------------------------------------------------------
-//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
 //
@@ -22,25 +20,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-#pragma once
+#import <Foundation/Foundation.h>
+#import "MSALLegacySharedAccount.h"
 
-#include "MSALPublicClientApplication+Internal.h"
+@class MSIDJsonObject;
+@class MSALAccount;
+@class MSALAccountEnumerationParameters;
+@class MSALTenantProfile;
 
-// Unit test client ID
-#define UNIT_TEST_CLIENT_ID                 @"b92e0ba5-f86e-4411-8e18-6b5f928d968a"
+@interface MSALLegacySharedAccountFactory : NSObject
 
-// Unit test correlation ID
-#define UNIT_TEST_CORRELATION_ID            @"60032DDF-822D-470B-9957-D694F92E3D27"
++ (nullable MSALLegacySharedAccount *)accountWithJSONDictionary:(nonnull NSDictionary *)jsonDictionary
+                                                          error:(NSError * _Nullable * _Nullable)error;
 
-// Unit test redirect scheme : msal<clientId>
-#define UNIT_TEST_DEFAULT_REDIRECT_SCHEME   @"msal"UNIT_TEST_CLIENT_ID
++ (nullable MSALLegacySharedAccount *)accountWithMSALAccount:(nonnull id<MSALAccount>)account
+                                                      claims:(nonnull NSDictionary *)claims
+                                             applicationName:(nonnull NSString *)applicationName
+                                              accountVersion:(MSALLegacySharedAccountVersion)accountVersion
+                                                       error:(NSError * _Nullable * _Nullable )error;
 
-// Unit test redirect uri : msal<clientId>://auth
-#define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
++ (nullable MSALAccountEnumerationParameters *)parametersForAccount:(nonnull id<MSALAccount>)account
+                                            tenantProfileIdentifier:(nullable NSString *)tenantProfileIdentifier;
 
-#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"
-
-#define UT_SLICE_PARAMS_QUERY 
+@end
