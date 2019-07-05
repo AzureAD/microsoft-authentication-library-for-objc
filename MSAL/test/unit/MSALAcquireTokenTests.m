@@ -79,12 +79,16 @@
 #import "MSALClaimsRequest.h"
 #import "MSALAccountId+Internal.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSALInteractiveTokenParameters.h"
+#import <UIKit/UIKit.h>
 
 @interface MSALAcquireTokenTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSIDAccountCredentialCache *accountCache;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
+@property (nonatomic) UIViewController *parentController;
+@property (nonatomic) UIWindow *window;
 
 @end
 
@@ -107,6 +111,12 @@
     [self.tokenCache clearWithContext:nil error:nil];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
+    
+    self.parentController = [UIViewController new];
+    UIView *view = [UIView new];
+    self.window = [UIWindow new];
+    [view setValue:self.window forKey:@"window"];
+    [self.parentController setValue:view forKey:@"view"];
 }
 
 - (void)tearDown
@@ -172,10 +182,12 @@
     [cache setObject:record forKey:@"login.windows.net"];
     [cache setObject:record forKey:@"login.microsoft.com"];
     
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.parentViewController = self.parentController;
     __block MSALAccount *resultAccount = nil;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+    [application acquireTokenWithParameters:parameters
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
@@ -257,9 +269,12 @@
     
     application.webviewType = MSALWebviewTypeWKWebView;
     
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.parentViewController = self.parentController;
+    
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenForScopes"];
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
-                       completionBlock:^(MSALResult *result, NSError *error)
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
