@@ -25,25 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALInteractiveTokenParameters.h"
-#import "MSALTokenParameters+Internal.h"
+#import "MSALWebviewConfig.h"
 #import "MSALGlobalConfig.h"
 
-@implementation MSALInteractiveTokenParameters
+@implementation MSALWebviewConfig
 
-@synthesize telemetryApiId;
-
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
-                 webviewConfig:(MSALWebviewConfig *)webviewConfig
+#if TARGET_OS_IPHONE
+- (instancetype)init
 {
-    self = [super initWithScopes:scopes];
+    return [super init];
+}
+
++ (instancetype)new
+{
+    return [super new];
+}
+
+- (instancetype)initWithParentViewController:(UIViewController *)parentViewController
+{
+    self = [super init];
     if (self)
     {
-        self.telemetryApiId = MSALTelemetryApiIdAcquireWithTokenParameters;
-        _promptType = MSALPromptTypeDefault;
-        _webviewConfig = webviewConfig;
+        _parentViewController = parentViewController;
     }
+    
     return self;
 }
+#endif
 
 @end

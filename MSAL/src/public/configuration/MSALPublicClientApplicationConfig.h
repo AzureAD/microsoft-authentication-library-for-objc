@@ -30,7 +30,6 @@
 
 @class MSALRedirectUri;
 @class MSALAuthority;
-@class MSALWebViewConfig;
 @class MSALSliceConfig;
 @class MSALCacheConfig;
 
@@ -39,44 +38,44 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALPublicClientApplicationConfig : NSObject <NSCopying>
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property NSString *clientId;
+@property (nonatomic) NSString *clientId;
 
 /*! The redirect URI of the application */
-@property NSString *redirectUri;
+@property (nonatomic) NSString *redirectUri;
 
 /*! The authority the application will use to obtain tokens */
-@property MSALAuthority *authority;
+@property (nonatomic) MSALAuthority *authority;
 
 /*! List of known authorities that application should trust.
     Note that authorities listed here will bypass authority validation logic.
     Thus, it is advised not putting in here dynamically resolving authorities here.
  */
-@property NSArray<MSALAuthority *> *knownAuthorities;
+@property (nonatomic) NSArray<MSALAuthority *> *knownAuthorities;
 
 /*! Enable to return access token with extended lifttime during server outage. */
-@property BOOL extendedLifetimeEnabled;
+@property (nonatomic) BOOL extendedLifetimeEnabled;
 
 /*! List of additional ESTS features that client handles. */
-@property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
+@property (nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property double tokenExpirationBuffer;
+@property (nonatomic) double tokenExpirationBuffer;
 
 /*! slice configuration for testing. */
-@property (nullable) MSALSliceConfig *sliceConfig;
+@property (nonatomic, nullable) MSALSliceConfig *sliceConfig;
 
 /*! Cache configurations, refer to MSALCacheConfig.h for more detail */
-@property (readonly) MSALCacheConfig *cacheConfig;
+@property (nonatomic, readonly) MSALCacheConfig *cacheConfig;
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId   The clientID of your application, you should get this from the app portal.
  */
-- (nonnull instancetype)initWithClientId:(NSString *)clientId;
+- (nonnull instancetype)initWithClientId:(NSString *)clientId DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority:] instead");
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
@@ -87,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
+                               authority:(nullable MSALAuthority *)authority;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

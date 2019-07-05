@@ -28,7 +28,6 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALPromptType_Internal.h"
 #import "MSALError.h"
-
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #import "MSIDMacTokenCache.h"
@@ -83,16 +82,16 @@
 #import "MSALOauth2Provider.h"
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
-
+#import "MSALWebviewConfig.h"
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
 #import <UIKit/UIKit.h>
+#import "MSALWebviewConfig.h"
 #else
 #import "MSIDMacKeychainTokenCache.h"
 #endif
-
 
 @interface MSALPublicClientApplication()
 {
@@ -103,7 +102,6 @@
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 
 @end
-
 
 @implementation MSALPublicClientApplication
 
@@ -134,9 +132,6 @@
     
     self.internalConfig.sliceConfig = [MSALSliceConfig configWithSlice:sliceParameters[@"slice"] dc:sliceParameters[@"dc"]];
 }
-
-- (MSALWebviewType)webviewType { return MSALGlobalConfig.defaultWebviewType; }
-- (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
 
 #if TARGET_OS_IPHONE
 - (NSString *)keychainGroup { return self.internalConfig.cacheConfig.keychainSharingGroup; }
@@ -203,8 +198,8 @@
 
 #endif
 
-- (nullable instancetype)initWithConfiguration:(nonnull MSALPublicClientApplicationConfig *)config
-                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error
+- (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config
+                                error:(NSError **)error
 {
     if (!(self = [super init]))
     {
@@ -285,13 +280,15 @@
          keychainGroup:(NSString *)keychainGroup
              authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
-                 error:(NSError * __autoreleasing *)error
+                 error:(NSError **)error DEPRECATED_MSG_ATTRIBUTE("Use MSALPublicClientApplicationConfig initWithConfiguration:error: instead");
 {
     if (!(self = [super init]))
     {
         return nil;
     }
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                                redirectUri:redirectUri
+                                                                                                  authority:authority];
     
 #if TARGET_OS_IPHONE
     config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
@@ -508,7 +505,7 @@
 #if TARGET_OS_IPHONE
     if (@available(iOS 13.0, *))
     {
-        if (parameters.parentViewController == nil)
+        if (parameters.webviewConfig.parentViewController == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
@@ -516,22 +513,24 @@
             return;
         }
         
-        if (parameters.parentViewController.view.window == nil)
+        if (parameters.webviewConfig.parentViewController.view.window == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window!", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
             completionBlock(nil, msalError);
             return;
         }
+        
+        msidParams.prefersEphemeralWebBrowserSession = parameters.webviewConfig.prefersEphemeralWebBrowserSession;
     }
     
-    msidParams.parentViewController = parameters.parentViewController;
-    msidParams.presentationType = parameters.presentationStyle;
+    msidParams.parentViewController = parameters.webviewConfig.parentViewController;
+    msidParams.presentationType = parameters.webviewConfig.presentationStyle;
 #endif
     
     // Configure webview
     NSError *msidWebviewError = nil;
-    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(parameters.webviewType, &msidWebviewError);
+    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(parameters.webviewConfig.webviewType, &msidWebviewError);
     
     if (msidWebviewError)
     {
@@ -540,8 +539,8 @@
     }
     
     msidParams.webviewType = msidWebViewType;
-    msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(parameters.webviewType);
-    msidParams.customWebview = parameters.customWebview ?: self.customWebview;
+    msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(parameters.webviewConfig.webviewType);
+    msidParams.customWebview = parameters.webviewConfig.customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -564,8 +563,8 @@
                     MSALStringForPromptType(parameters.promptType),
                     parameters.extraQueryParameters,
                     parameters.authority,
-                    MSALStringForMSALWebviewType(parameters.webviewType),
-                    parameters.customWebview ? @"Yes" : @"No",
+                    MSALStringForMSALWebviewType(parameters.webviewConfig.webviewType),
+                    parameters.webviewConfig.customWebview ? @"Yes" : @"No",
                     parameters.correlationId,
                     self.internalConfig.clientApplicationCapabilities,
                     parameters.claimsRequest);
@@ -618,7 +617,9 @@
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.telemetryApiId = MSALTelemetryApiIdAcquire;
     
     [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
@@ -630,7 +631,9 @@
                     loginHint:(NSString *)loginHint
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.loginHint = loginHint;
     parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHint;
     
@@ -643,7 +646,9 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
@@ -661,7 +666,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
@@ -683,7 +690,9 @@
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
@@ -702,7 +711,9 @@
                       account:(MSALAccount *)account
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.account = account;
     parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
     
@@ -715,7 +726,9 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.account = account;
     parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
@@ -733,7 +746,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.account = account;
     parameters.promptType = promptType;
@@ -755,7 +770,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.account = account;
     parameters.promptType = promptType;

@@ -33,20 +33,23 @@
 #import "MSALCacheConfig+Internal.h"
 
 static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
+static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @implementation MSALPublicClientApplicationConfig
 {
     MSALSliceConfig *_sliceConfig;
 }
 
-static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
-
 - (instancetype)initWithClientId:(NSString *)clientId
 {
-    return [self initWithClientId:clientId redirectUri:nil authority:nil];
+    return [self initWithClientId:clientId
+                      redirectUri:nil
+                        authority:nil];
 }
 
-- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
+- (instancetype)initWithClientId:(NSString *)clientId
+                     redirectUri:(NSString *)redirectUri
+                       authority:(MSALAuthority *)authority
 {
     self = [super init];
     if (self)
@@ -55,9 +58,8 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         _redirectUri = redirectUri;
         
         NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
-        
         _authority = authority ?: [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
-        _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
+        _extraQueryParameters = [MSALExtraQueryParameters new];
         
         _cacheConfig = [MSALCacheConfig defaultConfig];
         _tokenExpirationBuffer = defaultTokenExpirationBuffer;
@@ -92,9 +94,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 - (id)copyWithZone:(NSZone *)zone
 {
     NSString *clientId = [_clientId copyWithZone:zone];
-    MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId];
-    item->_redirectUri = [_redirectUri copyWithZone:zone];
-    item->_authority = [_authority copyWithZone:zone];
+    NSString *redirectUri = [_redirectUri copyWithZone:zone];
+    MSALAuthority *authority = [_authority copyWithZone:zone];
+    
+    MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
+                                                                                              redirectUri:redirectUri
+                                                                                                authority:authority];
     
     if (_knownAuthorities)
     {

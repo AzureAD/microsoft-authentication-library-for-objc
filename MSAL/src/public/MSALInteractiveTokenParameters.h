@@ -27,9 +27,9 @@
 
 #import "MSALTokenParameters.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@class MSALWebviewConfig;
 
-@class WKWebView;
+NS_ASSUME_NONNULL_BEGIN
 
 /*!
  Token parameters to be used in interactive flow.
@@ -62,40 +62,22 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) NSArray<NSString *> *extraScopesToConsent;
 
 /*!
+ Web view configuration.
+ */
+@property (nonatomic, readonly) MSALWebviewConfig *webviewConfig;
+
+/*!
  Initialize a MSALInteractiveTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
                     in the result in the completionBlock. Not all scopes are
                     gauranteed to be included in the access token returned.
+ @param webviewConfig   Web view configuration.
  */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
+                 webviewConfig:(MSALWebviewConfig *)webviewConfig NS_DESIGNATED_INITIALIZER;
 
-#if TARGET_OS_IPHONE
-/*!
- // TODO: update commnet and verify logic with multipel windows.
- 
- The view controller to present from. If nil, the current topmost view controller will be used.
- It is a required parameters on iOS 13 for presenting ASWebAuthenticationSession.
- */
-@property (nullable, weak, nonatomic) UIViewController *parentViewController;
-
-/*!
- Modal presentation style for displaying authentication web content.
- */
-@property (nonatomic) UIModalPresentationStyle presentationStyle;
-#endif
-
-/*!
- A specific webView type for the interactive authentication flow.
- By default, it will be set to MSALGlobalConfig.defaultWebviewType.
- */
-@property (nonatomic) MSALWebviewType webviewType;
-/*!
- For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
- Web content will be rendered onto this view.
- Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
- */
-@property (nonatomic, nullable) WKWebView *customWebview;
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
 
 @end
 

@@ -45,6 +45,7 @@
 #import "MSALAuthority.h"
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
+#import "MSALWebviewConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -543,27 +544,29 @@
         });
     };
 
+    MSALWebviewConfig *webviewConfig = [[MSALWebviewConfig alloc] initWithParentViewController:self];
+    webviewConfig.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
-    parameters.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
-    if (parameters.webviewType == MSALWebviewTypeWKWebView
+    if (webviewConfig.webviewType == MSALWebviewTypeWKWebView
         && _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
-        parameters.customWebview = _webView;
+        webviewConfig.customWebview = _webView;
         
         [_acquireSettingsView setHidden:YES];
         [_authView setHidden:NO];
     }
-        
+    
+    if (@available(iOS 13.0, *))
+    {
+        webviewConfig.parentViewController = self;
+    }
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
+                                                                                          webviewConfig:webviewConfig];
     parameters.loginHint = _loginHintField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
-    
-    if (@available(iOS 13.0, *))
-    {
-        parameters.parentViewController = self;
-    }
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
 }

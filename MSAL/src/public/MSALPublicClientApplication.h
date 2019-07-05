@@ -54,34 +54,32 @@
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
-@property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("MSALPublicClientApplicationConfig.knownAuthorities instead");
+@property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use configuration.knownAuthorities instead");
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly, nonnull) MSALAuthority *authority;
+@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("Use configuration.authority instead");
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property (readonly, nonnull) NSString *clientId;
+@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("Use configuration.clientId instead");
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) MSALRedirectUri *redirectUri;
+@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("Use configuration.redirectUri instead");
 
 /*!
  Used to specify query parameters that must be passed to both the authorize and token endpoints
  to target MSAL at a specific test slice & flight. These apply to all requests made by an application.
  */
-@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters;
+@property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters DEPRECATED_MSG_ATTRIBUTE("Use configuration.sliceConfig instead");
 
-/*! The webview selection to be used for authentication.
- By default, it is going to use the following to authenticate.
- - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
- - macOS:  WKWebView
+#if TARGET_OS_IPHONE
+/*!
+ The keychain sharing group to use for the token cache.
+ If it is nil, default MSAL group will be used.
  */
-@property MSALWebviewType webviewType;
+@property (nonatomic, readonly, nullable) NSString *keychainGroup DEPRECATED_MSG_ATTRIBUTE("Use configuration.cacheConfig.keychainSharingGroup instead");
+#endif
 
-/*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
-    For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
-@property (nullable) WKWebView *customWebview;
-
+#pragma mark - Initializers
 
 /*!
  Initialize a MSALPublicClientApplication with a given configuration
@@ -103,7 +101,7 @@
     @param  error       The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
@@ -119,7 +117,7 @@
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                                 authority:(nullable MSALAuthority *)authority
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and redirectUri
@@ -138,15 +136,10 @@
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                                 authority:(nullable MSALAuthority *)authority
                               redirectUri:(nullable NSString *)redirectUri
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 
 
 #if TARGET_OS_IPHONE
-/*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
- */
-@property (nonatomic, readonly, nullable) NSString *keychainGroup;
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID and keychain group
@@ -158,7 +151,7 @@
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                             keychainGroup:(nullable NSString *)keychainGroup
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
@@ -178,7 +171,7 @@
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
                             keychainGroup:(nullable NSString *)keychainGroup
                                 authority:(nullable MSALAuthority *)authority
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 
 /*!
  Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
@@ -200,8 +193,10 @@
                             keychainGroup:(nullable NSString *)keychainGroup
                                 authority:(nullable MSALAuthority *)authority
                               redirectUri:(nullable NSString *)redirectUri
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
 #endif
+
+#pragma mark - Account
 
 /*!
  Returns an array of all accounts visible to this application.
@@ -257,6 +252,16 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
+/*!
+ Removes all tokens from the cache for this application for the provided account
+ MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
+ User might need to enter his credentials again after calling this API
+ 
+ @param  account    The account to remove from the cache
+ */
+- (BOOL)removeAccount:(nonnull MSALAccount *)account
+                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
 #pragma mark - SafariViewController Support
 
 #if TARGET_OS_IPHONE
@@ -311,7 +316,8 @@
                             flow completes, or encounters an error.
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
+
 
 #pragma mark - Acquire Token using Login Hint
 
@@ -330,7 +336,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                     loginHint:(nullable NSString *)loginHint
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -351,7 +357,7 @@
                     loginHint:(nullable NSString *)loginHint
                    promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -385,7 +391,7 @@
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token for a new account using interactive authentication
@@ -421,7 +427,7 @@
                 claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 #pragma mark - Acquire Token using Account
 
@@ -439,7 +445,7 @@
  */
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
                       account:(nullable MSALAccount *)account
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -460,7 +466,7 @@
                       account:(nullable MSALAccount *)account
                    promptType:(MSALPromptType)promptType
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -495,7 +501,7 @@
          extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 /*!
  Acquire a token interactively for an existing account. This is typically used after receiving
@@ -532,7 +538,7 @@
                 claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                     authority:(nullable MSALAuthority *)authority
                 correlationId:(nullable NSUUID *)correlationId
-              completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenWithParameters:completionBlock] instead");
 
 #pragma mark - Acquire Token Silent
 
@@ -559,7 +565,7 @@
  */
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenSilentWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token silently for an existing account.
@@ -582,7 +588,7 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenSilentWithParameters:completionBlock] instead");
 
 /*!
     Acquire a token silently for an existing account.
@@ -609,7 +615,7 @@
                           authority:(nullable MSALAuthority *)authority
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenSilentWithParameters:completionBlock] instead");
 
 /*!
  Acquire a token silently for an existing account.
@@ -639,19 +645,6 @@
                       claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
                        forceRefresh:(BOOL)forceRefresh
                       correlationId:(nullable NSUUID *)correlationId
-                    completionBlock:(nonnull MSALCompletionBlock)completionBlock;
-
-#pragma mark - Remove account from cache
-
-/*!
-    Removes all tokens from the cache for this application for the provided account
-    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
-    User might need to enter his credentials again after calling this API
- 
-    @param  account    The account to remove from the cache
- */
-- (BOOL)removeAccount:(nonnull MSALAccount *)account
-                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
-
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication acquireTokenSilentWithParameters:completionBlock] instead");
 
 @end
