@@ -310,22 +310,23 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
     if ([self passedInWebview])
     {
-        application.customWebview = self.webView;
+        webviewConfig.customWebview = self.webView;
         [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes
+                                                                                          webviewConfig:webviewConfig];
     parameters.loginHint = [self.loginHintTextField stringValue];
     parameters.account = self.settings.currentAccount;
     parameters.promptType = [self promptType];
     parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
-    
 }
 
 - (IBAction)acquireTokenSilent:(id)sender
