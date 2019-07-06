@@ -262,5 +262,23 @@
     XCTAssertEqual(msalError.code, MSIDErrorUserCancel);
 }
 
+- (void)testErrorConversion_whenErrorMappedToInternalError_shouldSetInternalErrorToUnexpected
+{
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSIDErrorDomain
+                                                        code:MSIDErrorInternal
+                                            errorDescription:nil
+                                                  oauthError:nil
+                                                    subError:nil
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil
+                                          msalOauth2Provider:nil];
+    
+    XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    NSNumber *internalCode = msalError.userInfo[MSALInternalErrorCodeKey];
+    XCTAssertEqual([internalCode integerValue], MSALInternalErrorUnexpected);
+}
+
 @end
 

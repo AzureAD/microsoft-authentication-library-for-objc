@@ -31,12 +31,14 @@
 @class MSIDAccountMetadataCacheAccessor;
 @class MSIDAuthority;
 @class MSALOauth2Provider;
+@class MSALExternalAccountHandler;
 
 @interface MSALPublicClientApplication ()
 
 @property (nonatomic, nonnull) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic, nonnull) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nonatomic, nonnull) MSALOauth2Provider *msalOauth2Provider;
+@property (nonatomic, nullable) MSALExternalAccountHandler *externalAccountHandler;
 
 + (nonnull NSOrderedSet *)defaultOIDCScopes;
 - (BOOL)shouldExcludeValidationForAuthority:(nonnull MSIDAuthority *)authority;

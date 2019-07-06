@@ -40,6 +40,9 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSALAccountsProvider.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALOauth2Provider.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALAccount
 
@@ -96,6 +99,35 @@
                    tenantProfiles:tenantProfiles];
 }
 
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider
+{
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:externalAccount.identifier];
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:accountIdentifier.homeAccountId
+                                                                           objectId:accountIdentifier.uid
+                                                                           tenantId:accountIdentifier.utid];
+    
+    NSError *tenantProfileError = nil;
+    MSALTenantProfile *tenantProfile = [oauthProvider tenantProfileWithClaims:externalAccount.accountClaims
+                                                                homeAccountId:homeAccountId
+                                                                  environment:externalAccount.environment
+                                                                        error:&tenantProfileError];
+    
+    if (tenantProfileError)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to create tenant profile with error code %ld, domain %@", tenantProfileError.code, tenantProfileError.domain);
+    }
+    
+    NSArray *tenantProfiles = tenantProfile ? @[tenantProfile] : nil;
+    
+    MSALAccount *account = [self initWithUsername:externalAccount.username
+                                    homeAccountId:homeAccountId
+                                      environment:externalAccount.environment
+                                   tenantProfiles:tenantProfiles];
+    
+    return account;
+}
+
 #pragma mark - NSCopying
 
 - (instancetype)copyWithZone:(NSZone *)zone
@@ -124,7 +156,7 @@
         return NO;
     }
     
-    return [self isEqualToUser:(MSALAccount *)object];
+    return [self isEqualToAccount:(MSALAccount *)object];
 }
 
 - (NSUInteger)hash
@@ -133,11 +165,10 @@
     hash = hash * 31 + self.username.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
-    hash = hash * 31 + self.identifier.hash;
     return hash;
 }
 
-- (BOOL)isEqualToUser:(MSALAccount *)user
+- (BOOL)isEqualToAccount:(MSALAccount *)user
 {
     if (!user) return NO;
 
@@ -145,7 +176,6 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-    result &= (!self.identifier && !user.identifier) || [self.identifier isEqualToString:user.identifier];
     return result;
 }
 

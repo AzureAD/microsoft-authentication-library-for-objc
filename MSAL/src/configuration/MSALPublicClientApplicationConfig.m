@@ -31,6 +31,7 @@
 #import "MSALExtraQueryParameters.h"
 #import "MSALSliceConfig.h"
 #import "MSALCacheConfig+Internal.h"
+#import "MSIDConstants.h"
 
 static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
 
@@ -38,8 +39,6 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
 {
     MSALSliceConfig *_sliceConfig;
 }
-
-static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
@@ -54,7 +53,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         _clientId = clientId;
         _redirectUri = redirectUri;
         
-        NSURL *authorityURL = [NSURL URLWithString:s_defaultAuthorityUrlString];
+        NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
         _authority = authority ?: [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
         _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
