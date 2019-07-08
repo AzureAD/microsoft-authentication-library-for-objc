@@ -25,26 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-@class MSALAuthority;
+#import "MSALMockExternalAccountHandler.h"
 
-#import "MSALTenantProfile.h"
+@implementation MSALMockExternalAccountHandler
 
-NS_ASSUME_NONNULL_BEGIN
+- (instancetype)initMock
+{
+    return [super init];
+}
 
-@interface MSALTenantProfile ()
+- (BOOL)updateWithResult:(MSALResult *)result error:(NSError * _Nullable * _Nullable)error
+{
+    self.updateInvokedCount++;
+    
+    if (self.accountOperationError)
+    {
+        if (error)
+        {
+            *error = self.accountOperationError;
+        }
+        
+        return NO;
+    }
+    
+    return self.accountOperationResult;
+}
 
-@property (readwrite, nullable) NSString *identifier;
-@property (readwrite, nullable) NSString *environment;
-@property (readwrite, nullable) NSString *tenantId;
-@property (readwrite) BOOL isHomeTenantProfile;
-@property (readwrite, nullable) NSDictionary<NSString *, NSString *> *claims;
+- (BOOL)removeAccount:(MSALAccount *)account error:(NSError * _Nullable * _Nullable)error
+{
+    self.removeAccountCount++;
+    
+    if (self.accountOperationError)
+    {
+        if (error)
+        {
+            *error = self.accountOperationError;
+        }
+        
+        return NO;
+    }
+    
+    return self.accountOperationResult;
+}
 
-- (instancetype)initWithIdentifier:(nonnull NSString *)identifier
-                          tenantId:(nonnull NSString *)tenantId
-                       environment:(nonnull NSString *)environment
-               isHomeTenantProfile:(BOOL)isHomeTenantProfile
-                            claims:(nullable NSDictionary *)claims;
+- (nullable NSArray<MSALAccount *> *)allExternalAccountsWithParameters:(MSALAccountEnumerationParameters *)parameters error:(NSError **)error
+{
+    self.allExternalAccountsInvokedCount++;
+    return self.externalAccountsResult;
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

@@ -26,39 +26,22 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALExternalAccountHandler.h"
 
-@class MSALAccount;
-@class MSIDDefaultTokenCacheAccessor;
-@class MSALAuthority;
-@class MSIDAccount;
-@class MSIDIdTokenClaims;
-@class MSALExternalAccountHandler;
-@class MSALAccountEnumerationParameters;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALAccountsProvider : NSObject
+@interface MSALMockExternalAccountHandler : MSALExternalAccountHandler
 
-- (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
+@property (nonatomic) NSUInteger updateInvokedCount;
+@property (nonatomic) NSUInteger removeAccountCount;
+@property (nonatomic) NSUInteger allExternalAccountsInvokedCount;
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId;
+@property (nonatomic) NSError *accountOperationError;
+@property (nonatomic) BOOL accountOperationResult;
+@property (nonatomic) NSArray *externalAccountsResult;
 
-- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-                          clientId:(NSString *)clientId
-           externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider NS_DESIGNATED_INITIALIZER;
-
-// Authority filtering (deprecated)
-- (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
-                       completionBlock:(MSALAccountsCompletionBlock)completionBlock;
-
-// Convinience
-- (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
-
-- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
-                                error:(NSError * __autoreleasing *)error;
-
-// Filtering
-- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
-                                            error:(NSError * __autoreleasing *)error;
+- (instancetype)initMock;
 
 @end
+
+NS_ASSUME_NONNULL_END

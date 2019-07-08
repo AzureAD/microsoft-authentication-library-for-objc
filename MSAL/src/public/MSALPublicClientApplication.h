@@ -213,7 +213,7 @@
 - (nullable NSArray <MSALAccount *> *)allAccounts:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
+ Returns account for the given home identifier (received from an account object returned in a previous acquireToken call)
 
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
@@ -222,7 +222,7 @@
                                             error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication accountForIdentifier:error:] instead");
 
 /*!
- Returns account for for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
+ Returns account for the given account identifier (received from an account object returned in a previous acquireToken call)
  
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
@@ -231,13 +231,13 @@
                                          error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns account for for the given account identifier (received from an account object returned in a previous acquireToken call)
+ Returns account for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
  
  @param  error      The error that occured trying to get the accounts, if any, if you're
- not interested in the specific error pass in nil.
+                    not interested in the specific error pass in nil.
  */
-- (nullable MSALAccount *)accountForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
-                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (nullable NSArray<MSALAccount *> *)accountsForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 
 /*!

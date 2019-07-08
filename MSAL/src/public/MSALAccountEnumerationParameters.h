@@ -44,6 +44,13 @@
  */
 @property (nonatomic, readonly, nullable) NSString *username;
 
+/*!
+ Filter accounts by whether there's a refresh token present for the account.
+ YES by default.
+ Set it to NO to query all accounts regardless if there's a refresh token present or not.
+ */
+@property (nonatomic, readwrite) BOOL needsAssociatedRefreshToken;
+
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
 
 - (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
