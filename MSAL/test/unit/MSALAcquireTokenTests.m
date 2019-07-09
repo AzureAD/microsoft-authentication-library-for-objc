@@ -1080,8 +1080,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
-    
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
@@ -1239,7 +1238,7 @@
     
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
@@ -1388,8 +1387,7 @@
     MSIDAADV2TokenResponse *response = [[MSIDAADV2TokenResponse alloc] initWithJSONDictionary:json error:nil];
     
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
-    
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
@@ -1748,7 +1746,8 @@
     application.accountMetadataCache = self.accountMetadataCache;
     
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
@@ -1821,7 +1820,8 @@
     application.accountMetadataCache = self.accountMetadataCache;
     
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
