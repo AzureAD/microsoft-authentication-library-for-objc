@@ -174,7 +174,10 @@ static NSSet *s_recoverableErrorCode;
         
         if (![s_recoverableErrorCode containsObject:mappedCode])
         {
-            internalCode = mappedCode;
+            // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
+            // to avoid the case when both mapped and internal code are MSALErrorInternal.
+            internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
+            
             mappedCode = @(MSALErrorInternal);
         }
     }

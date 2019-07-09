@@ -41,4 +41,6 @@
 // Unit test redirect uri : msal<clientId>://auth
 #define UNIT_TEST_DEFAULT_REDIRECT_URI      UNIT_TEST_DEFAULT_REDIRECT_SCHEME"://auth"
 
+#define UNIT_TEST_DEFAULT_BUNDLE_ID         @"com.microsoft.mytest.bundleId"
+
 #define UT_SLICE_PARAMS_QUERY 
