@@ -268,7 +268,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
     
 #if TARGET_OS_IPHONE
-    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
+    config.cacheConfig.keychainSharingGroup = keychainGroup;
 #endif
     
     return [self initWithConfiguration:config error:error];

@@ -69,6 +69,7 @@
 #import "MSALCacheConfig.h"
 #import "MSALB2CAuthority.h"
 #import "MSALAccountId+Internal.h"
+#import "MSALCacheConfig.h"
 
 @interface MSALFakeInteractiveRequest : NSObject
 
@@ -320,9 +321,7 @@
     XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
-
-
-- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupWithBundleId
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainSharingDisabled
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
@@ -336,7 +335,7 @@
                                               redirectUri:@"mycustom.redirect://bundle_id"
                                                     error:nil];
     
-    XCTAssertEqualObjects(application.keychainGroup, [[NSBundle mainBundle] bundleIdentifier]);
+    XCTAssertEqualObjects(application.keychainGroup, nil);
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup

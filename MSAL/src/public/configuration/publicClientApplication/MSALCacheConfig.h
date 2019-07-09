@@ -33,14 +33,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 /*!
     The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache.
+    The default value is MSALCacheConfig.defaultKeychainSharingGroup, i.e. "com.microsoft.adalcache".
+    Keychain group MUST be added to the capability of your Application Entilement.
+ 
+    Set it to nil to disable keychain sharing.
  */
 @property NSString *keychainSharingGroup;
 
+/*!
+    Default keychain sharing group used for the token cache if keychainSharingGroup is not set.
+ */
+@property (class, readonly) NSString *defaultKeychainSharingGroup;
+
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
 
 @end
 
