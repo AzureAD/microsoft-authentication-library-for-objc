@@ -65,6 +65,7 @@
 @property (nonatomic) IBOutlet UISegmentedControl *promptTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *webviewTypeSegmentControl;
 @property (nonatomic) IBOutlet UISegmentedControl *customWebviewTypeSegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *systemWebviewSSOSegmentControl;
 @property (nonatomic) IBOutlet UITextView *resultTextView;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *acquireButtonsViewBottomConstraint;
 @property (nonatomic) IBOutlet UIView *customWebviewContainer;
@@ -107,6 +108,7 @@
     [self.customWebview.topAnchor constraintEqualToAnchor:self.wkWebViewContainer.topAnchor].active = YES;
     [self.customWebview.bottomAnchor constraintEqualToAnchor:self.wkWebViewContainer.bottomAnchor].active = YES;
     self.customWebviewContainer.hidden = YES;
+    [self.view bringSubviewToFront:self.customWebviewContainer];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onKeyboardWillShow:)
@@ -224,6 +226,7 @@
     if (@available(iOS 13.0, *))
     {
         webviewConfig.parentViewController = self;
+        webviewConfig.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
@@ -440,6 +443,7 @@
 - (IBAction)onWebviewTypeChanged:(UISegmentedControl *)sender
 {
     self.customWebviewTypeSegmentControl.enabled = sender.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_TYPE_INDEX;
+    self.systemWebviewSSOSegmentControl.enabled = sender.selectedSegmentIndex == TEST_SYSTEM_WEBVIEW_TYPE_INDEX;
 }
 
 - (IBAction)onCancelCustomWebviewButtonTapped:(id)sender
