@@ -84,15 +84,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="profile" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IeS-CA-pBS">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="4Fl-M5-gJ5"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WcD-VP-hFc">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="PWA-Hd-01x"/>
-                                                                        </constraints>
                                                                         <state key="normal" title="Test App"/>
                                                                         <connections>
                                                                             <action selector="onSelectProfileButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="zjn-Y2-237"/>
@@ -105,15 +105,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="authority" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Avh-EC-KXZ">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="DqG-fk-31G"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VO4-Cz-Zs9">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="kjh-Xa-rUa"/>
-                                                                        </constraints>
                                                                         <state key="normal" title="Default"/>
                                                                         <connections>
                                                                             <action selector="onSelectAuthorityButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="bPE-mX-bao"/>
@@ -126,15 +126,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="valAuth" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJx-MO-9ne">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="e5y-ta-bXx"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="QiB-X6-Q50">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="35"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="gc5-GA-UXk"/>
-                                                                        </constraints>
                                                                         <segments>
                                                                             <segment title="Yes"/>
                                                                             <segment title="No"/>
@@ -147,15 +147,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="loginHint" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="20r-1n-cbK">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="yuD-jU-fMc"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lkS-vB-ubC">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="0g3-QI-IoH"/>
-                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                         <connections>
@@ -169,15 +169,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="user" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0l7-IA-oSI">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="UpU-DV-TLi"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lVb-Iy-zgo">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="IsG-nP-bri"/>
-                                                                        </constraints>
                                                                         <state key="normal" title="User"/>
                                                                         <connections>
                                                                             <action selector="onSelectUserButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="CYC-40-mrB"/>
@@ -190,15 +190,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="scopes" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cp6-W5-hUH">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="PUl-Tk-LGf"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2YX-cm-swG">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="J07-lO-KWc"/>
-                                                                        </constraints>
                                                                         <state key="normal" title="Select Scopes"/>
                                                                         <connections>
                                                                             <action selector="onSelectScopeButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="YVc-tV-tFS"/>
@@ -211,15 +211,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="prompt" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JjR-Mj-tmv">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="RfX-65-ezK"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="2" translatesAutoresizingMaskIntoConstraints="NO" id="bos-37-rqi">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="35"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="l97-kH-B8M"/>
-                                                                        </constraints>
                                                                         <segments>
                                                                             <segment title="Select"/>
                                                                             <segment title="Login"/>
@@ -233,15 +233,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="webview" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bTU-Ko-Vtz">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="anS-ca-TWN"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="CDc-j7-zbl">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="35"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="SsL-Kh-3Wy"/>
-                                                                        </constraints>
                                                                         <segments>
                                                                             <segment title="Embedded"/>
                                                                             <segment title="System"/>
@@ -257,15 +257,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="embeddedWV" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TJo-Qu-czs">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="IUD-iA-zmb"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="iH2-2a-wwo">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="35"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="27q-bf-NWj"/>
-                                                                        </constraints>
                                                                         <segments>
                                                                             <segment title="MSAL"/>
                                                                             <segment title="Passed In"/>
@@ -278,15 +278,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="systemWV SSO" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MaM-DE-JmV">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="31"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="aES-Ul-yDo"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <segmentedControl opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="g7Y-3x-P2Z">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="32"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="cQj-cx-PS9"/>
-                                                                        </constraints>
                                                                         <segments>
                                                                             <segment title="Yes"/>
                                                                             <segment title="No"/>
@@ -299,15 +299,15 @@
                                                                 <subviews>
                                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="EQP" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WGJ-sf-E7G">
                                                                         <rect key="frame" x="0.0" y="0.0" width="112" height="34"/>
+                                                                        <constraints>
+                                                                            <constraint firstAttribute="width" constant="112" id="7P1-gy-ZJx"/>
+                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                         <nil key="textColor"/>
                                                                         <nil key="highlightedColor"/>
                                                                     </label>
                                                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="N35-g1-oxz">
                                                                         <rect key="frame" x="124" y="0.0" width="250" height="34"/>
-                                                                        <constraints>
-                                                                            <constraint firstAttribute="width" constant="250" id="7mN-Xt-dVv"/>
-                                                                        </constraints>
                                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                         <textInputTraits key="textInputTraits"/>
                                                                         <connections>
