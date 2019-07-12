@@ -45,6 +45,9 @@
 #import "MSALTestBundle.h"
 #import "MSALOauth2Provider.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @interface MSALPublicClientApplicationAccountUpdateTests : XCTestCase
 
 @end
@@ -168,3 +171,5 @@
 }
 
 @end
+
+#pragma clang diagnostic pop
