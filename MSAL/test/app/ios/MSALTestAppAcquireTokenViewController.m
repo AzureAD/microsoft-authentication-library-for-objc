@@ -43,8 +43,7 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
 #import "MSALAuthority.h"
-#import <MSAL/MSALGlobalConfig.h>
-#import <MSAL/MSALLoggerConfig.h>
+#import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
@@ -457,7 +456,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
     
     [_resultView setText:resultText];
     

@@ -676,7 +676,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate"/>
+                <customObject id="Voe-Tx-rLC" customClass="MSALAppDelegate"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -1249,6 +1249,7 @@
                         <outlet property="redirectUriTextField" destination="0fw-W9-f9B" id="cNm-P4-6uJ"/>
                         <outlet property="resultTextView" destination="t7N-kO-jh7" id="rGn-BP-fOg"/>
                         <outlet property="scopesTextField" destination="YEu-y5-rbc" id="N2t-BX-bBo"/>
+                        <outlet property="userPopup" destination="1uI-5I-pfk" id="F1e-zo-yWM"/>
                         <outlet property="validateAuthoritySegment" destination="X17-0b-omW" id="oXZ-Oc-PRD"/>
                         <outlet property="webView" destination="OPe-Ph-gNT" id="kx6-3U-Mw0"/>
                         <outlet property="webViewSegment" destination="Z8m-x5-sYy" id="Eib-PX-ouH"/>

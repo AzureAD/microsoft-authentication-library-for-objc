@@ -122,4 +122,19 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
                                      rawTenant:(nullable NSString *)rawTenant
                                          error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
+/*
+ Initializes MSALAADAuthority with a cloud instance, audience type and an optional tenant ID.
+ @param     environment         Host of Azure AD authentication endpoint in a national cloud (e.g. "login.microsoftonline.com" or "login.microsoftonline.de")
+ @param     audienceType        The sign-in audience for the authority.
+ @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
+ @param     error               The error that occurred creating the application object, if any, if you're
+                                not interested in the specific error pass in nil.
+ */
+- (nullable instancetype)initWithEnvironment:(nonnull NSString *)environment
+                                audienceType:(MSALAudienceType)audienceType
+                                   rawTenant:(nullable NSString *)rawTenant
+                                       error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+
+
 @end

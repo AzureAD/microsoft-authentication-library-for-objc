@@ -32,21 +32,33 @@
 @class MSALAuthority;
 @class MSIDAccount;
 @class MSIDIdTokenClaims;
+@class MSALExternalAccountHandler;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALAccountsProvider : NSObject
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                           clientId:(NSString *)clientId;
 
+- (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+                          clientId:(NSString *)clientId
+           externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider NS_DESIGNATED_INITIALIZER;
+
+// Authority filtering (deprecated)
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
                        completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
+// Convinience
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error;
 
-- (MSALAccount *)accountForHomeAccountId:(NSString *)homeAccountId
-                                   error:(NSError * __autoreleasing *)error;
+- (MSALAccount *)accountForParameters:(MSALAccountEnumerationParameters *)parameters
+                                error:(NSError * __autoreleasing *)error;
 
-- (MSALAccount *)accountForUsername:(NSString *)username
-                              error:(NSError * __autoreleasing *)error;
+// Filtering
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                            error:(NSError * __autoreleasing *)error;
 
 @end
