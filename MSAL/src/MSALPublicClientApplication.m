@@ -87,7 +87,7 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
-
+#import "MSALWebviewConfig.h"
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
@@ -548,13 +548,18 @@
     }
     
 #if TARGET_OS_IPHONE
-    msidParams.parentViewController = parameters.parentViewController;
-    msidParams.presentationType = parameters.presentationStyle;
+    msidParams.parentViewController = parameters.webviewConfig.parentViewController;
+    msidParams.presentationType = parameters.webviewConfig.presentationStyle;
 #endif
     
     // Configure webview
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    MSALWebviewType webviewType = parameters.webviewConfig ? parameters.webviewConfig.webviewType : MSALGlobalConfig.defaultWebviewType;
+#pragma clang diagnostic pop
+    
     NSError *msidWebviewError = nil;
-    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(parameters.webviewType, &msidWebviewError);
+    MSIDWebviewType msidWebViewType = MSIDWebviewTypeFromMSALType(webviewType, &msidWebviewError);
     
     if (msidWebviewError)
     {
@@ -563,8 +568,8 @@
     }
     
     msidParams.webviewType = msidWebViewType;
-    msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(parameters.webviewType);
-    msidParams.customWebview = parameters.customWebview ?: self.customWebview;
+    msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
+    msidParams.customWebview = parameters.webviewConfig.customWebview ?: _customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -587,8 +592,8 @@
                     MSALStringForPromptType(parameters.promptType),
                     parameters.extraQueryParameters,
                     parameters.authority,
-                    MSALStringForMSALWebviewType(parameters.webviewType),
-                    parameters.customWebview ? @"Yes" : @"No",
+                    MSALStringForMSALWebviewType(webviewType),
+                    parameters.webviewConfig.customWebview ? @"Yes" : @"No",
                     parameters.correlationId,
                     self.internalConfig.clientApplicationCapabilities,
                     parameters.claimsRequest);
@@ -646,7 +651,9 @@
 - (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.telemetryApiId = MSALTelemetryApiIdAcquire;
     
     [self acquireTokenWithParameters:parameters completionBlock:completionBlock];
@@ -658,7 +665,9 @@
                     loginHint:(NSString *)loginHint
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.loginHint = loginHint;
     parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithHint;
     
@@ -671,7 +680,9 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
@@ -689,7 +700,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
@@ -711,7 +724,9 @@
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.loginHint = loginHint;
     parameters.promptType = promptType;
@@ -730,7 +745,9 @@
                       account:(MSALAccount *)account
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.account = account;
     parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
     
@@ -743,7 +760,9 @@
          extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.account = account;
     parameters.promptType = promptType;
     parameters.extraQueryParameters = extraQueryParameters;
@@ -761,7 +780,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.account = account;
     parameters.promptType = promptType;
@@ -783,7 +804,9 @@
                 correlationId:(NSUUID *)correlationId
               completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                      webviewConfig:webviewConfig];
     parameters.extraScopesToConsent = extraScopesToConsent;
     parameters.account = account;
     parameters.promptType = promptType;

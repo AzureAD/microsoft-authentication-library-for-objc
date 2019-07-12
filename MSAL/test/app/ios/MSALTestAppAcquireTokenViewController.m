@@ -45,6 +45,7 @@
 #import "MSALAuthority.h"
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
+#import "MSALWebviewConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -543,18 +544,19 @@
         });
     };
 
-    
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]];
-    parameters.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
-    if (parameters.webviewType == MSALWebviewTypeWKWebView
+    MSALWebviewConfig *webviewConfig = [[MSALWebviewConfig alloc] initWithParentViewController:self];
+    webviewConfig.webviewType = _webviewSelection.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    if (webviewConfig.webviewType == MSALWebviewTypeWKWebView
         && _customWebViewSelection.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
-        parameters.customWebview = _webView;
+        webviewConfig.customWebview = _webView;
         
         [_acquireSettingsView setHidden:YES];
         [_authView setHidden:NO];
     }
-        
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
+                                                                                          webviewConfig:webviewConfig];
     parameters.loginHint = _loginHintField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptType];

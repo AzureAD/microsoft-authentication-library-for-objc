@@ -37,6 +37,7 @@
 #import "MSIDAutomationPassedInWebViewController.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALClaimsRequest.h"
+#import "MSALWebviewConfig.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -129,33 +130,25 @@
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array];
-    parameters.extraScopesToConsent = extraScopes.array;
-    parameters.account = account;
-    parameters.loginHint = testRequest.loginHint;
-    parameters.promptType = promptType;
-    parameters.extraQueryParameters = extraQueryParameters;
-    parameters.claimsRequest = claimsRequest;
-    parameters.authority = acquireTokenAuthority;
-    parameters.correlationId = correlationId;
+    MSALWebviewConfig *webviewConfig = [[MSALWebviewConfig alloc] initWithParentViewController:containerController];
     
     MSIDWebviewType webviewSelection = testRequest.webViewType;
     
     switch (webviewSelection) {
         case MSIDWebviewTypeWKWebView:
-            parameters.webviewType = MSALWebviewTypeWKWebView;
+            webviewConfig.webviewType = MSALWebviewTypeWKWebView;
             break;
             
         case MSIDWebviewTypeDefault:
-            parameters.webviewType = MSALWebviewTypeDefault;
+            webviewConfig.webviewType = MSALWebviewTypeDefault;
             break;
             
         case MSIDWebviewTypeSafariViewController:
-            parameters.webviewType = MSALWebviewTypeSafariViewController;
+            webviewConfig.webviewType = MSALWebviewTypeSafariViewController;
             break;
             
         case MSIDWebviewTypeAuthenticationSession:
-            parameters.webviewType = MSALWebviewTypeAuthenticationSession;
+            webviewConfig.webviewType = MSALWebviewTypeAuthenticationSession;
             break;
             
         default:
@@ -164,10 +157,21 @@
     
     if (testRequest.usePassedWebView)
     {
-        parameters.webviewType = MSALWebviewTypeWKWebView;
-        parameters.customWebview = containerController.passedinWebView;
+        webviewConfig.webviewType = MSALWebviewTypeWKWebView;
+        webviewConfig.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
+    
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array
+                                                                                          webviewConfig:webviewConfig];
+    parameters.extraScopesToConsent = extraScopes.array;
+    parameters.account = account;
+    parameters.loginHint = testRequest.loginHint;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.claimsRequest = claimsRequest;
+    parameters.authority = acquireTokenAuthority;
+    parameters.correlationId = correlationId;
         
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
