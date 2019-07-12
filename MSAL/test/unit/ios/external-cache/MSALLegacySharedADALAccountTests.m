@@ -265,7 +265,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
-    params.needsAssociatedRefreshToken = YES;
+    params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -287,7 +287,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.utid"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -299,7 +299,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.utid" username:@"user@contoso.com"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -313,7 +313,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oID.UTid" username:@"USER@contoso.COM"];
-    params.needsAssociatedRefreshToken = YES;
+    params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -325,7 +325,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:@"myoid"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -337,7 +337,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user2@contoso.com"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -349,7 +349,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:@"myoid2"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -361,7 +361,7 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.utid2"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }

@@ -113,7 +113,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (BOOL)matchesParameters:(MSALAccountEnumerationParameters *)parameters
 {
-    if (parameters.needsAssociatedRefreshToken)
+    if (parameters.returnOnlySignedInAccounts)
     {
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *signinStatus = [self.signinStatusDictionary msidStringObjectForKey:appIdentifier];

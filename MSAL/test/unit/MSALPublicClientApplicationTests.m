@@ -112,8 +112,6 @@
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:[MSIDTestCacheDataSource new]];
 #endif
     
-    [self.tokenCacheAccessor clearWithContext:nil error:nil];
-
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
@@ -2015,8 +2013,11 @@
     headers[@"Accept"] = @"application/json";
     headers[@"x-ms-PkeyAuth"] = @"1.0";
     response->_requestHeaders = headers;
+    
+    NSString *endpoint = [NSString stringWithFormat:@"%@/v2.0/.well-known/openid-configuration", authority];
+    
     __auto_type responseJson = @{
-                                 @"tenant_discovery_endpoint" : @"https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+                                 @"tenant_discovery_endpoint" : endpoint,
                                  @"metadata" : @[
                                          @{
                                              @"preferred_network" : @"login.microsoftonline.com",
