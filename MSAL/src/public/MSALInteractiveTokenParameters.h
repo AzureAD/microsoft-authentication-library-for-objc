@@ -90,6 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+#if TARGET_OS_IPHONE
 /*!
  Initialize a MSALInteractiveTokenParameters with scopes.
  
@@ -98,6 +99,16 @@ NS_ASSUME_NONNULL_BEGIN
  gauranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewParameters: instead");
+#else
+/*!
+ Initialize a MSALInteractiveTokenParameters with scopes.
+ 
+ @param scopes      Permissions you want included in the access token received
+ in the result in the completionBlock. Not all scopes are
+ gauranteed to be included in the access token returned.
+ */
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes;
+#endif
 
 /*!
  Initialize a MSALInteractiveTokenParameters with scopes.
