@@ -147,14 +147,15 @@
 #endif
 
 #pragma mark - Initializers
+
 - (id)initWithClientId:(NSString *)clientId
                  error:(NSError * __autoreleasing *)error
 {
-    return [self initWithClientId:clientId
-                    keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
-                        authority:nil
-                      redirectUri:nil
-                            error:error];
+    return [self initPrivateWithClientId:clientId
+                           keychainGroup:MSALCacheConfig.defaultKeychainSharingGroup
+                               authority:nil
+                             redirectUri:nil
+                                   error:error];
 }
 
 - (id)initWithClientId:(NSString *)clientId
@@ -318,24 +319,17 @@
     return self;
 }
 
-
 - (id)initWithClientId:(NSString *)clientId
          keychainGroup:(NSString *)keychainGroup
              authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error
 {
-    if (!(self = [super init]))
-    {
-        return nil;
-    }
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
-    
-#if TARGET_OS_IPHONE
-    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
-#endif
-    
-    return [self initWithConfiguration:config error:error];
+    return [self initPrivateWithClientId:clientId
+                           keychainGroup:keychainGroup
+                               authority:authority
+                             redirectUri:redirectUri
+                                   error:error];
 }
 
 #pragma mark - Accounts
@@ -847,6 +841,25 @@
 }
 
 #pragma mark - private methods
+
+- (id)initPrivateWithClientId:(NSString *)clientId
+         keychainGroup:(NSString *)keychainGroup
+             authority:(MSALAuthority *)authority
+           redirectUri:(NSString *)redirectUri
+                 error:(NSError * __autoreleasing *)error
+{
+    if (!(self = [super init]))
+    {
+        return nil;
+    }
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
+    
+#if TARGET_OS_IPHONE
+    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
+#endif
+    
+    return [self initWithConfiguration:config error:error];
+}
 
 + (void)logOperation:(NSString *)operation
               result:(MSALResult *)result

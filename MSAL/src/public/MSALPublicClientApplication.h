@@ -104,7 +104,7 @@
     @param  error       The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
