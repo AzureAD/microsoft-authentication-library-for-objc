@@ -138,12 +138,13 @@
     NSString *queryClientId = nil;
     NSString *queryFamilyId = nil;
     
-    if (!parameters || parameters.needsAssociatedRefreshToken)
+    if (!parameters || parameters.returnOnlySignedInAccounts)
     {
         MSIDAppMetadataCacheItem *appMetadata = [self appMetadataItem];
         NSString *familyId = appMetadata ? appMetadata.familyId : MSID_DEFAULT_FAMILY_ID;
         
         queryClientId = self.clientId;
+        
         queryFamilyId = familyId;
     }
     
@@ -211,6 +212,11 @@
     
     for (MSIDAccount *msidAccount in msidAccounts)
     {
+        // if requiresRefreshToken
+        // make sure account hasn't been marked as removed explicitly
+        // if it has, don't return it
+        // also don't flip familyId on account removal anymore
+        
         MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
         if (!msalAccount) continue;
         

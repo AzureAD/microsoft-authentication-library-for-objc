@@ -43,7 +43,7 @@
     
     if (self)
     {
-        _needsAssociatedRefreshToken = YES;
+        _returnOnlySignedInAccounts = YES;
     }
     
     return self;
@@ -56,7 +56,7 @@
     if (self)
     {
         _identifier = accountIdentifier;
-        _needsAssociatedRefreshToken = YES;
+        _returnOnlySignedInAccounts = YES;
     }
     
     return self;
@@ -71,7 +71,7 @@
     {
         _identifier = accountIdentifier;
         _username = username;
-        _needsAssociatedRefreshToken = YES;
+        _returnOnlySignedInAccounts = YES;
     }
     
     return self;
@@ -84,7 +84,7 @@
     if (self)
     {
         _tenantProfileIdentifier = tenantProfileIdentifier;
-        _needsAssociatedRefreshToken = YES;
+        _returnOnlySignedInAccounts = YES;
     }
     
     return self;
@@ -94,7 +94,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, needs associated refresh token %d", self.identifier, self.username, self.tenantProfileIdentifier, self.needsAssociatedRefreshToken];
+    return [NSString stringWithFormat:@"Account identifier %@, username %@, tenant profile identifier %@, return only signed in accounts %d", self.identifier, self.username, self.tenantProfileIdentifier, self.returnOnlySignedInAccounts];
 }
 
 @end

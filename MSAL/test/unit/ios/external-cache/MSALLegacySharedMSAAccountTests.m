@@ -104,7 +104,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
-    params.needsAssociatedRefreshToken = YES;
+    params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -126,7 +126,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     NSString *expectedIdentifier = [NSString stringWithFormat:@"%@.%@", kDefaultTestUid, MSID_DEFAULT_MSA_TENANTID.lowercaseString];
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:expectedIdentifier];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -139,7 +139,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     
     NSString *expectedIdentifier = [NSString stringWithFormat:@"%@.%@", kDefaultTestUid, MSID_DEFAULT_MSA_TENANTID.lowercaseString];
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:expectedIdentifier username:@"user@outlook.com"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -152,7 +152,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     
     NSString *expectedIdentifier = [NSString stringWithFormat:@"%@.%@", kDefaultTestUid.uppercaseString, MSID_DEFAULT_MSA_TENANTID];
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:expectedIdentifier username:@"USER@outlOOK.com"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
@@ -164,7 +164,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:@"myoid"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -176,7 +176,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user2@contoso.com"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }
@@ -188,7 +188,7 @@ static NSString *kDefaultTestCid = @"40c03bac188d0d10";
     MSALLegacySharedMSAAccount *account = [[MSALLegacySharedMSAAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.utid2"];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }

@@ -90,13 +90,13 @@
     if ([self isMSAAccount:account])
     {
         MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:account.identifier];
-        parameters.needsAssociatedRefreshToken = NO;
+        parameters.returnOnlySignedInAccounts = NO;
         return parameters;
     }
     else if (![NSString msidIsStringNilOrBlank:tenantProfileIdentifier])
     {
         MSALAccountEnumerationParameters *parameters =  [[MSALAccountEnumerationParameters alloc] initWithTenantProfileIdentifier:tenantProfileIdentifier];
-        parameters.needsAssociatedRefreshToken = NO;
+        parameters.returnOnlySignedInAccounts = NO;
         return parameters;
     }
     
