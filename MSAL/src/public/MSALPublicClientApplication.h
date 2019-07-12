@@ -44,11 +44,12 @@
 
 /*!
     A copy of the configuration which was provided in the initializer.
+    Any changes to mutable properties on the configuration object will not affect the behavior of the Public Cilent Application.
     Parameter to be used to configure MSALPublicClientApplication.
     It contains all values to be used in the instance and is a superset of all properties
     known to this class.
  */
-@property (readonly, nonnull, copy) MSALPublicClientApplicationConfig *configuration;
+@property (readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
 
 /*!
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
