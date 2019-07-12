@@ -34,7 +34,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALSilentTokenParameters.h"
 #import "WebKit/WebKit.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
 static NSString * const clientId = @"clientId";
 static NSString * const redirectUri = @"redirectUri";
@@ -313,17 +313,17 @@ static NSString * const defaultScope = @"User.Read";
         });
     };
     
-    MSALWebviewConfig *webviewConfig = [MSALWebviewConfig new];
+    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
     if ([self passedInWebview])
     {
-        webviewConfig.customWebview = self.webView;
+        webviewParameters.customWebview = self.webView;
         [self.acquireTokenView setHidden:YES];
         [self.webView setHidden:NO];
     }
     
     NSDictionary *extraQueryParameters = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:[self.extraQueryParamsTextField stringValue]];
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:self.selectedScopes
-                                                                                          webviewConfig:webviewConfig];
+                                                                                      webviewParameters:webviewParameters];
     parameters.loginHint = [self.loginHintTextField stringValue];
     parameters.account = self.settings.currentAccount;
     parameters.promptType = [self promptType];

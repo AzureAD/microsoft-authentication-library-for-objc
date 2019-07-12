@@ -37,7 +37,7 @@
 #import "MSIDAutomationPassedInWebViewController.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALClaimsRequest.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
 @implementation MSALAutomationAcquireTokenAction
 
@@ -130,25 +130,25 @@
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
     
-    MSALWebviewConfig *webviewConfig = [[MSALWebviewConfig alloc] initWithParentViewController:containerController];
+    MSALWebviewParameters *webviewParameters= [[MSALWebviewParameters alloc] initWithParentViewController:containerController];
     
     MSIDWebviewType webviewSelection = testRequest.webViewType;
     
     switch (webviewSelection) {
         case MSIDWebviewTypeWKWebView:
-            webviewConfig.webviewType = MSALWebviewTypeWKWebView;
+            webviewParameters.webviewType = MSALWebviewTypeWKWebView;
             break;
             
         case MSIDWebviewTypeDefault:
-            webviewConfig.webviewType = MSALWebviewTypeDefault;
+            webviewParameters.webviewType = MSALWebviewTypeDefault;
             break;
             
         case MSIDWebviewTypeSafariViewController:
-            webviewConfig.webviewType = MSALWebviewTypeSafariViewController;
+            webviewParameters.webviewType = MSALWebviewTypeSafariViewController;
             break;
             
         case MSIDWebviewTypeAuthenticationSession:
-            webviewConfig.webviewType = MSALWebviewTypeAuthenticationSession;
+            webviewParameters.webviewType = MSALWebviewTypeAuthenticationSession;
             break;
             
         default:
@@ -157,13 +157,13 @@
     
     if (testRequest.usePassedWebView)
     {
-        webviewConfig.webviewType = MSALWebviewTypeWKWebView;
-        webviewConfig.customWebview = containerController.passedinWebView;
+        webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+        webviewParameters.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array
-                                                                                          webviewConfig:webviewConfig];
+                                                                                          webviewParameters:webviewParameters];
     parameters.extraScopesToConsent = extraScopes.array;
     parameters.account = account;
     parameters.loginHint = testRequest.loginHint;

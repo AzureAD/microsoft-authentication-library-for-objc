@@ -30,7 +30,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALWebviewConfig : NSObject <NSCopying>
+@interface MSALWebviewParameters : NSObject <NSCopying>
 
 #if TARGET_OS_IPHONE
 /*!

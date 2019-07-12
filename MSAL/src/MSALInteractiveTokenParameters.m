@@ -28,21 +28,21 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALTokenParameters+Internal.h"
 #import "MSALGlobalConfig.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
 @implementation MSALInteractiveTokenParameters
 
 @synthesize telemetryApiId;
 
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
-                 webviewConfig:(MSALWebviewConfig *)webviewConfig
+             webviewParameters:(MSALWebviewParameters *)webviewParameters
 {
     self = [super initWithScopes:scopes];
     if (self)
     {
         self.telemetryApiId = MSALTelemetryApiIdAcquireWithTokenParameters;
         _promptType = MSALPromptTypeDefault;
-        _webviewConfig = [webviewConfig copy];
+        _webviewParameters = [webviewParameters copy];
     }
     return self;
 }
@@ -50,51 +50,51 @@
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
 {
     return [self initWithScopes:scopes
-                  webviewConfig:[MSALWebviewConfig new]];
+                  webviewParameters:[MSALWebviewParameters new]];
 }
 
 #if TARGET_OS_IPHONE
 
 - (void)setParentViewController:(UIViewController *)parentViewController
 {
-    self.webviewConfig.parentViewController = parentViewController;
+    self.webviewParameters.parentViewController = parentViewController;
 }
 
 - (UIViewController *)parentViewController
 {
-    return self.webviewConfig.parentViewController;
+    return self.webviewParameters.parentViewController;
 }
 
 - (void)setPresentationStyle:(UIModalPresentationStyle)presentationStyle
 {
-    self.webviewConfig.presentationStyle = presentationStyle;
+    self.webviewParameters.presentationStyle = presentationStyle;
 }
 
 - (UIModalPresentationStyle)presentationStyle
 {
-    return self.webviewConfig.presentationStyle;
+    return self.webviewParameters.presentationStyle;
 }
 
 #endif
 
 - (void)setWebviewType:(MSALWebviewType)webviewType
 {
-    self.webviewConfig.webviewType = webviewType;
+    self.webviewParameters.webviewType = webviewType;
 }
 
 - (MSALWebviewType)webviewType
 {
-    return self.webviewConfig.webviewType;
+    return self.webviewParameters.webviewType;
 }
 
 - (void)setCustomWebview:(WKWebView *)customWebview
 {
-    self.webviewConfig.customWebview = customWebview;
+    self.webviewParameters.customWebview = customWebview;
 }
 
 - (WKWebView *)customWebview
 {
-    return self.webviewConfig.customWebview;
+    return self.webviewParameters.customWebview;
 }
 
 @end

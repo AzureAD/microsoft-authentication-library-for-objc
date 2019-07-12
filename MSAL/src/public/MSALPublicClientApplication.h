@@ -77,11 +77,11 @@
  - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
  - macOS:  WKWebView
  */
-@property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewConfig to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+@property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
 /*! Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
     For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
-@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewConfig to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
 /*!
  Initialize a MSALPublicClientApplication with a given configuration

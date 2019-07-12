@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
  - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
  - macOS:  WKWebView
  */
-@property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewConfig to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
+@property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
 
 #if TARGET_OS_IPHONE
 /*!

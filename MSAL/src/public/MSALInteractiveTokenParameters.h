@@ -30,7 +30,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class WKWebView;
-@class MSALWebviewConfig;
+@class MSALWebviewParameters;
 
 /*!
  Token parameters to be used in interactive flow.
@@ -65,15 +65,15 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  A copy of the configuration which was provided in the initializer.
  */
-@property (nonatomic, readonly, copy) MSALWebviewConfig *webviewConfig;
+@property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
 
 #if TARGET_OS_IPHONE
 /*!
  Modal presentation style for displaying authentication web content.
  */
-@property (nullable, weak, nonatomic) UIViewController *parentViewController DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewConfig and provide it to -initWithScopes:webviewConfig: instead");
+@property (nullable, weak, nonatomic) UIViewController *parentViewController DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
-@property (nonatomic) UIModalPresentationStyle presentationStyle DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewConfig and provide it to -initWithScopes:webviewConfig: instead");
+@property (nonatomic) UIModalPresentationStyle presentationStyle DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
 #endif
 
@@ -81,14 +81,14 @@ NS_ASSUME_NONNULL_BEGIN
  A specific webView type for the interactive authentication flow.
  By default, it will be set to MSALGlobalConfig.defaultWebviewType.
  */
-@property (nonatomic) MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewConfig and provide it to -initWithScopes:webviewConfig: instead");
+@property (nonatomic) MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
 /*!
  For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
  Web content will be rendered onto this view.
  Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
  */
-@property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewConfig and provide it to -initWithScopes:webviewConfig: instead");
+@property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
 /*!
  Initialize a MSALInteractiveTokenParameters with scopes.
@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
  in the result in the completionBlock. Not all scopes are
  gauranteed to be included in the access token returned.
  */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewConfig: instead");
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewParameters: instead");
 
 /*!
  Initialize a MSALInteractiveTokenParameters with scopes.
@@ -105,10 +105,10 @@ NS_ASSUME_NONNULL_BEGIN
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
  gauranteed to be included in the access token returned.
- @param webviewConfig   Web view configuration.
+ @param webviewParameters   Web view paramaters.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
-                 webviewConfig:(MSALWebviewConfig *)webviewConfig NS_DESIGNATED_INITIALIZER;
+             webviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
 
 @end
 

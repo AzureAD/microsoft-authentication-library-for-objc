@@ -80,7 +80,7 @@
 #import "MSALAccountId+Internal.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALInteractiveTokenParameters.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -177,7 +177,7 @@
     __block MSALAccount *resultAccount = nil;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
-    parameters.webviewConfig.webviewType = MSALWebviewTypeWKWebView;
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
     [application acquireTokenWithParameters:parameters

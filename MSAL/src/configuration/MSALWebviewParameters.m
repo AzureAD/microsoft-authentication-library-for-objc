@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
-@implementation MSALWebviewConfig
+@implementation MSALWebviewParameters
 
 #if TARGET_OS_IPHONE
 - (instancetype)init
@@ -56,13 +56,13 @@
 
 - (id)copyWithZone:(__unused NSZone *)zone
 {
-    MSALWebviewConfig *item;
+    MSALWebviewParameters *item;
 #if TARGET_OS_IPHONE
-    item = [[MSALWebviewConfig alloc] initWithParentViewController:_parentViewController];
+    item = [[MSALWebviewParameters alloc] initWithParentViewController:_parentViewController];
     item.parentViewController = _parentViewController;
     item.presentationStyle = _presentationStyle;
 #else
-    item = [MSALWebviewConfig new];
+    item = [MSALWebviewParameters new];
 #endif
     
     item.webviewType = _webviewType;

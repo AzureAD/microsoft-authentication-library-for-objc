@@ -87,7 +87,7 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
@@ -957,14 +957,14 @@
     }
     
 #if TARGET_OS_IPHONE
-    msidParams.parentViewController = parameters.webviewConfig.parentViewController;
-    msidParams.presentationType = parameters.webviewConfig.presentationStyle;
+    msidParams.parentViewController = parameters.webviewParameters.parentViewController;
+    msidParams.presentationType = parameters.webviewParameters.presentationStyle;
 #endif
     
     // Configure webview
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    MSALWebviewType webviewType = useWebviewTypeFromGlobalConfig ? MSALGlobalConfig.defaultWebviewType : parameters.webviewConfig.webviewType;
+    MSALWebviewType webviewType = useWebviewTypeFromGlobalConfig ? MSALGlobalConfig.defaultWebviewType : parameters.webviewParameters.webviewType;
 #pragma clang diagnostic pop
     
     NSError *msidWebviewError = nil;
@@ -978,7 +978,7 @@
     
     msidParams.webviewType = msidWebViewType;
     msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
-    msidParams.customWebview = parameters.webviewConfig.customWebview ?: _customWebview;
+    msidParams.customWebview = parameters.webviewParameters.customWebview ?: _customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
@@ -1002,7 +1002,7 @@
                           parameters.extraQueryParameters,
                           parameters.authority,
                           MSALStringForMSALWebviewType(webviewType),
-                          parameters.webviewConfig.customWebview ? @"Yes" : @"No",
+                          parameters.webviewParameters.customWebview ? @"Yes" : @"No",
                           parameters.correlationId,
                           self.internalConfig.clientApplicationCapabilities,
                           parameters.claimsRequest);
