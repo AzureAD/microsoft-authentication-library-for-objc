@@ -59,13 +59,13 @@
 @property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
 
 /*! The authority the application will use to obtain tokens */
-@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("Use authority in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+@property (readonly, nonnull) MSALAuthority *authority DEPRECATED_MSG_ATTRIBUTE("Use authority in MSALPublicClientApplicationConfig instead.");
 
 /*! The client ID of the application, this should come from the app developer portal. */
-@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("Use clientId in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+@property (readonly, nonnull) NSString *clientId DEPRECATED_MSG_ATTRIBUTE("Use clientId in MSALPublicClientApplicationConfig instead.");
 
 /*! The redirect URI of the application */
-@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("Use redirectUri in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+@property (readonly, nonnull) MSALRedirectUri *redirectUri DEPRECATED_MSG_ATTRIBUTE("Use redirectUri in MSALPublicClientApplicationConfig instead.");
 
 /*!
  Used to specify query parameters that must be passed to both the authorize and token endpoints
