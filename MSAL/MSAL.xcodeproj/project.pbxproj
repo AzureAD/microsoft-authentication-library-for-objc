@@ -289,7 +289,7 @@
 		B223B0C022ADFACB00FB8713 /* MSALLegacySharedAccount.m in Sources */ = {isa = PBXBuildFile; fileRef = B223B0BE22ADFACB00FB8713 /* MSALLegacySharedAccount.m */; };
 		B223B0C522AE215D00FB8713 /* MSALLegacySharedAccountFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = B223B0C322AE215D00FB8713 /* MSALLegacySharedAccountFactory.h */; };
 		B223B0C622AE215D00FB8713 /* MSALLegacySharedAccountFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = B223B0C422AE215D00FB8713 /* MSALLegacySharedAccountFactory.m */; };
-		B227037122A4BA3600030ADC /* MSALLegacySharedAccountsProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B29A56BD228266E20023F5E6 /* MSALLegacySharedAccountsProvider.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B227037122A4BA3600030ADC /* MSALLegacySharedAccountsProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B29A56BD228266E20023F5E6 /* MSALLegacySharedAccountsProvider.h */; };
 		B227037322A4BA3E00030ADC /* MSALLegacySharedAccountsProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = B29A56BE228266E20023F5E6 /* MSALLegacySharedAccountsProvider.m */; };
 		B2472CA3226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
 		B2472CA4226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };

@@ -37,11 +37,9 @@
 
 ## [0.3.0] - 2019-04-22
 ### Added
-<<<<<<< HEAD
 -Added broker support to MSAL iOS SDK
 =======
 - Added broker support to MSAL iOS SDK
->>>>>>> origin/hotfix/0.4.3
 
 ## [0.2.3] - 2019-02-12
 ### Fixed
