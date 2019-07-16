@@ -347,12 +347,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 
                 if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
                 {
-                    cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.authority.url.msidTenant, refreshToken.clientId];
+                    cell.textLabel.text = [NSString stringWithFormat:@"[Legacy RT] %@, FRT %@", token.realm, refreshToken.clientId];
                     cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
                 }
                 else
                 {
-                    cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.authority.url.msidTenant, refreshToken.familyId];
+                    cell.textLabel.text = [NSString stringWithFormat:@"[RT] %@, FRT %@", refreshToken.realm, refreshToken.familyId];
                     cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", refreshToken.clientId];
                 }
                 
@@ -366,7 +366,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             case MSIDAccessTokenType:
             {
                 MSIDAccessToken *accessToken = (MSIDAccessToken *) token;
-                cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.authority.url.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[AT] %@/%@", [accessToken.scopes msidToString], accessToken.realm];
                 cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", accessToken.clientId];
                 if (accessToken.isExpired)
                 {
@@ -376,7 +376,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             }
             case MSIDIDTokenType:
             {
-                cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.authority.url.msidTenant];
+                cell.textLabel.text = [NSString stringWithFormat:@"[ID] %@", token.realm];
                 cell.detailTextLabel.text = [NSString stringWithFormat:@"[ClientId] %@", token.clientId];
                 break;
             }
@@ -393,7 +393,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     else if([cacheEntry isKindOfClass:[MSIDAccount class]])
     {
         MSIDAccount *account = (MSIDAccount *)cacheEntry;
-        cell.textLabel.text = [NSString stringWithFormat:@"[AC] %@", account.authority.environment];
+        cell.textLabel.text = [NSString stringWithFormat:@"[AC] %@", account.environment];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"[Account Identifier] %@", [self rowIdentifier:account.accountIdentifier]];
     }
     

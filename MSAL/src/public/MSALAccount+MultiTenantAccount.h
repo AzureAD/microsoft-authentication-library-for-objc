@@ -25,34 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALOauth2FactoryProducer.h"
-#import "MSIDOauth2Factory.h"
-#import "MSIDB2CAuthority.h"
-#import "MSIDAADAuthority.h"
-#import "MSIDAADV2Oauth2Factory.h"
-#import "MSIDB2COauth2Factory.h"
+#import "MSALAccount.h"
 
-@implementation MSALOauth2FactoryProducer
+@class MSALTenantProfile;
+@class MSALAccountId;
 
-+ (MSIDOauth2Factory *)msidOauth2FactoryForAuthority:(NSURL *)authority
-                                             context:(id<MSIDRequestContext>)context
-                                               error:(NSError **)error
-{
-    if (!authority)
-    {
-        MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Provided authority url is nil.", nil);
+@interface MSALAccount (MultiTenantAccount)
 
-        return nil;
-    }
+/*!
+ Array of all tenants for which a token has been requested by the client.
+ 
+ Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
+ -allAccounts:
+ -accountForHomeAccountId:error:
+ -accountForUsername:error:
+ -allAccountsFilteredByAuthority:
+ 
+ The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
+ */
+@property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
-    if ([MSIDB2CAuthority isAuthorityFormatValid:authority context:context error:nil])
-    {
-        return [MSIDB2COauth2Factory new];
-    }
-
-    // Create AAD v2 factory for everything else, but in future we might want to further separate this out
-    // (e.g. ADFS, Google, Oauth2 etc...)
-    return [MSIDAADV2Oauth2Factory new];
-}
+/*!
+ Unique identifier of the account in the home tenant.
+ Provides additional information regarding account's home objectId and home tenantId in case of AAD.
+ */
+@property (readonly, nullable) MSALAccountId *homeAccountId;
 
 @end

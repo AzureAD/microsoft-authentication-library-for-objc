@@ -54,8 +54,6 @@
 {
     NSUInteger hash = 0;
     hash = hash * 31 + self.identifier.hash;
-    hash = hash * 31 + self.objectId.hash;
-    hash = hash * 31 + self.tenantId.hash;
     return hash;
 }
 
@@ -78,8 +76,16 @@
 {
     BOOL result = YES;
     result &= (!self.identifier && !accountId.identifier) || [self.identifier isEqualToString:accountId.identifier];
-    result &= (!self.objectId && !accountId.objectId) || [self.objectId isEqualToString:accountId.objectId];
-    result &= (!self.tenantId && !accountId.tenantId) || [self.tenantId isEqualToString:accountId.tenantId];
+    
+    if (self.objectId && accountId.objectId)
+    {
+        result &= [self.objectId isEqualToString:accountId.objectId];
+    }
+    
+    if (self.tenantId && accountId.tenantId)
+    {
+        result &= [self.tenantId isEqualToString:accountId.tenantId];
+    }
     
     return result;
 }
