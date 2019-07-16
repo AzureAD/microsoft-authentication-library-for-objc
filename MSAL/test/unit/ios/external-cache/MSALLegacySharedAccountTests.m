@@ -116,7 +116,7 @@
     XCTAssertTrue(result);
 }
 
-- (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenNO_andAppSignedOut_shouldReturnYES
+- (void)testMatchesParameters_whenReturnOnlySignedInAccountsNO_andAppSignedOut_shouldReturnYES
 {
     NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
@@ -126,12 +126,12 @@
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
-    params.needsAssociatedRefreshToken = NO;
+    params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
 
-- (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenYES_andAppSignedIn_shouldReturnYES
+- (void)testMatchesParameters_whenReturnOnlySignedInAccountsYES_andAppSignedIn_shouldReturnYES
 {
     NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
@@ -141,12 +141,12 @@
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
-    params.needsAssociatedRefreshToken = YES;
+    params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertTrue(result);
 }
 
-- (void)testMatchesParameters_whenNeedsAssociatedRefreshTokenYES_andAppSignedOut_shouldReturnNO
+- (void)testMatchesParameters_whenReturnOnlySignedInAccountsYES_andAppSignedOut_shouldReturnNO
 {
     NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
@@ -156,7 +156,7 @@
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
-    params.needsAssociatedRefreshToken = YES;
+    params.returnOnlySignedInAccounts = YES;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);
 }

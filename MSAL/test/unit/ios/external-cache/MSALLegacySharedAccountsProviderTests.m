@@ -97,7 +97,7 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
-    parameters.needsAssociatedRefreshToken = NO;
+    parameters.returnOnlySignedInAccounts = NO;
     
     NSError *error = nil;
     NSArray *results = [self.accountsProvider accountsWithParameters:parameters error:&error];
@@ -132,7 +132,7 @@
     [self saveAccountsBlob:oldAccountsBlob version:@"AccountsV2"];
     
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
-    parameters.needsAssociatedRefreshToken = NO;
+    parameters.returnOnlySignedInAccounts = NO;
     
     NSError *error = nil;
     NSArray *results = [self.accountsProvider accountsWithParameters:parameters error:&error];
@@ -156,7 +156,7 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
-    parameters.needsAssociatedRefreshToken = NO;
+    parameters.returnOnlySignedInAccounts = NO;
     
     NSError *error = nil;
     NSArray *results = [self.accountsProvider accountsWithParameters:parameters error:&error];
@@ -174,7 +174,7 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@contoso.com"];
-    parameters.needsAssociatedRefreshToken = NO;
+    parameters.returnOnlySignedInAccounts = NO;
     
     NSError *error = nil;
     NSArray *results = [self.accountsProvider accountsWithParameters:parameters error:&error];

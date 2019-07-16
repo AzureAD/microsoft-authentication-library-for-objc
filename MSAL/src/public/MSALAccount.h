@@ -27,8 +27,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAccountId;
-@class MSALTenantProfile;
 @class MSALPublicClientApplication;
 
 @protocol MSALAccount <NSObject>
@@ -77,12 +75,6 @@
 @end
 
 @interface MSALAccount : NSObject <MSALAccount, NSCopying>
-
-/*!
- Unique identifier of the account in the home tenant.
- Provides additional information regarding account's home objectId and home tenantId in case of AAD.
- */
-@property (readonly, nullable) MSALAccountId *homeAccountId;
 
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;

@@ -34,7 +34,7 @@ These libraries are suitable to use in a production environment. We provide the 
                 let accessToken = authResult.accessToken
                 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId?.identifier
+                let accountIdentifier = authResult.account.identifier
             })
         }
         else {
@@ -58,7 +58,7 @@ These libraries are suitable to use in a production environment. We provide the 
         {
             // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *accountIdentifier = result.account.homeAccountId.identifier;
+            NSString *accountIdentifier = result.account.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -168,7 +168,7 @@ NSError *msalError;
 MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"<your-client-id-here>"];
 MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
     
-```                                                
+```
 ### Acquiring Your First Token
 Swift
 ```swift
@@ -184,7 +184,7 @@ Swift
                 let accessToken = authResult.accessToken
                 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId?.identifier
+                let accountIdentifier = authResult.account.identifier
             })
 ```
 Objective-C
@@ -195,7 +195,7 @@ Objective-C
         {
             // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *accountIdentifier = result.account.homeAccountId.identifier;
+            NSString *accountIdentifier = result.account.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -210,7 +210,7 @@ Objective-C
 ### Silently Acquiring an Updated Token
 Swift
 ```swift
-guard let account = try? application.account(forHomeAccountId: accountIdentifier) else { return }
+guard let account = try? application.account(forIdentifier: accountIdentifier) else { return }
         let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
         application.acquireTokenSilent(with: silentParameters) { (result, error) in
             
@@ -234,7 +234,7 @@ guard let account = try? application.account(forHomeAccountId: accountIdentifier
 Objective-C
 ```objective-c
     NSError *error = nil;
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
     if (!account)
     {
         // handle error

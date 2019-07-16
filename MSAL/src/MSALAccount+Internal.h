@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccount.h"
+#import "MSALTenantProfile+Internal.h"
 
 @class MSIDAccountIdentifier;
 @class MSIDAADV2IdTokenClaims;
