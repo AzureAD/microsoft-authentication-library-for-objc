@@ -69,6 +69,7 @@
 - (void)adfsEnterPassword:(NSString *)password app:(XCUIApplication *)app;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView;
+- (void)acceptSpeedBump;
 - (void)closeAuthUIUsingWebViewType:(MSIDWebviewType)webViewType
                     passedInWebView:(BOOL)usesPassedInWebView;
 - (void)openURL:(NSDictionary *)config;

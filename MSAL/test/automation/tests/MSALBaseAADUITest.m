@@ -49,6 +49,11 @@
 
     [self aadEnterPassword];
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
+    
+    if (!request.usesEmbeddedWebView)
+    {
+        [self acceptSpeedBump];
+    }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 

@@ -69,11 +69,15 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent with wrong authority
+    // In 0.5.0+ it should succeed
+    // this might change in 0.6.0??
+    // TODO: verify expected behavior for this
     request.homeAccountIdentifier = homeAccountID;
     request.acquireTokenAuthority = request.configurationAuthority;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:MSALErrorInteractionRequired];
+    [self assertAccessTokenNotNil];
+    [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
 
     // 4. Run silent with correct authority
@@ -105,10 +109,14 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     // 3. Run silent with wrong authority
+    // In 0.5.0+ it should succeed
+    // this might change in 0.6.0??
+    // TODO: verify expected behavior for this
     request.homeAccountIdentifier = homeAccountID;
     NSDictionary *config = [self configWithTestRequest:request];
     [self acquireTokenSilent:config];
-    [self assertErrorCode:MSALErrorInteractionRequired];
+    [self assertAccessTokenNotNil];
+    [self runSharedResultAssertionWithTestRequest:request];
     [self closeResultView];
 
     // 4. Run silent with correct authority

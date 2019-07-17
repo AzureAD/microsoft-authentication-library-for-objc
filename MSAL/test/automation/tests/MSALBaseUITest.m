@@ -259,16 +259,31 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)acceptMSSTSConsentIfNecessary:(NSString *)acceptButtonTitle embeddedWebView:(BOOL)embeddedWebView
 {
-    XCUIElement *consentAcceptButton = self.testApp.buttons[acceptButtonTitle];
+    [self acceptConsentIfNecessary:self.testApp.buttons[acceptButtonTitle]
+                     consentButton:acceptButtonTitle
+                   embeddedWebView:embeddedWebView];
+}
 
+- (void)acceptSpeedBump
+{
+    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Only continue if you downloaded the app from a store or website you trust."]
+                     consentButton:@"Continue"
+                   embeddedWebView:NO];
+}
+
+- (void)acceptConsentIfNecessary:(XCUIElement *)elementToCheck
+                   consentButton:(NSString *)consentButton
+                 embeddedWebView:(BOOL)embeddedWebView
+{
     int i = 0;
-
+    
     while (i < 20) {
-
+        
         // If consent button found, tap it and return
-        if (consentAcceptButton.exists)
+        if (elementToCheck.exists)
         {
-            [consentAcceptButton msidTap];
+            XCUIElement *button = self.testApp.buttons[consentButton];
+            [button msidTap];
             return;
         }
         // If consent button is not there, but system webview is still shown, wait for 1 more second
