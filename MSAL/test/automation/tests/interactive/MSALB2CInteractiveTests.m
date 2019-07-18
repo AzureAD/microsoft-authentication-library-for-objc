@@ -105,6 +105,7 @@
     request.testAccount = [self.primaryAccount copy];
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
+    request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.tenantName policy:self.testConfiguration.policies[@"signin"]];
     request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
@@ -139,6 +140,7 @@
     request.testAccount = [self.primaryAccount copy];
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
+    request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.targetTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.expectedResultAuthority = [self.class.confProvider b2cAuthorityForIdentifier:self.testEnvironment tenantName:self.primaryAccount.homeTenantId policy:self.testConfiguration.policies[@"signin"]];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
