@@ -266,7 +266,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)acceptSpeedBump
 {
-    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Only continue if you downloaded the app from a store or website you trust."]
+    [self acceptConsentIfNecessary:self.testApp.staticTexts[@"Only continue if you downloaded the app from a store or website that you trust."]
                      consentButton:@"Continue"
                    embeddedWebView:NO];
 }
