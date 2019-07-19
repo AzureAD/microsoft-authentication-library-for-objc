@@ -32,7 +32,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #import "MSIDMacTokenCache.h"
-#import "MSIDMacKeychainTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccount.h"
