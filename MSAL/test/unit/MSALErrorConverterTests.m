@@ -70,6 +70,7 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     XCTAssertNil(msalError);
 }
@@ -94,6 +95,7 @@
                                                     userInfo:@{MSIDHTTPHeadersKey : httpHeaders,
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
                                                                @"additional_user_info": @"unmapped_userinfo"}
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     NSString *expectedErrorDomain = NSOSStatusErrorDomain;
@@ -129,6 +131,7 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
@@ -156,12 +159,41 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     NSString *expectedErrorDomain = MSALErrorDomain;
     XCTAssertNotNil(msalError);
     XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
     XCTAssertEqual(msalError.code, MSALErrorUserCanceled);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertNil(msalError.userInfo[MSALInternalErrorCodeKey]);
+}
+
+- (void)testErrorConversion_whenUnclassifiedUnrecoverableErrorPassed_andClassifyErrorsNO_shouldNotClassify
+{
+    NSInteger errorCode = -42400;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSALErrorDomain
+                                                        code:errorCode
+                                            errorDescription:errorDescription
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:nil
+                                              classifyErrors:NO
+                                          msalOauth2Provider:nil];
+    
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, -42400);
     XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
@@ -189,6 +221,7 @@
                                                                MSIDHTTPResponseCodeKey : httpResponseCode,
                                                                @"additional_user_info": @"unmapped_userinfo",
                                                                MSIDInvalidTokenResultKey : [self testTokenResult]}
+                                              classifyErrors:YES
                                           msalOauth2Provider:[[MSALAADOauth2Provider alloc] initWithClientId:@"someClientId"
                                                                                                   tokenCache:nil
                                                                                         accountMetadataCache:nil]];
@@ -274,6 +307,7 @@
                                                  underlyingError:nil
                                                    correlationId:nil
                                                         userInfo:nil
+                                                  classifyErrors:YES
                                               msalOauth2Provider:nil];
             
             XCTAssertNotEqual(error.code, errorCode);
@@ -293,6 +327,7 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
@@ -310,6 +345,7 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     XCTAssertEqualObjects(msalError.domain, @"Unmapped Domain");
@@ -326,6 +362,7 @@
                                              underlyingError:nil
                                                correlationId:nil
                                                     userInfo:nil
+                                              classifyErrors:YES
                                           msalOauth2Provider:nil];
     
     XCTAssertEqualObjects(msalError.domain, MSALErrorDomain);
