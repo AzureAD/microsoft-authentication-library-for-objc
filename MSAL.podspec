@@ -64,6 +64,8 @@ Pod::Spec.new do |s|
 
     legacyapp.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src-internal/public/ios/*"
     legacyapp.requires_arc = true
+    legacyapp.prefix_header_contents = "#define MSAL_LEGACY_ENABLED 1"
+
 
   end
 
