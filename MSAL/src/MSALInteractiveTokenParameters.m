@@ -28,21 +28,73 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALTokenParameters+Internal.h"
 #import "MSALGlobalConfig.h"
+#import "MSALWebviewParameters.h"
 
 @implementation MSALInteractiveTokenParameters
 
 @synthesize telemetryApiId;
 
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
+             webviewParameters:(MSALWebviewParameters *)webviewParameters
 {
     self = [super initWithScopes:scopes];
     if (self)
     {
-        self.webviewType = MSALGlobalConfig.defaultWebviewType;
-        self.promptType = MSALPromptTypeDefault;
         self.telemetryApiId = MSALTelemetryApiIdAcquireWithTokenParameters;
+        _promptType = MSALPromptTypeDefault;
+        _webviewParameters = [webviewParameters copy];
     }
     return self;
+}
+
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
+{
+    return [self initWithScopes:scopes
+                  webviewParameters:[MSALWebviewParameters new]];
+}
+
+#if TARGET_OS_IPHONE
+
+- (void)setParentViewController:(UIViewController *)parentViewController
+{
+    self.webviewParameters.parentViewController = parentViewController;
+}
+
+- (UIViewController *)parentViewController
+{
+    return self.webviewParameters.parentViewController;
+}
+
+- (void)setPresentationStyle:(UIModalPresentationStyle)presentationStyle
+{
+    self.webviewParameters.presentationStyle = presentationStyle;
+}
+
+- (UIModalPresentationStyle)presentationStyle
+{
+    return self.webviewParameters.presentationStyle;
+}
+
+#endif
+
+- (void)setWebviewType:(MSALWebviewType)webviewType
+{
+    self.webviewParameters.webviewType = webviewType;
+}
+
+- (MSALWebviewType)webviewType
+{
+    return self.webviewParameters.webviewType;
+}
+
+- (void)setCustomWebview:(WKWebView *)customWebview
+{
+    self.webviewParameters.customWebview = customWebview;
+}
+
+- (WKWebView *)customWebview
+{
+    return self.webviewParameters.customWebview;
 }
 
 @end

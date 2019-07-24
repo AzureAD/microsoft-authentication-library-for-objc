@@ -76,6 +76,9 @@
 #import "MSIDTestCacheDataSource.h"
 #import "MSALOauth2ProviderFactory.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @interface MSALFakeInteractiveRequest : NSObject
 
 @property NSString *state;
@@ -2094,3 +2097,4 @@
 
 @end
 
+#pragma clang diagnostic pop
