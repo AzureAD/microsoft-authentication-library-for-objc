@@ -99,7 +99,13 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 ### Adding MSAL to your project
 1. Register your app in the [Azure portal](https://aka.ms/MobileAppReg)
-2. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+2. Make sure you register a redirect URI for your application. It should be in the following format: 
+
+ `msauth.[BUNDLE_ID]://auth`
+
+####iOS only steps:
+
+1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -111,9 +117,7 @@ You can also use Git Submodule or check out the latest release and use as framew
     </dict>
 </array>
 ```
-#### iOS only steps:
-
-1. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
 ```xml
 <key>LSApplicationQueriesSchemes</key>
@@ -124,11 +128,11 @@ You can also use Git Submodule or check out the latest release and use as framew
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
-2. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
+3. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
 
 ![](Images/keychain_example.png)
 
-3. To handle a callback, add the following to `appDelegate`:
+4. To handle a callback, add the following to `appDelegate`:
 
 Swift
 ```swift
