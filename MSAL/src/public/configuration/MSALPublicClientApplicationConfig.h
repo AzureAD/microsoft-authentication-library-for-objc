@@ -75,7 +75,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param  clientId   The clientID of your application, you should get this from the app portal.
  */
-- (nonnull instancetype)initWithClientId:(NSString *)clientId DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority:] instead");
+- (nonnull instancetype)initWithClientId:(NSString *)clientId;
 
 /*!
  Initialize a MSALPublicClientApplicationConfig with a given clientId
@@ -86,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId
                              redirectUri:(nullable NSString *)redirectUri
-                               authority:(nullable MSALAuthority *)authority;
+                               authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;

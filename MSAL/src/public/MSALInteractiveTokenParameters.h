@@ -27,8 +27,6 @@
 
 #import "MSALTokenParameters.h"
 
-@class MSALWebviewConfig;
-
 NS_ASSUME_NONNULL_BEGIN
 
 @class WKWebView;

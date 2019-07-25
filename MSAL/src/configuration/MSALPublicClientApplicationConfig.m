@@ -34,7 +34,6 @@
 #import "MSIDConstants.h"
 
 static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching of clock differences between the server and the device
-static NSString *const s_defaultAuthorityUrlString = @"https://login.microsoftonline.com/common";
 
 @implementation MSALPublicClientApplicationConfig
 {
@@ -43,14 +42,10 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 - (instancetype)initWithClientId:(NSString *)clientId
 {
-    return [self initWithClientId:clientId
-                      redirectUri:nil
-                        authority:nil];
+    return [self initWithClientId:clientId redirectUri:nil authority:nil];
 }
 
-- (instancetype)initWithClientId:(NSString *)clientId
-                     redirectUri:(NSString *)redirectUri
-                       authority:(MSALAuthority *)authority
+- (instancetype)initWithClientId:(NSString *)clientId redirectUri:(nullable NSString *)redirectUri authority:(nullable MSALAuthority *)authority
 {
     self = [super init];
     if (self)

@@ -73,10 +73,10 @@
  */
 @property (nullable) NSDictionary<NSString *, NSString *> *sliceParameters DEPRECATED_MSG_ATTRIBUTE("Use sliceConfig in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
 
-#if TARGET_OS_IPHONE
-/*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
+/*! The webview selection to be used for authentication.
+ By default, it is going to use the following to authenticate.
+ - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+ - macOS:  WKWebView
  */
 @property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
@@ -104,7 +104,7 @@
     @param  error       The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
-                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication initWithConfiguration:error:] instead");
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 /*!
     Initialize a MSALPublicClientApplication with a given clientID and authority
  
@@ -205,8 +205,6 @@
                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
 #endif
 
-#pragma mark - Account
-
 /*!
  Returns an array of all accounts visible to this application.
 
@@ -260,16 +258,6 @@
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
-
-/*!
- Removes all tokens from the cache for this application for the provided account
- MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
- User might need to enter his credentials again after calling this API
- 
- @param  account    The account to remove from the cache
- */
-- (BOOL)removeAccount:(nonnull MSALAccount *)account
-                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 #pragma mark - SafariViewController Support
 
