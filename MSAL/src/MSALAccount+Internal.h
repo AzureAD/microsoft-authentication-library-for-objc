@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccount.h"
+#import "MSALTenantProfile+Internal.h"
 
 @class MSIDAccountIdentifier;
 @class MSIDAADV2IdTokenClaims;
@@ -33,6 +34,8 @@
 @class MSIDAccount;
 @class MSALAccountId;
 @class MSIDIdTokenClaims;
+@protocol MSALAccount;
+@class MSALOauth2Provider;
 
 @interface MSALAccount ()
 
@@ -55,6 +58,8 @@
  @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
 - (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider;
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 

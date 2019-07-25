@@ -45,7 +45,7 @@
 #import "MSALAuthority.h"
 #import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
-#import "MSALWebviewConfig.h"
+#import "MSALWebviewParameters.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
 #define TEST_SYSTEM_WEBVIEW_TYPE_INDEX 1
@@ -213,24 +213,24 @@
         });
     };
 
-    MSALWebviewConfig *webviewConfig = [[MSALWebviewConfig alloc] initWithParentViewController:self];
-    webviewConfig.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
+    MSALWebviewParameters *webviewParameters = [[MSALWebviewParameters alloc] initWithParentViewController:self];
+    webviewParameters.webviewType = self.webviewTypeSegmentControl.selectedSegmentIndex == 0 ? MSALWebviewTypeWKWebView : MSALWebviewTypeDefault;
     
-    if (webviewConfig.webviewType == MSALWebviewTypeWKWebView
+    if (webviewParameters.webviewType == MSALWebviewTypeWKWebView
         && self.customWebviewTypeSegmentControl.selectedSegmentIndex == TEST_EMBEDDED_WEBVIEW_CUSTOM)
     {
-        webviewConfig.customWebview = self.customWebview;
+        webviewParameters.customWebview = self.customWebview;
         self.customWebviewContainer.hidden = NO;
     }
     
     if (@available(iOS 13.0, *))
     {
-        webviewConfig.parentViewController = self;
-        webviewConfig.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
+        webviewParameters.parentViewController = self;
+        webviewParameters.prefersEphemeralWebBrowserSession = self.systemWebviewSSOSegmentControl.selectedSegmentIndex == 1; // 0 - Yes, 1 - No.
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:[settings.scopes allObjects]
-                                                                                          webviewConfig:webviewConfig];
+                                                                                      webviewParameters:webviewParameters];
     parameters.loginHint = self.loginHintTextField.text;
     parameters.account = settings.currentAccount;
     parameters.promptType = [self promptTypeValue];

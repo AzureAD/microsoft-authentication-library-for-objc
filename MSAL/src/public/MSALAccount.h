@@ -27,11 +27,9 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALAccountId;
-@class MSALTenantProfile;
 @class MSALPublicClientApplication;
 
-@interface MSALAccount : NSObject <NSCopying>
+@protocol MSALAccount <NSObject>
 
 /*!
  Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string including special characters such as @, /, or whitespace.
@@ -47,29 +45,23 @@
 @property (readonly, nullable) NSString *identifier;
 
 /*!
- Unique identifier of the account in the home tenant.
- This can be used later to retrieve accounts and tokens silently from MSAL.
- */
-@property (readonly, nullable) MSALAccountId *homeAccountId DEPRECATED_MSG_ATTRIBUTE("Use MSALAccount.identifier property instead");
-
-/*!
  Host part of the authority string used for authentication based on the issuer identifier.
  Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed (see MSALAccount+MultiTenantAccount.h header)
  If a host doesn't support multiple tenants, there'll be one MSALAccount with accountClaims returned.
  
  e.g. if app accesses following tenants: Contoso.com and MyOrg.com in the Public AAD cloud, there'll be following information returned:
  
-MSALAccount
-- environment of "login.microsoftonline.com"
-- identifier based on the GUID of "MyOrg.com"
-- accountClaims from the id token for the "MyOrg.com"
-- tenantProfiles
+ MSALAccount
+ - environment of "login.microsoftonline.com"
+ - identifier based on the GUID of "MyOrg.com"
+ - accountClaims from the id token for the "MyOrg.com"
+ - tenantProfiles
     - tenantProfile[0]
-        - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
-        - claims for the id token issued by MyOrg.com
-    - tenantProfile[1]
-        - identifier based on account identifiers from "Contoso.com"
-        - claims for the id token issued by Contoso.com
+    - identifier based on account identifiers from "MyOrg.com" (account object id in MyOrg.com and tenant Id for MyOrg.com directory)
+    - claims for the id token issued by MyOrg.com
+ - tenantProfile[1]
+    - identifier based on account identifiers from "Contoso.com"
+    - claims for the id token issued by Contoso.com
  */
 @property (readonly, nonnull) NSString *environment;
 
@@ -77,8 +69,12 @@ MSALAccount
  ID token claims for the account.
  Can be used to read additional information about the account, e.g. name
  Will only be returned if there has been an id token issued for the client Id for the account's source tenant.
-*/
+ */
 @property (readonly, nullable) NSDictionary<NSString *, NSString *> *accountClaims;
+
+@end
+
+@interface MSALAccount : NSObject <MSALAccount, NSCopying>
 
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)init NS_UNAVAILABLE;

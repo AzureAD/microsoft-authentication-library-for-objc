@@ -41,6 +41,8 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDAccountIdentifier.h"
+#import "MSIDAADV2IdTokenClaims.h"
+#import "MSALTenantProfile+Internal.h"
 
 @implementation MSALAADOauth2Provider
 
@@ -121,6 +123,27 @@
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority
 {
     return [authority isKindOfClass:[MSIDAADAuthority class]];
+}
+
+- (MSALTenantProfile *)tenantProfileWithClaims:(NSDictionary *)claims
+                                 homeAccountId:(MSALAccountId *)homeAccountId
+                                   environment:(NSString *)environment
+                                         error:(NSError **)error
+{
+    MSIDAADV2IdTokenClaims *idTokenClaims = [[MSIDAADV2IdTokenClaims alloc] initWithJSONDictionary:claims error:error];
+    
+    if (!idTokenClaims)
+    {
+        return nil;
+    }
+    
+    BOOL isHomeTenantProfile = [homeAccountId.objectId isEqualToString:idTokenClaims.uniqueId];
+    
+    return [[MSALTenantProfile alloc] initWithIdentifier:idTokenClaims.uniqueId
+                                                tenantId:idTokenClaims.realm
+                                             environment:environment
+                                     isHomeTenantProfile:isHomeTenantProfile
+                                                  claims:claims];
 }
 
 #pragma mark - Protected

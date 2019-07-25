@@ -50,6 +50,9 @@
 #import "MSALResult.h"
 #import "MSALAccount.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @interface MSALB2CPolicyTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
@@ -207,3 +210,5 @@
 }
 
 @end
+
+#pragma clang diagnostic pop

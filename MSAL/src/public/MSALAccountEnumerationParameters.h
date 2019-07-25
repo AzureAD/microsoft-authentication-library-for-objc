@@ -44,6 +44,16 @@
  */
 @property (nonatomic, readonly, nullable) NSString *username;
 
+/*!
+ Filter accounts by whether this account is in the signed in state for the current client.
+ Signed in state is determined by the presence of a refresh token credential for the requesting client.
+ If account has been explicitly removed through the "removeAccount" API, it will be also marked as "signed out" as MSAL will remove refresh token for the client.
+ 
+ YES by default (== only returns signed in accounts).
+ Set it to NO to query all accounts visible to your application regardless if there's a refresh token present or not.
+ */
+@property (nonatomic, readwrite) BOOL returnOnlySignedInAccounts;
+
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
 
 - (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
