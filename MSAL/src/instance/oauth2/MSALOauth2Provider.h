@@ -60,6 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
+                                instanceAware:(BOOL)instanceAware
                                         error:(NSError **)error;
 
 - (BOOL)isSupportedAuthority:(MSIDAuthority *)authority;

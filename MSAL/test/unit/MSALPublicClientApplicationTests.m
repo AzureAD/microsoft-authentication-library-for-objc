@@ -1030,7 +1030,11 @@
                                                                                     error:nil];
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier
+                                         clientId:UNIT_TEST_CLIENT_ID
+                                    instanceAware:NO
+                                          context:nil
+                                            error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1096,7 +1100,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
                                     homeAccountId:@"1.1234-5678-90abcdefg"
-                                         clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                         clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     application.accountMetadataCache = self.accountMetadataCache;
     application.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority
@@ -1178,7 +1182,7 @@
                                                                                     error:nil];
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1383,7 +1387,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:account
@@ -1899,7 +1903,7 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authorityUrl]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"]
                                     homeAccountId:account.accountIdentifier.homeAccountId
-                                         clientId:@"myclient" context:nil error:nil];
+                                         clientId:@"myclient" instanceAware:NO context:nil error:nil];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1"]
                                      account:msalAccount

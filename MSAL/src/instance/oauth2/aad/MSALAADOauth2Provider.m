@@ -99,6 +99,7 @@
 
 - (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
+                                instanceAware:(BOOL)instanceAware
                                         error:(NSError **)error
 {
     if (self.accountMetadataCache)
@@ -106,6 +107,7 @@
         NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
                                                         homeAccountId:account.homeAccountId.identifier
                                                              clientId:self.clientId
+                                                        instanceAware:instanceAware
                                                               context:nil
                                                                 error:error];
         

@@ -83,6 +83,7 @@
 
 - (MSIDAuthority *)issuerAuthorityWithAccount:(MSALAccount *)account
                              requestAuthority:(MSIDAuthority *)requestAuthority
+                                instanceAware:(BOOL)instanceAware
                                         error:(NSError * _Nullable __autoreleasing *)error
 {
     // TODO: after authority->issuer cache is ready, this should always lookup cached issuer instead
