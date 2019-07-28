@@ -48,7 +48,10 @@ class SampleMSALAuthentication {
             // about the account being logged in.
             if let displayableMessage = message {
                 if (!containsPII) {
+#if DEBUG
+                    // Only print to console using print in debug mode
                     print(displayableMessage)
+#endif
                 }
             }
         }
