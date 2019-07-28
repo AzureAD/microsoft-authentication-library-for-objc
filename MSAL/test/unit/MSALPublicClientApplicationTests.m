@@ -1118,6 +1118,55 @@
     
 }
 
+- (void)testAcquireTokenSilent_whenNoAuthority_andCommonAuthorityInPublicClientApplication_andNoAccountMetadata_shouldUseHomeAuthority
+{
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         
+         MSIDRequestParameters *params = [obj requestParameters];
+         XCTAssertNotNil(params);
+         XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"user@contoso.com"
+                                                   homeAccountId:accountId
+                                                     environment:@"login.microsoftonline.com"
+                                                  tenantProfiles:nil];
+    
+    application.accountMetadataCache = self.accountMetadataCache;
+    application.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:authority
+                                                                                 clientId:UNIT_TEST_CLIENT_ID
+                                                                               tokenCache:self.tokenCacheAccessor
+                                                                     accountMetadataCache:self.accountMetadataCache
+                                                                                  context:nil
+                                                                                    error:nil];
+    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
+                                     account:account
+                             completionBlock:^(MSALResult *result, NSError *error)
+     {
+         XCTAssertNil(result);
+         XCTAssertNotNil(error);
+     }];
+}
+
 - (void)testAcquireSilentScopesUser_whenNoAuthority_andCommonAuthorityInPublicClientApplication_shouldUseAccountHomeAuthority
 {
     NSError *error = nil;
