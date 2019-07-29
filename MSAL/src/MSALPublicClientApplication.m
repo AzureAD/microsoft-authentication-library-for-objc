@@ -827,10 +827,12 @@
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
+     TODO: update instanceAware parameter to the instanceAware in config
      */
     NSError *authorityError = nil;
     requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
                                                           requestAuthority:requestAuthority
+                                                             instanceAware:NO
                                                                      error:&authorityError];
     
     if (!requestAuthority)
