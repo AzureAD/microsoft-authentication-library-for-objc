@@ -653,6 +653,20 @@
 			remoteGlobalIDString = D626FF5A1FBA6E9500EE4487;
 			remoteInfo = "IdentityCore Mac";
 		};
+		1E81E0AA22EF82A4006E17BE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C93C92572272571F00B59FC9;
+			remoteInfo = MSIDTestKeychainUtil;
+		};
+		1E81E0AC22EF82A4006E17BE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C93C927322779E3200B59FC9;
+			remoteInfo = MSIDTestKeychainUtil2;
+		};
 		1EC12C382256BC5400339572 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
@@ -2148,6 +2162,8 @@
 				B29520A420B4CB9F0068C021 /* libIdentityAutomationAppLib Mac.dylib */,
 				B21FA9BC2204DC5700806B68 /* libIdentityAutomationTestLib iOS.a */,
 				B21FA9BE2204DC5700806B68 /* libIdentityAutomationTestLib Mac.a */,
+				1E81E0AB22EF82A4006E17BE /* MSIDTestKeychainUtil */,
+				1E81E0AD22EF82A4006E17BE /* MSIDTestKeychainUtil2 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2898,6 +2914,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		1E81E0AB22EF82A4006E17BE /* MSIDTestKeychainUtil */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MSIDTestKeychainUtil;
+			remoteRef = 1E81E0AA22EF82A4006E17BE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E81E0AD22EF82A4006E17BE /* MSIDTestKeychainUtil2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = MSIDTestKeychainUtil2;
+			remoteRef = 1E81E0AC22EF82A4006E17BE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		231CE9D31FEC641D00E95D3E /* MSIDTestsHostApp.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;

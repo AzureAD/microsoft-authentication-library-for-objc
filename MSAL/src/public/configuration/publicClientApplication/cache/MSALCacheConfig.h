@@ -59,6 +59,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
 
+/*!
+ Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
+ created by the keychain cache.
+ */
+@property (readonly, nonnull) NSArray *trustedApplications;
+
 #endif
 
 - (nonnull instancetype)init NS_UNAVAILABLE;
