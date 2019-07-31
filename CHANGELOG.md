@@ -1,3 +1,10 @@
+## [0.5.0] - 2019-07-30
+### Updated
+- Added initial macOS support
+- Better resolution of authorities for silent token acquisition
+- Added backward compatibility for legacy account storages
+- Added backward compatibility for ADAL macOS cache
+
 ## [0.4.3] - 2019-05-24
 ### Updated
 - Updated to newer v2 broker protocol version
