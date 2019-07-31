@@ -1521,31 +1521,6 @@
 			path = mac;
 			sourceTree = "<group>";
 		};
-		B223B0A922ADF61C00FB8713 /* public */ = {
-			isa = PBXGroup;
-			children = (
-				B223B0B022ADF63300FB8713 /* ios */,
-			);
-			path = public;
-			sourceTree = "<group>";
-		};
-		B223B0B022ADF63300FB8713 /* ios */ = {
-			isa = PBXGroup;
-			children = (
-				B29A56BD228266E20023F5E6 /* MSALLegacySharedAccountsProvider.h */,
-			);
-			path = ios;
-			sourceTree = "<group>";
-		};
-		B223B0C722AE27BE00FB8713 /* src-internal */ = {
-			isa = PBXGroup;
-			children = (
-				B223B0A922ADF61C00FB8713 /* public */,
-				B2725EC722C04562009B454A /* ios */,
-			);
-			path = "src-internal";
-			sourceTree = "<group>";
-		};
 		B25A439021C35A67000B3DD4 /* actions */ = {
 			isa = PBXGroup;
 			children = (
@@ -1583,6 +1558,7 @@
 		B2659C792287BBB000F5A0C3 /* external */ = {
 			isa = PBXGroup;
 			children = (
+				B2725EC722C04562009B454A /* ios */,
 				B29A56B9228266B40023F5E6 /* MSALSerializedADALCacheProvider.m */,
 				B2659C862287D13B00F5A0C3 /* MSALSerializedADALCacheProvider+Internal.h */,
 				B267569B228F335E000F01D7 /* MSALExternalAccountHandler.h */,
@@ -1694,6 +1670,22 @@
 				B295A17222D0348600FFB313 /* main.m */,
 			);
 			path = "unit-test-host";
+			sourceTree = "<group>";
+		};
+		B2968C4122F24259005AFC33 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				B2968C4222F24265005AFC33 /* cache */,
+			);
+			path = ios;
+			sourceTree = "<group>";
+		};
+		B2968C4222F24265005AFC33 /* cache */ = {
+			isa = PBXGroup;
+			children = (
+				B29A56BD228266E20023F5E6 /* MSALLegacySharedAccountsProvider.h */,
+			);
+			path = cache;
 			sourceTree = "<group>";
 		};
 		B29A56A32282622F0023F5E6 /* cache */ = {
@@ -1953,6 +1945,7 @@
 				232D616922498EDF00260C42 /* MSALJsonSerializable.h */,
 				23FB5C1C22542B99002BF1EB /* MSALJsonDeserializable.h */,
 				B27CCDF0229F9F4700CAD565 /* MSALAccountEnumerationParameters.h */,
+				B2968C4122F24259005AFC33 /* ios */,
 			);
 			path = public;
 			sourceTree = "<group>";
@@ -2173,7 +2166,6 @@
 				231CE9E01FECBD4600E95D3E /* unit-test-host.entitlements */,
 				D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */,
 				D65A6F671E3FF3D900C69FBA /* src */,
-				B223B0C722AE27BE00FB8713 /* src-internal */,
 				D61F5B691E53FCA100912CB8 /* test */,
 				D65A6FB71E3FF44A00C69FBA /* resources */,
 				D65A6FBC1E3FF46100C69FBA /* xcconfig */,

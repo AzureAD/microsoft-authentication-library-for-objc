@@ -36,6 +36,7 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDConstants.h"
 #import "MSALLegacySharedAccountTestUtil.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALLegacySharedAccountsProviderTests : XCTestCase
 
