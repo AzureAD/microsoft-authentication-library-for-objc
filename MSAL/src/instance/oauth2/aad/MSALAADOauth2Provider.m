@@ -132,6 +132,18 @@
                 || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers
                 || aadAuthority.tenant.type == MSIDAADTenantTypeOrganizations)
             {
+                // This is just a precaution to ensure tenantId is a valid AAD tenant semantically
+                NSUUID *tenantUUID = [[NSUUID alloc] initWithUUIDString:account.homeAccountId.tenantId];
+                
+                if (tenantUUID)
+                {
+                    authority = [[MSIDAADAuthority alloc] initWithURL:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:error];
+                }
+                else
+                {
+                    MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Unexpected tenantId found %@", MSID_PII_LOG_MASKABLE(account.homeAccountId.tenantId));
+                }
+                
                 authority = [[MSIDAADAuthority alloc] initWithURL:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:error];
             }
 
