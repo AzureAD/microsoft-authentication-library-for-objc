@@ -74,6 +74,4 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALAccountEnumerationParameters.h>
 #import <MSAL/MSALExternalAccountProviding.h>
 #import <MSAL/MSALSerializedADALCacheProvider.h>
-#ifndef MSAL_LEGACY_ACCOUNTS_DISABLED
 #import <MSAL/MSALLegacySharedAccountsProvider.h>
-#endif
