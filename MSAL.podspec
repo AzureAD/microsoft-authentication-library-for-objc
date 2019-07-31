@@ -53,17 +53,4 @@ Pod::Spec.new do |s|
   	ext.requires_arc = true
   end
 
-  s.subspec 'MSALBackwardCompat' do |legacyapp|
-
-    legacyapp.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/src-internal/**/*.{h,m}"
-    legacyapp.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src-internal/public/ios/*.h"
-    legacyapp.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
-
-    legacyapp.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
-
-    legacyapp.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src-internal/public/ios/*"
-    legacyapp.requires_arc = true
-
-  end
-
 end
