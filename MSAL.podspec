@@ -37,6 +37,7 @@ Pod::Spec.new do |s|
   		
   	app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
   	app.requires_arc = true
+        app.prefix_header_contents = "#define MSAL_LEGACY_ACCOUNTS_DISABLED 1"
   end
   
   # Note, MSAL has limited support for running in app extensions.
@@ -50,7 +51,7 @@ Pod::Spec.new do |s|
   	# for both the platform and overall.
   	ext.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
   	ext.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
-  	
+        ext.prefix_header_contents = "#define MSAL_LEGACY_ACCOUNTS_DISABLED 1"
   	ext.requires_arc = true
   end
 
@@ -64,7 +65,6 @@ Pod::Spec.new do |s|
 
     legacyapp.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src-internal/public/ios/*"
     legacyapp.requires_arc = true
-    legacyapp.compiler_flags = '-DMSAL_LEGACY_ENABLED=1'
 
   end
 
