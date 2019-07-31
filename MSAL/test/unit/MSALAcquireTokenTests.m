@@ -311,7 +311,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
@@ -385,7 +385,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     NSError *error = nil;
     MSALPublicClientApplication *application =
@@ -1099,7 +1099,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     NSOrderedSet *expectedScopes = [NSOrderedSet orderedSetWithArray:@[@"user.read", @"openid", @"profile", @"offline_access"]];
@@ -1182,7 +1182,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Set up two 504 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
@@ -1257,7 +1257,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:authority];
     [MSIDTestURLSession addResponse:discoveryResponse];
@@ -1328,7 +1328,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
 
     // Set up a 200 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes
@@ -1411,7 +1411,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Set up two 504 network responses
     MSIDTestURLResponse *tokenResponse = [MSIDTestURLResponse rtResponseForScopes:expectedScopes authority:authority tenantId:@"1234-5678-90abcdefg" uid:@"1" user:account claims:nil];
@@ -1570,7 +1570,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Mock token response
     [MSIDTestURLSession addResponse:oidcResponse];
@@ -1671,7 +1671,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     // Acquire a token silently
     NSError *error = nil;
@@ -1754,7 +1754,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
@@ -1828,7 +1828,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -1918,7 +1918,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -2007,7 +2007,7 @@
     application.accountMetadataCache = self.accountMetadataCache;
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -2092,7 +2092,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
     [application acquireTokenSilentForScopes:@[@"user.read"]
@@ -2175,7 +2175,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     [self removeRefreshTokenFromCache];
     
@@ -2253,7 +2253,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     [self removeRefreshTokenFromCache];
     
@@ -2330,7 +2330,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     [self removeRefreshTokenFromCache];
     NSArray<MSIDAppMetadataCacheItem *> *metadataEntries = [self.tokenCache getAppMetadataEntries:configuration
@@ -2456,7 +2456,7 @@
     application.accountMetadataCache = self.accountMetadataCache;
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTAssertNotNil(application);
     
@@ -2533,7 +2533,7 @@
     
     // Save account metadata authority map from common to the specific tenant id.
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:authority]
-                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID context:nil error:nil];
+                                    forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTAssertNotNil(application);
     
