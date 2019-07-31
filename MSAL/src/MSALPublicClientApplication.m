@@ -32,7 +32,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #import "MSIDMacTokenCache.h"
-#import "MSIDMacKeychainTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccount.h"
@@ -678,10 +677,12 @@
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
+     TODO: update instanceAware parameter to the instanceAware in config
      */
     NSError *authorityError = nil;
     requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
                                                           requestAuthority:requestAuthority
+                                                             instanceAware:NO
                                                                      error:&authorityError];
     
     if (!requestAuthority)
@@ -746,7 +747,7 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
         completionBlock(result, msalError);
     };
@@ -855,7 +856,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
     
 #if TARGET_OS_IPHONE
-    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
+    config.cacheConfig.keychainSharingGroup = keychainGroup;
 #endif
     
     return [self initWithConfiguration:config error:error];

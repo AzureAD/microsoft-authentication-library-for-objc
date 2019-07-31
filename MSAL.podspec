@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "MSAL"
-  s.version      = "0.4.3"
+  s.version      = "0.5.0"
   s.summary      = "Microsoft Authentication Library (MSAL) Preview for iOS"
 
   s.description  = <<-DESC
@@ -37,6 +37,7 @@ Pod::Spec.new do |s|
   		
   	app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
   	app.requires_arc = true
+        app.prefix_header_contents = "#define MSAL_LEGACY_ACCOUNTS_DISABLED 1"
   end
   
   # Note, MSAL has limited support for running in app extensions.
@@ -50,7 +51,21 @@ Pod::Spec.new do |s|
   	# for both the platform and overall.
   	ext.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
   	ext.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
-  	
+        ext.prefix_header_contents = "#define MSAL_LEGACY_ACCOUNTS_DISABLED 1"
   	ext.requires_arc = true
   end
+
+  s.subspec 'MSALBackwardCompat' do |legacyapp|
+
+    legacyapp.source_files = "MSAL/src/**/*.{h,m}", "MSAL/IdentityCore/IdentityCore/src/**/*.{h,m}", "MSAL/src-internal/**/*.{h,m}"
+    legacyapp.ios.public_header_files = "MSAL/src/public/*.h","MSAL/src/public/ios/*.h", "MSAL/src/public/configuration/**/*.h", "MSAL/src-internal/public/ios/*.h"
+    legacyapp.osx.public_header_files = "MSAL/src/public/mac/*.h","MSAL/src/public/*.h", "MSAL/src/public/configuration/**/*.h"
+
+    legacyapp.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
+
+    legacyapp.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/src-internal/public/ios/*"
+    legacyapp.requires_arc = true
+
+  end
+
 end
