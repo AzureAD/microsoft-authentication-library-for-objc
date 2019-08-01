@@ -24,7 +24,6 @@
 #import "MSALTestAppSettings.h"
 #import "MSIDAuthority.h"
 #import "MSALAccountId.h"
-#import "MSALAuthorityFactory.h"
 #import "MSIDAuthority.h"
 #import "MSALAuthority.h"
 #import "MSALAuthority_Internal.h"
@@ -41,10 +40,7 @@
 // github enlistment!
 static NSDictionary* _additionalProfiles()
 {
-    return @{
-             @"MSAL-TestApp" : @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
-                            @"redirectUri" :@"msauth.com.microsoft.MSALTestApp://auth"},
-             };
+    return nil;
 }
 #endif
 
@@ -62,7 +58,11 @@ static NSArray<NSString *> *s_scopes_available = nil;
 
 static NSArray<NSString *> *s_authorityTypes = nil;
 
-static NSDictionary *s_profiles = nil;
+static NSDictionary *s_additionalProfiles = nil;
+static NSMutableDictionary *s_profiles = nil;
+static NSArray* s_profileTitles = nil;
+static NSUInteger s_currentProfileIdx = 0;
+static NSDictionary *s_currentProfile = nil;
 
 @interface MSALTestAppSettings()
 {
@@ -99,7 +99,20 @@ static NSDictionary *s_profiles = nil;
     
     s_b2cAuthorities = @[signinPolicyAuthority, signupPolicyAuthority, profilePolicyAuthority];
     s_authorityTypes = @[@"AAD",@"B2C"];
-    s_profiles = _additionalProfiles();
+    
+    
+    NSString *defaultKey = @"MSAL-TestApp";
+    NSDictionary *defaultValue = @{@"clientId" : @"b6c69a37-df96-4db0-9088-2ab96e1d8215",
+                                   @"redirectUri" :@"msauth.com.microsoft.MSALTestApp://auth"};
+    
+    s_profiles = [[NSMutableDictionary alloc] initWithObjectsAndKeys:defaultValue, defaultKey, nil];
+    s_additionalProfiles = _additionalProfiles();
+    [s_profiles addEntriesFromDictionary:s_additionalProfiles];
+    
+    NSMutableArray *titles = [[NSMutableArray alloc] init];
+    [titles addObjectsFromArray:[s_profiles allKeys]];
+    
+    s_profileTitles = titles;
 }
 
 + (MSALTestAppSettings*)settings
@@ -109,17 +122,11 @@ static NSDictionary *s_profiles = nil;
     
     dispatch_once(&s_settingsOnce,^{
         s_settings = [MSALTestAppSettings new];
-        s_settings->_profile = [[s_profiles allValues] objectAtIndex:0];
         [s_settings readFromDefaults];
         s_settings->_scopes = [NSMutableSet new];
     });
     
     return s_settings;
-}
-
-+ (NSDictionary *)profiles
-{
-    return s_profiles;
 }
 
 + (NSArray<NSString *> *)aadAuthorities
@@ -144,7 +151,7 @@ static NSDictionary *s_profiles = nil;
         return nil;
     }
     
-    NSDictionary *currentProfile = _profile;
+    NSDictionary *currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     
@@ -158,33 +165,37 @@ static NSDictionary *s_profiles = nil;
 
     if (application == nil)
     {
-        MSID_LOG_ERROR(nil, @"failed to create application to get user: %@", error);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"failed to create application to get user: %@", error);
         return nil;
     }
     
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
     return account;
 }
 
 - (void)readFromDefaults
 {
+    s_currentProfileIdx = 0;
+    s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
+    
     NSDictionary *settings = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MSAL_APP_SETTINGS_KEY];
     if (!settings)
     {
         return;
     }
     
-    NSDictionary *profile = [settings objectForKey:MSAL_APP_PROFILE];
-    if (profile)
+    NSString* currentProfile = [settings objectForKey:MSAL_APP_PROFILE];
+    if (currentProfile)
     {
-        _profile = profile;
+        s_currentProfileIdx = [s_profileTitles indexOfObject:currentProfile];
+        s_currentProfile = [s_profiles objectForKey:[s_profileTitles objectAtIndex:s_currentProfileIdx]];
     }
     
     NSString *authorityString = [settings objectForKey:@"authority"];
     if (authorityString)
     {
         NSURL *authorityUrl = [[NSURL alloc] initWithString:authorityString];
-        __auto_type authority = [MSALAuthorityFactory authorityFromUrl:authorityUrl context:nil error:nil];
+        __auto_type authority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
         _authority = authority;
     }
     
@@ -230,7 +241,7 @@ static NSDictionary *s_profiles = nil;
 
 - (void)setCurrentAccount:(MSALAccount *)currentAccount
 {
-    [self setValue:currentAccount.homeAccountId.identifier forKey:@"currentHomeAccountId"];
+    [self setValue:currentAccount.identifier forKey:@"currentHomeAccountId"];
     _currentAccount = currentAccount;
 }
 
@@ -266,10 +277,33 @@ static NSDictionary *s_profiles = nil;
     return YES;
 }
 
-- (void)setProfile:(id)profile
++ (NSDictionary *)profiles
 {
-    [self setValue:profile forKey:MSAL_APP_PROFILE];
-    _profile = profile;
+    return s_profiles;
 }
+
++ (NSDictionary *)currentProfile
+{
+    return s_currentProfile;
+}
+
++ (NSString *)currentProfileName
+{
+    return [s_profileTitles objectAtIndex:s_currentProfileIdx];
+}
+
++ (NSString *)profileTitleForIndex:(NSUInteger)index
+{
+    return [s_profileTitles objectAtIndex:index];
+}
+
+- (void)setCurrentProfile:(NSUInteger)index
+{
+    s_currentProfileIdx = index;
+    NSString *profileName = [s_profileTitles objectAtIndex:index];
+    s_currentProfile = [s_profiles objectForKey:profileName];
+    [self setValue:profileName forKey:MSAL_APP_PROFILE];
+}
+
 
 @end

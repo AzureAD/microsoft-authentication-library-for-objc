@@ -38,6 +38,7 @@
 @class MSALSilentTokenParameters;
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
+@class MSALAccountEnumerationParameters;
 
 @interface MSALPublicClientApplication : NSObject
 
@@ -142,8 +143,9 @@
 
 #if TARGET_OS_IPHONE
 /*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
+ The current keychain sharing group used for the token cache.
+ If it is nil, it means keychain sharing is disabled. Please
+ refer to MSALCacheConfig for more details.
  */
 @property (nonatomic, readonly, nullable) NSString *keychainGroup;
 
@@ -151,8 +153,8 @@
  Initialize a MSALPublicClientApplication with a given clientID and keychain group
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  error          The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
@@ -163,8 +165,8 @@
  Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -183,8 +185,8 @@
  Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -212,13 +214,32 @@
 - (nullable NSArray <MSALAccount *> *)allAccounts:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 /*!
- Returns account for for the given home identifier (received from an account object returned in a previous acquireToken call)
+ Returns account for the given home identifier (received from an account object returned in a previous acquireToken call)
 
  @param  error      The error that occured trying to get the accounts, if any, if you're
                     not interested in the specific error pass in nil.
  */
 - (nullable MSALAccount *)accountForHomeAccountId:(nonnull NSString *)homeAccountId
-                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+                                            error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use [MSALPublicClientApplication accountForIdentifier:error:] instead");
+
+/*!
+ Returns account for the given account identifier (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (nullable MSALAccount *)accountForIdentifier:(nonnull NSString *)identifier
+                                         error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+/*!
+ Returns account for the given account identifying parameters (received from an account object returned in a previous acquireToken call)
+ 
+ @param  error      The error that occured trying to get the accounts, if any, if you're
+                    not interested in the specific error pass in nil.
+ */
+- (nullable NSArray<MSALAccount *> *)accountsForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
 
 /*!
  Returns account for for the given username (received from an account object returned in a previous acquireToken call or ADAL)
@@ -625,7 +646,8 @@
 
 /*!
     Removes all tokens from the cache for this application for the provided account
-    User will need to enter his credentials again after calling this API
+    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
+    User might need to enter his credentials again after calling this API
  
     @param  account    The account to remove from the cache
  */

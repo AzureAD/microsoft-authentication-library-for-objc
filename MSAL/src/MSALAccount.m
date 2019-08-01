@@ -36,77 +36,109 @@
 #import "MSIDAccount.h"
 #import "MSALAccountId+Internal.h"
 #import "MSIDAuthority.h"
-
-@interface MSALAccount ()
-
-@property (nonatomic) MSALAccountId *homeAccountId;
-@property (nonatomic) NSString *username;
-@property (nonatomic) NSString *environment;
-
-@end
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
+#import "MSALPublicClientApplication+Internal.h"
+#import "MSALAccountsProvider.h"
+#import "MSALAuthority_Internal.h"
+#import "MSALOauth2Provider.h"
+#import "MSIDAccountIdentifier.h"
 
 @implementation MSALAccount
 
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-              tenantId:(NSString *)tenantId
+- (instancetype)initWithUsername:(NSString *)username
+                   homeAccountId:(MSALAccountId *)homeAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
     self = [super init];
 
     if (self)
     {
         _username = username;
-        _name = name;
         _environment = environment;
-
-        NSArray *accountIdComponents = [homeAccountId componentsSeparatedByString:@"."];
-
-        NSString *uid = nil;
-        NSString *utid = nil;
-
-        if ([accountIdComponents count] == 2)
-        {
-            uid = accountIdComponents[0];
-            utid = accountIdComponents[1];
-        }
-
-        _homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:homeAccountId
-                                                                 objectId:uid
-                                                                 tenantId:utid];
+        _homeAccountId = homeAccountId;
+        _identifier = homeAccountId.identifier;
+        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
-        _localAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:localAccountId
-                                                                  objectId:localAccountId
-                                                                  tenantId:tenantId];
-
-        _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId];
+        if (tenantProfiles.count > 0)
+        {
+            self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+        }
     }
 
     return self;
 }
 
-- (id)initWithMSIDAccount:(MSIDAccount *)account
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account
+                createTenantProfile:(BOOL)createTenantProfile
 {
+    NSArray *tenantProfiles = nil;
+    if (createTenantProfile)
+    {
+        NSDictionary *allClaims = account.idTokenClaims.jsonDictionary;
+        
+        MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:account.localAccountId
+                                                                                tenantId:account.realm
+                                                                             environment:account.environment
+                                                                     isHomeTenantProfile:account.isHomeTenantAccount
+                                                                                  claims:allClaims];
+        if (tenantProfile)
+        {
+            tenantProfiles = @[tenantProfile];
+        }
+    }
+    
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:account.accountIdentifier.homeAccountId
+                                                                           objectId:account.accountIdentifier.uid
+                                                                           tenantId:account.accountIdentifier.utid];
+    
     return [self initWithUsername:account.username
-                             name:account.name
-                    homeAccountId:account.accountIdentifier.homeAccountId
-                   localAccountId:account.localAccountId
-                      environment:account.authority.environment
-                         tenantId:account.authority.url.msidTenant];
+                    homeAccountId:homeAccountId
+                      environment:account.environment
+                   tenantProfiles:tenantProfiles];
+}
+
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider
+{
+    MSIDAccountIdentifier *accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:externalAccount.identifier];
+    MSALAccountId *homeAccountId = [[MSALAccountId alloc] initWithAccountIdentifier:accountIdentifier.homeAccountId
+                                                                           objectId:accountIdentifier.uid
+                                                                           tenantId:accountIdentifier.utid];
+    
+    NSError *tenantProfileError = nil;
+    MSALTenantProfile *tenantProfile = [oauthProvider tenantProfileWithClaims:externalAccount.accountClaims
+                                                                homeAccountId:homeAccountId
+                                                                  environment:externalAccount.environment
+                                                                        error:&tenantProfileError];
+    
+    if (tenantProfileError)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Failed to create tenant profile with error code %ld, domain %@", (long)tenantProfileError.code, tenantProfileError.domain);
+    }
+    
+    NSArray *tenantProfiles = tenantProfile ? @[tenantProfile] : nil;
+    
+    MSALAccount *account = [self initWithUsername:externalAccount.username
+                                    homeAccountId:homeAccountId
+                                      environment:externalAccount.environment
+                                   tenantProfiles:tenantProfiles];
+    
+    return account;
 }
 
 #pragma mark - NSCopying
 
-- (id)copyWithZone:(NSZone *)zone
+- (instancetype)copyWithZone:(NSZone *)zone
 {
-    MSALAccount *account = [[MSALAccount allocWithZone:zone] init];
-    account.username = [self.username copyWithZone:zone];
-    account.name = [self.name copyWithZone:zone];
-    account.homeAccountId = [self.homeAccountId copyWithZone:zone];
-    account.localAccountId = [self.localAccountId copyWithZone:zone];
-    account.environment = [self.environment copyWithZone:zone];
+    NSString *username = [self.username copyWithZone:zone];
+    MSALAccountId *homeAccountId = [self.homeAccountId copyWithZone:zone];
+    NSString *environment = [self.environment copyWithZone:zone];
+    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
+    
+    MSALAccount *account = [[MSALAccount allocWithZone:zone] initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
+    account.accountClaims = [self.accountClaims copyWithZone:zone];
     return account;
 }
 
@@ -124,44 +156,8 @@
         return NO;
     }
     
-    return [self isEqualToUser:(MSALAccount *)object];
+    return [self isEqualToAccount:(MSALAccount *)object];
 }
-
-/*
- TODO: this is correct implementation, but we can't use it until we agree on the public API changes
-- (NSUInteger)hash
-{
-    NSUInteger hash = 0;
-    hash = hash * 31 + self.username.hash;
-    hash = hash * 31 + self.name.hash;
-    hash = hash * 31 + self.homeAccountId.hash;
-    hash = hash * 31 + self.localAccountId.hash;
-    hash = hash * 31 + self.environment.hash;
-    hash = hash * 31 + self.tenantId.hash;
-    hash = hash * 31 + self.uid.hash;
-    hash = hash * 31 + self.utid.hash;
-    return hash;
-}
-
-- (BOOL)isEqualToUser:(MSALAccount *)user
-{
-    if (!user) return NO;
-    
-    BOOL result = YES;
-    result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
-    result &= (!self.name && !user.name) || [self.name isEqualToString:user.name];
-    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId isEqualToString:user.homeAccountId];
-    result &= (!self.localAccountId && !user.localAccountId) || [self.localAccountId isEqualToString:user.localAccountId];
-    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-    result &= (!self.tenantId && !user.tenantId) || [self.tenantId isEqualToString:user.tenantId];
-    result &= (!self.uid && !user.uid) || [self.uid isEqualToString:user.uid];
-    result &= (!self.utid && !user.utid) || [self.utid isEqualToString:user.utid];
-    
-    return result;
-}*/
-
-/* TODO: this is a temporary solution that maintains previous MSAL behavior of having one account per environment.
-   This is a temporary solution to test the overall app and will be removed once we agree on the public API changes. */
 
 - (NSUInteger)hash
 {
@@ -172,7 +168,7 @@
     return hash;
 }
 
-- (BOOL)isEqualToUser:(MSALAccount *)user
+- (BOOL)isEqualToAccount:(MSALAccount *)user
 {
     if (!user) return NO;
 
@@ -180,8 +176,28 @@
     result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
     result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
-
     return result;
+}
+
+#pragma mark - Tenant profiles
+
+- (NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    return self.mTenantProfiles;
+}
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+{
+    if (tenantProfiles.count <= 0) return;
+    
+    if (self.mTenantProfiles)
+    {
+        [self.mTenantProfiles addObjectsFromArray:tenantProfiles];
+    }
+    else
+    {
+        self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+    }
 }
 
 @end

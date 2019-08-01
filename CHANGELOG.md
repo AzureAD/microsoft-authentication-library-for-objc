@@ -1,3 +1,10 @@
+## [0.5.0] - 2019-07-30
+### Updated
+- Added initial macOS support
+- Better resolution of authorities for silent token acquisition
+- Added backward compatibility for legacy account storages
+- Added backward compatibility for ADAL macOS cache
+
 ## [0.4.3] - 2019-05-24
 ### Updated
 - Updated to newer v2 broker protocol version
@@ -15,6 +22,16 @@
 - Updated MSAL Public API surface to be more extensible and intuitive
 - Added support for custom B2C domains
 - Improved MSAL error handling
+
+## [0.3.4] - 2019-03-07
+### Fixed
+- Improve logging for token removal scenarios
+- Use ASCII for PKCE code challenge
+- Don't return Access token if ID token/Account are missing
+
+## [0.3.3] - 2019-05-29
+### Updated
+- Ignore cached fields in JSON if they contains "null"
 
 ## [0.3.2] - 2019-05-24
 ### Updated

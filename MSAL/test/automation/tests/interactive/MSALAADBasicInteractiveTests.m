@@ -98,8 +98,10 @@
     // 5. Run silent with invalid scopes
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"unsupported"];
     NSDictionary *config = [self configWithTestRequest:request];
-    [self acquireTokenSilent:config];
-    [self assertInternalErrorCode:MSALInternalErrorInvalidScope];
+    [self acquireToken:config];
+    [self acceptAuthSessionDialogIfNecessary:request];
+    [self aadEnterPassword];
+    [self assertInternalErrorCode:MSALInternalErrorInvalidClient];
     [self closeResultView];
 
     // 6. Run silent with not consented scopes
@@ -316,6 +318,8 @@
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
+    
+    [self acceptSpeedBump];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];

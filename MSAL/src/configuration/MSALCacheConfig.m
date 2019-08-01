@@ -30,7 +30,15 @@
 
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
+#else
+#import "MSIDMacKeychainTokenCache.h"
 #endif
+
+@interface MSALCacheConfig()
+
+@property (nonatomic, readwrite) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
+
+@end
 
 @implementation MSALCacheConfig
   
@@ -39,9 +47,7 @@
     self = [super init];
     if (self)
     {
-#if TARGET_OS_IPHONE
         _keychainSharingGroup = keychainSharingGroup;
-#endif
     }
     return self;
 }
@@ -51,17 +57,13 @@
 #if TARGET_OS_IPHONE
     return MSIDKeychainTokenCache.defaultKeychainGroup;
 #else
-    return nil;
+    return MSIDMacKeychainTokenCache.defaultKeychainGroup;
 #endif
 }
 
 + (instancetype)defaultConfig
 {
-#if TARGET_OS_IPHONE
-    return [[self.class alloc] initWithKeychainSharingGroup:MSIDKeychainTokenCache.defaultKeychainGroup];
-#else
-    return [[self.class alloc] initWithKeychainSharingGroup:nil];
-#endif
+    return [[self.class alloc] initWithKeychainSharingGroup:self.defaultKeychainSharingGroup];
 }
 
 #pragma mark - NSCopying
@@ -69,7 +71,25 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     NSString *keychainSharingGroup = [_keychainSharingGroup copyWithZone:zone];
-    return [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+    MSALCacheConfig *copiedConfig = [[self.class alloc] initWithKeychainSharingGroup:keychainSharingGroup];
+    copiedConfig->_externalAccountProviders = [[NSArray alloc] initWithArray:_externalAccountProviders copyItems:NO];
+#if !TARGET_OS_IPHONE
+    copiedConfig->_serializedADALCache = _serializedADALCache;
+#endif
+    return copiedConfig;
+}
+
+- (void)addExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider
+{
+    if (!externalAccountProvider)
+    {
+        return;
+    }
+    
+    NSMutableArray *newExternalProviders = [NSMutableArray new];
+    [newExternalProviders addObjectsFromArray:self.externalAccountProviders];
+    [newExternalProviders addObject:externalAccountProvider];
+    self.externalAccountProviders = newExternalProviders;
 }
 
 @end

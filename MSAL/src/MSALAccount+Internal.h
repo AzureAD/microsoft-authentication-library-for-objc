@@ -26,53 +26,41 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccount.h"
+#import "MSALTenantProfile+Internal.h"
 
 @class MSIDAccountIdentifier;
 @class MSIDAADV2IdTokenClaims;
 @class MSIDClientInfo;
 @class MSIDAccount;
 @class MSALAccountId;
+@class MSIDIdTokenClaims;
+@protocol MSALAccount;
+@class MSALOauth2Provider;
 
 @interface MSALAccount ()
 
+@property (nonatomic) MSALAccountId *homeAccountId;
+@property (nonatomic) NSString *username;
+@property (nonatomic) NSString *environment;
+@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+@property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
+@property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;
 
-/* TODO: These properties will be public once we agree on having an account per tenant.
-   For now, will keep them here.
- */
-
-/*!
- Account identifier for the target tenant
- */
-@property (nonatomic) MSALAccountId *localAccountId;
-
-/*!
- The displayable name of the account. Can be nil if not returned by the service.
- */
-@property (nonatomic) NSString *name;
-
-
-/*!
- Initialize an MSALAccount with given information
-
- @param  username            The username value in UserPrincipleName(UPN) format
- @param  name                The given name of the user
- @param  homeAccountId       Unique identifier of the account in the home directory
- @param  localAccountId      Unique identifier of the account in the signed in directory.
- @param  environment         Host part of the authority string
- @param  tenantId            An identifier for the tenant that the account was acquired from
- */
-- (id)initWithUsername:(NSString *)username
-                  name:(NSString *)name
-         homeAccountId:(NSString *)homeAccountId
-        localAccountId:(NSString *)localAccountId
-           environment:(NSString *)environment
-              tenantId:(NSString *)tenantId;
+- (instancetype)initWithUsername:(NSString *)username
+                   homeAccountId:(MSALAccountId *)homeAccountId
+                     environment:(NSString *)environment
+                  tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 /*!
  Initialize an MSALAccount with MSIDAccount
  @param  account             MSID account
+ @param  createTenantProfile Whether to create tenant profile based on the info of MSID account
  */
-- (id)initWithMSIDAccount:(MSIDAccount *)account;
+- (instancetype)initWithMSIDAccount:(MSIDAccount *)account createTenantProfile:(BOOL)createTenantProfile;
+- (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
+                             oauth2Provider:(MSALOauth2Provider *)oauthProvider;
+
+- (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles;
 
 @end

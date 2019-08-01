@@ -34,6 +34,7 @@
 #import "MSIDAutomationActionManager.h"
 #import "MSIDAutomationAccountsResult.h"
 #import "MSALAccount+Internal.h"
+#import "MSALTenantProfile.h"
 
 @implementation MSALAutomationReadAccountsAction
 
@@ -81,14 +82,14 @@
     for (MSALAccount *account in accounts)
     {
         MSIDAutomationUserInformation *userInfo = [MSIDAutomationUserInformation new];
-        userInfo.objectId = account.localAccountId.objectId;
-        userInfo.tenantId = account.localAccountId.tenantId;
         userInfo.username = account.username;
         userInfo.homeAccountId = account.homeAccountId.identifier;
-        userInfo.localAccountId = account.localAccountId.identifier;
+        userInfo.localAccountId = account.tenantProfiles[0].identifier;
         userInfo.homeObjectId = account.homeAccountId.objectId;
         userInfo.homeTenantId = account.homeAccountId.tenantId;
         userInfo.environment = account.environment;
+        userInfo.objectId = account.tenantProfiles[0].claims[@"oid"];
+        userInfo.tenantId = account.tenantProfiles[0].tenantId;
         [items addObject:userInfo];
     }
 

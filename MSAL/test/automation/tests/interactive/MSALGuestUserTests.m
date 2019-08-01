@@ -171,6 +171,11 @@
     [self enterGuestUsername];
     [self enterGuestPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
+    
+    if (!request.usesEmbeddedWebView)
+    {
+        [self acceptSpeedBump];
+    }
 
     NSString *homeAccountId = [self runSharedResultAssertionWithTestRequest:request];
 

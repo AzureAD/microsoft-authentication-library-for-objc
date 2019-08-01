@@ -116,6 +116,10 @@
     {
         promptType = MSALPromptTypePromptIfNecessary;
     }
+    else if ([testRequest.promptBehavior isEqualToString:@"select_account"])
+    {
+        promptType = MSALPromptTypeSelectAccount;
+    }
 
     MSALAuthority *acquireTokenAuthority = nil;
 

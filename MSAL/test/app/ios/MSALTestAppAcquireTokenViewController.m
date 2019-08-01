@@ -43,8 +43,7 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALSilentTokenParameters.h"
 #import "MSALAuthority.h"
-#import <MSAL/MSALGlobalConfig.h>
-#import <MSAL/MSALLoggerConfig.h>
+#import <MSAL/MSAL.h>
 #import "MSALHTTPConfig.h"
 
 #define TEST_EMBEDDED_WEBVIEW_TYPE_INDEX 0
@@ -457,7 +456,7 @@
 - (void)updateResultView:(MSALResult *)result
 {
     NSString *resultText = [NSString stringWithFormat:@"{\n\taccessToken = %@\n\texpiresOn = %@\n\ttenantId = %@\n\tuser = %@\n\tscopes = %@\n\tauthority = %@\n}",
-                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantId, result.account, result.scopes, result.authority];
+                            [result.accessToken msidTokenHash], result.expiresOn, result.tenantProfile.tenantId, result.account, result.scopes, result.authority];
     
     [_resultView setText:resultText];
     
@@ -483,7 +482,7 @@
     (void)sender;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
@@ -586,7 +585,7 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
@@ -655,7 +654,7 @@
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
     
     // Delete accounts.
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];
@@ -784,7 +783,7 @@
         return;
     }
     
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     __auto_type authority = [settings authority];

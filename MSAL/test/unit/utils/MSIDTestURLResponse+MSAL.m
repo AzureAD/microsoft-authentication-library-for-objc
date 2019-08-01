@@ -146,6 +146,7 @@
 + (MSIDTestURLResponse *)rtResponseForScopes:(NSOrderedSet<NSString *> *)scopes
                                    authority:(NSString *)authority
                                     tenantId:(NSString *)tid
+                                         uid:(NSString *)uid
                                         user:(MSALAccount *)user
                                       claims:(NSString *)claims
 {
@@ -170,9 +171,10 @@
                                              @"refresh_token" : @"i am a refresh token",
                                              @"id_token" : [MSIDTestIdTokenUtil idTokenWithName:@"Test name"
                                                                               preferredUsername:user.username
-                                                                                       tenantId:tid ? tid : user.homeAccountId.objectId],
+                                                                                            oid:nil
+                                                                                       tenantId:tid],
                                              @"id_token_expires_in" : @"1200",
-                                             @"client_info" : [@{ @"uid" : user.homeAccountId.objectId, @"utid" : user.homeAccountId.tenantId} msidBase64UrlJson],
+                                             @"client_info" : [@{ @"uid" : uid, @"utid" : tid} msidBase64UrlJson],
                                              @"scope": [scopes msidToString]
                                              } ];
     

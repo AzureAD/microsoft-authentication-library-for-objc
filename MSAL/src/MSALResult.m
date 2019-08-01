@@ -36,10 +36,12 @@
 #import "MSALAuthority.h"
 #import "MSIDAuthority.h"
 #import "MSIDAccountIdentifier.h"
-#import "MSALAuthorityFactory.h"
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
 #import "MSIDAADV2IdTokenClaims.h"
+#import "MSALAccountsProvider.h"
+#import "MSALTenantProfile.h"
+#import "MSALTenantProfile+Internal.h"
 
 @implementation MSALResult
 
@@ -51,11 +53,13 @@
                             expiresOn:(NSDate *)expiresOn
               isExtendedLifetimeToken:(BOOL)isExtendedLifetimeToken
                              tenantId:(NSString *)tenantId
+                        tenantProfile:(MSALTenantProfile *)tenantProfile
                               account:(MSALAccount *)account
                               idToken:(NSString *)idToken
                              uniqueId:(NSString *)uniqueId
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
+                        correlationId:(NSUUID *)correlationId
 {
     MSALResult *result = [MSALResult new];
     
@@ -63,70 +67,64 @@
     result->_expiresOn = expiresOn;
     result->_extendedLifeTimeToken = isExtendedLifetimeToken;
     result->_tenantId = tenantId;
+    result->_tenantProfile = tenantProfile;
     result->_account = account;
     result->_idToken = idToken;
     result->_uniqueId = uniqueId;
     result->_scopes = scopes;
     result->_authority = authority;
+    result->_correlationId = correlationId;
     
     return result;
 }
 
-+ (MSALResult *)resultWithTokenResult:(MSIDTokenResult *)tokenResult
-                                error:(NSError **)error
++ (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
+                                authority:(MSALAuthority *)authority
+                                    error:(NSError **)error
 {
     if (!tokenResult)
     {
         MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil token result provided", nil);
         return nil;
     }
-
-    MSIDAccount *resultAccount = tokenResult.account;
-    NSError *claimsError = nil;
-    MSIDAADV2IdTokenClaims *claims = [[MSIDAADV2IdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:&claimsError];
+    
+    MSIDIdTokenClaims *claims = [[MSIDIdTokenClaims alloc] initWithRawIdToken:tokenResult.rawIdToken error:error];
     
     if (!claims)
     {
-        if (error) *error = claimsError;
-        
         return nil;
     }
     
-    NSString *tenantId = claims.realm;
-
-    MSALAccount *account = [[MSALAccount alloc] initWithUsername:resultAccount.username
-                                                            name:resultAccount.name
-                                                   homeAccountId:resultAccount.accountIdentifier.homeAccountId
-                                                  localAccountId:resultAccount.localAccountId
-                                                     environment:tokenResult.authority.environment
-                                                        tenantId:tenantId];
-
-    NSError *authorityError = nil;
-    MSALAuthority *authority = [MSALAuthorityFactory authorityFromUrl:tokenResult.authority.url
-                                                       validateFormat:NO
-                                                            rawTenant:tenantId
-                                                              context:nil
-                                                                error:&authorityError];
-
     if (!authority)
     {
-        MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority");
-        MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"Invalid authority, error %@", authorityError);
-
-        if (error) *error = authorityError;
-
+        MSIDFillAndLogError(error, MSIDErrorInternal, @"Nil authority in the result provided", nil);
         return nil;
     }
-
+    
+    MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:tokenResult.account.localAccountId
+                                                                            tenantId:tokenResult.account.realm
+                                                                         environment:tokenResult.account.environment
+                                                                 isHomeTenantProfile:tokenResult.account.isHomeTenantAccount
+                                                                              claims:claims.jsonDictionary];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:tokenResult.account createTenantProfile:NO];
+    
+    if (tokenResult.account.isHomeTenantAccount)
+    {
+        account.accountClaims = claims.jsonDictionary;
+    }
+    
     return [self resultWithAccessToken:tokenResult.accessToken.accessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
-                              tenantId:tenantId
+                              tenantId:tenantProfile.tenantId
+                         tenantProfile:tenantProfile
                                account:account
                                idToken:tokenResult.rawIdToken
-                              uniqueId:resultAccount.localAccountId
+                              uniqueId:tenantProfile.identifier
                                 scopes:[tokenResult.accessToken.scopes array]
-                             authority:authority];
+                             authority:authority
+                         correlationId:tokenResult.correlationId];
 }
 
 @end

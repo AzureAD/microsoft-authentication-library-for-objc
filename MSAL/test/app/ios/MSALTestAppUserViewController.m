@@ -29,7 +29,6 @@
 #import "MSALPublicClientApplication.h"
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
-#import "MSIDAuthorityFactory.h"
 #import "MSALAccount.h"
 
 @interface MSALTestAppUserViewController ()
@@ -67,7 +66,7 @@
     _accounts = nil;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
-    NSDictionary *currentProfile = [settings profile];
+    NSDictionary *currentProfile = [MSALTestAppSettings currentProfile];
     NSString *clientId = [currentProfile objectForKey:MSAL_APP_CLIENT_ID];
     NSString *redirectUri = [currentProfile objectForKey:MSAL_APP_REDIRECT_URI];
     MSALAuthority *authority = [settings authority];
@@ -76,12 +75,12 @@
     MSALPublicClientApplicationConfig *pcaConfig = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
-
+    
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
     if (!application)
     {
-        MSID_LOG_ERROR(nil, @"Failed to create public client application: %@", error);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create public client application: %@", error);
         return;
     }
 
@@ -135,11 +134,11 @@
         return 0;
     }
     
-    NSString *currentAccountId = currentAccount.homeAccountId.identifier;
+    NSString *currentAccountId = currentAccount.identifier;
     
     for (NSInteger i = 0; i < _accounts.count; i++)
     {
-        if ([currentAccountId isEqualToString:_accounts[i].homeAccountId.identifier])
+        if ([currentAccountId isEqualToString:_accounts[i].identifier])
         {
             return i + 1;
         }

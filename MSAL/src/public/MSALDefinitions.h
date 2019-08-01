@@ -97,7 +97,7 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
      If multiple users are signed in, select account experience will be presented.
      */
     MSALPromptTypePromptIfNecessary,
-    MSALPromptTypeDefault = MSALPromptTypeSelectAccount,
+    MSALPromptTypeDefault = MSALPromptTypePromptIfNecessary,
 };
 
 typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
@@ -110,12 +110,18 @@ typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable a
  @param  level           The level of the log message
  @param  message         The message being logged
  @param  containsPII     If the message might contain Personally Identifiable Information (PII)
- this will be true. Log messages possibly containing PII will not be
- sent to the callback unless PIllLoggingEnabled is set to YES on the
- logger.
+                         this will be true. Log messages possibly containing PII will not be
+                         sent to the callback unless PIllLoggingEnabled is set to YES on the
+                         logger.
  
  */
 typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
 
+/*!
+ MSAL telemetry callback.
+ 
+ @param event Aggregated telemetry event.
+ */
+typedef void(^MSALTelemetryCallback)(NSDictionary<NSString *, NSString *> * _Nonnull event);
 
 #endif /* MSALConstants_h */

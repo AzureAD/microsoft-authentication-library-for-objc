@@ -27,8 +27,11 @@
 
 #import "MSIDError.h"
 
+@class MSALOauth2Provider;
+
 @interface MSALErrorConverter : NSObject
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError;
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError classifyErrors:(BOOL)shouldClassifyErrors msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider;
 
 @end

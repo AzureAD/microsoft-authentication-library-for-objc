@@ -28,6 +28,7 @@
 #import "MSALErrorConverter+Internal.h"
 #import "MSALResult+Internal.h"
 #import "MSALError.h"
+#import "MSALOauth2Provider.h"
 
 static NSDictionary *s_errorDomainMapping;
 static NSDictionary *s_errorCodeMapping;
@@ -124,6 +125,13 @@ static NSSet *s_recoverableErrorCode;
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
 {
+    return [self msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:nil];
+}
+
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+                     classifyErrors:(BOOL)shouldClassifyErrors
+                 msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
+{
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
                 errorDescription:msidError.userInfo[MSIDErrorDescriptionKey]
@@ -131,7 +139,9 @@ static NSSet *s_recoverableErrorCode;
                         subError:msidError.userInfo[MSIDOAuthSubErrorKey]
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
                    correlationId:msidError.userInfo[MSIDCorrelationIdKey]
-                        userInfo:msidError.userInfo];
+                        userInfo:msidError.userInfo
+                  classifyErrors:shouldClassifyErrors
+              msalOauth2Provider:oauth2Provider];
 }
 
 + (NSError *)errorWithDomain:(NSString *)domain
@@ -142,6 +152,8 @@ static NSSet *s_recoverableErrorCode;
              underlyingError:(NSError *)underlyingError
                correlationId:(NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
+              classifyErrors:(BOOL)shouldClassifyErrors
+          msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
     if ([NSString msidIsStringNilOrBlank:domain])
     {
@@ -155,20 +167,26 @@ static NSSet *s_recoverableErrorCode;
     // errorCode mapping is needed only if domain is mapped to MSALErrorDomain
     NSNumber *mappedCode = nil;
     NSNumber *internalCode = nil;
-    if (mappedDomain == MSALErrorDomain)
+    if ([mappedDomain isEqualToString:MSALErrorDomain])
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (mappedCode == nil)
         {
-            MSID_LOG_WARN(nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
         }
-        
-        if (![s_recoverableErrorCode containsObject:mappedCode])
-        {
-            internalCode = mappedCode;
-            mappedCode = @(MSALErrorInternal);
-        }
+    }
+    else if ([domain isEqualToString:MSALErrorDomain])
+    {
+        mappedCode = @(code);
+    }
+    
+    if (shouldClassifyErrors && mappedCode != nil && ![s_recoverableErrorCode containsObject:mappedCode])
+    {
+        // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
+        // to avoid the case when both mapped and internal code are MSALErrorInternal.
+        internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
+        mappedCode = @(MSALErrorInternal);
     }
     
     NSMutableDictionary *msalUserInfo = [NSMutableDictionary new];
@@ -185,15 +203,14 @@ static NSSet *s_recoverableErrorCode;
     msalUserInfo[NSUnderlyingErrorKey] = underlyingError;
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
-    if (userInfo[MSIDInvalidTokenResultKey])
+    if (userInfo[MSIDInvalidTokenResultKey] && oauth2Provider)
     {
         NSError *resultError = nil;
-        MSALResult *msalResult = [MSALResult resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
+        MSALResult *msalResult = [oauth2Provider resultWithTokenResult:userInfo[MSIDInvalidTokenResultKey] error:&resultError];
 
         if (!msalResult)
         {
-            MSID_LOG_NO_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %ld, %@", (long)resultError.code, resultError.domain);
-            MSID_LOG_PII(MSIDLogLevelWarning, nil, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", resultError);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"MSALErrorConverter could not convert MSIDTokenResult to MSALResult %@", MSID_PII_LOG_MASKABLE(resultError));
         }
         else
         {

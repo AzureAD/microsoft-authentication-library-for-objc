@@ -1,4 +1,4 @@
-Microsoft Authentication Library Preview for iOS
+Microsoft Authentication Library Preview for iOS and macOS
 =====================================
 
 | [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [Support](README.md#community-help-and-support) 
@@ -6,7 +6,7 @@ Microsoft Authentication Library Preview for iOS
 
 The MSAL library preview gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
-Note that for the preview, **only iOS is supported.** macOS support will be provided in a future realse.  Need it sooner? Let us know! 
+Note that throughout the preview, only iOS has been supported. Starting with **MSAL release 0.5.0**, MSAL now supports macOS. 
 
 ## Important Note about the MSAL Preview
 
@@ -34,7 +34,7 @@ These libraries are suitable to use in a production environment. We provide the 
                 let accessToken = authResult.accessToken
                 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId?.identifier
+                let accountIdentifier = authResult.account.identifier
             })
         }
         else {
@@ -58,7 +58,7 @@ These libraries are suitable to use in a production environment. We provide the 
         {
             // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *accountIdentifier = result.account.homeAccountId.identifier;
+            NSString *accountIdentifier = result.account.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -99,7 +99,13 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 ### Adding MSAL to your project
 1. Register your app in the [Azure portal](https://aka.ms/MobileAppReg)
-2. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+2. Make sure you register a redirect URI for your application. It should be in the following format: 
+
+ `msauth.[BUNDLE_ID]://auth`
+
+####iOS only steps:
+
+1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -111,7 +117,8 @@ You can also use Git Submodule or check out the latest release and use as framew
     </dict>
 </array>
 ```
-3. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+
 ```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
@@ -121,11 +128,11 @@ You can also use Git Submodule or check out the latest release and use as framew
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
-4. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
+3. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
 
 ![](Images/keychain_example.png)
 
-5. To handle a callback, add the following to `appDelegate`:
+4. To handle a callback, add the following to `appDelegate`:
 
 Swift
 ```swift
@@ -150,6 +157,10 @@ Objective-C
 }
 ```
 
+#### macOS only steps:
+
+1. Make sure your application is signed with a valid development certificate. While MSAL will still work in the unsigned mode, it will behave differently around cache persistence.
+
 ## Using MSAL
 
 ### Creating an Application Object
@@ -168,7 +179,7 @@ NSError *msalError;
 MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"<your-client-id-here>"];
 MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
     
-```                                                
+```
 ### Acquiring Your First Token
 Swift
 ```swift
@@ -184,7 +195,7 @@ Swift
                 let accessToken = authResult.accessToken
                 
                 // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.homeAccountId?.identifier
+                let accountIdentifier = authResult.account.identifier
             })
 ```
 Objective-C
@@ -195,7 +206,7 @@ Objective-C
         {
             // You'll want to get the account identifier to retrieve and reuse the account
             // for later acquireToken calls
-            NSString *accountIdentifier = result.account.homeAccountId.identifier;
+            NSString *accountIdentifier = result.account.identifier;
             
             NSString *accessToken = result.accessToken;
         }
@@ -210,7 +221,7 @@ Objective-C
 ### Silently Acquiring an Updated Token
 Swift
 ```swift
-guard let account = try? application.account(forHomeAccountId: accountIdentifier) else { return }
+guard let account = try? application.account(forIdentifier: accountIdentifier) else { return }
         let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
         application.acquireTokenSilent(with: silentParameters) { (result, error) in
             
@@ -234,7 +245,7 @@ guard let account = try? application.account(forHomeAccountId: accountIdentifier
 Objective-C
 ```objective-c
     NSError *error = nil;
-    MSALAccount *account = [application accountForHomeAccountId:accountIdentifier error:&error];
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
     if (!account)
     {
         // handle error

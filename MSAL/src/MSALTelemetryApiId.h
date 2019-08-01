@@ -36,6 +36,8 @@ typedef NS_ENUM(NSInteger, MSALTelemetryApiId)
     MSALTelemetryApiIdAcquireSilentWithUser = 30,
     MSALTelemetryApiIdAcquireSilentWithUserAndAuthority = 31,
     MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId = 32,
-    MSALTelemetryApiIdAcquireSilentWithTokenParameters = 33
+    MSALTelemetryApiIdAcquireSilentWithUserAuthorityClaimsForceRefreshAndCorrelationId = 33,
+    MSALTelemetryApiIdAcquireSilentWithTokenParameters = 34
+    
     
 };

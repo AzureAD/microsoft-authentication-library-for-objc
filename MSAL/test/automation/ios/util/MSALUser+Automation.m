@@ -29,6 +29,7 @@
 #import "MSIDClientInfo.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
+#import "MSALTenantProfile.h"
 
 @implementation MSALAccount (Automation)
 
@@ -36,9 +37,8 @@
 {
     NSMutableDictionary *resultDict = [NSMutableDictionary dictionary];
     [resultDict setValue:self.username forKey:@"username"];
-    [resultDict setValue:self.name forKey:@"name"];
     [resultDict setValue:self.homeAccountId.identifier forKey:@"home_account_id"];
-    [resultDict setValue:self.localAccountId.identifier forKey:@"local_account_id"];
+    [resultDict setValue:self.tenantProfiles[0].identifier forKey:@"local_account_id"];
     [resultDict setValue:self.homeAccountId.objectId forKey:@"homeAccountId.objectId"];
     [resultDict setValue:self.homeAccountId.tenantId forKey:@"homeAccountId.tenantId"];
     [resultDict setValue:self.environment forKey:@"environment"];
