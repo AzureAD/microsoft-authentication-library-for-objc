@@ -935,7 +935,7 @@
                                            extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                        supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
+                                               minBrokerVersion:MSIDBrokerVersionTypeWithV2Support
                                                     requestType:interactiveRequestType
                                                           error:&msidError];
     
