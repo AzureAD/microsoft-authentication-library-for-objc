@@ -253,7 +253,8 @@
 #else
     
     id<MSIDExtendedTokenCacheDataSource> dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                                                   trustedApplications:config.cacheConfig.trustedApplications];
+                                                                                   trustedApplications:config.cacheConfig.trustedApplications
+                                                                                                 error:error];
     if (!dataSource)
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed");
