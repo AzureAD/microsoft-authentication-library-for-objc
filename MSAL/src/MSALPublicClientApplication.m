@@ -244,7 +244,14 @@
     
 #if TARGET_OS_IPHONE
     // Optional Paramater
-    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup];
+    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&msidError];
+    
+    if (!dataSource)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize iOS keychain cache.");
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
     
     MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
     NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
@@ -257,14 +264,8 @@
                                                                                                  error:error];
     if (!dataSource)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed");
-            
-        if (error)
-        {
-            NSError *devError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed", nil, nil, nil, nil, nil);
-            *error = [MSALErrorConverter msalErrorFromMsidError:devError];
-        }
-            
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed.");
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
     
