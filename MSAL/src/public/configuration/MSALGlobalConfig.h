@@ -56,6 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
  Broker is enabled by default.
  */
 @property (class) MSALBrokeredAvailability brokerAvailability;
+@property (class) MSALBrokerProtocolType brokerProtocolType;
 #endif
 
 - (nonnull instancetype)init NS_UNAVAILABLE;

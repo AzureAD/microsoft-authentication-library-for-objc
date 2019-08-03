@@ -915,6 +915,7 @@
     NSError *msidError = nil;
     
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
+    MSIDBrokerVersionType brokerVersionType = MSIDBrokerVersionTypeDefault;
     
 #if TARGET_OS_IPHONE
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
@@ -925,6 +926,12 @@
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
+    
+    if (MSALGlobalConfig.brokerProtocolType == MSALBrokerProtocolTypeCustomSchemes)
+    {
+        brokerVersionType = MSIDBrokerVersionTypeWithV2Support;
+    }
+    
 #endif
     MSIDInteractiveRequestParameters *msidParams =
     [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
@@ -935,7 +942,7 @@
                                            extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                               minBrokerVersion:MSIDBrokerVersionTypeWithV2Support
+                                           allowedBrokerVersion:brokerVersionType
                                                     requestType:interactiveRequestType
                                                           error:&msidError];
     

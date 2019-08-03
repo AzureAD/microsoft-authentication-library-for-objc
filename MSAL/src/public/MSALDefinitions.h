@@ -74,6 +74,21 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
     MSALBrokeredAvailabilityNone
 };
 
+typedef NS_ENUM(NSInteger, MSALBrokerProtocolType)
+{
+    // Invoke broker through a universal link
+    // This is a default option and will work reliably for most cases
+    // This is the default option
+    MSALBrokerProtocolTypeUniversalLinks,
+    
+    // Invoke broker through custom scheme
+    // This option can only be used if application receives "UIApplicationLaunchOptionsSourceApplicationKey" in the AppDelegate callback
+    // On pre-iOS 13 devices, application always receives this in the AppDelegate callback
+    // On iOS 13+ devices, application will only receive this information if it's signed by same Team as Microsoft Authenticator app (Microsoft own applications)
+    // Therefore, this option should only be used on older iOS versions
+    MSALBrokerProtocolTypeCustomSchemes
+};
+
 
 typedef NS_ENUM(NSUInteger, MSALPromptType)
 {

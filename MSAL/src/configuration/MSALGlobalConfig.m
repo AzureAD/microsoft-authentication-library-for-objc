@@ -35,6 +35,7 @@
 #if TARGET_OS_IPHONE
 static MSALWebviewType s_webviewType = MSALWebviewTypeDefault;
 static MSALBrokeredAvailability s_brokerAvailability = MSALBrokeredAvailabilityAuto;
+static MSALBrokerProtocolType s_brokerProtocolType = MSALBrokerProtocolTypeUniversalLinks;
 #else
 static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #endif
@@ -61,6 +62,8 @@ static MSALWebviewType s_webviewType = MSALWebviewTypeWKWebView;
 #if TARGET_OS_IPHONE
 + (MSALBrokeredAvailability)brokerAvailability { return s_brokerAvailability; }
 + (void)setBrokerAvailability:(MSALBrokeredAvailability)brokerAvailability { s_brokerAvailability = brokerAvailability; }
++ (MSALBrokerProtocolType)brokerProtocolType { return s_brokerProtocolType; }
++ (void)setBrokerProtocolType:(MSALBrokerProtocolType)brokerProtocolType { s_brokerProtocolType = brokerProtocolType; }
 #endif
 + (MSALWebviewType)defaultWebviewType { return s_webviewType; }
 + (void)setDefaultWebviewType:(MSALWebviewType)defaultWebviewType { s_webviewType = defaultWebviewType; }
