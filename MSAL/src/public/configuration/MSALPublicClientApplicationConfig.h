@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL extendedLifetimeEnabled;
 
 /*! List of additional ESTS features that client handles. */
-@property (nullable) NSArray<NSString *> *clientApplicationCapabilities;
+@property (nonatomic, nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
 /*! When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
