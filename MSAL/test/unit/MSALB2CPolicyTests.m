@@ -49,6 +49,8 @@
 
 #import "MSALResult.h"
 #import "MSALAccount.h"
+#import "MSALInteractiveTokenParameters.h"
+#import "MSALWebviewParameters.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -56,6 +58,8 @@
 @interface MSALB2CPolicyTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
+@property (nonatomic) UIViewController *parentController;
+@property (nonatomic) UIWindow *window;
 
 @end
 
@@ -71,6 +75,12 @@
 
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
+    
+    self.parentController = [UIViewController new];
+    UIView *view = [UIView new];
+    self.window = [UIWindow new];
+    [view setValue:self.window forKey:@"window"];
+    [self.parentController setValue:view forKey:@"view"];
 }
 
 - (void)tearDown
@@ -144,9 +154,13 @@
     application.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.parentViewController = self.parentController;
 
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
-                       completionBlock:^(MSALResult *result, NSError *error)
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
@@ -164,16 +178,17 @@
     // Override oidc and token responses for the second policy
     [self setupURLSessionWithB2CAuthority:secondAuthority policy:@"b2c_2_policy"];
 
+    parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.parentViewController = self.parentController;
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.authority = secondAuthority;
+    
     // Use an authority with a different policy in the second acquiretoken call
     expectation = [self expectationWithDescription:@"Acquire Token."];
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
-                  extraScopesToConsent:nil
-                             loginHint:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:nil
-                             authority:secondAuthority
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error) {
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
+    {
 
                            XCTAssertNil(error);
                            XCTAssertNotNil(result);
