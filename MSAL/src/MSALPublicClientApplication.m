@@ -915,7 +915,7 @@
     NSError *msidError = nil;
     
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
-    MSIDBrokerVersionType brokerVersionType = MSIDBrokerVersionTypeDefault;
+    MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeV2CustomScheme;
     
 #if TARGET_OS_IPHONE
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
@@ -927,11 +927,11 @@
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
     
-    if (MSALGlobalConfig.brokerProtocolType == MSALBrokerProtocolTypeCustomSchemes)
+    if ([self.internalConfig.redirectUri hasPrefix:@"https"])
     {
-        brokerVersionType = MSIDBrokerVersionTypeWithV2Support;
+        brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
     }
-    
+
 #endif
     MSIDInteractiveRequestParameters *msidParams =
     [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
@@ -942,7 +942,8 @@
                                            extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                           allowedBrokerVersion:brokerVersionType
+                                             requiredBrokerType:MSIDRequiredBrokerTypeDefault
+                                                 brokerProtocol:brokerProtocol
                                                     requestType:interactiveRequestType
                                                           error:&msidError];
     
