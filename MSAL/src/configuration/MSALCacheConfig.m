@@ -93,6 +93,7 @@
     self.externalAccountProviders = newExternalProviders;
 }
 
+#if !TARGET_OS_IPHONE
 /*
  This code will return nil if any of the passed in app paths is invalid.
  */
@@ -141,5 +142,7 @@
     
     return [trustedApps count] ? trustedApps : nil;
 }
+
+#endif
 
 @end
