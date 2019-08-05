@@ -248,7 +248,6 @@
     
     if (!dataSource)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize iOS keychain cache.");
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
@@ -261,10 +260,9 @@
     
     id<MSIDExtendedTokenCacheDataSource> dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
                                                                                    trustedApplications:config.cacheConfig.trustedApplications
-                                                                                                 error:error];
+                                                                                                 error:&msidError];
     if (!dataSource)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize macOS keychain cache. Please make sure the app you're running is properly signed.");
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
