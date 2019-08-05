@@ -62,6 +62,8 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
  created by the keychain cache.
+ Please use OSStatus SecTrustedApplicationCreateFromPath(const char *path, SecTrustedApplicationRef  _Nullable *app) to create a trusted application and add all such applications to NSArray.
+ https://developer.apple.com/documentation/security/1400622-sectrustedapplicationcreatefromp?language=objc
  */
 @property (readonly, nonnull) NSArray *trustedApplications;
 
