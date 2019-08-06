@@ -27,6 +27,7 @@
 
 
 #import "MSALCacheConfig.h"
+#import "MSALErrorConverter.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDKeychainTokenCache.h"
@@ -91,5 +92,57 @@
     [newExternalProviders addObject:externalAccountProvider];
     self.externalAccountProviders = newExternalProviders;
 }
+
+#if !TARGET_OS_IPHONE
+/*
+ This code will return nil if any of the passed in app paths is invalid.
+ */
+- (NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    NSMutableArray *trustedApps = [NSMutableArray new];
+    OSStatus status;
+    SecTrustedApplicationRef myself = nil;
+    status = SecTrustedApplicationCreateFromPath(nil, &myself);
+    if (status != errSecSuccess)
+    {
+        NSError *msidError;
+        NSString *errorMessage = [NSString stringWithFormat:@"Failed to create trusted application for current path (status: %d).", status];
+        MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, errorMessage, nil);
+        
+        if (error)
+        {
+            *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        }
+        
+        return nil;
+    }
+    
+    [trustedApps addObject:CFBridgingRelease(myself)];
+    
+    for (NSString *appPath in appPaths)
+    {
+        SecTrustedApplicationRef app = nil;
+        status = SecTrustedApplicationCreateFromPath([appPath UTF8String], &app);
+        if (status != errSecSuccess)
+        {
+            NSError *msidError;
+            NSString *errorMessage = [NSString stringWithFormat:@"Failed to create trusted application for path %@ (status: %d).", appPath, status];
+            MSIDFillAndLogError(&msidError, MSIDErrorInvalidDeveloperParameter, errorMessage, nil);
+            
+            if (error)
+            {
+                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            }
+            
+            return nil;
+        }
+        
+        [trustedApps addObject:CFBridgingRelease(app)];
+    }
+    
+    return [trustedApps count] ? trustedApps : nil;
+}
+
+#endif
 
 @end
