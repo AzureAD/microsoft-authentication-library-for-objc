@@ -1,3 +1,8 @@
+
+## [0.3.5] - 2019-08-07
+### Improved
+- Improved the code to allow easy extension for broker SDK
+
 ## [0.3.4] - 2019-03-07
 ### Fixed
 - Improve logging for token removal scenarios
