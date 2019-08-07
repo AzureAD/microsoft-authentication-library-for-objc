@@ -107,9 +107,12 @@
 		1E8B0031225E94A3006BB8BD /* MSALCacheViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8B002E225E81A2006BB8BD /* MSALCacheViewController.m */; };
 		1E8FC6A3221F370C00B4D4C1 /* MSALResultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */; };
 		1E8FC6A4221F370C00B4D4C1 /* MSALResultTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */; };
+		1E97064122FA409C00364AFA /* Credential.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E97064022FA409C00364AFA /* Credential.m */; };
+		1E97064322FA4F3700364AFA /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206371FC510B500755A51 /* Security.framework */; };
+		1E97064722FA502700364AFA /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
+		1E97064822FA502700364AFA /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1EB7ABD621262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */; };
 		1EC12C112255DB9200339572 /* MSALAcquireTokenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EC12C102255DB9200339572 /* MSALAcquireTokenViewController.m */; };
-		1EC12C3A2256BC6800339572 /* MSAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D65A6F501E3FD32D00C69FBA /* MSAL.framework */; };
 		1EDAE32C218A4FA0001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		1EDAE331218A4FA2001898E1 /* MSALAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 23A68A8A20F5508B0071E435 /* MSALAuthority_Internal.h */; };
 		231CE9DC1FEC682000E95D3E /* libIdentityTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206271FC50A4D00755A51 /* libIdentityTest.a */; };
@@ -653,13 +656,6 @@
 			remoteGlobalIDString = D626FF5A1FBA6E9500EE4487;
 			remoteInfo = "IdentityCore Mac";
 		};
-		1EC12C382256BC5400339572 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D6DFF39A1E2579360012891A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D65A6F4F1E3FD32D00C69FBA;
-			remoteInfo = "MSAL (Mac Framework)";
-		};
 		231CE9D21FEC641D00E95D3E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D6A206191FC50A4D00755A51 /* IdentityCore.xcodeproj */;
@@ -852,6 +848,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1E97064B22FA502700364AFA /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1E97064822FA502700364AFA /* MSAL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B20E245621FEB30F0037CA5E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -922,6 +929,8 @@
 		1E8B002D225E81A2006BB8BD /* MSALCacheViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALCacheViewController.h; sourceTree = "<group>"; };
 		1E8B002E225E81A2006BB8BD /* MSALCacheViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCacheViewController.m; sourceTree = "<group>"; };
 		1E8FC6A2221F370C00B4D4C1 /* MSALResultTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALResultTests.m; sourceTree = "<group>"; };
+		1E97063F22FA409C00364AFA /* Credential.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Credential.h; sourceTree = "<group>"; };
+		1E97064022FA409C00364AFA /* Credential.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Credential.m; sourceTree = "<group>"; };
 		1EB7ABD421262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALTestAppAuthorityTypeViewController.h; sourceTree = "<group>"; };
 		1EB7ABD521262C420058C7E0 /* MSALTestAppAuthorityTypeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALTestAppAuthorityTypeViewController.m; sourceTree = "<group>"; };
 		1EC12C0F2255DB9200339572 /* MSALAcquireTokenViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAcquireTokenViewController.h; sourceTree = "<group>"; };
@@ -1280,9 +1289,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E97064322FA4F3700364AFA /* Security.framework in Frameworks */,
 				1E8B0026225E8019006BB8BD /* WebKit.framework in Frameworks */,
 				1E1A2E062256D194001009ED /* AppKit.framework in Frameworks */,
-				1EC12C3A2256BC6800339572 /* MSAL.framework in Frameworks */,
+				1E97064722FA502700364AFA /* MSAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1845,6 +1855,8 @@
 				1E4522AC22581B8A00D27CA7 /* MSALScopesViewController.m */,
 				1E8B002D225E81A2006BB8BD /* MSALCacheViewController.h */,
 				1E8B002E225E81A2006BB8BD /* MSALCacheViewController.m */,
+				1E97063F22FA409C00364AFA /* Credential.h */,
+				1E97064022FA409C00364AFA /* Credential.m */,
 			);
 			path = mac;
 			sourceTree = "<group>";
@@ -2561,11 +2573,11 @@
 				1E614BD622558D8300EBF62F /* Sources */,
 				1E614BD722558D8300EBF62F /* Frameworks */,
 				1E614BD822558D8300EBF62F /* Resources */,
+				1E97064B22FA502700364AFA /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				1EC12C392256BC5400339572 /* PBXTargetDependency */,
 			);
 			name = "MSAL Test App (Mac)";
 			productName = MSALMacTestApp;
@@ -2785,6 +2797,7 @@
 					};
 					1E614BD922558D8300EBF62F = {
 						CreatedOnToolsVersion = 10.1;
+						DevelopmentTeam = UBF8T346G9;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -3197,6 +3210,7 @@
 				1EC12C112255DB9200339572 /* MSALAcquireTokenViewController.m in Sources */,
 				1E4522AD22581B8A00D27CA7 /* MSALScopesViewController.m in Sources */,
 				1E614BE922558D8300EBF62F /* main.m in Sources */,
+				1E97064122FA409C00364AFA /* Credential.m in Sources */,
 				1E614BDE22558D8300EBF62F /* MSALAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3503,11 +3517,6 @@
 			name = "IdentityCore Mac";
 			targetProxy = 04A6B5AC226935190035C7C2 /* PBXContainerItemProxy */;
 		};
-		1EC12C392256BC5400339572 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D65A6F4F1E3FD32D00C69FBA /* MSAL (Mac Framework) */;
-			targetProxy = 1EC12C382256BC5400339572 /* PBXContainerItemProxy */;
-		};
 		231CE9D91FEC677D00E95D3E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "IdentityTest iOS";
@@ -3697,12 +3706,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -3762,12 +3771,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = test/app/mac/MSALMacTestApp.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -4272,6 +4281,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
@@ -4282,6 +4292,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				DEVELOPMENT_TEAM = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
