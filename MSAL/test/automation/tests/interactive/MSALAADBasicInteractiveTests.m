@@ -318,6 +318,8 @@
     [self acceptAuthSessionDialog];
 
     [self selectAccountWithTitle:self.primaryAccount.account];
+    
+    [self acceptSpeedBump];
 
     [self assertAccessTokenNotNil];
     [self closeResultView];
