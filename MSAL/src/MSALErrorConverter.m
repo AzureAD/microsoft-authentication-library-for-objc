@@ -125,10 +125,12 @@ static NSSet *s_recoverableErrorCode;
 
 + (NSError *)msalErrorFromMsidError:(NSError *)msidError
 {
-    return [self msalErrorFromMsidError:msidError msalOauth2Provider:nil];
+    return [self msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:nil];
 }
 
-+ (NSError *)msalErrorFromMsidError:(NSError *)msidError msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
++ (NSError *)msalErrorFromMsidError:(NSError *)msidError
+                     classifyErrors:(BOOL)shouldClassifyErrors
+                 msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
     return [self errorWithDomain:msidError.domain
                             code:msidError.code
@@ -138,6 +140,7 @@ static NSSet *s_recoverableErrorCode;
                  underlyingError:msidError.userInfo[NSUnderlyingErrorKey]
                    correlationId:msidError.userInfo[MSIDCorrelationIdKey]
                         userInfo:msidError.userInfo
+                  classifyErrors:shouldClassifyErrors
               msalOauth2Provider:oauth2Provider];
 }
 
@@ -149,6 +152,7 @@ static NSSet *s_recoverableErrorCode;
              underlyingError:(NSError *)underlyingError
                correlationId:(NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
+              classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
 {
     if ([NSString msidIsStringNilOrBlank:domain])
@@ -163,7 +167,7 @@ static NSSet *s_recoverableErrorCode;
     // errorCode mapping is needed only if domain is mapped to MSALErrorDomain
     NSNumber *mappedCode = nil;
     NSNumber *internalCode = nil;
-    if (mappedDomain == MSALErrorDomain)
+    if ([mappedDomain isEqualToString:MSALErrorDomain])
     {
         mappedCode = s_errorCodeMapping[mappedDomain][@(code)];
         if (mappedCode == nil)
@@ -171,15 +175,18 @@ static NSSet *s_recoverableErrorCode;
             MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"MSALErrorConverter could not find the error code mapping entry for domain (%@) + error code (%ld).", domain, (long)code);
             mappedCode = @(MSALErrorInternal);
         }
-        
-        if (![s_recoverableErrorCode containsObject:mappedCode])
-        {
-            // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
-            // to avoid the case when both mapped and internal code are MSALErrorInternal.
-            internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
-            
-            mappedCode = @(MSALErrorInternal);
-        }
+    }
+    else if ([domain isEqualToString:MSALErrorDomain])
+    {
+        mappedCode = @(code);
+    }
+    
+    if (shouldClassifyErrors && mappedCode != nil && ![s_recoverableErrorCode containsObject:mappedCode])
+    {
+        // If mapped code is MSALErrorInternal, set internalCode to MSALInternalErrorUnexpected
+        // to avoid the case when both mapped and internal code are MSALErrorInternal.
+        internalCode = [mappedCode isEqual:@(MSALErrorInternal)] ? @(MSALInternalErrorUnexpected) : mappedCode;
+        mappedCode = @(MSALErrorInternal);
     }
     
     NSMutableDictionary *msalUserInfo = [NSMutableDictionary new];

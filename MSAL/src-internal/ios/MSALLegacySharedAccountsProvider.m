@@ -53,7 +53,7 @@
     
     if (self)
     {
-        self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:sharedGroup];
+        self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:sharedGroup error:nil];
         self.serviceIdentifier = serviceIdentifier;
         self.applicationIdentifier = applicationIdentifier;
         

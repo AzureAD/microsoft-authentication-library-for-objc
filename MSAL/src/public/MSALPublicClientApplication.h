@@ -144,8 +144,9 @@
 
 #if TARGET_OS_IPHONE
 /*!
- The keychain sharing group to use for the token cache.
- If it is nil, default MSAL group will be used.
+ The current keychain sharing group used for the token cache.
+ If it is nil, it means keychain sharing is disabled. Please
+ refer to MSALCacheConfig for more details.
  */
 @property (nonatomic, readonly, nullable) NSString *keychainGroup DEPRECATED_MSG_ATTRIBUTE("Use cacheConfig to configure keychain group in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
 
@@ -153,8 +154,8 @@
  Initialize a MSALPublicClientApplication with a given clientID and keychain group
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  error          The error that occurred creating the application object, if any (optional)
  */
 - (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
@@ -166,8 +167,8 @@
  Initialize a MSALPublicClientApplication with a given clientID, authority and keychain group
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
@@ -186,8 +187,8 @@
  Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
- @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
-                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
+                        keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
                         it is of the form https://<instance/<tenant>, where <instance> is the
                         directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
