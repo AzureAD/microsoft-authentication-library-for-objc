@@ -929,13 +929,21 @@
     }
     
     MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
+    MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
+    
+    if (@available(iOS 13.0, *))
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeDefault;
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
+    }
     
     if ([self.internalConfig.redirectUri hasPrefix:@"https"])
     {
         brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
+        requiredBrokerType = MSIDRequiredBrokerTypeDefault;
     }
     
-    brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:MSIDRequiredBrokerTypeDefault
+    brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
                                                                        protocolType:brokerProtocol
                                                                   aadRequestVersion:MSIDBrokerAADRequestVersionV2];
 
