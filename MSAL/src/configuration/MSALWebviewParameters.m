@@ -61,6 +61,10 @@
     item = [[MSALWebviewParameters alloc] initWithParentViewController:_parentViewController];
     item.parentViewController = _parentViewController;
     item.presentationStyle = _presentationStyle;
+    if (@available(iOS 13.0, *))
+    {
+        item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
+    }
 #else
     item = [MSALWebviewParameters new];
 #endif
