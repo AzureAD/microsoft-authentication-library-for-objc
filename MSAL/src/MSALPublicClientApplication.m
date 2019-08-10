@@ -998,7 +998,7 @@
         
         if (parameters.webviewParameters.parentViewController.view.window == nil)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window!", nil, nil, nil, nil, nil);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
             completionBlock(nil, msalError);
             return;
