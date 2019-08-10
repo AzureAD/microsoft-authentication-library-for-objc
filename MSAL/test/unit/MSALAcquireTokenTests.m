@@ -82,6 +82,7 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "XCTestCase+HelperMethods.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -91,8 +92,6 @@
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
 @property (nonatomic) MSIDAccountCredentialCache *accountCache;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
-@property (nonatomic) UIViewController *parentController;
-@property (nonatomic) UIWindow *window;
 
 @end
 
@@ -115,12 +114,6 @@
     [self.tokenCache clearWithContext:nil error:nil];
     
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
-    
-    self.parentController = [UIViewController new];
-    UIView *view = [UIView new];
-    self.window = [UIWindow new];
-    [view setValue:self.window forKey:@"window"];
-    [self.parentController setValue:view forKey:@"view"];
 }
 
 - (void)tearDown
@@ -186,7 +179,7 @@
     __block MSALAccount *resultAccount = nil;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
@@ -281,7 +274,7 @@
     [cache setObject:record forKey:@"login.microsoft.com"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     __block MSALAccount *resultAccount = nil;
     
@@ -368,7 +361,7 @@
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenForScopes"];
     [application acquireTokenWithParameters:parameters
@@ -611,7 +604,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
     parameters.claimsRequest = claimsRequest;
@@ -738,7 +731,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue", @"claims":@"claims_value"};
     parameters.claimsRequest = claimsRequest;
@@ -835,7 +828,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
@@ -918,7 +911,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
                                                                                                   authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
-    config.clientApplicationCapabilities = @[@"llt"];;
+    config.clientApplicationCapabilities = @[@"llt"];
     
     // Acquire token call
     NSError *error = nil;
@@ -931,7 +924,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.claimsRequest = claimsRequest;
@@ -1023,7 +1016,7 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.loginHint = @"upn@test.com";
     parameters.promptType = MSALPromptTypeDefault;
@@ -1123,7 +1116,7 @@
     __block MSALResult *result = nil;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.extraQueryParameters = @{@"instance_aware":@"true"};
@@ -1606,7 +1599,7 @@
     __block MSALResult *result = nil;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     
@@ -2716,7 +2709,7 @@
                                                   tenantProfiles:nil];
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]];
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.promptType = MSALPromptTypeDefault;
     parameters.account = account;

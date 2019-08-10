@@ -44,15 +44,12 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALTestBundle.h"
 #import "MSALOauth2Provider.h"
-#import <UIKit/UIKit.h>
+#import "XCTestCase+HelperMethods.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 @interface MSALPublicClientApplicationAccountUpdateTests : XCTestCase
-
-@property (nonatomic) UIViewController *parentController;
-@property (nonatomic) UIWindow *window;
 
 @end
 
@@ -65,12 +62,6 @@
     [super setUp];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
-    
-    self.parentController = [UIViewController new];
-    UIView *view = [UIView new];
-    self.window = [UIWindow new];
-    [view setValue:self.window forKey:@"window"];
-    [self.parentController setValue:view forKey:@"view"];
 }
 
 #pragma mark - Tests
@@ -98,7 +89,9 @@
 #endif
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
-    parameters.parentViewController = self.parentController;
+#if TARGET_OS_IPHONE
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+#endif
     parameters.loginHint = @"fakeuser@contoso.com";
     
     [application acquireTokenWithParameters:parameters

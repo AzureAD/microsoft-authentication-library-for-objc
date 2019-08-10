@@ -51,6 +51,7 @@
 #import "MSALAccount.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
+#import "XCTestCase+HelperMethods.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -58,8 +59,6 @@
 @interface MSALB2CPolicyTests : MSALTestCase
 
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
-@property (nonatomic) UIViewController *parentController;
-@property (nonatomic) UIWindow *window;
 
 @end
 
@@ -75,12 +74,6 @@
 
     MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
-    
-    self.parentController = [UIViewController new];
-    UIView *view = [UIView new];
-    self.window = [UIWindow new];
-    [view setValue:self.window forKey:@"window"];
-    [self.parentController setValue:view forKey:@"view"];
 }
 
 - (void)tearDown
@@ -157,7 +150,7 @@
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
 
     [application acquireTokenWithParameters:parameters
                             completionBlock:^(MSALResult *result, NSError *error)
@@ -180,7 +173,7 @@
 
     parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
-    parameters.parentViewController = self.parentController;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.promptType = MSALPromptTypeDefault;
     parameters.authority = secondAuthority;
     
