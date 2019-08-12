@@ -50,6 +50,11 @@
  
     NOTE: Once this is set this can not be unset, and it should be set early in
           the program's execution.
+ 
+    NOTE: MSAL logs might contain potentially sensitive information. When implementing MSAL logging, you should never output MSAL logs with NSLog or print directly, unless you're running your application in the debug mode. If you're writing MSAL logs to file, you must take necessary precautions to store the file securely.
+ 
+    Additionally, MSAL makes determination regarding PII status of a particular parameter based on the parameter type. It wouldn't automatically detect a case where PII information is passed into non-PII parameter due to a developer mistake (e.g. MSAL doesn't consider clientId PII and it expects developers to exersice caution and never pass any unexpected sensitive information into that parameter).
+ */
  */
 - (void)setCallback:(nonnull MSALLogCallback)callback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig setLogCallback: instead");;
 

@@ -65,7 +65,8 @@
             // WILL CONTAIN EVERYTHING
             // so message contains "redirect to https://somehost.com"
 #if DEBUG
-            // Only print to console using NSLog in debug mode
+            // NB! This sample uses print just for testing purposes
+            // You should only ever log to NSLog in debug mode to prevent leaking potentially sensitive information
             NSLog(@"%@", message);
 #endif
         }

@@ -49,7 +49,8 @@ class SampleMSALAuthentication {
             if let displayableMessage = message {
                 if (!containsPII) {
 #if DEBUG
-                    // Only print to console using print in debug mode
+                    // NB! This sample uses print just for testing purposes
+                    // You should only ever log to NSLog in debug mode to prevent leaking potentially sensitive information
                     print(displayableMessage)
 #endif
                 }
