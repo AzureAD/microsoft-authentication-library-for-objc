@@ -26,40 +26,45 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import <WebKit/WebKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MSALHTTPConfig;
-@class MSALTelemetryConfig;
-@class MSALLoggerConfig;
-@class MSALCacheConfig;
-
-@interface MSALGlobalConfig : NSObject
-
-/*! Network configuration, refer to MSALHTTPConfig.h for more detail */
-@property (class, readonly) MSALHTTPConfig *httpConfig;
-/*! Telemetry configurations, refer to MSALTelemetryConfig.h for more detail */
-@property (class, readonly) MSALTelemetryConfig *telemetryConfig;
-/*! Logger configurations, refer to MSALLoggerConfig.h for more detail */
-@property (class, readonly) MSALLoggerConfig *loggerConfig;
-
-/*! The webview selection to be used for authentication.
- By default, it is going to use the following to authenticate.
- - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
- - macOS:  WKWebView
- */
-@property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
+@interface MSALWebviewParameters : NSObject <NSCopying>
 
 #if TARGET_OS_IPHONE
 /*!
- Setting to define MSAL behavior regarding broker.
- Broker is enabled by default.
+ The view controller to present from. If nil, the current topmost view controller will be used.
  */
-@property (class) MSALBrokeredAvailability brokerAvailability;
+@property (nullable, weak, nonatomic) UIViewController *parentViewController;
+
+/*!
+ Modal presentation style for displaying authentication web content.
+ */
+@property (nonatomic) UIModalPresentationStyle presentationStyle;
+
 #endif
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
+/*!
+ A specific webView type for the interactive authentication flow.
+ By default, it will be set to MSALGlobalConfig.defaultWebviewType.
+ */
+@property (nonatomic) MSALWebviewType webviewType;
+
+/*!
+ For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
+ Web content will be rendered onto this view.
+ Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
+ */
+@property (nonatomic, nullable) WKWebView *customWebview;
+
+#if TARGET_OS_IPHONE
+- (nonnull instancetype)initWithParentViewController:(UIViewController *)parentViewController;
+
+- (nonnull instancetype)init DEPRECATED_MSG_ATTRIBUTE("Use -initWithParentViewController: instead.");
+
++ (nonnull instancetype)new DEPRECATED_MSG_ATTRIBUTE("Use -initWithParentViewController: instead.");
+#endif
 
 @end
 
