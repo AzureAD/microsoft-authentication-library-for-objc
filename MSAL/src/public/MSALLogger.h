@@ -55,7 +55,6 @@
  
     Additionally, MSAL makes determination regarding PII status of a particular parameter based on the parameter type. It wouldn't automatically detect a case where PII information is passed into non-PII parameter due to a developer mistake (e.g. MSAL doesn't consider clientId PII and it expects developers to exersice caution and never pass any unexpected sensitive information into that parameter).
  */
- */
-- (void)setCallback:(nonnull MSALLogCallback)callback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig setLogCallback: instead");;
+- (void)setCallback:(nonnull MSALLogCallback)callback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig setLogCallback: instead");
 
 @end
