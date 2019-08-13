@@ -65,12 +65,12 @@ static NSAttributedString* s_attrNewLine = nil;
     [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII)
     {
         (void)level;
-        if (!containsPII)
-        {
-            return;
-        }
-        
+
+#if DEBUG
+        // NB! This sample uses NSLog just for testing purposes
+        // You should only ever log to NSLog in debug mode to prevent leaking potentially sensitive information
         NSLog(@"%@", message);
+#endif
         
         NSAttributedString* attrLog = [[NSAttributedString alloc] initWithString:message];
         
