@@ -3724,6 +3724,7 @@
 /* Begin XCBuildConfiguration section */
 		1E5DA690227271BF00B7B816 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3734,6 +3735,7 @@
 		};
 		1E5DA691227271BF00B7B816 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -3743,6 +3745,7 @@
 		};
 		1E5DA692227271BF00B7B816 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3753,6 +3756,7 @@
 		};
 		1E5DA693227271BF00B7B816 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
