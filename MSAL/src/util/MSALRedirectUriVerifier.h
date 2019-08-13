@@ -31,9 +31,6 @@
 
 @interface MSALRedirectUriVerifier : NSObject
 
-+ (NSURL *)defaultBrokerCapableRedirectUri;
-+ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId;
-
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
                                          clientId:(NSString *)clientId
                                             error:(NSError * __autoreleasing *)error;

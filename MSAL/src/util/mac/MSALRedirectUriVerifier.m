@@ -30,18 +30,6 @@
 
 @implementation MSALRedirectUriVerifier
 
-+ (NSURL *)defaultBrokerCapableRedirectUri
-{
-    return nil;
-}
-
-+ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
-{
-    NSString *scheme = [NSString stringWithFormat:@"msal%@", clientId];
-    NSString *redirectUriString = [NSString stringWithFormat:@"%@://auth", scheme];
-    return [NSURL URLWithString:redirectUriString];
-}
-
 + (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
                                          clientId:(NSString *)clientId
                                             error:(NSError * __autoreleasing *)error
@@ -52,7 +40,7 @@
                                               brokerCapable:NO];
     }
 
-    return [[MSALRedirectUri alloc] initWithRedirectUri:[self defaultNonBrokerRedirectUri:clientId]
+    return [[MSALRedirectUri alloc] initWithRedirectUri:[MSALRedirectUri defaultBrokerCapableRedirectUri]
                                           brokerCapable:NO];
 }
 
