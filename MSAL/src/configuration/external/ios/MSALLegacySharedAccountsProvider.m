@@ -31,6 +31,8 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSIDConstants.h"
 #import "MSALErrorConverter.h"
+#import "MSALAccount.h"
+#import "MSALTenantProfile.h"
 
 @interface MSALLegacySharedAccountsProvider()
 
