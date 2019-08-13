@@ -42,10 +42,9 @@ class SampleMSALAuthentication {
     func setup() {
         MSALGlobalConfig.loggerConfig.setLogCallback {
             (level: MSALLogLevel, message: String?, containsPII: Bool) in
-            // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
-            // containsPII == NO. In this case, you only need to capture either one set of messages.
-            // however the containsPII version might contain Personally Identifiable Information (PII)
-            // about the account being logged in.
+            // If PiiLoggingEnabled is set YES, this block will potentially contain sensitive information (Personally Identifiable Information), but not all messages will contain it.
+            // containsPII == YES indicates if a particular message contains PII.
+            // You might want to capture PII only in debug builds, or only if you take necessary actions to handle PII properly according to legal requirements of the region
             if let displayableMessage = message {
                 if (!containsPII) {
 #if DEBUG
