@@ -897,10 +897,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		04A6B57B226921890035C7C2 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMSAL.a; path = "libMSAL (iOS Static Library).a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04A6B57B226921890035C7C2 /* libMSAL (iOS Static Library).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libMSAL (iOS Static Library).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04A6B584226921CD0035C7C2 /* msal__static__lib__ios.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__ios.xcconfig; sourceTree = "<group>"; };
 		04A6B585226921CD0035C7C2 /* msal__static__lib__mac.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = msal__static__lib__mac.xcconfig; sourceTree = "<group>"; };
-		04A6B59C2269286F0035C7C2 /* libMSAL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMSAL.a; path = "libMSAL (macOS Static Library).a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04A6B59C2269286F0035C7C2 /* libMSAL (macOS Static Library).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libMSAL (macOS Static Library).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		04D32CAC1FD61585000B123E /* MSALErrorConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALErrorConverter.h; sourceTree = "<group>"; };
 		04D32CAD1FD615B3000B123E /* MSALErrorConverter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverter.m; sourceTree = "<group>"; };
 		04D32CCF1FD8AFF3000B123E /* MSALErrorConverterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALErrorConverterTests.m; sourceTree = "<group>"; };
@@ -2195,8 +2195,8 @@
 				B2BB73702112C32C000EA4C5 /* InteractiveiOSTests.xctest */,
 				B29E2ACE21238F5200B170ED /* MultiAppiOSTests.xctest */,
 				1E614BDA22558D8300EBF62F /* MSAL Test App (Mac).app */,
-				04A6B57B226921890035C7C2 /* libMSAL.a */,
-				04A6B59C2269286F0035C7C2 /* libMSAL.a */,
+				04A6B57B226921890035C7C2 /* libMSAL (iOS Static Library).a */,
+				04A6B59C2269286F0035C7C2 /* libMSAL (macOS Static Library).a */,
 				B295A16422D0348400FFB313 /* unit-test-host-mac.app */,
 			);
 			name = Products;
@@ -2525,7 +2525,7 @@
 			);
 			name = "MSAL (iOS Static Library)";
 			productName = "MSAL (iOS Static Library)";
-			productReference = 04A6B57B226921890035C7C2 /* libMSAL.a */;
+			productReference = 04A6B57B226921890035C7C2 /* libMSAL (iOS Static Library).a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		04A6B59B2269286F0035C7C2 /* MSAL (Mac Static Library) */ = {
@@ -2543,7 +2543,7 @@
 			);
 			name = "MSAL (Mac Static Library)";
 			productName = "MSAL (macOS Static Library)";
-			productReference = 04A6B59C2269286F0035C7C2 /* libMSAL.a */;
+			productReference = 04A6B59C2269286F0035C7C2 /* libMSAL (macOS Static Library).a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		1E614BD922558D8300EBF62F /* MSAL Test App (Mac) */ = {
