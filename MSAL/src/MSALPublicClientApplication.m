@@ -917,6 +917,8 @@
     
     NSError *msidError = nil;
     
+    MSIDBrokerInvocationOptions *brokerOptions = nil;
+    
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
     
 #if TARGET_OS_IPHONE
@@ -928,6 +930,26 @@
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
+    
+    MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
+    MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
+    
+    if (@available(iOS 13.0, *))
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
+    }
+    
+    if ([self.internalConfig.redirectUri hasPrefix:@"https"])
+    {
+        brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
+                                                                       protocolType:brokerProtocol
+                                                                  aadRequestVersion:MSIDBrokerAADRequestVersionV2];
+
 #endif
     MSIDInteractiveRequestParameters *msidParams =
     [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
@@ -938,7 +960,7 @@
                                            extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                        supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
+                                                  brokerOptions:brokerOptions
                                                     requestType:interactiveRequestType
                                             intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                           error:&msidError];
