@@ -708,7 +708,8 @@
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
                                                                           oidcScopes:[self.class defaultOIDCScopes]
                                                                        correlationId:parameters.correlationId
-                                                                          telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                                      telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                                 intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                                                error:&msidError];
     
     if (!msidParams)
@@ -939,6 +940,7 @@
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                         supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
                                                     requestType:interactiveRequestType
+                                            intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                           error:&msidError];
     
     if (!msidParams)
