@@ -21,7 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import <MSAL/MSAL.h>
+#import <Foundation/Foundation.h>
+#import "MSALExternalAccountProviding.h"
 
 typedef NS_ENUM(NSInteger, MSALLegacySharedAccountMode)
 {

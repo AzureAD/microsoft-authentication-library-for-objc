@@ -71,7 +71,7 @@
 /*!
     The unique id of the account.
  */
-@property (readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.tenantProfileId instead");
+@property (readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
 
 /*!
     The scope values returned from the service.
