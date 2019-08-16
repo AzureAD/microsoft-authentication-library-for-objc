@@ -988,6 +988,8 @@
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
     msidParams.validateAuthority = _validateAuthority;
+    //TODO: set the following property with instance aware flag in config or exextraURLQueryParameters
+    //msidParams.instanceAware
     
     if (msidParams.validateAuthority
         && [self shouldExcludeValidationForAuthority:requestAuthority])
