@@ -431,13 +431,6 @@
         return YES;
     }
 
-    if ([NSString msidIsStringNilOrBlank:sourceApplication])
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
-        // TODO: add a link to Wiki describing why broker is necessary
-        return NO;
-    }
-
     // Only AAD is supported in broker at this time. If we need to support something else, we need to change this to dynamically read authority from response and create factory
     MSIDDefaultBrokerResponseHandler *brokerResponseHandler = [[MSIDDefaultBrokerResponseHandler alloc] initWithOauthFactory:[MSIDAADV2Oauth2Factory new]
                                                                                                       tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
