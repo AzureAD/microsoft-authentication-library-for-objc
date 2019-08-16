@@ -54,17 +54,20 @@
 {
     [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString *message, BOOL containsPII)
     {
-        // If PiiLoggingEnabled is set YES, this block will be called twice; containsPII == YES and
-        // containsPII == NO. In this case, you only need to capture either one set of messages.
-        // however the containsPII version might contain Personally Identifiable Information (PII)
-        // about the account being logged in.
+        // If PiiLoggingEnabled is set YES, this block will potentially contain sensitive information (Personally Identifiable Information), but not all messages will contain it.
+        // containsPII == YES indicates if a particular message contains PII.
+        // You might want to capture PII only in debug builds, or only if you take necessary actions to handle PII properly according to legal requirements of the region
         
         // if message is "redirect to https://somehost.com",
         if (!containsPII)
         {
             // WILL CONTAIN EVERYTHING
             // so message contains "redirect to https://somehost.com"
+#if DEBUG
+            // NB! This sample uses print just for testing purposes
+            // You should only ever log to NSLog in debug mode to prevent leaking potentially sensitive information
             NSLog(@"%@", message);
+#endif
         }
         
         else
