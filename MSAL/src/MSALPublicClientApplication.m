@@ -988,7 +988,8 @@
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
     msidParams.validateAuthority = _validateAuthority;
-    //TODO: set the following property with instance aware flag in config or exextraURLQueryParameters
+    //TODO: address/decide public header to allow setting instace_aware for requests;
+    //      set the following property with instance aware flag in config or extraURLQueryParameters
     //msidParams.instanceAware
     
     if (msidParams.validateAuthority
