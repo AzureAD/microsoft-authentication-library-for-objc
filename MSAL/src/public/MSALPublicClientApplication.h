@@ -282,7 +282,7 @@
                                 Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.
  @return  YES if URL is a response to a MSAL web or brokered session and handled, NO otherwise.
  */
-+ (BOOL)handleMSALResponse:(nonnull NSURL *)response sourceApplication:(nonnull NSString *)sourceApplication;
++ (BOOL)handleMSALResponse:(nonnull NSURL *)response sourceApplication:(nullable NSString *)sourceApplication;
 #endif
 
 /*!
