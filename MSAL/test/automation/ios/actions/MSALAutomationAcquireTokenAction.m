@@ -130,7 +130,14 @@
         acquireTokenAuthority = [MSALAuthority authorityWithURL:authorityUrl error:nil];
     }
     
-    MSALWebviewParameters *webviewParameters= [[MSALWebviewParameters alloc] initWithParentViewController:containerController];
+    UIViewController *parentController = containerController;
+    
+    if (containerController.presentedViewController)
+    {
+        parentController = containerController.presentedViewController;
+    }
+    
+    MSALWebviewParameters *webviewParameters= [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
     
     MSIDWebviewType webviewSelection = testRequest.webViewType;
     
