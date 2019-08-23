@@ -123,6 +123,16 @@ static NSDateFormatter *s_updateDateFormatter = nil;
             return NO;
         }
     }
+    else if ([self.signinStatusDictionary count])
+    {
+        // Don't return accounts that are signed out from everywhere
+        for (NSString *app in self.signinStatusDictionary)
+        {
+            if ([self.signinStatusDictionary[app] isEqualToString:@"SignedIn"]) return YES;
+        }
+        
+        return NO;
+    }
     
     return YES;
 }
