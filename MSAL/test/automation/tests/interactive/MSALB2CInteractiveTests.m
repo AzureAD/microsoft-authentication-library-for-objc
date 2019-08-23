@@ -42,6 +42,7 @@
 {
     [super setUp];
     self.testEnvironment = self.class.confProvider.wwEnvironment;
+    self.consentTitle = @"Yes";
 }
 
 #pragma mark - Shared
