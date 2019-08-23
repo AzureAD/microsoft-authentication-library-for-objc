@@ -118,23 +118,20 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *signinStatus = [self.signinStatusDictionary msidStringObjectForKey:appIdentifier];
         
-        if (![signinStatus isEqualToString:@"SignedIn"])
-        {
-            return NO;
-        }
+        return [signinStatus isEqualToString:@"SignedIn"];
     }
-    else if ([self.signinStatusDictionary count])
+    else if (![self.signinStatusDictionary count])
     {
-        // Don't return accounts that are signed out from everywhere
-        for (NSString *app in self.signinStatusDictionary)
-        {
-            if ([self.signinStatusDictionary[app] isEqualToString:@"SignedIn"]) return YES;
-        }
-        
-        return NO;
+        return YES;
     }
     
-    return YES;
+    // Don't return accounts that are signed out from everywhere
+    for (NSString *app in self.signinStatusDictionary)
+    {
+        if ([self.signinStatusDictionary[app] isEqualToString:@"SignedIn"]) return YES;
+    }
+    
+    return NO;
 }
 
 #pragma mark - Update
