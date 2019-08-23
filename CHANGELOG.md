@@ -1,3 +1,8 @@
+## [0.6.0] - 2019-08-22
+### Added
+- Enable iOS 13 compatible broker
+- Implement ACL control for macOS keychain
+
 ## [0.5.0] - 2019-07-30
 ### Updated
 - Added initial macOS support
