@@ -167,6 +167,7 @@
         webviewParameters.webviewType = MSALWebviewTypeWKWebView;
         webviewParameters.customWebview = containerController.passedinWebView;
         [containerController showPassedInWebViewControllerWithContext:@{@"context": application}];
+        webviewParameters.parentViewController = containerController;
     }
     
     MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes.array
