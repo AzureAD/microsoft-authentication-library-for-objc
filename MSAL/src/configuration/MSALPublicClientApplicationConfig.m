@@ -56,7 +56,7 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
         NSURL *authorityURL = [NSURL URLWithString:MSID_DEFAULT_AAD_AUTHORITY];
         
         _authority = authority ?: [[MSALAADAuthority alloc] initWithURL:authorityURL error:nil];
-        _extraQueryParameters = [[MSALExtraQueryParameters alloc] init];
+        _extraQueryParameters = [MSALExtraQueryParameters new];
         
         _cacheConfig = [MSALCacheConfig defaultConfig];
         _tokenExpirationBuffer = defaultTokenExpirationBuffer;

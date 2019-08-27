@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 #import "XCTestCase+HelperMethods.h"
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#endif
 
 @implementation XCTestCase (HelperMethods)
 
@@ -46,5 +49,24 @@
         _XCTFailureHandler(self, YES, file, line, @"Strings.", @"" "The strings are different: '%@' = '%@', expected '%@'", expression, actual, expected);
     }
 }
+
+#if TARGET_OS_IPHONE
++ (UIViewController *)sharedViewControllerStub
+{
+    static dispatch_once_t once;
+    static UIViewController *controller;
+    static UIWindow *window;
+    
+    dispatch_once(&once, ^{
+        controller = [UIViewController new];
+        UIView *view = [UIView new];
+        window = [UIWindow new];
+        [view setValue:window forKey:@"window"];
+        [controller setValue:view forKey:@"view"];
+    });
+    
+    return controller;
+}
+#endif
 
 @end

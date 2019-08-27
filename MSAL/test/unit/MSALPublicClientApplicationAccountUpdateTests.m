@@ -44,6 +44,7 @@
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSALTestBundle.h"
 #import "MSALOauth2Provider.h"
+#import "XCTestCase+HelperMethods.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -87,9 +88,14 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
 #endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                       completionBlock:^(MSALResult *result, NSError *error)
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
+#if TARGET_OS_IPHONE
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+#endif
+    parameters.loginHint = @"fakeuser@contoso.com";
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNotNil(result);
          XCTAssertNil(error);
