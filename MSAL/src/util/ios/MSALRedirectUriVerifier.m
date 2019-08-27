@@ -64,7 +64,7 @@
     }
 
     // First try to check for broker capable redirect URI
-    NSURL *defaultRedirectUri = [self defaultBrokerCapableRedirectUri];
+    NSURL *defaultRedirectUri = [MSALRedirectUri defaultBrokerCapableRedirectUri];
 
     NSError *redirectError = nil;
     if ([self verifySchemeIsRegistered:defaultRedirectUri error:&redirectError])
@@ -73,7 +73,7 @@
     }
 
     // Now check the uri that is not broker capable for backward compat
-    defaultRedirectUri = [self defaultNonBrokerRedirectUri:clientId];
+    defaultRedirectUri = [MSALRedirectUri defaultNonBrokerRedirectUri:clientId];
 
     if ([self verifySchemeIsRegistered:defaultRedirectUri error:nil])
     {
@@ -88,27 +88,9 @@
     return nil;
 }
 
-+ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
-{
-    if ([NSString msidIsStringNilOrBlank:clientId])
-    {
-        return nil;
-    }
-
-    NSString *redirectUri = [NSString stringWithFormat:@"msal%@://auth", clientId];
-    return [NSURL URLWithString:redirectUri];
-}
-
-+ (NSURL *)defaultBrokerCapableRedirectUri
-{
-    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    NSString *redirectUri = [NSString stringWithFormat:@"msauth.%@://auth", bundleID];
-    return [NSURL URLWithString:redirectUri];
-}
-
 + (BOOL)redirectUriIsBrokerCapable:(NSURL *)redirectUri
 {
-    NSURL *defaultRedirectUri = [self defaultBrokerCapableRedirectUri];
+    NSURL *defaultRedirectUri = [MSALRedirectUri defaultBrokerCapableRedirectUri];
 
     // Check default MSAL format
     if ([defaultRedirectUri isEqual:redirectUri])

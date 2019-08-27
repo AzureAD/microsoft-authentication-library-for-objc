@@ -36,6 +36,7 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDConstants.h"
 #import "MSALLegacySharedAccountTestUtil.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALLegacySharedAccountsProviderTests : XCTestCase
 
@@ -55,7 +56,7 @@
                                                                                       serviceIdentifier:@"MyAccountService"
                                                                                   applicationIdentifier:@"MyApp"];
     
-    self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:@"com.microsoft.adalcache"];
+    self.keychainTokenCache = [[MSIDKeychainTokenCache alloc] initWithGroup:@"com.microsoft.adalcache" error:nil];
     [self.keychainTokenCache clearWithContext:nil error:nil];
 }
 

@@ -27,7 +27,10 @@
 
 
 #import <Foundation/Foundation.h>
-#import <MSAL/MSAL.h>
+
+@protocol MSALAccount;
+@class MSALTenantProfile;
+@class MSALAccountEnumerationParameters;
 
 NS_ASSUME_NONNULL_BEGIN
 
