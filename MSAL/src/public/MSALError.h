@@ -347,5 +347,15 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /*!
      Broker returned unreadable result.
      */
-    MSALInternalErrorBrokerUnknown                      = -42711
+    MSALInternalErrorBrokerUnknown                      = -42711,
+    
+    /*!
+     Failed to write broker application token.
+     */
+    MSALInternalErrorBrokerApplicationTokenWriteFailed  = -42712,
+    
+    /*!
+     Failed to read broker application token.
+     */
+    MSALInternalErrorBrokerApplicationTokenReadFailed   = -42713,
 };

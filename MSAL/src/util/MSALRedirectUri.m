@@ -52,4 +52,24 @@
     return redirectUri;
 }
 
+#pragma mark - Helpers
+
++ (NSURL *)defaultNonBrokerRedirectUri:(NSString *)clientId
+{
+    if ([NSString msidIsStringNilOrBlank:clientId])
+    {
+        return nil;
+    }
+    
+    NSString *redirectUri = [NSString stringWithFormat:@"msal%@://auth", clientId];
+    return [NSURL URLWithString:redirectUri];
+}
+
++ (NSURL *)defaultBrokerCapableRedirectUri
+{
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    NSString *redirectUri = [NSString stringWithFormat:@"msauth.%@://auth", bundleID];
+    return [NSURL URLWithString:redirectUri];
+}
+
 @end

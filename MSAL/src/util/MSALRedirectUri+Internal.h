@@ -35,6 +35,9 @@
 - (nullable instancetype)initWithRedirectUri:(nonnull NSURL *)redirectUri
                                brokerCapable:(BOOL)brokerCapable;
 
++ (nullable NSURL *)defaultNonBrokerRedirectUri:(nonnull NSString *)clientId;
++ (nullable NSURL *)defaultBrokerCapableRedirectUri;
+
 @end
 
 #endif /* MSALRedirectUri_Internal_h */

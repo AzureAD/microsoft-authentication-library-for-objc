@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSURL *url;
 
 /* Indicates if redirect URI can be used with broker
-   Broker redirect URIs need to follow particular format, e.g. msauth<bundleId>://auth */
+   Broker redirect URIs need to follow particular format, e.g. msauth.<bundleId>://auth */
 @property (nonatomic, readonly) BOOL brokerCapable;
 
 @end
