@@ -744,7 +744,17 @@
     {
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
-        completionBlock(result, msalError);
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(result, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(result, msalError);
+        }
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
@@ -1047,13 +1057,13 @@
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
         
-        if ([NSThread isMainThread])
+        if ([NSThread isMainThread] && !parameters.completionBlockQueue)
         {
             completionBlock(result, msalError);
         }
         else
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(parameters.completionBlockQueue ? parameters.completionBlockQueue : dispatch_get_main_queue(), ^{
                 completionBlock(result, msalError);
             });
         }
