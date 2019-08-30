@@ -4219,7 +4219,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adal.sample;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "iOS Team Provisioning Profile";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
@@ -4238,7 +4238,7 @@
 				DEVELOPMENT_TEAM = UBF8T346G9;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSALTestApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adal.sample;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "iOS Team Provisioning Profile";
 				USER_HEADER_SEARCH_PATHS = "$(inherited) $IDCORE_PATH/src/** $(HOME)/aadoverrides";
