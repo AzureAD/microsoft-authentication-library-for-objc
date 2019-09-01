@@ -42,6 +42,7 @@
 {
     [super setUp];
     self.testEnvironment = self.class.confProvider.wwEnvironment;
+    self.consentTitle = @"Yes";
 }
 
 #pragma mark - Shared
@@ -76,6 +77,11 @@
     }
 
     [self aadEnterPassword];
+    
+    // Keep me signed in
+    [self acceptMSSTSConsentIfNecessary:@"Yes" embeddedWebView:request.usesEmbeddedWebView];
+    
+    // Consent
     [self acceptMSSTSConsentIfNecessary:self.consentTitle ? self.consentTitle : @"Accept" embeddedWebView:request.usesEmbeddedWebView];
 
     [self assertAccessTokenNotNil];
