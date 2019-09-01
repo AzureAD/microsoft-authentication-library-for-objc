@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
   
   	app.ios.exclude_files = "MSAL/src/**/mac/*", "MSAL/IdentityCore/IdentityCore/src/**/mac/*"
   		
-  	app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*"
+  	app.osx.exclude_files = "MSAL/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/ios/*", "MSAL/IdentityCore/IdentityCore/src/**/background/*"
   	app.requires_arc = true
   end
   
