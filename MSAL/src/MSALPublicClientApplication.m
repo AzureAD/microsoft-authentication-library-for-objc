@@ -32,7 +32,6 @@
 #import "MSALTelemetryApiId.h"
 #import "MSALTelemetry.h"
 #import "MSIDMacTokenCache.h"
-#import "MSIDMacKeychainTokenCache.h"
 #import "MSIDLegacyTokenCacheAccessor.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
 #import "MSIDAccount.h"
@@ -432,13 +431,6 @@
         return YES;
     }
 
-    if ([NSString msidIsStringNilOrBlank:sourceApplication])
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Application doesn't integrate with broker correctly");
-        // TODO: add a link to Wiki describing why broker is necessary
-        return NO;
-    }
-
     // Only AAD is supported in broker at this time. If we need to support something else, we need to change this to dynamically read authority from response and create factory
     MSIDDefaultBrokerResponseHandler *brokerResponseHandler = [[MSIDDefaultBrokerResponseHandler alloc] initWithOauthFactory:[MSIDAADV2Oauth2Factory new]
                                                                                                       tokenResponseValidator:[MSIDDefaultTokenResponseValidator new]];
@@ -679,10 +671,12 @@
     /*
      In the acquire token silent call we assume developer wants to get access token for account's home tenant,
      if authority is a common, organizations or consumers authority.
+     TODO: update instanceAware parameter to the instanceAware in config
      */
     NSError *authorityError = nil;
     requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
                                                           requestAuthority:requestAuthority
+                                                             instanceAware:NO
                                                                      error:&authorityError];
     
     if (!requestAuthority)
@@ -707,7 +701,8 @@
                                                                               scopes:[[NSOrderedSet alloc] initWithArray:parameters.scopes copyItems:YES]
                                                                           oidcScopes:[self.class defaultOIDCScopes]
                                                                        correlationId:parameters.correlationId
-                                                                          telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                                      telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
+                                                                 intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                                                error:&msidError];
     
     if (!msidParams)
@@ -747,9 +742,19 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
-        completionBlock(result, msalError);
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(result, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(result, msalError);
+        }
     };
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
@@ -856,7 +861,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId redirectUri:redirectUri authority:authority];
     
 #if TARGET_OS_IPHONE
-    config.cacheConfig.keychainSharingGroup = keychainGroup ?: [[NSBundle mainBundle] bundleIdentifier];
+    config.cacheConfig.keychainSharingGroup = keychainGroup;
 #endif
     
     return [self initWithConfiguration:config error:error];
@@ -915,6 +920,8 @@
     
     NSError *msidError = nil;
     
+    MSIDBrokerInvocationOptions *brokerOptions = nil;
+    
     MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
     
 #if TARGET_OS_IPHONE
@@ -926,6 +933,26 @@
     {
         interactiveRequestType = MSIDInteractiveRequestLocalType;
     }
+    
+    MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
+    MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
+    
+    if (@available(iOS 13.0, *))
+    {
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
+    }
+    
+    if ([self.internalConfig.redirectUri hasPrefix:@"https"])
+    {
+        brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
+        requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
+    }
+    
+    brokerOptions = [[MSIDBrokerInvocationOptions alloc] initWithRequiredBrokerType:requiredBrokerType
+                                                                       protocolType:brokerProtocol
+                                                                  aadRequestVersion:MSIDBrokerAADRequestVersionV2];
+
 #endif
     MSIDInteractiveRequestParameters *msidParams =
     [[MSIDInteractiveRequestParameters alloc] initWithAuthority:requestAuthority
@@ -936,8 +963,9 @@
                                            extraScopesToConsent:parameters.extraScopesToConsent ? [[NSOrderedSet alloc]     initWithArray:parameters.extraScopesToConsent copyItems:YES] : nil
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
-                                        supportedBrokerProtocol:MSID_BROKER_MSAL_SCHEME
+                                                  brokerOptions:brokerOptions
                                                     requestType:interactiveRequestType
+                                            intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                           error:&msidError];
     
     if (!msidParams)
@@ -963,6 +991,9 @@
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
     msidParams.validateAuthority = _validateAuthority;
+    //TODO: address/decide public header to allow setting instace_aware for requests;
+    //      set the following property with instance aware flag in config or extraURLQueryParameters
+    //msidParams.instanceAware
     
     if (msidParams.validateAuthority
         && [self shouldExcludeValidationForAuthority:requestAuthority])
@@ -1023,16 +1054,16 @@
     
     MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError msalOauth2Provider:self.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
         
-        if ([NSThread isMainThread])
+        if ([NSThread isMainThread] && !parameters.completionBlockQueue)
         {
             completionBlock(result, msalError);
         }
         else
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(parameters.completionBlockQueue ? parameters.completionBlockQueue : dispatch_get_main_queue(), ^{
                 completionBlock(result, msalError);
             });
         }

@@ -28,7 +28,6 @@
 #import "MSIDAccountIdentifier.h"
 #import "NSString+MSALAccountIdenfiers.h"
 #import "MSALAccountEnumerationParameters.h"
-#import "MSALLegacySharedAccountTestUtil.h"
 
 static NSString *kMSAAccountType = @"MSA";
 
