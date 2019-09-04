@@ -25,19 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        6
-#define MSAL_VER_PATCH      0
+#import <Foundation/Foundation.h>
+#import <WebKit/WebKit.h>
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+NS_ASSUME_NONNULL_BEGIN
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+@interface MSALWebviewParameters : NSObject <NSCopying>
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+#if TARGET_OS_IPHONE
+/*!
+ The view controller to present from. If nil, the current topmost view controller will be used.
+ */
+@property (nullable, weak, nonatomic) UIViewController *parentViewController;
+
+/*!
+ Modal presentation style for displaying authentication web content.
+ */
+@property (nonatomic) UIModalPresentationStyle presentationStyle;
+
+#endif
+
+/*!
+ A specific webView type for the interactive authentication flow.
+ By default, it will be set to MSALGlobalConfig.defaultWebviewType.
+ */
+@property (nonatomic) MSALWebviewType webviewType;
+
+/*!
+ For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
+ Web content will be rendered onto this view.
+ Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
+ */
+@property (nonatomic, nullable) WKWebView *customWebview;
+
+#if TARGET_OS_IPHONE
+- (nonnull instancetype)initWithParentViewController:(UIViewController *)parentViewController;
+
+- (nonnull instancetype)init DEPRECATED_MSG_ATTRIBUTE("Use -initWithParentViewController: instead.");
+
++ (nonnull instancetype)new DEPRECATED_MSG_ATTRIBUTE("Use -initWithParentViewController: instead.");
+#endif
+
+@end
+
+NS_ASSUME_NONNULL_END

@@ -91,7 +91,7 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
 - (id)copyWithZone:(NSZone *)zone
 {
     NSString *clientId = [_clientId copyWithZone:zone];
-    MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId];
+    MSALPublicClientApplicationConfig *item = [[MSALPublicClientApplicationConfig alloc] initWithClientId:[clientId copy]];
     item->_redirectUri = [_redirectUri copyWithZone:zone];
     item->_authority = [_authority copyWithZone:zone];
     

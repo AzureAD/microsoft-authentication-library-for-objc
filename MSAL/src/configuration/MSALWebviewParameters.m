@@ -25,19 +25,50 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       0
-#define MSAL_VER_LOW        6
-#define MSAL_VER_PATCH      0
+#import "MSALWebviewParameters.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@implementation MSALWebviewParameters
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+#if TARGET_OS_IPHONE
+- (instancetype)init
+{
+    return [super init];
+}
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
++ (instancetype)new
+{
+    return [super new];
+}
+
+- (instancetype)initWithParentViewController:(UIViewController *)parentViewController
+{
+    self = [super init];
+    if (self)
+    {
+        _parentViewController = parentViewController;
+    }
+    
+    return self;
+}
+#endif
+
+#pragma mark - NSCopying
+
+- (id)copyWithZone:(__unused NSZone *)zone
+{
+    MSALWebviewParameters *item;
+#if TARGET_OS_IPHONE
+    item = [[MSALWebviewParameters alloc] initWithParentViewController:_parentViewController];
+    item.parentViewController = _parentViewController;
+    item.presentationStyle = _presentationStyle;
+#else
+    item = [MSALWebviewParameters new];
+#endif
+    
+    item.webviewType = _webviewType;
+    item.customWebview = _customWebview;
+    
+    return item;
+}
+
+@end

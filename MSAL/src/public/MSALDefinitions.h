@@ -74,7 +74,6 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
     MSALBrokeredAvailabilityNone
 };
 
-
 typedef NS_ENUM(NSUInteger, MSALPromptType)
 {
     /*!
