@@ -318,6 +318,33 @@
     XCTAssertTrue(result);
 }
 
+- (void)testMatchesWithParameters_whenNoAppSignedIn_andDontReturnOnlySignedInAccounts_shouldReturnYES
+{
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:@"accountId" objectId:@"oid" tenantId:@"utid" username:nil] mutableCopy];
+    jsonDictionary[@"signInStatus"] = @{};
+    
+    MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oID.UTid" username:@"USER@contoso.COM"];
+    params.returnOnlySignedInAccounts = NO;
+    BOOL result = [account matchesParameters:params];
+    XCTAssertTrue(result);
+}
+
+- (void)testMatchesWithParameters_whenAllAppsSignedOut_andDontReturnOnlySignedInAccounts_shouldReturnNO
+{
+    NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:@"accountId" objectId:@"oid" tenantId:@"utid" username:nil] mutableCopy];
+    NSDictionary *signinStatusDict = @{@"com.microsoft.app1": @"SignedOut", @"com.microsoft.app2": @"SignedOut"};
+    jsonDictionary[@"signInStatus"] = signinStatusDict;
+    
+    MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oID.UTid" username:@"USER@contoso.COM"];
+    params.returnOnlySignedInAccounts = NO;
+    BOOL result = [account matchesParameters:params];
+    XCTAssertFalse(result);
+}
+
 - (void)testMatchesWithParameters_whenTenantProfileIdentifierNonNil_andTenantProfileIdentifierSame_shouldReturnYES
 {
     NSDictionary *jsonDictionary = [MSALLegacySharedAccountTestUtil sampleADALJSONDictionaryWithAccountId:@"accountId" objectId:@"myoid" tenantId:@"utid" username:nil];
