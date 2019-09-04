@@ -522,10 +522,7 @@
                               block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
-         
-         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-             completionBlock(nil, nil);
-         });
+         completionBlock(nil, nil);
      }];
     
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"username"
