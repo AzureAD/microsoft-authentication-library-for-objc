@@ -4397,7 +4397,7 @@
 			buildSettings = {
 				DEVELOPMENT_TEAM = "";
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
 			name = Debug;
 		};
@@ -4406,7 +4406,7 @@
 			baseConfigurationReference = D65A6FEB1E40002800C69FBA /* msal__framework__mac.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 			};
 			name = Release;
 		};
