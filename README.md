@@ -103,6 +103,10 @@ You can also use Git Submodule or check out the latest release and use as framew
 
  `msauth.[BUNDLE_ID]://auth`
 
+3. Add a new keychain group to your project Capabilities. See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS). Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
+
+![](/Users/olgadalton/Desktop/final_releases/msal/microsoft-authentication-library-for-objc/Images/keychain_example.png)
+
 ####iOS only steps:
 
 1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
@@ -130,11 +134,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
 
-3. Add a new keychain group to your project Capabilities `com.microsoft.adalcache` . See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS)
-
-![](Images/keychain_example.png)
-
-4. To handle a callback, add the following to `appDelegate`:
+3. To handle a callback, add the following to `appDelegate`:
 
 Swift
 ```swift
