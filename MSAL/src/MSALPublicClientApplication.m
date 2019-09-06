@@ -660,6 +660,25 @@
 - (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
                          completionBlock:(MSALCompletionBlock)completionBlock
 {
+    __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:context];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(result, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(result, msalError);
+        }
+    };
+    
     MSIDAuthority *providedAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     MSIDAuthority *requestAuthority = providedAuthority;
     
@@ -667,11 +686,11 @@
     // Authority type in PCA and parameters should match
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        if (completionBlock)
+        if (block)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            completionBlock(nil, msalError);
+            block(nil, msalError, nil);
         }
         
         return;
@@ -699,10 +718,10 @@
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
         
-        if (completionBlock)
+        if (block)
         {
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
-            completionBlock(nil, msalError);
+            block(nil, msalError, nil);
         }
         
         return;
@@ -723,7 +742,7 @@
     
     if (!msidParams)
     {
-        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:msidError]);
+        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidError], nil);
         return;
     }
     
@@ -756,23 +775,6 @@
                  self.internalConfig.clientApplicationCapabilities,
                  parameters.claimsRequest);
     
-    MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
-    {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
-        [MSALPublicClientApplication logOperation:@"acquireTokenSilent" result:result error:msalError context:msidParams];
-        
-        if (parameters.completionBlockQueue)
-        {
-            dispatch_async(parameters.completionBlockQueue, ^{
-                completionBlock(result, msalError);
-            });
-        }
-        else
-        {
-            completionBlock(result, msalError);
-        }
-    };
-    
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache
                                                                                                   accountMetadataAccessor:self.accountMetadataCache
@@ -786,7 +788,7 @@
     
     if (!requestController)
     {
-        block(nil, requestError);
+        block(nil, requestError, msidParams);
         return;
     }
     
@@ -794,16 +796,15 @@
         
         if (error)
         {
-            block(nil, error);
+            block(nil, error, msidParams);
             return;
         }
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
-        block(msalResult, resultError);
+        block(msalResult, resultError, msidParams);
     }];
-    
 }
 
 - (void)acquireTokenSilentForScopes:(NSArray<NSString *> *)scopes
@@ -920,16 +921,32 @@
     useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                    completionBlock:(MSALCompletionBlock)completionBlock
 {
+    __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
+        
+        if (!completionBlock) return;
+        
+        if ([NSThread isMainThread] && !parameters.completionBlockQueue)
+        {
+            completionBlock(result, msalError);
+        }
+        else
+        {
+            dispatch_async(parameters.completionBlockQueue ? parameters.completionBlockQueue : dispatch_get_main_queue(), ^{
+                completionBlock(result, msalError);
+            });
+        }
+    };
+    
     MSIDAuthority *requestAuthority = parameters.authority.msidAuthority ?: self.internalConfig.authority.msidAuthority;
     
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        if (completionBlock)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            completionBlock(nil, msalError);
-        }
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        block(nil, msalError, nil);
         
         return;
     }
@@ -986,7 +1003,7 @@
     
     if (!msidParams)
     {
-        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:msidError]);
+        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidError], nil);
         return;
     }
     
@@ -1024,7 +1041,7 @@
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            completionBlock(nil, msalError);
+            block(nil, msalError, msidParams);
             return;
         }
         
@@ -1032,7 +1049,7 @@
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            completionBlock(nil, msalError);
+            block(nil, msalError, msidParams);
             return;
         }
         
@@ -1054,7 +1071,7 @@
     
     if (msidWebviewError)
     {
-        completionBlock(nil, [MSALErrorConverter msalErrorFromMsidError:msidWebviewError]);
+        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidWebviewError], msidParams);
         return;
     }
     
@@ -1089,23 +1106,6 @@
                           self.internalConfig.clientApplicationCapabilities,
                           parameters.claimsRequest);
     
-    MSALCompletionBlock block = ^(MSALResult *result, NSError *msidError)
-    {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
-        [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:msidParams];
-        
-        if ([NSThread isMainThread] && !parameters.completionBlockQueue)
-        {
-            completionBlock(result, msalError);
-        }
-        else
-        {
-            dispatch_async(parameters.completionBlockQueue ? parameters.completionBlockQueue : dispatch_get_main_queue(), ^{
-                completionBlock(result, msalError);
-            });
-        }
-    };
-    
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache
                                                                                                   accountMetadataAccessor:self.accountMetadataCache
@@ -1119,15 +1119,15 @@
     
     if (!controller)
     {
-        block(nil, requestError);
+        block(nil, requestError, msidParams);
         return;
     }
     
-    [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
-        
+    [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
+    {
         if (error)
         {
-            block(nil, error);
+            block(nil, error, msidParams);
             return;
         }
         
@@ -1135,7 +1135,7 @@
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
-        block(msalResult, resultError);
+        block(msalResult, resultError, msidParams);
     }];
 }
 
