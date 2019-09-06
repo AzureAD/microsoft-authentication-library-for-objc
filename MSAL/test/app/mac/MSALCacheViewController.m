@@ -237,17 +237,17 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-    return !item ? [[self.cacheDict allKeys] count] : [[self.cacheDict objectForKey:item] count];
+    return item ? [[self.cacheDict objectForKey:item] count] : [[self.cacheDict allKeys] count];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
-    return !item ? YES : [[self.cacheDict objectForKey:item] count];
+    return item ? [[self.cacheDict objectForKey:item] count] : YES;
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
-    return !item ? [[self.cacheDict allKeys] objectAtIndex:index] : [[self.cacheDict objectForKey:item] objectAtIndex:index];
+    return item ? [[self.cacheDict objectForKey:item] objectAtIndex:index] : [[self.cacheDict allKeys] objectAtIndex:index];
 }
 
 - (NSView *)outlineView:(NSOutlineView *)outlineView viewForTableColumn:(NSTableColumn *)tableColumn item:(id)item
@@ -263,13 +263,11 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
         {
             textValue = [self getUPN:item] ? [self getUPN:item] : s_appMetadata;
         }
-        
         else if ([item isKindOfClass:[MSIDAccount class]])
         {
             MSIDAccount *account = (MSIDAccount *)item;
             textValue = [NSString stringWithFormat:@"Account: AccountIdentifier - %@", [self accountIdentifier:account.accountIdentifier]];
         }
-        
         else if ([item isKindOfClass:[MSIDAppMetadataCacheItem class]])
         {
             MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)item;
