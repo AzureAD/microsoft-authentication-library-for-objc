@@ -18,10 +18,18 @@ script:
   - ./build.py
 
 after_success:
-# Run slather once to have it print out the results in the travis log
-#  - slather coverage -s <xcode project here>
+    - gem install jazzy
+    - make documentation
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GH_TOKEN  # Set in the settings page of your repository, as a secure variable
+  local-dir: docs
+  on:
+    branch: reference-docs
 
 notifications:
   slack:
     secure: BIziStN+8QJLjdqNbLyRWWw9kI/MQsX+rZq+xz/bfTANk0gbEryLgMSiEoHxdoctu0dOqOet1voYuDKs3RQW3W0yh0AhDwVgWThNkTA0oDXF8zqm9AXettXNtmYHipaYb6+z6L4lpJOkClQp3hAheu8cM2igqye1O0FQla9g/PA=
+
 
