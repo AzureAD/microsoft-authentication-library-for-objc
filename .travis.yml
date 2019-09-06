@@ -18,7 +18,6 @@ script:
   - ./build.py
 
 after_success:
-    - gem install jazzy
     - ./build_docs.sh
 deploy:
   provider: pages
