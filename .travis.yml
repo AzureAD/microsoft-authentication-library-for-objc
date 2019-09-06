@@ -19,12 +19,12 @@ script:
 
 after_success:
     - gem install jazzy
-    - make documentation
+    - ./build_docs.sh
 deploy:
   provider: pages
   skip-cleanup: true
   github-token: $GH_TOKEN  # Set in the settings page of your repository, as a secure variable
-  local-dir: docs
+  local-dir: docs.temp/docs
   on:
     branch: reference-docs
 
