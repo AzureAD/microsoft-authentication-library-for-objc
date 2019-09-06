@@ -686,12 +686,8 @@
     // Authority type in PCA and parameters should match
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        if (block)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, nil);
-        }
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+        block(nil, msidError, nil);
         
         return;
     }
@@ -718,11 +714,7 @@
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error when updating authority: %ld, %@", (long)authorityError.code, authorityError.domain);
         
-        if (block)
-        {
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:authorityError];
-            block(nil, msalError, nil);
-        }
+        block(nil, authorityError, nil);
         
         return;
     }
@@ -742,7 +734,7 @@
     
     if (!msidParams)
     {
-        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidError], nil);
+        block(nil, msidError, nil);
         return;
     }
     
@@ -1003,7 +995,7 @@
     
     if (!msidParams)
     {
-        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidError], nil);
+        block(nil, msidError, nil);
         return;
     }
     
@@ -1071,7 +1063,7 @@
     
     if (msidWebviewError)
     {
-        block(nil, [MSALErrorConverter msalErrorFromMsidError:msidWebviewError], msidParams);
+        block(nil, msidWebviewError, msidParams);
         return;
     }
     
