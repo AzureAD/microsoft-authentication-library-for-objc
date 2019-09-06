@@ -40,6 +40,10 @@
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
 
+/**
+    Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
+    One instance of MSALPublicClientApplication can be used to interact with multiple AAD clouds, and tenants, without needing to create a new instance for each authority. For most apps, one MSALPublicClientApplication instance is sufficient.
+ */
 @interface MSALPublicClientApplication : NSObject
 
 /**
