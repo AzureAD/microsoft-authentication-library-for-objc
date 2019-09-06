@@ -46,43 +46,43 @@
 
  */
 
-/*!
+/**
     The OAuth error returned by the service.
  */
 extern NSString *MSALOAuthErrorKey;
 
-/*!
+/**
     The suberror returned by the service.
  */
 extern NSString *MSALOAuthSubErrorKey;
 
-/*!
+/**
     The extded error description. Note that this string can change ands should
     not be relied upon for any error handling logic.
  */
 extern NSString *MSALErrorDescriptionKey;
 
-/*!
+/**
  Internal error code returned together with MSALErrorInternal error.
  */
 extern NSString *MSALInternalErrorCodeKey;
 
-/*!
+/**
  Contains all http headers returned from the http error response
  */
 extern NSString *MSALHTTPHeadersKey;
 
-/*!
+/**
  Correlation ID used for the request
  */
 extern NSString *MSALCorrelationIDKey;
 
-/*!
+/**
  Specifies http response code for error cases
  */
 extern NSString *MSALHTTPResponseCodeKey;
 
-/*!
+/**
  List of scopes that were requested from MSAL, but not granted in the response.
 
  This can happen in multiple cases:
@@ -99,18 +99,18 @@ extern NSString *MSALDeclinedScopesKey;
  */
 extern NSString *MSALDisplayableUserIdKey;
 
-/*!
+/**
  List of granted scopes in case some scopes weren't granted (see MSALDeclinedScopesKey for more info)
  */
 extern NSString *MSALGrantedScopesKey;
 
-/*!
+/**
  If server returned tokens successfully, but response data doesn't pass validation,
  MSAL will return an error and original result in the error userInfo
  */
 extern NSString *MSALInvalidResultKey;
 
-/*!
+/**
  Broker version that was used for the authentication
  */
 extern NSString *MSALBrokerVersionKey;
@@ -122,24 +122,24 @@ extern NSString *MSALHomeAccountIdKey;
 
 extern NSString *MSALErrorDomain;
 
-/*!
+/**
  MSALError enum contains all errors that should be considered for handling in runtime.
  */
 typedef NS_ENUM(NSInteger, MSALError)
 {
-    /*!
+    /**
      An unrecoverable error occured either within the MSAL client or on server side.
      Generally, this error cannot be resolved in runtime. Log the error, then inspect the MSALInternalErrorCodeKey in the userInfo dictionary.
      More detailed information about the specific error under MSALInternalErrorCodeKey can be found in MSALInternalError enum.
      */
     MSALErrorInternal                            = -50000,
     
-    /*!
+    /**
      Workplace join is required to proceed. Handling of this error is optional.
      */
     MSALErrorWorkplaceJoinRequired               = -50001,
     
-    /*!
+    /**
      Interaction required errors occur because of a wide variety of errors
      returned by the authentication service. In all cases the proper response
      is to use a MSAL interactive AcquireToken call with the same parameters.
@@ -148,7 +148,7 @@ typedef NS_ENUM(NSInteger, MSALError)
      */
     MSALErrorInteractionRequired                 = -50002,
     
-    /*!
+    /**
      The request was not fully completed and some scopes were not granted access to.
      This can be caused by a user declining consent on certain scopes.
      For more details check MSALGrantedScopesKey and MSALDeclinedScopesKey
@@ -156,7 +156,7 @@ typedef NS_ENUM(NSInteger, MSALError)
      */
     MSALErrorServerDeclinedScopes                = -50003,
     
-    /*!
+    /**
      The requested resource is protected by an Intune Conditional Access policy.
      The calling app should integrate the Intune SDK and call the remediateComplianceForIdentity:silent: API,
      please see https://aka.ms/intuneMAMSDK for more information. Handling of this error is optional (handle it only
@@ -164,26 +164,26 @@ typedef NS_ENUM(NSInteger, MSALError)
      */
     MSALErrorServerProtectionPoliciesRequired    = -50004,
     
-    /*!
+    /**
      The user cancelled the web auth session by tapping the "Done" button on the SFSafariViewController.
      Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
 };
 
-/*!
+/**
  MSALInternalError enum contains all possible errors under MSALInternalErrorCodeKey.
  This enum exists only for the reference, you should not try to handle these errors in runtime.
  */
 typedef NS_ENUM(NSInteger, MSALInternalError)
 {
-    /*!
+    /**
      A required parameter was not provided, or a passed in parameter was
      invalid. See MSALErrorDescriptionKey for more information.
      */
     MSALInternalErrorInvalidParameter                   = -42000,
     
-    /*!
+    /**
      The required MSAL URL scheme is not registered in the app's info.plist.
      The scheme should be "msal<clientid>"
      
@@ -213,19 +213,19 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorInvalidScope                       = -42005,
     MSALInternalErrorUnauthorizedClient                 = -42006,
     
-    /*!
+    /**
      The server returned an unexpected http response. For instance, this code
      is returned for 5xx server response when something has gone wrong on the server but the
      server could not be more specific on what the exact problem is.
      */
     MSALInternalErrorUnhandledResponse                  = -42007,
     
-    /*!
+    /**
      An unexpected error occured within the MSAL client.
      */
     MSALInternalErrorUnexpected                         = -42008,
     
-    /*!
+    /**
      The passed in authority URL does not pass validation.
      If you're trying to use B2C, you must disable authority validation by
      setting validateAuthority of MSALPublicClientApplication to NO.
@@ -234,53 +234,53 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     
     MSALInternalErrorMismatchedUser                     = -42101,
     
-    /*!
+    /**
      The user or application failed to authenticate in the interactive flow.
      Inspect MSALOAuthErrorKey and MSALErrorDescriptionKey in the userInfo
      dictionary for more detailed information about the specific error.
      */
     MSALInternalErrorAuthorizationFailed                = -42104,
     
-    /*!
+    /**
      MSAL requires a non-nil account for the acquire token silent call
      */
     MSALInternalErrorAccountRequired                    = -42106,
     
-    /*!
+    /**
      The authentication request was cancelled programmatically.
      */
     MSALInternalErrorSessionCanceled                    = -42401,
     
-    /*!
+    /**
      An interactive authentication session is already running with the
      SafariViewController visible. Another authentication session can not be
      launched yet.
      */
     MSALInternalErrorInteractiveSessionAlreadyRunning   = -42402,
     
-    /*!
+    /**
      MSAL could not find the current view controller in the view controller
      heirarchy to display the SFSafariViewController on top of.
      */
     MSALInternalErrorNoViewController                   = -42403,
     
-    /*!
+    /**
      MSAL tried to open a URL from an extension, which is not allowed.
      */
     MSALInternalErrorAttemptToOpenURLFromExtension      = -42404,
     
-    /*!
+    /**
      MSAL tried to show UI in the extension, which is not allowed.
      */
     MSALInternalErrorUINotSupportedInExtension          = -42405,
     
-    /*!
+    /**
      The state returned by the server does not match the state that was sent to
      the server at the beginning of the authorization attempt.
      */
     MSALInternalErrorInvalidState                       = -42501,
     
-    /*!
+    /**
      Response was received in a network call, but the response body was invalid.
      
      e.g. Response was to be expected a key-value pair with "key1" and
@@ -289,72 +289,72 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      */
     MSALInternalErrorInvalidResponse                    = -42600,
     
-    /*!
+    /**
      Server tried to redirect to non https URL.
      */
     MSALInternalErrorNonHttpsRedirect                   = -42602,
     
-    /*!
+    /**
      User returned manually to the application without completion authentication inside the broker
      */
     MSALInternalErrorBrokerResponseNotReceived          = -42700,
     
-    /*!
+    /**
      MSAL cannot read broker resume state. It might be that application removed it, or NSUserDefaults is corrupted.
      */
     MSALInternalErrorBrokerNoResumeStateFound           = -42701,
     
-    /*!
+    /**
      MSAL cannot read broker resume state. It is corrupted.
      */
     MSALInternalErrorBrokerBadResumeStateFound          = -42702,
     
-    /*!
+    /**
      MSAL cannot read broker resume state. It is saved for a different redirect uri. The app should check its registered schemes.
      */
     MSALInternalErrorBrokerMismatchedResumeState        = -42703,
     
-    /*!
+    /**
      Invalid broker response.
      */
     MSALInternalErrorBrokerResponseHashMissing          = -42704,
     
-    /*!
+    /**
      Corrupted broker response.
      */
     MSALInternalErrorBrokerCorruptedResponse            = -42705,
     
-    /*!
+    /**
      Decryption of broker response failed.
      */
     MSALInternalErrorBrokerResponseDecryptionFailed     = -42706,
     
-    /*!
+    /**
      Unexpected broker response hash.
      */
     MSALInternalErrorBrokerResponseHashMismatch         = -42707,
     
-    /*!
+    /**
      Failed to create broker key.
      */
     MSALInternalErrorBrokerKeyFailedToCreate            = -42708,
     
-    /*!
+    /**
      Couldn't read broker key. Maybe broker key got wiped from the keychain.
      */
     MSALInternalErrorBrokerKeyNotFound                  = -42709,
     
-    /*!
+    /**
      Broker returned unreadable result.
      */
     MSALInternalErrorBrokerUnknown                      = -42711,
     
-    /*!
+    /**
      Failed to write broker application token.
      */
     MSALInternalErrorBrokerApplicationTokenWriteFailed  = -42712,
     
-    /*!
+    /**
      Failed to read broker application token.
      */
     MSALInternalErrorBrokerApplicationTokenReadFailed   = -42713,

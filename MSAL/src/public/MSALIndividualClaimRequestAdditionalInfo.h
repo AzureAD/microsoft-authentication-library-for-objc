@@ -30,7 +30,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  Represents the additional information that can be sent to an authorization server for a request claim in the claim request parameter.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
  
@@ -41,13 +41,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALIndividualClaimRequestAdditionalInfo : NSObject
 
-/*!
+/**
  Indicates whether the Claim being requested is an Essential Claim.
  Should be either boolean or nil.
 */
 @property (nonatomic, nullable) NSNumber *essential;
 
-/*!
+/**
  Requests that the Claim be returned with a particular value.
  Must be an instance of NSString, NSNumber, NSArray, NSDictionary, or NSNull.
  Otherwise exception will be thrown during json serialization.

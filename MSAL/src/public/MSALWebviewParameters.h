@@ -33,25 +33,25 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MSALWebviewParameters : NSObject <NSCopying>
 
 #if TARGET_OS_IPHONE
-/*!
+/**
  The view controller to present from. If nil, the current topmost view controller will be used.
  */
 @property (nullable, weak, nonatomic) UIViewController *parentViewController;
 
-/*!
+/**
  Modal presentation style for displaying authentication web content.
  */
 @property (nonatomic) UIModalPresentationStyle presentationStyle;
 
 #endif
 
-/*!
+/**
  A specific webView type for the interactive authentication flow.
  By default, it will be set to MSALGlobalConfig.defaultWebviewType.
  */
 @property (nonatomic) MSALWebviewType webviewType;
 
-/*!
+/**
  For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
  Web content will be rendered onto this view.
  Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.

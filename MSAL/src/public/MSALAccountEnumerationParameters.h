@@ -29,22 +29,22 @@
 
 @interface MSALAccountEnumerationParameters : NSObject
 
-/*!
+/**
  Unique identifier for the account.
  */
 @property (nonatomic, readonly, nullable) NSString *identifier;
 
-/*!
+/**
  Unique identifier for the tenant profile.
  */
 @property (nonatomic, readonly, nullable) NSString *tenantProfileIdentifier;
 
-/*!
+/**
  Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
  */
 @property (nonatomic, readonly, nullable) NSString *username;
 
-/*!
+/**
  Filter accounts by whether this account is in the signed in state for the current client.
  Signed in state is determined by the presence of a refresh token credential for the requesting client.
  If account has been explicitly removed through the "removeAccount" API, it will be also marked as "signed out" as MSAL will remove refresh token for the client.

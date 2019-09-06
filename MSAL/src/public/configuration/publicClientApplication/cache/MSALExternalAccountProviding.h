@@ -34,7 +34,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  Use this protocol if you have external account storage in addition to MSAL account storage.
  For example, if you find yourself in situation where on each MSAL completion block invocation you are updating accounts in your own storage,
  it might be beneficial to instead use MSALExternalAccountProviding extensibility feature.

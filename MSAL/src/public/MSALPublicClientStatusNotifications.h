@@ -30,22 +30,22 @@
 #ifndef MSALPublicClientStatusNotifications_h
 #define MSALPublicClientStatusNotifications_h
 
-/*! Fired at the start of a resource load in the webview. The URL of the load, if available, will be in the @"url" key in the userInfo dictionary */
+/** Fired at the start of a resource load in the webview. The URL of the load, if available, will be in the @"url" key in the userInfo dictionary */
 extern NSString *MSALWebAuthDidStartLoadNotification;
 
-/*! Fired when a resource finishes loading in the webview. */
+/** Fired when a resource finishes loading in the webview. */
 extern NSString *MSALWebAuthDidFinishLoadNotification;
 
-/*! Fired when web authentication fails due to reasons originating from the network. Look at the @"error" key in the userInfo dictionary for more details.*/
+/** Fired when web authentication fails due to reasons originating from the network. Look at the @"error" key in the userInfo dictionary for more details.*/
 extern NSString *MSALWebAuthDidFailNotification;
 
-/*! Fired when authentication finishes */
+/** Fired when authentication finishes */
 extern NSString *MSALWebAuthDidCompleteNotification;
 
-/*! Fired before ADAL invokes the broker app */
+/** Fired before ADAL invokes the broker app */
 extern NSString *MSALWebAuthWillSwitchToBrokerApp;
 
-/*! Fired when the application receives a response from the broker. Look at the @"response"
+/** Fired when the application receives a response from the broker. Look at the @"response"
  key in the userInfo dictionary for the broker response */
 extern NSString *MSALWebAuthDidReceieveResponseFromBroker;
 

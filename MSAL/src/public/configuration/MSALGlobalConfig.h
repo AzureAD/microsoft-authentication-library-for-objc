@@ -36,14 +36,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALGlobalConfig : NSObject
 
-/*! Network configuration, refer to MSALHTTPConfig.h for more detail */
+/** Network configuration, refer to MSALHTTPConfig.h for more detail */
 @property (class, readonly) MSALHTTPConfig *httpConfig;
-/*! Telemetry configurations, refer to MSALTelemetryConfig.h for more detail */
+/** Telemetry configurations, refer to MSALTelemetryConfig.h for more detail */
 @property (class, readonly) MSALTelemetryConfig *telemetryConfig;
-/*! Logger configurations, refer to MSALLoggerConfig.h for more detail */
+/** Logger configurations, refer to MSALLoggerConfig.h for more detail */
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
 
-/*! The webview selection to be used for authentication.
+/** The webview selection to be used for authentication.
  By default, it is going to use the following to authenticate.
  - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
  - macOS:  WKWebView
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
 
 #if TARGET_OS_IPHONE
-/*!
+/**
  Setting to define MSAL behavior regarding broker.
  Broker is enabled by default.
  */

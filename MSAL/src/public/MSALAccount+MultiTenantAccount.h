@@ -32,7 +32,7 @@
 
 @interface MSALAccount (MultiTenantAccount)
 
-/*!
+/**
  Array of all tenants for which a token has been requested by the client.
  
  Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
@@ -45,7 +45,7 @@
  */
 @property (readonly, nullable) NSArray<MSALTenantProfile *> *tenantProfiles;
 
-/*!
+/**
  Unique identifier of the account in the home tenant.
  Provides additional information regarding account's home objectId and home tenantId in case of AAD.
  */

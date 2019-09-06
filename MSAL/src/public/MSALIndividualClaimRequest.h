@@ -31,7 +31,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  Represents the individual claim request.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
  
@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALIndividualClaimRequest : NSObject
 
-/*!
+/**
  Init with claim name.
  @param name Name of the requsted claim.
  */
@@ -52,12 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init NS_UNAVAILABLE;
 
-/*!
+/**
  Name of the claim being requested.
  */
 @property (nonatomic) NSString *name;
 
-/*!
+/**
  Additional information that can be optionally sent to the authorization server (default is null) for a particular requested claim.
  */
 @property (nonatomic, nullable) MSALIndividualClaimRequestAdditionalInfo *additionalInfo;

@@ -32,18 +32,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALTelemetryConfig : NSObject
 
-/*!
+/**
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
 @property (atomic) BOOL piiEnabled;
 
-/*!
+/**
  If set YES, telemetry events are only dispatched when errors occurred;
  If set NO, MSAL will dispatch all events.
  */
 @property (atomic) BOOL notifyOnFailureOnly;
 
-/*!
+/**
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback;

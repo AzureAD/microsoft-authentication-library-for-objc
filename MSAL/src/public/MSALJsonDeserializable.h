@@ -29,12 +29,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  A protocol that objects adopt to provide deserialization from JSON.
  */
 @protocol MSALJsonDeserializable <NSObject>
 
-/*!
+/**
  Init with json string.
  @param jsonString Json string to deserialize from.
  @param error The error that occurred during deserialization.

@@ -25,7 +25,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  @class MSALTelemetry
  
  The central class for MSAL telemetry.
@@ -37,23 +37,23 @@ NS_ASSUME_NONNULL_BEGIN
 - (nonnull instancetype)init NS_UNAVAILABLE;
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
-/*!
+/**
  Get a singleton instance of MSALTelemetry.
  */
 + (nonnull MSALTelemetry *)sharedInstance DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
 
-/*!
+/**
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
 @property (atomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
 
-/*!
+/**
  If set YES, telemetry events are only dispatched when errors occurred;
  If set NO, MSAL will dispatch all events.
  */
 @property (atomic) BOOL notifyOnFailureOnly DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly instead");
 
-/*!
+/**
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.telemetryCallback instead");

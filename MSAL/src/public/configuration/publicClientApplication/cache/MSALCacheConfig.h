@@ -34,14 +34,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALCacheConfig : NSObject <NSCopying>
 
-/*!
+/**
     The keychain sharing group to use for the token cache.
     The default value is com.microsoft.adalcache and it needs to be declared in your application's entitlements.
     See more https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps?language=objc
  */
 @property NSString *keychainSharingGroup;
 
-/*!
+/**
     List of external account stotage providers that helps you to combine your own accounts with MSAL accounts and use a consistent API for the account management and enumeration.
     Each external account provider is responsible for retrieving, enumerating, updating and removing external accounts.
     Some examples where this might be useful:
@@ -53,19 +53,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
 
 #if !TARGET_OS_IPHONE
-/*!
+/**
     Backward compatible ADAL serialized cache provider.
     Use it if you were serializing ADAL cache on macOS and want to have backward compatibility with macOS apps.
  */
 @property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
 
-/*!
+/**
  Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
  created by the keychain cache.
  */
 @property (readonly, nonnull) NSArray *trustedApplications;
 
-/*!
+/**
  Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
  */
 - (NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
@@ -77,7 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)defaultKeychainSharingGroup;
 
-/*!
+/**
     Adds a new external account storage provider to be used by MSAL in account retrieval.
     This operation is not thread safe.
  */

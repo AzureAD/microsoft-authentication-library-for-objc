@@ -31,20 +31,20 @@
 
 @protocol MSALAccount <NSObject>
 
-/*!
+/**
  Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string including special characters such as @, /, or whitespace.
  Mostly maps to UserPrincipleName(UPN) in case of AAD.
  Can be nil if not returned from the service.
  */
 @property (readonly, nullable) NSString *username;
 
-/*!
+/**
  Unique identifier for the account.
  Save this for account lookups from cache at a later point.
  */
 @property (readonly, nullable) NSString *identifier;
 
-/*!
+/**
  Host part of the authority string used for authentication based on the issuer identifier.
  Note that if a host supports multiple tenants, there'll be one MSALAccount for the host and one tenant profile per each tenant accessed (see MSALAccount+MultiTenantAccount.h header)
  If a host doesn't support multiple tenants, there'll be one MSALAccount with accountClaims returned.
@@ -65,7 +65,7 @@
  */
 @property (readonly, nonnull) NSString *environment;
 
-/*!
+/**
  ID token claims for the account.
  Can be used to read additional information about the account, e.g. name
  Will only be returned if there has been an id token issued for the client Id for the account's source tenant.

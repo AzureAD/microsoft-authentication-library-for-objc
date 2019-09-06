@@ -32,7 +32,9 @@
 @class MSALAccount;
 
 
-/*! Levels of logging. Defines the priority of the logged message */
+/**
+ Levels of logging. Defines the priority of the logged message
+ */
 typedef NS_ENUM(NSInteger, MSALLogLevel)
 {
     MSALLogLevelNothing,
@@ -76,21 +78,21 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
 
 typedef NS_ENUM(NSUInteger, MSALPromptType)
 {
-    /*!
+    /**
      If no user is specified the authentication webview will present a list of users currently
      signed in for the user to select among.
      */
     MSALPromptTypeSelectAccount,
 
-    /*!
+    /**
      Require the user to authenticate in the webview
      */
     MSALPromptTypeLogin,
-    /*!
+    /**
      Require the user to consent to the current set of scopes for the request.
      */
     MSALPromptTypeConsent,
-    /*!
+    /**
      The SSO experience will be determined by the presence of cookies in the webview and account type.
      User won't be prompted unless necessary.
      If multiple users are signed in, select account experience will be presented.
@@ -103,7 +105,7 @@ typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nu
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 
-/*!
+/**
  The LogCallback block for the MSAL logger
  
  @param  level           The level of the log message
@@ -116,7 +118,7 @@ typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable a
  */
 typedef void (^MSALLogCallback)(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII);
 
-/*!
+/**
  MSAL telemetry callback.
  
  @param event Aggregated telemetry event.
