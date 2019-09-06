@@ -105,7 +105,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 3. Add a new keychain group to your project Capabilities. See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS). Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
 
-![](/Users/olgadalton/Desktop/final_releases/msal/microsoft-authentication-library-for-objc/Images/keychain_example.png)
+![](Images/keychain_example.png)
 
 ####iOS only steps:
 
