@@ -31,10 +31,12 @@
 /**
     An ADFS authority indicating a directory that MSAL can use to obtain tokens when talking to ADFS directly.
     For example: https://somesite.contoso.com/adfs
-    Note, modern authentication with Active Directory Federation Services as identity provider (ADFS) is not supported (see ADFS for Developers for details). ADFS is supported through federation only.
+    @note Modern authentication with Active Directory Federation Services as identity provider (ADFS) is not supported by MSAL. ADFS is supported through federation only.
     Initialization of MSALADFSAuthority will always fail.
  */
 @interface MSALADFSAuthority : MSALAuthority
+
+#pragma mark - Initializing MSALADFSAuthority with an NSURL
 
 /**
 Initializes MSALADFSAuthority with NSURL.
