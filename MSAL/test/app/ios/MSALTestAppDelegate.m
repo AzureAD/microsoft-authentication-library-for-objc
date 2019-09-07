@@ -60,8 +60,8 @@
     
     _tabBar = [UITabBarController new];
     
-    
-    MSALTestAppAcquireTokenViewController* tokenController = [MSALTestAppAcquireTokenViewController new];
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"MSALTestAppAcquireTokenViewController" bundle:nil];
+    MSALTestAppAcquireTokenViewController *tokenController = [storyboard instantiateViewControllerWithIdentifier:@"MSALTestAppAcquireTokenViewController"];
     UINavigationController* tokenNavController = [[UINavigationController alloc] initWithRootViewController:tokenController];
     tokenNavController.tabBarItem = tokenController.tabBarItem;
     tokenNavController.navigationBar.hidden = YES;

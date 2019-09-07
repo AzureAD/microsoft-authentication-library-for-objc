@@ -330,7 +330,6 @@ static NSString * const defaultScope = @"User.Read";
     parameters.extraQueryParameters = extraQueryParameters;
     
     [application acquireTokenWithParameters:parameters completionBlock:completionBlock];
-    
 }
 
 - (IBAction)acquireTokenSilent:(id)sender

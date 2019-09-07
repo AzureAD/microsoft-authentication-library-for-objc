@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALTestCase.h"
+#import "XCTestCase+HelperMethods.h"
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDTestSwizzle.h"
 #import "MSALTestBundle.h"
@@ -493,6 +494,7 @@
     UIViewController *controller = nil;
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
+    params.parentViewController = [self.class sharedViewControllerStub];
 #else
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]];
 #endif
@@ -510,6 +512,127 @@
                             }];
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+#if TARGET_OS_IPHONE
+- (void)testAcquireToken_whenCustomCompletionBlockQueueAndParentControllerNilError_shouldExecuteOnThatQueue
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+    
+    MSALInteractiveTokenParameters *params = nil;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    UIViewController *controller = nil;
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    [application acquireTokenWithParameters:params
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                
+                                const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+                                XCTAssertEqual(l1, l2);
+                            }];
+}
+
+- (void)testAcquireToken_whenCustomCompletionBlockQueueAndWindowNilError_shouldExecuteOnThatQueue
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+    
+    MSALInteractiveTokenParameters *params = nil;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    UIViewController *controller = nil;
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
+    params.parentViewController = [self.class sharedViewControllerStub];
+    params.parentViewController.view = nil;
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    [application acquireTokenWithParameters:params
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                
+                                const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+                                XCTAssertEqual(l1, l2);
+                            }];
+}
+#endif
+
+- (void)testAcquireToken_whenCustomCompletionBlockQueueAndScopeIsReservedError_shouldExecuteOnThatQueue
+{
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.knownAuthorities = @[authority];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDLocalInteractiveController class]
+                              block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
+         completionBlock(nil, nil);
+     }];
+    
+    MSALInteractiveTokenParameters *params = nil;
+    #if TARGET_OS_IPHONE
+        MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+        
+        UIViewController *controller = nil;
+        MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+        params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"] webviewParameters:webParams];
+        params.parentViewController = [self.class sharedViewControllerStub];
+    #else
+        params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"profile"]];
+    #endif
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    [application acquireTokenWithParameters:params
+                            completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                
+                                const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+                                XCTAssertEqual(l1, l2);
+                            }];
 }
 
 - (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
@@ -550,6 +673,41 @@
     }];
     
     [self waitForExpectationsWithTimeout:1.0 handler:nil];
+}
+
+- (void)testAcquireTokenSilent_whenCustomCompletionBlockQueueAndScopeIsReservedError_shouldExecuteOnThatQueue
+{
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:[@"https://login.microsoftonline.com/common" msalAuthority]];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(acquireToken:)
+                              class:[MSIDSilentController class]
+                              block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
+     {
+         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+         completionBlock(nil, nil);
+     }];
+    
+    MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"username"
+                                                   homeAccountId:[[MSALAccountId alloc] initWithAccountIdentifier:@"kk" objectId:@"oid" tenantId:@"tid"]
+                                                     environment:@"env"
+                                                  tenantProfiles:nil];
+    
+    MSALSilentTokenParameters *params = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"profile"] account:account];
+    
+    params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+    const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
+    
+    [application acquireTokenSilentWithParameters:params
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+                                      const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
+                                      XCTAssertEqual(l1, l2);
+    }];
 }
 
 - (void)testAcquireToken_whenNoCustomCompletionBlockQueue_andInvokedFromBackgroundQueue_shouldExecuteOnMainQueue

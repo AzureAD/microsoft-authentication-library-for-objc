@@ -52,7 +52,7 @@ static id FakeCurrentViewController(id obj, SEL sel)
     
     // Because msalCurrentViewController is defined in a category we can't safely
     // override it in yet another category, instead, swizzling!
-    [[MSIDTestSwizzle classMethod:@selector(msidCurrentViewController)
+    [[MSIDTestSwizzle classMethod:@selector(msidCurrentViewController:)
                             class:[UIApplication class]
                              impl:(IMP)FakeCurrentViewController] makePermanent];
 }
