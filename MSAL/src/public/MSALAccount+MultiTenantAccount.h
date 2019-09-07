@@ -32,14 +32,16 @@
 
 @interface MSALAccount (MultiTenantAccount)
 
+#pragma mark - Reading information about account in different AAD tenants
+
 /**
  Array of all tenants for which a token has been requested by the client.
  
  Note that this field will only be available when querying account(s) by the following APIs of MSALPublicClientApplication:
- -allAccounts:
- -accountForHomeAccountId:error:
- -accountForUsername:error:
- -allAccountsFilteredByAuthority:
+ `-[MSALPublicClientApplication allAccounts:]`
+ `-[MSALPublicClientApplication accountForHomeAccountId:error:]`
+ `-[MSALPublicClientApplication accountForUsername:error:]`
+ `-[MSALPublicClientApplication allAccountsFilteredByAuthority:]`
  
  The field will be nil in other scenarios. E.g., account returned as part of the result of an acquire token interactive/silent call.
  */
