@@ -43,8 +43,26 @@
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
     One instance of MSALPublicClientApplication can be used to interact with multiple AAD clouds, and tenants, without needing to create a new instance for each authority. For most apps, one MSALPublicClientApplication instance is sufficient.
- */
+
+    To create an instance of the MSALPublicClientApplication, first create an instance `MSALPublicClientApplicationConfig`.
+    Setup  `MSALPublicClientApplicationConfig` with needed configuration, and pass it to the `[MSALPublicClientApplication initWithConfiguration:error:]` initializer.
+
+    For example:
+
+    <pre>
+    NSError *msalError = nil;
+
+    MSALPublicClientApplicationConfig *config =
+            [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"your-client-id-here"];
+
+    MSALPublicClientApplication *application =
+            [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
+    </pre>
+
+*/
 @interface MSALPublicClientApplication : NSObject
+
+#pragma mark - Public properties
 
 /**
     A copy of the configuration which was provided in the initializer.
@@ -95,6 +113,8 @@
  Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
  For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+
+#pragma mark - Initializers
 
 /**
  Initialize a MSALPublicClientApplication with a given configuration
@@ -218,6 +238,8 @@
                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
 #endif
 
+#pragma mark - Account enumeration
+
 /**
  Returns an array of all accounts visible to this application.
 
@@ -272,7 +294,7 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
-#pragma mark - SafariViewController Support
+#pragma mark - MSAL response callback
 
 #if TARGET_OS_IPHONE
 /**
@@ -304,7 +326,7 @@
  */
 + (BOOL)cancelCurrentWebAuthSession;
 
-#pragma mark - Acquire Token
+#pragma mark - Getting a token interactively
 
 /**
  Acquire a token for a provided parameters using interactive authentication.
@@ -328,7 +350,7 @@
 - (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
               completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenWithParameters:completionBlock instead");
 
-#pragma mark - Acquire Token using Login Hint
+#pragma mark - Getting a token interactively with a Login Hint
 
 
 /**
@@ -438,7 +460,7 @@
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenWithParameters:completionBlock instead");
 
-#pragma mark - Acquire Token using Account
+#pragma mark - Getting a token interactively with an Account
 
 /**
     Acquire a token interactively for an existing account. This is typically used after receiving
@@ -549,7 +571,7 @@
                 correlationId:(nullable NSUUID *)correlationId
               completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenWithParameters:completionBlock instead");
 
-#pragma mark - Acquire Token Silent
+#pragma mark - Getting a token silently
 
 /**
  Acquire a token silently for a provided parameters.
@@ -656,7 +678,7 @@
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenSilentWithParameters:completionBlock instead");
 
-#pragma mark - Remove account from cache
+#pragma mark - Account removal
 
 /**
     Removes all tokens from the cache for this application for the provided account
