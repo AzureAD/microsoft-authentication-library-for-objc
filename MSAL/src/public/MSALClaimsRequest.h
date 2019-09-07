@@ -32,12 +32,20 @@
 @class MSALIndividualClaimRequest;
 
 /**
- Claims targets. Currently we support only "access_token" and "id_token".
+ Target for the claims request.
+ Currently we support only "access_token" and "id_token".
  "userinfo" is not supported.
  */
 typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)
 {
+    /**
+        Request specific claims for the id_token.
+     */
     MSALClaimsRequestTargetIdToken,
+    
+    /**
+       Request specific claims for the access_token.
+    */
     MSALClaimsRequestTargetAccessToken
 };
 

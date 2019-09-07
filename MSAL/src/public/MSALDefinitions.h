@@ -37,32 +37,48 @@
  */
 typedef NS_ENUM(NSInteger, MSALLogLevel)
 {
+    /** Disable all logging */
     MSALLogLevelNothing,
+    
+    /** Default level, prints out information only when errors occur */
     MSALLogLevelError,
+    
+    /** Warnings only */
     MSALLogLevelWarning,
+    
+    /** Library entry points, with parameters and various keychain operations */
     MSALLogLevelInfo,
+    
+    /** API tracing */
     MSALLogLevelVerbose,
+    
+    /** API tracing */
     MSALLogLevelLast = MSALLogLevelVerbose,
 };
 
-
+/**
+ MSAL requires a web browser is required for interactive authentication.
+ There are multiple web browsers available to complete authentication.
+ MSAL will default to the web browser that provides best security and user experience for a given platform.
+ MSALWebviewType allows changing the experience by customizing the configuration to other options for displaying web content
+ */
 typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
 #if TARGET_OS_IPHONE
-    // For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession
-    // or SFAuthenticationSession).
-    // For older versions, with AuthenticationSession not being available, uses
-    // SafariViewController.
+    /**
+     For iOS 11 and up, uses AuthenticationSession (ASWebAuthenticationSession or SFAuthenticationSession).
+     For older versions, with AuthenticationSession not being available, uses SafariViewController.
+     */
     MSALWebviewTypeDefault,
     
-    // Use SFAuthenticationSession/ASWebAuthenticationSession
+    /** Use SFAuthenticationSession/ASWebAuthenticationSession */
     MSALWebviewTypeAuthenticationSession,
     
-    // Use SFSafariViewController for all versions.
+    /** Use SFSafariViewController for all versions. */
     MSALWebviewTypeSafariViewController,
     
 #endif
-    // Use WKWebView
+    /** Use WKWebView */
     MSALWebviewTypeWKWebView,
 };
 
@@ -89,6 +105,9 @@ typedef NS_ENUM(NSInteger, MSALBrokeredAvailability)
     MSALBrokeredAvailabilityNone
 };
 
+/**
+ OIDC prompt parameter  that specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+ */
 typedef NS_ENUM(NSUInteger, MSALPromptType)
 {
     /**
@@ -114,16 +133,25 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
     MSALPromptTypeDefault = MSALPromptTypePromptIfNecessary,
 };
 
+/**
+    The block that gets invoked after MSAL has finished getting a token silently or interactively.
+    @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
+    @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
+ */
 typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
+
+/**
+    The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+ */
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 
 /**
- The LogCallback block for the MSAL logger
+ The block that returns a MSAL log message.
  
- @param  level           The level of the log message
- @param  message         The message being logged
- @param  containsPII     If the message might contain Personally Identifiable Information (PII)
+ @param  level                     The level of the log message
+ @param  message                 The message being logged
+ @param  containsPII        If the message might contain Personally Identifiable Information (PII)
                          this will be true. Log messages possibly containing PII will not be
                          sent to the callback unless PIllLoggingEnabled is set to YES on the
                          logger.

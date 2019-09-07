@@ -176,7 +176,7 @@ typedef NS_ENUM(NSInteger, MSALError)
 
 /**
  MSALInternalError enum contains all possible errors under MSALInternalErrorCodeKey.
- This enum exists only for the reference, you should not try to handle these errors in runtime.
+ This enum exists only for the debugging and error information purposes, you should not try to recover from these errors in runtime.
  */
 typedef NS_ENUM(NSInteger, MSALInternalError)
 {

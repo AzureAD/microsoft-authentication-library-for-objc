@@ -35,8 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MSALJsonDeserializable <NSObject>
 
 /**
- Init with json string.
- @param jsonString Json string to deserialize from.
+ Initialize with a JSON string.
+ @param jsonString JSON string to deserialize from.
  @param error The error that occurred during deserialization.
  */
 - (instancetype)initWithJsonString:(NSString *)jsonString
