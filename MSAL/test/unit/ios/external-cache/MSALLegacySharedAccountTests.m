@@ -120,7 +120,7 @@
 {
     NSMutableDictionary *jsonDictionary = [[MSALLegacySharedAccountTestUtil sampleADALJSONDictionary] mutableCopy];
     
-    NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut"};
+    NSDictionary *signinStatusDict = @{[[NSBundle mainBundle] bundleIdentifier]: @"SignedOut", @"com.microsoft.otherapp": @"SignedIn"};
     jsonDictionary[@"signInStatus"] = signinStatusDict;
     
     MSALLegacySharedAccount *account = [[MSALLegacySharedAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
