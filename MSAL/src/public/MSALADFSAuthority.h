@@ -39,9 +39,9 @@
 #pragma mark - Initializing MSALADFSAuthority with an NSURL
 
 /**
-Initializes MSALADFSAuthority with NSURL.
-@param     url                    Authority indicating an ADFS instance that MSAL can use to obtain tokens.
-@param     error               The error that occurred creating the application object, if any, if you're not interested in the specific error pass in nil.
+    Initializes MSALADFSAuthority with NSURL.
+    @param     url                    Authority indicating an ADFS instance that MSAL can use to obtain tokens.
+    @param     error               The error that occurred creating the authority object, if any, if you're not interested in the specific error pass in nil.
 */
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;

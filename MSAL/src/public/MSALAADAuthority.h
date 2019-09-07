@@ -109,7 +109,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
                                 identifier within the directory itself (e.g. a domain associated to the
                                 tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                 TenantID property of the directory)
- @param     error               The error that occurred creating the application object, if any, if you're
+ @param     error               The error that occurred creating the authority object, if any, if you're
                                 not interested in the specific error pass in nil.
  */
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
@@ -124,7 +124,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
                                 tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                 TenantID property of the directory)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
- @param     error                    The error that occurred creating the application object, if any, if you're
+ @param     error                    The error that occurred creating the authority object, if any, if you're
                                 not interested in the specific error pass in nil.
  */
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
@@ -138,7 +138,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
  @param     cloudInstance       Azure AD authentication endpoint in a national cloud (see `MSALAzureCloudInstance`)
  @param     audienceType        The sign-in audience for the authority (see `MSALAudienceType`)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
- @param     error               The error that occurred creating the application object, if any, if you're
+ @param     error               The error that occurred creating the authority object, if any, if you're
                                 not interested in the specific error pass in nil.
  */
 - (nullable instancetype)initWithCloudInstance:(MSALAzureCloudInstance)cloudInstance
@@ -151,7 +151,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
  @param     environment         Host of Azure AD authentication endpoint in a national cloud (e.g. "login.microsoftonline.com" or "login.microsoftonline.de")
  @param     audienceType        The sign-in audience for the authority (see `MSALAudienceType`)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
- @param     error               The error that occurred creating the application object, if any, if you're
+ @param     error               The error that occurred creating the authority object, if any, if you're
                                 not interested in the specific error pass in nil.
  */
 - (nullable instancetype)initWithEnvironment:(nonnull NSString *)environment

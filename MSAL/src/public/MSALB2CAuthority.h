@@ -28,8 +28,20 @@
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
+/**
+    B2C endpoint that MSAL will use to get a token and perform B2C policies.
+    @note By default, the B2C authority url should be in the following format, where <port> is optional: https://<host>:<port>/tfp/<tenant>/<policy>. However, MSAL also supports other arbitrary B2C authority formats.
+    See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-protocols
+*/
 @interface MSALB2CAuthority : MSALAuthority
 
+#pragma mark - Constructing a B2C authority
+
+/**
+    Initializes MSALB2CAuthority with NSURL.
+    @param     url                    Authority indicating a B2C endpoint that MSAL can use to obtain tokens.
+    @param     error               The error that occurred creating the authority object, if any, if you're not interested in the specific error pass in nil.
+*/
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 

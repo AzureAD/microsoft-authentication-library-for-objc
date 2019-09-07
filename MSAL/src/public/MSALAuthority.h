@@ -29,15 +29,43 @@
 
 @protocol MSIDRequestContext;
 
+/**
+    MSALAuthority represents an identity provider instance that MSAL can use to obtain tokens. For AAD it is of the form https://aad_instance/aad_tenant, where aad_instance is the
+    directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
+ 
+    @note The MSALAuthority class is the base abstract class for the MSAL authority classes. Don't try to create instance of it using alloc or new. Instead, either create one of its subclasses directly (MSALAADAuthority, MSALB2CAuthority) or use the factory method authorityWithURL:error: to create subclasses using an authority URL.
+*/
 @interface MSALAuthority : NSObject <NSCopying>
 
 NS_ASSUME_NONNULL_BEGIN
 
+#pragma mark - Getting a normalized authority URL
+
 @property (readonly, nonnull) NSURL *url;
 
+#pragma mark - Unavailable initializers
+
+/**
+   @note Use `[MSALAuthority authorityWithURL:error:]` instead
+*/
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   @note Use `[MSALAuthority authorityWithURL:error:]` instead
+*/
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
+#pragma mark - Constructing MSALAuthority based on the URL
+
+/**
+
+    Factory method that parses input authority URL and tries to detect its type automatically.
+    @note This initializer will work in most cases. However, some valid authorities might be misclassified.
+    Initialize `MSALAADAuthority` or `MSALB2CAuthority` directly for better reliability.
+ 
+    @param     url                    Authority URL that MSAL can use to obtain tokens.
+    @param     error               The error that occurred creating the authority, if any, if you're not interested in the specific error pass in nil.
+*/
 + (nullable MSALAuthority *)authorityWithURL:(nonnull NSURL *)url
                                        error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 

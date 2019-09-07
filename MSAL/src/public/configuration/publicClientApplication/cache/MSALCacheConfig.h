@@ -32,7 +32,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ MSAL configuration interface responsible for token caching and keychain configuration.
+ */
 @interface MSALCacheConfig : NSObject <NSCopying>
+
+#pragma mark - Configure keychain sharing
 
 /**
     The keychain sharing group to use for the token cache.
@@ -40,6 +45,13 @@ NS_ASSUME_NONNULL_BEGIN
     See more https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps?language=objc
  */
 @property NSString *keychainSharingGroup;
+
+/**
+    Retrieve default MSAL keychain access group.
+ */
++ (NSString *)defaultKeychainSharingGroup;
+
+#pragma mark - Extend MSAL account cache
 
 /**
     List of external account stotage providers that helps you to combine your own accounts with MSAL accounts and use a consistent API for the account management and enumeration.
@@ -52,7 +64,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) NSArray<id<MSALExternalAccountProviding>> *externalAccountProviders;
 
+/**
+    Adds a new external account storage provider to be used by MSAL in account retrieval.
+    This operation is not thread safe.
+ */
+- (void)addExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider;
+
 #if !TARGET_OS_IPHONE
+
+#pragma mark - Configure macOS cache
+
 /**
     Backward compatible ADAL serialized cache provider.
     Use it if you were serializing ADAL cache on macOS and want to have backward compatibility with macOS apps.
@@ -60,28 +81,29 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, nullable) MSALSerializedADALCacheProvider *serializedADALCache;
 
 /**
- Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
- created by the keychain cache.
+    Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
+    created by the keychain cache.
  */
 @property (readonly, nonnull) NSArray *trustedApplications;
 
 /**
- Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
+    Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
  */
 - (NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 #endif
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
-
-+ (NSString *)defaultKeychainSharingGroup;
+#pragma mark - Unavailable initializers
 
 /**
-    Adds a new external account storage provider to be used by MSAL in account retrieval.
-    This operation is not thread safe.
+    Use instance of MSALCacheConfig in the `MSALPublicClientApplicationConfig` instead.
  */
-- (void)addExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider;
+- (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use instance of MSALCacheConfig in the `MSALPublicClientApplicationConfig` instead.
+*/
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 

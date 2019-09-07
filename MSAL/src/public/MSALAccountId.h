@@ -23,20 +23,25 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+    Account identifier in the Azure Active Directory (AAD).
+ */
 @interface MSALAccountId : NSObject <NSCopying>
 
 /**
- Account identifier in the directory
+    Unique MSAL account identifier
+    @note This is a non-displayable identifier and its format is not guaranteed. You should not make any assumptions about components or format of this identifier.
  */
 @property (nonatomic, readonly, nonnull) NSString *identifier;
 
 /**
- Object id of the account in the tenant
+    Object id of the account in the tenant
+    Object id is the immutable identifier for an object in the Microsoft identity system, in this case, a user account. This ID uniquely identifies the user across applications - two different applications signing in the same user will receive the same value in the oid claim.
  */
 @property (nonatomic, readonly, nullable) NSString *objectId;
 
 /**
- An identifier for the tenant that the account was acquired from
+    An identifier for the tenant that the account was acquired from
  */
 @property (nonatomic, readonly, nullable) NSString *tenantId;
 
