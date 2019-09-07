@@ -27,38 +27,59 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+    MSALAccountEnumerationParameters represents possible account identifying parameters that should be used for filtering cached accounts.
+ */
 @interface MSALAccountEnumerationParameters : NSObject
 
+#pragma mark - Filtering options
+
 /**
- Unique identifier for the account.
+    Unique identifier for the account.
  */
 @property (nonatomic, readonly, nullable) NSString *identifier;
 
 /**
- Unique identifier for the tenant profile.
+    Unique identifier for the tenant profile.
  */
 @property (nonatomic, readonly, nullable) NSString *tenantProfileIdentifier;
 
 /**
- Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
+    Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe.
  */
 @property (nonatomic, readonly, nullable) NSString *username;
 
 /**
- Filter accounts by whether this account is in the signed in state for the current client.
- Signed in state is determined by the presence of a refresh token credential for the requesting client.
- If account has been explicitly removed through the "removeAccount" API, it will be also marked as "signed out" as MSAL will remove refresh token for the client.
+    Filter accounts by whether this account is in the signed in state for the current client.
+    Signed in state is determined by the presence of a refresh token credential for the requesting client.
+    If account has been explicitly removed through the "removeAccount" API, it will be also marked as "signed out" as MSAL will remove refresh token for the client.
  
- YES by default (== only returns signed in accounts).
- Set it to NO to query all accounts visible to your application regardless if there's a refresh token present or not.
+    YES by default (== only returns signed in accounts).
+    Set it to NO to query all accounts visible to your application regardless if there's a refresh token present or not.
  */
 @property (nonatomic, readwrite) BOOL returnOnlySignedInAccounts;
 
+#pragma mark - Initializing enumeration parameters
+
+/**
+    Creates a filter with an account identifier.
+    @param accountIdentifier                    Unique identifier for the account.
+ */
+
 - (nonnull instancetype)initWithIdentifier:(nonnull NSString *)accountIdentifier;
 
+/**
+    Creates a filter with an account identifier and a displayable username.
+    @param accountIdentifier                    Unique identifier for the account.
+    @param username                                        Shorthand name by which the End-User wishes to be referred to at the RP, such as janedoe or j.doe. This value MAY be any valid JSON string                                                                              including special characters such as @, /, or whitespace.
+*/
 - (nonnull instancetype)initWithIdentifier:(nullable NSString *)accountIdentifier
                                   username:(nonnull NSString *)username;
 
+/**
+    Creates a filter with a tenant profile identifier.
+    @param tenantProfileIdentifier          Unique identifier for the tenant profile.
+*/
 - (nonnull instancetype)initWithTenantProfileIdentifier:(nonnull NSString *)tenantProfileIdentifier;
 
 @end
