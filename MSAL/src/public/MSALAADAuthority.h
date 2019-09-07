@@ -64,6 +64,12 @@ typedef NS_ENUM(NSInteger, MSALAudienceType)
     MSALPersonalMicrosoftAccountAudience
 };
 
+/**
+    All the national clouds authenticate users separately in each environment and have separate authentication endpoints.
+    MSALAzureCloudInstance represents a national cloud environment that should be used for authentication.
+    See instructions here: https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud
+ */
+
 typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 {
     /**
@@ -129,8 +135,8 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 
 /**
  Initializes MSALAADAuthority with a cloud instance, audience type and an optional tenant ID.
- @param     cloudInstance       Azure AD authentication endpoint in a national cloud.
- @param     audienceType        The sign-in audience for the authority.
+ @param     cloudInstance       Azure AD authentication endpoint in a national cloud (see `MSALAzureCloudInstance`)
+ @param     audienceType        The sign-in audience for the authority (see `MSALAudienceType`)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
  @param     error               The error that occurred creating the application object, if any, if you're
                                 not interested in the specific error pass in nil.
@@ -143,7 +149,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 /**
  Initializes MSALAADAuthority with a cloud instance, audience type and an optional tenant ID.
  @param     environment         Host of Azure AD authentication endpoint in a national cloud (e.g. "login.microsoftonline.com" or "login.microsoftonline.de")
- @param     audienceType        The sign-in audience for the authority.
+ @param     audienceType        The sign-in audience for the authority (see `MSALAudienceType`)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
  @param     error               The error that occurred creating the application object, if any, if you're
                                 not interested in the specific error pass in nil.
