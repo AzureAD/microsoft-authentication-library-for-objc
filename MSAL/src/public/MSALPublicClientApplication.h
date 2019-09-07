@@ -62,7 +62,7 @@
 */
 @interface MSALPublicClientApplication : NSObject
 
-#pragma mark - Public properties
+#pragma mark - Configuration
 
 /**
     A copy of the configuration which was provided in the initializer.
@@ -114,7 +114,7 @@
  For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen. */
 @property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
-#pragma mark - Initializers
+#pragma mark - Initializing MSALPublicClientApplication
 
 /**
  Initialize a MSALPublicClientApplication with a given configuration
@@ -238,7 +238,7 @@
                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
 #endif
 
-#pragma mark - Account enumeration
+#pragma mark - Enumerating accounts
 
 /**
  Returns an array of all accounts visible to this application.
@@ -294,7 +294,7 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
-#pragma mark - MSAL response callback
+#pragma mark - Handling MSAL responses
 
 #if TARGET_OS_IPHONE
 /**
@@ -678,7 +678,7 @@
                       correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenSilentWithParameters:completionBlock instead");
 
-#pragma mark - Account removal
+#pragma mark - Removing account and clearing cache
 
 /**
     Removes all tokens from the cache for this application for the provided account
