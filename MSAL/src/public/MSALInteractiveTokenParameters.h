@@ -33,9 +33,11 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSALWebviewParameters;
 
 /**
- Token parameters to be used in interactive flow.
+ Token parameters to be used when MSAL is getting a token interactively.
  */
 @interface MSALInteractiveTokenParameters : MSALTokenParameters
+
+#pragma mark - Configuring MSALInteractiveTokenParameters
 
 /**
  A specific prompt type for the interactive authentication flow.
@@ -89,6 +91,8 @@ NS_ASSUME_NONNULL_BEGIN
  Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
  */
 @property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
+
+#pragma mark - Constructing MSALInteractiveTokenParameters
 
 #if TARGET_OS_IPHONE
 /**

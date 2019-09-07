@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (atomic) BOOL piiEnabled;
 
-#pragma mark - Adding logging callback
+#pragma mark - Setting up the logging callback
 
 /**
  Sets the callback block to send MSAL log messages to.

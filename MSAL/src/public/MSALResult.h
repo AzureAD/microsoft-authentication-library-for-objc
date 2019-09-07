@@ -31,7 +31,13 @@
 @class MSALAuthority;
 @class MSALTenantProfile;
 
+/**
+    MSALResult represents information returned to the application after a successful interactive or silent token acquisition.
+    It contains information requested by the application (e.g. access_token and id_token), and information that can be used to get a token silently from MSAL (e.g. account).
+ */
 @interface MSALResult : NSObject
+
+#pragma mark - Token response
 
 /** The Access Token requested. */
 @property (readonly, nonnull) NSString *accessToken;
@@ -59,6 +65,13 @@
 @property (readonly, nullable) NSString *idToken;
 
 /**
+    The scope values returned from the service.
+ */
+@property (readonly, nonnull) NSArray<NSString *> *scopes;
+
+#pragma mark - Account information
+
+/**
  A tenant profile object that contains all the tenant-specific information, including tenant id, user object id, etc. It also contains all the id token claims as a dictionary.
  */
 @property (readonly, nonnull) MSALTenantProfile *tenantProfile;
@@ -73,10 +86,7 @@
  */
 @property (readonly, nullable) NSString *uniqueId DEPRECATED_MSG_ATTRIBUTE("Use MSALTenantProfile.identifier instead");
 
-/**
-    The scope values returned from the service.
- */
-@property (readonly, nonnull) NSArray<NSString *> *scopes;
+#pragma mark - Request information
 
 /**
  Represents the authority used for getting the token from STS and caching it.

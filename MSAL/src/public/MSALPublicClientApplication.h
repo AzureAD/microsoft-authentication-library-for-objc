@@ -119,7 +119,7 @@
 /**
  Initialize a MSALPublicClientApplication with a given configuration
  
- Note, it is important to configure your MSALPublicClientApplicationConfig object before calling MSALPublicClientApplication's initializer.
+ @note It is important to configure your MSALPublicClientApplicationConfig object before calling MSALPublicClientApplication's initializer.
  MSALPublicClientApplication makes a copy of the configuration object you provide on initialization.
  Once configured, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
  

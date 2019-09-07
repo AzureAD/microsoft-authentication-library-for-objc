@@ -30,15 +30,19 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Token parameters to be used in silent flow.
+ Token parameters to be used when MSAL is getting a token silently.
  */
 @interface MSALSilentTokenParameters : MSALTokenParameters
+
+#pragma mark - Configuring MSALSilentTokenParameters
 
 /**
  Ignore any existing access token in the cache and force MSAL to
  get a new access token from the service.
  */
 @property (nonatomic) BOOL forceRefresh;
+
+#pragma mark - Constructing MSALSilentTokenParameters
 
 /**
  Initialize a MSALSilentTokenParameters with scopes and account.

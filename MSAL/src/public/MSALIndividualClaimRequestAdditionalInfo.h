@@ -41,6 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALIndividualClaimRequestAdditionalInfo : NSObject
 
+#pragma mark - Configuring MSALIndividualClaimRequestAdditionalInfo
+
 /**
  Indicates whether the Claim being requested is an Essential Claim.
  Should be either boolean or nil.

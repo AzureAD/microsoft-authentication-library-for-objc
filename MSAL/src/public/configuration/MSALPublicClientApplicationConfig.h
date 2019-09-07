@@ -36,7 +36,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    Configuration for an instance of `MSALPublicClientApplication`
+    @note Once configured, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
+*/
 @interface MSALPublicClientApplicationConfig : NSObject <NSCopying>
+
+#pragma mark - Configuration options
 
 /** The client ID of the application, this should come from the app developer portal. */
 @property NSString *clientId;
@@ -49,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** List of known authorities that application should trust.
     Note that authorities listed here will bypass authority validation logic.
-    Thus, it is advised not putting in here dynamically resolving authorities here.
+    Thus, it is advised not putting dynamically resolving authorities here.
  */
 @property NSArray<MSALAuthority *> *knownAuthorities;
 
@@ -71,6 +77,8 @@ NS_ASSUME_NONNULL_BEGIN
 /** Cache configurations, refer to MSALCacheConfig.h for more detail */
 @property (readonly) MSALCacheConfig *cacheConfig;
 
+#pragma mark - Constructing configuration
+
 /**
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
@@ -89,10 +97,17 @@ NS_ASSUME_NONNULL_BEGIN
                              redirectUri:(nullable NSString *)redirectUri
                                authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
+#pragma mark - Unavailable initializers
 
-// Todo: add a init that takes in a config file.
+/**
+    Use `[MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority]` instead
+ */
+- (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use `[MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority]` instead
+*/
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 

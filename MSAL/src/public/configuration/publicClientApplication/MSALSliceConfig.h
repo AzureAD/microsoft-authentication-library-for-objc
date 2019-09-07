@@ -29,18 +29,54 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    MSAL configuration interface responsible for custom parameters  to target MSAL at a specific test slice & flight
+*/
 @interface MSALSliceConfig : NSObject <NSCopying>
 
+#pragma mark - Configuration options
+
+/**
+   Specific test slice
+ */
 @property NSString *slice;
+
+/**
+  Specific data center
+*/
 @property NSString *dc;
 
+/**
+  Current slice and flight configuration
+*/
 @property (readonly) NSDictionary *sliceDictionary;
 
+#pragma mark - Constructing MSALSliceConfig
+
+/**
+    Initializes MSALSliceConfig with specified slice and dc parameters
+    @param slice Specific test slice
+    @param dc Specific data center
+ */
 - (nullable instancetype)initWithSlice:(nullable NSString *)slice dc:(nullable NSString *)dc NS_DESIGNATED_INITIALIZER;
 
+/**
+    Initializes MSALSliceConfig with specified slice and dc parameters
+    @param slice Specific test slice
+    @param dc Specific data center
+*/
 + (nullable instancetype)configWithSlice:(nullable NSString *)slice dc:(nullable NSString *)dc;
 
+#pragma mark - Unavailable initializers
+
+/**
+    Use `[MSALSliceConfig initWithSlice:dc:]` instead
+ */
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use `[MSALSliceConfig initWithSlice:dc:]` instead
+*/
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end

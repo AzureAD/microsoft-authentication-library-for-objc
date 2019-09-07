@@ -28,13 +28,28 @@
 #import <Foundation/Foundation.h>
 #import "MSALDefinitions.h"
 
+/**
+    MSAL configuration interface responsible for setting up MSAL logging callback and configuring log collection behavior.
+    @note MSALLogger is deprecated. Configure MSAL logging  inside `MSALLoggerConfig` instead
+*/
 @interface MSALLogger : NSObject
 
+#pragma mark - Unavailable initializers
+
+/**
+    Configure MSAL logging  inside `MSALLoggerConfig` instead
+ */
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
-+ (nonnull MSALLogger *)sharedLogger DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig instead");
-                                                            
+#pragma mark - Getting a shared logger configuration
 
+/**
+    Returns a shared logger configuration.
+ */
++ (nonnull MSALLogger *)sharedLogger DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig instead");
+
+#pragma mark - Configuring log collection
+                                                            
 /**
     The minimum log level for messages to be passed onto the log callback.
  */
@@ -44,6 +59,8 @@
     MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
 @property (readwrite) BOOL PiiLoggingEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.piiEnabled instead");
+
+#pragma mark - Setting up the logging callback
 
 /**
     Sets the callback block to send MSAL log messages to.
