@@ -29,7 +29,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    MSAL configuration interface responsible for network configuration.
+    @note Configuration changes inside MSALHTTPConfig will apply to all instances of `MSALPublicClientApplication`
+*/
 @interface MSALHTTPConfig : NSObject
+
+#pragma mark - Configuration options
 
 /**
  Number of retry attemps to be made in case of a network error,
@@ -48,7 +54,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property NSTimeInterval timeoutIntervalForRequest;
 
+#pragma mark - Unavailable initializers
+
+/**
+   Use class properties instead.
+*/
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use class properties instead.
+*/
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end

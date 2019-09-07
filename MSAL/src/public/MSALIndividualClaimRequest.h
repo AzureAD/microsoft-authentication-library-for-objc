@@ -42,15 +42,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALIndividualClaimRequest : NSObject
 
+#pragma mark - Creating MSALIndividualClaimRequest
+
 /**
  Init with claim name.
  @param name Name of the requsted claim.
  */
 - (instancetype)initWithName:(NSString *)name;
 
-+ (instancetype)new NS_UNAVAILABLE;
-
-- (instancetype)init NS_UNAVAILABLE;
+#pragma mark - Updating MSALIndividualClaimRequest
 
 /**
  Name of the claim being requested.
@@ -61,6 +61,18 @@ NS_ASSUME_NONNULL_BEGIN
  Additional information that can be optionally sent to the authorization server (default is null) for a particular requested claim.
  */
 @property (nonatomic, nullable) MSALIndividualClaimRequestAdditionalInfo *additionalInfo;
+
+#pragma mark - Unavailable initializers
+
+/**
+    Use `[MSALIndividualClaimRequest initWithName:]` instead
+ */
++ (instancetype)new NS_UNAVAILABLE;
+
+/**
+   Use `[MSALIndividualClaimRequest initWithName:]` instead
+*/
+- (instancetype)init NS_UNAVAILABLE;
 
 @end
 
