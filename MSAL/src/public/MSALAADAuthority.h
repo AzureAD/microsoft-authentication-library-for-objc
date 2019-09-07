@@ -88,8 +88,8 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 };
 
 /**
-    An Azure Active Directory (AAD) authority indicating a directory that MSAL can use to obtain tokens. For AAD it is of the form https://<instance/<tenant>, where <instance> is the
-    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
+    An Azure Active Directory (AAD) authority indicating a directory that MSAL can use to obtain tokens. For AAD it is of the form https://aad_instance/aad_tenant, where aad_instance is the
+    directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
  */
 @interface MSALAADAuthority : MSALAuthority
 
@@ -98,8 +98,8 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 /**
  Initializes MSALAADAuthority with NSURL.
  @param     url                 Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                                it is of the form https://<instance>/<tenant>, where <instance> is the
-                                directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                it is of the form https://aad_instance/aad_tenant, where aad_instance is the
+                                directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a
                                 identifier within the directory itself (e.g. a domain associated to the
                                 tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                 TenantID property of the directory)
@@ -112,13 +112,13 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 /**
  Initializes MSALAADAuthority with NSURL and tenant ID.
  @param     url                 Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                                it is of the form https://<instance>/<tenant>, where <instance> is the
-                                directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                it is of the form https://aad_instance/aad_tenant, where aad_instance is the
+                                directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a
                                 identifier within the directory itself (e.g. a domain associated to the
                                 tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                 TenantID property of the directory)
  @param     rawTenant           GUID representing the TenantID of your Azure Active Directory
- @param     error               The error that occurred creating the application object, if any, if you're
+ @param     error                    The error that occurred creating the application object, if any, if you're
                                 not interested in the specific error pass in nil.
  */
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url

@@ -142,8 +142,8 @@
  
     @param  clientId    The clientID of your application, you should get this from the app portal.
     @param  authority   Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
-                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                        directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                         TenantID property of the directory)
@@ -159,8 +159,8 @@
 
  @param  clientId       The clientID of your application, you should get this from the app portal.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance>/<tenant>, where <instance> is the
-                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                        directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                         TenantID property of the directory)
@@ -202,8 +202,8 @@
  @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
                         keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
-                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                        directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                         TenantID property of the directory)
@@ -222,8 +222,8 @@
  @param  keychainGroup  The keychain sharing group to use for the token cache. Pass nil to disable
                         keychain sharing.
  @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
-                        it is of the form https://<instance/<tenant>, where <instance> is the
-                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                        directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                         identifier within the directory itself (e.g. a domain associated to the
                         tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                         TenantID property of the directory)
@@ -406,8 +406,8 @@
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
-                                    it is of the form https://<instance/<tenant>, where <instance> is the
-                                    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                                    directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                     identifier within the directory itself (e.g. a domain associated to the
                                     tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                     TenantID property of the directory)
@@ -440,8 +440,8 @@
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens. Azure AD
-                                    it is of the form https://<instance/<tenant>, where <instance> is the
-                                    directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    it is of the form https://authority_instance/authority_tenant, where authority_instance is the
+                                    directory host (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                     identifier within the directory itself (e.g. a domain associated to the
                                     tenant, such as contoso.onmicrosoft.com, or the GUID representing the
                                     TenantID property of the directory)
@@ -515,9 +515,9 @@
     @param  extraQueryParameters    Key-value pairs to pass to the authentication server during
                                     the interactive authentication flow.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance/<tenant>, where
-                                    <instance> is the directory host
-                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    Azure AD it is of the form https://authority_instance/authority_tenant, where
+                                    authority_instance is the directory host
+                                    (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                     identifier within the directory itself (e.g. a domain associated
                                     to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                     representing the TenantID property of the directory)
@@ -551,9 +551,9 @@
                                  the interactive authentication flow. This should not be url-encoded value.
  @param  claimsRequest           The claims parameter that needs to be sent to authorization endpoint.
  @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
-                                 Azure AD it is of the form https://<instance/<tenant>, where
-                                 <instance> is the directory host
-                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 Azure AD it is of the form https://authority_instance/authority_tenant, where
+                                 authority_instance is the directory host
+                                 (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                  identifier within the directory itself (e.g. a domain associated
                                  to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                  representing the TenantID property of the directory)
@@ -607,9 +607,9 @@
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance/<tenant>, where
-                                    <instance> is the directory host
-                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    Azure AD it is of the form https://authority_instance/authority_tenant, where
+                                    authority_instance is the directory host
+                                    (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                     identifier within the directory itself (e.g. a domain associated
                                     to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                     representing the TenantID property of the directory)
@@ -629,9 +629,9 @@
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
-                                    Azure AD it is of the form https://<instance/<tenant>, where
-                                    <instance> is the directory host
-                                    (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                    Azure AD it is of the form https://authority_instance/authority_tenant, where
+                                    authority_instance is the directory host
+                                    (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                     identifier within the directory itself (e.g. a domain associated
                                     to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                     representing the TenantID property of the directory)
@@ -656,9 +656,9 @@
  @param  account                 An account object retrieved from the application object that the
                                  interactive authentication flow will be locked down to.
  @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
-                                 Azure AD it is of the form https://<instance/<tenant>, where
-                                 <instance> is the directory host
-                                 (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                 Azure AD it is of the form https://authority_instance/authority_tenant, where
+                                 authority_instance is the directory host
+                                 (e.g. https://login.microsoftonline.com) and authority_tenant is a
                                  identifier within the directory itself (e.g. a domain associated
                                  to the tenant, such as contoso.onmicrosoft.com, or the GUID
                                  representing the TenantID property of the directory)
