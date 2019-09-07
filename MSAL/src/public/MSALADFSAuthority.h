@@ -28,8 +28,19 @@
 #import <Foundation/Foundation.h>
 #import "MSALAuthority.h"
 
+/**
+    An ADFS authority indicating a directory that MSAL can use to obtain tokens when talking to ADFS directly.
+    For example: https://somesite.contoso.com/adfs
+    Note, modern authentication with Active Directory Federation Services as identity provider (ADFS) is not supported (see ADFS for Developers for details). ADFS is supported through federation only.
+    Initialization of MSALADFSAuthority will always fail.
+ */
 @interface MSALADFSAuthority : MSALAuthority
 
+/**
+Initializes MSALADFSAuthority with NSURL.
+@param     url                    Authority indicating an ADFS instance that MSAL can use to obtain tokens.
+@param     error               The error that occurred creating the application object, if any, if you're not interested in the specific error pass in nil.
+*/
 - (nullable instancetype)initWithURL:(nonnull NSURL *)url
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
