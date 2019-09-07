@@ -34,9 +34,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- MSALTokenParameters is the base abstract class for all types of token parameters (silent and interactive).
+ MSALTokenParameters is the base abstract class for all types of token parameters (see `MSALInteractiveTokenParameters` and `MSALSilentTokenParameters`).
  */
 @interface MSALTokenParameters : NSObject
+
+#pragma mark - Configuration parameters
 
 /**
  Permissions you want included in the access token received
@@ -85,6 +87,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) dispatch_queue_t completionBlockQueue;
 
+#pragma mark - Creating MSALTokenParameters
+
 /**
  Initialize a MSALTokenParameters with scopes.
  
@@ -94,8 +98,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
 
+#pragma mark - Unavailable initializers
+
+/**
+    Use `[MSALTokenParameters initWithScopes:]` instead
+ */
 + (instancetype)new NS_UNAVAILABLE;
 
+/**
+   Use `[MSALTokenParameters initWithScopes:]` instead
+*/
 - (instancetype)init NS_UNAVAILABLE;
 
 @end

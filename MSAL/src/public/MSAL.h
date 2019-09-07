@@ -33,10 +33,10 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-//! Project version number for MSAL.
+/** Project version number for MSAL */
 FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 
-//! Project version string for MSAL.
+/** Project version string for MSAL */
 FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
 #import <MSAL/MSALDefinitions.h>

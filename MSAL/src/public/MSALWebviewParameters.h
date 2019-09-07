@@ -30,7 +30,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
+ */
 @interface MSALWebviewParameters : NSObject <NSCopying>
+
+#pragma mark - Configuration options
 
 #if TARGET_OS_IPHONE
 /**
@@ -58,8 +63,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) WKWebView *customWebview;
 
+#pragma mark - Constructing MSALWebviewParameters
+
 #if TARGET_OS_IPHONE
+
+/**
+    Creates an instance of MSALWebviewParameters with a provided parentViewController.
+    @param parentViewController The view controller to present authorization UI from.
+    @note parentViewController is mandatory on iOS 13+
+ */
 - (nonnull instancetype)initWithParentViewController:(UIViewController *)parentViewController;
+
+#pragma mark - Unavailable initializers
 
 - (nonnull instancetype)init DEPRECATED_MSG_ATTRIBUTE("Use -initWithParentViewController: instead.");
 
