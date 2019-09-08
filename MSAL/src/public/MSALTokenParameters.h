@@ -48,16 +48,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) NSArray<NSString *> *scopes;
 
 /**
- An account object retrieved from the application object that the
- authentication flow will be locked down to.
+ An account object for which tokens should be returned.
  */
 @property (nonatomic, nullable) MSALAccount *account;
 
 /**
  The authority that MSAL will use to obtain tokens.
- Azure AD it is of the form https://<instance/<tenant>, where
- <instance> is the directory host
- (e.g. https://login.microsoftonline.com) and <tenant> is a
+ Azure AD it is of the form https://aad_instance/aad_tenant, where
+ aad_instance is the directory host
+ (e.g. https://login.microsoftonline.com) and aad_tenant is a
  identifier within the directory itself (e.g. a domain associated
  to the tenant, such as contoso.onmicrosoft.com, or the GUID
  representing the TenantID property of the directory).

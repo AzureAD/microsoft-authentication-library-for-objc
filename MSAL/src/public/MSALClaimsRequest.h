@@ -33,7 +33,7 @@
 
 /**
  Target for the claims request.
- Currently we support only "access_token" and "id_token".
+ Only "access_token" and "id_token" are supported.
  "userinfo" is not supported.
  */
 typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)

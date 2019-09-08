@@ -42,14 +42,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol MSALExternalAccountProviding <NSObject>
 
-/*
+/**
  This is called when new and/or updated account is available.
  */
 - (BOOL)updateAccount:(id<MSALAccount>)account
         idTokenClaims:(NSDictionary *)idTokenClaims
                 error:(NSError * _Nullable * _Nullable)error;
 
-/*
+/**
  This is triggered when removal of an account is necessary.
  It normally happens when the app calls removeAccount API in MSAL.
  But it can also happen in other circumstances when MSAL needs to cleanup account.
@@ -58,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error;
 
-/*
+/**
  This is triggered when MSAL needs to enumerate account.
  Return your accounts that match parameters.
  MSAL will merge external accounts with its own internal storage and return a combined list of accounts that mathes specified parameters.

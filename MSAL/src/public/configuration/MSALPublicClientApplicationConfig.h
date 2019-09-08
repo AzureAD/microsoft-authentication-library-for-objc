@@ -38,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
     Configuration for an instance of `MSALPublicClientApplication`
-    @note Once configured, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
+    @note Once `MSALPublicClientApplication` is initialized, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
 */
 @interface MSALPublicClientApplicationConfig : NSObject <NSCopying>
 
@@ -65,16 +65,18 @@ NS_ASSUME_NONNULL_BEGIN
 /** List of additional ESTS features that client handles. */
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
-/** When checking an access token for expiration we check if time to expiration
+/** Time in seconds controlling how long before token expiry MSAL refreshes access tokens.
+ When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
 @property double tokenExpirationBuffer;
 
-/** slice configuration for testing. */
+/** Used to specify query parameters that must be passed to both the authorize and token endpoints
+to target MSAL at a specific test slice & flight. These apply to all requests made by an application. */
 @property (nullable) MSALSliceConfig *sliceConfig;
 
-/** Cache configurations, refer to MSALCacheConfig.h for more detail */
+/** MSAL configuration interface responsible for token caching and keychain configuration. Refer to `MSALCacheConfig` for more details */
 @property (readonly) MSALCacheConfig *cacheConfig;
 
 #pragma mark - Constructing configuration

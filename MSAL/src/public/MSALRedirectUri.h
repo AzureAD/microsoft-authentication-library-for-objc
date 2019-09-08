@@ -45,8 +45,8 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Checking redirect uri capabilities
 
 /**
-    Indicates if redirect URI can be used to talk to the Microsoft Authenticator application (broker)
-    Broker redirect URIs need to follow particular format, e.g. msauth.<bundleId>://auth */
+    Indicates if redirect URI can be used to talk to the Microsoft Authenticator application (broker).
+    Broker redirect URIs need to follow particular format, e.g. msauth.your.app.bundleId://auth */
 @property (nonatomic, readonly) BOOL brokerCapable;
 
 @end

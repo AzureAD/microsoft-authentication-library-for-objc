@@ -31,7 +31,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
-    The Microsoft Identity platform allows one account to be used to access resources belonging to multiple organizations (Azure Active Directory tenants)
+    The Microsoft Identity platform allows one account to be used to access resources belonging to multiple organizations (Azure Active Directory tenants).
     MSALTenantProfile represents information about the account record in a particular AAD tenant
  */
 @interface MSALTenantProfile : NSObject <NSCopying>

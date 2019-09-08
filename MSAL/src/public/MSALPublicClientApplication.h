@@ -313,7 +313,6 @@
  @param   response              URL response from your application delegate's openURL handler for MSAL web or brokered authentication sessions
  @param   sourceApplication     The application that opened your app with that URL. Can be retrieved from options by UIApplicationOpenURLOptionsSourceApplicationKey key.
                                 See more info here: https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623112-application?language=objc
-                                Note that if sourceApplication is not provided, MSAL won't be able to verify broker response.
  @return  YES if URL is a response to a MSAL web or brokered session and handled, NO otherwise.
  */
 + (BOOL)handleMSALResponse:(nonnull NSURL *)response sourceApplication:(nullable NSString *)sourceApplication;
@@ -321,7 +320,7 @@
 
 /**
     Cancels any currently running interactive web authentication session, resulting
-    in the SafariViewController being dismissed and the acquireToken request ending
+    in the authorization UI being dismissed and the acquireToken request ending
     in a cancelation error.
  */
 + (BOOL)cancelCurrentWebAuthSession;
@@ -681,8 +680,8 @@
 #pragma mark - Removing account and clearing cache
 
 /**
-    Removes all tokens from the cache for this application for the provided account
-    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken
+    Removes all tokens from the cache for this application for the provided account.
+    MSAL won't be able to return tokens silently after calling this API, and developer will need to call acquireToken.
     User might need to enter his credentials again after calling this API
  
     @param  account    The account to remove from the cache

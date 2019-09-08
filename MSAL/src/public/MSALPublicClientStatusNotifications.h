@@ -42,11 +42,11 @@ extern NSString *MSALWebAuthDidFailNotification;
 /** Fired when authentication finishes */
 extern NSString *MSALWebAuthDidCompleteNotification;
 
-/** Fired before ADAL invokes the broker app */
+/** Fired before MSAL invokes the broker app */
 extern NSString *MSALWebAuthWillSwitchToBrokerApp;
 
 /** Fired when the application receives a response from the broker. Look at the @"response"
  key in the userInfo dictionary for the broker response */
-extern NSString *MSALWebAuthDidReceieveResponseFromBroker;
+extern NSString *MSALWebAuthDidReceiveResponseFromBroker;
 
 #endif

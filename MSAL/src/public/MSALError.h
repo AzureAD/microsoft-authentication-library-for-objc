@@ -57,7 +57,7 @@ extern NSString *MSALOAuthErrorKey;
 extern NSString *MSALOAuthSubErrorKey;
 
 /**
-    The extended error description. Note that this string can change ands should
+    The extended error description. Note that this string can change and should
     not be relied upon for any error handling logic.
  */
 extern NSString *MSALErrorDescriptionKey;
@@ -94,7 +94,7 @@ extern NSString *MSALHTTPResponseCodeKey;
  */
 extern NSString *MSALDeclinedScopesKey;
 
-/*
+/**
  Displayable user id for the particular error if available
  */
 extern NSString *MSALDisplayableUserIdKey;
