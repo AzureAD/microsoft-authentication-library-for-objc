@@ -30,7 +30,6 @@
 
 @class MSALRedirectUri;
 @class MSALAuthority;
-@class MSALWebViewConfig;
 @class MSALSliceConfig;
 @class MSALCacheConfig;
 
@@ -57,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
     Note that authorities listed here will bypass authority validation logic.
     Thus, it is advised not putting dynamically resolving authorities here.
  */
-@property NSArray<MSALAuthority *> *knownAuthorities;
+@property (nonatomic) NSArray<MSALAuthority *> *knownAuthorities;
 
 /** Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
@@ -70,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property double tokenExpirationBuffer;
+@property (nonatomic) double tokenExpirationBuffer;
 
 /** Used to specify query parameters that must be passed to both the authorize and token endpoints
 to target MSAL at a specific test slice & flight. These apply to all requests made by an application. */

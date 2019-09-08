@@ -83,8 +83,12 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     [self setExtendedLayoutIncludesOpaqueBars:NO];
+#if TARGET_OS_UIKITFORMAC
+    _cacheTableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+#else
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
-
+#endif
+    
     self.legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:@[self.legacyAccessor]];
     _tokenCache = [[MSIDAccountCredentialCache alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache];
@@ -133,7 +137,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                 {
                     [self.defaultAccessor removeToken:token context:nil error:nil];
                 }
-
+                
                 break;
             }
             default:
@@ -165,14 +169,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                           familyId:nil
                                            context:nil
                                              error:nil];
-
+        
         [self.legacyAccessor clearCacheForAccount:account.accountIdentifier
-                                         authority:nil
-                                          clientId:nil
-                                          familyId:nil
-                                           context:nil
-                                             error:nil];
-
+                                        authority:nil
+                                         clientId:nil
+                                         familyId:nil
+                                          context:nil
+                                            error:nil];
+        
         [self loadCache];
     }
 }
@@ -212,11 +216,11 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
                                                       object:nil
                                                        queue:nil
                                                   usingBlock:^(__unused NSNotification * _Nonnull note)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self loadCache];
-        });
-    }];
+     {
+         dispatch_async(dispatch_get_main_queue(), ^{
+             [self loadCache];
+         });
+     }];
 }
 
 - (void)loadCache
@@ -224,14 +228,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     [self.refreshControl beginRefreshing];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-
+        
         [self setAccounts:[self.defaultAccessor accountsWithAuthority:nil
                                                              clientId:nil
                                                              familyId:nil
                                                     accountIdentifier:nil
                                                               context:nil
                                                                 error:nil]];
-
+        
         [self setAppMetadataEntries:[self.defaultAccessor getAppMetadataEntries:nil context:nil error:nil]];
         
         _cacheSections = [NSMutableDictionary dictionary];
@@ -245,7 +249,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
             _cacheSections[[self rowIdentifier:account.accountIdentifier]] = [NSMutableArray array];
             [_cacheSections[[self rowIdentifier:account.accountIdentifier]] addObject:account];
         }
-
+        
         NSMutableArray *allTokens = [[self.defaultAccessor allTokensWithContext:nil error:nil] mutableCopy];
         NSArray *legacyTokens = [self.legacyAccessor allTokensWithContext:nil error:nil];
         [allTokens addObjectsFromArray:legacyTokens];
@@ -322,7 +326,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"cacheCell"];
     }
-
+    
     cell.backgroundColor = [UIColor whiteColor];
     cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     cell.textLabel.textColor = [UIColor darkTextColor];
@@ -335,7 +339,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDAppMetadataCacheItem *appMetadata = [self appMetadataEntries][indexPath.row];
         cell.textLabel.text = [NSString stringWithFormat:@"[ClientId] %@", appMetadata.clientId];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"[Environment] %@, FamilyId %@", appMetadata.environment, appMetadata.familyId];
-
+        
     }
     else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
     {
@@ -402,6 +406,91 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #pragma mark - UITableViewDelegate
 
+- (UISwipeActionsConfiguration *)tableView:(UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath API_AVAILABLE(ios(11.0))
+{
+    NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
+    NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
+    id cacheEntry = [sectionObjects objectAtIndex:indexPath.row];
+    if ([cacheEntry isKindOfClass:[MSIDAppMetadataCacheItem class]])
+    {
+        MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)cacheEntry;
+        __auto_type deleteTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
+                                                                                title:@"Delete"
+                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                         {
+                                             [self deleteAppMetadata:appMetadata];
+                                         }];
+        
+        __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction]];
+        return configuration;
+    }
+    else if ([cacheEntry isKindOfClass:[MSIDBaseToken class]])
+    {
+        MSIDBaseToken *token = (MSIDBaseToken *)cacheEntry;
+        __auto_type deleteTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
+                                                                                title:@"Delete"
+                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                         {
+                                             [self deleteToken:token];
+                                         }];
+        
+        __auto_type invalidateAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
+                                                                               title:@"Invalidate"
+                                                                             handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                        {
+                                            [self invalidateRefreshToken:(MSIDRefreshToken *)token];
+                                        }];
+        invalidateAction.backgroundColor = [UIColor orangeColor];
+        
+        __auto_type expireTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
+                                                                                title:@"Expire"
+                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                         {
+                                             [self expireAccessToken:(MSIDAccessToken *)token];
+                                         }];
+        expireTokenAction.backgroundColor = [UIColor orangeColor];
+        
+        switch (token.credentialType)
+        {
+            case MSIDRefreshTokenType:
+            {
+                if ([token isKindOfClass:[MSIDLegacyRefreshToken class]])
+                {
+                    return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction]];
+                }
+                
+                return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction, invalidateAction]];
+            }
+            case MSIDAccessTokenType:
+            {
+                return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction, expireTokenAction]];
+            }
+            case MSIDIDTokenType:
+            {
+                return [UISwipeActionsConfiguration configurationWithActions:@[deleteTokenAction]];
+            }
+            default:
+                return nil;
+        }
+    }
+    else if ([cacheEntry isKindOfClass:[MSIDAccount class]])
+    {
+        MSIDAccount *account = (MSIDAccount *)cacheEntry;
+        __auto_type deleteAccountAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
+                                                                                  title:@"Delete All"
+                                                                                handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                           {
+                                               [self deleteAllEntriesForAccount:account];
+                                           }];
+        
+        __auto_type configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteAccountAction]];
+        return configuration;
+    }
+    
+    return nil;
+}
+
+#if !TARGET_OS_UIKITFORMAC
 - (nullable NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView
                            editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -487,6 +576,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     return nil;
 }
+#endif
 
 - (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath
 {

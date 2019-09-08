@@ -48,6 +48,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) UIModalPresentationStyle presentationStyle;
 
+/*!
+ A Boolean value that indicates whether the ASWebAuthenticationSession should ask the browser for a private authentication session.
+ The value of this property is false by default. For more info see here: https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession/3237231-prefersephemeralwebbrowsersessio?language=objc
+ */
+@property (nonatomic) BOOL prefersEphemeralWebBrowserSession API_AVAILABLE(ios(13.0));
+
 #endif
 
 /**

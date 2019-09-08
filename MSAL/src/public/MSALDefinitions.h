@@ -31,7 +31,6 @@
 @class MSALResult;
 @class MSALAccount;
 
-
 /**
  Levels of logging. Defines the priority of the logged message
  */
@@ -144,7 +143,6 @@ typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nu
     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
-
 
 /**
  The block that returns a MSAL log message.

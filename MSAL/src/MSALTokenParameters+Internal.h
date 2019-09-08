@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
 
-@property MSALTelemetryApiId telemetryApiId;
+@property (nonatomic) MSALTelemetryApiId telemetryApiId;
 
 @end
 
