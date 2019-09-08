@@ -22,29 +22,29 @@ let scopes = ["your-scope1-here", "your-scope2-here"]
         
 if let application = try? MSALPublicClientApplication(configuration: config) {
             
-		#if os(iOS)
-				let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-				let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
-#else
-				let webviewParameters = MSALWebviewParameters()
-#endif
-		let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
-		application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
+	#if os(iOS)
+		let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+		let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	#else
+		let webviewParameters = MSALWebviewParameters()
+	#endif
+let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
+application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
-				guard let authResult = result, error == nil else {
-						print(error!.localizedDescription)
-						return
-				}
+	guard let authResult = result, error == nil else {
+		print(error!.localizedDescription)
+		return
+	}
                 
-				// Get access token from result
-				let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
                 
-				// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-				let accountIdentifier = authResult.account.identifier
-		})
+	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+	let accountIdentifier = authResult.account.identifier
+	})
 }
 else {
-		print("Unable to create application.")
+	print("Unable to create application.")
 }
 ```
 
@@ -153,14 +153,14 @@ See more info about [configuring redirect uri for MSAL](https://docs.microsoft.c
 
 Swift
 ```swift
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         
-        guard let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String else {
+	guard let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String else {
             return false
         }
         
-        return MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApplication)
-    }
+	return MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApplication)
+}
 ```
 
 Objective-C
@@ -201,24 +201,24 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
 Swift
 ```swift
 #if os(iOS)
-		let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-		let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
 #else
-		let webviewParameters = MSALWebviewParameters()
+	let webviewParameters = MSALWebviewParameters()
 #endif
 let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
 application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
-		guard let authResult = result, error == nil else {
-				print(error!.localizedDescription)
-				return
-		}
+	guard let authResult = result, error == nil else {
+		print(error!.localizedDescription)
+		return
+	}
                 
-		// Get access token from result
-		let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
                 
-		// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-		let accountIdentifier = authResult.account.identifier
+	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+	let accountIdentifier = authResult.account.identifier
 })
 ```
 Objective-C
@@ -232,18 +232,18 @@ Objective-C
 
 MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
 [application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
-		if (!error)	
-    {
-				// You'll want to get the account identifier to retrieve and reuse the account
-				// for later acquireToken calls
-				NSString *accountIdentifier = result.account.identifier;
+	if (!error)	
+	{
+		// You'll want to get the account identifier to retrieve and reuse the account
+		// for later acquireToken calls
+		NSString *accountIdentifier = result.account.identifier;
             
-				NSString *accessToken = result.accessToken;
-    }
+		NSString *accessToken = result.accessToken;
+	}
   	else
-		{
-				// Check the error
-		}
+	{
+		// Check the error
+	}
 }];
 ```
 > Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about [default values, and support for other iOS versions](https://docs.microsoft.com/en-us/azure/active-directory/develop/customize-webviews).
@@ -255,21 +255,21 @@ guard let account = try? application.account(forIdentifier: accountIdentifier) e
 let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
 application.acquireTokenSilent(with: silentParameters) { (result, error) in
             
-		guard let authResult = result, error == nil else {
+	guard let authResult = result, error == nil else {
                 
-				let nsError = error! as NSError
+	let nsError = error! as NSError
                 
-						if (nsError.domain == MSALErrorDomain &&
-								nsError.code == MSALError.interactionRequired.rawValue) {
+		if (nsError.domain == MSALErrorDomain &&
+			nsError.code == MSALError.interactionRequired.rawValue) {
                     
-								// Interactive auth will be required
-								return
-						}
-				return
+			// Interactive auth will be required
+			return
 		}
+		return
+	}
             
-		// Get access token from result
-		let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
 }
 ```
 Objective-C
