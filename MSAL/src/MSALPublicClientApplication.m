@@ -241,7 +241,7 @@
     
     config.verifiedRedirectUri = msalRedirectUri;
     
-    BOOL cacheResult = [self setuplTokenCacheWithConfiguration:config error:error];
+    BOOL cacheResult = [self setupTokenCacheWithConfiguration:config error:error];
     
     if (!cacheResult)
     {
@@ -300,7 +300,7 @@
 #pragma mark - Keychain
 
 #if TARGET_OS_IPHONE
-- (BOOL)setuplTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
+- (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
 {
     NSError *dataSourceError = nil;
     MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
@@ -319,7 +319,7 @@
     return YES;
 }
 #else
-- (BOOL)setuplTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
+- (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
 {
     id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
     id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = nil;
