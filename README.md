@@ -23,13 +23,14 @@ let scopes = ["your-scope1-here", "your-scope2-here"]
 if let application = try? MSALPublicClientApplication(configuration: config) {
             
 	#if os(iOS)
-		let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
-		let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
 	#else
-		let webviewParameters = MSALWebviewParameters()
+	let webviewParameters = MSALWebviewParameters()
 	#endif
-let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
-application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
+	
+	let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
+	application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
 	guard let authResult = result, error == nil else {
 		print(error!.localizedDescription)
