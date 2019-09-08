@@ -33,7 +33,7 @@ The sign-in audience specifies what kind of accounts you want to support in your
  
  For example, if you're building an application that will be only used in your organization, you can specify MSALAudienceType as MSALAzureADMyOrgOnlyAudience, and specify what organization it is by passing its tenant ID
  
- If your app will be used by multiple organizations and you want to sign-in users with both their work and school accopunts, you can specify MSALAudienceType as MSALAzureADAndPersonalMicrosoftAccountAudience.
+ If your app will be used by multiple organizations and you want to sign-in users with both their work and school accounts, you can specify MSALAudienceType as MSALAzureADAndPersonalMicrosoftAccountAudience.
 
  Note that effective audience will be also dependent on what you specify in your application registration. For example, if you specify sign in audience as My Org Only in your app registration, and in MSAL as Multiple Orgs, the effective audience for your application will be the minimum of those two (My Org Only). See instructions here: https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#register-a-new-application-using-the-azure-portal
 */
@@ -95,11 +95,11 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
 
 /**
     An Azure Active Directory (AAD) authority indicating a directory that MSAL can use to obtain tokens. For AAD it is of the form https://aad_instance/aad_tenant, where aad_instance is the
-    directory host (e.g. https://login.microsoftonline.com) and aad_tenant is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
+    directory host (e.g. login.microsoftonline.com) and aad_tenant is a identifier within the directory itself (e.g. a domain associated to the tenant, such as contoso.onmicrosoft.com, or the GUID representing the TenantID property of the directory)
  */
 @interface MSALAADAuthority : MSALAuthority
 
-#pragma mark - Initializing MSALAADAuthority with an NSURL
+#pragma mark - Initializing MSALAADAuthority with a URL
 
 /**
  Initializes MSALAADAuthority with NSURL.
@@ -131,7 +131,7 @@ typedef NS_ENUM(NSInteger, MSALAzureCloudInstance)
                            rawTenant:(nullable NSString *)rawTenant
                                error:(NSError * _Nullable __autoreleasing * _Nullable)error NS_DESIGNATED_INITIALIZER;
 
-#pragma mark - Initializing MSALAADAuthority with a cloud instance and a sign in audience
+#pragma mark - Initializing MSALAADAuthority with a cloud instance and a sign-in audience
 
 /**
  Initializes MSALAADAuthority with a cloud instance, audience type and an optional tenant ID.

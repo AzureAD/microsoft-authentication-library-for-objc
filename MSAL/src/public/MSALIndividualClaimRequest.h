@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  Represents the individual claim request.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
  
- Example of Individual Claim Request serialized to json:
+ Example of Individual Claim Request serialized to JSON:
  
     "auth_time": {"essential": true}
  
@@ -45,8 +45,8 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Creating MSALIndividualClaimRequest
 
 /**
- Init with claim name.
- @param name Name of the requsted claim.
+ Initialize individual claim with a specific name.
+ @param name Name of the requested claim.
  */
 - (instancetype)initWithName:(NSString *)name;
 

@@ -70,11 +70,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
 
 #if TARGET_OS_IPHONE
+
 /**
- Modal presentation style for displaying authentication web content.
- */
+The view controller to present from. If nil, the current topmost view controller will be used.
+*/
 @property (nullable, weak, nonatomic) UIViewController *parentViewController DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+/**
+Modal presentation style for displaying authentication web content.
+*/
 @property (nonatomic) UIModalPresentationStyle presentationStyle DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
 #endif
@@ -96,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #if TARGET_OS_IPHONE
 /**
- Initialize a MSALInteractiveTokenParameters with scopes.
+ Initializes MSALInteractiveTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
@@ -105,7 +109,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewParameters: instead");
 #else
 /**
- Initialize a MSALInteractiveTokenParameters with scopes.
+ Initialize MSALInteractiveTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
@@ -115,12 +119,12 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
 /**
- Initialize a MSALInteractiveTokenParameters with scopes.
+ Initialize MSALInteractiveTokenParameters with scopes and web parameters.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
  gauranteed to be included in the access token returned.
- @param webviewParameters   Web view paramaters.
+ @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
              webviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;

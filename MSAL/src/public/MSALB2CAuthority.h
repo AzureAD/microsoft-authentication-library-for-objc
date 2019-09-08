@@ -30,7 +30,7 @@
 
 /**
     B2C endpoint that MSAL will use to get a token and perform B2C policies.
-    @note By default, the B2C authority url should be in the following format, where <port> is optional: https://<host>:<port>/tfp/<tenant>/<policy>. However, MSAL also supports other arbitrary B2C authority formats.
+    @note By default, the B2C authority url should be in the following format, where custom_port is optional: https://b2c_host:custom_port/tfp/b2c_tenant/b2c_policy. However, MSAL also supports other arbitrary B2C authority formats.
     See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-protocols
 */
 @interface MSALB2CAuthority : MSALAuthority

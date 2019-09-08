@@ -43,24 +43,24 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Configuration options
 
 /**
-    Network configuration, refer to `MSALHTTPConfig` for more detail
+    Network configuration, refer to `MSALHTTPConfig` for more details
  */
 @property (class, readonly) MSALHTTPConfig *httpConfig;
 
 /**
-    Telemetry configurations, refer to `MSALTelemetryConfig` for more detail
+    Telemetry configurations, refer to `MSALTelemetryConfig` for more details
  */
 @property (class, readonly) MSALTelemetryConfig *telemetryConfig;
 
 /**
-    Logger configurations, refer to `MSALLoggerConfig` for more detail
+    Logger configurations, refer to `MSALLoggerConfig` for more details
  */
 @property (class, readonly) MSALLoggerConfig *loggerConfig;
 
 /**
     The webview selection to be used for authentication.
     By default, it is going to use the following to authenticate.
-        - iOS: SFAuthenticationSession for iOS11 and up, SFSafariViewController otherwise.
+        - iOS: ASWebAuthenticationSession for iOS 12+, SFAuthenticationSession for iOS11, SFSafariViewController on iOS 10.
         - macOS:  WKWebView
  */
 @property (class) MSALWebviewType defaultWebviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to MSALPublicClientApplication -acquireTokenWithParameters:completionBlock:)");
@@ -68,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 #if TARGET_OS_IPHONE
 /**
     Setting to define MSAL behavior when Microsoft Authenticator application is installed.
-    By default, MSAL will try using Microsoft Authenticator application.
+    By default, MSAL will always try to use Microsoft Authenticator application when getting a token interactively. 
     Set this property to MSALBrokeredAvailabilityNone to disable this behavior
  */
 @property (class) MSALBrokeredAvailability brokerAvailability;

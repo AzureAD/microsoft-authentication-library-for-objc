@@ -41,13 +41,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
     The keychain sharing group to use for the token cache.
-    The default value is com.microsoft.adalcache and it needs to be declared in your application's entitlements.
+    The default value is `com.microsoft.adalcache` for iOS and `com.microsoft.identity.universalstorage` for macOS and it needs to be declared in your application's entitlements.
     See more https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps?language=objc
  */
 @property NSString *keychainSharingGroup;
 
 /**
     Retrieve default MSAL keychain access group.
+    The default value is `com.microsoft.adalcache` for iOS and `com.microsoft.identity.universalstorage` for macOS
  */
 + (NSString *)defaultKeychainSharingGroup;
 
@@ -66,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
     Adds a new external account storage provider to be used by MSAL in account retrieval.
-    This operation is not thread safe.
+    @note This operation is not thread safe.
  */
 - (void)addExternalAccountProvider:(id<MSALExternalAccountProviding>)externalAccountProvider;
 

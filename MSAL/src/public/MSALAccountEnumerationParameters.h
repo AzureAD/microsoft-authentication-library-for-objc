@@ -28,7 +28,7 @@
 #import <Foundation/Foundation.h>
 
 /**
-    MSALAccountEnumerationParameters represents possible account identifying parameters that should be used for filtering cached accounts.
+    MSALAccountEnumerationParameters represents possible account identifying parameters that could be used for filtering cached accounts.
  */
 @interface MSALAccountEnumerationParameters : NSObject
 
