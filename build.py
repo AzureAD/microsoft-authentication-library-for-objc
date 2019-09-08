@@ -88,12 +88,6 @@ target_specifiers = [
 		"min_warn_codecov" : 70.0,
 		"platform" : "Mac"
 	},
-	{
-		"name" : "Mac Test App",
-		"scheme" : "MSAL Test App (Mac)",
-		"operations" : [ "build" ],
-		"platform" : "Mac",
-	},
 ]
 
 def print_operation_start(name, operation) :

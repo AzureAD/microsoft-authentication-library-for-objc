@@ -87,13 +87,14 @@
 #import "MSIDExtendedTokenCacheDataSource.h"
 #import "MSALWebviewParameters.h"
 #if TARGET_OS_IPHONE
-#import "MSIDKeychainTokenCache.h"
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
 #import <UIKit/UIKit.h>
 #else
 #import "MSIDMacKeychainTokenCache.h"
 #endif
+
+#import "MSIDKeychainTokenCache.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -239,48 +240,13 @@
     
     config.verifiedRedirectUri = msalRedirectUri;
     
-#if TARGET_OS_IPHONE
-    // Optional Paramater
-    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&msidError];
+    BOOL cacheResult = [self setupTokenCacheWithConfiguration:config error:error];
     
-    if (!dataSource)
+    if (!cacheResult)
     {
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
-    
-    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
-    self.tokenCache = defaultAccessor;
-#else
-    
-    id<MSIDExtendedTokenCacheDataSource> dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
-                                                                                   trustedApplications:config.cacheConfig.trustedApplications
-                                                                                                 error:&msidError];
-    if (!dataSource)
-    {
-        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        return nil;
-    }
-    
-    NSMutableArray *legacyAccessors = [NSMutableArray new];
-    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
-    if (externalDataSource)
-    {
-        __auto_type legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
-        __auto_type defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
-        _externalCacheSeeder = [[MSIDExternalAADCacheSeeder alloc] initWithDefaultAccessor:defaultAccessor
-                                                                    externalLegacyAccessor:legacyAccessor];
-        if (legacyAccessor) [legacyAccessors addObject:legacyAccessor];
-    }
-    
-    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
-    self.tokenCache = defaultAccessor;
-#endif
-    
-    _accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
-    
+        
     // Maintain an internal copy of config.
     // Developers shouldn't be able to change any properties on config after PCA has been created
     _configuration = config;
@@ -329,6 +295,88 @@
                              redirectUri:redirectUri
                                    error:error];
 }
+
+#pragma mark - Keychain
+
+#if TARGET_OS_IPHONE
+- (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
+{
+    NSError *dataSourceError = nil;
+    MSIDKeychainTokenCache *dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+    
+    if (!dataSource)
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:dataSourceError];
+        return NO;
+    }
+    
+    MSIDLegacyTokenCacheAccessor *legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+    NSArray *otherAccessors = legacyAccessor ? @[legacyAccessor] : nil;
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
+    self.tokenCache = defaultAccessor;
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    return YES;
+}
+#else
+- (BOOL)setupTokenCacheWithConfiguration:(MSALPublicClientApplicationConfig *)config error:(NSError **)error
+{
+    id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
+    id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = nil;
+    NSError *dataSourceError = nil;
+    
+    if (@available(macOS 10.15, *)) {
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup error:&dataSourceError];
+        
+        NSError *secondaryDataSourceError = nil;
+        secondaryDataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+                                                           trustedApplications:config.cacheConfig.trustedApplications
+                                                                         error:&secondaryDataSourceError];
+        
+        if (secondaryDataSourceError)
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
+        }
+    }
+    else
+    {
+        dataSource = [[MSIDMacKeychainTokenCache alloc] initWithGroup:config.cacheConfig.keychainSharingGroup
+                                                  trustedApplications:config.cacheConfig.trustedApplications
+                                                                error:&dataSourceError];
+    }
+    
+    if (!dataSource)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create primary data source with error %@", MSID_PII_LOG_MASKABLE(dataSourceError));
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:dataSourceError];
+        return NO;
+    }
+    
+    NSMutableArray *legacyAccessors = [NSMutableArray new];
+    
+    // Setup backward compatibility with ADAL's macOS cache
+    id<MSIDTokenCacheDataSource> externalDataSource = config.cacheConfig.serializedADALCache.msidTokenCacheDataSource;
+    if (externalDataSource)
+    {
+        __auto_type legacyAccessor = [[MSIDLegacyTokenCacheAccessor alloc] initWithDataSource:externalDataSource otherCacheAccessors:nil];
+        __auto_type defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];
+        _externalCacheSeeder = [[MSIDExternalAADCacheSeeder alloc] initWithDefaultAccessor:defaultAccessor
+                                                                    externalLegacyAccessor:legacyAccessor];
+        if (legacyAccessor) [legacyAccessors addObject:legacyAccessor];
+    }
+    
+    // Setup backward compatibility on pre-10.15 devices with login keychain
+    if (secondaryDataSource)
+    {
+        __auto_type secondaryAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:secondaryDataSource otherCacheAccessors:nil];
+        if (secondaryAccessor) [legacyAccessors addObject:secondaryAccessor];
+    }
+    
+    MSIDDefaultTokenCacheAccessor *defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:legacyAccessors];
+    self.tokenCache = defaultAccessor;
+    self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    return YES;
+}
+#endif
 
 #pragma mark - Accounts
 

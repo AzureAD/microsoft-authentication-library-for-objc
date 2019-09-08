@@ -627,12 +627,17 @@
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
     [application acquireTokenWithParameters:params
                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
                                 
                                 const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
                                 XCTAssertEqual(l1, l2);
+                                [expectation fulfill];
                             }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
@@ -703,11 +708,16 @@
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
     [application acquireTokenSilentWithParameters:params
                                   completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
                                       const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
                                       XCTAssertEqual(l1, l2);
+                                      [expectation fulfill];
     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void)testAcquireToken_whenNoCustomCompletionBlockQueue_andInvokedFromBackgroundQueue_shouldExecuteOnMainQueue
