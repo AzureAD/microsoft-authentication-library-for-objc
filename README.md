@@ -126,6 +126,7 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
 ####iOS only steps:
 
 1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -139,13 +140,13 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
 ```
 3. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
-   Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
+Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
    
 ```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
-    <string>msauthv2</string>
-  	<string>msauthv3</string>
+	<string>msauthv2</string>
+	<string>msauthv3</string>
 </array>
 ```
 See more info about [configuring redirect uri for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/redirect-uris)
