@@ -1016,7 +1016,7 @@
         MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Requiring default broker type due to app being built with iOS 13 SDK");
     }
     
-    if ([self.internalConfig.redirectUri hasPrefix:@"https"])
+    if ([self.internalConfig.verifiedRedirectUri.url.absoluteString hasPrefix:@"https"])
     {
         brokerProtocol = MSIDBrokerProtocolTypeUniversalLink;
         requiredBrokerType = MSIDRequiredBrokerTypeWithNonceSupport;
