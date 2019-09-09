@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface SampleCalendarEvent : NSObject
 
@@ -41,7 +42,8 @@
 /*
     Retrieves updated calendar event information from Microsoft graph
  */
-- (void)getEvents:(void (^)(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error))completionBlock;
+- (void)getEventsWithParentController:(UIViewController *)controller
+                           completion:(void (^)(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error))completionBlock;
 
 /*
     Returns cached calendar events (if any) for the current user
