@@ -74,7 +74,7 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     
     if (@available(macOS 10.15, *))
     {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainCache.keychainGroup error:nil];
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainGroup error:nil];
         
         id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
         
