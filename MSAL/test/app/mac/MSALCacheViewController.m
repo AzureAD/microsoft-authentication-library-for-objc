@@ -70,31 +70,23 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
 - (void)loadCache
 {
     id<MSIDExtendedTokenCacheDataSource> dataSource = nil;
-    id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = nil;
-    NSError *dataSourceError = nil;
+    NSArray *otherAccessors = nil;
     
-    if (@available(macOS 10.15, *)) {
-        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainCache.keychainGroup error:&dataSourceError];
+    if (@available(macOS 10.15, *))
+    {
+        dataSource = [[MSIDKeychainTokenCache alloc] initWithGroup:MSIDMacKeychainTokenCache.defaultKeychainCache.keychainGroup error:nil];
         
-        NSError *secondaryDataSourceError = nil;
-        secondaryDataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
+        id<MSIDExtendedTokenCacheDataSource> secondaryDataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
         
-        if (secondaryDataSourceError)
+        if (secondaryDataSource)
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to create secondary data source with error %@", MSID_PII_LOG_MASKABLE(secondaryDataSourceError));
+            self.legacyAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:secondaryDataSource otherCacheAccessors:nil];
+            if (self.legacyAccessor) otherAccessors = @[self.legacyAccessor];
         }
     }
     else
     {
         dataSource = MSIDMacKeychainTokenCache.defaultKeychainCache;
-    }
-    
-    NSArray *otherAccessors = nil;
-    
-    if (secondaryDataSource)
-    {
-        self.legacyAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:secondaryDataSource otherCacheAccessors:nil];
-        if (self.legacyAccessor) otherAccessors = @[self.legacyAccessor];
     }
     
     self.defaultAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:otherAccessors];
