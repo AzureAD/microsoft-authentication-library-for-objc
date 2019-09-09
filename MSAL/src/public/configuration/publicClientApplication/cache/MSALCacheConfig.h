@@ -43,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
     The keychain sharing group to use for the token cache.
     The default value is `com.microsoft.adalcache` for iOS and `com.microsoft.identity.universalstorage` for macOS and it needs to be declared in your application's entitlements.
     See more https://developer.apple.com/documentation/security/keychain_services/keychain_items/sharing_access_to_keychain_items_among_a_collection_of_apps?language=objc
+    @note To disable keychain sharing, set this to your bundleIdentifier using [[NSBundle mainBundle] bundleIdentifier]. MSAL will then use your private keychain group, which is available only to your application.
  */
 @property NSString *keychainSharingGroup;
 
