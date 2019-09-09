@@ -123,7 +123,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 See more information about [keychain groups](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-v2-keychain-objc) and [Silent SSO for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/single-sign-on-macos-ios).
 
-####iOS only steps:
+#### iOS only steps:
 
 1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 
