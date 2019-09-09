@@ -31,7 +31,6 @@
 @class MSALResult;
 @class MSALAccount;
 
-
 /*! Levels of logging. Defines the priority of the logged message */
 typedef NS_ENUM(NSInteger, MSALLogLevel)
 {
@@ -42,7 +41,6 @@ typedef NS_ENUM(NSInteger, MSALLogLevel)
     MSALLogLevelVerbose,
     MSALLogLevelLast = MSALLogLevelVerbose,
 };
-
 
 typedef NS_ENUM(NSInteger, MSALWebviewType)
 {
@@ -101,7 +99,6 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
 
 typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nullable error);
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
-
 
 /*!
  The LogCallback block for the MSAL logger

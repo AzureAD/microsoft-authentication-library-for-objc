@@ -45,4 +45,8 @@
                           file:(const char *)file
                           line:(int)line;
 
+#if TARGET_OS_IPHONE
++ (UIViewController *)sharedViewControllerStub;
+#endif
+
 @end
