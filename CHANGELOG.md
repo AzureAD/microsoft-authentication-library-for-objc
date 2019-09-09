@@ -4,7 +4,7 @@
 - Support keychain access groups on macOS 10.15
 
 ## [0.6.0] - 2019-08-22
-### Added
+### Added 
 - Enable iOS 13 compatible broker
 - Implement ACL control for macOS keychain
 
