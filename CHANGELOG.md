@@ -1,5 +1,10 @@
-## [0.6.0] - 2019-08-22
+## [0.7.0] - 2019-09-09
 ### Added
+- iOS 13 support for ASWebAuthenticationSession
+- Support keychain access groups on macOS 10.15
+
+## [0.6.0] - 2019-08-22
+### Added 
 - Enable iOS 13 compatible broker
 - Implement ACL control for macOS keychain
 
