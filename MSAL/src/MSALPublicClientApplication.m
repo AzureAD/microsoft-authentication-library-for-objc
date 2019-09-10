@@ -1025,6 +1025,7 @@
     msidParams.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
     msidParams.customWebview = parameters.webviewParameters.customWebview ?: _customWebview;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
+    msidParams.providedAuthority = requestAuthority;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
