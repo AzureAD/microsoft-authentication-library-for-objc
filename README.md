@@ -282,6 +282,7 @@ For more information, please see the [wiki](https://github.com/AzureAD/microsoft
 ## Supported Versions
 
 **iOS** - MSAL supports iOS 10 and above.
+
 **macOS** - MSAL supports macOS (OSX) 10.12 and above.
 
 ## Migrating from ADAL Objective-C
