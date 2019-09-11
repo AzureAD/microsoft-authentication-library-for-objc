@@ -10,7 +10,7 @@ Note that throughout the preview, only iOS has been supported. Starting with **M
 
 ## Important Note about the MSAL Preview
 
-These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements  This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support.
+These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do for our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements. This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support.
 
 [![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
@@ -103,7 +103,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
  `msauth.[BUNDLE_ID]://auth`
 
-3. Add a new keychain group to your project Capabilities. See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-on-iOS). Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
+3. Add a new keychain group to your project Capabilities. See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-for-MSAL-on-iOS). Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
 
 ![](Images/keychain_example.png)
 
@@ -129,7 +129,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 <key>LSApplicationQueriesSchemes</key>
 <array>
     <string>msauthv2</string>
-  	<string>msauthv3</string>
+    <string>msauthv3</string>
 </array>
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
@@ -166,7 +166,7 @@ Objective-C
 ## Using MSAL
 
 ### Creating an Application Object
-Use the client ID from yout app listing when initializing your MSALPublicClientApplication object:
+Use the client ID from your app listing when initializing your MSALPublicClientApplication object:
 
 Swift
 ```swift
@@ -186,19 +186,19 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
 Swift
 ```swift
     let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes)
-            application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
+    application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
-                guard let authResult = result, error == nil else {
-                    print(error!.localizedDescription)
-                    return
-                }
+        guard let authResult = result, error == nil else {
+            print(error!.localizedDescription)
+            return
+        }
                 
-                // Get access token from result
-                let accessToken = authResult.accessToken
+        // Get access token from result
+        let accessToken = authResult.accessToken
                 
-                // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.identifier
-            })
+        // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+        let accountIdentifier = authResult.account.identifier
+    })
 ```
 Objective-C
 ```obj-c
@@ -218,31 +218,31 @@ Objective-C
         }
     }];
 ```
-> Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/MSAL-for-iOS-uses-web-browser)
+> Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions  [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Customizing-Browsers-and-WebViews).
 
 ### Silently Acquiring an Updated Token
 Swift
 ```swift
 guard let account = try? application.account(forIdentifier: accountIdentifier) else { return }
-        let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
-        application.acquireTokenSilent(with: silentParameters) { (result, error) in
+let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
+application.acquireTokenSilent(with: silentParameters) { (result, error) in
             
-            guard let authResult = result, error == nil else {
+    guard let authResult = result, error == nil else {
                 
-                let nsError = error! as NSError
+        let nsError = error! as NSError
                 
-                if (nsError.domain == MSALErrorDomain &&
-                    nsError.code == MSALError.interactionRequired.rawValue) {
+        if (nsError.domain == MSALErrorDomain &&
+            nsError.code == MSALError.interactionRequired.rawValue) {
                     
-                    // Interactive auth will be required
-                    return
-                }
-                return
-            }
-            
-            // Get access token from result
-            let accessToken = authResult.accessToken
+            // Interactive auth will be required
+            return
         }
+        return
+    }
+            
+    // Get access token from result
+    let accessToken = authResult.accessToken
+}
 ```
 Objective-C
 ```objective-c
@@ -280,19 +280,19 @@ Occasionally user interaction will be required to get a new access token, when t
 For more information, please see the [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Error-Handling).
 
 ## Migrating from ADAL Objective-C
-MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Migrating-from-ADAL-Objective-C-to-MSAL-SDK).
+MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Migrating-from-ADAL-Objective-C-to-MSAL-Objective-C).
 
 ## Additional guidance
 
 Our [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki) is intended to document common patterns, error handling and debugging, functionality (e.g. logging, telemetry), and active bugs.
-You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki)
+You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki).
 
 
 ## Community Help and Support
 
 We use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before. 
 
-If you find and bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
+If you find a bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
 
 To provide a recommendation, visit our [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 
@@ -313,4 +313,4 @@ If you find a security issue with our libraries or services please report it to 
 
 ## License
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
+Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License").
