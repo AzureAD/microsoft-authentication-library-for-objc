@@ -121,10 +121,10 @@ You can also use Git Submodule or check out the latest release and use as framew
     </dict>
 </array>
 ```
-3. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
    Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
-   
+
 ```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
@@ -132,7 +132,7 @@ You can also use Git Submodule or check out the latest release and use as framew
     <string>msauthv3</string>
 </array>
 ```
-See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
+See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL).
 
 3. To handle a callback, add the following to `appDelegate`:
 
