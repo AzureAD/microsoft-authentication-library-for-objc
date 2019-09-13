@@ -191,23 +191,7 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      The scheme should be "msauth.[my.app.bundleId]"
      
      e.g. an app with the bundle Identifier "com.contoso.myapp" would need to
-     register the scheme "msauth.com.contoso.myapp" and add the
-     following to the info.plist file:
-     
-     <pre>
-     <key>CFBundleURLTypes</key>
-     <array>
-     <dict>
-     <key>CFBundleTypeRole</key>
-     <string>Editor</string>
-     <key>CFBundleURLName</key>
-     <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-     <key>CFBundleURLSchemes</key>
-     <array>
-     <string>msauth.com.contoso.myapp</string>
-     </array>
-     </dict>
-     </pre>
+     register the scheme "msauth.com.contoso.myapp" and add the scheme into its Info.plist under CFBundleURLTypes - CFBundleURLSchemes key
      
      */
     MSALInternalErrorRedirectSchemeNotRegistered        = -42001,
