@@ -92,14 +92,15 @@
     }];
 }
 
-- (void)checkUpdatePhoto:(PhotoBlock)photoBlock
+- (void)checkUpdatePhotoWithParentController:(UIViewController *)controller completion:(PhotoBlock)photoBlock
 {
     if (![self checkTimestamp])
     {
         return;
     }
     
-    [self getUserPhotoImpl:^(UIImage *photo, NSError *error)
+    [self getUserPhotoImplWithParentController:controller
+                                    completion:^(UIImage *photo, NSError *error)
      {
         dispatch_async(dispatch_get_main_queue(), ^{
             photoBlock(photo, error);
@@ -107,7 +108,7 @@
      }];
 }
 
-- (void)getUserPhotoImpl:(PhotoBlock)photoBlock
+- (void)getUserPhotoImplWithParentController:(UIViewController *)controller completion:(PhotoBlock)photoBlock
 {
     // When acquiring a token for a specific purpose you should limit the scopes
     // you ask for to just the ones needed for that operation. A user or admin might not
@@ -116,6 +117,7 @@
     __block NSArray *scopesRequired = @[@"User.Read"];
     
     [[SampleMSALUtil sharedUtil] acquireTokenForCurrentAccount:scopesRequired
+                                              parentController:controller
                                                completionBlock:^(NSString *token, NSError *error)
      {
          if (error)

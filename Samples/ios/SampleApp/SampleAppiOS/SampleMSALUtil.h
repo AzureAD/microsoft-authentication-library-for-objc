@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class MSALAccount;
 
@@ -49,7 +50,8 @@
 /*!
     Signs in an account using MSAL.
  */
-- (void)signInAccount:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock;
+- (void)signInAccountWithParentController:(UIViewController *)controller
+                               completion:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock;
 
 /*!
     Removes MSAL account state from the application.
@@ -60,21 +62,16 @@
 /*!
     Acquires a token to use against graph for the current account
  */
-- (void)acquireTokenSilentForCurrentAccount:(NSArray<NSString *> *)scopes
-                            completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
+- (void)acquireTokenForCurrentAccount:(NSArray<NSString *> *)scopes
+                     parentController:(UIViewController *)controller
+                      completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 /*!
     Acquires a token using an interactive flow for the current account. Used if
     the library returns MSALErrorInteractionRequired.
  */
 - (void)acquireTokenInteractiveForCurrentAccount:(NSArray<NSString *> *)scopes
+                                parentController:(UIViewController *)controller
                                  completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
-
-
-/*!
-    Acquires a token first with the silent flow, falling back to a interactive call if required.
- */
-- (void)acquireTokenForCurrentAccount:(NSArray<NSString *> *)scopes
-                      completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
 @end
