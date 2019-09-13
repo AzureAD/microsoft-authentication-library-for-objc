@@ -159,6 +159,32 @@ Objective-C
 }
 ```
 
+Note, that if you adopted UISceneDelegate on iOS 13+, MSAL callback needs to be placed into the approproate delegate method of UISceneDelegate instead. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL.
+
+Swift
+
+
+
+Objective-C
+
+```
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+    if (URLContexts.count != 1)
+    {
+        return;
+    }
+    
+    UIOpenURLContext *context = URLContexts.anyObject;
+    NSURL *url = context.URL;
+    NSString *sourceApplication = context.options.sourceApplication;
+    
+    [MSALPublicClientApplication handleMSALResponse:url sourceApplication:sourceApplication];
+}
+```
+
+
+
 #### macOS only steps:
 
 1. Make sure your application is signed with a valid development certificate. While MSAL will still work in the unsigned mode, it will behave differently around cache persistence.
