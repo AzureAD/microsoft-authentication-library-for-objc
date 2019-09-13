@@ -159,7 +159,7 @@ Objective-C
 }
 ```
 
-**Note, that if you adopted UISceneDelegate on iOS 13+**, MSAL callback needs to be placed into the approproate delegate method of UISceneDelegate instead. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL.
+**Note, that if you adopted UISceneDelegate on iOS 13+**, MSAL callback needs to be placed into the appropriate delegate method of UISceneDelegate instead of AppDelegate. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL. If you supporting both cases, MSAL callback needs to be placed into both places.
 
 Swift
 
