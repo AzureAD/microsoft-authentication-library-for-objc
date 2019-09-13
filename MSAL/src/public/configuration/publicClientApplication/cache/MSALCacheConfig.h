@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Extend MSAL account cache
 
 /**
-    List of external account stotage providers that helps you to combine your own accounts with MSAL accounts and use a consistent API for the account management and enumeration.
+    List of external account storage providers that helps you to combine your own accounts with MSAL accounts and use a consistent API for the account management and enumeration.
     Each external account provider is responsible for retrieving, enumerating, updating and removing external accounts.
     Some examples where this might be useful:
     1.  An app is migrating from ADAL to MSAL. Because ADAL didn't support account enumeration, developer built a separate layer to store ADAL accounts in the app.

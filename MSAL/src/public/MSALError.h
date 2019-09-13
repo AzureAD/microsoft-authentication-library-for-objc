@@ -168,7 +168,7 @@ typedef NS_ENUM(NSInteger, MSALError)
     MSALErrorServerProtectionPoliciesRequired    = -50004,
     
     /**
-     The user cancelled the web auth session by tapping the "Done" button on the SFSafariViewController.
+     The user cancelled the web auth session by tapping the "Done" or "Cancel" button in the web browser.
      Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
@@ -188,12 +188,13 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     
     /**
      The required MSAL URL scheme is not registered in the app's info.plist.
-     The scheme should be "msal<clientid>"
+     The scheme should be "msauth.[my.app.bundleId]"
      
-     e.g. an app with the client ID "abcde-12345-vwxyz-67890" would need to
-     register the scheme "msalabcde-12345-vwxyz-67890" and add the
+     e.g. an app with the bundle Identifier "com.contoso.myapp" would need to
+     register the scheme "msauth.com.contoso.myapp" and add the
      following to the info.plist file:
      
+     <pre>
      <key>CFBundleURLTypes</key>
      <array>
      <dict>
@@ -203,17 +204,40 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
      <key>CFBundleURLSchemes</key>
      <array>
-     <string>msalabcde-12345-vwxyz-67890</string>
+     <string>msauth.com.contoso.myapp</string>
      </array>
      </dict>
+     </pre>
      
      */
     MSALInternalErrorRedirectSchemeNotRegistered        = -42001,
     
+    /**
+     Protocol error, such as a missing required parameter.
+     */
     MSALInternalErrorInvalidRequest                     = -42002,
+    
+    /**
+     Client authentication failed.
+     The client credentials aren't valid. To fix, the application administrator updates the credentials.
+     */
     MSALInternalErrorInvalidClient                      = -42003,
+    
+    /**
+     The provided grant is invalid or has expired.
+     Try a new request to the /authorize endpoint.
+     */
     MSALInternalErrorInvalidGrant                       = -42004,
+    
+    /**
+     Invalid scope parameter.
+     */
     MSALInternalErrorInvalidScope                       = -42005,
+    
+    /**
+     The client application isn't permitted to request an authorization code.
+     This error usually occurs when the client application isn't registered in Azure AD or isn't added to the user's Azure AD tenant. The application can prompt the user with instruction for installing the application and adding it to Azure AD.
+     */
     MSALInternalErrorUnauthorizedClient                 = -42006,
     
     /**
@@ -256,14 +280,14 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     
     /**
      An interactive authentication session is already running with the
-     SafariViewController visible. Another authentication session can not be
+     web browser visible. Another authentication session can not be
      launched yet.
      */
     MSALInternalErrorInteractiveSessionAlreadyRunning   = -42402,
     
     /**
      MSAL could not find the current view controller in the view controller
-     heirarchy to display the SFSafariViewController on top of.
+     heirarchy to display the web browser on top of.
      */
     MSALInternalErrorNoViewController                   = -42403,
     

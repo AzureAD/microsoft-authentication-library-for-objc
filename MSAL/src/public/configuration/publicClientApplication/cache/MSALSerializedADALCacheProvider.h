@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MSALSerializedADALCacheProvider;
 
 /**
-    Class implementing MSALSerializedADALCacheProviderDelegate is responsinble for persistence and management of ADAL cache on macOS
+    Class implementing MSALSerializedADALCacheProviderDelegate is responsible for persistence and management of ADAL cache on macOS
  */
 
 @protocol MSALSerializedADALCacheProviderDelegate <NSObject>

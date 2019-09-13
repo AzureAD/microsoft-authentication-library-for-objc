@@ -61,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
-/** List of additional ESTS features that client handles. */
+/** List of additional STS features that client handles. */
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
 /** Time in seconds controlling how long before token expiry MSAL refreshes access tokens.
