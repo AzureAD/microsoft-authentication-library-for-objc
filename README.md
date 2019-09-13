@@ -159,22 +159,29 @@ Objective-C
 }
 ```
 
-Note, that if you adopted UISceneDelegate on iOS 13+, MSAL callback needs to be placed into the approproate delegate method of UISceneDelegate instead. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL.
+**Note, that if you adopted UISceneDelegate on iOS 13+**, MSAL callback needs to be placed into the approproate delegate method of UISceneDelegate instead. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL.
 
 Swift
 
-
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        
+        guard let urlContext = URLContexts.first else {
+            return
+        }
+        
+        let url = urlContext.url
+        let sourceApp = urlContext.options.sourceApplication
+        
+        MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApp)
+    }
+```
 
 Objective-C
 
-```
+```objective-c
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
 {
-    if (URLContexts.count != 1)
-    {
-        return;
-    }
-    
     UIOpenURLContext *context = URLContexts.anyObject;
     NSURL *url = context.URL;
     NSString *sourceApplication = context.options.sourceApplication;
