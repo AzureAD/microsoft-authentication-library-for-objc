@@ -691,16 +691,18 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:nil
-                         claimsRequest:[MSALClaimsRequest new]
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                                      webviewParameters:webParameters];
+    
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.claimsRequest = [MSALClaimsRequest new];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
@@ -1689,7 +1691,6 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilent"];
     
-    application.webviewType = MSALWebviewTypeWKWebView;
     [application acquireTokenSilentForScopes:@[@"user.read", @"fakescope1", @"fakescope2", @"fakescope3"]
                                      account:account
                                    authority:[@"https://login.microsoftonline.com/common" msalAuthority]
@@ -1779,13 +1780,12 @@
     application.accountMetadataCache = self.accountMetadataCache;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -1854,13 +1854,12 @@
     
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:[MSALClaimsRequest new]
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = [MSALClaimsRequest new];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we return access token in cache
          XCTAssertNil(error);
@@ -1927,13 +1926,11 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:nil
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we return access token in cache
          XCTAssertNil(error);
@@ -2017,13 +2014,11 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:nil
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -2106,13 +2101,13 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -2191,13 +2186,12 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNotNil(error);

@@ -143,12 +143,14 @@
                                                     error:&error];
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-
-    application.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire Token."];
     
-    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"] webviewParameters:webParameters];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     parameters.parentViewController = [self.class sharedViewControllerStub];
 
