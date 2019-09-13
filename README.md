@@ -107,7 +107,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 
 ![](Images/keychain_example.png)
 
-####iOS only steps:
+#### iOS only steps:
 
 1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
 ```xml
@@ -129,7 +129,7 @@ You can also use Git Submodule or check out the latest release and use as framew
 <key>LSApplicationQueriesSchemes</key>
 <array>
     <string>msauthv2</string>
-  	<string>msauthv3</string>
+    <string>msauthv3</string>
 </array>
 ```
 See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL)
