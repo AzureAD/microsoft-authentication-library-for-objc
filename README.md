@@ -10,7 +10,7 @@ Note that throughout the preview, only iOS has been supported. Starting with **M
 
 ## Important Note about the MSAL Preview
 
-These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements  This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support.
+These libraries are suitable to use in a production environment. We provide the same production level support for these libraries as we do for our current production libraries. During the preview we reserve the right to make changes to the API, cache format, and other mechanisms of this library without notice which you will be required to take along with bug fixes or feature improvements. This may impact your application. For instance, a change to the cache format may impact your users, such as requiring them to sign in again and an API change may require you to update your code. When we provide our General Availability release later, we will require you to update your application to our General Availabilty version within six months to continue to get support.
 
 [![Build Status](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc.svg?branch=dev)](https://travis-ci.org/AzureAD/microsoft-authentication-library-for-objc)
 
@@ -138,7 +138,7 @@ See more information about [keychain groups](https://docs.microsoft.com/en-us/az
     </dict>
 </array>
 ```
-3. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
+2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
 Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
 
@@ -176,6 +176,39 @@ Objective-C
 }
 ```
 
+**Note, that if you adopted UISceneDelegate on iOS 13+**, MSAL callback needs to be placed into the appropriate delegate method of UISceneDelegate instead of AppDelegate. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL. If you support both UISceneDelegate and UIApplicationDelegate for compatibility with older iOS, MSAL callback would need to be placed into both files.
+
+Swift
+
+```swift
+func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        
+        guard let urlContext = URLContexts.first else {
+            return
+        }
+        
+        let url = urlContext.url
+        let sourceApp = urlContext.options.sourceApplication
+        
+        MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApp)
+    }
+```
+
+Objective-C
+
+```objective-c
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+    UIOpenURLContext *context = URLContexts.anyObject;
+    NSURL *url = context.URL;
+    NSString *sourceApplication = context.options.sourceApplication;
+    
+    [MSALPublicClientApplication handleMSALResponse:url sourceApplication:sourceApplication];
+}
+```
+
+
+
 #### macOS only steps:
 
 1. Make sure your application is signed with a valid development certificate. While MSAL will still work in the unsigned mode, it will behave differently around cache persistence.
@@ -183,7 +216,7 @@ Objective-C
 ## Using MSAL
 
 ### Creating an Application Object
-Use the client ID from yout app listing when initializing your MSALPublicClientApplication object:
+Use the client ID from your app listing when initializing your MSALPublicClientApplication object:
 
 Swift
 ```swift
@@ -315,20 +348,20 @@ MSAL Objective-C is designed to support smooth migration from ADAL Objective-C l
 ## Additional guidance
 
 Our [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki) is intended to document common patterns, error handling and debugging, functionality (e.g. logging, telemetry), and active bugs.
-You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki)
+You can find it [here](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki).
 
 
 ## Community Help and Support
 
 We use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) with the community to provide support. We highly recommend you ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before. 
 
-If you find and bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
+If you find a bug or have a feature request, please raise the issue on [GitHub Issues](../../issues). 
 
 To provide a recommendation, visit our [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 
 ## Contribute
 
-We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](Contributing.md) for more information.
+We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
@@ -343,4 +376,4 @@ If you find a security issue with our libraries or services please report it to 
 
 ## License
 
-Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License");
+Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MIT License (the "License").
