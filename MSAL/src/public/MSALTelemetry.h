@@ -29,6 +29,9 @@ NS_ASSUME_NONNULL_BEGIN
  The central class for MSAL telemetry.
  
  Usage: Get a singleton instance of MSALTelemetry; register a callback (`telemetryCallback`) for receiving telemetry events.
+ 
+ @note MSALTelemetry is deprecated. Use `MSALTelemetryConfig` instead to register a `telemetryCallback` and changing telemetry configuration.
+ 
  */
 @interface MSALTelemetry : NSObject
 
