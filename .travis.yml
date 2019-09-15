@@ -25,7 +25,7 @@ deploy:
   github-token: $GH_TOKEN
   local-dir: docs.temp/docs
   on:
-    branch: reference-docs
+    branch: master
 
 notifications:
   slack:
