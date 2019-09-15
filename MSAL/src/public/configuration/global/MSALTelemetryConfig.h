@@ -30,25 +30,42 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    MSAL configuration interface responsible for setting up MSAL telemetry callback and configuring telemetry collection behavior.
+    @note Configuration changes inside MSALTelemetryConfig will apply to all instances of `MSALPublicClientApplication`
+*/
 @interface MSALTelemetryConfig : NSObject
 
-/*!
+#pragma mark - Configuring telemetry collection
+
+/**
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
 @property (atomic) BOOL piiEnabled;
 
-/*!
+/**
  If set YES, telemetry events are only dispatched when errors occurred;
  If set NO, MSAL will dispatch all events.
  */
 @property (atomic) BOOL notifyOnFailureOnly;
 
-/*!
+#pragma mark - Listening to telemetry events
+
+/**
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback;
 
+#pragma mark - Unavailable initializers
+
+/**
+   Use class properties instead.
+*/
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use class properties instead.
+*/
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end

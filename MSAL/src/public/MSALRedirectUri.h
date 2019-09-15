@@ -29,13 +29,24 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    MSALRedirectUri is a representation of an OAuth redirect_uri parameter.
+    A redirect URI, or reply URL, is the location that the authorization server will send the user to once the app has been successfully authorized, and granted an authorization code or access token.
+ */
 @interface MSALRedirectUri : NSObject <NSCopying>
 
-/* Redirect URI that will be used for network requests */
+#pragma mark - Getting a redirect_uri parameter
+
+/**
+    Redirect URI that will be used for network requests
+ */
 @property (nonatomic, readonly) NSURL *url;
 
-/* Indicates if redirect URI can be used with broker
-   Broker redirect URIs need to follow particular format, e.g. msauth.<bundleId>://auth */
+#pragma mark - Checking redirect uri capabilities
+
+/**
+    Indicates if redirect URI can be used to talk to the Microsoft Authenticator application (broker).
+    Broker redirect URIs need to follow particular format, e.g. msauth.your.app.bundleId://auth */
 @property (nonatomic, readonly) BOOL brokerCapable;
 
 @end

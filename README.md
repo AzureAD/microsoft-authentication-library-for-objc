@@ -1,8 +1,8 @@
 Microsoft Authentication Library Preview for iOS and macOS
 =====================================
 
-| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [Support](README.md#community-help-and-support) 
-| --- | --- | --- |
+| [Get Started](https://docs.microsoft.com/azure/active-directory/develop/quickstart-v2-ios) | [iOS Sample Code](https://github.com/Azure-Samples/active-directory-ios-swift-native-v2) | [macOS Sample Code](https://github.com/Azure-Samples/active-directory-macOS-swift-native-v2) | [Library reference](https://azuread.github.io/microsoft-authentication-library-for-objc/index.html) | [Support](https://github.com/AzureAD/microsoft-authentication-library-for-objc/blob/dev/README.md#community-help-and-support) 
+| --- | --- | --- | --- | --- |
 
 The MSAL library preview gives your app the ability to begin using the [Microsoft Identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/) for those using our hosted identity management service.
 
@@ -17,56 +17,70 @@ These libraries are suitable to use in a production environment. We provide the 
 ## Swift
 
 ```swift
-        let config = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>")
-        let scopes = ["your-scope1-here", "your-scope2-here"]
+let config = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>")
+let scopes = ["your-scope1-here", "your-scope2-here"]
         
-        if let application = try? MSALPublicClientApplication(configuration: config) {
+if let application = try? MSALPublicClientApplication(configuration: config) {
             
-            let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes)
-            application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
+	#if os(iOS)
+	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+	#else
+	let webviewParameters = MSALWebviewParameters()
+	#endif
+	
+	let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
+	application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
-                guard let authResult = result, error == nil else {
-                    print(error!.localizedDescription)
-                    return
-                }
+	guard let authResult = result, error == nil else {
+		print(error!.localizedDescription)
+		return
+	}
                 
-                // Get access token from result
-                let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
                 
-                // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-                let accountIdentifier = authResult.account.identifier
-            })
-        }
-        else {
-            print("Unable to create application.")
-        }
+	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+	let accountIdentifier = authResult.account.identifier
+	})
+}
+else {
+	print("Unable to create application.")
+}
 ```
 
 ## Objective-C
 
 ```obj-c
-    NSError *msalError;
+NSError *msalError = nil;
     
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"<your-client-id-here>"];
-    NSArray<NSString *> *scopes = @[@"your-scope1-here", @"your-scope2-here"];
+MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"<your-client-id-here>"];
+NSArray<NSString *> *scopes = @[@"your-scope1-here", @"your-scope2-here"];
     
-    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
+MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
     
-    MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
-    [application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
-        if (!error)
-        {
-            // You'll want to get the account identifier to retrieve and reuse the account
-            // for later acquireToken calls
-            NSString *accountIdentifier = result.account.identifier;
+#if TARGET_OS_IPHONE
+    UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:viewController];
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
+#endif
+    
+MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
+[application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
+    if (!error)
+    {
+        // You'll want to get the account identifier to retrieve and reuse the account
+        // for later acquireToken calls
+        NSString *accountIdentifier = result.account.identifier;
             
-            NSString *accessToken = result.accessToken;
-        }
-        else
-        {
-            // Check the error
-        }
-    }];
+        NSString *accessToken = result.accessToken;
+    }
+    else
+    {
+        // Check the error
+    }
+}];
 ```
 
 ## Installation
@@ -103,13 +117,16 @@ You can also use Git Submodule or check out the latest release and use as framew
 
  `msauth.[BUNDLE_ID]://auth`
 
-3. Add a new keychain group to your project Capabilities. See more information about keychain groups for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Keychain-for-MSAL-on-iOS). Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
+3. Add a new keychain group to your project Capabilities. Keychain group should be  `com.microsoft.adalcache` on iOS and `com.microsoft.identity.universalstorage` on macOS. 
 
 ![](Images/keychain_example.png)
+
+See more information about [keychain groups](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-v2-keychain-objc) and [Silent SSO for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/single-sign-on-macos-ios).
 
 #### iOS only steps:
 
 1. Add your application's redirect URI scheme to your `Info.plist` file, it will be in the format of `msauth.[BUNDLE_ID]`
+
 ```xml
 <key>CFBundleURLTypes</key>
 <array>
@@ -123,29 +140,29 @@ You can also use Git Submodule or check out the latest release and use as framew
 ```
 2. Add `LSApplicationQueriesSchemes` to allow making call to Microsoft Authenticator if installed.
 
-   Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
+Note that "msauthv3" scheme is needed when compiling your app with Xcode 11 and later. 
 
 ```xml
 <key>LSApplicationQueriesSchemes</key>
 <array>
-    <string>msauthv2</string>
-    <string>msauthv3</string>
+	<string>msauthv2</string>
+	<string>msauthv3</string>
 </array>
 ```
-See more info about configuring redirect uri for MSAL in our [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Redirect-uris-in-MSAL).
+See more info about [configuring redirect uri for MSAL](https://docs.microsoft.com/en-us/azure/active-directory/develop/redirect-uris)
 
 3. To handle a callback, add the following to `appDelegate`:
 
 Swift
 ```swift
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         
-        guard let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String else {
+	guard let sourceApplication = options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String else {
             return false
         }
         
-        return MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApplication)
-    }
+	return MSALPublicClientApplication.handleMSALResponse(url, sourceApplication: sourceApplication)
+}
 ```
 
 Objective-C
@@ -209,49 +226,62 @@ let application = try? MSALPublicClientApplication(configuration: config)
 
 Objective-C
 ```obj-c
-NSError *msalError;
+NSError *msalError = nil;
     
 MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:@"<your-client-id-here>"];
 MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&msalError];
     
 ```
-### Acquiring Your First Token
+### Acquiring Your First Token interactively
 Swift
 ```swift
-    let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes)
-    application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
+#if os(iOS)
+	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
+	let webviewParameters = MSALWebviewParameters(parentViewController: viewController)
+#else
+	let webviewParameters = MSALWebviewParameters()
+#endif
+let interactiveParameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webviewParameters)
+application.acquireToken(with: interactiveParameters, completionBlock: { (result, error) in
                 
-        guard let authResult = result, error == nil else {
-            print(error!.localizedDescription)
-            return
-        }
+	guard let authResult = result, error == nil else {
+		print(error!.localizedDescription)
+		return
+	}
                 
-        // Get access token from result
-        let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
                 
-        // You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
-        let accountIdentifier = authResult.account.identifier
-    })
+	// You'll want to get the account identifier to retrieve and reuse the account for later acquireToken calls
+	let accountIdentifier = authResult.account.identifier
+})
 ```
 Objective-C
 ```obj-c
-    MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
-    [application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
-        if (!error)
-        {
-            // You'll want to get the account identifier to retrieve and reuse the account
-            // for later acquireToken calls
-            NSString *accountIdentifier = result.account.identifier;
+#if TARGET_OS_IPHONE
+    UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:viewController];
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
+#endif 
+
+MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
+[application acquireTokenWithParameters:interactiveParams completionBlock:^(MSALResult *result, NSError *error) {
+	if (!error)	
+	{
+		// You'll want to get the account identifier to retrieve and reuse the account
+		// for later acquireToken calls
+		NSString *accountIdentifier = result.account.identifier;
             
-            NSString *accessToken = result.accessToken;
-        }
-        else
-        {
-            // Check the error
-        }
-    }];
+		NSString *accessToken = result.accessToken;
+	}
+  	else
+	{
+		// Check the error
+	}
+}];
 ```
-> Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about default values, and support for other iOS versions  [Wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Customizing-Browsers-and-WebViews).
+> Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about [default values, and support for other iOS versions](https://docs.microsoft.com/en-us/azure/active-directory/develop/customize-webviews).
 
 ### Silently Acquiring an Updated Token
 Swift
@@ -260,60 +290,60 @@ guard let account = try? application.account(forIdentifier: accountIdentifier) e
 let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
 application.acquireTokenSilent(with: silentParameters) { (result, error) in
             
-    guard let authResult = result, error == nil else {
+	guard let authResult = result, error == nil else {
                 
-        let nsError = error! as NSError
+	let nsError = error! as NSError
                 
-        if (nsError.domain == MSALErrorDomain &&
-            nsError.code == MSALError.interactionRequired.rawValue) {
+		if (nsError.domain == MSALErrorDomain &&
+			nsError.code == MSALError.interactionRequired.rawValue) {
                     
-            // Interactive auth will be required
-            return
-        }
-        return
-    }
+			// Interactive auth will be required
+			return
+		}
+		return
+	}
             
-    // Get access token from result
-    let accessToken = authResult.accessToken
+	// Get access token from result
+	let accessToken = authResult.accessToken
 }
 ```
 Objective-C
 ```objective-c
-    NSError *error = nil;
-    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
-    if (!account)
-    {
-        // handle error
-        return;
-    }
+NSError *error = nil;
+MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
+if (!account)
+{
+    // handle error
+    return;
+}
     
-    MSALSilentTokenParameters *silentParams = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
-    [application acquireTokenSilentWithParameters:silentParams completionBlock:^(MSALResult *result, NSError *error) {
-        if (!error)
+MSALSilentTokenParameters *silentParams = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+[application acquireTokenSilentWithParameters:silentParams completionBlock:^(MSALResult *result, NSError *error) {
+    if (!error)
+    {
+        NSString *accessToken = result.accessToken;
+    }
+    else
+    {
+        // Check the error
+        if ([error.domain isEqual:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
         {
-            NSString *accessToken = result.accessToken;
+            // Interactive auth will be required
         }
-        else
-        {
-            // Check the error
-            if ([error.domain isEqual:MSALErrorDomain] && error.code == MSALErrorInteractionRequired)
-            {
-                // Interactive auth will be required
-            }
             
-            // Other errors may require trying again later, or reporting authentication problems to the user
-        }
-    }];
+        // Other errors may require trying again later, or reporting authentication problems to the user
+    }
+}];
 ```
 
 
 ### Responding to an Interaction Required Error
 Occasionally user interaction will be required to get a new access token, when this occurs you will receive a `MSALErrorInteractionRequired` error when trying to silently acquire a new token. In those cases call `acquireToken:` with the same account and scopes as the failing `acquireTokenSilent:` call. It is recommended to display a status message to the user in an unobtrusive way before invoking interactive `acquireToken:` call.
 
-For more information, please see the [wiki](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Error-Handling).
+For more information, please see [MSAL error handling guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-handling-exceptions).
 
 ## Migrating from ADAL Objective-C
-MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://github.com/AzureAD/microsoft-authentication-library-for-objc/wiki/Migrating-from-ADAL-Objective-C-to-MSAL-Objective-C).
+MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/migrate-objc-adal-msal)
 
 ## Additional guidance
 
