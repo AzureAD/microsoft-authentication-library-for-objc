@@ -157,33 +157,6 @@
                             error:error];
 }
 
-#if TARGET_OS_IPHONE
-
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-                 error:(NSError * __autoreleasing *)error
-{
-    return [self initWithClientId:clientId
-                    keychainGroup:keychainGroup
-                        authority:nil
-                      redirectUri:nil
-                            error:error];
-}
-
-- (id)initWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
-             authority:(MSALAuthority *)authority
-                 error:(NSError * __autoreleasing *)error
-{
-    return [self initWithClientId:clientId
-                    keychainGroup:keychainGroup
-                        authority:authority
-                      redirectUri:nil
-                            error:error];
-}
-
-#endif
-
 - (instancetype)initWithConfiguration:(MSALPublicClientApplicationConfig *)config
                                 error:(NSError **)error
 {
@@ -539,6 +512,25 @@
                             completionBlock:completionBlock];
 }
 
+- (void)acquireTokenForScopes:(NSArray<NSString *> *)scopes
+                      account:(MSALAccount *)account
+                   promptType:(MSALPromptType)promptType
+         extraQueryParameters:(NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(MSALCompletionBlock)completionBlock
+{
+    MSALWebviewParameters *webviewParameters = [MSALWebviewParameters new];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                  webviewParameters:webviewParameters];
+    parameters.account = account;
+    parameters.promptType = promptType;
+    parameters.extraQueryParameters = extraQueryParameters;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters;
+    
+    return [self acquireTokenWithParameters:parameters
+             useWebviewTypeFromGlobalConfig:YES
+                            completionBlock:completionBlock];
+}
+
 #pragma mark - Silent
 
 - (void)acquireTokenSilentWithParameters:(MSALSilentTokenParameters *)parameters
@@ -701,6 +693,24 @@
     __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
     parameters.authority = authority;
     parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAndAuthority;
+    
+    [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
+}
+
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(nullable NSUUID *)correlationId
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock
+{
+    __auto_type parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    parameters.authority = authority;
+    parameters.claimsRequest = claimsRequest;
+    parameters.forceRefresh = forceRefresh;
+    parameters.correlationId = correlationId;
+    parameters.telemetryApiId = MSALTelemetryApiIdAcquireSilentWithUserAuthorityClaimsForceRefreshAndCorrelationId;
     
     [self acquireTokenSilentWithParameters:parameters completionBlock:completionBlock];
 }
