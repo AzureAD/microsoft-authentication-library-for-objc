@@ -37,6 +37,7 @@
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
+@class WKWebView;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -77,6 +78,17 @@
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
 @property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+
+/**
+ The webview type to be used for authorization.
+ */
+@property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+
+/**
+ Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
+ For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen.
+ */
+@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
 #pragma mark - Initializing MSALPublicClientApplication
 

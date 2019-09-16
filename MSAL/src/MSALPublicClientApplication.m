@@ -122,6 +122,11 @@
     MSIDNotifications.webAuthDidReceiveResponseFromBrokerNotificationName = MSALWebAuthDidReceiveResponseFromBroker;
 }
 
+#pragma mark - Properties
+
+- (MSALWebviewType)webviewType { return MSALGlobalConfig.defaultWebviewType; }
+- (void)setWebviewType:(MSALWebviewType)webviewType { MSALGlobalConfig.defaultWebviewType = webviewType; }
+
 #pragma mark - Initializers
 
 - (id)initWithClientId:(NSString *)clientId
