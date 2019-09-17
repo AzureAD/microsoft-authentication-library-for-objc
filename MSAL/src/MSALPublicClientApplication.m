@@ -1077,7 +1077,8 @@
 #if TARGET_OS_IPHONE
     if (@available(iOS 13.0, *))
     {
-        if (parameters.webviewParameters.parentViewController == nil)
+        // Temporary workaround for iOS 13
+        /* if (parameters.webviewParameters.parentViewController == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
@@ -1091,7 +1092,7 @@
             NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
             block(nil, msalError, msidParams);
             return;
-        }
+        } */
         
         msidParams.prefersEphemeralWebBrowserSession = parameters.webviewParameters.prefersEphemeralWebBrowserSession;
     }
