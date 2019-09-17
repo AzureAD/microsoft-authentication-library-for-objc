@@ -37,6 +37,7 @@
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
+@class WKWebView;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -77,6 +78,17 @@
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
 @property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+
+/**
+ The webview type to be used for authorization.
+ */
+@property MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure web view type in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+
+/**
+ Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
+ For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen.
+ */
+@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
 #pragma mark - Initializing MSALPublicClientApplication
 
@@ -136,6 +148,31 @@
                                 authority:(nullable MSALAuthority *)authority
                               redirectUri:(nullable NSString *)redirectUri
                                     error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
+
+#if TARGET_OS_IPHONE
+
+/**
+ Initialize a MSALPublicClientApplication with a given clientID, authority, keychain group and redirect uri
+ 
+ @param  clientId       The clientID of your application, you should get this from the app portal.
+ @param  keychainGroup  The keychain sharing group to use for the token cache. (optional)
+                        If you provide this key, you MUST add the capability to your Application Entilement.
+ @param  authority      Authority indicating a directory that MSAL can use to obtain tokens. In Azure AD
+                        it is of the form https://<instance/<tenant>, where <instance> is the
+                        directory host (e.g. https://login.microsoftonline.com) and <tenant> is a
+                        identifier within the directory itself (e.g. a domain associated to the
+                        tenant, such as contoso.onmicrosoft.com, or the GUID representing the
+                        TenantID property of the directory)
+ @param  redirectUri    The redirect URI of the application
+ @param  error          The error that occurred creating the application object, if any, if you're
+                        not interested in the specific error pass in nil.
+ */
+- (nullable instancetype)initWithClientId:(nonnull NSString *)clientId
+                            keychainGroup:(nullable NSString *)keychainGroup
+                                authority:(nullable MSALAuthority *)authority
+                              redirectUri:(nullable NSString *)redirectUri
+                                    error:(NSError * _Nullable __autoreleasing * _Nullable)error DEPRECATED_MSG_ATTRIBUTE("Use -initWithConfiguration:error: instead");
+#endif
 
 /**
  Returns an array of all accounts visible to this application.
@@ -283,6 +320,27 @@
                       account:(nullable MSALAccount *)account
               completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenWithParameters:completionBlock instead");
 
+/**
+ Acquire a token interactively for an existing account. This is typically used after receiving
+ a MSALErrorInteractionRequired error.
+ 
+ @param  scopes                 Permissions you want included in the access token received
+                                in the result in the completionBlock. Not all scopes are
+                                guaranteed to be included in the access token returned.
+ @param  account                An account object retrieved from the application object that the
+                                interactive authentication flow will be locked down to.
+ @param  promptType             A prompt type for the interactive authentication flow
+ @param  extraQueryParameters   Key-value pairs to pass to the authentication server during
+                                the interactive authentication flow. This should not be url-encoded value.
+ @param  completionBlock        The completion block that will be called when the authentication
+                                flow completes, or encounters an error.
+ */
+- (void)acquireTokenForScopes:(nonnull NSArray<NSString *> *)scopes
+                      account:(nullable MSALAccount *)account
+                   promptType:(MSALPromptType)promptType
+         extraQueryParameters:(nullable NSDictionary <NSString *, NSString *> *)extraQueryParameters
+              completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenWithParameters:completionBlock instead");
+
 #pragma mark - Acquire Token Silent
 
 /**
@@ -331,6 +389,37 @@
 - (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
                             account:(nonnull MSALAccount *)account
                           authority:(nullable MSALAuthority *)authority
+                    completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenSilentWithParameters:completionBlock instead");
+
+
+/**
+ Acquire a token silently for an existing account.
+ 
+ @param  scopes                 Scopes to request from the server, the scopes that come back
+                                can differ from the ones in the original call
+ @param  account                An account object retrieved from the application object that the
+                                interactive authentication flow will be locked down to.
+ @param  authority              Authority indicating a directory that MSAL can use to obtain tokens.
+                                Azure AD it is of the form https://<instance/<tenant>, where
+                                <instance> is the directory host
+                                (e.g. https://login.microsoftonline.com) and <tenant> is a
+                                identifier within the directory itself (e.g. a domain associated
+                                to the tenant, such as contoso.onmicrosoft.com, or the GUID
+                                representing the TenantID property of the directory)
+ @param  claimsRequest          The claims parameter that needs to be sent to token endpoint. When claims
+                                is passed, access token will be skipped and refresh token will be tried.
+ @param  forceRefresh           Ignore any existing access token in the cache and force MSAL to
+                                get a new access token from the service.
+ @param  correlationId          UUID to correlate this request with the server
+ @param  completionBlock        The completion block that will be called when the authentication
+                                flow completes, or encounters an error.
+ */
+- (void)acquireTokenSilentForScopes:(nonnull NSArray<NSString *> *)scopes
+                            account:(nonnull MSALAccount *)account
+                          authority:(nullable MSALAuthority *)authority
+                      claimsRequest:(nullable MSALClaimsRequest *)claimsRequest
+                       forceRefresh:(BOOL)forceRefresh
+                      correlationId:(nullable NSUUID *)correlationId
                     completionBlock:(nonnull MSALCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use -acquireTokenSilentWithParameters:completionBlock instead");
 
 
