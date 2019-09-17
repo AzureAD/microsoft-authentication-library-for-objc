@@ -24,15 +24,26 @@
 #import <Foundation/Foundation.h>
 #import "MSALExternalAccountProviding.h"
 
+/**
+    Specifies if MSALLegacySharedAccountsProvider will attempt to write/remove accounts.
+ */
+
 typedef NS_ENUM(NSInteger, MSALLegacySharedAccountMode)
 {
+    /**
+        MSALLegacySharedAccountsProvider will operate in a read-only mode.
+     */
     MSALLegacySharedAccountModeReadOnly = 0,
+    
+    /**
+       MSALLegacySharedAccountsProvider will operate in a read-write mode.
+    */
     MSALLegacySharedAccountModeReadWrite
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*
+/**
  Sample implementation of the MSALExternalAccountProviding protocol that can work with legacy Microsoft account storage.
  Use it if:
  1. You're migrating from ADAL to MSAL and where previously relying on shared Microsoft account storage.
@@ -41,14 +52,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MSALLegacySharedAccountsProvider : NSObject <MSALExternalAccountProviding>
 
-/*
+#pragma mark - Switching between read-write and read-only modes
+
+/**
  Specifies if MSALLegacySharedAccountsProvider will attempt to write/remove accounts.
  Set to MSALLegacySharedAccountModeReadWrite to attempt writing accounts
  Default is MSALLegacySharedAccountModeReadOnly, which means MSALLegacySharedAccountsProvider will not modify external account storage
  */
 @property (nonatomic) MSALLegacySharedAccountMode sharedAccountMode;
 
-/*
+#pragma mark - Constructing MSALLegacySharedAccountsProvider
+
+/**
  Initialize new instance of MSALLegacySharedAccountsProvider.
  
  @param sharedGroup             Specify keychain access group from which accounts will be read.
@@ -57,6 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  After initialization, set it in the MSALCacheConfig class, e.g.
  
+ <pre>
  MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.mycompany.mysso"
                                                                                                         serviceIdentifier:@"MyAccountServiceIdentifier"
                                                                                                     applicationIdentifier:@"MyApp"];
@@ -67,6 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  [pcaConfig.cacheConfig addExternalAccountProvider:provider];
  MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
+ </pre>
  
  */
 - (instancetype)initWithSharedKeychainAccessGroup:(NSString *)sharedGroup

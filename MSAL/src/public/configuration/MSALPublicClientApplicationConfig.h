@@ -30,55 +30,64 @@
 
 @class MSALRedirectUri;
 @class MSALAuthority;
-@class MSALWebViewConfig;
 @class MSALSliceConfig;
 @class MSALCacheConfig;
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    Configuration for an instance of `MSALPublicClientApplication`
+    @note Once `MSALPublicClientApplication` is initialized, MSALPublicClientApplication object ignores any changes you make to the MSALPublicClientApplicationConfig object.
+*/
 @interface MSALPublicClientApplicationConfig : NSObject <NSCopying>
 
-/*! The client ID of the application, this should come from the app developer portal. */
+#pragma mark - Configuration options
+
+/** The client ID of the application, this should come from the app developer portal. */
 @property NSString *clientId;
 
-/*! The redirect URI of the application */
+/** The redirect URI of the application */
 @property NSString *redirectUri;
 
-/*! The authority the application will use to obtain tokens */
+/** The authority the application will use to obtain tokens */
 @property MSALAuthority *authority;
 
-/*! List of known authorities that application should trust.
+/** List of known authorities that application should trust.
     Note that authorities listed here will bypass authority validation logic.
-    Thus, it is advised not putting in here dynamically resolving authorities here.
+    Thus, it is advised not putting dynamically resolving authorities here.
  */
-@property NSArray<MSALAuthority *> *knownAuthorities;
+@property (nonatomic) NSArray<MSALAuthority *> *knownAuthorities;
 
-/*! Enable to return access token with extended lifttime during server outage. */
+/** Enable to return access token with extended lifttime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
-/*! List of additional ESTS features that client handles. */
+/** List of additional STS features that client handles. */
 @property(nullable) NSArray<NSString *> *clientApplicationCapabilities;
 
-/*! When checking an access token for expiration we check if time to expiration
+/** Time in seconds controlling how long before token expiry MSAL refreshes access tokens.
+ When checking an access token for expiration we check if time to expiration
  is less than this value (in seconds) before making the request. The goal is to
  refresh the token ahead of its expiration and also not to return a token that is
  about to expire. */
-@property double tokenExpirationBuffer;
+@property (nonatomic) double tokenExpirationBuffer;
 
-/*! slice configuration for testing. */
+/** Used to specify query parameters that must be passed to both the authorize and token endpoints
+to target MSAL at a specific test slice & flight. These apply to all requests made by an application. */
 @property (nullable) MSALSliceConfig *sliceConfig;
 
-/*! Cache configurations, refer to MSALCacheConfig.h for more detail */
+/** MSAL configuration interface responsible for token caching and keychain configuration. Refer to `MSALCacheConfig` for more details */
 @property (readonly) MSALCacheConfig *cacheConfig;
 
-/*!
+#pragma mark - Constructing configuration
+
+/**
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId   The clientID of your application, you should get this from the app portal.
  */
 - (nonnull instancetype)initWithClientId:(NSString *)clientId;
 
-/*!
+/**
  Initialize a MSALPublicClientApplicationConfig with a given clientId
  
  @param  clientId       The clientID of your application, you should get this from the app portal.
@@ -89,10 +98,17 @@ NS_ASSUME_NONNULL_BEGIN
                              redirectUri:(nullable NSString *)redirectUri
                                authority:(nullable MSALAuthority *)authority NS_DESIGNATED_INITIALIZER;
 
-- (nonnull instancetype)init NS_UNAVAILABLE;
-+ (nonnull instancetype)new NS_UNAVAILABLE;
+#pragma mark - Unavailable initializers
 
-// Todo: add a init that takes in a config file.
+/**
+    Use `[MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority]` instead
+ */
+- (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+   Use `[MSALPublicClientApplicationConfig initWithClientId:redirectUri:authority]` instead
+*/
++ (nonnull instancetype)new NS_UNAVAILABLE;
 
 @end
 

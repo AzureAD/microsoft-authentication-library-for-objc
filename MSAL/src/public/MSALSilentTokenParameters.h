@@ -29,29 +29,39 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
- Token parameters to be used in silent flow.
+/**
+ Token parameters to be used when MSAL is getting a token silently.
  */
 @interface MSALSilentTokenParameters : MSALTokenParameters
 
-/*!
+#pragma mark - Configuring MSALSilentTokenParameters
+
+/**
  Ignore any existing access token in the cache and force MSAL to
  get a new access token from the service.
  */
 @property (nonatomic) BOOL forceRefresh;
 
-/*!
+#pragma mark - Constructing MSALSilentTokenParameters
+
+/**
  Initialize a MSALSilentTokenParameters with scopes and account.
  
  @param scopes      Permissions you want included in the access token received
                     in the result in the completionBlock. Not all scopes are
                     gauranteed to be included in the access token returned.
- @param account     An account object retrieved from the application object that the
-                    interactive authentication flow will be locked down to.
+ @param account     An account object retrieved from the MSALResult object that MSAL should return a token for.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
                        account:(MSALAccount *)account NS_DESIGNATED_INITIALIZER;
 
+/**
+Initialize a MSALSilentTokenParameters with scopes and account.
+
+@param scopes      Permissions you want included in the access token received
+                   in the result in the completionBlock. Not all scopes are
+                   gauranteed to be included in the access token returned.
+*/
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
 
 @end

@@ -33,10 +33,10 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-//! Project version number for MSAL.
+/** Project version number for MSAL */
 FOUNDATION_EXPORT double MSAL__Framework_VersionNumber;
 
-//! Project version string for MSAL.
+/** Project version string for MSAL */
 FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 
 #import <MSAL/MSALDefinitions.h>
@@ -73,6 +73,7 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALAccount+MultiTenantAccount.h>
 #import <MSAL/MSALAccountEnumerationParameters.h>
 #import <MSAL/MSALExternalAccountProviding.h>
+#import <MSAL/MSALWebviewParameters.h>
 #import <MSAL/MSALSerializedADALCacheProvider.h>
 #import <MSAL/MSALWebviewParameters.h>
 #if TARGET_OS_IPHONE
