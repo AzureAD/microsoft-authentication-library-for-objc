@@ -34,7 +34,7 @@
 #import "SamplePhotoUtil.h"
 
 #define CURRENT_ACCOUNT_KEY @"MSALCurrentAccountIdentifier"
-#define CLIENT_ID @"b6c69a37-df96-4db0-9088-2ab96e1d8215"
+#define CLIENT_ID @"58391843-2c87-41d1-a457-80b095b7c83f"
 
 @implementation SampleMSALUtil
 
@@ -113,7 +113,7 @@
     NSError *localError = nil;
     
     // Ask MSALPublicClientApplication object to retrieve the account from the cache.
-    MSALAccount *account = [[self createClientApplication] accountForHomeAccountId:currentAccountIdentifer error:&localError];
+    MSALAccount *account = [[self createClientApplication] accountForIdentifier:currentAccountIdentifer error:&localError];
     
     // If we did not find an account because it wasn't found in the cache then that must mean someone else removed
     // the account underneath us, either due to multiple apps sharing a client ID, or due to the account restoring an
@@ -133,7 +133,8 @@
     return account;
 }
 
-- (void)signInAccount:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock
+- (void)signInAccountWithParentController:(UIViewController *)controller
+                               completion:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock
 {
     MSALPublicClientApplication *application = [self createClientApplication];
     
@@ -145,7 +146,8 @@
     // want to use so the service can request consent for them up front and minimize
     // how much users are interrupted for interactive auth.
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"User.Read", @"Calendars.Read"]];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"User.Read", @"Calendars.Read"] webviewParameters:webParameters];
     [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
     {
         if (error)
@@ -194,6 +196,7 @@
 }
 
 - (void)acquireTokenInteractiveForCurrentAccount:(NSArray<NSString *> *)scopes
+                                parentController:(UIViewController *)controller
                                  completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
     MSALPublicClientApplication *application = [self createClientApplication];
@@ -206,7 +209,8 @@
         return;
     }
     
-    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes webviewParameters:webParameters];
     parameters.account = currentAccount;
     parameters.promptType = MSALPromptTypeDefault;
     
@@ -217,6 +221,7 @@
 }
 
 - (void)acquireTokenForCurrentAccount:(NSArray<NSString *> *)scopes
+                     parentController:(UIViewController *)controller
                       completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock
 {
     [self acquireTokenSilentForCurrentAccount:scopes
@@ -237,6 +242,7 @@
          {
              dispatch_async(dispatch_get_main_queue(), ^{
                  [self acquireTokenInteractiveForCurrentAccount:scopes
+                                               parentController:controller
                                                 completionBlock:acquireTokenBlock];
              });
              return;

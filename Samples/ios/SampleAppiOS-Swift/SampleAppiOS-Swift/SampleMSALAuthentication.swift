@@ -30,7 +30,7 @@ import MSAL
 // MARK: Setup and initialization
 class SampleMSALAuthentication {
     
-    let kClientId = "b6c69a37-df96-4db0-9088-2ab96e1d8215"
+    let kClientId = "58391843-2c87-41d1-a457-80b095b7c83f"
     let kCurrentAccountIdentifier = "MSALCurrentAccountIdentifier"
     
     let kAuthority = "https://login.microsoftonline.com/"
@@ -99,7 +99,7 @@ extension SampleMSALAuthentication {
         
         var acc: MSALAccount?
         do {
-            acc = try clientApplication.account(forHomeAccountId: accountIdentifier)
+            acc = try clientApplication.account(forIdentifier: accountIdentifier)
         } catch let error as NSError {
             throw SampleAppError.UserNotFound(error)
         }
@@ -126,11 +126,12 @@ extension SampleMSALAuthentication {
 // MARK: Sign in an account
 extension SampleMSALAuthentication {
     
-    func signInAccount(completion: @escaping (MSALAccount?, _ accessToken: String?, Error?) -> Void) {
+    func signInAccount(parentController : UIViewController, completion: @escaping (MSALAccount?, _ accessToken: String?, Error?) -> Void) {
         do {
             let clientApplication = try createClientApplication()
             
-            let parameters = MSALInteractiveTokenParameters(scopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue])
+            let webParameters = MSALWebviewParameters(parentViewController: parentController)
+            let parameters = MSALInteractiveTokenParameters(scopes: [GraphScopes.UserRead.rawValue, GraphScopes.CalendarsRead.rawValue], webviewParameters: webParameters)
             clientApplication.acquireToken(with: parameters) {
                 (result: MSALResult?, error: Error?) in
                 
@@ -179,12 +180,13 @@ extension SampleMSALAuthentication {
         }
     }
     
-    func acquireTokenInteractiveForCurrentAccount(forScopes scopes: [String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
+    func acquireTokenInteractiveForCurrentAccount(parentController : UIViewController, forScopes scopes: [String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
         do {
             let application = try createClientApplication()
             let account = try currentAccount()
             
-            let parameters = MSALInteractiveTokenParameters(scopes: scopes)
+            let webParameters = MSALWebviewParameters(parentViewController: parentController)
+            let parameters = MSALInteractiveTokenParameters(scopes: scopes, webviewParameters: webParameters)
             parameters.account = account
             parameters.promptType = .default
             
@@ -203,7 +205,7 @@ extension SampleMSALAuthentication {
         }
     }
     
-    func acquireTokenForCurrentAccount(forScopes scopes: [String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
+    func acquireTokenForCurrentAccount(parentController: UIViewController, forScopes scopes: [String], completion: @escaping (_ accessToken: String?, Error?) -> Void) {
         acquireTokenSilentForCurrentAccount(forScopes: scopes) {
             (token: String?, error: Error?) in
             if let token = token {
@@ -222,7 +224,7 @@ extension SampleMSALAuthentication {
             if (nsError.domain == MSALErrorDomain &&
                 nsError.code == MSALError.interactionRequired.rawValue) {
                 DispatchQueue.main.async {
-                    self.acquireTokenInteractiveForCurrentAccount(forScopes: scopes, completion: completion)
+                    self.acquireTokenInteractiveForCurrentAccount(parentController: parentController, forScopes: scopes, completion: completion)
                 }
                 return
             }
