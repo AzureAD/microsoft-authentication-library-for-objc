@@ -1,3 +1,7 @@
+## [0.7.1] - 2019-09-11
+### Added
+- Update ACL authorization tag to kSecACLAuthorizationDecrypt for adding trusted applications to keychain items on OSX.
+
 ## [0.7.0] - 2019-09-09
 ### Added
 - iOS 13 support for ASWebAuthenticationSession

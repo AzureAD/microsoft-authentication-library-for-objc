@@ -342,6 +342,12 @@ Occasionally user interaction will be required to get a new access token, when t
 
 For more information, please see [MSAL error handling guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-handling-exceptions).
 
+## Supported Versions
+
+**iOS** - MSAL supports iOS 10 and above.
+
+**macOS** - MSAL supports macOS (OSX) 10.12 and above.
+
 ## Migrating from ADAL Objective-C
 MSAL Objective-C is designed to support smooth migration from ADAL Objective-C library. For detailed design and instructions, follow this [guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/migrate-objc-adal-msal)
 
