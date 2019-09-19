@@ -81,6 +81,8 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
+#import "MSALSilentTokenParameters.h"
+#import "XCTestCase+HelperMethods.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -177,6 +179,7 @@
     __block MSALAccount *resultAccount = nil;
     
     __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
@@ -257,7 +260,6 @@
     XCTAssertNil(error);
     
 //    application.accountMetadataCache = self.accountMetadataCache;
-    application.webviewType = MSALWebviewTypeWKWebView;
     
     // Add authorities to cache
     MSIDAadAuthorityCacheRecord *record = [MSIDAadAuthorityCacheRecord new];
@@ -271,10 +273,13 @@
     [cache setObject:record forKey:@"login.windows.net"];
     [cache setObject:record forKey:@"login.microsoft.com"];
     
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
     __block MSALAccount *resultAccount = nil;
     
     XCTestExpectation *interactiveExpectation = [self expectationWithDescription:@"acquireTokenForScopes"];
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
+    [application acquireTokenWithParameters:parameters
                        completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
@@ -354,11 +359,13 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    application.webviewType = MSALWebviewTypeWKWebView;
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakeb2cscopes"]];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.parentViewController = [self.class sharedViewControllerStub];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenForScopes"];
-    [application acquireTokenForScopes:@[@"fakeb2cscopes"]
-                       completionBlock:^(MSALResult *result, NSError *error)
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
@@ -595,22 +602,21 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                         claimsRequest:claimsRequest
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(result);
-         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         [expectation fulfill];
-     }];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
+    parameters.claimsRequest = claimsRequest;
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -685,16 +691,18 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:nil
-                         claimsRequest:[MSALClaimsRequest new]
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]
+                                                                                      webviewParameters:webParameters];
+    
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.claimsRequest = [MSALClaimsRequest new];
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(error);
          XCTAssertNotNil(result);
@@ -723,25 +731,24 @@
     __auto_type claimsRequest = [[MSALClaimsRequest alloc] initWithJsonString:claims error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue", @"claims":@"claims_value"}
-                         claimsRequest:claimsRequest
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNotNil(error);
-         XCTAssertNil(result);
-         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorInternal);
-         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
-         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
-         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
-         [expectation fulfill];
-     }];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue", @"claims":@"claims_value"};
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNotNil(error);
+        XCTAssertNil(result);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+        XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
+        XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -821,22 +828,20 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                         claimsRequest:nil
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(result);
-         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         [expectation fulfill];
-     }];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -908,7 +913,7 @@
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
                                                                                                   authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
-    config.clientApplicationCapabilities = @[@"llt"];;
+    config.clientApplicationCapabilities = @[@"llt"];
     
     // Acquire token call
     NSError *error = nil;
@@ -919,22 +924,21 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                         claimsRequest:claimsRequest
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.claimsRequest = claimsRequest;
+    parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
-         XCTAssertNil(error);
-         XCTAssertNotNil(result);
-         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         [expectation fulfill];
-     }];
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -1012,22 +1016,22 @@
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                             loginHint:@"upn@test.com"
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"eqpKey":@"eqpValue"}
-                         claimsRequest:claimsRequest
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(result);
-         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         [expectation fulfill];
-     }];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.loginHint = @"upn@test.com";
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = @{@"eqpKey":@"eqpValue"};
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -1113,50 +1117,48 @@
     XCTestExpectation *expectationInteractive = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
     
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescopes"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{@"instance_aware":@"true"}
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *rlt, NSError *error)
-     {
-         result = rlt;
-         
-         XCTAssertNil(error);
-         XCTAssertNotNil(result);
-         XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
-         
-         // Expect authority to be cloud authority
-         XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
-         XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.de");
-         
-         [expectationInteractive fulfill];
-     }];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraQueryParameters = @{@"instance_aware":@"true"};
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *rlt, NSError *error)
+    {
+        result = rlt;
+        
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        
+        // Expect authority to be cloud authority
+        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+        XCTAssertEqualObjects(result.account.environment, @"login.microsoftonline.de");
+        
+        [expectationInteractive fulfill];
+    }];
     
     [self waitForExpectations:@[expectationInteractive] timeout:1];
     
     // acquire token silently to verify that access token is stored under the correct authority
     XCTestExpectation *expectationSilent = [self expectationWithDescription:@"acquireTokenSilent"];
+    
     MSALAccount *account = result.account;
-    [application acquireTokenSilentForScopes:@[@"fakescopes"]
-                                     account:account
-                                   authority:[@"https://login.microsoftonline.de/" DEFAULT_TEST_UTID msalAuthority]
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *rlt, NSError *error)
-     {
-         XCTAssertNil(error);
-         XCTAssertNotNil(rlt);
-         XCTAssertEqualObjects(rlt.accessToken, @"i am an updated access token!");
-         
-         // authority cloud authority as expected
-         XCTAssertEqualObjects(rlt.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
-         
-         [expectationSilent fulfill];
-     }];
+    __auto_type silentParameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescopes"] account:account];
+    silentParameters.authority = [@"https://login.microsoftonline.de/" DEFAULT_TEST_UTID msalAuthority];
+    silentParameters.forceRefresh = NO;
+    
+    [application acquireTokenSilentWithParameters:silentParameters completionBlock:^(MSALResult *rlt, NSError *error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(rlt);
+        XCTAssertEqualObjects(rlt.accessToken, @"i am an updated access token!");
+        
+        // authority cloud authority as expected
+        XCTAssertEqualObjects(rlt.authority.url.absoluteString, @"https://login.microsoftonline.de/" DEFAULT_TEST_UTID);
+        
+        [expectationSilent fulfill];
+    }];
     
     [self waitForExpectations:@[expectationSilent] timeout:1];
 }
@@ -1598,31 +1600,28 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
     
-    application.webviewType = MSALWebviewTypeWKWebView;
-    [application acquireTokenForScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]
-                  extraScopesToConsent:nil
-                               account:nil
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:nil
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *rlt, NSError *error)
-     {
-         result = rlt;
-         
-         XCTAssertNotNil(error);
-         XCTAssertNil(result);
-         XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-         XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
-         
-         NSArray *grantedScopesArr = @[@"fakescope1", @"fakescope2", @"additional.scope", @"additional.scope2"];
-         XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);
-         
-         NSArray *declinedScopesArr = @[@"fakescope3", @"fakescope4"];
-         XCTAssertEqualObjects(error.userInfo[MSALDeclinedScopesKey], declinedScopesArr);
-         
-         [expectation fulfill];
-     }];
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope3", @"fakescope4", @"fakescope1"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.promptType = MSALPromptTypeDefault;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *rlt, NSError *error)
+    {
+        result = rlt;
+        
+        XCTAssertNotNil(error);
+        XCTAssertNil(result);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorServerDeclinedScopes);
+        
+        NSArray *grantedScopesArr = @[@"fakescope1", @"fakescope2", @"additional.scope", @"additional.scope2"];
+        XCTAssertEqualObjects(error.userInfo[MSALGrantedScopesKey], grantedScopesArr);
+        
+        NSArray *declinedScopesArr = @[@"fakescope3", @"fakescope4"];
+        XCTAssertEqualObjects(error.userInfo[MSALDeclinedScopesKey], declinedScopesArr);
+        
+        [expectation fulfill];
+    }];
     
     [self waitForExpectations:@[expectation] timeout:1];
 }
@@ -1692,7 +1691,6 @@
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilent"];
     
-    application.webviewType = MSALWebviewTypeWKWebView;
     [application acquireTokenSilentForScopes:@[@"user.read", @"fakescope1", @"fakescope2", @"fakescope3"]
                                      account:account
                                    authority:[@"https://login.microsoftonline.com/common" msalAuthority]
@@ -1782,13 +1780,12 @@
     application.accountMetadataCache = self.accountMetadataCache;
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -1857,13 +1854,12 @@
     
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:[MSALClaimsRequest new]
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = [MSALClaimsRequest new];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we return access token in cache
          XCTAssertNil(error);
@@ -1930,13 +1926,11 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:nil
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we return access token in cache
          XCTAssertNil(error);
@@ -2020,13 +2014,11 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:nil
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -2109,13 +2101,13 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNil(error);
@@ -2194,13 +2186,12 @@
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountID.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenSilentForScopes"];
-    [application acquireTokenSilentForScopes:@[@"user.read"]
-                                     account:account
-                                   authority:nil
-                               claimsRequest:claimsRequest
-                                forceRefresh:NO
-                               correlationId:nil
-                             completionBlock:^(MSALResult *result, NSError *error)
+    
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"user.read"] account:account];
+    parameters.claimsRequest = claimsRequest;
+    
+    [application acquireTokenSilentWithParameters:parameters
+                                  completionBlock:^(MSALResult *result, NSError *error)
      {
          // Ensure we skip the old access token and get back a new one
          XCTAssertNotNil(error);
@@ -2705,21 +2696,20 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"acquireTokenInteractive"];
     __block MSALResult *result = nil;
     
-    application.webviewType = MSALWebviewTypeWKWebView;
     MSALAccountId *accountID = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.1234-5678-90abcdefg" objectId:@"1" tenantId:@"1234-5678-90abcdefg"];
     MSALAccount *account = [[MSALAccount alloc] initWithUsername:@"preferredUserName"
                                                    homeAccountId:accountID
                                                      environment:@"login.microsoftonline.com"
                                                   tenantProfiles:nil];
     
-    [application acquireTokenForScopes:@[@"fakescope"]
-                  extraScopesToConsent:nil
-                               account:account
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:nil
-                             authority:nil
-                         correlationId:nil
-                       completionBlock:^(MSALResult *rlt, NSError *error)
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.account = account;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *rlt, NSError *error)
      {
          result = rlt;
          

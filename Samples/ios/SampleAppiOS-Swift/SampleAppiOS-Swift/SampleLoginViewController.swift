@@ -44,7 +44,7 @@ class SampleLoginViewController: UIViewController {
     
     @IBAction func signIn(_ sender: Any) {
         
-        SampleMSALAuthentication.shared.signInAccount {
+        SampleMSALAuthentication.shared.signInAccount(parentController: self, completion: {
             (account, token, error) in
             
             if let error = error {
@@ -54,7 +54,7 @@ class SampleLoginViewController: UIViewController {
             
             let appDelegate = UIApplication.shared.delegate as! AppDelegate
             appDelegate.showMainVC()
-        }
+        })
     }
 
 }

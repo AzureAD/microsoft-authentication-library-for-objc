@@ -31,24 +31,41 @@
 
 @class MSALIndividualClaimRequest;
 
-/*!
- Claims targets. Currently we support only "access_token" and "id_token".
+/**
+ Target for the claims request.
+ Only "access_token" and "id_token" are supported.
  "userinfo" is not supported.
  */
 typedef NS_ENUM(NSUInteger, MSALClaimsRequestTarget)
 {
+    /**
+        Request specific claims for the id_token.
+     */
     MSALClaimsRequestTargetIdToken,
+    
+    /**
+       Request specific claims for the access_token.
+    */
     MSALClaimsRequestTargetAccessToken
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
- Represents the claims request parameter as an object. It is not thread safe.
+/**
+ OpenID Connect allows you to optionally request the return of individual claims from the UserInfo Endpoint and/or in the ID Token. A claims request is represented as a JSON object that contains a list of requested claims.
+
+ The Microsoft Authentication Library (MSAL) for iOS and macOS allows requesting specific claims in both interactive and silent token acquisition scenarios. It does so through the claimsRequest parameter.
+
+ There are multiple scenarios where this is needed. For example:
+
+ - Requesting claims outside of the standard set for your application.
+ - Requesting specific combinations of the standard claims that cannot be specified using scopes for your application. For example, if an access token gets rejected because of missing claims, the application can request the missing claims using MSAL.
+ 
  See more info here: https://openid.net/specs/openid-connect-core-1_0-final.html#ClaimsParameter
  
  Example of Claims Request serialized to json:
  
+  <pre>
  {
     "access_token":
     {
@@ -60,11 +77,17 @@ NS_ASSUME_NONNULL_BEGIN
      "acr": {"values": ["urn:mace:incommon:iap:silver"]}
     }
  }
+ </pre>
+ 
+ @note MSALClaimsRequest is NOT thread safe.
+ @note MSAL bypasses the access token cache whenever a claims request is specified. It's important to only provide claimsRequest parameter when additional claims are needed (as opposed to always providing same claimsRequest parameter in each MSAL API call).
  
  */
 @interface MSALClaimsRequest : NSObject <MSALJsonSerializable, MSALJsonDeserializable>
 
-/*!
+#pragma mark - Constructing MSALClaimsRequest
+
+/**
  Adds a request for a specific claim to be included in the target via the claims request parameter.
  If claim request alredy exists, provided claim request takes its place.
  @param request Individual claim request.
@@ -76,14 +99,7 @@ NS_ASSUME_NONNULL_BEGIN
            forTarget:(MSALClaimsRequestTarget)target
                error:(NSError * _Nullable * _Nullable)error;
 
-/*!
- Return the array of requested claims for the target.
- @param target Target of requested claims.
- @return Array of individual claim requests.
- */
-- (nullable NSArray<MSALIndividualClaimRequest *> *)claimsRequestsForTarget:(MSALClaimsRequestTarget)target;
-
-/*!
+/**
  Remove requested claims for the target.
  @param name of requested claim.
  @param target Target of individual claim.
@@ -93,6 +109,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)removeClaimRequestWithName:(NSString *)name
                             target:(MSALClaimsRequestTarget)target
                              error:(NSError * _Nullable * _Nullable)error;
+
+#pragma mark - Read components of MSALClaimsRequest
+
+/**
+ Return the array of requested claims for the target.
+ @param target Target of requested claims.
+ @return Array of individual claim requests.
+ */
+- (nullable NSArray<MSALIndividualClaimRequest *> *)claimsRequestsForTarget:(MSALClaimsRequestTarget)target;
 
 @end
 

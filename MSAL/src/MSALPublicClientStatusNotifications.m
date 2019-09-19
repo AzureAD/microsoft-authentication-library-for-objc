@@ -32,5 +32,5 @@ NSString *MSALWebAuthDidFinishLoadNotification = @"MSALWebAuthDidFinishLoadNotif
 NSString *MSALWebAuthDidFailNotification = @"MSALWebAuthDidFailNotification";
 NSString *MSALWebAuthDidCompleteNotification = @"MSALWebAuthDidCompleteNotification";
 NSString *MSALWebAuthWillSwitchToBrokerApp = @"MSALWebAuthWillSwitchToBrokerApp";
-NSString *MSALWebAuthDidReceieveResponseFromBroker = @"MSALWebAuthDidReceieveResponseFromBroker";
+NSString *MSALWebAuthDidReceiveResponseFromBroker = @"MSALWebAuthDidReceiveResponseFromBroker";
 

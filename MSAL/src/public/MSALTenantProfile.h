@@ -30,30 +30,38 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+    The Microsoft Identity platform allows one account to be used to access resources belonging to multiple organizations (Azure Active Directory tenants).
+    MSALTenantProfile represents information about the account record in a particular AAD tenant
+ */
 @interface MSALTenantProfile : NSObject <NSCopying>
 
-/*!
- Unique identifier for the tenant profile.
+#pragma mark - Getting account identifiers
+
+/**
+    Unique identifier for the tenant profile.
  */
 @property (readonly, nullable) NSString *identifier;
 
-/*!
+/**
  Host part of the authority.
  */
 @property (readonly, nullable) NSString *environment;
 
-/*!
+/**
  Identifier for the directory where account is locally represented
  */
 @property (readonly, nullable) NSString *tenantId;
 
-/*!
+/**
  Indicator if this tenant profile represents account's home tenant.
  If an admin deletes this account from the tenant, it prevents this account from accessing anything in any tenant with the Microsoft Identity Platform.
  */
 @property (readonly) BOOL isHomeTenantProfile;
 
-/*!
+#pragma mark - Reading id_token claims
+
+/**
  ID token claims for the account in the specified tenant. 
 */
 @property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;

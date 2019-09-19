@@ -37,7 +37,7 @@ typedef void(^PhotoBlock)(UIImage *photo, NSError *error);
 - (UIImage *)cachedPhoto;
 
 // Checks with the graph for an updated photo, if enough time has passed since the last check
-- (void)checkUpdatePhoto:(PhotoBlock)photoBlock;
+- (void)checkUpdatePhotoWithParentController:(UIViewController *)controller completion:(PhotoBlock)photoBlock;
 
 // Clears out any cached data for the current user
 - (void)clearPhotoCache;

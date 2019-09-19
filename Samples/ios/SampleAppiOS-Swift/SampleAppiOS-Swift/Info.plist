@@ -39,6 +39,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>msauthv2</string>
+        <string>msauthv3</string>
+    </array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -48,7 +53,7 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>msalb6c69a37-df96-4db0-9088-2ab96e1d8215</string>
+				<string>msauth.com.microsoft.SampleAppiOS-Swift</string>
 			</array>
 		</dict>
 	</array>
