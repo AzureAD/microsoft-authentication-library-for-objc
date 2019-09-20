@@ -205,7 +205,7 @@
     NSString *errorDescription = @"a fake error description.";
     NSString *oauthError = @"a fake oauth error message.";
     NSString *subError = @"a fake suberror";
-    NSError *underlyingError = [NSError errorWithDomain:NSOSStatusErrorDomain code:errSecItemNotFound userInfo:nil];
+    NSError *underlyingError = [NSError errorWithDomain:MSIDErrorDomain code:MSIDErrorServerInvalidGrant userInfo:@{MSIDOAuthSubErrorKey : @"basic_action"}];
     NSUUID *correlationId = [NSUUID UUID];
     NSDictionary *httpHeaders = @{@"fake header key" : @"fake header value"};
     NSString *httpResponseCode = @"-99999";
@@ -237,7 +237,6 @@
     XCTAssertNil(msalError.userInfo[MSIDOAuthErrorKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
     XCTAssertNil(msalError.userInfo[MSIDOAuthSubErrorKey]);
-    XCTAssertEqualObjects(msalError.userInfo[NSUnderlyingErrorKey], underlyingError);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPHeadersKey], httpHeaders);
     XCTAssertNil(msalError.userInfo[MSIDHTTPHeadersKey]);
     XCTAssertEqualObjects(msalError.userInfo[MSALHTTPResponseCodeKey], httpResponseCode);
@@ -247,6 +246,12 @@
     XCTAssertNotNil(msalError.userInfo[MSALInvalidResultKey]);
     MSALResult *result = msalError.userInfo[MSALInvalidResultKey];
     XCTAssertEqualObjects(result.accessToken, @"access-token");
+    
+    NSError *mappedUnderlyingError = msalError.userInfo[NSUnderlyingErrorKey];
+    XCTAssertEqualObjects(mappedUnderlyingError.domain, MSALErrorDomain);
+    XCTAssertEqual(mappedUnderlyingError.code, MSALErrorInternal);
+    XCTAssertEqual(mappedUnderlyingError.userInfo[MSALOAuthSubErrorKey], @"basic_action");
+    XCTAssertEqual([mappedUnderlyingError.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidGrant);
 }
 
 - (MSIDTokenResult *)testTokenResult
