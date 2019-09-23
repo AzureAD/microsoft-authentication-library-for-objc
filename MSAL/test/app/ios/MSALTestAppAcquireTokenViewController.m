@@ -279,7 +279,7 @@
     }
     
     __auto_type scopes = [settings.scopes allObjects];
-    __auto_type account = settings.currentAccount;
+    MSALAccount *account = nil;
     MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
     parameters.authority = settings.authority;
     __block BOOL fBlockHit = NO;

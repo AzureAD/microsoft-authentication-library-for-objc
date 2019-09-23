@@ -2642,6 +2642,35 @@
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testAcquireTokenSilent_whenNilAccountPassed_shouldReturnInteractionRequiredError
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                               error:&error];
+    
+    MSALAccount *nilAccount = nil;
+    
+    MSALSilentTokenParameters *silentParameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"testscope"] account:nilAccount];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Silent expectation"];
+    
+    [application acquireTokenSilentWithParameters:silentParameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        
+                                      XCTAssertNil(result);
+                                      XCTAssertNotNil(error);
+                                      XCTAssertEqual(error.code, MSALErrorInteractionRequired);
+                                      XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"No account provided for the silent request. Please call interactive acquireToken request to get an account identifier before calling acquireTokenSilent.");
+                                      [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
 
 - (void)testAcquireTokenInteractive_whenAccountMismatch_shouldReturnAccountMismatchError
 {
