@@ -202,7 +202,12 @@ static NSSet *s_recoverableErrorCode;
     msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
     msalUserInfo[MSALOAuthErrorKey] = oauthError;
     msalUserInfo[MSALOAuthSubErrorKey] = subError;
-    msalUserInfo[NSUnderlyingErrorKey] = underlyingError;
+    
+    if (underlyingError)
+    {
+        msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
+    }
+    
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 
     if (userInfo[MSIDInvalidTokenResultKey] && oauth2Provider)

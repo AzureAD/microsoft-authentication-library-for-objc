@@ -104,51 +104,47 @@
 {
     MSIDAuthority *authority = requestAuthority;
     
-    if (self.accountMetadataCache)
+    NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
+                                                    homeAccountId:account.homeAccountId.identifier
+                                                         clientId:self.clientId
+                                                    instanceAware:instanceAware
+                                                          context:nil
+                                                            error:error];
+    
+    if (cachedURL)
     {
-        NSURL *cachedURL = [self.accountMetadataCache getAuthorityURL:requestAuthority.url
-                                                        homeAccountId:account.homeAccountId.identifier
-                                                             clientId:self.clientId
-                                                        instanceAware:instanceAware
-                                                              context:nil
-                                                                error:error];
+        authority = [[MSIDAADAuthority alloc] initWithURL:cachedURL rawTenant:nil context:nil error:error];
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, authority.url);
+    }
+    else if ([authority isKindOfClass:[MSIDAADAuthority class]])
+    {
+        /*
+         In the acquire token silent call we assume developer wants to get access token for account's home tenant,
+         if authority is a common, organizations or consumers authority.
+         TODO: this logic can be removed when server side issue with returning wrong id token is fixed in cross-tenant scenarios
+         */
+        MSIDAADAuthority *aadAuthority = (MSIDAADAuthority *)authority;
         
-        if (cachedURL)
+        if (aadAuthority.tenant.type == MSIDAADTenantTypeCommon
+            || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers
+            || aadAuthority.tenant.type == MSIDAADTenantTypeOrganizations)
         {
-            authority = [[MSIDAADAuthority alloc] initWithURL:cachedURL rawTenant:nil context:nil error:error];
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request authority cache look up for %@, using %@ instead", requestAuthority.url, authority.url);
-        }
-        else if ([authority isKindOfClass:[MSIDAADAuthority class]])
+            // This is just a precaution to ensure tenantId is a valid AAD tenant semantically
+            NSUUID *tenantUUID = [[NSUUID alloc] initWithUUIDString:account.homeAccountId.tenantId];
             
-        {
-            /*
-             In the acquire token silent call we assume developer wants to get access token for account's home tenant,
-             if authority is a common, organizations or consumers authority.
-             TODO: this logic can be removed when server side issue with returning wrong id token is fixed in cross-tenant scenarios
-             */
-            MSIDAADAuthority *aadAuthority = (MSIDAADAuthority *)authority;
-            
-            if (aadAuthority.tenant.type == MSIDAADTenantTypeCommon
-                || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers
-                || aadAuthority.tenant.type == MSIDAADTenantTypeOrganizations)
+            if (tenantUUID)
             {
-                // This is just a precaution to ensure tenantId is a valid AAD tenant semantically
-                NSUUID *tenantUUID = [[NSUUID alloc] initWithUUIDString:account.homeAccountId.tenantId];
-                
-                if (tenantUUID)
-                {
-                    authority = [[MSIDAADAuthority alloc] initWithURL:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:error];
-                }
-                else
-                {
-                    MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Unexpected tenantId found %@", MSID_PII_LOG_MASKABLE(account.homeAccountId.tenantId));
-                }
-                
                 authority = [[MSIDAADAuthority alloc] initWithURL:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:error];
             }
-
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Didn't find cached authority for %@. Falling back to home authority instead %@", requestAuthority.url, authority.url);
+            else
+            {
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Unexpected tenantId found %@", MSID_PII_LOG_MASKABLE(account.homeAccountId.tenantId));
+            }
+            
+            authority = [[MSIDAADAuthority alloc] initWithURL:authority.url rawTenant:account.homeAccountId.tenantId context:nil error:error];
         }
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Didn't find cached authority for %@. Falling back to home authority instead %@", requestAuthority.url, authority.url);
     }
     
     return authority;

@@ -98,7 +98,7 @@ fileprivate extension SampleMainViewController {
         let photoUtil = SamplePhotoUtil.shared
         setUserPhoto(withPhoto: photoUtil.cachedPhoto())
         
-        photoUtil.checkUpdatePhoto {
+        photoUtil.checkUpdatePhoto(parentController: self, withCompletion: {
             (image, error) in
             
             if let error = error {
@@ -109,7 +109,7 @@ fileprivate extension SampleMainViewController {
             if let image = image {
                 self.setUserPhoto(withPhoto: image)
             }
-        }
+        })
     }
     
     func setUserPhoto(withPhoto photo: UIImage) {
@@ -128,7 +128,7 @@ fileprivate extension SampleMainViewController {
         
         tableView.reloadData()
         
-        calendarUtil.getEvents {
+        calendarUtil.getEvents(parentController: self, withCompletion: {
             (events: [Date : [SampleCalendarEvent]]?, error: Error?) in
             
             if let error = error {
@@ -140,7 +140,7 @@ fileprivate extension SampleMainViewController {
                 self.events = events
                 self.tableView.reloadData()
             }
-        }
+        })
     }
 }
 
