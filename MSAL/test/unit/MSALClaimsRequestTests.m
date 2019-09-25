@@ -274,9 +274,9 @@
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInternal);
-    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorUnexpected));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"essential is not a NSNumber.");
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"essential key in dictionary is not of expected type. Allowed types: NSNumber.");
 }
 
 - (void)testInitWithJSONString_whenClaimRequestedWithInvalidValues_shouldFailWithError
@@ -289,9 +289,9 @@
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInternal);
-    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorUnexpected));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"values is not an NSArray.");
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"values key in dictionary is not of expected type. Allowed types: NSArray.");
 }
 
 - (void)testInitWithJSONString_whenClaimRequestedWithoutNestedClaimsDictionary_shouldFailWithError
@@ -304,9 +304,9 @@
     XCTAssertNil(claimsRequest);
     XCTAssertNotNil(error);
     XCTAssertEqual(error.code, MSALErrorInternal);
-    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorInvalidParameter));
+    XCTAssertEqualObjects(error.userInfo[MSALInternalErrorCodeKey], @(MSALInternalErrorUnexpected));
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
-    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"id_token is not a NSDictionary.");
+    XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"id_token key in dictionary is not of expected type. Allowed types: NSDictionary.");
 }
 
 #pragma mark - testJSONString
