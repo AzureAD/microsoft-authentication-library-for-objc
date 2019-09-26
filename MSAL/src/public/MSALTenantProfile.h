@@ -64,7 +64,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  ID token claims for the account in the specified tenant. 
 */
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *claims;
+@property (readonly, nullable) NSDictionary<NSString *, id> *claims;
 
 @end
 
