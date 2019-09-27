@@ -1,3 +1,10 @@
+## [1.0.0] - 2019-09-26
+### Fixed
+- Return type of the account claims
+
+### Updated
+- MSAL version number and availability. MSAL for iOS and macOS is now generally available. 
+
 ## [0.8.0] - 2019-09-20
 ### Updated
 - Improved Readme.md
