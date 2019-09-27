@@ -78,7 +78,7 @@
     Will only be returned if there has been an id token issued for the client Id for the account's source tenant.
         
  */
-@property (readonly, nullable) NSDictionary<NSString *, NSString *> *accountClaims;
+@property (readonly, nullable) NSDictionary<NSString *, id> *accountClaims;
 
 @end
 

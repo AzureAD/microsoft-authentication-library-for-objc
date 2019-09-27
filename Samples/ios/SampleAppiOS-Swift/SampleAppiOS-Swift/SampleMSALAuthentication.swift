@@ -144,7 +144,7 @@ extension SampleMSALAuthentication {
                 // that comes back in the result.
                 let signedInAccount = acquireTokenResult.account
                 self.currentAccountIdentifier = signedInAccount.homeAccountId?.identifier
-                
+                                
                 completion(signedInAccount, acquireTokenResult.accessToken, nil)
             }
         } catch let createApplicationError {
