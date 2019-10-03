@@ -929,16 +929,14 @@
         if (parameters.webviewParameters.parentViewController == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            block(nil, msidError, msidParams);
             return;
         }
         
         if (parameters.webviewParameters.parentViewController.view.window == nil)
         {
             NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            block(nil, msidError, msidParams);
             return;
         }
         
