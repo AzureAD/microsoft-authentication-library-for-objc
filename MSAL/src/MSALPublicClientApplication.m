@@ -773,22 +773,22 @@
              context:(id<MSIDRequestContext>)ctx
                 mask:(BOOL)mask
 {
-  if (error)
-  {
-    NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
-    errorDescription = errorDescription ? errorDescription : @"emptyString";
-    if (mask) {
-      MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
-    } else {
-      MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+    if (error)
+    {
+        NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
+        errorDescription = errorDescription ? errorDescription : @"";
+        if (mask) {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
+        } else {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+        }
     }
-  }
   
-  if (result)
-  {
-    NSString *hashedAT = [result.accessToken msidTokenHash];
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
-  }
+    if (result)
+    {
+        NSString *hashedAT = [result.accessToken msidTokenHash];
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+    }
 }
 
 
