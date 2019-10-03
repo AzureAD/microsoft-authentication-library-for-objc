@@ -767,6 +767,31 @@
     }
 }
 
++ (void)logOperation:(NSString *)operation
+              result:(MSALResult *)result
+               error:(NSError *)error
+             context:(id<MSIDRequestContext>)ctx
+                mask:(BOOL)mask
+{
+  if (error)
+  {
+    NSString *errorDescription = error.userInfo[MSALErrorDescriptionKey];
+    errorDescription = errorDescription ? errorDescription : @"emptyString";
+    if (mask) {
+      MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, MSID_PII_LOG_MASKABLE(errorDescription));
+    } else {
+      MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, ctx, @"%@ returning with error: (%@, %ld) %@", operation, error.domain, (long)error.code, errorDescription);
+    }
+  }
+  
+  if (result)
+  {
+    NSString *hashedAT = [result.accessToken msidTokenHash];
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, ctx, @"%@ returning with at: %@ scopes:%@ expiration:%@", operation, hashedAT, result.scopes, result.expiresOn);
+  }
+}
+
+
 - (void)updateExternalAccountsWithResult:(MSALResult *)result context:(id<MSIDRequestContext>)context
 {
     if (result && self.externalAccountHandler)
@@ -788,7 +813,7 @@
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
-        [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
+        [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context mask:NO];
         
         if (!completionBlock) return;
         
