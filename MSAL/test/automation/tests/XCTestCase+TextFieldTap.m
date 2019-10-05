@@ -37,7 +37,7 @@
 
     while (true)
     {
-        [element pressForDuration:0.2f];
+        [element tap];
 
         if (keyboard.exists
             && keyboard.hittable)
