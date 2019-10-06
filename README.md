@@ -10,8 +10,7 @@ The MSAL library for iOS and macOS gives your app the ability to begin using the
 
 ## Quick sample
 
-###Swift
-
+#### Swift
 ```swift
 let config = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>")
 let scopes = ["your-scope1-here", "your-scope2-here"]
@@ -45,8 +44,7 @@ else {
 }
 ```
 
-###Objective-C
-
+#### Objective-C
 ```obj-c
 NSError *msalError = nil;
     
@@ -149,7 +147,7 @@ See more info about [configuring redirect uri for MSAL](https://docs.microsoft.c
 
 3. To handle a callback, add the following to `appDelegate`:
 
-Swift
+#### Swift
 ```swift
 func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         
@@ -157,7 +155,7 @@ func application(_ app: UIApplication, open url: URL, options: [UIApplication.Op
 }
 ```
 
-Objective-C
+#### Objective-C
 ```obj-c
 - (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)url
@@ -170,8 +168,7 @@ Objective-C
 
 **Note, that if you adopted UISceneDelegate on iOS 13+**, MSAL callback needs to be placed into the appropriate delegate method of UISceneDelegate instead of AppDelegate. MSAL `handleMSALResponse:sourceApplication:` must be called only once for each URL. If you support both UISceneDelegate and UIApplicationDelegate for compatibility with older iOS, MSAL callback would need to be placed into both files.
 
-Swift
-
+#### Swift
 ```swift
 func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         
@@ -186,8 +183,7 @@ func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>)
     }
 ```
 
-Objective-C
-
+#### Objective-C
 ```objective-c
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
 {
@@ -210,13 +206,13 @@ Objective-C
 ### Creating an Application Object
 Use the client ID from your app listing when initializing your MSALPublicClientApplication object:
 
-Swift
+#### Swift
 ```swift
 let config = MSALPublicClientApplicationConfig(clientId: "<your-client-id-here>")
 let application = try? MSALPublicClientApplication(configuration: config) 
 ```
 
-Objective-C
+#### Objective-C
 ```obj-c
 NSError *msalError = nil;
     
@@ -225,7 +221,8 @@ MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] 
     
 ```
 ### Acquiring Your First Token interactively
-Swift
+
+#### Swift
 ```swift
 #if os(iOS)
 	let viewController = ... // Pass a reference to the view controller that should be used when getting a token interactively
@@ -248,7 +245,8 @@ application.acquireToken(with: interactiveParameters, completionBlock: { (result
 	let accountIdentifier = authResult.account.identifier
 })
 ```
-Objective-C
+
+#### Objective-C
 ```obj-c
 #if TARGET_OS_IPHONE
     UIViewController *viewController = ...; // Pass a reference to the view controller that should be used when getting a token interactively
@@ -276,7 +274,8 @@ MSALInteractiveTokenParameters *interactiveParams = [[MSALInteractiveTokenParame
 > Our library uses the ASWebAuthenticationSession for authentication on iOS 12 by default. See more information about [default values, and support for other iOS versions](https://docs.microsoft.com/en-us/azure/active-directory/develop/customize-webviews).
 
 ### Silently Acquiring an Updated Token
-Swift
+
+#### Swift
 ```swift
 guard let account = try? application.account(forIdentifier: accountIdentifier) else { return }
 let silentParameters = MSALSilentTokenParameters(scopes: scopes, account: account)
@@ -299,7 +298,8 @@ application.acquireTokenSilent(with: silentParameters) { (result, error) in
 	let accessToken = authResult.accessToken
 }
 ```
-Objective-C
+
+#### Objective-C
 ```objective-c
 NSError *error = nil;
 MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&error];
