@@ -37,7 +37,14 @@
 
     while (true)
     {
-        [element tap];
+        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 13.0f)
+        {
+            [element tap];
+        }
+        else
+        {
+            [element pressForDuration:0.2f];
+        }
 
         if (keyboard.exists
             && keyboard.hittable)
