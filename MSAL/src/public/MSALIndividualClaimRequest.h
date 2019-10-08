@@ -31,36 +31,48 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  Represents the individual claim request.
  See more info here: https://openid.net/specs/openid-connect-core-1_0.html#IndividualClaimsRequests
  
- Example of Individual Claim Request serialized to json:
+ Example of Individual Claim Request serialized to JSON:
  
     "auth_time": {"essential": true}
  
  */
 @interface MSALIndividualClaimRequest : NSObject
 
-/*!
- Init with claim name.
- @param name Name of the requsted claim.
+#pragma mark - Creating MSALIndividualClaimRequest
+
+/**
+ Initialize individual claim with a specific name.
+ @param name Name of the requested claim.
  */
 - (instancetype)initWithName:(NSString *)name;
 
-+ (instancetype)new NS_UNAVAILABLE;
+#pragma mark - Updating MSALIndividualClaimRequest
 
-- (instancetype)init NS_UNAVAILABLE;
-
-/*!
+/**
  Name of the claim being requested.
  */
 @property (nonatomic) NSString *name;
 
-/*!
+/**
  Additional information that can be optionally sent to the authorization server (default is null) for a particular requested claim.
  */
 @property (nonatomic, nullable) MSALIndividualClaimRequestAdditionalInfo *additionalInfo;
+
+#pragma mark - Unavailable initializers
+
+/**
+    Use `[MSALIndividualClaimRequest initWithName:]` instead
+ */
++ (instancetype)new NS_UNAVAILABLE;
+
+/**
+   Use `[MSALIndividualClaimRequest initWithName:]` instead
+*/
+- (instancetype)init NS_UNAVAILABLE;
 
 @end
 

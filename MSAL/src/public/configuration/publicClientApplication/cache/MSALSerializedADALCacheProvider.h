@@ -27,22 +27,73 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MSALSerializedADALCacheProvider;
 
+/**
+    Class implementing MSALSerializedADALCacheProviderDelegate is responsible for persistence and management of ADAL cache on macOS
+ */
+
 @protocol MSALSerializedADALCacheProviderDelegate <NSObject>
 
+/**
+    This delegate method will be called before performing a cache lookup operation.
+    The delegate implementation should ensure that latest cache is loaded from disk to the in-memory representation of ADAL cache (MSALSerializedADALCacheProvider) at this point
+ */
 - (void)willAccessCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+
+/**
+    This delegate method will be called after performing a cache lookup operation.
+ */
 - (void)didAccessCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+
+/**
+    This delegate method will be called before performing a cache write operation.
+    The delegate implementation should ensure that latest cache is loaded from disk to the in-memory representation of ADAL cache (MSALSerializedADALCacheProvider) at this point.
+*/
 - (void)willWriteCache:(nonnull MSALSerializedADALCacheProvider *)cache;
+
+/**
+    This delegate method will be called after performing a cache update operation.
+    The delegate implementation should serialize and write the latest in-memory representation of ADAL cache to disk at this point.
+*/
 - (void)didWriteCache:(nonnull MSALSerializedADALCacheProvider *)cache;
 
 @end
 
+/**
+    Representation of ADAL serialized cache.
+    Use it to achieve SSO or migration scenarios between ADAL Objective-C for macOS and MSAL for macOS
+ */
+
 @interface MSALSerializedADALCacheProvider : NSObject <NSCopying>
 
+#pragma mark - Getting a class implementing MSALSerializedADALCacheProviderDelegate
+
+/**
+    Delegate of MSALSerializedADALCacheProvider is responsible for storing and reading serialized ADAL cache to the disk (e.g. keychain).
+ */
 @property (nonatomic, nonnull, readonly) id<MSALSerializedADALCacheProviderDelegate> delegate;
 
+#pragma mark - Data serialization
+
+/**
+    Serializes current in-memory representation of ADAL cache into NSData
+    @param error                                Error if present
+ */
 - (nullable NSData *)serializeDataWithError:(NSError * _Nullable * _Nullable)error;
+
+/**
+    Deserializes NSData into in-memory representation of ADAL cache
+    @param serializedData             Serialized ADAL cache
+    @param error                                 Error if present
+*/
 - (BOOL)deserialize:(nonnull NSData *)serializedData error:(NSError * _Nullable * _Nullable)error;
 
+#pragma mark - Configure MSALSerializedADALCacheProvider
+
+/**
+    Initializes MSALSerializedADALCacheProvider with a delegate.
+    @param delegate                         Class implementing MSALSerializedADALCacheProviderDelegate protocol that is responsible for persistence and management of ADAL cache
+    @param error                                Error if present
+ */
 - (nullable instancetype)initWithDelegate:(nonnull id<MSALSerializedADALCacheProviderDelegate>)delegate
                                     error:(NSError * _Nullable * _Nullable)error;
 

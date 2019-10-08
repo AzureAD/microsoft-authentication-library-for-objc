@@ -18,10 +18,17 @@ script:
   - ./build.py
 
 after_success:
-# Run slather once to have it print out the results in the travis log
-#  - slather coverage -s <xcode project here>
+    - ./build_docs.sh
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GH_TOKEN
+  local-dir: docs.temp/docs
+  on:
+    branch: master
 
 notifications:
   slack:
     secure: BIziStN+8QJLjdqNbLyRWWw9kI/MQsX+rZq+xz/bfTANk0gbEryLgMSiEoHxdoctu0dOqOet1voYuDKs3RQW3W0yh0AhDwVgWThNkTA0oDXF8zqm9AXettXNtmYHipaYb6+z6L4lpJOkClQp3hAheu8cM2igqye1O0FQla9g/PA=
+
 
