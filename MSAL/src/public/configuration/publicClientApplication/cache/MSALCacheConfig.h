@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
     Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
  */
-- (NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (nullable NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 #endif
 

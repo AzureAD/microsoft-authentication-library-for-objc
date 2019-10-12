@@ -48,9 +48,4 @@
     return nil;
 }
 
-- (NSURL *)url
-{
-    return nil;
-}
-
 @end

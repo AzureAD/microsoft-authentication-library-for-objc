@@ -522,7 +522,7 @@
 
 #pragma mark - Helpers
 
-- (void)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
+- (BOOL)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@, error %@", logLine, MSID_PII_LOG_MASKABLE(resultError));
     
@@ -530,6 +530,7 @@
     {
         *error = [MSALErrorConverter msalErrorFromMsidError:resultError];
     }
+    return YES;
 }
 
 - (NSString *)accountVersionIdentifier:(MSALLegacySharedAccountVersion)version
