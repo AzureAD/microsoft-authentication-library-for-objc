@@ -201,7 +201,7 @@
     
     if (!parameters)
     {
-        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil);
+        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:parameterError logLine:@"Unsupported account found, skipping update"];
         return nil;
     }
@@ -266,7 +266,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -283,7 +283,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -482,7 +482,7 @@
     
     if ([jsonAccounts count] > 1)
     {
-        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
+        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:readError logLine:@"Ambigious query for external accounts, found multiple accounts."];
         return nil;
     }
