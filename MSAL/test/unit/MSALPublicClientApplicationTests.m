@@ -2181,6 +2181,11 @@
     
     // Make sure the user is now gone
     XCTAssertEqual([application allAccounts:nil].count, 0);
+    
+    // Account metadata should mark account as signed out
+    BOOL isSignedOut = [self.accountMetadataCache signedOutStateForHomeAccountId:@"myuid.utid" clientId:UNIT_TEST_CLIENT_ID context:nil error:&error];
+    XCTAssertNil(error);
+    XCTAssertTrue(isSignedOut);
 }
 
 
