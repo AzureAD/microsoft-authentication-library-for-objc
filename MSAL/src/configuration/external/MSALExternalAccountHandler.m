@@ -167,7 +167,7 @@
 
 #pragma mark - Helpers
 
-- (void)fillAndLogParameterError:(NSError **)error parameterName:(NSString *)parameterName
+- (BOOL)fillAndLogParameterError:(NSError **)error parameterName:(NSString *)parameterName
 {
     NSString *errorMessage = [NSString stringWithFormat:@"Parameter missing: %@", parameterName];
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@", errorMessage);
@@ -178,6 +178,8 @@
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
         *error = msalError;
     }
+    
+    return YES;
 }
 
 @end
