@@ -562,7 +562,7 @@
     
     if (!parameters.account)
     {
-        NSError *noAccountError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No account provided for the silent request. Please call interactive acquireToken request to get an account identifier before calling acquireTokenSilent.", nil, nil, nil, nil, nil);
+        NSError *noAccountError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No account provided for the silent request. Please call interactive acquireToken request to get an account identifier before calling acquireTokenSilent.", nil, nil, nil, nil, nil, YES);
         block(nil, noAccountError, nil);
         return;
     }
@@ -574,7 +574,7 @@
     // Authority type in PCA and parameters should match
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
         block(nil, msidError, nil);
         
         return;
@@ -809,9 +809,8 @@
     
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        block(nil, msalError, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
+        block(nil, msidError, nil);
         
         return;
     }
@@ -902,17 +901,15 @@
     {
         if (parameters.webviewParameters.parentViewController == nil)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
+            block(nil, msidError, msidParams);
             return;
         }
         
         if (parameters.webviewParameters.parentViewController.view.window == nil)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+            block(nil, msidError, msidParams);
             return;
         }
         
@@ -1023,6 +1020,7 @@
                                                   error:&msidError];
     if (!result)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing MSAL token cache for the specified account failed with error %@", MSID_PII_LOG_MASKABLE(msidError));
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return NO;
     }
@@ -1031,6 +1029,8 @@
     {
         NSError *externalError = nil;
         result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"External account removed with result %d", (int)result);
         
         if (externalError && error)
         {
@@ -1043,6 +1043,7 @@
                                                                                context:nil
                                                                                  error:error])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
         return NO;
     }
     

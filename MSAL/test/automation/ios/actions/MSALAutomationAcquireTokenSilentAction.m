@@ -81,7 +81,7 @@
         }
         else
         {
-            NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil);
+            NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil, YES);
 
             result = [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                                  error:error

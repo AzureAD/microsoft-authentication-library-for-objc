@@ -27,9 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSString (MSALAccountIdenfiers)
 
-- (NSString *)msalStringAsGUID;
-- (NSData *)msalStringAsGUIDData;
-- (NSString *)msalGUIDAsShortString;
+- (nullable NSString *)msalStringAsGUID;
+- (nullable NSData *)msalStringAsGUIDData;
+- (nullable NSString *)msalGUIDAsShortString;
 
 @end
 

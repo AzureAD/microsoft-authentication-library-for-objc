@@ -2348,7 +2348,7 @@
          (void)account;
          (void)clientId;
          
-         *error = MSIDCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil, nil);
+         *error = MSIDCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil, nil, YES);
          
          return NO;
      }];

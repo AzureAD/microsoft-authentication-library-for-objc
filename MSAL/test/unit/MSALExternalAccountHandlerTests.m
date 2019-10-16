@@ -147,7 +147,7 @@
 - (void)testAllExternalAccountsWithParameters_whenFailedToReadExternalAccounts_shouldReturnError
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
-    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account reading error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"});
+    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account reading error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"}, YES);
     testProvider.accountOperationError = error;
     
     NSArray *externalAccountProviders = @[testProvider];
@@ -264,7 +264,7 @@
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
     testProvider.accountOperationResult = NO;
-    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected update error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"});
+    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected update error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"}, YES);
     testProvider.accountOperationError = error;
     
     NSArray *externalAccountProviders = @[testProvider];
@@ -327,7 +327,7 @@
 {
     MSALTestExternalAccountsProvider *testProvider = [MSALTestExternalAccountsProvider new];
     testProvider.accountOperationResult = NO;
-    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected removal error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"});
+    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected removal error", nil, nil, nil, [NSUUID UUID], @{@"extra":@"extra1"}, YES);
     testProvider.accountOperationError = error;
     
     NSArray *externalAccountProviders = @[testProvider];

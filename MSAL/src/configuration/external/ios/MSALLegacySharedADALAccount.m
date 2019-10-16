@@ -60,7 +60,7 @@ static NSString *kADALAccountType = @"ADAL";
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
@@ -74,7 +74,7 @@ static NSString *kADALAccountType = @"ADAL";
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
