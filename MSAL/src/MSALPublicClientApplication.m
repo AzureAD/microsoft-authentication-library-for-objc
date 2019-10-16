@@ -595,7 +595,7 @@
     NSError *authorityError = nil;
     requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
                                                           requestAuthority:requestAuthority
-                                                             instanceAware:NO
+                                                             instanceAware:self.internalConfig.multipleCloudsSupported
                                                                      error:&authorityError];
     
     if (!requestAuthority)
@@ -636,6 +636,7 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = providedAuthority;
+    msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -887,9 +888,7 @@
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
     msidParams.validateAuthority = _validateAuthority;
-    //TODO: address/decide public header to allow setting instace_aware for requests;
-    //      set the following property with instance aware flag in config or extraURLQueryParameters
-    //msidParams.instanceAware
+    msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
     
     if (msidParams.validateAuthority
         && [self shouldExcludeValidationForAuthority:requestAuthority])

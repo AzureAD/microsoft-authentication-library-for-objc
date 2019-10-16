@@ -59,7 +59,7 @@
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.extraQueryParameters = @{@"instance_aware": @"true"};
+    request.instanceAware = YES;
 
     // 1. Run interactive
     NSString *homeAccountID = [self runSharedAADLoginWithTestRequest:request];
@@ -95,7 +95,7 @@
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
     request.expectedResultScopes = request.requestScopes;
     request.testAccount = self.primaryAccount;
-    request.extraQueryParameters = @{@"instance_aware": @"true"};
+    request.instanceAware = YES;
     request.webViewType = MSIDWebviewTypeWKWebView;
     request.expectedResultAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
     request.cacheAuthority = [self.class.confProvider defaultAuthorityForIdentifier:@"de" tenantId:self.primaryAccount.targetTenantId];
