@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSString *clientId;
 
 /** The redirect URI of the application */
-@property NSString *redirectUri;
+@property (nullable) NSString *redirectUri;
 
 /** The authority the application will use to obtain tokens */
 @property MSALAuthority *authority;

@@ -1024,6 +1024,7 @@
                                                   error:&msidError];
     if (!result)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing MSAL token cache for the specified account failed with error %@", MSID_PII_LOG_MASKABLE(msidError));
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return NO;
     }
@@ -1032,6 +1033,8 @@
     {
         NSError *externalError = nil;
         result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"External account removed with result %d", (int)result);
         
         if (externalError && error)
         {
@@ -1044,6 +1047,7 @@
                                                                                context:nil
                                                                                  error:error])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
         return NO;
     }
     
