@@ -174,7 +174,7 @@
     
     if (error)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, errorMessage, nil, nil, nil, nil, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, errorMessage, nil, nil, nil, nil, nil, NO);
         NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
         *error = msalError;
     }
