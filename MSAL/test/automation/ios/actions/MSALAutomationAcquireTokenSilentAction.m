@@ -122,10 +122,11 @@
     parameters.authority = silentAuthority;
     parameters.forceRefresh = forceRefresh;
     parameters.correlationId = correlationId;
+    parameters.completionBlockQueue = dispatch_get_main_queue();
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
-         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-         completionBlock(testResult);
+        MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+        completionBlock(testResult);
      }];
 }
 

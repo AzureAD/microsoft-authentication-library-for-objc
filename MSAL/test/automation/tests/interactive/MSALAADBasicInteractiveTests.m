@@ -376,6 +376,7 @@
 
     XCUIElement *enrollButton = self.testApp.buttons[@"Enroll now"];
     [self waitForElement:enrollButton];
+    sleep(0.5f);
     [enrollButton msidTap];
 
     XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
@@ -412,7 +413,8 @@
 
     BOOL result = [safari waitForState:XCUIApplicationStateRunningForeground timeout:20];
     XCTAssertTrue(result);
-
+    
+    sleep(1.0f);
     XCUIElement *getTheAppButton = safari.staticTexts[@"GET THE APP"];
     [self waitForElement:getTheAppButton];
     [self.testApp activate];
