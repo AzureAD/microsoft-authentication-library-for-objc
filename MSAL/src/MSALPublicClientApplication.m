@@ -637,6 +637,7 @@
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = providedAuthority;
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
+    msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -889,6 +890,7 @@
     
     msidParams.validateAuthority = _validateAuthority;
     msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
+    msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     
     if (msidParams.validateAuthority
         && [self shouldExcludeValidationForAuthority:requestAuthority])
