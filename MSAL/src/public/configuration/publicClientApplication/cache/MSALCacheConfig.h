@@ -86,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
     Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
     created by the keychain cache.
  */
-@property (readonly, nonnull) NSArray *trustedApplications;
+@property (nonatomic, nonnull) NSArray *trustedApplications;
 
 /**
     Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
