@@ -64,7 +64,7 @@
     {
         if (error)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAzureCloudInstance provided", nil, nil, nil, nil, nil);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAzureCloudInstance provided", nil, nil, nil, nil, nil, YES);
             *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         }
         
@@ -86,7 +86,7 @@
     {
         if (error)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid environment provided", nil, nil, nil, nil, nil);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid environment provided", nil, nil, nil, nil, nil, YES);
             *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         }
         
@@ -99,7 +99,7 @@
         {
             if (error)
             {
-                NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+                NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You can only provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil, YES);
                 *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
             }
             
@@ -154,7 +154,7 @@
         }
         case MSALAzureADMyOrgOnlyAudience:
         {
-            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);;
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil, YES);
             break;
         }
         case MSALPersonalMicrosoftAccountAudience:
@@ -164,7 +164,7 @@
             
         default:
         {
-            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil);
+            msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Invalid MSALAudienceType provided. You must provide rawTenant when using MSALAzureADMyOrgOnlyAudience.", nil, nil, nil, nil, nil, YES);
             break;
         }
     }

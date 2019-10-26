@@ -1,3 +1,13 @@
+## [1.0.1] - 2019-10-25
+### Added
+- Support for apps that are present in multiple clouds
+- Better logging when error is created
+
+### Fixed
+- Block swipe to dismiss for auth controller
+- Remove arm64e architecture
+- Pass custom keychain group for broker requests
+
 ## [1.0.0] - 2019-09-26
 ### Fixed
 - Return type of the account claims
