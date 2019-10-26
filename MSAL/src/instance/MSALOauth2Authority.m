@@ -40,16 +40,11 @@
     {
         if (error)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Non Microsoft authority is not supported yet in MSAL", nil, nil, nil, nil, nil, YES);
             *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         }
     }
     
-    return nil;
-}
-
-- (NSURL *)url
-{
     return nil;
 }
 
