@@ -25,6 +25,7 @@
 #import "MSIDMacTokenCache.h"
 #import "MSALErrorConverter.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
+#import "MSIDMacLegacyCachePersistenceHandler.h"
 
 @interface MSALSerializedADALCacheProvider() <MSIDMacTokenCacheDelegate>
 
@@ -47,6 +48,32 @@
         // Init datasource.
         _macTokenCache = [MSIDMacTokenCache new];
         _macTokenCache.delegate = self;
+    }
+    
+    return self;
+}
+
+- (nullable instancetype)initWithKeychainAttributes:(nonnull NSDictionary *)keychainAttributes
+                                trustedApplications:(nonnull NSArray *)trustedApplications
+                                        accessLabel:(nonnull NSString *)accessLabel
+                                              error:(NSError * _Nullable * _Nullable)error
+{
+    self = [super init];
+    
+    if (self)
+    {
+        MSIDMacLegacyCachePersistenceHandler *persistenceHandler = [[MSIDMacLegacyCachePersistenceHandler alloc] initWithTrustedApplications:trustedApplications
+                                                                                                                                 accessLabel:accessLabel
+                                                                                                                                  attributes:keychainAttributes
+                                                                                                                                       error:error];
+        
+        if (!persistenceHandler)
+        {
+            return nil;
+        }
+        
+        _macTokenCache = [MSIDMacTokenCache new];
+        _macTokenCache.delegate = persistenceHandler;
     }
     
     return self;
