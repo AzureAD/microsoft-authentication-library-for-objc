@@ -42,7 +42,7 @@
 #ifdef ADFS_NOT_YET_SUPPORTED
     if (error)
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"AD FS authority is not supported yet in MSAL", nil, nil, nil, nil, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"AD FS authority is not supported yet in MSAL", nil, nil, nil, nil, nil, YES);
         *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     }
     return nil;

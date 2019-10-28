@@ -104,6 +104,7 @@
     }
     
     config.sliceConfig = [[MSALSliceConfig alloc] initWithSlice:parameters.sliceParameters[@"slice"] dc:parameters.sliceParameters[@"dc"]];
+    config.multipleCloudsSupported = parameters.instanceAware;
     
     MSALPublicClientApplication *clientApplication = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
   

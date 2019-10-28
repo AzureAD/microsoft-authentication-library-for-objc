@@ -5,6 +5,7 @@ GENERATE_MASTER_OBJECT_FILE = YES
 
 // Add armv7s and arm64e to standard ARCHs.
 ARCHS = $(ARCHS_STANDARD) armv7s arm64e
+ARCHS[sdk=iphoneos*] = $(ARCHS_STANDARD) armv7s arm64e
 
 // Activate full bitcode on release configuration for real devices.
 OTHER_CFLAGS[config=Release][sdk=iphoneos*] = $(OTHER_CFLAGS) -fembed-bitcode
