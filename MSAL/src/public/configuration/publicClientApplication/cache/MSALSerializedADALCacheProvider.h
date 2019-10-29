@@ -97,6 +97,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithDelegate:(nonnull id<MSALSerializedADALCacheProviderDelegate>)delegate
                                     error:(NSError * _Nullable * _Nullable)error;
 
+#if TARGET_OS_OSX
+
 /**
    Initializes MSALSerializedADALCacheProvider with attributes allowing MSAL to write item into the keychain.
     @param keychainAttributes              All keychain attributes needed to write ADAL cache item (at minimum kSecAttrService and kSecAttrAccount)
@@ -108,6 +110,8 @@ NS_ASSUME_NONNULL_BEGIN
                                 trustedApplications:(nonnull NSArray *)trustedApplications
                                         accessLabel:(nonnull NSString *)accessLabel
                                               error:(NSError * _Nullable * _Nullable)error;
+
+#endif
 
 
 @end

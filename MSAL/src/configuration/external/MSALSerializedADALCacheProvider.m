@@ -25,7 +25,9 @@
 #import "MSIDMacTokenCache.h"
 #import "MSALErrorConverter.h"
 #import "MSALSerializedADALCacheProvider+Internal.h"
+#if TARGET_OS_OSX
 #import "MSIDMacLegacyCachePersistenceHandler.h"
+#endif
 
 @interface MSALSerializedADALCacheProvider() <MSIDMacTokenCacheDelegate>
 
@@ -53,6 +55,8 @@
     return self;
 }
 
+#if TARGET_OS_OSX
+
 - (nullable instancetype)initWithKeychainAttributes:(nonnull NSDictionary *)keychainAttributes
                                 trustedApplications:(nonnull NSArray *)trustedApplications
                                         accessLabel:(nonnull NSString *)accessLabel
@@ -78,6 +82,8 @@
     
     return self;
 }
+
+#endif
 
 - (nullable NSData *)serializeDataWithError:(NSError **)error
 {
