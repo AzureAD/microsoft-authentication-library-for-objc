@@ -66,13 +66,21 @@
     
     if (self)
     {
+        NSError *msidError = nil;
         MSIDMacLegacyCachePersistenceHandler *persistenceHandler = [[MSIDMacLegacyCachePersistenceHandler alloc] initWithTrustedApplications:trustedApplications
                                                                                                                                  accessLabel:accessLabel
                                                                                                                                   attributes:keychainAttributes
-                                                                                                                                       error:error];
+                                                                                                                                       error:&msidError];
         
         if (!persistenceHandler)
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to initialize persistent ADAL cache handler");
+            
+            if (error)
+            {
+                *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+            }
+            
             return nil;
         }
         
