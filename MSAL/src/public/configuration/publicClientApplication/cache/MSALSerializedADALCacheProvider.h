@@ -105,6 +105,9 @@ NS_ASSUME_NONNULL_BEGIN
     @param trustedApplications            List of apps that the item should be shared with.
     @param accessLabel                              Title for the ADAL cache item access control.
     @param error                                           Error if present
+ 
+    @note By using this initializer, application delegates writing and reading from the keychain to MSAL.
+    This might or might not work for all apps. If you have your own implementation of ADAL cache serialization when migrating to MSAL, you should use initWithDelegate:error: initializer and implement your own ADAL cache persistence.
 */
 - (nullable instancetype)initWithKeychainAttributes:(nonnull NSDictionary *)keychainAttributes
                                 trustedApplications:(nonnull NSArray *)trustedApplications
