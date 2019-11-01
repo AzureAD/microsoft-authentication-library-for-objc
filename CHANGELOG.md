@@ -1,3 +1,8 @@
+## [1.0.2] - 2019-10-29
+### Fixed
+- Make trustedApps in MSALCacheConfig writable to allow apps sharing keychain on macOS
+- Always write to the data protection keychain on macOS 10.15
+
 ## [1.0.1] - 2019-10-25
 ### Added
 - Support for apps that are present in multiple clouds
