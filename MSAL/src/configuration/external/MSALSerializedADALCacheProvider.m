@@ -33,6 +33,9 @@
 
 @property (nonatomic, nonnull, readwrite) id<MSALSerializedADALCacheProviderDelegate> delegate;
 @property (nonatomic, readwrite) MSIDMacTokenCache *macTokenCache;
+#if TARGET_OS_OSX
+@property (nonatomic, readwrite) MSIDMacLegacyCachePersistenceHandler *cachePersistenceHandler;
+#endif
 
 @end
 
@@ -84,6 +87,7 @@
             return nil;
         }
         
+        _cachePersistenceHandler = persistenceHandler;
         _macTokenCache = [MSIDMacTokenCache new];
         _macTokenCache.delegate = persistenceHandler;
     }
