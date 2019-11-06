@@ -28,30 +28,46 @@
 #import <Foundation/Foundation.h>
 #import "MSALDefinitions.h"
 
+/**
+    MSAL configuration interface responsible for setting up MSAL logging callback and configuring log collection behavior.
+    @note MSALLogger is deprecated. Configure MSAL logging  inside `MSALLoggerConfig` instead
+*/
 @interface MSALLogger : NSObject
 
+#pragma mark - Unavailable initializers
+
+/**
+    Configure MSAL logging  inside `MSALLoggerConfig` instead
+ */
 - (nonnull instancetype)init NS_UNAVAILABLE;
 
-+ (nonnull MSALLogger *)sharedLogger DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig instead");
-                                                            
+#pragma mark - Getting a shared logger configuration
 
-/*!
+/**
+    Returns a shared logger configuration.
+ */
++ (nonnull MSALLogger *)sharedLogger DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig instead");
+
+#pragma mark - Configuring log collection
+                                                            
+/**
     The minimum log level for messages to be passed onto the log callback.
  */
 @property (readwrite) MSALLogLevel level DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.logLevel instead");
 
-/*!
+/**
     MSAL provides logging callbacks that assist in diagnostics. There is a boolean value in the logging callback that indicates whether the message contains user information. If PiiLoggingEnabled is set to NO, the callback will not be triggered for log messages that contain any user information. By default the library will not return any messages with user information in them.
  */
 @property (readwrite) BOOL PiiLoggingEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.loggerConfig.piiEnabled instead");
 
-/*!
+#pragma mark - Setting up the logging callback
+
+/**
     Sets the callback block to send MSAL log messages to.
  
-    NOTE: Once this is set this can not be unset, and it should be set early in
-          the program's execution.
+    @note Once this is set this can not be unset, and it should be set early in the program's execution.
  
-    NOTE: MSAL logs might contain potentially sensitive information. When implementing MSAL logging, you should never output MSAL logs with NSLog or print directly, unless you're running your application in the debug mode. If you're writing MSAL logs to file, you must take necessary precautions to store the file securely.
+    @note MSAL logs might contain potentially sensitive information. When implementing MSAL logging, you should never output MSAL logs with NSLog or print directly, unless you're running your application in the debug mode. If you're writing MSAL logs to file, you must take necessary precautions to store the file securely.
  
     Additionally, MSAL makes determination regarding PII status of a particular parameter based on the parameter type. It wouldn't automatically detect a case where PII information is passed into non-PII parameter due to a developer mistake (e.g. MSAL doesn't consider clientId PII and it expects developers to exersice caution and never pass any unexpected sensitive information into that parameter).
  */

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 import Foundation
+import UIKit
 
 typealias CalendarCompletion = ([Date: [SampleCalendarEvent]]?, Error?) -> Void
 
@@ -63,13 +64,13 @@ class SampleCalendarUtil  {
     /*
      Retrieves updated calendar event information from Microsoft graph
      */
-    func getEvents(withCompletion completion: @escaping CalendarCompletion) {
+    func getEvents(parentController : UIViewController, withCompletion completion: @escaping CalendarCompletion) {
         
         if checkTimestamp() == false {
             return
         }
         
-        SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(forScopes: [GraphScopes.CalendarsRead.rawValue]) {
+        SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(parentController: parentController, forScopes: [GraphScopes.CalendarsRead.rawValue]) {
             (token: String?, error: Error?) in
             
             guard let accessToken = token, error == nil else {

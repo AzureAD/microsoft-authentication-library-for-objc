@@ -120,7 +120,8 @@ static NSDateFormatter *s_df = nil;
     return (-[lastChecked timeIntervalSinceNow] > 30 * 60);
 }
 
-- (void)getEvents:(void (^)(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error))completionBlock
+- (void)getEventsWithParentController:(UIViewController *)controller
+                           completion:(void (^)(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error))completionBlock
 {
     if (![self checkTimestamp])
     {
@@ -128,6 +129,7 @@ static NSDateFormatter *s_df = nil;
     }
     
     [[SampleMSALUtil sharedUtil] acquireTokenForCurrentAccount:@[@"Calendars.Read"]
+                                              parentController:controller
                                                completionBlock:^(NSString *token, NSError *error)
      {
          if (error)

@@ -161,10 +161,10 @@
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.redirectUri, nil);
 #if TARGET_OS_IPHONE
-    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
     
     XCTAssertEqualObjects(MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion, @"v2.0");
@@ -183,11 +183,11 @@
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.authority, authority);
+    XCTAssertEqualObjects(application.configuration.redirectUri, nil);
 #if TARGET_OS_IPHONE
-    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
 }
 
@@ -205,11 +205,11 @@
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.authority, authority);
+    XCTAssertEqualObjects(application.configuration.redirectUri, @"mycustom.redirect://bundle_id");
 #if TARGET_OS_IPHONE
-    XCTAssertEqualObjects(application.keychainGroup, @"com.microsoft.adalcache");
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 #endif
 }
 
@@ -254,15 +254,16 @@
 {
     NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                      keychainGroup:@"com.contoso.msalcache"
-                                                                              error:&error];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID];
+    config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
-    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.redirectUri, nil);
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.contoso.msalcache");
 }
 
 - (void)testInitWithClientIdAndAuthorityAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
@@ -270,17 +271,17 @@
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                      keychainGroup:@"com.contoso.msalcache"
-                                                                          authority:authority
-                                                                              error:&error];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:nil authority:authority];
+    config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, UNIT_TEST_DEFAULT_REDIRECT_URI);
-    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.authority, authority);
+    XCTAssertEqualObjects(application.configuration.redirectUri, nil);
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.contoso.msalcache");
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenAllValidParameters_shouldReturnApplicationAndNilError
@@ -290,18 +291,17 @@
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     NSError *error = nil;
     
-    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                                                      keychainGroup:@"com.contoso.msalcache"
-                                                                          authority:authority
-                                                                        redirectUri:@"mycustom.redirect://bundle_id"
-                                                                              error:&error];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
+    config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
     
     XCTAssertNotNil(application);
     XCTAssertNil(error);
-    XCTAssertEqualObjects(application.clientId, UNIT_TEST_CLIENT_ID);
-    XCTAssertEqualObjects(application.authority, authority);
-    XCTAssertEqualObjects(application.redirectUri.url.absoluteString, @"mycustom.redirect://bundle_id");
-    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+    XCTAssertEqualObjects(application.configuration.clientId, UNIT_TEST_CLIENT_ID);
+    XCTAssertEqualObjects(application.configuration.authority, authority);
+    XCTAssertEqualObjects(application.configuration.redirectUri, @"mycustom.redirect://bundle_id");
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.contoso.msalcache");
 }
 
 - (void)testInitWithClientId_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -310,7 +310,7 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
-    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+    XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
 - (void)testInitWithClientIdAndAuthority_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -320,7 +320,7 @@
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority error:nil];
-    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+    XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenKeychainGroupNotSpecified_shouldHaveDefaultKeychainGroup
@@ -330,24 +330,21 @@
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     MSALPublicClientApplication *app = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID authority:authority redirectUri:@"mycustom.redirect://bundle_id" error:nil];
-    XCTAssertEqualObjects(app.keychainGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
+    XCTAssertEqualObjects(app.configuration.cacheConfig.keychainSharingGroup, MSIDKeychainTokenCache.defaultKeychainGroup);
 }
 
-- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainSharingDisabled
+- (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupSpecifiedNil_shouldHaveKeychainGroupDefault
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                            keychainGroup:nil
-                                                authority:authority
-                                              redirectUri:@"mycustom.redirect://bundle_id"
-                                                    error:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
     
-    XCTAssertEqualObjects(application.keychainGroup, nil);
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
+    
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.microsoft.adalcache");
 }
 
 - (void)testInitWithClientIdAndAuthorityAndRedirectUriAndKeychainGroup_whenKeychainGroupCustomSpecified_shouldHaveCustomKeychainGroup
@@ -357,14 +354,12 @@
     
     MSALAuthority *authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
     
-    MSALPublicClientApplication *application =
-    [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
-                                            keychainGroup:@"com.contoso.msalcache"
-                                                authority:authority
-                                              redirectUri:@"mycustom.redirect://bundle_id"
-                                                    error:nil];
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID redirectUri:@"mycustom.redirect://bundle_id" authority:authority];
+    config.cacheConfig.keychainSharingGroup = @"com.contoso.msalcache";
     
-    XCTAssertEqualObjects(application.keychainGroup, @"com.contoso.msalcache");
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
+    
+    XCTAssertEqualObjects(application.configuration.cacheConfig.keychainSharingGroup, @"com.contoso.msalcache");
 }
 #endif
 
@@ -627,12 +622,17 @@
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
     [application acquireTokenWithParameters:params
                             completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
                                 
                                 const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
                                 XCTAssertEqual(l1, l2);
+                                [expectation fulfill];
                             }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void)testAcquireTokenSilent_whenCustomCompletionBlockQueue_shouldExecuteOnThatQueue
@@ -703,11 +703,16 @@
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
     
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Acquire token"];
+    
     [application acquireTokenSilentWithParameters:params
                                   completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
                                       const char *l2 = dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL);
                                       XCTAssertEqual(l1, l2);
+                                      [expectation fulfill];
     }];
+    
+    [self waitForExpectationsWithTimeout:1.0 handler:nil];
 }
 
 - (void)testAcquireToken_whenNoCustomCompletionBlockQueue_andInvokedFromBackgroundQueue_shouldExecuteOnMainQueue
@@ -969,7 +974,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintPromptTypeAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -988,13 +993,22 @@
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                             loginHint:@"fakeuser@contoso.com"
-                            promptType:MSALPromptTypeLogin
-                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                       completionBlock:^(MSALResult *result, NSError *error)
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
+#endif
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    
+    parameters.promptType = MSALPromptTypeLogin;
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
@@ -1028,7 +1042,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHintPromptTypeParametersAuthorityAndCorrelationId];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -1048,16 +1062,24 @@
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
 #endif
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                  extraScopesToConsent:@[@"fakescope3"]
-                             loginHint:@"fakeuser@contoso.com"
-                            promptType:MSALPromptTypeConsent
-                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                             authority:authority
-                         correlationId:correlationId
-                       completionBlock:^(MSALResult *result, NSError *error)
+    parameters.promptType = MSALPromptTypeConsent;
+    parameters.extraScopesToConsent = @[@"fakescope3"];
+    parameters.loginHint = @"fakeuser@contoso.com";
+    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
@@ -1101,6 +1123,7 @@
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
+         XCTAssertEqualObjects(params.providedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
@@ -1161,7 +1184,7 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
@@ -1181,13 +1204,22 @@
     
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-#endif
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                               account:account
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                       completionBlock:^(MSALResult *result, NSError *error)
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
+#endif
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
+    
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.account = account;
+    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
@@ -1228,9 +1260,10 @@
          MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeParametersAuthorityAndCorrelationId];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
+         XCTAssertEqualObjects(params.providedAuthority.url.absoluteString, @"https://login.microsoftonline.com/contoso.com");
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
@@ -1249,16 +1282,24 @@
     authority = [@"https://login.microsoftonline.com/contoso.com" msalAuthority];
 #if TARGET_OS_IPHONE
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    UIViewController *parentController = nil;
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithParentViewController:parentController];
+    webParameters.webviewType = MSALWebviewTypeWKWebView;
+#else
+    MSALWebviewParameters *webParameters = [MSALWebviewParameters new];
 #endif
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"]
+                                                                                      webviewParameters:webParameters];
     
-    [application acquireTokenForScopes:@[@"fakescope1", @"fakescope2"]
-                  extraScopesToConsent:@[@"fakescope3"]
-                               account:account
-                            promptType:MSALPromptTypeDefault
-                  extraQueryParameters:@{ @"eqp1" : @"val1", @"eqp2" : @"val2" }
-                             authority:authority
-                         correlationId:correlationId
-                       completionBlock:^(MSALResult *result, NSError *error)
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.extraScopesToConsent = @[@"fakescope3"];
+    parameters.account = account;
+    parameters.extraQueryParameters = @{ @"eqp1" : @"val1", @"eqp2" : @"val2" };
+    parameters.authority = authority;
+    parameters.correlationId = correlationId;
+    
+    [application acquireTokenWithParameters:parameters
+                            completionBlock:^(MSALResult *result, NSError *error)
      {
          XCTAssertNil(result);
          XCTAssertNotNil(error);
@@ -1376,6 +1417,7 @@
          XCTAssertEqualObjects(params.extraURLQueryParameters, (@{ @"slice" : @"slice", @"dc" : @"dc" }));
          
          XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/1234-5678-90abcdefg");
+         XCTAssertEqualObjects(params.providedAuthority.url.absoluteString, @"https://login.microsoftonline.com/common");
          
          XCTAssertFalse(obj.forceRefresh);
          
@@ -1692,7 +1734,7 @@
          MSIDRequestParameters *params = [obj requestParameters];
          XCTAssertNotNil(params);
          
-         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithUserAuthorityForceRefreshAndCorrelationId];
+         NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireSilentWithTokenParameters];
          XCTAssertEqualObjects(params.telemetryApiId, expectedApiId);
          XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"user@contoso.com");
          XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"1.1234-5678-90abcdefg");
@@ -1737,17 +1779,17 @@
     [self.accountMetadataCache updateAuthorityURL:[NSURL URLWithString:@"https://login.microsoftonline.com/1234-5678-90abcdefg"]
                                     forRequestURL:[NSURL URLWithString:@"https://login.microsoftonline.com/common"] homeAccountId:accountId.identifier clientId:UNIT_TEST_CLIENT_ID instanceAware:NO context:nil error:nil];
     
-    [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
-                                     account:account
-                                   authority:authority
-                                forceRefresh:YES
-                               correlationId:correlationId
-                             completionBlock:^(MSALResult *result, NSError *error)
-     {
-         XCTAssertNil(result);
-         XCTAssertNotNil(error);
-     }];
+    MSALSilentTokenParameters *silentParameters = [[MSALSilentTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] account:account];
+    silentParameters.correlationId = correlationId;
+    silentParameters.forceRefresh = YES;
+    silentParameters.authority = authority;
     
+    [application acquireTokenSilentWithParameters:silentParameters
+                                  completionBlock:^(MSALResult * _Nullable result, NSError * _Nullable error) {
+        
+                XCTAssertNil(result);
+                XCTAssertNotNil(error);
+    }];    
 }
 
 #if TARGET_OS_IPHONE

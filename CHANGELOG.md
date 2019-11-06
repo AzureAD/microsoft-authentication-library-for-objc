@@ -1,5 +1,27 @@
-## [0.6.0] - 2019-08-22
+## [1.0.0] - 2019-09-26
+### Fixed
+- Return type of the account claims
+
+### Updated
+- MSAL version number and availability. MSAL for iOS and macOS is now generally available. 
+
+## [0.8.0] - 2019-09-20
+### Updated
+- Improved Readme.md
+- Added library reference
+- Improved threading behavior around main thread checks
+
+## [0.7.1] - 2019-09-11
 ### Added
+- Update ACL authorization tag to kSecACLAuthorizationDecrypt for adding trusted applications to keychain items on OSX.
+
+## [0.7.0] - 2019-09-09
+### Added
+- iOS 13 support for ASWebAuthenticationSession
+- Support keychain access groups on macOS 10.15
+
+## [0.6.0] - 2019-08-22
+### Added 
 - Enable iOS 13 compatible broker
 - Implement ACL control for macOS keychain
 
