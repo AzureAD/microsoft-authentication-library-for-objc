@@ -1033,17 +1033,16 @@
         }
     }
 
-    if (self.accountMetadataCache &&
-        ![self.accountMetadataCache markSignedOutStateForHomeAccountId:account.identifier
-                                                              clientId:self.internalConfig.clientId
-                                                               context:nil
-                                                                 error:error])
+    if (self.accountMetadataCache && ![self.accountMetadataCache markSignedOutStateForHomeAccountId:account.identifier
+                                                                                           clientId:self.internalConfig.clientId
+                                                                                            context:nil
+                                                                                              error:error])
     {
         return NO;
     }
     
-    
-    return YES;
+    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
+                                                          error:error];
 }
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
