@@ -83,7 +83,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     
     [self setEdgesForExtendedLayout:UIRectEdgeNone];
     [self setExtendedLayoutIncludesOpaqueBars:NO];
-#if TARGET_OS_UIKITFORMAC
+#if TARGET_OS_MACCATALYST
     _cacheTableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
 #else
     [self setAutomaticallyAdjustsScrollViewInsets:NO];
@@ -490,7 +490,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return nil;
 }
 
-#if !TARGET_OS_UIKITFORMAC
+#if !TARGET_OS_MACCATALYST
 - (nullable NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView
                            editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {

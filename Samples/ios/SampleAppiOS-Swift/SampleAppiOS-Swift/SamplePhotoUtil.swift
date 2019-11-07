@@ -58,17 +58,17 @@ class SamplePhotoUtil {
     }
     
     // Checks with the graph for an updated photo, if enough time has passed since the last check
-    func checkUpdatePhoto(withCompletion completion: @escaping PhotoCompletion) {
+    func checkUpdatePhoto(parentController : UIViewController, withCompletion completion: @escaping PhotoCompletion) {
         if checkTimestamp() == false {
             return
         }
         
-        getUserPhotoImpl {
+        getUserPhotoImpl(parentController: parentController, with: {
             (image, error) in
             DispatchQueue.main.async {
                 completion(image, error)
             }
-        }
+        })
     }
     
     // Clears out any cached data for the current user
@@ -153,14 +153,14 @@ fileprivate extension SamplePhotoUtil {
 // MARK: Request
 fileprivate extension SamplePhotoUtil {
     
-    func getUserPhotoImpl(with completion: @escaping PhotoCompletion) {
+    func getUserPhotoImpl(parentController : UIViewController, with completion: @escaping PhotoCompletion) {
         // When acquiring a token for a specific purpose you should limit the scopes
         // you ask for to just the ones needed for that operation. A user or admin might not
         // consent to all of the scopes asked for, and core application functionality should
         // not be blocked on not having consent for edge features.
         let scopesRequired = [GraphScopes.UserRead.rawValue];
         
-        SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(forScopes: scopesRequired) {
+        SampleMSALAuthentication.shared.acquireTokenForCurrentAccount(parentController: parentController, forScopes: scopesRequired) {
             (token, error) in
             
             guard let accessToken = token, error == nil else {

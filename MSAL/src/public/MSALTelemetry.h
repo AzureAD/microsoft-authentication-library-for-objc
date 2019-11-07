@@ -25,35 +25,49 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
- @class MSALTelemetry
- 
+/**
  The central class for MSAL telemetry.
  
- Usage: Get a singleton instance of MSALTelemetry; register an observer for receiving telemetry events.
+ Usage: Get a singleton instance of MSALTelemetry; register a callback (`telemetryCallback`) for receiving telemetry events.
+ 
+ @note MSALTelemetry is deprecated. Use `MSALTelemetryConfig` instead to register a `telemetryCallback` and changing telemetry configuration.
+ 
  */
 @interface MSALTelemetry : NSObject
 
+#pragma mark - Unavailable initializers
+
+/**
+ Get a singleton instance of MSALTelemetry instead.
+ */
 - (nonnull instancetype)init NS_UNAVAILABLE;
+
+/**
+Get a singleton instance of MSALTelemetry instead.
+*/
 + (nonnull instancetype)new NS_UNAVAILABLE;
 
-/*!
+#pragma mark - Getting a shared instance
+
+/**
  Get a singleton instance of MSALTelemetry.
  */
 + (nonnull MSALTelemetry *)sharedInstance DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig instead");
 
-/*!
+#pragma mark - Configuring telemetry collection
+
+/**
  Setting piiEnabled to YES, will allow MSAL to return fields with user information in the telemetry events. MSAL does not send telemetry data by itself to any server. If apps want to collect MSAL telemetry with user information they must setup the telemetry callback and set this flag on. By default MSAL will not return any user information in telemetry.
  */
 @property (atomic) BOOL piiEnabled DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.piiEnabled instead");
 
-/*!
+/**
  If set YES, telemetry events are only dispatched when errors occurred;
  If set NO, MSAL will dispatch all events.
  */
 @property (atomic) BOOL notifyOnFailureOnly DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.notifyOnFailureOnly instead");
 
-/*!
+/**
  Invoked when telemetry data is received.
  */
 @property (atomic, copy, nullable) MSALTelemetryCallback telemetryCallback DEPRECATED_MSG_ATTRIBUTE("use MSALGlobalConfig.telemetryConfig.telemetryCallback instead");

@@ -63,7 +63,8 @@
 
 - (IBAction)signIn:(id)sender
 {
-    [[SampleMSALUtil sharedUtil] signInAccount:^(MSALAccount *account, NSString *token, NSError *error)
+    [[SampleMSALUtil sharedUtil] signInAccountWithParentController:self
+                                                        completion:^(MSALAccount *account, NSString *token, NSError *error)
     {
         if (error)
         {

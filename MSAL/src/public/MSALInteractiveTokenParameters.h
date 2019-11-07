@@ -32,67 +32,75 @@ NS_ASSUME_NONNULL_BEGIN
 @class WKWebView;
 @class MSALWebviewParameters;
 
-/*!
- Token parameters to be used in interactive flow.
+/**
+ Token parameters to be used when MSAL is getting a token interactively.
  */
 @interface MSALInteractiveTokenParameters : MSALTokenParameters
 
-/*!
+#pragma mark - Configuring MSALInteractiveTokenParameters
+
+/**
  A specific prompt type for the interactive authentication flow.
  */
 @property (nonatomic) MSALPromptType promptType;
 
-/*!
+/**
  A loginHint (usually an email) to pass to the service at the
  beginning of the interactive authentication flow. The account returned
  in the completion block is not guaranteed to match the loginHint.
  */
 @property (nonatomic, nullable) NSString *loginHint;
 
-/*!
+/**
  Key-value pairs to pass to the authentication server during
  the interactive authentication flow. This should not be url-encoded value.
  */
 @property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
 
-/*!
+/**
  Permissions you want the account to consent to in the same
  authentication flow, but won't be included in the returned
  access token.
  */
 @property (nonatomic, nullable) NSArray<NSString *> *extraScopesToConsent;
 
-/*!
+/**
  A copy of the configuration which was provided in the initializer.
  */
 @property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
 
 #if TARGET_OS_IPHONE
-/*!
- Modal presentation style for displaying authentication web content.
- */
+
+/**
+The view controller to present from. If nil, the current topmost view controller will be used.
+*/
 @property (nullable, weak, nonatomic) UIViewController *parentViewController DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+/**
+Modal presentation style for displaying authentication web content.
+*/
 @property (nonatomic) UIModalPresentationStyle presentationStyle DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
 #endif
 
-/*!
+/**
  A specific webView type for the interactive authentication flow.
  By default, it will be set to MSALGlobalConfig.defaultWebviewType.
  */
 @property (nonatomic) MSALWebviewType webviewType DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
-/*!
+/**
  For a webviewType MSALWebviewTypeWKWebView, custom WKWebView can be passed on.
  Web content will be rendered onto this view.
  Observe strings declared in MSALPublicClientStatusNotifications to know when to dismiss.
  */
 @property (nonatomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Create MSALWebviewParameters and provide it to -initWithScopes:webviewParameters: instead");
 
+#pragma mark - Constructing MSALInteractiveTokenParameters
+
 #if TARGET_OS_IPHONE
-/*!
- Initialize a MSALInteractiveTokenParameters with scopes.
+/**
+ Initializes MSALInteractiveTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
@@ -100,8 +108,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewParameters: instead");
 #else
-/*!
- Initialize a MSALInteractiveTokenParameters with scopes.
+/**
+ Initialize MSALInteractiveTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
@@ -110,13 +118,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes;
 #endif
 
-/*!
- Initialize a MSALInteractiveTokenParameters with scopes.
+/**
+ Initialize MSALInteractiveTokenParameters with scopes and web parameters.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
  gauranteed to be included in the access token returned.
- @param webviewParameters   Web view paramaters.
+ @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes
              webviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
