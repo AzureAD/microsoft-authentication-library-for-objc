@@ -29,14 +29,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
+/**
  A protocol that objects adopt to provide serialization to JSON.
  */
 @protocol MSALJsonSerializable <NSObject>
 
-/*!
- Deserialize object to json string.
- @return Json string.
+/**
+ Serialize object to JSON string.
+ @return JSON string.
  */
 - (nullable NSString *)jsonString;
 

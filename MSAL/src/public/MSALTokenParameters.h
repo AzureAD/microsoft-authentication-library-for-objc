@@ -33,29 +33,30 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/*!
- MSALTokenParameters is the base abstract class for all types of token parameters (silent and interactive).
+/**
+ MSALTokenParameters is the base abstract class for all types of token parameters (see `MSALInteractiveTokenParameters` and `MSALSilentTokenParameters`).
  */
 @interface MSALTokenParameters : NSObject
 
-/*!
+#pragma mark - Configuration parameters
+
+/**
  Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
  gauranteed to be included in the access token returned.
  */
 @property (nonatomic) NSArray<NSString *> *scopes;
 
-/*!
- An account object retrieved from the application object that the
- authentication flow will be locked down to.
+/**
+ An account object for which tokens should be returned.
  */
 @property (nonatomic, nullable) MSALAccount *account;
 
-/*!
+/**
  The authority that MSAL will use to obtain tokens.
- Azure AD it is of the form https://<instance/<tenant>, where
- <instance> is the directory host
- (e.g. https://login.microsoftonline.com) and <tenant> is a
+ Azure AD it is of the form https://aad_instance/aad_tenant, where
+ aad_instance is the directory host
+ (e.g. https://login.microsoftonline.com) and aad_tenant is a
  identifier within the directory itself (e.g. a domain associated
  to the tenant, such as contoso.onmicrosoft.com, or the GUID
  representing the TenantID property of the directory).
@@ -63,18 +64,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) MSALAuthority *authority;
 
-/*!
+/**
  The claims parameter that needs to be sent to authorization or token endpoint.
  If claims parameter is passed in silent flow, access token will be skipped and refresh token will be tried.
  */
 @property (nonatomic, nullable) MSALClaimsRequest *claimsRequest;
 
-/*!
+/**
  UUID to correlate this request with the server.
  */
 @property (nonatomic, nullable) NSUUID *correlationId;
 
-/*!
+/**
  The dispatch queue on which to dispatch the completion block with MSAL result.
  This configuration is optional.
  MSAL default behavior when this property is not set depends on the token acquisition type:
@@ -85,7 +86,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, nullable) dispatch_queue_t completionBlockQueue;
 
-/*!
+#pragma mark - Creating MSALTokenParameters
+
+/**
  Initialize a MSALTokenParameters with scopes.
  
  @param scopes      Permissions you want included in the access token received
@@ -94,8 +97,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_DESIGNATED_INITIALIZER;
 
+#pragma mark - Unavailable initializers
+
+/**
+    Use `[MSALTokenParameters initWithScopes:]` instead
+ */
 + (instancetype)new NS_UNAVAILABLE;
 
+/**
+   Use `[MSALTokenParameters initWithScopes:]` instead
+*/
 - (instancetype)init NS_UNAVAILABLE;
 
 @end

@@ -109,7 +109,8 @@
 {
     SamplePhotoUtil *util = [SamplePhotoUtil sharedUtil];
     [self setUserPhoto:[util cachedPhoto]];
-    [util checkUpdatePhoto:^(UIImage *photo, NSError *error)
+    [util checkUpdatePhotoWithParentController:self
+                                    completion:^(UIImage *photo, NSError *error)
      {
          if (error)
          {
@@ -128,7 +129,8 @@
     [self updateKeys];
     
     [_tableView reloadData];
-    [util getEvents:^(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error) {
+    [util getEventsWithParentController:self
+                             completion:^(NSDictionary<NSDate *, NSArray<SampleCalendarEvent *> *> *events, NSError *error) {
         if (error)
         {
             return;
