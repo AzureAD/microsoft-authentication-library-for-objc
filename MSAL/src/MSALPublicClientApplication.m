@@ -1033,10 +1033,10 @@
         }
     }
 
-    if (self.accountMetadataCache && ![self.accountMetadataCache clearForHomeAccountId:account.identifier
-                                                                              clientId:self.internalConfig.clientId
-                                                                               context:nil
-                                                                                 error:error])
+    if (self.accountMetadataCache && ![self.accountMetadataCache markSignedOutStateForHomeAccountId:account.identifier
+                                                                                           clientId:self.internalConfig.clientId
+                                                                                            context:nil
+                                                                                              error:error])
     {
         return NO;
     }
