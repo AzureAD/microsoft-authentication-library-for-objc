@@ -268,7 +268,7 @@
     [authority.msidAuthority resolveAndValidate:NO
                               userPrincipalName:nil
                                         context:nil
-                                completionBlock:^(NSURL * _Nullable openIdConfigurationEndpoint, BOOL validated, NSError * _Nullable error) {
+                                completionBlock:^(__unused NSURL * _Nullable openIdConfigurationEndpoint, __unused BOOL validated, NSError * _Nullable error) {
                                     
                                     if (error)
                                     {
