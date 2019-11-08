@@ -140,7 +140,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                               error:(NSError **)error
+                               error:(__unused NSError **)error
 {
     if (accountVersion == MSALLegacySharedAccountVersionV1)
     {
@@ -192,7 +192,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return YES;
 }
 
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(__unused id<MSALAccount>)account claims:(__unused NSDictionary *)claims
 {
     return nil;
 }

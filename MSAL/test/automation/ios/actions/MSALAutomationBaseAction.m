@@ -71,9 +71,9 @@
     return NO;
 }
 
-- (void)performActionWithParameters:(MSIDAutomationTestRequest *)parameters
-                containerController:(MSIDAutomationMainViewController *)containerController
-                    completionBlock:(MSIDAutoCompletionBlock)completionBlock
+- (void)performActionWithParameters:(__unused MSIDAutomationTestRequest *)parameters
+                containerController:(__unused MSIDAutomationMainViewController *)containerController
+                    completionBlock:(__unused MSIDAutoCompletionBlock)completionBlock
 {
     NSAssert(NO, @"Abstract method, it should never be called!");
 }

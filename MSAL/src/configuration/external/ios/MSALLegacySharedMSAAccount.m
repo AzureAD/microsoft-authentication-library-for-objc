@@ -93,11 +93,11 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     return self;
 }
 
-- (instancetype)initWithMSALAccount:(id<MSALAccount>)account
-                      accountClaims:(NSDictionary *)claims
-                    applicationName:(NSString *)appName
-                     accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                              error:(NSError **)error
+- (instancetype)initWithMSALAccount:(__unused id<MSALAccount>)account
+                      accountClaims:(__unused NSDictionary *)claims
+                    applicationName:(__unused NSString *)appName
+                     accountVersion:(__unused MSALLegacySharedAccountVersion)accountVersion
+                              error:(__unused NSError **)error
 {
     return nil; // Creating new MSA accounts isn't supported currently and will be added at a later point
 }
