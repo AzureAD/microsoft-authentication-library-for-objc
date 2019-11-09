@@ -281,14 +281,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return [_cacheSectionTitles count];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableView:(__unused UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
     return [sectionObjects count];
 }
 
-- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+- (UIView *)tableView:(__unused UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     UILabel *label = [[UILabel alloc] init];
     NSArray *sectionObjects = [_cacheSections objectForKey:[_cacheSectionTitles objectAtIndex:section]];
@@ -311,7 +311,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
     return label;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+- (CGFloat)tableView:(__unused UITableView *)tableView heightForHeaderInSection:(__unused NSInteger)section
 {
     return 30;
 }
@@ -406,7 +406,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #pragma mark - UITableViewDelegate
 
-- (UISwipeActionsConfiguration *)tableView:(UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath API_AVAILABLE(ios(11.0))
+- (UISwipeActionsConfiguration *)tableView:(__unused UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath API_AVAILABLE(ios(11.0))
 {
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
@@ -416,7 +416,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDAppMetadataCacheItem *appMetadata = (MSIDAppMetadataCacheItem *)cacheEntry;
         __auto_type deleteTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
                                                                                 title:@"Delete"
-                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                                                              handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
                                          {
                                              [self deleteAppMetadata:appMetadata];
                                          }];
@@ -429,14 +429,14 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDBaseToken *token = (MSIDBaseToken *)cacheEntry;
         __auto_type deleteTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
                                                                                 title:@"Delete"
-                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                                                              handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
                                          {
                                              [self deleteToken:token];
                                          }];
         
         __auto_type invalidateAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
                                                                                title:@"Invalidate"
-                                                                             handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                                                             handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
                                         {
                                             [self invalidateRefreshToken:(MSIDRefreshToken *)token];
                                         }];
@@ -444,7 +444,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         
         __auto_type expireTokenAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
                                                                                 title:@"Expire"
-                                                                              handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                                                              handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
                                          {
                                              [self expireAccessToken:(MSIDAccessToken *)token];
                                          }];
@@ -478,7 +478,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDAccount *account = (MSIDAccount *)cacheEntry;
         __auto_type deleteAccountAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive
                                                                                   title:@"Delete All"
-                                                                                handler:^(UIContextualAction *action, __kindof UIView *sourceView, void (^completionHandler)(BOOL))
+                                                                                handler:^(__unused UIContextualAction *action, __unused __kindof UIView *sourceView, void (__unused ^completionHandler)(BOOL))
                                            {
                                                [self deleteAllEntriesForAccount:account];
                                            }];
@@ -491,7 +491,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 }
 
 #if !TARGET_OS_MACCATALYST
-- (nullable NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView
+- (nullable NSArray<UITableViewRowAction *> *)tableView:( __unused UITableView *)tableView
                            editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
@@ -503,7 +503,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         UITableViewRowAction *deleteTokenAction =
         [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                            title:@"Delete"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
+                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
          {
              [self deleteAppMetadata:appMetadata];
          }];
@@ -516,7 +516,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         UITableViewRowAction *deleteTokenAction =
         [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                            title:@"Delete"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
+                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
          {
              [self deleteToken:token];
          }];
@@ -524,7 +524,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         UITableViewRowAction* invalidateAction =
         [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
                                            title:@"Invalidate"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
+                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
          {
              [self invalidateRefreshToken:(MSIDRefreshToken *)token];
          }];
@@ -534,7 +534,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         UITableViewRowAction* expireTokenAction =
         [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal
                                            title:@"Expire"
-                                         handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
+                                         handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
          {
              [self expireAccessToken:(MSIDAccessToken *)token];
          }];
@@ -568,7 +568,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
         MSIDAccount *account = (MSIDAccount *)cacheEntry;
         return @[[UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive
                                                     title:@"Delete All"
-                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath)
+                                                  handler:^(__unused UITableViewRowAction * _Nonnull action, __unused NSIndexPath * _Nonnull indexPath)
                   {
                       [self deleteAllEntriesForAccount:account];
                   }]];

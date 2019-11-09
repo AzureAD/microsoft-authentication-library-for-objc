@@ -39,7 +39,7 @@
                                          clientId:(NSString *)clientId
                                        tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
                              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
-                                          context:(id<MSIDRequestContext>)context
+                                          context:(__unused id<MSIDRequestContext>)context
                                             error:(NSError **)error
 {
     if (!authority)

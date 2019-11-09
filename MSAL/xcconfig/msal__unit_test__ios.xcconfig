@@ -3,4 +3,4 @@
 INFOPLIST_FILE = test/automation/tests/interactive/Info.plist;
 PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-iOS-Unit-Tests;
 PRODUCT_NAME = "MSAL-iOS-UI-Tests";
-
+GCC_WARN_UNUSED_PARAMETER = NO
