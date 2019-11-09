@@ -36,7 +36,7 @@
 
 #define ADFS_NOT_YET_SUPPORTED
 
-- (instancetype)initWithURL:(NSURL *)url
+- (instancetype)initWithURL:(__unused NSURL *)url
                       error:(NSError **)error
 {
 #ifdef ADFS_NOT_YET_SUPPORTED

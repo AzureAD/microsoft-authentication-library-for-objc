@@ -147,7 +147,7 @@
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                          withParameters:(MSALAccountEnumerationParameters *)parameters
-                                                                  error:(NSError **)error
+                                                                  error:(__unused NSError **)error
 {
     NSMutableArray *resultAccounts = [NSMutableArray new];
     

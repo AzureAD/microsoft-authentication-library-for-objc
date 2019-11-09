@@ -732,7 +732,7 @@
 #pragma mark - private methods
 
 - (id)initPrivateWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
+         keychainGroup:(__unused NSString *)keychainGroup
              authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error

@@ -100,7 +100,7 @@
     [super viewDidLoad];
 }
 
-- (void)addAuthority:(id)sender
+- (void)addAuthority:(__unused id)sender
 {
     UIAlertController *controller = [UIAlertController alertControllerWithTitle:@"Add authority" message:nil preferredStyle:UIAlertControllerStyleAlert];
     [controller addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
@@ -108,7 +108,7 @@
     }];
     
     [controller addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-    [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [controller addAction:[UIAlertAction actionWithTitle:@"Add" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction * _Nonnull action) {
         NSString *authority = controller.textFields[0].text;
         [self saveAuthority:authority];
     }]];

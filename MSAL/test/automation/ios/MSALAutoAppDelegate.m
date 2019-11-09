@@ -36,7 +36,7 @@
 {
     (void)application;
     (void)launchOptions;
-    [MSALGlobalConfig.loggerConfig setLogCallback:^(MSALLogLevel level, NSString * _Nullable message, BOOL containsPII) {
+    [MSALGlobalConfig.loggerConfig setLogCallback:^(__unused MSALLogLevel level, NSString * _Nullable message, __unused BOOL containsPII) {
         [MSIDAutomationMainViewController forwardIdentitySDKLog:message];
     }];
     
