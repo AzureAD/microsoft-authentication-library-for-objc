@@ -4,3 +4,4 @@
 INFOPLIST_FILE = test/unit/resources/mac/Info.plist;
 PRODUCT_BUNDLE_IDENTIFIER = com.microsoft.MSAL-Mac-Unit-Tests;
 PRODUCT_NAME = "MSAL-Mac-Unit-Tests"
+GCC_WARN_UNUSED_PARAMETER = NO

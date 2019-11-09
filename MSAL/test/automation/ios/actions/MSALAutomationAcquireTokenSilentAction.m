@@ -55,7 +55,7 @@
 }
 
 - (void)performActionWithParameters:(MSIDAutomationTestRequest *)testRequest
-                containerController:(MSIDAutoViewController *)containerController
+                containerController:(__unused MSIDAutoViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
     NSError *applicationError = nil;
