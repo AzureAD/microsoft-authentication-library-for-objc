@@ -147,7 +147,7 @@
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)accountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                          withParameters:(MSALAccountEnumerationParameters *)parameters
-                                                                  error:(NSError **)error
+                                                                  error:(__unused NSError **)error
 {
     NSMutableArray *resultAccounts = [NSMutableArray new];
     
@@ -201,7 +201,7 @@
     
     if (!parameters)
     {
-        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil);
+        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:parameterError logLine:@"Unsupported account found, skipping update"];
         return nil;
     }
@@ -266,7 +266,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -283,7 +283,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -482,7 +482,7 @@
     
     if ([jsonAccounts count] > 1)
     {
-        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
+        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:readError logLine:@"Ambigious query for external accounts, found multiple accounts."];
         return nil;
     }
@@ -522,7 +522,7 @@
 
 #pragma mark - Helpers
 
-- (void)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
+- (BOOL)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@, error %@", logLine, MSID_PII_LOG_MASKABLE(resultError));
     
@@ -530,6 +530,7 @@
     {
         *error = [MSALErrorConverter msalErrorFromMsidError:resultError];
     }
+    return YES;
 }
 
 - (NSString *)accountVersionIdentifier:(MSALLegacySharedAccountVersion)version

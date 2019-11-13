@@ -57,7 +57,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected shared account found without type or identifier", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected shared account found without type or identifier", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
@@ -85,7 +85,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     {
         if (error)
         {
-            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected parameter - no account", nil, nil, nil, nil, nil);
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected parameter - no account", nil, nil, nil, nil, nil, NO);
         }
         
         return nil;
@@ -140,7 +140,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
                      applicationName:(NSString *)appName
                            operation:(MSALLegacySharedAccountWriteOperation)operation
                       accountVersion:(MSALLegacySharedAccountVersion)accountVersion
-                               error:(NSError **)error
+                               error:(__unused NSError **)error
 {
     if (accountVersion == MSALLegacySharedAccountVersionV1)
     {
@@ -192,7 +192,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return YES;
 }
 
-- (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)claimsFromMSALAccount:(__unused id<MSALAccount>)account claims:(__unused NSDictionary *)claims
 {
     return nil;
 }

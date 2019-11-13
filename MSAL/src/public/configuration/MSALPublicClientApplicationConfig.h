@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property NSString *clientId;
 
 /** The redirect URI of the application */
-@property NSString *redirectUri;
+@property (nullable) NSString *redirectUri;
 
 /** The authority the application will use to obtain tokens */
 @property MSALAuthority *authority;
@@ -58,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) NSArray<MSALAuthority *> *knownAuthorities;
 
-/** Enable to return access token with extended lifttime during server outage. */
+/** Enable to return access token with extended lifetime during server outage. */
 @property BOOL extendedLifetimeEnabled;
 
 /** List of additional STS features that client handles. */
@@ -77,6 +77,14 @@ to target MSAL at a specific test slice & flight. These apply to all requests ma
 
 /** MSAL configuration interface responsible for token caching and keychain configuration. Refer to `MSALCacheConfig` for more details */
 @property (readonly) MSALCacheConfig *cacheConfig;
+
+/**
+ For clients that support multiple national clouds, set this to YES. NO by default.
+ If set to YES, the Microsoft identity platform will automatically redirect user to the correct national cloud during the authorization flow. You can determine the national cloud of the signed-in account by examining the authority associated with the MSALResult. Note that the MSALResult doesn't provide the national cloud-specific endpoint address of the resource for which you request a token.
+ 
+ @note Your client_id needs to be registered in national clouds for this feature to work.
+ */
+@property (nonatomic) BOOL multipleCloudsSupported;
 
 #pragma mark - Constructing configuration
 

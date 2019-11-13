@@ -112,6 +112,7 @@ static double defaultTokenExpirationBuffer = 300; //in seconds, ensures catching
     item->_cacheConfig = [_cacheConfig copyWithZone:zone];
     item->_verifiedRedirectUri = [_verifiedRedirectUri copyWithZone:zone];
     item->_extraQueryParameters = [_extraQueryParameters copyWithZone:zone];
+    item->_multipleCloudsSupported = _multipleCloudsSupported;
     return item;
 }
 
