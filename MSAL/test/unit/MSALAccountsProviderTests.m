@@ -75,8 +75,6 @@
     defaultCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyCache]];
     
     [defaultCache clearWithContext:nil error:nil];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)testAllAccounts_whenNoAccountInCache_shouldReturnEmptyList {
