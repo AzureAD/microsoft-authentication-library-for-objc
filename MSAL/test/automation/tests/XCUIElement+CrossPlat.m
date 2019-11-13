@@ -38,7 +38,7 @@
 {
 #if TARGET_OS_IPHONE
     [UIPasteboard generalPasteboard].string = text;
-    [self doubleTap];
+    [self pressForDuration:1.0f];
     [app.menuItems[@"Paste"] tap];
 #else
     [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
