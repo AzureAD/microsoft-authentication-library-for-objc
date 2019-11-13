@@ -43,6 +43,7 @@
 #import "MSIDAccountIdentifier.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALTenantProfile+Internal.h"
+#import "MSIDConstants.h"
 
 @implementation MSALAADOauth2Provider
 
@@ -127,7 +128,10 @@
         
         if (aadAuthority.tenant.type == MSIDAADTenantTypeCommon
             || aadAuthority.tenant.type == MSIDAADTenantTypeConsumers
-            || aadAuthority.tenant.type == MSIDAADTenantTypeOrganizations)
+            // MSA mega tenant is not available through organizations endpoint
+            // Therefore, going to MSA megatenant to request a token is wrong here for that case
+            // Note, that it's a temporary workaround. Once server side fix is available to issue correct id_token, it will be removed
+            || (aadAuthority.tenant.type == MSIDAADTenantTypeOrganizations && ![account.homeAccountId.tenantId isEqualToString:MSID_DEFAULT_MSA_TENANTID]))
         {
             // This is just a precaution to ensure tenantId is a valid AAD tenant semantically
             NSUUID *tenantUUID = [[NSUUID alloc] initWithUUIDString:account.homeAccountId.tenantId];

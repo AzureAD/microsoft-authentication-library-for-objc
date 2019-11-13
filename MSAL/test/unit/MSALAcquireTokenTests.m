@@ -112,15 +112,11 @@
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)tearDown
 {
     [super tearDown];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
