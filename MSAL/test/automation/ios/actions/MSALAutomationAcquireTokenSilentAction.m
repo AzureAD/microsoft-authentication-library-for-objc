@@ -55,7 +55,7 @@
 }
 
 - (void)performActionWithParameters:(MSIDAutomationTestRequest *)testRequest
-                containerController:(MSIDAutoViewController *)containerController
+                containerController:(__unused MSIDAutoViewController *)containerController
                     completionBlock:(MSIDAutoCompletionBlock)completionBlock
 {
     NSError *applicationError = nil;
@@ -81,7 +81,7 @@
         }
         else
         {
-            NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil);
+            NSError *error = MSIDCreateError(MSALErrorDomain, MSALErrorInteractionRequired, @"no account", nil, nil, nil, nil, nil, YES);
 
             result = [[MSIDAutomationErrorResult alloc] initWithAction:self.actionIdentifier
                                                                  error:error
@@ -122,10 +122,11 @@
     parameters.authority = silentAuthority;
     parameters.forceRefresh = forceRefresh;
     parameters.correlationId = correlationId;
+    parameters.completionBlockQueue = dispatch_get_main_queue();
     [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
      {
-         MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
-         completionBlock(testResult);
+        MSIDAutomationTestResult *testResult = [self testResultWithMSALResult:result error:error];
+        completionBlock(testResult);
      }];
 }
 

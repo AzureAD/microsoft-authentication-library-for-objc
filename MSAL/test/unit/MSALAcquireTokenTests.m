@@ -112,15 +112,11 @@
     self.accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
     [self.accountCache clearWithContext:nil error:nil];
     [self.tokenCache clearWithContext:nil error:nil];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
 }
 
 - (void)tearDown
 {
     [super tearDown];
-    
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
 }
 
 - (void)testAcquireTokenInteractiveWithParameters_whenB2CAuthority_shouldCacheTokens
@@ -747,6 +743,77 @@
         NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
         XCTAssertEqual(internalErrorCode, MSALInternalErrorInvalidParameter);
         XCTAssertEqualObjects(error.userInfo[MSALErrorDescriptionKey], @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.");
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testAcquireTokenInteractive_whenMultipleCloudsSetToYes_shouldSendInstanceAwareToServer
+{
+    [MSALTestBundle overrideBundleId:@"com.microsoft.unittests"];
+    NSArray* override = @[ @{ @"CFBundleURLSchemes" : @[UNIT_TEST_DEFAULT_REDIRECT_SCHEME] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    MSIDTestURLResponse *discoveryResponse = [MSIDTestURLResponse discoveryResponseForAuthority:DEFAULT_TEST_AUTHORITY];
+    
+    // Mock tenant discovery response
+    MSIDTestURLResponse *oidcResponse =
+    [MSIDTestURLResponse oidcResponseForAuthority:DEFAULT_TEST_AUTHORITY
+                                      responseUrl:DEFAULT_TEST_AUTHORITY
+                                            query:nil];
+    // Mock auth code grant response
+    MSIDTestURLResponse *tokenResponse =
+    [MSIDTestURLResponse authCodeResponse:@"iamauthcode"
+                                authority:@"https://login.microsoftonline.de/common"
+                                    query:nil
+                                   scopes:[NSOrderedSet orderedSetWithArray:@[@"fakescopes", @"openid", @"profile", @"offline_access"]]
+                                   claims:nil];
+    
+    [MSIDTestURLSession addResponses:@[discoveryResponse, oidcResponse, tokenResponse]];
+    
+    // Check claims is in start url
+    [MSIDTestSwizzle classMethod:@selector(startEmbeddedWebviewAuthWithConfiguration:oauth2Factory:webview:context:completionHandler:)
+                           class:[MSIDWebviewAuthorization class]
+                           block:(id)^(id obj, MSIDWebviewConfiguration *configuration, MSIDOauth2Factory *oauth2Factory, WKWebView *webview, id<MSIDRequestContext>context, MSIDWebviewAuthCompletionHandler completionHandler)
+     {
+        NSURL *url = [oauth2Factory.webviewFactory startURLFromConfiguration:configuration requestState:[[NSUUID UUID] UUIDString]];
+        XCTAssertNotNil(url);
+        NSDictionary *QPs = [NSDictionary msidDictionaryFromWWWFormURLEncodedString:url.query];
+        XCTAssertEqualObjects(QPs[@"instance_aware"], @"true");
+         
+         NSString *responseString = [NSString stringWithFormat:UNIT_TEST_DEFAULT_REDIRECT_URI"?code=%@&state=%@&client_info=%@&cloud_instance_host_name=login.microsoftonline.de", @"iamauthcode", QPs[@"state"], @"eyJ1aWQiOiI5ZjQ4ODBkOC04MGJhLTRjNDAtOTdiYy1mN2EyM2M3MDMwODQiLCJ1dGlkIjoiZjY0NWFkOTItZTM4ZC00ZDFhLWI1MTAtZDFiMDlhNzRhOGNhIn0"];
+         MSIDWebAADAuthResponse *oauthResponse = [[MSIDWebAADAuthResponse alloc] initWithURL:[NSURL URLWithString:responseString]
+                                                                                     context:nil error:nil];
+         completionHandler(oauthResponse, nil);
+     }];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:[DEFAULT_TEST_AUTHORITY msalAuthority]];
+    config.multipleCloudsSupported = YES;
+    
+    // Acquire token call
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config error:&error];
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"acquireToken"];
+    
+    __auto_type parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescopes"]];
+    parameters.parentViewController = [self.class sharedViewControllerStub];
+    parameters.promptType = MSALPromptTypeDefault;
+    parameters.webviewParameters.webviewType = MSALWebviewTypeWKWebView;
+    
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        XCTAssertNil(error);
+        XCTAssertNotNil(result);
+        XCTAssertEqualObjects(result.accessToken, @"i am an updated access token!");
+        XCTAssertEqualObjects(result.authority.url.absoluteString, @"https://login.microsoftonline.de/1234-5678-90abcdefg");
         [expectation fulfill];
     }];
     

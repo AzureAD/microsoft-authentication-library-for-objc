@@ -208,7 +208,6 @@
     _configuration = config;
     _internalConfig = [config copy];
     
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     NSError *oauthProviderError = nil;
     self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority
                                                                           clientId:config.clientId
@@ -562,7 +561,7 @@
     
     if (!parameters.account)
     {
-        NSError *noAccountError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No account provided for the silent request. Please call interactive acquireToken request to get an account identifier before calling acquireTokenSilent.", nil, nil, nil, nil, nil);
+        NSError *noAccountError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"No account provided for the silent request. Please call interactive acquireToken request to get an account identifier before calling acquireTokenSilent.", nil, nil, nil, nil, nil, YES);
         block(nil, noAccountError, nil);
         return;
     }
@@ -574,7 +573,7 @@
     // Authority type in PCA and parameters should match
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
         block(nil, msidError, nil);
         
         return;
@@ -595,7 +594,7 @@
     NSError *authorityError = nil;
     requestAuthority = [self.msalOauth2Provider issuerAuthorityWithAccount:parameters.account
                                                           requestAuthority:requestAuthority
-                                                             instanceAware:NO
+                                                             instanceAware:self.internalConfig.multipleCloudsSupported
                                                                      error:&authorityError];
     
     if (!requestAuthority)
@@ -639,6 +638,8 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = providedAuthority;
+    msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
+    msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                  @"-[MSALPublicClientApplication acquireTokenSilentForScopes:%@\n"
@@ -733,7 +734,7 @@
 #pragma mark - private methods
 
 - (id)initPrivateWithClientId:(NSString *)clientId
-         keychainGroup:(NSString *)keychainGroup
+         keychainGroup:(__unused NSString *)keychainGroup
              authority:(MSALAuthority *)authority
            redirectUri:(NSString *)redirectUri
                  error:(NSError * __autoreleasing *)error
@@ -811,9 +812,8 @@
     
     if (![self.msalOauth2Provider isSupportedAuthority:requestAuthority])
     {
-        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil);
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-        block(nil, msalError, nil);
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Unsupported authority type. Please configure MSALPublicClientApplication with the same authority type", nil, nil, nil, nil, nil, YES);
+        block(nil, msidError, nil);
         
         return;
     }
@@ -882,9 +882,8 @@
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
     
     msidParams.validateAuthority = _validateAuthority;
-    //TODO: address/decide public header to allow setting instace_aware for requests;
-    //      set the following property with instance aware flag in config or extraURLQueryParameters
-    //msidParams.instanceAware
+    msidParams.instanceAware = self.internalConfig.multipleCloudsSupported;
+    msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     
     if (msidParams.validateAuthority
         && [self shouldExcludeValidationForAuthority:requestAuthority])
@@ -897,17 +896,15 @@
     {
         if (parameters.webviewParameters.parentViewController == nil)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
+            block(nil, msidError, msidParams);
             return;
         }
         
         if (parameters.webviewParameters.parentViewController.view.window == nil)
         {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil);
-            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError];
-            block(nil, msalError, msidParams);
+            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+            block(nil, msidError, msidParams);
             return;
         }
         
@@ -1018,6 +1015,7 @@
                                                   error:&msidError];
     if (!result)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing MSAL token cache for the specified account failed with error %@", MSID_PII_LOG_MASKABLE(msidError));
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return NO;
     }
@@ -1026,6 +1024,8 @@
     {
         NSError *externalError = nil;
         result &= [self.externalAccountHandler removeAccount:account error:&externalError];
+        
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"External account removed with result %d", (int)result);
         
         if (externalError && error)
         {
@@ -1038,6 +1038,7 @@
                                                                                context:nil
                                                                                  error:error])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
         return NO;
     }
     

@@ -152,7 +152,7 @@ static NSSet *s_recoverableErrorCode;
                   oauthError:(NSString *)oauthError
                     subError:(NSString *)subError
              underlyingError:(NSError *)underlyingError
-               correlationId:(NSUUID *)correlationId
+               correlationId:(__unused NSUUID *)correlationId
                     userInfo:(NSDictionary *)userInfo
               classifyErrors:(BOOL)shouldClassifyErrors
           msalOauth2Provider:(MSALOauth2Provider *)oauth2Provider
