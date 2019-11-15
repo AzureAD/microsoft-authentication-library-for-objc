@@ -1,3 +1,10 @@
+## [1.0.3] - 2019-11-15
+### Added
+- Added default implementation for ADAL legacy persistence
+
+### Fixed
+- Fixed error logging when MSAL was logging false positives
+
 ## [1.0.2] - 2019-10-29
 ### Fixed
 - Make trustedApps in MSALCacheConfig writable to allow apps sharing keychain on macOS
