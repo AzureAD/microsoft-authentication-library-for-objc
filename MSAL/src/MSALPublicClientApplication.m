@@ -208,7 +208,6 @@
     _configuration = config;
     _internalConfig = [config copy];
     
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     NSError *oauthProviderError = nil;
     self.msalOauth2Provider = [MSALOauth2ProviderFactory oauthProviderForAuthority:config.authority
                                                                           clientId:config.clientId
