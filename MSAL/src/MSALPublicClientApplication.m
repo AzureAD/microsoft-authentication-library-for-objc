@@ -427,7 +427,7 @@
         return YES;
     }
 
-    if ([MSIDCertAuthHandler completeCertAuthChallenge:response error:nil])
+    if ([MSIDCertAuthHandler completeCertAuthChallenge:response])
     {
         return YES;
     }
@@ -913,13 +913,17 @@
             block(nil, msidError, msidParams);
             return;
         }
-        
-        msidParams.prefersEphemeralWebBrowserSession = parameters.webviewParameters.prefersEphemeralWebBrowserSession;
     }
     
-    msidParams.parentViewController = parameters.webviewParameters.parentViewController;
     msidParams.presentationType = parameters.webviewParameters.presentationStyle;
 #endif
+    
+    msidParams.parentViewController = parameters.webviewParameters.parentViewController;
+    
+    if (@available(iOS 13.0, macOS 10.15, *))
+    {
+        msidParams.prefersEphemeralWebBrowserSession = parameters.webviewParameters.prefersEphemeralWebBrowserSession;
+    }
     
     // Configure webview
 #pragma clang diagnostic push
