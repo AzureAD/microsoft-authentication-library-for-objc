@@ -72,7 +72,6 @@
 
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:MSIDKeychainTokenCache.defaultKeychainCache otherCacheAccessors:nil];
 
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = @"v2.0";
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
@@ -80,7 +79,6 @@
 {
     [super tearDown];
 
-    MSIDAADNetworkConfiguration.defaultConfiguration.aadApiVersion = nil;
     [self.tokenCacheAccessor clearWithContext:nil error:nil];
 }
 
