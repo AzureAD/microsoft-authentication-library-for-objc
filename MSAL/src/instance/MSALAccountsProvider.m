@@ -47,10 +47,12 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 
 @interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nullable, nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nullable, nonatomic) NSString *clientId;
 @property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
 @property (nullable, nonatomic) NSPredicate *homeTenantFilterPredicate;
@@ -62,14 +64,17 @@
 #pragma mark - Init
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
 {
     return [self initWithTokenCache:tokenCache
+               accountMetadataCache:accountMetadataCache
                            clientId:clientId
             externalAccountProvider:nil];
 }
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
            externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider
 {
@@ -78,6 +83,7 @@
     if (self)
     {
         _tokenCache = tokenCache;
+        _accountMetadataCache = accountMetadataCache;
         _clientId = clientId;
         _externalAccountProvider = externalAccountProvider;
         _homeTenantFilterPredicate = [NSPredicate predicateWithFormat:@"isHomeTenantProfile == YES"];
@@ -237,6 +243,8 @@
         [self addMSALAccount:externalAccount toSet:resultAccounts claims:accountClaims];
     }
     
+    resultAccounts = [self filterSignedOutAccounts:resultAccounts];
+    
     return [resultAccounts allObjects];
 }
 
@@ -258,6 +266,42 @@
     {
         existingAccount.accountClaims = accountClaims;
     }
+}
+
+- (NSMutableSet<MSALAccount *> *)filterSignedOutAccounts:(NSSet<MSALAccount *> *)accounts
+{
+    // To improve performance, load relevant account metadata into memory in one query
+    NSError *localError;
+    [self.accountMetadataCache loadAccountMetadataForClientId:self.clientId
+                                                      context:nil
+                                                        error:&localError];
+
+    if (localError)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Could not load account metadata with error domain (%@) + error code (%ld).", localError.domain, (long)localError.code);
+    }
+    
+    NSMutableSet<MSALAccount *> *filteredAccounts = [NSMutableSet new];
+    for (MSALAccount *account in accounts)
+    {
+        MSIDAccountMetadataState accountState = MSIDAccountMetadataStateUnknown;
+        if (account.identifier)
+        {
+            localError = nil;
+            accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.identifier
+                                                                         clientId:self.clientId
+                                                                          context:nil
+                                                                            error:&localError];
+            if (localError) continue;
+        }
+        
+        if (accountState != MSIDAccountMetadataStateSignedOut)
+        {
+            [filteredAccounts addObject:account];
+        }
+    }
+    
+    return filteredAccounts;
 }
 
 #pragma mark - Authority (deprecated)
