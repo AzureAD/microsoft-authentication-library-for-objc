@@ -121,11 +121,12 @@
     {
         if (accounts.count == 1)
         {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Returning account for parameters with environment %@, identifier %@, username %@", accounts[0].environment, MSID_PII_LOG_TRACKABLE(accounts[0].identifier), MSID_PII_LOG_EMAIL(accounts[0].username));
             return accounts[0];
         }
         else if (accounts.count > 1)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", accounts[0].environment == accounts[1].environment ? @"YES" : @"NO", accounts[0].homeAccountId == accounts[1].homeAccountId ? @"YES" : @"NO", accounts[0].username == accounts[1].username ? @"YES" : @"NO");
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@ (%@, %@), homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", [accounts[0].environment isEqualToString:accounts[1].environment] ? @"YES" : @"NO", accounts[0].environment, accounts[1].environment, [accounts[0].identifier isEqualToString:accounts[1].identifier] ? @"YES" : @"NO", [accounts[0].username isEqualToString:accounts[1].username] ? @"YES" : @"NO");
             return accounts[0];
         }
     }
