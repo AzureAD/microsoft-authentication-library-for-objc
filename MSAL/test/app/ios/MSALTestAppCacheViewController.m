@@ -406,7 +406,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 
 #pragma mark - UITableViewDelegate
 
-- (UISwipeActionsConfiguration *)tableView:(__unused UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath API_AVAILABLE(ios(11.0))
+- (UISwipeActionsConfiguration *)tableView:(__unused UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(__unused NSIndexPath *)indexPath API_AVAILABLE(ios(11.0))
 {
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];
     NSArray *sectionObjects = [_cacheSections objectForKey:sectionTitle];
@@ -491,7 +491,7 @@ static NSString *const s_defaultAuthorityUrlString = @"https://login.microsofton
 }
 
 #if !TARGET_OS_MACCATALYST
-- (nullable NSArray<UITableViewRowAction *> *)tableView:( __unused UITableView *)tableView
+- (nullable NSArray<UITableViewRowAction *> *)tableView:(__unused UITableView *)tableView
                            editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *sectionTitle = [_cacheSectionTitles objectAtIndex:indexPath.section];

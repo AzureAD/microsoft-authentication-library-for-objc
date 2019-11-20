@@ -608,6 +608,8 @@
     
     NSError *msidError = nil;
     
+    MSIDRequestType requestType = [self requestType];
+    
     // add known authorities here.
     MSIDRequestParameters *msidParams = [[MSIDRequestParameters alloc] initWithAuthority:requestAuthority
                                                                          redirectUri:self.internalConfig.verifiedRedirectUri.url.absoluteString
@@ -617,6 +619,7 @@
                                                                        correlationId:parameters.correlationId
                                                                       telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                                                  intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
+                                                                             requestType:requestType
                                                                                error:&msidError];
     
     if (!msidParams)
@@ -819,18 +822,9 @@
     
     MSIDBrokerInvocationOptions *brokerOptions = nil;
     
-    MSIDInteractiveRequestType interactiveRequestType = MSIDInteractiveRequestBrokeredType;
+    MSIDRequestType requestType = [self requestType];
     
 #if TARGET_OS_IPHONE
-    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
-    {
-        interactiveRequestType = MSIDInteractiveRequestLocalType;
-    }
-    else if (!self.internalConfig.verifiedRedirectUri.brokerCapable)
-    {
-        interactiveRequestType = MSIDInteractiveRequestLocalType;
-    }
-    
     MSIDBrokerProtocolType brokerProtocol = MSIDBrokerProtocolTypeCustomScheme;
     MSIDRequiredBrokerType requiredBrokerType = MSIDRequiredBrokerTypeWithV2Support;
     
@@ -861,7 +855,7 @@
                                                   correlationId:parameters.correlationId
                                                  telemetryApiId:[NSString stringWithFormat:@"%ld", (long)parameters.telemetryApiId]
                                                   brokerOptions:brokerOptions
-                                                    requestType:interactiveRequestType
+                                                    requestType:requestType
                                             intuneAppIdentifier:[[NSBundle mainBundle] bundleIdentifier]
                                                           error:&msidError];
     
@@ -1043,10 +1037,11 @@
         }
     }
 
-    if (self.accountMetadataCache && ![self.accountMetadataCache clearForHomeAccountId:account.identifier
-                                                                              clientId:self.internalConfig.clientId
-                                                                               context:nil
-                                                                                 error:error])
+    if (self.accountMetadataCache && ![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
+                                                                                          clientId:self.internalConfig.clientId
+                                                                                             state:MSIDAccountMetadataStateSignedOut
+                                                                                           context:nil
+                                                                                             error:error])
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
         return NO;
@@ -1081,6 +1076,28 @@
     return [NSOrderedSet orderedSetWithObjects:MSID_OAUTH2_SCOPE_OPENID_VALUE,
                                                MSID_OAUTH2_SCOPE_PROFILE_VALUE,
                                                MSID_OAUTH2_SCOPE_OFFLINE_ACCESS_VALUE, nil];
+}
+
+#pragma mark - Private
+
+- (MSIDRequestType)requestType
+{
+    MSIDRequestType requestType = MSIDRequestLocalType;
+        
+#if TARGET_OS_IPHONE
+    requestType = MSIDRequestBrokeredType;
+    
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityNone)
+    {
+        requestType = MSIDRequestLocalType;
+    }
+    else if (!self.internalConfig.verifiedRedirectUri.brokerCapable)
+    {
+        requestType = MSIDRequestLocalType;
+    }
+#endif
+    
+    return requestType;
 }
 
 @end
