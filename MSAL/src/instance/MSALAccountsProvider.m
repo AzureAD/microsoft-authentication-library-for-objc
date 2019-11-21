@@ -271,24 +271,13 @@
 
 - (NSMutableSet<MSALAccount *> *)filterSignedOutAccounts:(NSSet<MSALAccount *> *)accounts
 {
-    // To improve performance, load relevant account metadata into memory in one query
-    NSError *localError;
-    [self.accountMetadataCache loadAccountMetadataForClientId:self.clientId
-                                                      context:nil
-                                                        error:&localError];
-
-    if (localError)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Could not load account metadata with error domain (%@) + error code (%ld).", localError.domain, (long)localError.code);
-    }
-    
     NSMutableSet<MSALAccount *> *filteredAccounts = [NSMutableSet new];
     for (MSALAccount *account in accounts)
     {
         MSIDAccountMetadataState accountState = MSIDAccountMetadataStateUnknown;
         if (account.identifier)
         {
-            localError = nil;
+            NSError *localError;
             accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.identifier
                                                                          clientId:self.clientId
                                                                           context:nil
