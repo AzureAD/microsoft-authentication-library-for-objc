@@ -62,7 +62,7 @@ Initialize a MSALSilentTokenParameters with scopes and account.
                    in the result in the completionBlock. Not all scopes are
                    gauranteed to be included in the access token returned.
 */
-- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes NS_UNAVAILABLE;
+- (instancetype)initWithScopes:(NSArray<NSString *> *)scopes;
 
 @end
 

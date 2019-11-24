@@ -38,6 +38,7 @@
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
 @class WKWebView;
+@class MSALWebviewParameters;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -227,6 +228,15 @@
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
+
+/**
+   Returns an array of accounts available to this application, including accounts from the SSO extension.
+   Use this API over synchronous account retrieval APIs to maximize SSO. Synchronous account retrieval APIs will only return accounts available locally for the application.
+
+   @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+*/
+- (void)allAccountsOnDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                         completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
 #pragma mark - Handling MSAL responses
 
@@ -435,5 +445,20 @@
 - (BOOL)removeAccount:(nonnull MSALAccount *)account
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
+/**
+   Removes all tokens from the cache for this application for the provided account.
+   Additionally, this API will remove account from the system browser or embedded webView, and SSO extension if present.
+   As a result, application will not be able to get tokens for the account without user interaction.
+   Note, this will not sign out from other signed in apps on the device.
+
+   @param  account    The account to remove from the device
+*/
+- (void)signoutWithAccount:(nonnull MSALAccount *)account
+         webViewParameters:(nonnull MSALWebviewParameters *)webViewParameters
+           completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock;
+
+#pragma mark - Device state
+
+- (void)loadDeviceStateWithCompletionBlock:(nonnull MSALOnDeviceStateLoadedCompletionBlock)completionBlock;
 
 @end
