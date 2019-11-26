@@ -57,6 +57,7 @@
 @property (nonatomic) IBOutlet UIButton *profileButton;
 @property (nonatomic) IBOutlet UIButton *authorityButton;
 @property (nonatomic) IBOutlet UISegmentedControl *validateAuthoritySegmentControl;
+@property (nonatomic) IBOutlet UISegmentedControl *instanceAwareSegmentControl;
 @property (nonatomic) IBOutlet UITextField *loginHintTextField;
 @property (nonatomic) IBOutlet UITextField *extraQueryParamsTextField;
 @property (nonatomic) IBOutlet UIButton *userButton;
@@ -132,6 +133,7 @@
     
     self.navigationController.navigationBarHidden = YES;
     self.validateAuthoritySegmentControl.selectedSegmentIndex = settings.validateAuthority ? 0 : 1;
+    self.instanceAwareSegmentControl.selectedSegmentIndex = 1; // NO.
     
     [_profileButton setTitle:[MSALTestAppProfileViewController currentTitle]
                     forState:UIControlStateNormal];
@@ -167,6 +169,8 @@
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
+    
+    pcaConfig.multipleCloudsSupported = self.instanceAwareSegmentControl.selectedSegmentIndex == 0;
     
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
@@ -268,6 +272,8 @@
     {
         pcaConfig.knownAuthorities = @[pcaConfig.authority];
     }
+    
+    pcaConfig.multipleCloudsSupported = self.instanceAwareSegmentControl.selectedSegmentIndex == 0;
     
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
