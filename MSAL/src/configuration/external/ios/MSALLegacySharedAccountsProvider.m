@@ -90,7 +90,7 @@
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
                                                             error:(NSError * _Nullable * _Nullable)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters %@", MSID_PII_LOG_MASKABLE(parameters));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
     NSMutableSet *allAccounts = [NSMutableSet new];
     NSTimeInterval lastWrite = [[NSDate distantPast] timeIntervalSince1970];

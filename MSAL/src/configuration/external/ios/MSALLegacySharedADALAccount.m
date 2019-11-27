@@ -51,9 +51,7 @@ static NSString *kADALAccountType = @"ADAL";
     self = [super initWithJSONDictionary:jsonDictionary error:error];
     
     if (self)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creating external account from ADAL account");
-        
+    {        
         if (![_accountType isEqualToString:kADALAccountType])
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", _accountType);
@@ -134,17 +132,17 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (parameters.identifier)
     {
-        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+        matchResult &= (self.identifier && [self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
+        matchResult &= (self.username && [self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
     {
-        matchResult &= ([self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
+        matchResult &= (self.objectId && [self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
     }
     
     return matchResult &= [super matchesParameters:parameters];

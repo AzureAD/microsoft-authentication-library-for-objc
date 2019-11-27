@@ -118,6 +118,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
         NSString *appIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *signinStatus = [self.signinStatusDictionary msidStringObjectForKey:appIdentifier];
         
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Requested to only returned signed in accounts. Current sign in status for the app is %@", signinStatus);
         return [signinStatus isEqualToString:@"SignedIn"];
     }
     else if (![self.signinStatusDictionary count])
