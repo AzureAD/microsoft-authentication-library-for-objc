@@ -134,17 +134,17 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (parameters.identifier)
     {
-        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+        matchResult &= (self.identifier && [self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
+        matchResult &= (self.username && [self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
     {
-        matchResult &= ([self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
+        matchResult &= (self.objectId && [self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
     }
     
     return matchResult &= [super matchesParameters:parameters];
