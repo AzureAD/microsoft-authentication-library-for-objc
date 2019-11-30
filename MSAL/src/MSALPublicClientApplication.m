@@ -338,6 +338,7 @@
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -357,6 +358,7 @@
                                 error:(NSError **)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -374,6 +376,7 @@
                                             error:(NSError **)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -388,6 +391,7 @@
                               error:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -402,6 +406,7 @@
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
 
@@ -1037,18 +1042,26 @@
         }
     }
 
-    if (self.accountMetadataCache && ![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
-                                                                                          clientId:self.internalConfig.clientId
-                                                                                             state:MSIDAccountMetadataStateSignedOut
-                                                                                           context:nil
-                                                                                             error:error])
+    if (!self.accountMetadataCache)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        NSError *noAccountMetadataCacheError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"accountMetadataCache is nil when removing account!.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:noAccountMetadataCacheError];
         return NO;
     }
     
-    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
-                                                          error:error];
+    msidError = nil;
+    if (![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
+                                                             clientId:self.internalConfig.clientId
+                                                                state:MSIDAccountMetadataStateSignedOut
+                                                              context:nil
+                                                                error:&msidError])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority

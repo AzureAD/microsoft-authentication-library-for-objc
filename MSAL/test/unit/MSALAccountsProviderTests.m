@@ -50,6 +50,7 @@
 #import "MSALAADOauth2Provider.h"
 #import "MSALAccountId+Internal.h"
 #import "MSALTenantProfile+Internal.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -59,6 +60,7 @@
 {
     MSIDDefaultTokenCacheAccessor *defaultCache;
     MSIDLegacyTokenCacheAccessor *legacyCache;
+    MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 }
 
 - (void)setUp {
@@ -74,11 +76,13 @@
                                                        otherCacheAccessors:@[]];
     defaultCache = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:@[legacyCache]];
     
+    accountMetadataCache = [[MSIDAccountMetadataCacheAccessor alloc] initWithDataSource:dataSource];
+    
     [defaultCache clearWithContext:nil error:nil];
 }
 
 - (void)testAllAccounts_whenNoAccountInCache_shouldReturnEmptyList {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"a_different_client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"a_different_client_id"];
     
     NSError *error;
     NSArray *allAccounts = [provider allAccounts:&error];
@@ -88,7 +92,7 @@
 }
 
 - (void)testAllAccounts_whenAccountWithDifferentClientIdInCache_shouldReturnEmptyList {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"some_client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"some_client_id"];
     
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                              clientId:@"client_id"
@@ -109,7 +113,7 @@
 }
 
 - (void)testAllAccounts_whenDefaultAccountInCache_shouldReturnAccount {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                              clientId:@"client_id"
@@ -142,7 +146,7 @@
 }
 
 - (void)testAllAccounts_whenLegacyAccountInCache_shouldReturnAccount {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                             clientId:@"client_id"
@@ -175,7 +179,7 @@
 }
 
 - (void)testAllAccounts_whenDefaultAccountInCacheButDifferentClientId_shouldNotFindIt {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                              clientId:@"different_client_id"
@@ -196,7 +200,7 @@
 }
 
 - (void)testAllAccounts_whenDefaultAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
@@ -232,7 +236,7 @@
 }
 
 - (void)testAllAccounts_whenLegacyAccountInCacheButDifferentClientId_shouldNotFindIt {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid"
                                             clientId:@"different_client_id"
@@ -253,7 +257,7 @@
 }
 
 - (void)testAllAccounts_whenLegacyAccountInCacheWithDifferentClientIdButSameFamily_shouldFindItButNotExposeAllClaims {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     MSIDAuthority *authority = [@"https://login.microsoftonline.com/tid" aadAuthority];
     
@@ -289,7 +293,7 @@
 }
 
 - (void)testAllAccounts_whenMultipleDefaultAccountsInCache_shouldReturnThem {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     // first user logged in 1 home tenant and 2 guest tenants
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
@@ -482,7 +486,7 @@
 }
 
 - (void)testAllAccounts_whenMultipleLegacyAccountsInCache_shouldReturnThem {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     // first user logged in 1 home tenant and 2 guest tenants
     [MSIDTestCacheUtil saveLegacyTokensWithAuthority:@"https://login.microsoftonline.com/tid"
@@ -623,7 +627,7 @@
 }
 
 - (void)testAllAccounts_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [self setupMixedAccountsInCache];
     
@@ -708,7 +712,7 @@
 }
 
 - (void)testAccountForHomeAccountId_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [self setupMixedAccountsInCache];
     
@@ -758,7 +762,7 @@
 }
 
 - (void)testAccountForUsername_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     [self setupMixedAccountsInCache];
     
@@ -808,7 +812,7 @@
 }
 
 - (void)testAllAccountsFilteredByAuthority_whenMixLegacyAccountsAndDefaultAccountsInCache_shouldReturnThemProperly {
-    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache clientId:@"client_id"];
+    MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache accountMetadataCache:accountMetadataCache clientId:@"client_id"];
     
     // first user logged in 1 home tenant and 2 guest tenants
     [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
@@ -1006,6 +1010,7 @@
     externalAccountsHandler.externalAccountsResult = @[externalAccount];
     
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                 accountMetadataCache:accountMetadataCache
                                                                              clientId:@"client_id"
                                                               externalAccountProvider:externalAccountsHandler];
     
@@ -1065,6 +1070,7 @@
     externalAccountsHandler.externalAccountsResult = @[externalAccount];
     
     MSALAccountsProvider *provider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                 accountMetadataCache:accountMetadataCache
                                                                              clientId:@"client_id"
                                                               externalAccountProvider:externalAccountsHandler];
     
