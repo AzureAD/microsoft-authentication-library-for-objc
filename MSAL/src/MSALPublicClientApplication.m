@@ -97,7 +97,7 @@
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDAccountRequestFactory.h"
-#import "MSIDLogoutRequest.h"
+#import "MSIDOIDCSignoutRequest.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -1122,13 +1122,13 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
     
-    MSIDLogoutRequest *logoutRequest = [MSIDAccountRequestFactory logoutRequestWithRequestParameters:msidParams
-                                                                                        oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
+    MSIDOIDCSignoutRequest *signoutRequest = [MSIDAccountRequestFactory signoutRequestWithRequestParameters:msidParams
+                                                                                               oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
     
     NSString *requestId = [NSString stringWithFormat:@"logout_%@", [NSUUID UUID].UUIDString];
-    [self.currentRequests setObject:logoutRequest forKey:requestId];
+    [self.currentRequests setObject:signoutRequest forKey:requestId];
     
-    [logoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
+    [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
         [self.currentRequests removeObjectForKey:requestId];
         block(success, error, msidParams);
     }];
