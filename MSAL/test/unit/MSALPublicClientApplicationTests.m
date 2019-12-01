@@ -58,7 +58,7 @@
 #import "MSIDAADNetworkConfiguration.h"
 #import "NSString+MSIDTestUtil.h"
 #import "MSIDLocalInteractiveController.h"
-#import "MSIDInteractiveRequestParameters.h"
+#import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSALTelemetryApiId.h"
 #import "MSIDSilentController.h"
 #import "MSALRedirectUri.h"
@@ -385,7 +385,7 @@
                               block:(id)^(MSIDLocalInteractiveController *obj, MSIDRequestCompletionBlock completionBlock)
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedTelemetryAPIId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquire];
@@ -440,7 +440,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          XCTAssertTrue(params.validateAuthority);
@@ -782,7 +782,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          XCTAssertFalse(params.validateAuthority);
@@ -916,7 +916,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithHint];
@@ -972,7 +972,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1041,7 +1041,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1119,7 +1119,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithUserPromptTypeAndParameters];
@@ -1183,7 +1183,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];
@@ -1259,7 +1259,7 @@
      {
          XCTAssertTrue([obj isKindOfClass:[MSIDLocalInteractiveController class]]);
          
-         MSIDInteractiveRequestParameters *params = [obj interactiveRequestParamaters];
+         MSIDInteractiveTokenRequestParameters *params = [obj interactiveRequestParamaters];
          XCTAssertNotNil(params);
          
          NSString *expectedApiId = [NSString stringWithFormat:@"%ld", (long)MSALTelemetryApiIdAcquireWithTokenParameters];

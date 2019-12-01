@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15508"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -402,7 +402,7 @@
                                         <rect key="frame" x="0.0" y="788" width="414" height="30"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="tWi-d4-WNB">
-                                                <rect key="frame" x="78" y="0.0" width="258" height="30"/>
+                                                <rect key="frame" x="13.5" y="0.0" width="387" height="30"/>
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ToY-db-bYT">
                                                         <rect key="frame" x="0.0" y="0.0" width="129" height="30"/>
@@ -416,6 +416,13 @@
                                                         <state key="normal" title="acquireTokenSilent"/>
                                                         <connections>
                                                             <action selector="onAcquireTokenSilentButtonTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="0I8-uv-sYn"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uxy-eI-Fvx">
+                                                        <rect key="frame" x="258" y="0.0" width="129" height="30"/>
+                                                        <state key="normal" title="signout"/>
+                                                        <connections>
+                                                            <action selector="onSignoutTapped:" destination="7Mt-tc-cPe" eventType="touchUpInside" id="QO0-2S-gHh"/>
                                                         </connections>
                                                     </button>
                                                 </subviews>

@@ -150,6 +150,11 @@ typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nu
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 /**
+    The completion block that will be called when sign out is completed, or MSAL encountered an error.
+ */
+typedef void (^MSALSignoutCompletionBlock)(BOOL success, NSError * _Nullable error);
+
+/**
  The block that returns a MSAL log message.
  
  @param  level                     The level of the log message
