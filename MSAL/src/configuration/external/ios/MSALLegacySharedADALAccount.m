@@ -95,6 +95,20 @@ static NSString *kADALAccountType = @"ADAL";
         {
             _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:_objectId utid:_tenantId];
         }
+        else
+        {
+            NSDictionary *additionalPropertiesDictionary = [jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
+            
+            if (additionalPropertiesDictionary)
+            {
+                NSString *homeAccountId = [additionalPropertiesDictionary msidObjectForKey:@"home_account_id" ofClass:[NSString class]];
+                
+                if (![NSString msidIsStringNilOrBlank:homeAccountId])
+                {
+                    _identifier = homeAccountId;
+                }
+            }
+        }
         
         NSMutableDictionary *claims = [NSMutableDictionary new];
         

@@ -115,6 +115,7 @@
     
     NSMutableDictionary *mutableDict = [adalAccountDictionary mutableCopy];
     mutableDict[@"authEndpointUrl"] = @"https://login.microsoftonline.com/contoso.com";
+    mutableDict[@"additionalProperties"] = @{@"home_account_id": @"uid.utid"};
     
     NSError *error = nil;
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:mutableDict error:&error];
@@ -122,12 +123,12 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertNil(account.identifier);
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.accountClaims[@"oid"], objectId);
     XCTAssertEqualObjects(account.accountClaims[@"tid"], tenantId);
     XCTAssertEqualObjects(account.accountClaims[@"name"], @"myDisplayName.contoso.user");
+    XCTAssertEqualObjects(account.identifier, @"uid.utid");
 }
 
 #pragma mark - InitWithMSALAccount

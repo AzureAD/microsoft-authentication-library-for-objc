@@ -104,7 +104,11 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     jsonDictionary[@"signInStatus"] = @{appBundleId : @"SignedIn"};
     jsonDictionary[@"username"] = account.username;
-    jsonDictionary[@"additionalProperties"] = @{@"createdBy": appName};
+    
+    NSMutableDictionary *additionalProperties = [NSMutableDictionary new];
+    [additionalProperties addEntriesFromDictionary:@{@"createdBy": appName}];
+    [additionalProperties addEntriesFromDictionary:[self additionalPropertiesFromMSALAccount:account claims:claims]];
+    jsonDictionary[@"additionalProperties"] = additionalProperties;
     [jsonDictionary addEntriesFromDictionary:[self claimsFromMSALAccount:account claims:claims]];
     return [self initWithJSONDictionary:jsonDictionary error:error];
 }
@@ -180,6 +184,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     
     mutableAdditionalInfo[@"updatedBy"] = appName;
     mutableAdditionalInfo[@"updatedAt"] = [[[self class] dateFormatter] stringFromDate:[NSDate date]];
+    [mutableAdditionalInfo addEntriesFromDictionary:[self additionalPropertiesFromMSALAccount:account claims:nil]];
     
     oldDictionary[@"additionalProperties"] = mutableAdditionalInfo;
     
@@ -195,6 +200,16 @@ static NSDateFormatter *s_updateDateFormatter = nil;
 
 - (NSDictionary *)claimsFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
 {
+    return nil;
+}
+
+- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+{
+    if (account.identifier)
+    {
+        return @{@"home_account_id": account.identifier};
+    }
+    
     return nil;
 }
 
