@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALUser+Automation.h"
-#import "MSIDClientInfo.h"
 #import "MSALAccount+Internal.h"
 #import "MSALAccountId.h"
 #import "MSALTenantProfile.h"
