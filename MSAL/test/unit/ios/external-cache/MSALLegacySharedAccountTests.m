@@ -208,6 +208,8 @@
     XCTAssertNotNil(updatedAt);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
+    NSString *homeAccountId = [account jsonDictionary][@"additionalProperties"][@"home_account_id"];
+    XCTAssertEqualObjects(homeAccountId, @"uid.utid");
 }
 
 - (void)testUpdateAccountWithMSALAccount_whenUpdateOperation_shouldUpdateSigninStatusAndUpdatedDict
@@ -238,6 +240,8 @@
     XCTAssertNotNil(updatedAt);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
+    NSString *homeAccountId = [account jsonDictionary][@"additionalProperties"][@"home_account_id"];
+    XCTAssertEqualObjects(homeAccountId, @"uid.utid");
 }
 
 @end
