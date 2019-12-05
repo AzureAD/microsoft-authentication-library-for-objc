@@ -190,6 +190,56 @@
     XCTAssertEqual(account.tenantProfiles[1].isHomeTenantProfile, YES);
 }
 
+- (void)testAddTenantProfiles_whenDuplicateTenantProfile_shouldNotAddToExistingAccount
+{
+    // Create MSAL account 1
+    MSIDAccount *msidAccount = [MSIDAccount new];
+    msidAccount.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+    msidAccount.username = @"user@contoso.com";
+    msidAccount.accountType = MSIDAccountTypeMSSTS;
+    msidAccount.name = @"User";
+    msidAccount.localAccountId = @"guest_oid";
+    __auto_type authorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/guest_tid"];
+    __auto_type authority = [[MSIDAADAuthority alloc] initWithURL:authorityUrl context:nil error:nil];
+    msidAccount.environment = authority.environment;
+    msidAccount.realm = authority.realm;
+    NSDictionary *clientInfoClaims = @{ @"uid" : @"uid",
+                                        @"utid" : @"tid"
+                                        };
+    
+    
+    MSIDClientInfo *clientInfo = [[MSIDClientInfo alloc] initWithJSONDictionary:clientInfoClaims error:nil];
+    msidAccount.clientInfo = clientInfo;
+    
+    NSDictionary *idTokenDictionary = @{ @"aud" : @"b6c69a37",
+                                         @"oid" : @"ff9feb5a"
+                                         };
+    
+    MSIDIdTokenClaims *idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:idTokenDictionary error:nil];
+    XCTAssertNotNil(idTokenClaims);
+    msidAccount.idTokenClaims = idTokenClaims;
+    MSALAccount *account = [[MSALAccount alloc] initWithMSIDAccount:msidAccount createTenantProfile:YES];
+    
+    // Create MSAL account 2
+    MSIDAccount *msidAccount2 = [msidAccount copy];
+    msidAccount2.localAccountId = @"new_oid";
+    __auto_type homeAuthorityUrl = [NSURL URLWithString:@"https://login.microsoftonline.com/guest_tid"];
+    __auto_type homeAuthority = [[MSIDAADAuthority alloc] initWithURL:homeAuthorityUrl context:nil error:nil];
+    msidAccount2.environment = homeAuthority.environment;
+    msidAccount2.realm = homeAuthority.realm;
+    
+    MSALAccount *account2 = [[MSALAccount alloc] initWithMSIDAccount:msidAccount2 createTenantProfile:YES];
+    XCTAssertNotNil(account2);
+    
+    // Add tenant profiles
+    [account addTenantProfiles:account2.tenantProfiles];
+    
+    XCTAssertEqual(account.tenantProfiles.count, 1);
+    XCTAssertEqualObjects(account.tenantProfiles[0].identifier, @"guest_oid");
+    XCTAssertEqualObjects(account.tenantProfiles[0].tenantId, @"guest_tid");
+    XCTAssertEqual(account.tenantProfiles[0].isHomeTenantProfile, NO);
+}
+
 - (void)testAddTenantProfiles_whenAddNilTenantProfiles_shouldNotAddToExistingAccount
 {
     MSALAuthority *authority = [MSALAuthority authorityWithURL:[NSURL URLWithString:@"https://login.microsoftonline.com/tid"]
@@ -322,6 +372,37 @@
     
     XCTAssertNotNil(account2);
     XCTAssertEqualObjects(account, account2);
+}
+
+- (void)testEquals_whenIdentifiersEqual_userNameDifferent_shouldConsiderEqual
+{
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:@"1.2" objectId:@"1" tenantId:@"2"];
+    MSALAccount *account1 = [[MSALAccount alloc] initWithUsername:@"displayableID"
+                                                    homeAccountId:accountId
+                                                      environment:@"login.microsoftonline.com"
+                                                   tenantProfiles:nil];
+    
+    XCTAssertNotNil(account1);
+    MSALAccount *account2 = [account1 copy];
+    account2.username = @"differentDisplayableIDAlias";
+    
+    XCTAssertNotNil(account2);
+    XCTAssertEqualObjects(account1, account2);
+}
+
+- (void)testEquals_whenIdentifiersMissing_userNameDifferent_shouldConsiderDifferentAccount
+{
+    MSALAccount *account1 = [[MSALAccount alloc] initWithUsername:@"displayableID"
+                                                    homeAccountId:nil
+                                                      environment:@"login.microsoftonline.com"
+                                                   tenantProfiles:nil];
+    
+    XCTAssertNotNil(account1);
+    MSALAccount *account2 = [account1 copy];
+    account2.username = @"differentDisplayableIDAlias";
+    
+    XCTAssertNotNil(account2);
+    XCTAssertNotEqualObjects(account1, account2);
 }
 
 @end

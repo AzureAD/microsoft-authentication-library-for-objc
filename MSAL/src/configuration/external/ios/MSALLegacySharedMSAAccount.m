@@ -110,12 +110,12 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     
     if (parameters.identifier)
     {
-        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+        matchResult &= (self.identifier && [self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
+        matchResult &= (self.username && [self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
