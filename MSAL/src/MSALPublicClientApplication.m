@@ -86,6 +86,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
 #import "MSALWebviewParameters.h"
+#import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
@@ -663,6 +664,27 @@
                  parameters.correlationId,
                  self.internalConfig.clientApplicationCapabilities,
                  parameters.claimsRequest);
+    
+    // Return early if account is in signed out state
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+    NSError *signInStateError;
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:&signInStateError];
+    
+    if (signInStateError) {
+        block(nil, signInStateError, msidParams);
+        return;
+    }
+    if (signInState == MSIDAccountMetadataStateSignedOut)
+    {
+        NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
+        block(nil, interactionError, msidParams);
+        return;
+    }
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache

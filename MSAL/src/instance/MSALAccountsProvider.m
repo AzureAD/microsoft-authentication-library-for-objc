@@ -194,6 +194,11 @@
         msidAccounts = filteredAccounts;
     }
     
+    if (parameters.returnOnlySignedInAccounts)
+    {
+        msidAccounts = [self filterSignedOutAccounts:msidAccounts];
+    }
+    
     NSArray *externalAccounts = nil;
     
     if (self.externalAccountProvider)
@@ -244,8 +249,6 @@
         [self addMSALAccount:externalAccount toSet:resultAccounts claims:accountClaims];
     }
     
-    resultAccounts = [self filterSignedOutAccounts:resultAccounts];
-    
     return [resultAccounts allObjects];
 }
 
@@ -269,16 +272,16 @@
     }
 }
 
-- (NSMutableSet<MSALAccount *> *)filterSignedOutAccounts:(NSSet<MSALAccount *> *)accounts
+- (NSArray<MSIDAccount *> *)filterSignedOutAccounts:(NSArray<MSIDAccount *> *)accounts
 {
-    NSMutableSet<MSALAccount *> *filteredAccounts = [NSMutableSet new];
-    for (MSALAccount *account in accounts)
+    NSMutableArray<MSIDAccount *> *filteredAccounts = [NSMutableArray new];
+    for (MSIDAccount *account in accounts)
     {
         MSIDAccountMetadataState accountState = MSIDAccountMetadataStateUnknown;
-        if (account.identifier)
+        if (account.accountIdentifier.homeAccountId)
         {
             NSError *localError;
-            accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.identifier
+            accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.accountIdentifier.homeAccountId
                                                                          clientId:self.clientId
                                                                           context:nil
                                                                             error:&localError];
@@ -338,6 +341,22 @@
     }
 
     return nil;
+}
+
+#pragma mark - Account metadata
+- (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
+                                                context:(id<MSIDRequestContext>)context
+                                                  error:(NSError **)error
+{
+    if (!self.accountMetadataCache || [NSString msidIsStringNilOrBlank:homeAccountId])
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    return [self.accountMetadataCache signInStateForHomeAccountId:homeAccountId
+                                                         clientId:self.clientId
+                                                          context:context
+                                                            error:error];
 }
 
 @end
