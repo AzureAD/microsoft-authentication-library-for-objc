@@ -203,7 +203,7 @@ static NSDateFormatter *s_updateDateFormatter = nil;
     return nil;
 }
 
-- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccount>)account claims:(NSDictionary *)claims
+- (NSDictionary *)additionalPropertiesFromMSALAccount:(id<MSALAccount>)account claims:(__unused NSDictionary *)claims
 {
     if (account.identifier)
     {
