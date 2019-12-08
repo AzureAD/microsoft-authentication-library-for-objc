@@ -107,7 +107,6 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
-@property (nonatomic) MSIDCache *currentRequests;
 
 @end
 
@@ -174,7 +173,6 @@
         return nil;
     }
     
-    _currentRequests = [MSIDCache new];
     _validateAuthority = YES;
     
     // Verify required fields
@@ -685,15 +683,11 @@
         block(nil, requestError, msidParams);
         return;
     }
-    
-    NSString *requestId = [NSString stringWithFormat:@"silent_%@", [NSUUID UUID].UUIDString];
-    [self.currentRequests setObject:requestController forKey:requestId];
-    
+        
     [requestController acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error) {
         
         if (error)
         {
-            [self.currentRequests removeObjectForKey:requestId];
             block(nil, error, msidParams);
             return;
         }
@@ -701,7 +695,6 @@
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
-        [self.currentRequests removeObjectForKey:requestId];
         block(msalResult, resultError, msidParams);
     }];
 }
@@ -804,12 +797,9 @@
     useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                    completionBlock:(MSALCompletionBlock)completionBlock
 {
-    __weak typeof(self) weakSelf = self;
-    NSString *requestId = [NSString stringWithFormat:@"interactive_%@", [NSUUID UUID].UUIDString];
-    
     __auto_type block = ^(MSALResult *result, NSError *msidError, id<MSIDRequestContext> context)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:weakSelf.msalOauth2Provider];
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
         [MSALPublicClientApplication logOperation:@"acquireToken" result:result error:msalError context:context];
         
         if (!completionBlock) return;
@@ -957,14 +947,11 @@
         block(nil, requestError, msidParams);
         return;
     }
-    
-    [self.currentRequests setObject:controller forKey:requestId];
-    
+        
     [controller acquireToken:^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
     {
         if (error)
         {
-            [self.currentRequests removeObjectForKey:requestId];
             block(nil, error, msidParams);
             return;
         }
@@ -973,7 +960,6 @@
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
         [self updateExternalAccountsWithResult:msalResult context:msidParams];
         
-        [self.currentRequests removeObjectForKey:requestId];
         block(msalResult, resultError, msidParams);
     }];
 }
@@ -1124,12 +1110,10 @@
     
     MSIDOIDCSignoutRequest *signoutRequest = [MSIDAccountRequestFactory signoutRequestWithRequestParameters:msidParams
                                                                                                oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
-    
-    NSString *requestId = [NSString stringWithFormat:@"logout_%@", [NSUUID UUID].UUIDString];
-    [self.currentRequests setObject:signoutRequest forKey:requestId];
-    
-    [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
-        [self.currentRequests removeObjectForKey:requestId];
+        
+    [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [signoutRequest class]);
         block(success, error, msidParams);
     }];
 }
