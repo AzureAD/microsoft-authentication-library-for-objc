@@ -167,6 +167,8 @@
                                                           clientId:queryClientId
                                                           familyId:queryFamilyId
                                                  accountIdentifier:queryAccountIdentifier
+                             accountMetadataCache:self.accountMetadataCache
+                                              signedInAccountsOnly:parameters.returnOnlySignedInAccounts
                                                            context:nil
                                                              error:&msidError];
     
@@ -192,11 +194,6 @@
         }
         
         msidAccounts = filteredAccounts;
-    }
-    
-    if (parameters.returnOnlySignedInAccounts)
-    {
-        msidAccounts = [self filterSignedOutAccounts:msidAccounts];
     }
     
     NSArray *externalAccounts = nil;
@@ -270,31 +267,6 @@
     {
         existingAccount.accountClaims = accountClaims;
     }
-}
-
-- (NSArray<MSIDAccount *> *)filterSignedOutAccounts:(NSArray<MSIDAccount *> *)accounts
-{
-    NSMutableArray<MSIDAccount *> *filteredAccounts = [NSMutableArray new];
-    for (MSIDAccount *account in accounts)
-    {
-        MSIDAccountMetadataState accountState = MSIDAccountMetadataStateUnknown;
-        if (account.accountIdentifier.homeAccountId)
-        {
-            NSError *localError;
-            accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.accountIdentifier.homeAccountId
-                                                                         clientId:self.clientId
-                                                                          context:nil
-                                                                            error:&localError];
-            if (localError) continue;
-        }
-        
-        if (accountState != MSIDAccountMetadataStateSignedOut)
-        {
-            [filteredAccounts addObject:account];
-        }
-    }
-    
-    return filteredAccounts;
 }
 
 #pragma mark - Authority (deprecated)
