@@ -41,7 +41,7 @@
 @property (nonatomic) MSALAccountId *homeAccountId;
 @property (nonatomic) NSString *username;
 @property (nonatomic) NSString *environment;
-@property (nonatomic) NSMutableArray<MSALTenantProfile *> *mTenantProfiles;
+@property (nonatomic) NSMutableDictionary<NSString *, MSALTenantProfile *> *mTenantProfiles;
 @property (nonatomic) NSDictionary<NSString *, NSString *> *accountClaims;
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) MSIDAccountIdentifier *lookupAccountIdentifier;

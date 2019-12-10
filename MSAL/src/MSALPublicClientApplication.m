@@ -356,6 +356,8 @@
 - (MSALAccount *)accountForIdentifier:(NSString *)identifier
                                 error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for identifier %@", MSID_PII_LOG_TRACKABLE(identifier));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
@@ -367,12 +369,16 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
+    
     return account;
 }
 
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
@@ -381,12 +387,16 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+    
     return accounts;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
@@ -395,6 +405,8 @@
     MSALAccount *account = [request accountForParameters:parameters error:&msidError];
 
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
 
     return account;
 }
