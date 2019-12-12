@@ -169,7 +169,7 @@ static NSArray* s_deviceRows = nil;
     return 0;
 }
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView;
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     (void)tableView;
     return 2;
