@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 #import "MSALAccount.h"
-#import "MSIDClientInfo.h"
 #import "MSIDAccount.h"
 #import "MSALAccount+Internal.h"
 #import "NSURL+MSIDExtensions.h"
@@ -61,10 +60,7 @@
         _identifier = homeAccountId.identifier;
         _lookupAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:username homeAccountId:homeAccountId.identifier];
         
-        if (tenantProfiles.count > 0)
-        {
-            self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
-        }
+        [self addTenantProfiles:tenantProfiles];
     }
 
     return self;
@@ -80,7 +76,7 @@
         
         MSALTenantProfile *tenantProfile = [[MSALTenantProfile alloc] initWithIdentifier:account.localAccountId
                                                                                 tenantId:account.realm
-                                                                             environment:account.environment
+                                                                             environment:account.storageEnvironment ?: account.environment
                                                                      isHomeTenantProfile:account.isHomeTenantAccount
                                                                                   claims:allClaims];
         if (tenantProfile)
@@ -95,7 +91,7 @@
     
     return [self initWithUsername:account.username
                     homeAccountId:homeAccountId
-                      environment:account.environment
+                      environment:account.storageEnvironment ?: account.environment
                    tenantProfiles:tenantProfiles];
 }
 
@@ -135,7 +131,7 @@
     NSString *username = [self.username copyWithZone:zone];
     MSALAccountId *homeAccountId = [self.homeAccountId copyWithZone:zone];
     NSString *environment = [self.environment copyWithZone:zone];
-    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:self.mTenantProfiles copyItems:YES];
+    NSArray *tenantProfiles = [[NSMutableArray alloc] initWithArray:[self tenantProfiles] copyItems:YES];
     
     MSALAccount *account = [[MSALAccount allocWithZone:zone] initWithUsername:username homeAccountId:homeAccountId environment:environment tenantProfiles:tenantProfiles];
     account.accountClaims = [self.accountClaims copyWithZone:zone];
@@ -162,8 +158,6 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    hash = hash * 31 + self.username.hash;
-    hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.environment.hash;
     return hash;
 }
@@ -173,8 +167,16 @@
     if (!user) return NO;
 
     BOOL result = YES;
-    result &= (!self.username && !user.username) || [self.username isEqualToString:user.username];
-    result &= (!self.homeAccountId && !user.homeAccountId) || [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
+    
+    if (self.homeAccountId.identifier && user.homeAccountId.identifier)
+    {
+        result &= [self.homeAccountId.identifier isEqualToString:user.homeAccountId.identifier];
+    }
+    else if (self.username || user.username)
+    {
+        result &= [self.username.lowercaseString isEqualToString:user.username.lowercaseString];
+    }
+    
     result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
     return result;
 }
@@ -183,20 +185,24 @@
 
 - (NSArray<MSALTenantProfile *> *)tenantProfiles
 {
-    return self.mTenantProfiles;
+    return self.mTenantProfiles.allValues;
 }
 
 - (void)addTenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
 {
     if (tenantProfiles.count <= 0) return;
     
-    if (self.mTenantProfiles)
+    if (!self.mTenantProfiles)
     {
-        [self.mTenantProfiles addObjectsFromArray:tenantProfiles];
+        self.mTenantProfiles = [NSMutableDictionary new];
     }
-    else
+    
+    for (MSALTenantProfile *profile in tenantProfiles)
     {
-        self.mTenantProfiles = [[NSMutableArray alloc] initWithArray:tenantProfiles];
+        if (profile.tenantId && !self.mTenantProfiles[profile.tenantId])
+        {
+            self.mTenantProfiles[profile.tenantId] = profile;
+        }
     }
 }
 

@@ -212,13 +212,13 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
 
 #pragma mark Button Actions
 
-- (IBAction)refreshCache:(id)sender
+- (IBAction)refreshCache:(__unused id)sender
 {
     [self loadCache];
 }
 
 
-- (IBAction)expireOrInvalidateToken:(id)sender
+- (IBAction)expireOrInvalidateToken:(__unused id)sender
 {
     id item = [self.outLineView itemAtRow:[self.outLineView selectedRow]];
     
@@ -235,7 +235,7 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
     }
 }
 
-- (IBAction)deleteItem:(id)sender
+- (IBAction)deleteItem:(__unused id)sender
 {
     id item = [self.outLineView itemAtRow:[self.outLineView selectedRow]];
     if ([item isKindOfClass:[MSIDAccount class]])
@@ -254,17 +254,17 @@ static NSString *s_badRefreshToken = @"Bad-Refresh-Token";
 
 #pragma mark NSOutlineView Data Source Test Methods
 
-- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(__unused NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] count] : [[self.cacheDict allKeys] count];
 }
 
-- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+- (BOOL)outlineView:(__unused NSOutlineView *)outlineView isItemExpandable:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] count] : YES;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
+- (id)outlineView:(__unused NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
     return item ? [[self.cacheDict objectForKey:item] objectAtIndex:index] : [[self.cacheDict allKeys] objectAtIndex:index];
 }

@@ -47,6 +47,7 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALAccountsProvider()
 
@@ -231,7 +232,7 @@
         
         if ([externalAccount.mTenantProfiles count])
         {
-            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.mTenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
+            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.tenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
             if ([homeTenantProfileArray count] == 1) accountClaims = homeTenantProfileArray[0].claims;
         }
     
@@ -252,12 +253,13 @@
     }
     else
     {
-        [existingAccount addTenantProfiles:account.mTenantProfiles];
+        [existingAccount addTenantProfiles:account.tenantProfiles];
     }
     
     if (accountClaims)
     {
         existingAccount.accountClaims = accountClaims;
+        existingAccount.username = account.username;
     }
 }
 

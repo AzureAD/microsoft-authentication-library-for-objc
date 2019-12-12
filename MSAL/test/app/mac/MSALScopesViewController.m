@@ -48,7 +48,7 @@
     [self.scopesView reloadData];
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+- (NSInteger)numberOfRowsInTableView:(__unused NSTableView *)tableView
 {
     return [self.scopesList count];
 }
@@ -66,7 +66,7 @@
     return nil;
 }
 
-- (IBAction)insertNewRow:(id)sender
+- (IBAction)insertNewRow:(__unused id)sender
 {
     NSString *scope = [self.scopesText stringValue];
     
@@ -82,14 +82,14 @@
     }
 }
 
-- (IBAction)deleteSelectedRows:(id)sender
+- (IBAction)deleteSelectedRows:(__unused id)sender
 {
     NSIndexSet *indexes = [self.scopesView selectedRowIndexes];
     [self.scopesList removeObjectsAtIndexes:indexes];
     [self.scopesView removeRowsAtIndexes:indexes withAnimation:NSTableViewAnimationSlideDown];
 }
 
-- (IBAction)done:(id)sender
+- (IBAction)done:(__unused id)sender
 {
     NSIndexSet *indexes = [self.scopesView selectedRowIndexes];
     NSMutableArray *selectedScopes = [[NSMutableArray alloc] init];
