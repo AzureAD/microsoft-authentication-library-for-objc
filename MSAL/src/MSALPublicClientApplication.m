@@ -99,6 +99,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDAccountRequestFactory.h"
 #import "MSIDOIDCSignoutRequest.h"
+#import "MSALSignoutParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -1059,7 +1060,7 @@
 }
 
 - (void)signoutWithAccount:(nonnull MSALAccount *)account
-         webViewParameters:(nonnull MSALWebviewParameters *)webViewParameters
+         signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
            completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock
 {
     __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
@@ -1077,13 +1078,13 @@
         
         if (!signoutCompletionBlock) return;
         
-        if ([NSThread isMainThread])
+        if ([NSThread isMainThread] && !signoutParameters.completionBlockQueue)
         {
             signoutCompletionBlock(result, msalError);
         }
         else
         {
-            dispatch_async(dispatch_get_main_queue(), ^{ // TODO: allow passing custom queue?
+            dispatch_async(signoutParameters.completionBlockQueue ? signoutParameters.completionBlockQueue : dispatch_get_main_queue(), ^{
                 signoutCompletionBlock(result, msalError);
             });
         }
@@ -1126,7 +1127,7 @@
     }
     
     NSError *webViewParamsError;
-    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:webViewParameters
+    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
                                                              account:account
                                       useWebviewTypeFromGlobalConfig:NO
                                                        customWebView:_customWebview
@@ -1143,7 +1144,14 @@
     msidParams.providedAuthority = requestAuthority;
     
     MSIDOIDCSignoutRequest *signoutRequest = [MSIDAccountRequestFactory signoutRequestWithRequestParameters:msidParams
+                                                                                   shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
                                                                                                oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
+    
+    if (!signoutRequest)
+    {
+        block(YES, nil, msidParams);
+        return;
+    }
         
     [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error)
     {
