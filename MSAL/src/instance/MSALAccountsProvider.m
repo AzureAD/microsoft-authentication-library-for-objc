@@ -47,11 +47,13 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
+#import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALAccountsProvider()
 
 @property (nullable, nonatomic) MSIDDefaultTokenCacheAccessor *tokenCache;
+@property (nullable, nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 @property (nullable, nonatomic) NSString *clientId;
 @property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
 @property (nullable, nonatomic) NSPredicate *homeTenantFilterPredicate;
@@ -63,14 +65,17 @@
 #pragma mark - Init
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
 {
     return [self initWithTokenCache:tokenCache
+               accountMetadataCache:accountMetadataCache
                            clientId:clientId
             externalAccountProvider:nil];
 }
 
 - (instancetype)initWithTokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
+              accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
            externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider
 {
@@ -79,6 +84,7 @@
     if (self)
     {
         _tokenCache = tokenCache;
+        _accountMetadataCache = accountMetadataCache;
         _clientId = clientId;
         _externalAccountProvider = externalAccountProvider;
         _homeTenantFilterPredicate = [NSPredicate predicateWithFormat:@"isHomeTenantProfile == YES"];
@@ -162,6 +168,8 @@
                                                           clientId:queryClientId
                                                           familyId:queryFamilyId
                                                  accountIdentifier:queryAccountIdentifier
+                             accountMetadataCache:self.accountMetadataCache
+                                              signedInAccountsOnly:parameters.returnOnlySignedInAccounts
                                                            context:nil
                                                              error:&msidError];
     
@@ -307,6 +315,22 @@
     }
 
     return nil;
+}
+
+#pragma mark - Account metadata
+- (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
+                                                context:(id<MSIDRequestContext>)context
+                                                  error:(NSError **)error
+{
+    if (!self.accountMetadataCache || [NSString msidIsStringNilOrBlank:homeAccountId])
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    return [self.accountMetadataCache signInStateForHomeAccountId:homeAccountId
+                                                         clientId:self.clientId
+                                                          context:context
+                                                            error:error];
 }
 
 @end
