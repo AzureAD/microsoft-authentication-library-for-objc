@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSIDAccountMetadata.h"
 
 @class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
@@ -35,6 +36,7 @@
 @class MSALExternalAccountHandler;
 @class MSALAccountEnumerationParameters;
 @class MSIDAccountMetadataCacheAccessor;
+@class MSIDRequestParameters;
 
 @interface MSALAccountsProvider : NSObject
 
@@ -63,5 +65,10 @@
 // Filtering
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError * __autoreleasing *)error;
+
+// Check sign in state
+- (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
+                                                context:(id<MSIDRequestContext>)context
+                                                  error:(NSError **)error;
 
 @end

@@ -30,9 +30,7 @@
 #import "MSALPublicClientApplication+Internal.h"
 #import "MSIDTestSwizzle.h"
 #import "MSALTestBundle.h"
-#import "MSIDClientInfo.h"
 #import "MSALTestConstants.h"
-#import "MSIDClientInfo.h"
 #import "NSDictionary+MSIDTestUtil.h"
 #import "MSIDKeychainTokenCache+MSIDTestsUtil.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
@@ -97,7 +95,6 @@
 
 @interface MSALPublicClientApplicationTests : MSALTestCase
 
-@property (nonatomic) MSIDClientInfo *clientInfo;
 @property (nonatomic) MSIDDefaultTokenCacheAccessor *tokenCacheAccessor;
 @property (nonatomic) MSIDAccountMetadataCacheAccessor *accountMetadataCache;
 
@@ -109,8 +106,6 @@
 {
     [super setUp];
     
-    NSString *base64String = [@{ @"uid" : @"1", @"utid" : @"1234-5678-90abcdefg"} msidBase64UrlJson];
-    self.clientInfo = [[MSIDClientInfo alloc] initWithRawClientInfo:base64String error:nil];
 #if TARGET_OS_IPHONE
     id<MSIDExtendedTokenCacheDataSource> dataSource = MSIDKeychainTokenCache.defaultKeychainCache;
     self.tokenCacheAccessor = [[MSIDDefaultTokenCacheAccessor alloc] initWithDataSource:dataSource otherCacheAccessors:nil];

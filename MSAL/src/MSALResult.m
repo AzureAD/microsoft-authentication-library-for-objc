@@ -29,7 +29,6 @@
 #import "MSIDAccessToken.h"
 #import "NSString+MSIDExtensions.h"
 #import "NSURL+MSIDExtensions.h"
-#import "MSIDClientInfo.h"
 #import "MSIDAADV2IdTokenClaims.h"
 #import "MSALAccount+Internal.h"
 #import "MSIDIdToken.h"
