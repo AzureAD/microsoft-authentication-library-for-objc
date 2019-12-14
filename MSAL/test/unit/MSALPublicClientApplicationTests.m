@@ -78,6 +78,8 @@
 #import "MSALInteractiveTokenParameters.h"
 #import "MSALWebviewParameters.h"
 #import "MSALSilentTokenParameters.h"
+#import "MSALSignoutParameters.h"
+#import "MSIDSignoutController.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -565,10 +567,17 @@
     
     MSALInteractiveTokenParameters *params = nil;
     MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
-    UIViewController *controller = nil;
+
+    static dispatch_once_t once;
+    static UIViewController *controller;
+    
+    dispatch_once(&once, ^{
+        controller = [UIViewController new];
+    });
+    
     MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
     params = [[MSALInteractiveTokenParameters alloc] initWithScopes:@[@"fakescope1", @"fakescope2"] webviewParameters:webParams];
-    params.parentViewController = [self.class sharedViewControllerStub];
+    params.parentViewController = controller;
     params.parentViewController.view = nil;
     params.completionBlockQueue = dispatch_queue_create([@"test.queue" cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
     const char *l1 = dispatch_queue_get_label(params.completionBlockQueue);
@@ -2364,6 +2373,153 @@
     XCTAssertNotNil(error);
     XCTAssertEqualObjects(error.domain, NSOSStatusErrorDomain);
 }
+
+#pragma mark - Signout
+
+- (void)testSignoutWithAccount_whenNilAccount_shouldReturnError
+{
+    MSALAccount *account = nil;
+    
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                   error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALViewController *controller = nil;
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:account
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertFalse(success);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+        XCTAssertEqual(error.code, MSALErrorInternal);
+        XCTAssertEqual([error.userInfo[MSALInternalErrorCodeKey] integerValue], MSALInternalErrorInvalidParameter);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+#if TARGET_OS_IPHONE
+
+- (void)testSignoutWithAccount_whenNonNilaccount_andSignoutFromBrowserFalse_andBrokerDisabled_shouldRemoveAccountLocallyOnly
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.signoutFromBrowser = NO;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+- (void)testSignoutWithAccount_whenNonNilAccount_andSignoutFromBrowserTrue_andBrokerDisabled_shouldRemoveAccountFromBrowser
+{
+    [self msalStoreTokenResponseInCache];
+    
+    MSIDAccount *account = [[MSIDAADV2Oauth2Factory new] accountFromResponse:[self msalDefaultTokenResponse]
+                                                               configuration:[self msalDefaultConfiguration]];
+    MSALAccount *msalAccount = [[MSALAccount alloc] initWithMSIDAccount:account createTenantProfile:NO];
+        
+    NSError *error = nil;
+    __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
+    
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                                                redirectUri:nil
+                                                                                                  authority:authority];
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
+                                                                                                    error:&error];
+    
+    XCTAssertNotNil(application);
+    XCTAssertNil(error);
+    
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+    MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
+    parameters.signoutFromBrowser = YES;
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityNone;
+    
+    XCTAssertEqual([application allAccounts:nil].count, 1);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                             class:[MSIDSignoutController class]
+                             block:(id)^(MSIDSignoutController *obj, MSIDSignoutRequestCompletionBlock completionBlock)
+    {
+        XCTAssertTrue([obj isKindOfClass:[MSIDSignoutController class]]);
+        
+        MSIDInteractiveRequestParameters *params = [obj parameters];
+        XCTAssertNotNil(params);
+        
+        XCTAssertEqualObjects(params.accountIdentifier.displayableId, @"fakeuser@contoso.com");
+        XCTAssertEqualObjects(params.accountIdentifier.homeAccountId, @"myuid.utid");
+        
+        XCTAssertEqualObjects(params.authority.url.absoluteString, @"https://login.microsoftonline.com/common");
+        XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
+        
+        XCTAssertNotNil(params.correlationId);
+        
+        completionBlock(YES, nil);
+    }];
+    
+    
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
+    
+    [application signoutWithAccount:msalAccount
+                  signoutParameters:parameters completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
+        XCTAssertTrue(success);
+        XCTAssertNil(error);
+
+        XCTAssertEqual([application allAccounts:nil].count, 0);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
+}
+
+#endif
 
 #pragma mark - Helpers
 

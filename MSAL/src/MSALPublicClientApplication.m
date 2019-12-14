@@ -97,8 +97,7 @@
 
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSIDAccountRequestFactory.h"
-#import "MSIDOIDCSignoutRequest.h"
+#import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
 
 @interface MSALPublicClientApplication()
@@ -1143,19 +1142,20 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
     
-    MSIDOIDCSignoutRequest *signoutRequest = [MSIDAccountRequestFactory signoutRequestWithRequestParameters:msidParams
-                                                                                   shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
-                                                                                               oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
+    NSError *controllerError;
+    MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
+                                                                                        oauthFactory:self.msalOauth2Provider.msidOauth2Factory
+                                                                            shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                               error:&controllerError];
     
-    if (!signoutRequest)
+    if (!controller)
     {
-        block(YES, nil, msidParams);
+        block(NO, controllerError, msidParams);
         return;
     }
-        
-    [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [signoutRequest class]);
+    
+    [controller executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [controller class]);
         block(success, error, msidParams);
     }];
 }

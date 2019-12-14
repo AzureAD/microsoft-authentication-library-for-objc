@@ -248,10 +248,13 @@
     __block BOOL fBlockHit = NO;
     
     MSALTestAppSettings *settings = [MSALTestAppSettings settings];
+    
+    MSALSignoutParameters *signoutParameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:[self msalTestWebViewParameters]];
+    
     [application signoutWithAccount:settings.currentAccount
-                  webViewParameters:[self msalTestWebViewParameters]
-                    completionBlock:^(BOOL success, NSError * _Nullable error)
-    {
+                  signoutParameters:signoutParameters
+                    completionBlock:^(BOOL success, NSError * _Nullable error) {
+        
         if (fBlockHit)
         {
             [self showCompletionBlockHitMultipleTimesAlert];
