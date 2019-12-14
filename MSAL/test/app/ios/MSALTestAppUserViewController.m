@@ -30,6 +30,7 @@
 #import "MSALTestAppSettings.h"
 #import "MSALAccountId.h"
 #import "MSALAccount.h"
+#import "MSALAccountEnumerationParameters.h"
 
 @interface MSALTestAppUserViewController ()
 
@@ -84,7 +85,10 @@
         return;
     }
 
-    _accounts = [application allAccounts:nil];
+    MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+    parameters.returnOnlySignedInAccounts = YES;
+    
+    _accounts = [application accountsForParameters:parameters error:nil];
     dispatch_async(dispatch_get_main_queue(), ^{
         [super refresh];
     });
