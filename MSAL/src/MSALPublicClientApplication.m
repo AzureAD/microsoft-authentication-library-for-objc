@@ -1089,6 +1089,13 @@
         }
     };
     
+    if (!account)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Account is required", nil, nil, nil, nil, nil, NO);
+        block(NO, error, nil);
+        return;
+    }
+    
     NSError *localError;
     BOOL localRemovalResult = [self removeAccount:account error:&localError];
     

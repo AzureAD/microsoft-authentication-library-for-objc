@@ -2392,8 +2392,11 @@
     XCTAssertNotNil(application);
     XCTAssertNil(error);
     
-    MSALViewController *controller = nil;
-    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:controller];
+#if TARGET_OS_IPHONE
+    MSALWebviewParameters *webParams = [[MSALWebviewParameters alloc] initWithParentViewController:[self.class sharedViewControllerStub]];
+#else
+    MSALWebviewParameters *webParams = [MSALWebviewParameters new];
+#endif
     MSALSignoutParameters *parameters = [[MSALSignoutParameters alloc] initWithWebviewParameters:webParams];
     
     XCTestExpectation *expectation = [self expectationWithDescription:@"Signout"];
