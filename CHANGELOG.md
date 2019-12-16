@@ -1,3 +1,10 @@
+## [1.0.5] - 2019-12-13
+### Fixed
+- Account lookup fix when no refresh tokens present (#799)
+
+## [1.0.4] - 2019-11-26
+### Fixed
+- Fixed external account matching when identifier is not present (#787)
 
 ## [1.0.3] - 2019-11-15
 ### Added

@@ -86,6 +86,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
 #import "MSALWebviewParameters.h"
+#import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
@@ -96,8 +97,8 @@
 
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
 #import "MSIDKeychainTokenCache.h"
-#import "MSIDAccountRequestFactory.h"
-#import "MSIDOIDCSignoutRequest.h"
+#import "MSIDSignoutController.h"
+#import "MSALSignoutParameters.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -360,6 +361,8 @@
 - (MSALAccount *)accountForIdentifier:(NSString *)identifier
                                 error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for identifier %@", MSID_PII_LOG_TRACKABLE(identifier));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                 accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
@@ -372,12 +375,16 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
+    
     return account;
 }
 
 - (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
                                             error:(NSError **)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                 accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
@@ -387,12 +394,16 @@
     
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
     
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+    
     return accounts;
 }
 
 - (MSALAccount *)accountForUsername:(NSString *)username
                               error:(NSError * __autoreleasing *)error
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
+    
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
                                                                 accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
@@ -402,6 +413,8 @@
     MSALAccount *account = [request accountForParameters:parameters error:&msidError];
 
     if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+    
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with identifier %@, username %@", MSID_PII_LOG_TRACKABLE(account.identifier), MSID_PII_LOG_EMAIL(account.username));
 
     return account;
 }
@@ -666,6 +679,27 @@
                  parameters.correlationId,
                  self.internalConfig.clientApplicationCapabilities,
                  parameters.claimsRequest);
+    
+    // Return early if account is in signed out state
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+    NSError *signInStateError;
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:&signInStateError];
+    
+    if (signInStateError) {
+        block(nil, signInStateError, msidParams);
+        return;
+    }
+    if (signInState == MSIDAccountMetadataStateSignedOut)
+    {
+        NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
+        block(nil, interactionError, msidParams);
+        return;
+    }
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache
@@ -1025,7 +1059,7 @@
 }
 
 - (void)signoutWithAccount:(nonnull MSALAccount *)account
-         webViewParameters:(nonnull MSALWebviewParameters *)webViewParameters
+         signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
            completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock
 {
     __auto_type block = ^(BOOL result, NSError *msidError, id<MSIDRequestContext> context)
@@ -1043,17 +1077,24 @@
         
         if (!signoutCompletionBlock) return;
         
-        if ([NSThread isMainThread])
+        if ([NSThread isMainThread] && !signoutParameters.completionBlockQueue)
         {
             signoutCompletionBlock(result, msalError);
         }
         else
         {
-            dispatch_async(dispatch_get_main_queue(), ^{ // TODO: allow passing custom queue?
+            dispatch_async(signoutParameters.completionBlockQueue ? signoutParameters.completionBlockQueue : dispatch_get_main_queue(), ^{
                 signoutCompletionBlock(result, msalError);
             });
         }
     };
+    
+    if (!account)
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"Account is required", nil, nil, nil, nil, nil, NO);
+        block(NO, error, nil);
+        return;
+    }
     
     NSError *localError;
     BOOL localRemovalResult = [self removeAccount:account error:&localError];
@@ -1092,7 +1133,7 @@
     }
     
     NSError *webViewParamsError;
-    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:webViewParameters
+    BOOL webViewParamsResult = [msidParams fillWithWebViewParameters:signoutParameters.webviewParameters
                                                              account:account
                                       useWebviewTypeFromGlobalConfig:NO
                                                        customWebView:_customWebview
@@ -1108,12 +1149,20 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.providedAuthority = requestAuthority;
     
-    MSIDOIDCSignoutRequest *signoutRequest = [MSIDAccountRequestFactory signoutRequestWithRequestParameters:msidParams
-                                                                                               oauthFactory:self.msalOauth2Provider.msidOauth2Factory];
-        
-    [signoutRequest executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error)
+    NSError *controllerError;
+    MSIDSignoutController *controller = [MSIDRequestControllerFactory signoutControllerForParameters:msidParams
+                                                                                        oauthFactory:self.msalOauth2Provider.msidOauth2Factory
+                                                                            shouldSignoutFromBrowser:signoutParameters.signoutFromBrowser
+                                                                                               error:&controllerError];
+    
+    if (!controller)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [signoutRequest class]);
+        block(NO, controllerError, msidParams);
+        return;
+    }
+    
+    [controller executeRequestWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, msidParams, @"Finished executing signout request with type %@", [controller class]);
         block(success, error, msidParams);
     }];
 }

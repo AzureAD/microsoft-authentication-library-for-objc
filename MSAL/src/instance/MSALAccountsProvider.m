@@ -48,6 +48,7 @@
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALAccountsProvider()
 
@@ -167,6 +168,8 @@
                                                           clientId:queryClientId
                                                           familyId:queryFamilyId
                                                  accountIdentifier:queryAccountIdentifier
+                             accountMetadataCache:self.accountMetadataCache
+                                              signedInAccountsOnly:parameters.returnOnlySignedInAccounts
                                                            context:nil
                                                              error:&msidError];
     
@@ -237,14 +240,12 @@
         
         if ([externalAccount.mTenantProfiles count])
         {
-            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.mTenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
+            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.tenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
             if ([homeTenantProfileArray count] == 1) accountClaims = homeTenantProfileArray[0].claims;
         }
     
         [self addMSALAccount:externalAccount toSet:resultAccounts claims:accountClaims];
     }
-    
-    resultAccounts = [self filterSignedOutAccounts:resultAccounts];
     
     return [resultAccounts allObjects];
 }
@@ -260,38 +261,14 @@
     }
     else
     {
-        [existingAccount addTenantProfiles:account.mTenantProfiles];
+        [existingAccount addTenantProfiles:account.tenantProfiles];
     }
     
     if (accountClaims)
     {
         existingAccount.accountClaims = accountClaims;
+        existingAccount.username = account.username;
     }
-}
-
-- (NSMutableSet<MSALAccount *> *)filterSignedOutAccounts:(NSSet<MSALAccount *> *)accounts
-{
-    NSMutableSet<MSALAccount *> *filteredAccounts = [NSMutableSet new];
-    for (MSALAccount *account in accounts)
-    {
-        MSIDAccountMetadataState accountState = MSIDAccountMetadataStateUnknown;
-        if (account.identifier)
-        {
-            NSError *localError;
-            accountState = [self.accountMetadataCache signInStateForHomeAccountId:account.identifier
-                                                                         clientId:self.clientId
-                                                                          context:nil
-                                                                            error:&localError];
-            if (localError) continue;
-        }
-        
-        if (accountState != MSIDAccountMetadataStateSignedOut)
-        {
-            [filteredAccounts addObject:account];
-        }
-    }
-    
-    return filteredAccounts;
 }
 
 #pragma mark - Authority (deprecated)
@@ -338,6 +315,22 @@
     }
 
     return nil;
+}
+
+#pragma mark - Account metadata
+- (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
+                                                context:(id<MSIDRequestContext>)context
+                                                  error:(NSError **)error
+{
+    if (!self.accountMetadataCache || [NSString msidIsStringNilOrBlank:homeAccountId])
+    {
+        return MSIDAccountMetadataStateUnknown;
+    }
+    
+    return [self.accountMetadataCache signInStateForHomeAccountId:homeAccountId
+                                                         clientId:self.clientId
+                                                          context:context
+                                                            error:error];
 }
 
 @end

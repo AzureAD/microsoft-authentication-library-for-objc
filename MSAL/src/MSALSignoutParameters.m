@@ -25,19 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-#define MSAL_VER_HIGH       1
-#define MSAL_VER_LOW        0
-#define MSAL_VER_PATCH      5
+#import "MSALSignoutParameters.h"
+#import "MSALWebviewParameters.h"
 
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
+@implementation MSALSignoutParameters
 
-// Framework versions only support high and low for the double value, sadly.
-#define MSAL_VERSION_STRING     STR(MSAL_VER_HIGH) "." STR(MSAL_VER_LOW) "." STR(MSAL_VER_PATCH)
+- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters
+{
+    self = [super init];
+    if (self)
+    {
+        _webviewParameters = [webviewParameters copy];
+        _signoutFromBrowser = YES;
+    }
+    return self;
+}
 
-#import "IdentityCore_Internal.h"
-#import "MSIDLogger+Internal.h"
-#import "MSALError.h"
-#import "MSIDRequestContext.h"
-#import "MSALDefinitions.h"
-#import "MSALError.h"
+@end
