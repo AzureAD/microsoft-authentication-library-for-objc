@@ -49,6 +49,8 @@
 #import "MSALTenantProfile.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+MultiTenantAccount.h"
+#import "MSIDSSOExtensionGetAccountsRequest.h"
+#import "MSIDRequestParameters.h"
 
 @interface MSALAccountsProvider()
 
@@ -141,6 +143,17 @@
                                         authority:(MSIDAuthority *)authority
                                             error:(NSError * __autoreleasing *)error
 {
+    return [self accountsForParameters:parameters
+                             authority:authority
+                        brokerAccounts:nil
+                                 error:error];
+}
+
+- (NSArray<MSALAccount *> *)accountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                        authority:(MSIDAuthority *)authority
+                                   brokerAccounts:(NSArray<MSIDAccount *> *)brokerAccounts
+                                            error:(NSError * __autoreleasing *)error
+{
     NSError *msidError = nil;
     
     NSString *queryClientId = nil;
@@ -164,6 +177,8 @@
         queryAccountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:parameters.username homeAccountId:parameters.identifier];
     }
     
+    NSMutableArray *allAccounts = [NSMutableArray new];
+    
     NSArray *msidAccounts = [self.tokenCache accountsWithAuthority:authority
                                                           clientId:queryClientId
                                                           familyId:queryFamilyId
@@ -182,6 +197,16 @@
         return nil;
     }
     
+    [allAccounts addObjectsFromArray:msidAccounts];
+    [allAccounts addObjectsFromArray:brokerAccounts];
+    
+    return [self filteredAccountsForParameters:parameters msidAccounts:allAccounts includeExternalAccounts:YES];
+}
+
+- (NSArray<MSALAccount *> *)filteredAccountsForParameters:(MSALAccountEnumerationParameters *)parameters
+                                             msidAccounts:(NSArray<MSIDAccount *> *)msidAccounts
+                                     includeExternalAccounts:(BOOL)includeExternalAccounts
+{
     if (![NSString msidIsStringNilOrBlank:parameters.tenantProfileIdentifier])
     {
         NSMutableArray *filteredAccounts = [NSMutableArray new];
@@ -199,7 +224,7 @@
     
     NSArray *externalAccounts = nil;
     
-    if (self.externalAccountProvider)
+    if (self.externalAccountProvider && includeExternalAccounts)
     {
         NSError *externalError = nil;
         externalAccounts = [self.externalAccountProvider allExternalAccountsWithParameters:parameters error:&externalError];
@@ -294,6 +319,57 @@
                                 }];
 }
 
+- (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSError *requestError;
+    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:nil
+                                                                                    redirectUri:nil
+                                                                                       clientId:self.clientId
+                                                                                         scopes:nil
+                                                                                     oidcScopes:nil
+                                                                                  correlationId:nil
+                                                                                 telemetryApiId:nil
+                                                                            intuneAppIdentifier:nil
+                                                                                    requestType:MSIDRequestBrokeredType
+                                                                                          error:&requestError];
+    
+    if (requestError)
+    {
+        completionBlock(nil, requestError);
+        return;
+    }
+    
+    MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
+                                                                                                                              error:&requestError];
+    
+    if (!ssoExtensionRequest)
+    {
+        completionBlock(nil, requestError);
+        return;
+    }
+    
+    [ssoExtensionRequest executeRequestWithCompletion:^(NSArray<MSIDAccount *> * _Nullable accounts, BOOL returnBrokerAccountsOnly, NSError * _Nullable error)
+    {
+        if (error)
+        {
+            completionBlock(nil, error);
+            return;
+        }
+        
+        if (returnBrokerAccountsOnly)
+        {
+            NSArray<MSALAccount *> *msalAccounts = [self filteredAccountsForParameters:parameters msidAccounts:accounts includeExternalAccounts:NO];
+            completionBlock(msalAccounts, nil);
+            return;
+        }
+        
+        NSError *localError;
+        NSArray<MSALAccount *> *msalAccounts = [self accountsForParameters:parameters authority:nil brokerAccounts:accounts error:&localError];
+        completionBlock(msalAccounts, localError);
+    }];
+}
+
 #pragma mark - App metadata
 
 - (MSIDAppMetadataCacheItem *)appMetadataItem
@@ -331,6 +407,34 @@
                                                          clientId:self.clientId
                                                           context:context
                                                             error:error];
+}
+
+#pragma mark - Principal account id
+
+- (MSALAccount *)currentPrincipalAccount:(NSError **)error
+{
+    MSIDAccountIdentifier *principalAccountId = [self currentPrincipalAccountIdWithError:error];
+    
+    if (!principalAccountId)
+    {
+        return nil;
+    }
+    
+    MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:principalAccountId.homeAccountId];
+    return [self accountForParameters:parameters error:error];
+}
+
+- (MSIDAccountIdentifier *)currentPrincipalAccountIdWithError:(NSError **)error
+{
+    return [self.accountMetadataCache principalAccountIdForClientId:self.clientId context:nil error:error];
+}
+
+- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId error:(NSError **)error
+{
+    return [self.accountMetadataCache updatePrincipalAccountIdForClientId:self.clientId
+                                                       principalAccountId:currentAccountId
+                                                                  context:nil
+                                                                    error:error];
 }
 
 @end

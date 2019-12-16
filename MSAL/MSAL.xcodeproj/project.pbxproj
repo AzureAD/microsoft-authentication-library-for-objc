@@ -273,6 +273,8 @@
 		B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */; };
 		B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */; };
 		B217861B23A580B200839CE8 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */; };
+		B21786A523A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; };
+		B21786A623A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; };
 		B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
 		B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
 		B21E07B3210E542C007E3A3C /* MSALRedirectUriVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */; };
@@ -1113,6 +1115,7 @@
 		B203459321AF77FB00B221AA /* MSALRedirectUri.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALRedirectUri.m; sourceTree = "<group>"; };
 		B203459C21AFA1FB00B221AA /* MSALRedirectUri+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALRedirectUri+Internal.h"; sourceTree = "<group>"; };
 		B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.1.sdk/System/Library/Frameworks/AuthenticationServices.framework; sourceTree = DEVELOPER_DIR; };
+		B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALPublicClientApplication+SingleAccount.h"; sourceTree = "<group>"; };
 		B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALRedirectUriVerifier.h; sourceTree = "<group>"; };
 		B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALRedirectUriVerifier.m; sourceTree = "<group>"; };
 		B21E07BC210E5458007E3A3C /* MSALRedirectUriVerifier.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALRedirectUriVerifier.m; sourceTree = "<group>"; };
@@ -2037,6 +2040,7 @@
 				9682A62A218290F700E37E63 /* MSALDefinitions.h */,
 				D65A6F821E3FF3D900C69FBA /* MSALError.h */,
 				D65A6F841E3FF3D900C69FBA /* MSALPublicClientApplication.h */,
+				B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */,
 				D65A6F851E3FF3D900C69FBA /* MSALResult.h */,
 				D65A6F861E3FF3D900C69FBA /* MSALAccount.h */,
 				B27CCDDE229F65D700CAD565 /* MSALAccount+MultiTenantAccount.h */,
@@ -2550,6 +2554,7 @@
 				B273D0CC226E85C8005A7BB4 /* MSALHTTPConfig+Internal.h in Headers */,
 				B223B0B922ADF8E600FB8713 /* MSALLegacySharedMSAAccount.h in Headers */,
 				B2D478A3230E3E54005AE186 /* MSALTelemetryEventsObservingProxy.h in Headers */,
+				B21786A523A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */,
 				B273D0B3226E858B005A7BB4 /* MSALErrorConverter.h in Headers */,
 				B223B0B322ADF8C500FB8713 /* MSALLegacySharedADALAccount.h in Headers */,
 				2342584B20649A9800621AFE /* MSALAccount+Internal.h in Headers */,
@@ -2634,6 +2639,7 @@
 				B203459521AF77FB00B221AA /* MSALRedirectUri.h in Headers */,
 				D62746D31E9B38AF00EFCE99 /* MSALPublicClientApplication+Internal.h in Headers */,
 				B273D0B9226E859F005A7BB4 /* MSALPublicClientApplicationConfig+Internal.h in Headers */,
+				B21786A623A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */,
 				B273D0C6226E85C1005A7BB4 /* MSALCacheConfig+Internal.h in Headers */,
 				B26756BF22921A71000F01D7 /* MSALOauth2Provider.h in Headers */,
 				96B5E6F32256D197002232F9 /* MSALExtraQueryParameters.h in Headers */,

@@ -99,6 +99,7 @@
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
+#import "MSALPublicClientApplication+SingleAccount.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -429,6 +430,95 @@
     [request allAccountsFilteredByAuthority:self.internalConfig.authority
                             completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
         completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:msidError]);
+    }];
+}
+
+- (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    [request allAccountsFromDevice:parameters
+                   completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        if (error)
+        {
+            NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:error classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+            if (completionBlock) completionBlock(nil, msalError);
+            return;
+        }
+        
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+        if (completionBlock) completionBlock(accounts, nil);
+    }];
+}
+
+#pragma mark - Single Account
+
+- (void)getCurrentAccountWithCompletionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
+    {
+        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        [MSALPublicClientApplication logOperation:@"getCurrentAccount" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        completionBlock(account, previousAccount, msidError);
+    };
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    
+    NSError *localError;
+    MSALAccount *previousAccount = [request currentPrincipalAccount:&localError];
+    
+    if (localError)
+    {
+        block(nil, nil, localError);
+        return;
+    }
+    
+    MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
+    parameters.returnOnlySignedInAccounts = YES;
+    
+    [self accountsFromDeviceForParameters:parameters
+                          completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        if (error)
+        {
+            block(nil, nil, error);
+            return;
+        }
+        
+        if ([accounts count] > 1)
+        {
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorMismatchedAccount, @"Multiple accounts found in cache.", nil, nil, nil, nil, nil, YES);
+            block(nil, nil, error);
+            return;
+        }
+        
+        MSALAccount *newAccount = [accounts count] ? accounts[0] : nil;
+        
+        if (newAccount)
+        {
+            NSError *accountUpdateError;
+            BOOL result = [request setCurrentPrincipalAccountId:newAccount.lookupAccountIdentifier error:&accountUpdateError];
+            
+            if (!result)
+            {
+                block(nil, nil, accountUpdateError);
+                return;
+            }
+        }
+        
+        block(newAccount, previousAccount, nil);
     }];
 }
 
