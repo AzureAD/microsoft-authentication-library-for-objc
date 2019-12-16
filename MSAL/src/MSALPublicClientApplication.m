@@ -86,6 +86,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSIDExtendedTokenCacheDataSource.h"
 #import "MSALWebviewParameters.h"
+#import "MSIDAccountIdentifier.h"
 #if TARGET_OS_IPHONE
 #import "MSIDCertAuthHandler+iOS.h"
 #import "MSIDBrokerInteractiveController.h"
@@ -338,6 +339,7 @@
 - (NSArray <MSALAccount *> *)allAccounts:(NSError * __autoreleasing *)error
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -359,6 +361,7 @@
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for identifier %@", MSID_PII_LOG_TRACKABLE(identifier));
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -380,6 +383,7 @@
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -398,6 +402,7 @@
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL account for username %@", MSID_PII_LOG_EMAIL(username));
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
     NSError *msidError = nil;
@@ -414,6 +419,7 @@
 - (void)allAccountsFilteredByAuthority:(MSALAccountsCompletionBlock)completionBlock
 {
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
                                                                             clientId:self.internalConfig.clientId
                                                              externalAccountProvider:self.externalAccountHandler];
 
@@ -670,6 +676,27 @@
                  parameters.correlationId,
                  self.internalConfig.clientApplicationCapabilities,
                  parameters.claimsRequest);
+    
+    // Return early if account is in signed out state
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                         accountMetadataCache:self.accountMetadataCache
+                                                                                     clientId:self.internalConfig.clientId
+                                                                      externalAccountProvider:self.externalAccountHandler];
+    NSError *signInStateError;
+    MSIDAccountMetadataState signInState = [accountsProvider signInStateForHomeAccountId:msidParams.accountIdentifier.homeAccountId
+                                                                                 context:msidParams
+                                                                                   error:&signInStateError];
+    
+    if (signInStateError) {
+        block(nil, signInStateError, msidParams);
+        return;
+    }
+    if (signInState == MSIDAccountMetadataStateSignedOut)
+    {
+        NSError *interactionError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInteractionRequired, @"Account is signed out, user interaction is required.", nil, nil, nil, msidParams.correlationId, nil, YES);
+        block(nil, interactionError, msidParams);
+        return;
+    }
     
     MSIDDefaultTokenRequestProvider *tokenRequestProvider = [[MSIDDefaultTokenRequestProvider alloc] initWithOauthFactory:self.msalOauth2Provider.msidOauth2Factory
                                                                                                           defaultAccessor:self.tokenCache
@@ -1049,18 +1076,26 @@
         }
     }
 
-    if (self.accountMetadataCache && ![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
-                                                                                          clientId:self.internalConfig.clientId
-                                                                                             state:MSIDAccountMetadataStateSignedOut
-                                                                                           context:nil
-                                                                                             error:error])
+    if (!self.accountMetadataCache)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        NSError *noAccountMetadataCacheError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"accountMetadataCache is nil when removing account!.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:noAccountMetadataCacheError];
         return NO;
     }
     
-    return [self.msalOauth2Provider removeAdditionalAccountInfo:account
-                                                          error:error];
+    msidError = nil;
+    if (![self.accountMetadataCache updateSignInStateForHomeAccountId:account.identifier
+                                                             clientId:self.internalConfig.clientId
+                                                                state:MSIDAccountMetadataStateSignedOut
+                                                              context:nil
+                                                                error:&msidError])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Clearing account metadata cache failed");
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (BOOL)shouldExcludeValidationForAuthority:(MSIDAuthority *)authority
