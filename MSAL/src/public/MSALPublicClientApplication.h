@@ -37,6 +37,8 @@
 @class MSALInteractiveTokenParameters;
 @class MSALClaimsRequest;
 @class MSALAccountEnumerationParameters;
+@class MSALWebviewParameters;
+@class MSALSignoutParameters;
 @class WKWebView;
 
 /**
@@ -434,6 +436,18 @@
  */
 - (BOOL)removeAccount:(nonnull MSALAccount *)account
                 error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+
+/**
+   Removes all tokens from the cache for this application for the provided account.
+   Additionally, this API will remove account from the system browser or the embedded webView by navigating to the OIDC end session endpoint if requested in parameters (see more https://openid.net/specs/openid-connect-session-1_0.html).
+   Moreover, if device has an SSO extension installed, the signout request will be handled through the SSO extension.
+ 
+   As a result of the signout operation, application will not be able to get tokens for the given account without user entering credentials.
+   However, this will not sign out from other signed in apps on the device, unless it is explicitly enabled by the administrator configuration through an MDM profile.
+*/
+- (void)signoutWithAccount:(nonnull MSALAccount *)account
+         signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
+           completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock;
 
 
 @end
