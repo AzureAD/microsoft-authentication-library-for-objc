@@ -59,6 +59,7 @@
 @property (nullable, nonatomic) NSString *clientId;
 @property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
 @property (nullable, nonatomic) NSPredicate *homeTenantFilterPredicate;
+@property (nullable, nonatomic) MSIDSSOExtensionGetAccountsRequest *currentRequest API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
 
@@ -322,6 +323,14 @@
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
               completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
 {
+    if (![MSIDSSOExtensionGetAccountsRequest canPerformRequest])
+    {
+        NSError *localError;
+        NSArray<MSALAccount *> *msalAccounts = [self accountsForParameters:parameters authority:nil brokerAccounts:nil error:&localError];
+        completionBlock(msalAccounts, localError);
+        return;
+    }
+    
     NSError *requestError;
     MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:nil
                                                                                     redirectUri:nil
@@ -349,9 +358,16 @@
         return;
     }
     
+    if (![self setCurrentSSOExtensionRequest:ssoExtensionRequest])
+    {
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to start a get accounts request while one is already executing", nil, nil, nil, nil, nil, YES);
+        completionBlock(nil, error);
+        return;
+    }
+    
     [ssoExtensionRequest executeRequestWithCompletion:^(NSArray<MSIDAccount *> * _Nullable accounts, BOOL returnBrokerAccountsOnly, NSError * _Nullable error)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Completed request with type %@", ssoExtensionRequest.class);
+        [self copyAndClearCurrentSSOExtensionRequest];
         
         if (error)
         {
@@ -437,6 +453,43 @@
                                                        principalAccountId:currentAccountId
                                                                   context:nil
                                                                     error:error];
+}
+
+#pragma mark - Completion block
+
+- (BOOL)setCurrentSSOExtensionRequest:(MSIDSSOExtensionGetAccountsRequest *)request API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    @synchronized (self)
+    {
+        if (self.currentRequest)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request is already executing. Please wait or cancel the request before starting it again.");
+            return NO;
+        }
+        
+        self.currentRequest = request;
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (MSIDSSOExtensionGetAccountsRequest *)copyAndClearCurrentSSOExtensionRequest API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    @synchronized (self)
+    {
+        if (!self.currentRequest)
+        {
+            // There's no error param because this isn't on a critical path. Just log that you are
+            // trying to clear a request when there isn't one.
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Trying to clear out an empty request");
+            return nil;
+        }
+        
+        MSIDSSOExtensionGetAccountsRequest *currentRequest = self.currentRequest;
+        self.currentRequest = nil;
+        return currentRequest;
+    }
 }
 
 @end
