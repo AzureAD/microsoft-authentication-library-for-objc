@@ -183,7 +183,7 @@
                                                           clientId:queryClientId
                                                           familyId:queryFamilyId
                                                  accountIdentifier:queryAccountIdentifier
-                             accountMetadataCache:self.accountMetadataCache
+                                              accountMetadataCache:self.accountMetadataCache
                                               signedInAccountsOnly:parameters.returnOnlySignedInAccounts
                                                            context:nil
                                                              error:&msidError];
