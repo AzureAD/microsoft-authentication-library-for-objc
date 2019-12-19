@@ -351,6 +351,8 @@
     
     [ssoExtensionRequest executeRequestWithCompletion:^(NSArray<MSIDAccount *> * _Nullable accounts, BOOL returnBrokerAccountsOnly, NSError * _Nullable error)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Completed request with type %@", ssoExtensionRequest.class);
+        
         if (error)
         {
             completionBlock(nil, error);

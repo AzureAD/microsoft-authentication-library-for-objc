@@ -104,6 +104,7 @@
         // Fallback on earlier versions
     }
     
+    /*
     if (@available(iOS 13.0, *)) {
         [application getCurrentAccountWithCompletionBlock:^(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error) {
             
@@ -111,7 +112,7 @@
         }];
     } else {
         // Fallback on earlier versions
-    }
+    }*/
 }
 
 - (NSInteger)numberOfRows
