@@ -51,6 +51,9 @@
 #import "MSALAccountId+Internal.h"
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDAccountMetadataCacheAccessor.h"
+#import "MSIDTestSwizzle.h"
+#import "MSIDSSOExtensionGetAccountsRequest.h"
+#import "MSIDAccount.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -1103,6 +1106,266 @@
     XCTAssertEqualObjects(secondAccount.username, @"user2@contoso.com");
     XCTAssertEqualObjects(secondAccount.environment, @"login.microsoftonline.com");
     XCTAssertEqualObjects(secondAccount.accountClaims, @{@"home":@"claim"});
+}
+
+#pragma mark - AllAccountsFromDevice
+
+- (void)testAllAccountsFromDevice_whenCurrentSSOExtensionAlreadyPresent_shouldReturnNilAndFillError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:nil
+                                                                         accountMetadataCache:nil
+                                                                                     clientId:@"myclientid"];
+        
+    __block dispatch_semaphore_t dsem = dispatch_semaphore_create(0);
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            dispatch_semaphore_wait(dsem, DISPATCH_TIME_FOREVER);
+            callback(@[], NO, nil);
+        });
+    }];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    XCTestExpectation *expectation = [self expectationWithDescription:@"All Accounts"];
+    XCTestExpectation *failExpectation = [self expectationWithDescription:@"Failed expectation"];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        [expectation fulfill];
+    }];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        XCTAssertNil(accounts);
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqual(error.code, MSIDErrorInternal);
+        [failExpectation fulfill];
+        dispatch_semaphore_signal(dsem);
+    }];
+    
+    [self waitForExpectations:@[expectation, failExpectation] timeout:1];
+}
+
+- (void)testAllAccuntsFromDevice_whenSSOExtensionNotAvailable_shouldReturnLocalAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+                                             clientId:@"client_id"
+                                                  upn:@"user@contoso.com"
+                                                 name:@"simple_user"
+                                                  uid:@"uid"
+                                                 utid:@"tid"
+                                                  oid:@"oid"
+                                             tenantId:@"tid"
+                                             familyId:nil
+                                        cacheAccessor:defaultCache];
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return NO;
+    }];
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                         accountMetadataCache:nil
+                                                                                     clientId:@"client_id"];
+        
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    expectation.inverted = YES;
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+    }];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(accounts);
+        XCTAssertEqual([accounts count], 1);
+        [allAccountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
+}
+
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_encounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                         accountMetadataCache:nil
+                                                                                     clientId:@"client_id"];
+        
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorUnsupportedFunctionality, @"Unsupported functionality", nil, nil, nil, nil, nil, NO);
+        callback(nil, NO, error);
+    }];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        XCTAssertNotNil(error);
+        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+        XCTAssertEqual(error.code, MSIDErrorUnsupportedFunctionality);
+        XCTAssertNil(accounts);
+        XCTAssertEqual([accounts count], 0);
+        [allAccountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
+}
+
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_shouldCombineWithLocalAccounts API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+         clientId:@"client_id"
+              upn:@"user@contoso.com"
+             name:@"simple_user"
+              uid:@"uid"
+             utid:@"tid"
+              oid:@"oid"
+         tenantId:@"tid"
+         familyId:nil
+    cacheAccessor:defaultCache];
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                         accountMetadataCache:nil
+                                                                                     clientId:@"client_id"];
+        
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDAccount *account2 = [MSIDAccount new];
+        account2.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
+        account2.environment = @"login.microsoftonline.com";
+        
+        MSIDAccount *account3 = [MSIDAccount new];
+        account3.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user2@contoso.com" homeAccountId:@"uid2.utid"];
+        account3.environment = @"login.microsoftonline.com";
+        
+        callback(@[account2, account3], NO, nil);
+    }];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(accounts);
+        XCTAssertEqual([accounts count], 2);
+        
+        MSALAccount *firstAccount = accounts[0];
+        XCTAssertEqualObjects(firstAccount.identifier, @"uid.tid");
+        
+        MSALAccount *secondAccount = accounts[1];
+        XCTAssertEqualObjects(secondAccount.identifier, @"uid2.utid");
+        
+        [allAccountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
+}
+
+- (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_andReturnBrokerAccountsOnlyYES_shouldReturnBrokerAccountsOnly API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+         clientId:@"client_id"
+              upn:@"user@contoso.com"
+             name:@"simple_user"
+              uid:@"uid"
+             utid:@"tid"
+              oid:@"oid"
+         tenantId:@"tid"
+         familyId:nil
+    cacheAccessor:defaultCache];
+    
+    [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
+                           class:[MSIDSSOExtensionGetAccountsRequest class]
+                           block:(id)^(id obj)
+    {
+        return YES;
+    }];
+    
+    MSALAccountsProvider *accountsProvider = [[MSALAccountsProvider alloc] initWithTokenCache:defaultCache
+                                                                         accountMetadataCache:nil
+                                                                                     clientId:@"client_id"];
+        
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(executeRequestWithCompletion:)
+                              class:[MSIDSSOExtensionGetAccountsRequest  class]
+                              block:(id)^(id obj, MSIDGetAccountsRequestCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDAccount *account3 = [MSIDAccount new];
+        account3.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user2@contoso.com" homeAccountId:@"uid2.utid"];
+        account3.environment = @"login.microsoftonline.com";
+        
+        callback(@[account3], YES, nil);
+    }];
+    
+    MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
+    XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
+    
+    [accountsProvider allAccountsFromDevice:params
+                            completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        XCTAssertNil(error);
+        XCTAssertNotNil(accounts);
+        XCTAssertEqual([accounts count], 1);
+        
+        MSALAccount *account = accounts[0];
+        XCTAssertEqualObjects(account.identifier, @"uid2.utid");
+        
+        [allAccountsExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, allAccountsExpectation] timeout:1];
 }
 
 @end
