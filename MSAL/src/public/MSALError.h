@@ -246,6 +246,11 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     MSALInternalErrorMismatchedUser                     = -42101,
     
     /**
+      Found multiple accounts in cache. Please use getAccounts: API which supports multiple accounts.
+     */
+    MSALInternalErrorAmbiguousAccount                   = -42102,
+    
+    /**
      The user or application failed to authenticate in the interactive flow.
      Inspect MSALOAuthErrorKey and MSALErrorDescriptionKey in the userInfo
      dictionary for more detailed information about the specific error.

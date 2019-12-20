@@ -27,12 +27,14 @@
 
 #import "MSALPublicClientApplication.h"
 #import "MSALDefinitions.h"
+#import "MSALParameters.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALPublicClientApplication (SingleAccount)
 
-- (void)getCurrentAccountWithCompletionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
+                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
 

@@ -451,7 +451,7 @@
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
         }
         
-        [MSALPublicClientApplication logOperation:@"getAccountsFromDevcie" result:nil error:msalError context:nil];
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
         
         if (!completionBlock) return;
         
@@ -499,16 +499,36 @@
 
 #pragma mark - Single Account
 
-- (void)getCurrentAccountWithCompletionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)getCurrentAccountWithParameters:(MSALParameters *)parameters
+                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
 {
     __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
     {
-        NSError *msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
-        [MSALPublicClientApplication logOperation:@"getCurrentAccount" result:nil error:msalError context:nil];
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with current account %@, previous account %@", MSID_PII_LOG_EMAIL(account.username), MSID_PII_LOG_EMAIL(previousAccount.username));
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
         
         if (!completionBlock) return;
         
-        completionBlock(account, previousAccount, msidError);
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(account, previousAccount, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(account, previousAccount, msalError);
+        }
     };
     
     MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
@@ -525,10 +545,10 @@
         return;
     }
     
-    MSALAccountEnumerationParameters *parameters = [MSALAccountEnumerationParameters new];
-    parameters.returnOnlySignedInAccounts = YES;
+    MSALAccountEnumerationParameters *accountParameters = [MSALAccountEnumerationParameters new];
+    accountParameters.returnOnlySignedInAccounts = YES;
     
-    [self accountsFromDeviceForParameters:parameters
+    [self accountsFromDeviceForParameters:accountParameters
                           completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         
         if (error)
@@ -539,7 +559,7 @@
         
         if ([accounts count] > 1)
         {
-            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorMismatchedAccount, @"Multiple accounts found in cache.", nil, nil, nil, nil, nil, YES);
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorCacheMultipleUsers, @"Multiple accounts found in cache.", nil, nil, nil, nil, nil, YES);
             block(nil, nil, error);
             return;
         }
