@@ -50,7 +50,7 @@
 #import "MSIDAccountMetadataCacheAccessor.h"
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
-#import "MSIDRequestParameters.h"
+#import "MSIDRequestParameters+Broker.h"
 
 @interface MSALAccountsProvider()
 
@@ -321,9 +321,10 @@
 }
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
+            requestParameters:(MSIDRequestParameters *)requestParameters
               completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    if (![MSIDSSOExtensionGetAccountsRequest canPerformRequest])
+    if (![MSIDSSOExtensionGetAccountsRequest canPerformRequest] || ![requestParameters shouldUseBroker])
     {
         NSError *localError;
         NSArray<MSALAccount *> *msalAccounts = [self accountsForParameters:parameters authority:nil brokerAccounts:nil error:&localError];
@@ -332,23 +333,6 @@
     }
     
     NSError *requestError;
-    MSIDRequestParameters *requestParameters = [[MSIDRequestParameters alloc] initWithAuthority:nil
-                                                                                    redirectUri:nil
-                                                                                       clientId:self.clientId
-                                                                                         scopes:nil
-                                                                                     oidcScopes:nil
-                                                                                  correlationId:nil
-                                                                                 telemetryApiId:nil
-                                                                            intuneAppIdentifier:nil
-                                                                                    requestType:MSIDRequestBrokeredType
-                                                                                          error:&requestError];
-    
-    if (requestError)
-    {
-        completionBlock(nil, requestError);
-        return;
-    }
-    
     MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
                                                                                                                               error:&requestError];
     

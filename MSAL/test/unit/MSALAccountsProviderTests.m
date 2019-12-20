@@ -54,6 +54,9 @@
 #import "MSIDTestSwizzle.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSIDAccount.h"
+#import "MSIDRequestParameters.h"
+#import "MSIDInteractiveTokenRequestParameters.h"
+#import "MSIDTestParametersProvider.h"
 
 @interface MSALAccountsProviderTests : XCTestCase
 
@@ -1139,13 +1142,18 @@
     XCTestExpectation *expectation = [self expectationWithDescription:@"All Accounts"];
     XCTestExpectation *failExpectation = [self expectationWithDescription:@"Failed expectation"];
     
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         
         [expectation fulfill];
     }];
     
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         
         XCTAssertNil(accounts);
@@ -1197,6 +1205,7 @@
     XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
     
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:[MSIDRequestParameters new]
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         XCTAssertNil(error);
         XCTAssertNotNil(accounts);
@@ -1234,7 +1243,11 @@
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
     XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
     
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         XCTAssertNotNil(error);
         XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
@@ -1293,7 +1306,11 @@
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
     XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
     
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         XCTAssertNil(error);
         XCTAssertNotNil(accounts);
@@ -1353,7 +1370,11 @@
     MSALAccountEnumerationParameters *params = [MSALAccountEnumerationParameters new];
     XCTestExpectation *allAccountsExpectation = [self expectationWithDescription:@"All Accounts"];
     
+    MSIDRequestParameters *requestParams = [MSIDTestParametersProvider testInteractiveParameters];
+    requestParams.validateAuthority = YES;
+    
     [accountsProvider allAccountsFromDevice:params
+                          requestParameters:requestParams
                             completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
         XCTAssertNil(error);
         XCTAssertNotNil(accounts);
