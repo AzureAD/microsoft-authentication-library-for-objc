@@ -1249,7 +1249,7 @@
 
 - (void)testAllAccountsFromDevice_whenSSOExtensionPresent_andReturnedAccounts_shouldCombineWithLocalAccounts API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.microsoftonline.com/tid"
+    [MSIDTestCacheUtil saveDefaultTokensWithAuthority:@"https://login.windows.net/tid"
          clientId:@"client_id"
               upn:@"user@contoso.com"
              name:@"simple_user"
@@ -1281,11 +1281,11 @@
         
         MSIDAccount *account2 = [MSIDAccount new];
         account2.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user@contoso.com" homeAccountId:@"uid.tid"];
-        account2.environment = @"login.microsoftonline.com";
+        account2.environment = @"login.windows.net";
         
         MSIDAccount *account3 = [MSIDAccount new];
         account3.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:@"user2@contoso.com" homeAccountId:@"uid2.utid"];
-        account3.environment = @"login.microsoftonline.com";
+        account3.environment = @"login.windows.net";
         
         callback(@[account2, account3], NO, nil);
     }];
