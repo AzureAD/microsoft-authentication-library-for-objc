@@ -1987,6 +1987,8 @@
     XCTAssertEqual([allAccounts count], 0);
 }
 
+
+#if TARGET_OS_IPHONE
 #pragma mark - All accounts from device
  
 - (void)testAllAccountsFromDevice_whenBrokerEnabled_andEncounteredError_shouldReturnError API_AVAILABLE(ios(13.0), macos(10.15))
@@ -2119,6 +2121,7 @@
     
     [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
 }
+#endif
 
 #pragma mark - allAccountsFilteredByAuthority
 
