@@ -273,8 +273,8 @@
 		B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */; };
 		B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */; };
 		B217861B23A580B200839CE8 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */; };
-		B21786A523A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; };
-		B21786A623A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; };
+		B21786A523A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B21786A623A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B21E07B1210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
 		B21E07B2210E542C007E3A3C /* MSALRedirectUriVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = B21E07AF210E542C007E3A3C /* MSALRedirectUriVerifier.h */; };
 		B21E07B3210E542C007E3A3C /* MSALRedirectUriVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = B21E07B0210E542C007E3A3C /* MSALRedirectUriVerifier.m */; };
