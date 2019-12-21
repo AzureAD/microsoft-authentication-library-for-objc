@@ -194,6 +194,7 @@
         return nil;
     }
         
+#if TARGET_OS_IPHONE
     if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityAuto
         && msalRedirectUri.brokerCapable
         && ![MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&msidError])
@@ -201,6 +202,7 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+#endif
     
     config.verifiedRedirectUri = msalRedirectUri;
     
