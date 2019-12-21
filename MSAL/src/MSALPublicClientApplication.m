@@ -193,6 +193,14 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+        
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityAuto
+        && msalRedirectUri.brokerCapable
+        && ![MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&msidError])
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
     
     config.verifiedRedirectUri = msalRedirectUri;
     
