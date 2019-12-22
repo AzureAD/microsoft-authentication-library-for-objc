@@ -92,8 +92,6 @@ static BOOL s_runningTest = NO;
                 MSALAccount *account = accounts[userIndex];
                 account = [application accountForIdentifier:account.identifier error:nil];
                 
-                NSLog(@"Retrieved account: %@", account.username);
-
                 if (multipleUsers)
                 {
                     userIndex = ++userIndex >= [accounts count] ? 0 : userIndex;
@@ -108,9 +106,7 @@ static BOOL s_runningTest = NO;
                      {
                          [self expireAllAccessTokens];
                      }
-                    
-                     NSLog(@"Retrieved token %@", result.account.username);
-                     
+                                         
                      dispatch_semaphore_signal(sem);
                  }];
             });
