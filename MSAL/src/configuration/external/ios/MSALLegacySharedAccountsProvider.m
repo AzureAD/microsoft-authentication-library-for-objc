@@ -184,11 +184,12 @@
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
     
-    return [self updateAccount:account
-                 idTokenClaims:idTokenClaims
-                tenantProfiles:nil
-                     operation:MSALLegacySharedAccountUpdateOperation
-                         error:error];
+    [self updateAccountAsync:account
+               idTokenClaims:idTokenClaims
+              tenantProfiles:nil
+                   operation:MSALLegacySharedAccountUpdateOperation
+                  completion:nil];
+    return YES;
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
@@ -247,11 +248,29 @@
                 error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
-    return [self updateAccount:account
-                 idTokenClaims:nil
-                tenantProfiles:tenantProfiles
-                     operation:MSALLegacySharedAccountRemoveOperation
-                         error:error];
+    
+    __block BOOL result = YES;
+    __block NSError *removeError;
+    
+    dispatch_barrier_sync(self.synchronizationQueue, ^{
+        result = [self updateAccountImpl:account
+                           idTokenClaims:nil
+                          tenantProfiles:tenantProfiles
+                               operation:MSALLegacySharedAccountRemoveOperation
+                                   error:&removeError];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error updating legacy accounts %@", MSID_PII_LOG_MASKABLE(removeError));
+        }
+    });
+    
+    if (error)
+    {
+        *error = removeError;
+    }
+    
+    return result;
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
@@ -303,11 +322,11 @@
 
 #pragma mark - Write
 
-- (BOOL)updateAccount:(id<MSALAccount>)account
-        idTokenClaims:(NSDictionary *)idTokenClaims
-       tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
-            operation:(MSALLegacySharedAccountWriteOperation)operation
-                error:(__unused NSError **)error
+- (void)updateAccountAsync:(id<MSALAccount>)account
+             idTokenClaims:(NSDictionary *)idTokenClaims
+            tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+                 operation:(MSALLegacySharedAccountWriteOperation)operation
+                completion:(void (^)(BOOL result, NSError *error))completion
 {
     dispatch_barrier_async(self.synchronizationQueue, ^{
         NSError *updateError;
@@ -321,9 +340,9 @@
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error updating legacy accounts %@", MSID_PII_LOG_MASKABLE(updateError));
         }
+        
+        if (completion) completion(result, updateError);
     });
-    
-    return YES;
 }
 
 - (BOOL)updateAccountImpl:(id<MSALAccount>)account
