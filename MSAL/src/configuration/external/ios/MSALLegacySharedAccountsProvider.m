@@ -307,25 +307,23 @@
         idTokenClaims:(NSDictionary *)idTokenClaims
        tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
             operation:(MSALLegacySharedAccountWriteOperation)operation
-                error:(NSError **)error
+                error:(__unused NSError **)error
 {
-    __block BOOL result = YES;
-    __block NSError *updateError = nil;
-    
     dispatch_barrier_sync(self.synchronizationQueue, ^{
-        result = [self updateAccountImpl:account
-                           idTokenClaims:idTokenClaims
-                          tenantProfiles:tenantProfiles
-                               operation:operation
-                                   error:&updateError];
+        NSError *updateError;
+        BOOL result = [self updateAccountImpl:account
+                                idTokenClaims:idTokenClaims
+                               tenantProfiles:tenantProfiles
+                                    operation:operation
+                                        error:&updateError];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error updating legacy accounts %@", MSID_PII_LOG_MASKABLE(updateError));
+        }
     });
     
-    if (error && updateError)
-    {
-        *error = updateError;
-    }
-    
-    return result;
+    return YES;
 }
 
 - (BOOL)updateAccountImpl:(id<MSALAccount>)account
