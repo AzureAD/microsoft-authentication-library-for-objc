@@ -309,7 +309,7 @@
             operation:(MSALLegacySharedAccountWriteOperation)operation
                 error:(__unused NSError **)error
 {
-    dispatch_barrier_sync(self.synchronizationQueue, ^{
+    dispatch_barrier_async(self.synchronizationQueue, ^{
         NSError *updateError;
         BOOL result = [self updateAccountImpl:account
                                 idTokenClaims:idTokenClaims
