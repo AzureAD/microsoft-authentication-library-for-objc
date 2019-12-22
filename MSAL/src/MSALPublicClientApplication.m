@@ -565,17 +565,15 @@
         }
         
         MSALAccount *newAccount = [accounts count] ? accounts[0] : nil;
+        MSIDAccountIdentifier *newIdentifier = newAccount.lookupAccountIdentifier ?: nil;
         
-        if (newAccount)
+        NSError *accountUpdateError;
+        BOOL result = [request setCurrentPrincipalAccountId:newIdentifier error:&accountUpdateError];
+        
+        if (!result)
         {
-            NSError *accountUpdateError;
-            BOOL result = [request setCurrentPrincipalAccountId:newAccount.lookupAccountIdentifier error:&accountUpdateError];
-            
-            if (!result)
-            {
-                block(nil, nil, accountUpdateError);
-                return;
-            }
+            block(nil, nil, accountUpdateError);
+            return;
         }
         
         block(newAccount, previousAccount, nil);

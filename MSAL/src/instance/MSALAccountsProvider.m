@@ -423,6 +423,7 @@
     }
     
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:principalAccountId.homeAccountId];
+    parameters.returnOnlySignedInAccounts = NO;
     return [self accountForParameters:parameters error:error];
 }
 
