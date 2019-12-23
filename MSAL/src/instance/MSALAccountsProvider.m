@@ -198,8 +198,8 @@
         return nil;
     }
     
-    [allAccounts addObjectsFromArray:msidAccounts];
-    [allAccounts addObjectsFromArray:brokerAccounts];
+    if (msidAccounts) [allAccounts addObjectsFromArray:msidAccounts];
+    if (brokerAccounts) [allAccounts addObjectsFromArray:brokerAccounts];
     
     return [self filteredAccountsForParameters:parameters msidAccounts:allAccounts includeExternalAccounts:YES];
 }
