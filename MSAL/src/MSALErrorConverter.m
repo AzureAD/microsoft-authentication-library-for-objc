@@ -60,7 +60,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorRedirectSchemeNotRegistered): @(MSALInternalErrorRedirectSchemeNotRegistered),
 
                                    // Cache
-                                   @(MSIDErrorCacheMultipleUsers) : @(MSALErrorInternal),
+                                   @(MSIDErrorCacheMultipleUsers) : @(MSALInternalErrorAmbiguousAccount),
                                    @(MSIDErrorCacheBadFormat) : @(MSALErrorInternal),
                                    // Authority Validation
                                    @(MSIDErrorAuthorityValidation) : @(MSALInternalErrorFailedAuthorityValidation),

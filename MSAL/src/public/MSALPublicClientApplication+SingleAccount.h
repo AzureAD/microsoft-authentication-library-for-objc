@@ -25,44 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALPublicClientApplication.h"
+#import "MSALDefinitions.h"
 #import "MSALParameters.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MSALWebviewParameters;
-
-@interface MSALSignoutParameters : MSALParameters
-
 /**
- A copy of the configuration which was provided in the initializer.
- */
-@property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
-
-/**
-  Specifies whether signout should also open the browser and send a network request to the end_session_endpoint.
-  YES by default.
- */
-@property (nonatomic) BOOL signoutFromBrowser;
-
-/**
- Initialize MSALSignoutParameters with web parameters.
- 
- @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
- */
-- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
-
-#pragma mark - Unavailable initializers
-
-/**
-    Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
- */
-+ (instancetype)new NS_UNAVAILABLE;
-
-/**
-   Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
+ An interface that contains list of operations that are available when MSAL is in 'single account' mode - which means there's only one account available on the device.
 */
-- (instancetype)init NS_UNAVAILABLE;
+@interface MSALPublicClientApplication (SingleAccount)
+
+/**
+ Gets the current account and return previous account if present. This can be useful to detect if the current account changes.
+ This method must be called whenever the application is resumed or prior to running a scheduled background operation.
+ 
+ If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
+*/
+- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
+                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
 

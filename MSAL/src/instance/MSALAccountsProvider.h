@@ -37,6 +37,8 @@
 @class MSALAccountEnumerationParameters;
 @class MSIDAccountMetadataCacheAccessor;
 @class MSIDRequestParameters;
+@class MSIDAccountIdentifier;
+@class MSIDRequestParameters;
 
 @interface MSALAccountsProvider : NSObject
 
@@ -51,6 +53,10 @@
               accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
                           clientId:(NSString *)clientId
            externalAccountProvider:(MSALExternalAccountHandler *)externalAccountProvider NS_DESIGNATED_INITIALIZER;
+
+- (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
+            requestParameters:(MSIDRequestParameters *)requestParameters
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 // Authority filtering (deprecated)
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority
@@ -70,5 +76,10 @@
 - (MSIDAccountMetadataState)signInStateForHomeAccountId:(NSString *)homeAccountId
                                                 context:(id<MSIDRequestContext>)context
                                                   error:(NSError **)error;
+
+#pragma mark - Principal account id
+
+- (MSALAccount *)currentPrincipalAccount:(NSError **)error;
+- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId error:(NSError **)error;
 
 @end

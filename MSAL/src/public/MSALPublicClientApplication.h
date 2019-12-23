@@ -230,6 +230,14 @@
  */
 - (void)allAccountsFilteredByAuthority:(nonnull MSALAccountsCompletionBlock)completionBlock DEPRECATED_MSG_ATTRIBUTE("Use other synchronous account retrieval API instead.");
 
+/**
+    Returns account for the given account identifying parameters including locally cached accounts and accounts from the SSO extension
+
+    @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
+*/
+- (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+
 #pragma mark - Handling MSAL responses
 
 #if TARGET_OS_IPHONE
