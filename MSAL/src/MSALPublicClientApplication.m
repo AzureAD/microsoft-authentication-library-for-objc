@@ -94,6 +94,7 @@
 #import "MSIDMacKeychainTokenCache.h"
 #endif
 
+#import "MSIDTokenResult.h"
 #import "MSIDKeychainTokenCache.h"
 
 @interface MSALPublicClientApplication()
@@ -696,7 +697,13 @@
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        
+        if (result.tokenResponse)
+        {
+            // Only update external accounts if we got new result from network as an optimization
+            [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        }
+        
         block(msalResult, resultError, msidParams);
     }];
 }
