@@ -37,6 +37,7 @@
 #import "MSIDConstants.h"
 #import "MSALLegacySharedAccountTestUtil.h"
 #import "MSALAccountEnumerationParameters.h"
+#import "MSALLegacySharedAccountsProvider+Internal.h"
 
 @interface MSALLegacySharedAccountsProviderTests : XCTestCase
 
@@ -194,11 +195,21 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
-    NSError *error = nil;
-    BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Update async"];
+    
+    [self.accountsProvider updateAccountAsync:testAccount
+                                idTokenClaims:testAccount.accountClaims
+                               tenantProfiles:nil
+                                    operation:MSALLegacySharedAccountUpdateOperation
+                                   completion:^(BOOL result, NSError * _Nonnull error)
+    {
+        XCTAssertTrue(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
     
     [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
 }
@@ -214,11 +225,21 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV3"];
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
-    NSError *error = nil;
-    BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Update async"];
+    
+    [self.accountsProvider updateAccountAsync:testAccount
+                                idTokenClaims:testAccount.accountClaims
+                               tenantProfiles:nil
+                                    operation:MSALLegacySharedAccountUpdateOperation
+                                   completion:^(BOOL result, NSError * _Nonnull error)
+    {
+        XCTAssertTrue(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
     
     [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:3];
 }
@@ -234,11 +255,21 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
-    NSError *error = nil;
-    BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Update async"];
+    
+    [self.accountsProvider updateAccountAsync:testAccount
+                                idTokenClaims:testAccount.accountClaims
+                               tenantProfiles:nil
+                                    operation:MSALLegacySharedAccountUpdateOperation
+                                   completion:^(BOOL result, NSError * _Nonnull error)
+    {
+        XCTAssertTrue(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
     
     [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
 
@@ -263,11 +294,21 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testMSAAccount];
-    NSError *error = nil;
-    BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Update async"];
+    
+    [self.accountsProvider updateAccountAsync:testAccount
+                                idTokenClaims:testAccount.accountClaims
+                               tenantProfiles:nil
+                                    operation:MSALLegacySharedAccountUpdateOperation
+                                   completion:^(BOOL result, NSError * _Nonnull error)
+    {
+        XCTAssertTrue(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
     
     [self verifyBlobCountWithV1Count:1 v2Count:2 v3Count:2];
     
@@ -292,11 +333,21 @@
     [self saveAccountsBlob:accountsBlob version:@"AccountsV2"];
     
     MSALAccount *testAccount = [MSALLegacySharedAccountTestUtil testADALAccount];
-    NSError *error = nil;
-    BOOL result = [self.accountsProvider updateAccount:testAccount idTokenClaims:testAccount.accountClaims error:&error];
     
-    XCTAssertTrue(result);
-    XCTAssertNil(error);
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Update async"];
+    
+    [self.accountsProvider updateAccountAsync:testAccount
+                                idTokenClaims:testAccount.accountClaims
+                               tenantProfiles:nil
+                                    operation:MSALLegacySharedAccountUpdateOperation
+                                   completion:^(BOOL result, NSError * _Nonnull error)
+    {
+        XCTAssertTrue(result);
+        XCTAssertNil(error);
+        [expectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation] timeout:1];
     
     [self verifyBlobCountWithV1Count:1 v2Count:3 v3Count:3];
 }
