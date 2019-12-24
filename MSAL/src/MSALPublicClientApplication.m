@@ -95,11 +95,8 @@
 #import "MSIDMacKeychainTokenCache.h"
 #endif
 
-<<<<<<< HEAD
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
-=======
 #import "MSIDTokenResult.h"
->>>>>>> origin/release/1.0.6
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
