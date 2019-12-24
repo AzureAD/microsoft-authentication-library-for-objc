@@ -2080,6 +2080,9 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
@@ -2283,6 +2286,9 @@
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
