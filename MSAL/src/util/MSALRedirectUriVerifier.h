@@ -35,4 +35,6 @@
                                          clientId:(NSString *)clientId
                                             error:(NSError * __autoreleasing *)error;
 
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+
 @end
