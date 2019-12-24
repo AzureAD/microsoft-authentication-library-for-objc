@@ -561,10 +561,14 @@
 		B2BB739C2112C7F9000EA4C5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BB739B2112C7F9000EA4C5 /* Security.framework */; };
 		B2BB739D2112C82E000EA4C5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BB739B2112C7F9000EA4C5 /* Security.framework */; };
 		B2BDEEE821FEA205001EBB8B /* MSALMultiAppCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */; };
+<<<<<<< HEAD
 		B2C0E79D23AC7996006C9CAD /* MSALParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C0E79B23AC7996006C9CAD /* MSALParameters.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B2C0E79E23AC7996006C9CAD /* MSALParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C0E79B23AC7996006C9CAD /* MSALParameters.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B2C0E79F23AC7996006C9CAD /* MSALParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C0E79C23AC7996006C9CAD /* MSALParameters.m */; };
 		B2C0E7A023AC7996006C9CAD /* MSALParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C0E79C23AC7996006C9CAD /* MSALParameters.m */; };
+=======
+		B2C0E80923AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C0E80723AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h */; };
+>>>>>>> origin/release/1.0.6
 		B2C17B071FC8DAC50070A514 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206231FC50A4D00755A51 /* libIdentityCore.a */; };
 		B2C17B081FC8DACC0070A514 /* libIdentityCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A206251FC50A4D00755A51 /* libIdentityCore.a */; };
 		B2C17B0A1FC8DB2E0070A514 /* MSIDVersion.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */; };
@@ -1250,8 +1254,12 @@
 		B2BB73962112C4B3000EA4C5 /* msal__ui_test__ios.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = msal__ui_test__ios.xcconfig; sourceTree = "<group>"; };
 		B2BB73982112C51E000EA4C5 /* MSALUITests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSALUITests.swift; sourceTree = "<group>"; };
 		B2BB739B2112C7F9000EA4C5 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.4.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+<<<<<<< HEAD
 		B2C0E79B23AC7996006C9CAD /* MSALParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALParameters.h; sourceTree = "<group>"; };
 		B2C0E79C23AC7996006C9CAD /* MSALParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALParameters.m; sourceTree = "<group>"; };
+=======
+		B2C0E80723AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MSALLegacySharedAccountsProvider+Internal.h"; sourceTree = "<group>"; };
+>>>>>>> origin/release/1.0.6
 		B2C17B091FC8DB2E0070A514 /* MSIDVersion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSIDVersion.m; sourceTree = "<group>"; };
 		B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALBlackforestUITests.m; sourceTree = "<group>"; };
 		B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALCacheRemovalTests.m; sourceTree = "<group>"; };
@@ -1749,6 +1757,7 @@
 				B223B0C422AE215D00FB8713 /* MSALLegacySharedAccountFactory.m */,
 				B266391922B4B84600FEB673 /* NSString+MSALAccountIdenfiers.h */,
 				B266391A22B4B84600FEB673 /* NSString+MSALAccountIdenfiers.m */,
+				B2C0E80723AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -2537,6 +2546,7 @@
 				B29A56C122826EE00023F5E6 /* MSALSerializedADALCacheProvider.h in Headers */,
 				96CF95212268FD0400D97374 /* MSALAccount.h in Headers */,
 				B267569D228F335E000F01D7 /* MSALExternalAccountHandler.h in Headers */,
+				B2C0E80923AF06DB006C9CAD /* MSALLegacySharedAccountsProvider+Internal.h in Headers */,
 				B26756C422921C42000F01D7 /* MSALAADOauth2Provider.h in Headers */,
 				232D6195224C62FF00260C42 /* MSALIndividualClaimRequest+Internal.h in Headers */,
 				B26756BE22921A71000F01D7 /* MSALOauth2Provider.h in Headers */,

@@ -159,4 +159,30 @@
     XCTAssertTrue([error.userInfo[MSIDErrorDescriptionKey] containsString:@"\"msauth.test.bundle.identifier://auth\""]);
 }
 
+- (void)testVerifyRegisteredSchemes_whenAllSchemesAreRegistered_shouldReturnYESAndNilError
+{
+    NSArray *urlTypes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSError *error;
+    BOOL result = [MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&error];
+    
+    XCTAssertTrue(result);
+    XCTAssertNil(error);
+}
+
+- (void)testVerifyRegisteredSchemes_whenSchemeIsNotRegistered_shouldReturnNOAndFillError
+{
+    NSArray *urlTypes = @[@"msauthv2", @"msauthv-wrong"];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSError *error;
+    BOOL result = [MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&error];
+    
+    XCTAssertFalse(result);
+    XCTAssertNotNil(error);
+    XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
+    XCTAssertEqual(error.code, MSIDErrorRedirectSchemeNotRegistered);
+}
+
 @end
