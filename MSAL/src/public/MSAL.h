@@ -77,6 +77,8 @@ FOUNDATION_EXPORT const unsigned char MSAL__Framework_VersionString[];
 #import <MSAL/MSALSerializedADALCacheProvider.h>
 #import <MSAL/MSALWebviewParameters.h>
 #import <MSAL/MSALSignoutParameters.h>
+#import <MSAL/MSALParameters.h>
+#import <MSAL/MSALPublicClientApplication+SingleAccount.h>
 #if TARGET_OS_IPHONE
 #import <MSAL/MSALLegacySharedAccountsProvider.h>
 #endif

@@ -25,45 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
 #import "MSALParameters.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
-@class MSALWebviewParameters;
-
-@interface MSALSignoutParameters : MSALParameters
-
-/**
- A copy of the configuration which was provided in the initializer.
- */
-@property (nonatomic, readonly, copy) MSALWebviewParameters *webviewParameters;
-
-/**
-  Specifies whether signout should also open the browser and send a network request to the end_session_endpoint.
-  YES by default.
- */
-@property (nonatomic) BOOL signoutFromBrowser;
-
-/**
- Initialize MSALSignoutParameters with web parameters.
- 
- @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
- */
-- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
-
-#pragma mark - Unavailable initializers
-
-/**
-    Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
- */
-+ (instancetype)new NS_UNAVAILABLE;
-
-/**
-   Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
-*/
-- (instancetype)init NS_UNAVAILABLE;
+@implementation MSALParameters
 
 @end
-
-NS_ASSUME_NONNULL_END

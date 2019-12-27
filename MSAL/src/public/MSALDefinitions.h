@@ -150,6 +150,11 @@ typedef void (^MSALCompletionBlock)(MSALResult * _Nullable result, NSError * _Nu
 typedef void (^MSALAccountsCompletionBlock)(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error);
 
 /**
+    The completion block that will be called when current account is loaded, or MSAL encountered an error.
+ */
+typedef void (^MSALCurrentAccountCompletionBlock)(MSALAccount * _Nullable account, MSALAccount * _Nullable previousAccount, NSError * _Nullable error);
+
+/**
     The completion block that will be called when sign out is completed, or MSAL encountered an error.
  */
 typedef void (^MSALSignoutCompletionBlock)(BOOL success, NSError * _Nullable error);
