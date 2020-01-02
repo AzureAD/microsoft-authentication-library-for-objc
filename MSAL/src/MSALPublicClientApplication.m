@@ -96,6 +96,7 @@
 #endif
 
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
+#import "MSIDTokenResult.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
@@ -198,6 +199,16 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+        
+#if TARGET_OS_IPHONE
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityAuto
+        && msalRedirectUri.brokerCapable
+        && ![MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&msidError])
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
+#endif
     
     config.verifiedRedirectUri = msalRedirectUri;
     
@@ -876,7 +887,13 @@
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        
+        if (result.tokenResponse)
+        {
+            // Only update external accounts if we got new result from network as an optimization
+            [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        }
+        
         block(msalResult, resultError, msidParams);
     }];
 }

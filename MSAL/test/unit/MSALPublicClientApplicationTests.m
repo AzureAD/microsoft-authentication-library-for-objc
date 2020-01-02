@@ -233,6 +233,29 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
+- (void)testInitWithClientId_whenBrokerQuerySchemeIsNotRegistered_shouldReturnNilApplicationAndFillError
+{
+    NSArray *schemes = @[@"msauthv2", @"msauthv-wrong"];
+    [MSALTestBundle overrideObject:schemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauth.test.bundle.identifier"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+    
+    NSError *error;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                              error:&error];
+    
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorRedirectSchemeNotRegistered);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+}
+
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
@@ -2057,6 +2080,9 @@
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
     
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     
@@ -2260,6 +2286,9 @@
     NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"myotherscheme", @"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
     
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
