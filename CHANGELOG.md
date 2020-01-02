@@ -1,3 +1,10 @@
+## [1.0.6] - 2020-01-03
+### Fixed
+- Set mobile content type for the WKWebView configuration (#810)
+- Better error handling for missing broker query schemes (#811)
+- Enable dogfood Authenticator support by default (#812)
+- Optimiza external account writing logic (#813)
+
 ## [1.0.5] - 2019-12-13
 ### Fixed
 - Account lookup fix when no refresh tokens present (#799)

@@ -44,4 +44,9 @@
                                           brokerCapable:NO];
 }
 
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
+{
+    return YES;
+}
+
 @end

@@ -549,6 +549,10 @@
                                                                                                    redirectUri:redirectUri
                                                                                                      authority:authority];
     
+    MSALLegacySharedAccountsProvider *provider = [[MSALLegacySharedAccountsProvider alloc] initWithSharedKeychainAccessGroup:@"com.microsoft.adalcache" serviceIdentifier:@"legacy-accounts-service" applicationIdentifier:@"my.msal.testapp"];
+    provider.sharedAccountMode = MSALLegacySharedAccountModeReadWrite;
+    [pcaConfig.cacheConfig addExternalAccountProvider:provider];
+    
     NSError *error;
     MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithConfiguration:pcaConfig error:&error];
     
