@@ -45,6 +45,7 @@
 #import "MSALTestBundle.h"
 #import "MSALOauth2Provider.h"
 #import "XCTestCase+HelperMethods.h"
+#import "MSIDTokenResponse.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -123,10 +124,15 @@
                               class:[MSIDSilentController class]
                               block:(id)^(MSIDSilentController *obj, MSIDRequestCompletionBlock completionBlock)
      {
-         XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
-         
-         completionBlock([self testTokenResult], nil);
+            XCTAssertTrue([obj isKindOfClass:[MSIDSilentController class]]);
+        
+            MSIDTokenResult *result = [self testTokenResult];
+            result.tokenResponse = [MSIDTokenResponse new];
+            completionBlock(result, nil);
      }];
+    
+    XCTestExpectation *updateExpectation = [self keyValueObservingExpectationForObject:mockExternalAccountHandler keyPath:@"updateInvokedCount" expectedValue:@1];
+    XCTestExpectation *acquireTokenExpectation = [self expectationWithDescription:@"Acquire token silent"];
     
     [application acquireTokenSilentForScopes:@[@"fakescope1", @"fakescope2"]
                                      account:[self testMSALAccount]
@@ -134,8 +140,10 @@
                                  
                                  XCTAssertNotNil(result);
                                  XCTAssertNil(error);
-                                 XCTAssertEqual(mockExternalAccountHandler.updateInvokedCount, 1);
+                                 [acquireTokenExpectation fulfill];
                              }];
+    
+    [self waitForExpectations:@[updateExpectation, acquireTokenExpectation] timeout:1];
 }
 
 - (void)testRemoveAccount_whenAccountExistsInExternalCache_shouldCallRemoveAccountFromExternalCache

@@ -96,9 +96,11 @@
 #endif
 
 #import "MSIDInteractiveRequestParameters+MSALRequest.h"
+#import "MSIDTokenResult.h"
 #import "MSIDKeychainTokenCache.h"
 #import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
+#import "MSALPublicClientApplication+SingleAccount.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -197,6 +199,16 @@
         if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
         return nil;
     }
+        
+#if TARGET_OS_IPHONE
+    if (MSALGlobalConfig.brokerAvailability == MSALBrokeredAvailabilityAuto
+        && msalRedirectUri.brokerCapable
+        && ![MSALRedirectUriVerifier verifyAdditionalRequiredSchemesAreRegistered:&msidError])
+    {
+        if (error) *error = [MSALErrorConverter msalErrorFromMsidError:msidError];
+        return nil;
+    }
+#endif
     
     config.verifiedRedirectUri = msalRedirectUri;
     
@@ -429,6 +441,153 @@
     [request allAccountsFilteredByAuthority:self.internalConfig.authority
                             completionBlock:^(NSArray<MSALAccount *> *accounts, NSError *msidError) {
         completionBlock(accounts, [MSALErrorConverter msalErrorFromMsidError:msidError]);
+    }];
+}
+
+- (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
+    
+    __auto_type block = ^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL accounts with count %ld", (long)accounts.count);
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(accounts, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(accounts, msalError);
+        }
+    };
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                redirectUri:self.internalConfig.redirectUri
+                                                                                   clientId:self.internalConfig.clientId
+                                                                                     scopes:nil
+                                                                                 oidcScopes:nil
+                                                                              correlationId:nil
+                                                                             telemetryApiId:nil
+                                                                        intuneAppIdentifier:nil
+                                                                                requestType:[self requestType]
+                                                                                      error:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        block(nil, requestParamsError);
+        return;
+    }
+    
+    requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
+    
+    [request allAccountsFromDevice:parameters
+                 requestParameters:requestParams
+                   completionBlock:block];
+}
+
+#pragma mark - Single Account
+
+- (void)getCurrentAccountWithParameters:(MSALParameters *)parameters
+                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Found MSAL account with current account %@, previous account %@", MSID_PII_LOG_EMAIL(account.username), MSID_PII_LOG_EMAIL(previousAccount.username));
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getAccountsFromDevice" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(account, previousAccount, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(account, previousAccount, msalError);
+        }
+    };
+    
+    MSALAccountsProvider *request = [[MSALAccountsProvider alloc] initWithTokenCache:self.tokenCache
+                                                                accountMetadataCache:self.accountMetadataCache
+                                                                            clientId:self.internalConfig.clientId
+                                                             externalAccountProvider:self.externalAccountHandler];
+    
+    NSError *localError;
+    MSALAccount *previousAccount = [request currentPrincipalAccount:&localError];
+    
+    if (localError)
+    {
+        block(nil, nil, localError);
+        return;
+    }
+    
+    MSALAccountEnumerationParameters *accountParameters = [MSALAccountEnumerationParameters new];
+    accountParameters.returnOnlySignedInAccounts = YES;
+    
+    [self accountsFromDeviceForParameters:accountParameters
+                          completionBlock:^(NSArray<MSALAccount *> * _Nullable accounts, NSError * _Nullable error) {
+        
+        if (error)
+        {
+            block(nil, nil, error);
+            return;
+        }
+        
+        if ([accounts count] > 1)
+        {
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorCacheMultipleUsers, @"Multiple accounts found in cache.", nil, nil, nil, nil, nil, YES);
+            block(nil, nil, error);
+            return;
+        }
+        
+        MSALAccount *newAccount = [accounts count] ? accounts[0] : nil;
+        MSIDAccountIdentifier *newIdentifier = newAccount.lookupAccountIdentifier ?: nil;
+        
+        NSError *accountUpdateError;
+        BOOL result = [request setCurrentPrincipalAccountId:newIdentifier error:&accountUpdateError];
+        
+        if (!result)
+        {
+            block(nil, nil, accountUpdateError);
+            return;
+        }
+        
+        block(newAccount, previousAccount, nil);
     }];
 }
 
@@ -728,7 +887,13 @@
         
         NSError *resultError = nil;
         MSALResult *msalResult = [self.msalOauth2Provider resultWithTokenResult:result error:&resultError];
-        [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        
+        if (result.tokenResponse)
+        {
+            // Only update external accounts if we got new result from network as an optimization
+            [self updateExternalAccountsWithResult:msalResult context:msidParams];
+        }
+        
         block(msalResult, resultError, msidParams);
     }];
 }

@@ -25,16 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALPublicClientApplication.h"
+#import "MSALDefinitions.h"
+#import "MSALParameters.h"
 
-@class MSALRedirectUri;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALRedirectUriVerifier : NSObject
+/**
+ An interface that contains list of operations that are available when MSAL is in 'single account' mode - which means there's only one account available on the device.
+*/
+@interface MSALPublicClientApplication (SingleAccount)
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
-
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+/**
+ Gets the current account and return previous account if present. This can be useful to detect if the current account changes.
+ This method must be called whenever the application is resumed or prior to running a scheduled background operation.
+ 
+ If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
+*/
+- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
+                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -25,16 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALParameters.h"
 
-@class MSALRedirectUri;
-
-@interface MSALRedirectUriVerifier : NSObject
-
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
-
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+@implementation MSALParameters
 
 @end
