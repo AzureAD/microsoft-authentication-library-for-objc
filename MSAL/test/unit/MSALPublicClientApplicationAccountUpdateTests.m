@@ -65,6 +65,12 @@
     [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
 }
 
+- (void)tearDown
+{
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    [application.tokenCache clearWithContext:nil error:nil];
+}
+
 #pragma mark - Tests
 
 - (void)testAcquireToken_whenSuccessfulResponse_shouldUpdateExternalAccount
