@@ -49,7 +49,7 @@
     
     if (error)
     {
-        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type found", nil, nil, nil, nil, nil);
+        *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type found", nil, nil, nil, nil, nil, NO);
     }
     
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Unknown account type found %@", accountType);

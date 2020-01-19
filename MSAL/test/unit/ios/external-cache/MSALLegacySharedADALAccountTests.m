@@ -115,6 +115,7 @@
     
     NSMutableDictionary *mutableDict = [adalAccountDictionary mutableCopy];
     mutableDict[@"authEndpointUrl"] = @"https://login.microsoftonline.com/contoso.com";
+    mutableDict[@"additionalProperties"] = @{@"home_account_id": @"uid.utid"};
     
     NSError *error = nil;
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:mutableDict error:&error];
@@ -122,12 +123,12 @@
     XCTAssertNil(error);
     XCTAssertEqualObjects(account.accountType, @"ADAL");
     XCTAssertEqualObjects(account.environment, @"login.microsoftonline.com");
-    XCTAssertNil(account.identifier);
     XCTAssertEqualObjects(account.accountIdentifier, accountId);
     XCTAssertEqualObjects(account.username, @"user@contoso.com");
     XCTAssertEqualObjects(account.accountClaims[@"oid"], objectId);
     XCTAssertEqualObjects(account.accountClaims[@"tid"], tenantId);
     XCTAssertEqualObjects(account.accountClaims[@"name"], @"myDisplayName.contoso.user");
+    XCTAssertEqualObjects(account.identifier, @"uid.utid");
 }
 
 #pragma mark - InitWithMSALAccount
@@ -388,6 +389,47 @@
     MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
     
     MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.utid2"];
+    params.returnOnlySignedInAccounts = NO;
+    BOOL result = [account matchesParameters:params];
+    XCTAssertFalse(result);
+}
+
+- (void)testMatchesWithParameters_whenRequestedIdentifierNonNil_andIdentifierInCacheNil_shouldReturnNO
+{
+    NSDictionary *jsonDictionary = @{@"authEndpointUrl": @"https://login.windows.net/tid/oauth2/authorize",
+                                     @"id": [NSUUID UUID].UUIDString,
+                                     @"environment": @"PROD",
+                                     @"oid": @"oid",
+                                     @"originAppId": @"com.myapp.app",
+                                     @"tenantDisplayName": @"",
+                                     @"type": @"ADAL",
+                                     @"displayName": @"myDisplayName.contoso.user",
+                                     @"tenantId": @"tid",
+                                     @"username": @"user@contoso.com"};
+    
+    MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:@"oid.tid"];
+    params.returnOnlySignedInAccounts = NO;
+    BOOL result = [account matchesParameters:params];
+    XCTAssertFalse(result);
+}
+
+- (void)testMatchesWithParameters_whenRequestedUsernameNonNil_andUsernameInCacheNil_shouldReturnNO
+{
+    NSDictionary *jsonDictionary = @{@"authEndpointUrl": @"https://login.windows.net/common/oauth2/authorize",
+                                     @"id": [NSUUID UUID].UUIDString,
+                                     @"environment": @"PROD",
+                                     @"oid": @"oid",
+                                     @"originAppId": @"com.myapp.app",
+                                     @"tenantDisplayName": @"",
+                                     @"type": @"ADAL",
+                                     @"displayName": @"myDisplayName.contoso.user",
+                                     @"tenantId": @"tid"};
+    
+    MSALLegacySharedADALAccount *account = [[MSALLegacySharedADALAccount alloc] initWithJSONDictionary:jsonDictionary error:nil];
+    
+    MSALAccountEnumerationParameters *params = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:nil username:@"user@consoto.com"];
     params.returnOnlySignedInAccounts = NO;
     BOOL result = [account matchesParameters:params];
     XCTAssertFalse(result);

@@ -42,7 +42,7 @@
 
 - (id)initWithRequest:(NSURLRequest *)request
               session:(MSIDTestURLSession *)session
-    completionHandler:(MSALTestHttpCompletionBlock)completionHandler;
+    completionHandler:(MSALTestHttpCompletionBlock)completionHandler
 {
     (void)completionHandler;
     

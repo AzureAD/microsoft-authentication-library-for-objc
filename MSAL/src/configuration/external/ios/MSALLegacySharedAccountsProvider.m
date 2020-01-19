@@ -90,7 +90,7 @@
 - (nullable NSArray<id<MSALAccount>> *)accountsWithParametersImpl:(MSALAccountEnumerationParameters *)parameters
                                                             error:(NSError * _Nullable * _Nullable)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters %@", MSID_PII_LOG_MASKABLE(parameters));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Reading accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
     NSMutableSet *allAccounts = [NSMutableSet new];
     NSTimeInterval lastWrite = [[NSDate distantPast] timeIntervalSince1970];
@@ -184,11 +184,12 @@
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
     
-    return [self updateAccount:account
-                 idTokenClaims:idTokenClaims
-                tenantProfiles:nil
-                     operation:MSALLegacySharedAccountUpdateOperation
-                         error:error];
+    [self updateAccountAsync:account
+               idTokenClaims:idTokenClaims
+              tenantProfiles:nil
+                   operation:MSALLegacySharedAccountUpdateOperation
+                  completion:nil];
+    return YES;
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)updatableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
@@ -201,7 +202,7 @@
     
     if (!parameters)
     {
-        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil);
+        NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unsupported account found, skipping update", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:parameterError logLine:@"Unsupported account found, skipping update"];
         return nil;
     }
@@ -247,11 +248,29 @@
                 error:(NSError * _Nullable * _Nullable)error
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
-    return [self updateAccount:account
-                 idTokenClaims:nil
-                tenantProfiles:tenantProfiles
-                     operation:MSALLegacySharedAccountRemoveOperation
-                         error:error];
+    
+    __block BOOL result = YES;
+    __block NSError *removeError;
+    
+    dispatch_barrier_sync(self.synchronizationQueue, ^{
+        result = [self updateAccountImpl:account
+                           idTokenClaims:nil
+                          tenantProfiles:tenantProfiles
+                               operation:MSALLegacySharedAccountRemoveOperation
+                                   error:&removeError];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error updating legacy accounts %@", MSID_PII_LOG_MASKABLE(removeError));
+        }
+    });
+    
+    if (error)
+    {
+        *error = removeError;
+    }
+    
+    return result;
 }
 
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
@@ -266,7 +285,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -283,7 +302,7 @@
         
         if (!parameters)
         {
-            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil);
+            NSError *parameterError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unable to create parameters for the account", nil, nil, nil, nil, nil, NO);
             [self fillAndLogError:error withError:parameterError logLine:@"Failed to create parameters for the account"];
             return nil;
         }
@@ -303,29 +322,27 @@
 
 #pragma mark - Write
 
-- (BOOL)updateAccount:(id<MSALAccount>)account
-        idTokenClaims:(NSDictionary *)idTokenClaims
-       tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
-            operation:(MSALLegacySharedAccountWriteOperation)operation
-                error:(NSError **)error
+- (void)updateAccountAsync:(id<MSALAccount>)account
+             idTokenClaims:(NSDictionary *)idTokenClaims
+            tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
+                 operation:(MSALLegacySharedAccountWriteOperation)operation
+                completion:(void (^)(BOOL result, NSError *error))completion
 {
-    __block BOOL result = YES;
-    __block NSError *updateError = nil;
-    
-    dispatch_barrier_sync(self.synchronizationQueue, ^{
-        result = [self updateAccountImpl:account
-                           idTokenClaims:idTokenClaims
-                          tenantProfiles:tenantProfiles
-                               operation:operation
-                                   error:&updateError];
+    dispatch_barrier_async(self.synchronizationQueue, ^{
+        NSError *updateError;
+        BOOL result = [self updateAccountImpl:account
+                                idTokenClaims:idTokenClaims
+                               tenantProfiles:tenantProfiles
+                                    operation:operation
+                                        error:&updateError];
+        
+        if (!result)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Encountered an error updating legacy accounts %@", MSID_PII_LOG_MASKABLE(updateError));
+        }
+        
+        if (completion) completion(result, updateError);
     });
-    
-    if (error && updateError)
-    {
-        *error = updateError;
-    }
-    
-    return result;
 }
 
 - (BOOL)updateAccountImpl:(id<MSALAccount>)account
@@ -482,7 +499,7 @@
     
     if ([jsonAccounts count] > 1)
     {
-        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil);
+        NSError *readError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Ambigious query for external accounts, found multiple accounts.", nil, nil, nil, nil, nil, NO);
         [self fillAndLogError:error withError:readError logLine:@"Ambigious query for external accounts, found multiple accounts."];
         return nil;
     }
@@ -522,7 +539,7 @@
 
 #pragma mark - Helpers
 
-- (void)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
+- (BOOL)fillAndLogError:(NSError **)error withError:(NSError *)resultError logLine:(NSString *)logLine
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@, error %@", logLine, MSID_PII_LOG_MASKABLE(resultError));
     
@@ -530,6 +547,7 @@
     {
         *error = [MSALErrorConverter msalErrorFromMsidError:resultError];
     }
+    return YES;
 }
 
 - (NSString *)accountVersionIdentifier:(MSALLegacySharedAccountVersion)version

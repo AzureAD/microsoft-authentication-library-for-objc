@@ -234,6 +234,29 @@
     XCTAssertEqualObjects(error.domain, MSALErrorDomain);
 }
 
+- (void)testInitWithClientId_whenBrokerQuerySchemeIsNotRegistered_shouldReturnNilApplicationAndFillError
+{
+    NSArray *schemes = @[@"msauthv2", @"msauthv-wrong"];
+    [MSALTestBundle overrideObject:schemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    NSArray *urlTypes = @[@{@"CFBundleURLSchemes": @[@"msauth.test.bundle.identifier"]}];
+    [MSALTestBundle overrideObject:urlTypes forKey:@"CFBundleURLTypes"];
+    [MSALTestBundle overrideBundleId:@"test.bundle.identifier"];
+    
+    MSALGlobalConfig.brokerAvailability = MSALBrokeredAvailabilityAuto;
+    
+    NSError *error;
+    __auto_type application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID
+                                                                              error:&error];
+    
+    XCTAssertNil(application);
+    XCTAssertNotNil(error);
+    XCTAssertEqual(error.code, MSALErrorInternal);
+    NSInteger internalErrorCode = [error.userInfo[MSALInternalErrorCodeKey] integerValue];
+    XCTAssertEqual(internalErrorCode, MSALInternalErrorRedirectSchemeNotRegistered);
+    XCTAssertEqualObjects(error.domain, MSALErrorDomain);
+}
+
 - (void)testInitWithClientIdAndAuthorityAndRedirectUri_whenInvalidSchemeRegistered_shouldReturnNilApplicationAndFillError
 {
     NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[@"mycustom.redirect"] } ];
@@ -950,13 +973,14 @@
 }
 
 
-- (void)testAcquireScopesLoginHintBehaviorEQPs
+- (void)testAcquireScopesLoginHintBehaviorEQPs_andCustomKeychainGroup
 {
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:UNIT_TEST_CLIENT_ID
                                                                                                 redirectUri:nil
                                                                                                   authority:authority];
     config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    config.cacheConfig.keychainSharingGroup = @"com.mycustom.group";
     
     NSError *error = nil;
     __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
@@ -987,6 +1011,7 @@
          XCTAssertEqualObjects(params.loginHint, @"fakeuser@contoso.com");
          XCTAssertNil(params.extraScopesToConsent);
          XCTAssertEqual(params.promptType, MSIDPromptTypeLogin);
+         XCTAssertEqualObjects(params.keychainAccessGroup, @"com.mycustom.group");
          
          completionBlock(nil, nil);
      }];
@@ -1707,7 +1732,7 @@
     
 }
 
-- (void)testAcquireSilentScopesUserAuthorityForceRefreshCorrelationId
+- (void)testAcquireSilentScopesUserAuthorityForceRefreshCorrelationId_andCustomKeychainGroup
 {
     NSError *error = nil;
     __auto_type authority = [@"https://login.microsoftonline.com/common" msalAuthority];
@@ -1716,6 +1741,7 @@
                                                                                                 redirectUri:nil
                                                                                                   authority:authority];
     config.sliceConfig = [MSALSliceConfig configWithSlice:@"slice" dc:@"dc"];
+    config.cacheConfig.keychainSharingGroup = @"com.mycustom.group";
     
     __auto_type application = [[MSALPublicClientApplication alloc] initWithConfiguration:config
                                                                                    error:&error];
@@ -1748,6 +1774,7 @@
          XCTAssertEqualObjects(params.target, @"fakescope1 fakescope2");
          XCTAssertEqualObjects(params.oidcScope, @"openid profile offline_access");
          XCTAssertEqualObjects(params.clientId, UNIT_TEST_CLIENT_ID);
+         XCTAssertEqualObjects(params.keychainAccessGroup, @"com.mycustom.group");
          
          XCTAssertNotNil(params.correlationId);
          
@@ -2348,7 +2375,7 @@
          (void)account;
          (void)clientId;
          
-         *error = MSIDCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil, nil);
+         *error = MSIDCreateError(NSOSStatusErrorDomain, -34018, nil, nil, nil, nil, nil, nil, YES);
          
          return NO;
      }];

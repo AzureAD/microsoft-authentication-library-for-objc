@@ -56,7 +56,7 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         {
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil, YES);
             }
             
             return nil;
@@ -71,11 +71,11 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
         
         if ([NSString msidIsStringNilOrBlank:uid])
         {
-            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Unable to read cid from MSA account, cid %@", cid);
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, nil, @"Unable to read cid from MSA account, cid %@", MSID_PII_LOG_TRACKABLE(cid));
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected identifier found for MSA account", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected identifier found for MSA account", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
@@ -110,12 +110,12 @@ static NSString *kDefaultCacheAuthority = @"https://login.windows.net/common";
     
     if (parameters.identifier)
     {
-        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+        matchResult &= (self.identifier && [self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
+        matchResult &= (self.username && [self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)

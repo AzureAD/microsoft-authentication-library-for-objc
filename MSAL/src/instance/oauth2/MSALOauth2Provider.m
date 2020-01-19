@@ -42,7 +42,7 @@
 
 - (instancetype)initWithClientId:(NSString *)clientId
                       tokenCache:(MSIDDefaultTokenCacheAccessor *)tokenCache
-            accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
+            accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
 
 {
     self = [super init];

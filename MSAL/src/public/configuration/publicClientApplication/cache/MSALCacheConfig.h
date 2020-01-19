@@ -84,14 +84,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
     Array of SecTrustedApplicationsRef that is allowed to access the keychain elements
-    created by the keychain cache.
+    created by the keychain cache on 10.12-10.14 devices.
+    createTrustedApplicationListFromPaths:error: helper API can be used to easily create a list of trustedApplications from a list of file paths.
  */
-@property (readonly, nonnull) NSArray *trustedApplications;
+@property (nonatomic, nonnull) NSArray *trustedApplications;
 
 /**
     Creates a list of trusted app instances (SecTrustedApplicationsRef) based on the apps at the given path in the file system.
  */
-- (NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
+- (nullable NSArray *)createTrustedApplicationListFromPaths:(NSArray<NSString *> *)appPaths error:(NSError * _Nullable __autoreleasing * _Nullable)error;
 
 #endif
 

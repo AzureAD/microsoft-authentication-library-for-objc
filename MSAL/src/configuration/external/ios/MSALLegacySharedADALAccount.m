@@ -51,16 +51,14 @@ static NSString *kADALAccountType = @"ADAL";
     self = [super initWithJSONDictionary:jsonDictionary error:error];
     
     if (self)
-    {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Creating external account from ADAL account");
-        
+    {        
         if (![_accountType isEqualToString:kADALAccountType])
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Failed to create ADAL account. Wrong account type %@ provided", _accountType);
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected account type", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
@@ -74,7 +72,7 @@ static NSString *kADALAccountType = @"ADAL";
             
             if (error)
             {
-                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil);
+                *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected authority found", nil, nil, nil, nil, nil, NO);
             }
             
             return nil;
@@ -96,6 +94,20 @@ static NSString *kADALAccountType = @"ADAL";
         if (_authority.tenant.type == MSIDAADTenantTypeCommon)
         {
             _identifier = [MSIDAccountIdentifier homeAccountIdentifierFromUid:_objectId utid:_tenantId];
+        }
+        else
+        {
+            NSDictionary *additionalPropertiesDictionary = [jsonDictionary msidObjectForKey:@"additionalProperties" ofClass:[NSDictionary class]];
+            
+            if (additionalPropertiesDictionary)
+            {
+                NSString *homeAccountId = [additionalPropertiesDictionary msidObjectForKey:@"home_account_id" ofClass:[NSString class]];
+                
+                if (![NSString msidIsStringNilOrBlank:homeAccountId])
+                {
+                    _identifier = homeAccountId;
+                }
+            }
         }
         
         NSMutableDictionary *claims = [NSMutableDictionary new];
@@ -134,17 +146,17 @@ static NSString *kADALAccountType = @"ADAL";
     
     if (parameters.identifier)
     {
-        matchResult &= ([self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
+        matchResult &= (self.identifier && [self.identifier caseInsensitiveCompare:parameters.identifier] == NSOrderedSame);
     }
     
     if (parameters.username)
     {
-        matchResult &= ([self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
+        matchResult &= (self.username && [self.username caseInsensitiveCompare:parameters.username] == NSOrderedSame);
     }
     
     if (parameters.tenantProfileIdentifier)
     {
-        matchResult &= ([self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
+        matchResult &= (self.objectId && [self.objectId caseInsensitiveCompare:parameters.tenantProfileIdentifier] == NSOrderedSame);
     }
     
     return matchResult &= [super matchesParameters:parameters];

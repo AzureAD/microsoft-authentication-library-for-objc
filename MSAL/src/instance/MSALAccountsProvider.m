@@ -47,6 +47,7 @@
 #import "MSALAccountEnumerationParameters.h"
 #import "MSALErrorConverter.h"
 #import "MSALTenantProfile.h"
+#import "MSALAccount+MultiTenantAccount.h"
 
 @interface MSALAccountsProvider()
 
@@ -115,11 +116,12 @@
     {
         if (accounts.count == 1)
         {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Returning account for parameters with environment %@, identifier %@, username %@", accounts[0].environment, MSID_PII_LOG_TRACKABLE(accounts[0].identifier), MSID_PII_LOG_EMAIL(accounts[0].username));
             return accounts[0];
         }
         else if (accounts.count > 1)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@, homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", accounts[0].environment == accounts[1].environment ? @"YES" : @"NO", accounts[0].homeAccountId == accounts[1].homeAccountId ? @"YES" : @"NO", accounts[0].username == accounts[1].username ? @"YES" : @"NO");
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Retrieved more than 1 msal accounts! (More info: environments are equal for first 2 accounts: %@ (%@, %@), homeAccountIds are equal for first 2 accounts: %@, usernames are equal for first 2 accounts: %@)", [accounts[0].environment isEqualToString:accounts[1].environment] ? @"YES" : @"NO", accounts[0].environment, accounts[1].environment, [accounts[0].identifier isEqualToString:accounts[1].identifier] ? @"YES" : @"NO", [accounts[0].username isEqualToString:accounts[1].username] ? @"YES" : @"NO");
             return accounts[0];
         }
     }
@@ -230,7 +232,7 @@
         
         if ([externalAccount.mTenantProfiles count])
         {
-            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.mTenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
+            NSArray<MSALTenantProfile *> *homeTenantProfileArray = [externalAccount.tenantProfiles filteredArrayUsingPredicate:self.homeTenantFilterPredicate];
             if ([homeTenantProfileArray count] == 1) accountClaims = homeTenantProfileArray[0].claims;
         }
     
@@ -251,12 +253,13 @@
     }
     else
     {
-        [existingAccount addTenantProfiles:account.mTenantProfiles];
+        [existingAccount addTenantProfiles:account.tenantProfiles];
     }
     
     if (accountClaims)
     {
         existingAccount.accountClaims = accountClaims;
+        existingAccount.username = account.username;
     }
 }
 

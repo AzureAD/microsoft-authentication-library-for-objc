@@ -1,3 +1,40 @@
+## [1.0.6] - 2020-01-03
+### Fixed
+- Set mobile content type for the WKWebView configuration (#810)
+- Better error handling for missing broker query schemes (#811)
+- Enable dogfood Authenticator support by default (#812)
+- Optimiza external account writing logic (#813)
+
+## [1.0.5] - 2019-12-13
+### Fixed
+- Account lookup fix when no refresh tokens present (#799)
+
+## [1.0.4] - 2019-11-26
+### Fixed
+- Fixed external account matching when identifier is not present (#787)
+
+## [1.0.3] - 2019-11-15
+### Added
+- Added default implementation for ADAL legacy persistence
+
+### Fixed
+- Fixed error logging when MSAL was logging false positives
+
+## [1.0.2] - 2019-10-29
+### Fixed
+- Make trustedApps in MSALCacheConfig writable to allow apps sharing keychain on macOS
+- Always write to the data protection keychain on macOS 10.15
+
+## [1.0.1] - 2019-10-25
+### Added
+- Support for apps that are present in multiple clouds
+- Better logging when error is created
+
+### Fixed
+- Block swipe to dismiss for auth controller
+- Remove arm64e architecture
+- Pass custom keychain group for broker requests
+
 ## [1.0.0] - 2019-09-26
 ### Fixed
 - Return type of the account claims
