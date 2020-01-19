@@ -886,6 +886,7 @@
     msidParams.tokenExpirationBuffer = self.internalConfig.tokenExpirationBuffer;
     msidParams.extendedLifetimeEnabled = self.internalConfig.extendedLifetimeEnabled;
     msidParams.clientCapabilities = self.internalConfig.clientApplicationCapabilities;
+    msidParams.shouldValidateResultAccount = YES;
     
     msidParams.validateAuthority = _validateAuthority;
     //TODO: address/decide public header to allow setting instace_aware for requests;
