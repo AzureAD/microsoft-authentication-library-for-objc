@@ -30,6 +30,7 @@
 
 @class MSALResult;
 @class MSALAccount;
+@class MSALDeviceInformation;
 
 /**
  Levels of logging. Defines the priority of the logged message
@@ -138,6 +139,22 @@ typedef NS_ENUM(NSUInteger, MSALPromptType)
 };
 
 /**
+ Device mode configured by the administrator
+ */
+typedef NS_ENUM(NSUInteger, MSALDeviceMode)
+{
+    /*
+        Administrator hasn't configured this device into any specific mode.
+    */
+    MSALDeviceModeDefault,
+    
+    /*
+        This device is shared by multiple employees. Employees can sign in and access customer information quickly. When they are finished with their shift or task, they can sign out of the device and it will be immediately ready for the next employee to use.
+     */
+    MSALDeviceModeShared
+};
+
+/**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
@@ -158,6 +175,11 @@ typedef void (^MSALCurrentAccountCompletionBlock)(MSALAccount * _Nullable accoun
     The completion block that will be called when sign out is completed, or MSAL encountered an error.
  */
 typedef void (^MSALSignoutCompletionBlock)(BOOL success, NSError * _Nullable error);
+
+/**
+   The completion block that will be called when MSAL has finished reading device state, or MSAL encountered an error.
+*/
+typedef void (^MSALDeviceInformationCompletionBlock)(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error);
 
 /**
  The block that returns a MSAL log message.

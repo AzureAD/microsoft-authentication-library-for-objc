@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSIDAccountMetadata.h"
+#import "MSALSSOExtensionRequestHandler.h"
 
 @class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
@@ -40,7 +41,7 @@
 @class MSIDAccountIdentifier;
 @class MSIDRequestParameters;
 
-@interface MSALAccountsProvider : NSObject
+@interface MSALAccountsProvider : MSALSSOExtensionRequestHandler
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
