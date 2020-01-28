@@ -334,6 +334,7 @@
     
     NSError *requestError;
     MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
+                                                                                                         returnOnlySignedInAccounts:parameters.returnOnlySignedInAccounts
                                                                                                                               error:&requestError];
     
     if (!ssoExtensionRequest)
