@@ -138,8 +138,9 @@
     return NO;
 }
 
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
 {
+#if !AD_BROKER
     NSArray *querySchemes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSApplicationQueriesSchemes"];
     
     if (![querySchemes containsObject:@"msauthv2"]
@@ -153,6 +154,7 @@
         
         return NO;
     }
+#endif
     
     return YES;
 }
