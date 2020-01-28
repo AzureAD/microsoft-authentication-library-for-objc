@@ -1,3 +1,7 @@
+# [1.0.0-hotfix2] - 2020-01-27
+### Fixed
+- [Broker patch] Keyed unarchiver deserialization fix for iOS 11.2
+
 # [1.0.0-hotfix1] - 2020-01-21
 ### Fixed
 - [Broker patch] Fixed account lookups and validation with the same email (#827)
