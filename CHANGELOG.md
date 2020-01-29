@@ -35,6 +35,10 @@
 - Remove arm64e architecture
 - Pass custom keychain group for broker requests
 
+## [1.0.0-hotfix1] - 2020-01-21
+### Fixed
+- [Broker patch] Fixed account lookups and validation with the same email (#827)
+
 ## [1.0.0] - 2019-09-26
 ### Fixed
 - Return type of the account claims
