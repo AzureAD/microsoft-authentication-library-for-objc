@@ -304,8 +304,8 @@
 		B2472CA4226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
 		B2472CA5226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
 		B2472CA6226FDC46008F22AB /* MSALB2CAuthority_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B2472CA2226FDC46008F22AB /* MSALB2CAuthority_Internal.h */; };
-		B253151923DD607600432133 /* MSALDeviceInformation.h in Headers */ = {isa = PBXBuildFile; fileRef = B253151723DD607600432133 /* MSALDeviceInformation.h */; };
-		B253151A23DD607600432133 /* MSALDeviceInformation.h in Headers */ = {isa = PBXBuildFile; fileRef = B253151723DD607600432133 /* MSALDeviceInformation.h */; };
+		B253151923DD607600432133 /* MSALDeviceInformation.h in Headers */ = {isa = PBXBuildFile; fileRef = B253151723DD607600432133 /* MSALDeviceInformation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B253151A23DD607600432133 /* MSALDeviceInformation.h in Headers */ = {isa = PBXBuildFile; fileRef = B253151723DD607600432133 /* MSALDeviceInformation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B253151B23DD607600432133 /* MSALDeviceInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = B253151823DD607600432133 /* MSALDeviceInformation.m */; };
 		B253151C23DD607600432133 /* MSALDeviceInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = B253151823DD607600432133 /* MSALDeviceInformation.m */; };
 		B253152A23DD66A300432133 /* MSALDeviceInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = B253152823DD66A300432133 /* MSALDeviceInfoProvider.h */; };

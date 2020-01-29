@@ -464,6 +464,6 @@
    Reads device information from the authentication broker if present on the device. 
 */
 - (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
-                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));;
+                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
