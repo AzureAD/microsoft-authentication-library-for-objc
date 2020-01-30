@@ -111,6 +111,7 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
+@property (nonatomic) MSALDeviceInfoProvider *deviceInfoProvider;
 
 @end
 
@@ -178,6 +179,7 @@
     }
     
     _validateAuthority = YES;
+    _deviceInfoProvider = [MSALDeviceInfoProvider new];
     
     // Verify required fields
     if ([NSString msidIsStringNilOrBlank:config.clientId])
@@ -446,7 +448,7 @@
 }
 
 - (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
-                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
@@ -501,7 +503,7 @@
 #pragma mark - Single Account
 
 - (void)getCurrentAccountWithParameters:(MSALParameters *)parameters
-                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock
 {
     __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
     {
@@ -1093,6 +1095,7 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
+    msidParams.shouldValidateResultAccount = YES;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
@@ -1357,9 +1360,7 @@
             completionBlock(deviceInformation, msalError);
         }
     };
-    
-    MSALDeviceInfoProvider *request = [MSALDeviceInfoProvider new];
-    
+        
     NSError *requestParamsError;
     MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
     
@@ -1369,7 +1370,7 @@
         return;
     }
     
-    [request deviceInfoWithRequestParameters:requestParams completionBlock:block];
+    [self.deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
 }
 
 #pragma mark - Authority validation

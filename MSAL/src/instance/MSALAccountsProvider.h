@@ -57,7 +57,7 @@
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
             requestParameters:(MSIDRequestParameters *)requestParameters
-              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
 // Authority filtering (deprecated)
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority

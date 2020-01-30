@@ -321,9 +321,16 @@
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
             requestParameters:(MSIDRequestParameters *)requestParameters
-              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock
 {
-    if (![MSIDSSOExtensionGetAccountsRequest canPerformRequest] || ![requestParameters shouldUseBroker])
+    BOOL shouldCallBroker = NO;
+    
+    if (@available(iOS 13.0, *))
+    {
+        shouldCallBroker = [MSIDSSOExtensionGetAccountsRequest canPerformRequest] && [requestParameters shouldUseBroker];
+    }
+    
+    if (!shouldCallBroker)
     {
         NSError *localError;
         NSArray<MSALAccount *> *msalAccounts = [self accountsForParameters:parameters authority:nil brokerAccounts:nil error:&localError];
@@ -331,6 +338,18 @@
         return;
     }
     
+    if (@available(iOS 13.0, *))
+    {
+        [self allAccountsFromSSOExtension:parameters
+                        requestParameters:requestParameters
+                          completionBlock:completionBlock];
+    }
+}
+
+- (void)allAccountsFromSSOExtension:(MSALAccountEnumerationParameters *)parameters
+                  requestParameters:(MSIDRequestParameters *)requestParameters
+                    completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
     NSError *requestError;
     MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
                                                                                                          returnOnlySignedInAccounts:parameters.returnOnlySignedInAccounts
