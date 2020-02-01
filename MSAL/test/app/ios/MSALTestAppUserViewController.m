@@ -40,6 +40,7 @@
 @implementation MSALTestAppUserViewController
 {
     NSArray<MSALAccount *> *_accounts;
+    MSALAccount *_currentAccount;
 }
 
 + (instancetype)sharedController
@@ -96,6 +97,16 @@
         {
             [self refreshWithAccounts:accounts];
         }];
+        
+        [application getCurrentAccountWithParameters:parameters
+                                     completionBlock:^(MSALAccount * _Nullable account, __unused MSALAccount * _Nullable previousAccount, __unused NSError * _Nullable error)
+        {
+            _currentAccount = account;
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [super refresh];
+            });
+        }];
     }
     else
     {
@@ -122,7 +133,16 @@
     {
         return @"(nil)";
     }
-    return _accounts[row - 1].username;
+    
+    MSALAccount *rowAccount = _accounts[row - 1];
+    NSString *title = rowAccount.username;
+    
+    if ([rowAccount.username isEqualToString:_currentAccount.username])
+    {
+        title = [title stringByAppendingString:@" (current)"];
+    }
+    
+    return title;
 }
 
 - (NSString *)subLabelForRow:(NSInteger)row
