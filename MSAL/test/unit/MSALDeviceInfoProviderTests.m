@@ -87,7 +87,7 @@
     [self waitForExpectations:@[expectation, failExpectation] timeout:1];
 }
 
-- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnBrokerUnavailableError API_AVAILABLE(ios(13.0), macos(10.15))
+- (void)testGetDeviceInfo_whenSSOExtensionNotAvailable_shouldReturnDefaultDeviceInfo API_AVAILABLE(ios(13.0), macos(10.15))
 {
     [MSIDTestSwizzle classMethod:@selector(canPerformRequest)
                            class:[MSIDSSOExtensionGetDeviceInfoRequest class]
@@ -116,10 +116,9 @@
     [deviceInfoProvider deviceInfoWithRequestParameters:requestParams
                                         completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
     {
-        XCTAssertNil(deviceInformation);
-        XCTAssertNotNil(error);
-        XCTAssertEqualObjects(error.domain, MSIDErrorDomain);
-        XCTAssertEqual(error.code, MSIDErrorBrokerNotAvailable);
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
         [failExpectation fulfill];
     }];
     

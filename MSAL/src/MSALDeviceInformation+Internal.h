@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSALDeviceInformation()
 
+@property (nonatomic, readwrite) MSALDeviceMode deviceMode;
+
 - (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo;
 
 @end

@@ -37,10 +37,21 @@
 - (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
                         completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
 {
-    if (![MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest] || ![requestParameters shouldUseBroker])
+    if (![requestParameters shouldUseBroker])
     {
-        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is either not present on this device or not available for this operation", nil, nil, nil, nil, nil, YES);
+        NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorBrokerNotAvailable, @"Broker is not enabled for this operation. Please make sure you have enabled broker support for your application", nil, nil, nil, nil, nil, YES);
         completionBlock(nil, error);
+        return;
+    }
+    
+    
+    if (![MSIDSSOExtensionGetDeviceInfoRequest canPerformRequest])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Broker is not present on this device. Defaulting to personal mode");
+        
+        MSALDeviceInformation *msalDeviceInfo = [MSALDeviceInformation new];
+        msalDeviceInfo.deviceMode = MSALDeviceModeDefault;
+        completionBlock(msalDeviceInfo, nil);
         return;
     }
     

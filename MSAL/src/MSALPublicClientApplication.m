@@ -111,7 +111,6 @@
 
 @property (nonatomic) MSALPublicClientApplicationConfig *internalConfig;
 @property (nonatomic) MSIDExternalAADCacheSeeder *externalCacheSeeder;
-@property (nonatomic) MSALDeviceInfoProvider *deviceInfoProvider;
 
 @end
 
@@ -179,7 +178,6 @@
     }
     
     _validateAuthority = YES;
-    _deviceInfoProvider = [MSALDeviceInfoProvider new];
     
     // Verify required fields
     if ([NSString msidIsStringNilOrBlank:config.clientId])
@@ -1370,7 +1368,8 @@
         return;
     }
     
-    [self.deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
 }
 
 #pragma mark - Authority validation
