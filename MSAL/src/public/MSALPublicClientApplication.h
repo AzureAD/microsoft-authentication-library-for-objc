@@ -40,6 +40,7 @@
 @class MSALWebviewParameters;
 @class MSALSignoutParameters;
 @class WKWebView;
+@class MSALParameters;
 
 /**
     Representation of OAuth 2.0 Public client application. Create an instance of this class to acquire tokens.
@@ -232,11 +233,12 @@
 
 /**
     Returns account for the given account identifying parameters including locally cached accounts and accounts from the SSO extension
+    Accounts from SSO extension are only available on iOS 13+. On earlier versions, this method will return same results as a local account query.
 
     @param  completionBlock     The completion block that will be called when accounts are loaded, or MSAL encountered an error.
 */
 - (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
-                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock;
 
 #pragma mark - Handling MSAL responses
 
@@ -457,5 +459,12 @@
          signoutParameters:(nonnull MSALSignoutParameters *)signoutParameters
            completionBlock:(nonnull MSALSignoutCompletionBlock)signoutCompletionBlock;
 
+#pragma mark - Device information
+
+/**
+   Reads device information from the authentication broker if present on the device. 
+*/
+- (void)getDeviceInformationWithParameters:(nullable MSALParameters *)parameters
+                           completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end

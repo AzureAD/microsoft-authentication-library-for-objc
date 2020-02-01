@@ -101,6 +101,7 @@
 #import "MSIDSignoutController.h"
 #import "MSALSignoutParameters.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
+#import "MSALDeviceInfoProvider.h"
 
 @interface MSALPublicClientApplication()
 {
@@ -445,7 +446,7 @@
 }
 
 - (void)accountsFromDeviceForParameters:(nonnull MSALAccountEnumerationParameters *)parameters
-                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                        completionBlock:(nonnull MSALAccountsCompletionBlock)completionBlock
 {
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying MSAL accounts with parameters (identifier=%@, tenantProfileId=%@, username=%@, return only signed in accounts %d)", MSID_PII_LOG_MASKABLE(parameters.identifier), MSID_PII_LOG_MASKABLE(parameters.tenantProfileIdentifier), MSID_PII_LOG_EMAIL(parameters.username), parameters.returnOnlySignedInAccounts);
     
@@ -484,25 +485,14 @@
                                                              externalAccountProvider:self.externalAccountHandler];
     
     NSError *requestParamsError;
-    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
-                                                                                redirectUri:self.internalConfig.redirectUri
-                                                                                   clientId:self.internalConfig.clientId
-                                                                                     scopes:nil
-                                                                                 oidcScopes:nil
-                                                                              correlationId:nil
-                                                                             telemetryApiId:nil
-                                                                        intuneAppIdentifier:nil
-                                                                                requestType:[self requestType]
-                                                                                      error:&requestParamsError];
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
     
     if (!requestParams)
     {
         block(nil, requestParamsError);
         return;
     }
-    
-    requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
-    
+        
     [request allAccountsFromDevice:parameters
                  requestParameters:requestParams
                    completionBlock:block];
@@ -511,7 +501,7 @@
 #pragma mark - Single Account
 
 - (void)getCurrentAccountWithParameters:(MSALParameters *)parameters
-                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+                        completionBlock:(nonnull MSALCurrentAccountCompletionBlock)completionBlock
 {
     __auto_type block = ^(MSALAccount *account, MSALAccount *previousAccount, NSError *msidError)
     {
@@ -1104,6 +1094,7 @@
     msidParams.keychainAccessGroup = self.internalConfig.cacheConfig.keychainSharingGroup;
     msidParams.claimsRequest = parameters.claimsRequest.msidClaimsRequest;
     msidParams.providedAuthority = requestAuthority;
+    msidParams.shouldValidateResultAccount = YES;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, msidParams,
                           @"-[MSALPublicClientApplication acquireTokenWithParameters:%@\n"
@@ -1333,6 +1324,55 @@
     }];
 }
 
+#pragma mark - Device information
+
+- (void)getDeviceInformationWithParameters:(MSALParameters *)parameters
+                           completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock
+{
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Querying device info");
+    
+    __auto_type block = ^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable msidError)
+    {
+        NSError *msalError = nil;
+        
+        if (msidError)
+        {
+            msalError = [MSALErrorConverter msalErrorFromMsidError:msidError classifyErrors:YES msalOauth2Provider:self.msalOauth2Provider];
+        }
+        else
+        {
+            MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Retrieved device info %@", deviceInformation);
+        }
+        
+        [MSALPublicClientApplication logOperation:@"getDeviceInformation" result:nil error:msalError context:nil];
+        
+        if (!completionBlock) return;
+        
+        if (parameters.completionBlockQueue)
+        {
+            dispatch_async(parameters.completionBlockQueue, ^{
+                completionBlock(deviceInformation, msalError);
+            });
+        }
+        else
+        {
+            completionBlock(deviceInformation, msalError);
+        }
+    };
+        
+    NSError *requestParamsError;
+    MSIDRequestParameters *requestParams = [self defaultRequestParametersWithError:&requestParamsError];
+    
+    if (!requestParams)
+    {
+        block(nil, requestParamsError);
+        return;
+    }
+    
+    MSALDeviceInfoProvider *deviceInfoProvider = [MSALDeviceInfoProvider new];
+    [deviceInfoProvider deviceInfoWithRequestParameters:requestParams completionBlock:block];
+}
+
 #pragma mark - Authority validation
 
 - (BOOL)shouldValidateAuthorityForRequestAuthority:(MSIDAuthority *)requestAuthority
@@ -1410,6 +1450,23 @@
     }
     
     return requestAuthority;
+}
+
+- (MSIDRequestParameters *)defaultRequestParametersWithError:(NSError **)requestParamsError
+{
+    MSIDRequestParameters *requestParams = [[MSIDRequestParameters alloc] initWithAuthority:self.internalConfig.authority.msidAuthority
+                                                                                redirectUri:self.internalConfig.redirectUri
+                                                                                   clientId:self.internalConfig.clientId
+                                                                                     scopes:nil
+                                                                                 oidcScopes:nil
+                                                                              correlationId:nil
+                                                                             telemetryApiId:nil
+                                                                        intuneAppIdentifier:nil
+                                                                                requestType:[self requestType]
+                                                                                      error:requestParamsError];
+    
+    requestParams.validateAuthority = [self shouldValidateAuthorityForRequestAuthority:self.internalConfig.authority.msidAuthority];
+    return requestParams;
 }
 
 @end

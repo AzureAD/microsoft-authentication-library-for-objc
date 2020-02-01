@@ -59,7 +59,6 @@
 @property (nullable, nonatomic) NSString *clientId;
 @property (nullable, nonatomic) MSALExternalAccountHandler *externalAccountProvider;
 @property (nullable, nonatomic) NSPredicate *homeTenantFilterPredicate;
-@property (nullable, nonatomic) MSIDSSOExtensionGetAccountsRequest *currentRequest API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
 
@@ -322,9 +321,16 @@
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
             requestParameters:(MSIDRequestParameters *)requestParameters
-              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock
 {
-    if (![MSIDSSOExtensionGetAccountsRequest canPerformRequest] || ![requestParameters shouldUseBroker])
+    BOOL shouldCallBroker = NO;
+    
+    if (@available(iOS 13.0, macOS 10.15, *))
+    {
+        shouldCallBroker = [MSIDSSOExtensionGetAccountsRequest canPerformRequest] && [requestParameters shouldUseBroker];
+    }
+    
+    if (!shouldCallBroker)
     {
         NSError *localError;
         NSArray<MSALAccount *> *msalAccounts = [self accountsForParameters:parameters authority:nil brokerAccounts:nil error:&localError];
@@ -332,6 +338,18 @@
         return;
     }
     
+    if (@available(iOS 13.0, macOS 10.15, *))
+    {
+        [self allAccountsFromSSOExtension:parameters
+                        requestParameters:requestParameters
+                          completionBlock:completionBlock];
+    }
+}
+
+- (void)allAccountsFromSSOExtension:(MSALAccountEnumerationParameters *)parameters
+                  requestParameters:(MSIDRequestParameters *)requestParameters
+                    completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15))
+{
     NSError *requestError;
     MSIDSSOExtensionGetAccountsRequest *ssoExtensionRequest = [[MSIDSSOExtensionGetAccountsRequest alloc] initWithRequestParameters:requestParameters
                                                                                                          returnOnlySignedInAccounts:parameters.returnOnlySignedInAccounts
@@ -439,43 +457,6 @@
                                                        principalAccountId:currentAccountId
                                                                   context:nil
                                                                     error:error];
-}
-
-#pragma mark - Completion block
-
-- (BOOL)setCurrentSSOExtensionRequest:(MSIDSSOExtensionGetAccountsRequest *)request API_AVAILABLE(ios(13.0), macos(10.15))
-{
-    @synchronized (self)
-    {
-        if (self.currentRequest)
-        {
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request is already executing. Please wait or cancel the request before starting it again.");
-            return NO;
-        }
-        
-        self.currentRequest = request;
-        return YES;
-    }
-    
-    return NO;
-}
-
-- (MSIDSSOExtensionGetAccountsRequest *)copyAndClearCurrentSSOExtensionRequest API_AVAILABLE(ios(13.0), macos(10.15))
-{
-    @synchronized (self)
-    {
-        if (!self.currentRequest)
-        {
-            // There's no error param because this isn't on a critical path. Just log that you are
-            // trying to clear a request when there isn't one.
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Trying to clear out an empty request");
-            return nil;
-        }
-        
-        MSIDSSOExtensionGetAccountsRequest *currentRequest = self.currentRequest;
-        self.currentRequest = nil;
-        return currentRequest;
-    }
 }
 
 @end

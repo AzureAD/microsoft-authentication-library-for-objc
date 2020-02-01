@@ -27,6 +27,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSIDAccountMetadata.h"
+#import "MSALSSOExtensionRequestHandler.h"
 
 @class MSALAccount;
 @class MSIDDefaultTokenCacheAccessor;
@@ -40,7 +41,7 @@
 @class MSIDAccountIdentifier;
 @class MSIDRequestParameters;
 
-@interface MSALAccountsProvider : NSObject
+@interface MSALAccountsProvider : MSALSSOExtensionRequestHandler
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -56,7 +57,7 @@
 
 - (void)allAccountsFromDevice:(MSALAccountEnumerationParameters *)parameters
             requestParameters:(MSIDRequestParameters *)requestParameters
-              completionBlock:(MSALAccountsCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+              completionBlock:(MSALAccountsCompletionBlock)completionBlock;
 
 // Authority filtering (deprecated)
 - (void)allAccountsFilteredByAuthority:(MSALAuthority *)authority

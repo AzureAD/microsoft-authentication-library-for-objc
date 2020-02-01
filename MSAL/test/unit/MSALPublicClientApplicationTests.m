@@ -82,6 +82,9 @@
 #import "MSIDSignoutController.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSALPublicClientApplication+SingleAccount.h"
+#import "MSALDeviceInfoProvider.h"
+#import "MSALDeviceInformation+Internal.h"
+#import "MSIDDeviceInfo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -2147,6 +2150,49 @@
     }];
     
     [self waitForExpectations:@[expectation, accountsExpectation] timeout:1];
+}
+
+#pragma mark - Get device info
+
+- (void)testGetDeviceInfo_whenBrokerEnabled_andFoundDeviceInfo_shouldReturnDeviceInfoAndNilError API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    NSString *scheme = [NSString stringWithFormat:@"msauth.%@", [[NSBundle mainBundle] bundleIdentifier]];
+    NSArray *override = @[ @{ @"CFBundleURLSchemes" : @[scheme] } ];
+    [MSALTestBundle overrideObject:override forKey:@"CFBundleURLTypes"];
+    
+    NSArray *querySchemes = @[@"msauthv2", @"msauthv3"];
+    [MSALTestBundle overrideObject:querySchemes forKey:@"LSApplicationQueriesSchemes"];
+    
+    MSALPublicClientApplication *application = [[MSALPublicClientApplication alloc] initWithClientId:UNIT_TEST_CLIENT_ID error:nil];
+    
+    XCTAssertNotNil(application);
+      
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Execute request"];
+    
+    [MSIDTestSwizzle instanceMethod:@selector(deviceInfoWithRequestParameters:completionBlock:)
+                              class:[MSALDeviceInfoProvider  class]
+                              block:(id)^(id obj, MSIDRequestParameters *requestParameters, MSALDeviceInformationCompletionBlock callback)
+    {
+        [expectation fulfill];
+        
+        MSIDDeviceInfo *msidDeviceInfo = [MSIDDeviceInfo new];
+        msidDeviceInfo.deviceMode = MSIDDeviceModeShared;
+        MSALDeviceInformation *deviceInfo = [[MSALDeviceInformation alloc] initWithMSIDDeviceInfo:msidDeviceInfo];
+        callback(deviceInfo, nil);
+    }];
+    
+    XCTestExpectation *deviceInfoExpectation = [self expectationWithDescription:@"Get device info"];
+    
+    [application getDeviceInformationWithParameters:nil
+                                    completionBlock:^(MSALDeviceInformation * _Nullable deviceInformation, NSError * _Nullable error)
+    {
+        XCTAssertNotNil(deviceInformation);
+        XCTAssertNil(error);
+        XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        [deviceInfoExpectation fulfill];
+    }];
+    
+    [self waitForExpectations:@[expectation, deviceInfoExpectation] timeout:1];
 }
 
 #pragma mark - Get current account

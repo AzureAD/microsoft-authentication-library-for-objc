@@ -25,26 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALPublicClientApplication.h"
-#import "MSALDefinitions.h"
-#import "MSALParameters.h"
+#import "MSALDeviceInformation.h"
+#import "MSALDeviceInformation+Internal.h"
+#import "MSIDDeviceInfo.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation MSALDeviceInformation
 
-/**
- An interface that contains list of operations that are available when MSAL is in 'single account' mode - which means there's only one account available on the device.
-*/
-@interface MSALPublicClientApplication (SingleAccount)
+- (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
+    }
+    
+    return self;
+}
 
-/**
- Gets the current account and return previous account if present. This can be useful to detect if the current account changes.
- This method must be called whenever the application is resumed or prior to running a scheduled background operation.
- 
- If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
-*/
-- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
-                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock;
+- (MSALDeviceMode)msalDeviceModeFromMSIDMode:(MSIDDeviceMode)msidDeviceMode
+{
+    switch (msidDeviceMode) {
+        case MSIDDeviceModeShared:
+            return MSALDeviceModeShared;
+            
+        default:
+            return MSALDeviceModeDefault;
+    }
+}
+
+- (NSString *)msalDeviceModeString
+{
+    switch (self.deviceMode) {
+        case MSALDeviceModeShared:
+            return @"shared";
+            
+        default:
+            return @"default";
+    }
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"Device mode %@", self.msalDeviceModeString];
+}
 
 @end
-
-NS_ASSUME_NONNULL_END
