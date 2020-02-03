@@ -271,7 +271,6 @@
 		B20E245E21FEB3BB0037CA5E /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B20E245C21FEB3650037CA5E /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B20E246021FEB3E20037CA5E /* MSAL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D65A6F431E3FD30A00C69FBA /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B29E2AC821238F2200B170ED /* MSALNonUnifiedADALCoexistenceCacheTests.m */; };
-		B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1921253ABB00DAB1CD /* MSALUnifiedADALCacheCoexistenceTests.m */; };
 		B217861B23A580B200839CE8 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */; };
 		B21786A523A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B21786A623A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h in Headers */ = {isa = PBXBuildFile; fileRef = B21786A323A72DFC00839CE8 /* MSALPublicClientApplication+SingleAccount.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -560,7 +559,6 @@
 		B2BB73992112C51E000EA4C5 /* MSALUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BB73982112C51E000EA4C5 /* MSALUITests.swift */; };
 		B2BB739C2112C7F9000EA4C5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BB739B2112C7F9000EA4C5 /* Security.framework */; };
 		B2BB739D2112C82E000EA4C5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2BB739B2112C7F9000EA4C5 /* Security.framework */; };
-		B2BDEEE821FEA205001EBB8B /* MSALMultiAppCacheCoexistenceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2734C1B21253AD300DAB1CD /* MSALMultiAppCacheCoexistenceTests.m */; };
 		B2C0E79D23AC7996006C9CAD /* MSALParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C0E79B23AC7996006C9CAD /* MSALParameters.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B2C0E79E23AC7996006C9CAD /* MSALParameters.h in Headers */ = {isa = PBXBuildFile; fileRef = B2C0E79B23AC7996006C9CAD /* MSALParameters.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B2C0E79F23AC7996006C9CAD /* MSALParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C0E79C23AC7996006C9CAD /* MSALParameters.m */; };
@@ -577,7 +575,6 @@
 		B2D0A38E21C71B8C0071E0DA /* MSALGuestUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */; };
 		B2D0A38F21C71D900071E0DA /* MSALCacheRemovalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */; };
 		B2D0A39221C72C740071E0DA /* MSALMSABasicInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B26D3107211680B2002B493F /* MSALMSABasicInteractiveTests.m */; };
-		B2D0A39921C73BD80071E0DA /* MSALB2CInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45744211E41C100818910 /* MSALB2CInteractiveTests.m */; };
 		B2D47881230E3DBE005AE186 /* MSALADFSOauth2Provider.h in Headers */ = {isa = PBXBuildFile; fileRef = B26756CE22921C6D000F01D7 /* MSALADFSOauth2Provider.h */; };
 		B2D47882230E3DC1005AE186 /* MSALADFSOauth2Provider.m in Sources */ = {isa = PBXBuildFile; fileRef = B26756CF22921C6D000F01D7 /* MSALADFSOauth2Provider.m */; };
 		B2D47883230E3DC1005AE186 /* MSALADFSOauth2Provider.m in Sources */ = {isa = PBXBuildFile; fileRef = B26756CF22921C6D000F01D7 /* MSALADFSOauth2Provider.m */; };
@@ -3436,10 +3433,8 @@
 				B29E2AE521238FBE00B170ED /* XCUIElement+MSALiOSUITests.m in Sources */,
 				B29E2AE121238FBE00B170ED /* MSALBaseAADUITest.m in Sources */,
 				B29E2AE421238FBE00B170ED /* XCTestCase+TextFieldTap.m in Sources */,
-				B2BDEEE821FEA205001EBB8B /* MSALMultiAppCacheCoexistenceTests.m in Sources */,
 				B29E2AE621238FBE00B170ED /* XCUIElement+CrossPlat.m in Sources */,
 				B20E246221FEB8160037CA5E /* MSALNonUnifiedADALCoexistenceCacheTests.m in Sources */,
-				B20E246421FEB8DB0037CA5E /* MSALUnifiedADALCacheCoexistenceTests.m in Sources */,
 				B29E2AE321238FBE00B170ED /* NSDictionary+MSALiOSUITests.m in Sources */,
 				B29E2AE021238FBE00B170ED /* MSALADFSBaseUITest.m in Sources */,
 			);
@@ -3458,7 +3453,6 @@
 				B2BB73912112C3F3000EA4C5 /* XCUIElement+MSALiOSUITests.m in Sources */,
 				B2A1C33F21C7038D00DDAE8E /* MSALADFSv3FederatedTests.m in Sources */,
 				B2F4572A211C0B4800818910 /* MSALBaseAADUITest.m in Sources */,
-				B2D0A39921C73BD80071E0DA /* MSALB2CInteractiveTests.m in Sources */,
 				B2D0A38821C709C30071E0DA /* MSALShibUITests.m in Sources */,
 				B2BB73732112C32C000EA4C5 /* MSALAADBasicInteractiveTests.m in Sources */,
 				B2D0A38E21C71B8C0071E0DA /* MSALGuestUserTests.m in Sources */,

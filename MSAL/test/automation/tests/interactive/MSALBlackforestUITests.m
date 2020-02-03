@@ -39,11 +39,17 @@
 - (void)setUp
 {
     [super setUp];
-
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderBlackForest;
-    configurationRequest.needsMultipleUsers = NO;
-    [self loadTestConfiguration:configurationRequest];
+    
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = MSIDTestAppEnvironmentGermanCloud;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = MSIDTestAccountEnvironmentTypeGermanCloud;
+    
+    [self loadTestAccount:accountConfigurationRequest];
 }
 
 #pragma mark - Interactive tests
@@ -51,7 +57,7 @@
 - (void)testInteractiveAADLogin_withConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph"];
@@ -88,8 +94,8 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withNoLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testApplication.appId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
@@ -126,8 +132,8 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withWWAuthority_withLoginHint_EmbeddedWebView_withInstanceAware
 {
     NSString *environment = self.class.confProvider.wwEnvironment;
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testApplication.appId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:@"de" type:@"ms_graph_static"];
@@ -135,7 +141,7 @@
     request.testAccount = self.primaryAccount;
     request.extraQueryParameters = @{@"instance_aware": @"true"};
     request.webViewType = MSIDWebviewTypeWKWebView;
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.domainUsername;
 
     // 1. Run interactive
     NSDictionary *config = [self configWithTestRequest:request];
@@ -151,8 +157,8 @@
 - (void)testInteractiveAADLogin_withNonConvergedApp_withBlackforestAuthority_withNoLoginHint_SystemWebView
 {
     NSString *environment = @"de";
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
-    request.clientId = self.testConfiguration.clientId;
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:environment targetTenantId:self.primaryAccount.targetTenantId];
+    request.clientId = self.testApplication.appId;
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:environment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:environment type:@"aad_graph_static"];

@@ -52,9 +52,16 @@ static BOOL msalAppInstalled = NO;
         [self closeResultView];
     }
 
-    MSIDAutomationConfigurationRequest *configurationRequest = [MSIDAutomationConfigurationRequest new];
-    configurationRequest.accountProvider = MSIDTestAccountProviderWW;
-    [self loadTestConfiguration:configurationRequest];
+    MSIDTestAutomationAppConfigurationRequest *appConfigurationRequest = [MSIDTestAutomationAppConfigurationRequest new];
+    appConfigurationRequest.testAppAudience = MSIDTestAppAudienceMultipleOrgs;
+    appConfigurationRequest.testAppEnvironment = self.testEnvironment;
+    
+    [self loadTestApp:appConfigurationRequest];
+    
+    MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    accountConfigurationRequest.environmentType = self.testEnvironment;
+    
+    [self loadTestAccount:accountConfigurationRequest];
 }
 
 #pragma mark - Tests
@@ -64,7 +71,7 @@ static BOOL msalAppInstalled = NO;
     // 1. Install other MSAL version and signin
     self.testApp = [self otherMSALApp];
     
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultNonConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph_static"];
@@ -95,9 +102,9 @@ static BOOL msalAppInstalled = NO;
 
 - (void)testCoexistenceWithOtherMSAL_startSigninInCurrentMSAL_withAADAccount_andUseDifferentAuthorities
 {
-    MSIDAutomationTestRequest *request = [self.class.confProvider defaultConvergedAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
+    MSIDAutomationTestRequest *request = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.targetTenantId];
     request.promptBehavior = @"force";
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.upn;
     request.testAccount = self.primaryAccount;
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"organizations"];
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"ms_graph"];
@@ -145,7 +152,7 @@ static BOOL msalAppInstalled = NO;
     MSIDAutomationTestRequest *request = [self.class.confProvider defaultFociRequestWithBroker];
     request.promptBehavior = @"force";
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:@"common"];
-    request.loginHint = self.primaryAccount.account;
+    request.loginHint = self.primaryAccount.upn;
     request.testAccount = self.primaryAccount;
     request.requestScopes = [self.class.confProvider scopesForEnvironment:self.testEnvironment type:@"aad_graph_static"];
     request.expectedResultScopes = request.requestScopes;
