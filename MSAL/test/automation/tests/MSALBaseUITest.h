@@ -95,5 +95,6 @@
 // New lab APIs
 - (void)loadTestApp:(MSIDTestAutomationAppConfigurationRequest *)appRequest;
 - (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest;
+- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests;
 
 @end

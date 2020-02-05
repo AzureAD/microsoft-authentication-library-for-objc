@@ -34,6 +34,7 @@
 #import "MSIDTestAutomationAppConfigurationRequest.h"
 #import "MSIDTestAutomationApplication.h"
 #import "MSIDAutomationOperationResponseHandler.h"
+#import "MSIDAutomationOperationAccountResponseHandler.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
 
@@ -200,9 +201,18 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)loadTestAccount:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
 {
+    NSArray *accounts = [self loadTestAccountRequest:accountRequest];
+    self.primaryAccount = accounts[0];
+    self.testAccounts = accounts;
+}
+
+- (NSArray *)loadTestAccountRequest:(MSIDTestAutomationAccountConfigurationRequest *)accountRequest
+{
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get account"];
     
-    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
+    MSIDAutomationOperationAccountResponseHandler *responseHandler = [[MSIDAutomationOperationAccountResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
+    
+    __block NSArray *results = nil;
     
     [self.class.confProvider.operationAPIRequestHandler executeAPIRequest:accountRequest
                                                           responseHandler:responseHandler
@@ -211,14 +221,13 @@ static MSIDTestConfigurationProvider *s_confProvider;
         XCTAssertNotNil(result);
         XCTAssertTrue([result isKindOfClass:[NSArray class]]);
         
-        NSArray *results = (NSArray *)result;
+        results = (NSArray *)result;
         XCTAssertTrue(results.count >= 1);
-        self.primaryAccount = results[0];
-        self.testAccounts = results;
+        
         XCTestExpectation *passwordLoadExpecation = [self expectationWithDescription:@"Get password"];
         passwordLoadExpecation.expectedFulfillmentCount = results.count;
         
-        for (MSIDTestAutomationAccount *account in self.testAccounts)
+        for (MSIDTestAutomationAccount *account in results)
         {
             [self.class.confProvider.passwordRequestHandler loadPasswordForTestAccount:account
                                                                      completionHandler:^(NSString *password, __unused NSError *error)
@@ -233,6 +242,26 @@ static MSIDTestConfigurationProvider *s_confProvider;
     }];
 
     [self waitForExpectations:@[expectation] timeout:120];
+    return results;
+}
+
+- (void)loadTestAccounts:(NSArray<MSIDTestAutomationAccountConfigurationRequest *> *)accountRequests
+{
+    NSMutableArray *allAccounts = [NSMutableArray new];
+    
+    for (MSIDTestAutomationAccountConfigurationRequest *request in accountRequests)
+    {
+        NSArray *accounts = [self loadTestAccountRequest:request];
+        if (accounts)
+        {
+            [allAccounts addObjectsFromArray:accounts];
+        }
+    }
+    
+    XCTAssertTrue(allAccounts.count >= 1);
+    
+    self.primaryAccount = allAccounts[0];
+    self.testAccounts = allAccounts;
 }
 
 #pragma mark - Actions

@@ -386,6 +386,8 @@
     [self waitForElement:enrollButton];
     sleep(0.5f);
     [enrollButton msidTap];
+    
+    [self selectAccountWithTitle:self.primaryAccount.upn];
 
     XCUIElement *getTheAppButton = self.testApp.staticTexts[@"GET THE APP"];
     [self waitForElement:getTheAppButton];
@@ -424,8 +426,6 @@
     XCTAssertTrue(result);
     
     sleep(1.0f);
-    XCUIElement *getTheAppButton = safari.staticTexts[@"GET THE APP"];
-    [self waitForElement:getTheAppButton];
     [self.testApp activate];
 
     [self assertErrorCode:MSALErrorUserCanceled];

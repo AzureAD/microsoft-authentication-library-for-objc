@@ -28,6 +28,7 @@
 #import "MSALBaseAADUITest.h"
 #import "XCUIElement+CrossPlat.h"
 #import "NSString+MSIDAutomationUtils.h"
+#import "MSIDAutomationTemporaryAccountRequest.h"
 
 @interface MSALAADMultiUserTests : MSALBaseAADUITest
 
@@ -54,7 +55,11 @@
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     
-    [self loadTestAccount:accountConfigurationRequest];
+    MSIDTestAutomationAccountConfigurationRequest *secondAccountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    secondAccountConfigurationRequest.environmentType = self.testEnvironment;
+    secondAccountConfigurationRequest.protectionPolicyType = MSIDTestAccountProtectionPolicyTypeMAMCASPO;
+    
+    [self loadTestAccounts:@[accountConfigurationRequest, secondAccountConfigurationRequest]];
 }
 
 #pragma mark - Different accounts

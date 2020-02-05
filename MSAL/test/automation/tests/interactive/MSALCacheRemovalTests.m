@@ -51,7 +51,11 @@
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     
-    [self loadTestAccount:accountConfigurationRequest];
+    MSIDTestAutomationAccountConfigurationRequest *secondAccountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
+    secondAccountConfigurationRequest.environmentType = self.testEnvironment;
+    secondAccountConfigurationRequest.protectionPolicyType = MSIDTestAccountProtectionPolicyTypeMAMCASPO;
+    
+    [self loadTestAccounts:@[accountConfigurationRequest, secondAccountConfigurationRequest]];
 }
 
 - (void)testRemoveAADAccount_whenOnlyOneAccountInCache_andConvergedApp
