@@ -211,6 +211,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get account"];
     
     MSIDAutomationOperationAccountResponseHandler *responseHandler = [[MSIDAutomationOperationAccountResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
+    responseHandler.requiresDomainName = accountRequest.federationProviderType == MSIDTestAccountFederationProviderTypePing || accountRequest.federationProviderType == MSIDTestAccountFederationProviderTypeShibboleth; // TODO: remove me once lab adds this information
     
     __block NSArray *results = nil;
     
@@ -268,7 +269,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 
 - (void)aadEnterEmail
 {
-    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.domainUsername] app:self.testApp];
+    [self aadEnterEmail:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn] app:self.testApp];
 }
 
 - (void)aadEnterEmail:(NSString *)email app:(XCUIApplication *)app

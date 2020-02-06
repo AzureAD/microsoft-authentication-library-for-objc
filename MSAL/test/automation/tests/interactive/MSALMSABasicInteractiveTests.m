@@ -53,8 +53,9 @@
     [self loadTestApp:appConfigurationRequest];
     
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
-    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeShibboleth;
+    accountConfigurationRequest.accountType = MSIDTestAccountTypeMSA;
     accountConfigurationRequest.environmentType = self.testEnvironment;
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeADFSV4;
     
     [self loadTestAccount:accountConfigurationRequest];
 }

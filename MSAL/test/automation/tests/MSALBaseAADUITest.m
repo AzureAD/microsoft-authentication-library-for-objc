@@ -127,7 +127,9 @@
 
         NSString *idTokenTenantId = claims.jsonDictionary[@"tid"];
 
-        XCTAssertEqualObjects(resultTenantId, request.testAccount.targetTenantId);
+        NSString *expectedTenantId = request.targetTenantId ?: request.testAccount.targetTenantId;
+        
+        XCTAssertEqualObjects(resultTenantId, expectedTenantId);
         XCTAssertEqualObjects(resultTenantId, idTokenTenantId);
     }
 

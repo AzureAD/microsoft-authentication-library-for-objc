@@ -52,6 +52,7 @@
     MSIDTestAutomationAccountConfigurationRequest *accountConfigurationRequest = [MSIDTestAutomationAccountConfigurationRequest new];
     accountConfigurationRequest.environmentType = self.testEnvironment;
     accountConfigurationRequest.accountType = MSIDTestAccountTypeGuest;
+    accountConfigurationRequest.federationProviderType = MSIDTestAccountFederationProviderTypeADFSV4;
     
     [self loadTestAccount:accountConfigurationRequest];
 }
@@ -83,6 +84,7 @@
     request.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
     request.expectedResultAuthority = request.configurationAuthority;
     request.cacheAuthority = request.configurationAuthority;
+    request.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedSilentAADLoginWithTestRequest:request];
 }
 
@@ -96,7 +98,8 @@
     homeRequest.expectedResultAuthority = homeRequest.configurationAuthority;
     homeRequest.cacheAuthority = homeRequest.configurationAuthority;
     homeRequest.webViewType = MSIDWebviewTypeWKWebView;
-    homeRequest.testAccount = [self.primaryAccount copy];
+    homeRequest.testAccount = self.primaryAccount;
+    homeRequest.targetTenantId = self.primaryAccount.homeTenantId;
 
     // 1. Run interactive in the home tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:NO];
@@ -119,6 +122,7 @@
     guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     guestRequest.homeAccountIdentifier = homeAccountId;
     guestRequest.webViewType = MSIDWebviewTypeWKWebView;
+    guestRequest.targetTenantId = self.primaryAccount.targetTenantId;
     [self runSharedSilentAADLoginWithTestRequest:guestRequest];
 }
 
@@ -130,6 +134,7 @@
     guestRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.targetTenantId];
     guestRequest.expectedResultAuthority = guestRequest.configurationAuthority;
     guestRequest.cacheAuthority = guestRequest.configurationAuthority;
+    guestRequest.targetTenantId = self.primaryAccount.targetTenantId;
 
     // 1. Run interactive in the guest tenant
     NSString *homeAccountId = [self runSharedGuestInteractiveLoginWithRequest:guestRequest closeResultView:NO];
@@ -143,7 +148,8 @@
     MSIDAutomationTestRequest *homeRequest = [self.class.confProvider defaultAppRequest:self.testEnvironment targetTenantId:self.primaryAccount.homeTenantId];
     homeRequest.promptBehavior = @"force";
     homeRequest.configurationAuthority = [self.class.confProvider defaultAuthorityForIdentifier:self.testEnvironment tenantId:self.primaryAccount.homeTenantId];
-    homeRequest.testAccount = [self.primaryAccount copy];
+    homeRequest.testAccount = self.primaryAccount;
+    homeRequest.targetTenantId = self.primaryAccount.homeTenantId;
     [self runSharedGuestInteractiveLoginWithRequest:homeRequest closeResultView:YES];
 
     // 3. Run silent for the guest tenant
@@ -169,7 +175,6 @@
         [self aadEnterEmail];
     }
 
-    [self enterGuestUsername];
     [self enterGuestPassword];
     [self acceptMSSTSConsentIfNecessary:@"Accept" embeddedWebView:request.usesEmbeddedWebView];
     
