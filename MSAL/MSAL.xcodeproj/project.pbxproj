@@ -498,6 +498,9 @@
 		B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */; };
 		B281B33C226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */; };
 		B282255C23EF811F0007DFE4 /* MSALB2CInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45744211E41C100818910 /* MSALB2CInteractiveTests.m */; };
+		B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B282255E23EF97C50007DFE4 /* MSALNationalCloudUITest.m */; };
+		B282256223EF9BFF0007DFE4 /* MSALChinaCloudUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B282256023EF9BFF0007DFE4 /* MSALChinaCloudUITests.m */; };
+		B282256323EF9BFF0007DFE4 /* MSALUSGovUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B282256123EF9BFF0007DFE4 /* MSALUSGovUITests.m */; };
 		B286B9E42389E751007833AD /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2EE86E223751CAE00D0BC96 /* AuthenticationServices.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		B286B9FD238A07A5007833AD /* MSALAcquireTokenTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D6B58A531EB2C4A8000B3A5F /* MSALAcquireTokenTests.m */; };
 		B286BA00238A08F6007833AD /* MSALB2CPolicyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B25F1BB21EC257F900474D1B /* MSALB2CPolicyTests.m */; };
@@ -1201,6 +1204,10 @@
 		B27CCDF0229F9F4700CAD565 /* MSALAccountEnumerationParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAccountEnumerationParameters.h; sourceTree = "<group>"; };
 		B27CCDF1229F9F4700CAD565 /* MSALAccountEnumerationParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountEnumerationParameters.m; sourceTree = "<group>"; };
 		B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientApplicationConfigTests.m; sourceTree = "<group>"; };
+		B282255D23EF97C50007DFE4 /* MSALNationalCloudUITest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALNationalCloudUITest.h; sourceTree = "<group>"; };
+		B282255E23EF97C50007DFE4 /* MSALNationalCloudUITest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALNationalCloudUITest.m; sourceTree = "<group>"; };
+		B282256023EF9BFF0007DFE4 /* MSALChinaCloudUITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALChinaCloudUITests.m; sourceTree = "<group>"; };
+		B282256123EF9BFF0007DFE4 /* MSALUSGovUITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALUSGovUITests.m; sourceTree = "<group>"; };
 		B28BBD312211DC7D00F51723 /* MSALPublicClientStatusNotifications.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALPublicClientStatusNotifications.h; sourceTree = "<group>"; };
 		B28BBD322211DC7D00F51723 /* MSALPublicClientStatusNotifications.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientStatusNotifications.m; sourceTree = "<group>"; };
 		B28BDA8C217E9EAB003E5670 /* MSALOauth2ProviderFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALOauth2ProviderFactory.h; sourceTree = "<group>"; };
@@ -1858,7 +1865,11 @@
 				B21F9DEC2120EB3E00B1B40C /* MSALPingUITests.m */,
 				B21F9DF02120F5CE00B1B40C /* MSALGuestUserTests.m */,
 				B2C2329F21224C21008092C1 /* MSALBlackforestUITests.m */,
+				B282256023EF9BFF0007DFE4 /* MSALChinaCloudUITests.m */,
+				B282256123EF9BFF0007DFE4 /* MSALUSGovUITests.m */,
 				B2C232AA2122A6A5008092C1 /* MSALCacheRemovalTests.m */,
+				B282255D23EF97C50007DFE4 /* MSALNationalCloudUITest.h */,
+				B282255E23EF97C50007DFE4 /* MSALNationalCloudUITest.m */,
 			);
 			path = interactive;
 			sourceTree = "<group>";
@@ -3447,9 +3458,11 @@
 			files = (
 				B2BB73922112C3F3000EA4C5 /* XCUIElement+CrossPlat.m in Sources */,
 				B2D0A38B21C70D800071E0DA /* MSALBlackforestUITests.m in Sources */,
+				B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */,
 				B21F9DEA2120E89E00B1B40C /* MSALADFSBaseUITest.m in Sources */,
 				B2BB738D2112C3F3000EA4C5 /* MSALBaseiOSUITest.m in Sources */,
 				B2D0A38F21C71D900071E0DA /* MSALCacheRemovalTests.m in Sources */,
+				B282256223EF9BFF0007DFE4 /* MSALChinaCloudUITests.m in Sources */,
 				B2D0A38A21C70AF50071E0DA /* MSALPingUITests.m in Sources */,
 				B2BB73912112C3F3000EA4C5 /* XCUIElement+MSALiOSUITests.m in Sources */,
 				B2A1C33F21C7038D00DDAE8E /* MSALADFSv3FederatedTests.m in Sources */,
@@ -3462,6 +3475,7 @@
 				B2BB738F2112C3F3000EA4C5 /* MSALBaseUITest.m in Sources */,
 				B2BB73902112C3F3000EA4C5 /* NSDictionary+MSALiOSUITests.m in Sources */,
 				B2BB738E2112C3F3000EA4C5 /* XCTestCase+TextFieldTap.m in Sources */,
+				B282256323EF9BFF0007DFE4 /* MSALUSGovUITests.m in Sources */,
 				B2A1C33D21C6FBAF00DDAE8E /* MSALAADMultiUserTests.m in Sources */,
 				B2BB73992112C51E000EA4C5 /* MSALUITests.swift in Sources */,
 				B2D0A38321C708CF0071E0DA /* MSALADFSv4FederatedTests.m in Sources */,
