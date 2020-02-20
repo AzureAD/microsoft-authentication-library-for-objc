@@ -1,3 +1,15 @@
+## [1.0.7] - 2020-01-29
+### Fixed
+- Keyed unarchiver deserialization fix for iOS 11.2
+- [Broker patch] Fixed account lookups and validation with the same email (#827)
+
+## [1.0.6] - 2020-01-03
+### Fixed
+- Set mobile content type for the WKWebView configuration (#810)
+- Better error handling for missing broker query schemes (#811)
+- Enable dogfood Authenticator support by default (#812)
+- Optimiza external account writing logic (#813)
+
 ## [1.0.5] - 2019-12-13
 ### Fixed
 - Account lookup fix when no refresh tokens present (#799)
@@ -27,6 +39,14 @@
 - Block swipe to dismiss for auth controller
 - Remove arm64e architecture
 - Pass custom keychain group for broker requests
+
+## [1.0.0-hotfix2] - 2020-01-27
+### Fixed
+- [Broker patch] Keyed unarchiver deserialization fix for iOS 11.2
+
+## [1.0.0-hotfix1] - 2020-01-21
+### Fixed
+- [Broker patch] Fixed account lookups and validation with the same email (#827)
 
 ## [1.0.0] - 2019-09-26
 ### Fixed

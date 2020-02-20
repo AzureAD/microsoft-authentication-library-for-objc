@@ -25,16 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "MSALDeviceInformation.h"
+#import "MSALDeviceInformation+Internal.h"
+#import "MSIDDeviceInfo.h"
 
-@class MSALRedirectUri;
+@implementation MSALDeviceInformation
 
-@interface MSALRedirectUriVerifier : NSObject
+- (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo
+{
+    self = [super init];
+    
+    if (self)
+    {
+        _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
+    }
+    
+    return self;
+}
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
+- (MSALDeviceMode)msalDeviceModeFromMSIDMode:(MSIDDeviceMode)msidDeviceMode
+{
+    switch (msidDeviceMode) {
+        case MSIDDeviceModeShared:
+            return MSALDeviceModeShared;
+            
+        default:
+            return MSALDeviceModeDefault;
+    }
+}
 
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+- (NSString *)msalDeviceModeString
+{
+    switch (self.deviceMode) {
+        case MSALDeviceModeShared:
+            return @"shared";
+            
+        default:
+            return @"default";
+    }
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"Device mode %@", self.msalDeviceModeString];
+}
 
 @end

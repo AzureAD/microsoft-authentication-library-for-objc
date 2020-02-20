@@ -138,4 +138,25 @@
     return NO;
 }
 
++ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(__unused NSError **)error
+{
+#if !AD_BROKER
+    NSArray *querySchemes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"LSApplicationQueriesSchemes"];
+    
+    if (![querySchemes containsObject:@"msauthv2"]
+        || ![querySchemes containsObject:@"msauthv3"])
+    {
+        if (error)
+        {
+            NSString *message = @"The required query schemes \"msauthv2\" and \"msauthv3\" are not registered in the app's info.plist file. Please add \"msauthv2\" and \"msauthv3\" into Info.plist under LSApplicationQueriesSchemes without any whitespaces.";
+            MSIDFillAndLogError(error, MSIDErrorRedirectSchemeNotRegistered, message, nil);
+        }
+        
+        return NO;
+    }
+#endif
+    
+    return YES;
+}
+
 @end

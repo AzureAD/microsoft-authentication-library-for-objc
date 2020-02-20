@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
  If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
 */
 - (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
-                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
+                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock;
 
 @end
 

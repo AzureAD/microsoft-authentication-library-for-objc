@@ -27,14 +27,13 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALRedirectUri;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALRedirectUriVerifier : NSObject
+@interface MSALSSOExtensionRequestHandler : NSObject
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
-
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+- (BOOL)setCurrentSSOExtensionRequest:(id)request API_AVAILABLE(ios(13.0), macos(10.15));
+- (id)copyAndClearCurrentSSOExtensionRequest API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
+
+NS_ASSUME_NONNULL_END

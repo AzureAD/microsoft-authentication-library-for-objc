@@ -27,14 +27,18 @@
 
 #import <Foundation/Foundation.h>
 
-@class MSALRedirectUri;
+NS_ASSUME_NONNULL_BEGIN
 
-@interface MSALRedirectUriVerifier : NSObject
+/**
+ Information about the device that is applicable to MSAL scenarios. 
+*/
+@interface MSALDeviceInformation : NSObject
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
-
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+/**
+ Device mode configured by the administrator
+*/
+@property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
 @end
+
+NS_ASSUME_NONNULL_END

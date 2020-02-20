@@ -374,4 +374,9 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
      Failed to read broker application token.
      */
     MSALInternalErrorBrokerApplicationTokenReadFailed   = -42713,
+    
+    /**
+     Broker is either not found on device or not available for this configuration.
+    */
+    MSALInternalBrokerNotAvailable                      = -42714
 };

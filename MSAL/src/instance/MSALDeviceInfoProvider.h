@@ -26,15 +26,17 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
+#import "MSALSSOExtensionRequestHandler.h"
 
-@class MSALRedirectUri;
+@class MSIDRequestParameters;
 
-@interface MSALRedirectUriVerifier : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
-+ (MSALRedirectUri *)msalRedirectUriWithCustomUri:(NSString *)customRedirectUri
-                                         clientId:(NSString *)clientId
-                                            error:(NSError * __autoreleasing *)error;
+@interface MSALDeviceInfoProvider : MSALSSOExtensionRequestHandler
 
-+ (BOOL)verifyAdditionalRequiredSchemesAreRegistered:(NSError **)error;
+- (void)deviceInfoWithRequestParameters:(MSIDRequestParameters *)requestParameters
+                        completionBlock:(MSALDeviceInformationCompletionBlock)completionBlock API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
+
+NS_ASSUME_NONNULL_END
