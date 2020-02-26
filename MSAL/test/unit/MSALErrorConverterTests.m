@@ -144,6 +144,34 @@
     XCTAssertEqualObjects(msalError.userInfo[MSALInternalErrorCodeKey], @(-42400));
 }
 
+- (void)testErrorConversion_whenUnclassifiedInternalMSALErrorPassed_andErrorDescriptionPassedInDictionary_shouldMapToInternal_andPreserveErrorDescription
+{
+    NSInteger errorCode = -42400;
+    NSString *errorDescription = @"a fake error description.";
+    NSString *oauthError = @"a fake oauth error message.";
+    NSString *subError = @"a fake suberror";
+    
+    NSError *msalError = [MSALErrorConverter errorWithDomain:MSALErrorDomain
+                                                        code:errorCode
+                                            errorDescription:nil
+                                                  oauthError:oauthError
+                                                    subError:subError
+                                             underlyingError:nil
+                                               correlationId:nil
+                                                    userInfo:@{MSALErrorDescriptionKey : errorDescription}
+                                              classifyErrors:YES
+                                          msalOauth2Provider:nil];
+    
+    NSString *expectedErrorDomain = MSALErrorDomain;
+    XCTAssertNotNil(msalError);
+    XCTAssertEqualObjects(msalError.domain, expectedErrorDomain);
+    XCTAssertEqual(msalError.code, MSALErrorInternal);
+    XCTAssertEqualObjects(msalError.userInfo[MSALErrorDescriptionKey], errorDescription);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthErrorKey], oauthError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALOAuthSubErrorKey], subError);
+    XCTAssertEqualObjects(msalError.userInfo[MSALInternalErrorCodeKey], @(-42400));
+}
+
 - (void)testErrorConversion_whenUnclassifiedRecoverableErrorPassed_shouldMapToRecoverable
 {
     NSInteger errorCode = MSALErrorUserCanceled;

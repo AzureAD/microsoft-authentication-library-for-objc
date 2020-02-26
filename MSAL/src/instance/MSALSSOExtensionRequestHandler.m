@@ -25,26 +25,51 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALPublicClientApplication.h"
-#import "MSALDefinitions.h"
-#import "MSALParameters.h"
+#import "MSALSSOExtensionRequestHandler.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@interface MSALSSOExtensionRequestHandler()
 
-/**
- An interface that contains list of operations that are available when MSAL is in 'single account' mode - which means there's only one account available on the device.
-*/
-@interface MSALPublicClientApplication (SingleAccount)
-
-/**
- Gets the current account and return previous account if present. This can be useful to detect if the current account changes.
- This method must be called whenever the application is resumed or prior to running a scheduled background operation.
- 
- If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
-*/
-- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
-                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock;
+@property (nullable, nonatomic) id currentRequest API_AVAILABLE(ios(13.0), macos(10.15));
 
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation MSALSSOExtensionRequestHandler
+
+#pragma mark - Request tracking
+
+- (BOOL)setCurrentSSOExtensionRequest:(id)request API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    @synchronized (self)
+    {
+        if (self.currentRequest)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Request is already executing. Please wait or cancel the request before starting it again.");
+            return NO;
+        }
+        
+        self.currentRequest = request;
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (id)copyAndClearCurrentSSOExtensionRequest API_AVAILABLE(ios(13.0), macos(10.15))
+{
+    @synchronized (self)
+    {
+        if (!self.currentRequest)
+        {
+            // There's no error param because this isn't on a critical path. Just log that you are
+            // trying to clear a request when there isn't one.
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Trying to clear out an empty request");
+            return nil;
+        }
+        
+        id currentRequest = self.currentRequest;
+        self.currentRequest = nil;
+        return currentRequest;
+    }
+}
+
+@end

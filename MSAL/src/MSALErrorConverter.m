@@ -89,6 +89,7 @@ static NSSet *s_recoverableErrorCode;
                                    @(MSIDErrorBrokerUnknown): @(MSALInternalErrorBrokerUnknown),
                                    @(MSIDErrorBrokerApplicationTokenReadFailed): @(MSALInternalErrorBrokerApplicationTokenReadFailed),
                                    @(MSIDErrorBrokerApplicationTokenWriteFailed): @(MSALInternalErrorBrokerApplicationTokenWriteFailed),
+                                   @(MSIDErrorBrokerNotAvailable) : @(MSALInternalBrokerNotAvailable),
 
                                    // Oauth2 errors
                                    @(MSIDErrorServerOauth) : @(MSALInternalErrorAuthorizationFailed),
@@ -199,14 +200,11 @@ static NSSet *s_recoverableErrorCode;
         msalUserInfo[mappedKey] = userInfo[key];
     }
 
-    msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
-    msalUserInfo[MSALOAuthErrorKey] = oauthError;
-    msalUserInfo[MSALOAuthSubErrorKey] = subError;
+    if (errorDescription) msalUserInfo[MSALErrorDescriptionKey] = errorDescription;
+    if (oauthError) msalUserInfo[MSALOAuthErrorKey] = oauthError;
+    if (subError) msalUserInfo[MSALOAuthSubErrorKey] = subError;
     
-    if (underlyingError)
-    {
-        msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
-    }
+    if (underlyingError) msalUserInfo[NSUnderlyingErrorKey] = [MSALErrorConverter msalErrorFromMsidError:underlyingError];
     
     msalUserInfo[MSALInternalErrorCodeKey] = internalCode;
 

@@ -25,25 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALPublicClientApplication.h"
-#import "MSALDefinitions.h"
-#import "MSALParameters.h"
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- An interface that contains list of operations that are available when MSAL is in 'single account' mode - which means there's only one account available on the device.
+ Information about the device that is applicable to MSAL scenarios. 
 */
-@interface MSALPublicClientApplication (SingleAccount)
+@interface MSALDeviceInformation : NSObject
 
 /**
- Gets the current account and return previous account if present. This can be useful to detect if the current account changes.
- This method must be called whenever the application is resumed or prior to running a scheduled background operation.
- 
- If there're multiple accounts present, MSAL will return an ambiguous account error, and application should do account disambiguation by calling other MSAL Account enumeration APIs.
+ Device mode configured by the administrator
 */
-- (void)getCurrentAccountWithParameters:(nullable MSALParameters *)parameters
-                        completionBlock:(MSALCurrentAccountCompletionBlock)completionBlock;
+@property (nonatomic, readonly) MSALDeviceMode deviceMode;
 
 @end
 
