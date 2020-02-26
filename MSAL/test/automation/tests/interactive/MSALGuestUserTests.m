@@ -28,6 +28,7 @@
 #import "MSALADFSBaseUITest.h"
 #import "XCTestCase+TextFieldTap.h"
 #import "NSString+MSIDAutomationUtils.h"
+#import "XCUIElement+CrossPlat.h"
 
 @interface MSALGuestUserTests : MSALADFSBaseUITest
 
@@ -195,17 +196,17 @@
 
 - (void)enterGuestUsername
 {
-    XCUIElement *passwordTextField = [self.testApp.textFields elementBoundByIndex:0];
-    [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
-    [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn]];
+    XCUIElement *emailTextField = [self.testApp.textFields elementBoundByIndex:0];
+    [self waitForElement:emailTextField];
+    [emailTextField msidTap];
+    [emailTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.upn]];
 }
 
 - (void)enterGuestPassword
 {
     XCUIElement *passwordTextField = [self.testApp.secureTextFields elementBoundByIndex:0];
     [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
+    [passwordTextField msidTap];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
 
