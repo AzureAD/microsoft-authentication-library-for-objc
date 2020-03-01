@@ -34,7 +34,6 @@
 #import "MSIDTestAutomationAppConfigurationRequest.h"
 #import "MSIDTestAutomationApplication.h"
 #import "MSIDAutomationOperationResponseHandler.h"
-#import "MSIDAutomationOperationAccountResponseHandler.h"
 
 static MSIDTestConfigurationProvider *s_confProvider;
 
@@ -210,8 +209,7 @@ static MSIDTestConfigurationProvider *s_confProvider;
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Get account"];
     
-    MSIDAutomationOperationAccountResponseHandler *responseHandler = [[MSIDAutomationOperationAccountResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
-    responseHandler.requiresDomainName = accountRequest.federationProviderType == MSIDTestAccountFederationProviderTypePing || accountRequest.federationProviderType == MSIDTestAccountFederationProviderTypeShibboleth; // TODO: remove me once lab adds this information
+    MSIDAutomationOperationResponseHandler *responseHandler = [[MSIDAutomationOperationResponseHandler alloc] initWithClass:MSIDTestAutomationAccount.class];
     
     __block NSArray *results = nil;
     
