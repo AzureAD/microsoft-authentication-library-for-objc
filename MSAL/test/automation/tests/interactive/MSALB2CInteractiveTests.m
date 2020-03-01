@@ -123,7 +123,7 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
-    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:nil];
+    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
     
     // 1. Start B2C login
@@ -142,7 +142,7 @@
     [self runSharedAuthUIAppearsStepWithTestRequest:request];
 
     request.homeAccountIdentifier = homeAccountId;
-    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:homeTenantId];
+    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     // 4. Run silent login
     request.testAccount = nil;
     request.expectedResultAuthority = request.cacheAuthority;
