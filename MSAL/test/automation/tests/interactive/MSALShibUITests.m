@@ -151,7 +151,7 @@
 {
     XCUIElement *usernameTextField = [self.testApp.textFields elementBoundByIndex:0];
     [self waitForElement:usernameTextField];
-    [self tapElementAndWaitForKeyboardToAppear:usernameTextField];
+    [usernameTextField msidTap];
     [usernameTextField activateTextField];
     [usernameTextField typeText:self.primaryAccount.domainUsername];
 }
@@ -160,7 +160,7 @@
 {
     XCUIElement *passwordTextField = [self.testApp.secureTextFields elementBoundByIndex:0];
     [self waitForElement:passwordTextField];
-    [self tapElementAndWaitForKeyboardToAppear:passwordTextField];
+    [passwordTextField msidTap];
     [passwordTextField activateTextField];
     [passwordTextField typeText:[NSString stringWithFormat:@"%@\n", self.primaryAccount.password]];
 }
