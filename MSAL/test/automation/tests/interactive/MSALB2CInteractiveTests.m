@@ -157,7 +157,7 @@
     request.webViewType = MSALWebviewTypeWKWebView;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
-    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:nil];
+    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
     
     // 1. Start B2C login
@@ -172,7 +172,7 @@
     
     [self closeResultView];
         
-    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:homeTenantId];
+    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     request.usePassedWebView = YES;
     [self runSharedB2CLoginStartWithTestRequest:request];
     NSString *homeAccountId2 = [self runSharedB2CMSALoginWithRequest:request closeResultView:YES];
@@ -187,7 +187,7 @@
     request.webViewType = MSIDWebviewTypeSafariViewController;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
-    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:nil];
+    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
     
     // 1. Start B2C login
@@ -203,7 +203,7 @@
     [self closeResultView];
 
     request.homeAccountIdentifier = homeAccountId;
-    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:homeTenantId];
+    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     request.expectedResultAuthority = request.cacheAuthority;
     // 3. Run silent login
     request.testAccount = nil;
@@ -221,7 +221,7 @@
     request.usePassedWebView = YES;
     request.requestIDP = @"Microsoft";
     request.promptBehavior = @"force";
-    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:nil];
+    request.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:nil];
     request.expectedResultScopes = request.requestScopes;
     
     // 1. Start B2C login
@@ -244,9 +244,9 @@
     profileRequest.usePassedWebView = YES;
     profileRequest.loginHint = self.primaryAccount.upn;
     profileRequest.requestIDP = @"Microsoft";
-    profileRequest.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"profile" tenantId:nil];
+    profileRequest.configurationAuthority = [self.testApplication b2cAuthorityForPolicy:@"ProfileEditPolicy" tenantId:nil];
     profileRequest.expectedResultScopes = request.requestScopes;
-    profileRequest.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"profile" tenantId:homeTenantId];
+    profileRequest.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"ProfileEditPolicy" tenantId:homeTenantId];
     profileRequest.expectedResultAuthority = profileRequest.cacheAuthority;
 
     [self runSharedB2CLoginStartWithTestRequest:profileRequest];
@@ -265,7 +265,7 @@
     // 5. Get token silently for the first request
     request.homeAccountIdentifier = homeAccountId;
     request.testAccount = nil;
-    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignIn" tenantId:homeTenantId];
+    request.cacheAuthority = [self.testApplication b2cAuthorityForPolicy:@"SignInPolicy" tenantId:homeTenantId];
     request.expectedResultAuthority = request.cacheAuthority;
     [self runSharedSilentAADLoginWithTestRequest:request];
 
