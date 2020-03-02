@@ -52,7 +52,7 @@
     
     [self loadTestAccount:accountConfigurationRequest];
     
-    self.nationalCloudEnvironment = @"de";
+    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeGermanCloud;
 }
 
 #pragma mark - Interactive tests
