@@ -293,7 +293,9 @@ static MSIDTestConfigurationProvider *s_confProvider;
     // Enter password
     XCUIElement *passwordTextField = app.secureTextFields.firstMatch;
     [self waitForElement:passwordTextField];
+    sleep(0.1f);
     [passwordTextField msidTap];
+    sleep(0.1f);
     [passwordTextField typeText:password];
 }
 
