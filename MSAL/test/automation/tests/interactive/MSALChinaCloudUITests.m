@@ -52,7 +52,7 @@
     
     [self loadTestAccount:accountConfigurationRequest];
     
-    self.nationalCloudEnvironment = MSIDTestAccountEnvironmentTypeChinaCloud;
+    self.nationalCloudEnvironment = [NSString stringWithFormat:@"%@-instance_aware", MSIDTestAccountEnvironmentTypeChinaCloud];
 }
 
 #pragma mark - Interactive tests
