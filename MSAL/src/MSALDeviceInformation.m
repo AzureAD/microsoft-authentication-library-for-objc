@@ -38,6 +38,7 @@
     if (self)
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
+        _ssoExtensionMode = [self msalSSOExtensionModeFromMSIDMode:deviceInfo.ssoExtensionMode];
     }
     
     return self;
