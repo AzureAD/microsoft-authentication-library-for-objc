@@ -55,6 +55,17 @@
     }
 }
 
+- (MSALSSOExtensionMode)msalSSOExtensionModeFromMSIDMode:(MSIDSSOExtensionMode)msidSSOExtensionMode
+{
+    switch (msidSSOExtensionMode) {
+        case MSIDSSOExtensionModeSilentOnly:
+            return MSALSSOExtensionModeSilentOnly;
+            
+        default:
+            return MSALSSOExtensionModeModeFull;
+    }
+}
+
 - (NSString *)msalDeviceModeString
 {
     switch (self.deviceMode) {
@@ -66,9 +77,20 @@
     }
 }
 
+- (NSString *)msalSSOExtensionModeString
+{
+    switch (self.ssoExtensionMode) {
+        case MSALSSOExtensionModeSilentOnly:
+            return @"silent_only";
+            
+        default:
+            return @"full";
+    }
+}
+
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"Device mode %@", self.msalDeviceModeString];
+    return [NSString stringWithFormat:@"Device mode %@, SSO Extension mode %@", self.msalDeviceModeString, self.msalSSOExtensionModeString];
 }
 
 @end
