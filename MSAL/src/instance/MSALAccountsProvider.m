@@ -51,6 +51,9 @@
 #import "MSALAccount+MultiTenantAccount.h"
 #import "MSIDSSOExtensionGetAccountsRequest.h"
 #import "MSIDRequestParameters+Broker.h"
+#import "MSALAccount+Internal.h"
+#import "MSALAccountId+Internal.h"
+#import "MSIDAccountMetadataCacheItem.h"
 
 @interface MSALAccountsProvider()
 
@@ -434,27 +437,41 @@
 
 - (MSALAccount *)currentPrincipalAccount:(NSError **)error
 {
-    MSIDAccountIdentifier *principalAccountId = [self currentPrincipalAccountIdWithError:error];
-    
-    if (!principalAccountId)
+    MSIDAccountMetadataCacheItem *accountMetadataCacheItem = [self.accountMetadataCache retrieveAccountMetadataCacheItemForClientId:self.clientId context:nil error:error];
+        
+    if (!accountMetadataCacheItem.principalAccountId)
     {
         return nil;
     }
     
+    MSIDAccountIdentifier *principalAccountId = accountMetadataCacheItem.principalAccountId;
+    
     MSALAccountEnumerationParameters *parameters = [[MSALAccountEnumerationParameters alloc] initWithIdentifier:principalAccountId.homeAccountId];
     parameters.returnOnlySignedInAccounts = NO;
-    return [self accountForParameters:parameters error:error];
+    MSALAccount *account = [self accountForParameters:parameters error:error];
+    
+    if (account)
+    {
+        return account;
+    }
+    
+    MSALAccountId *accountId = [[MSALAccountId alloc] initWithAccountIdentifier:principalAccountId.homeAccountId
+                                                                       objectId:principalAccountId.uid
+                                                                       tenantId:principalAccountId.utid];
+    
+    account = [[MSALAccount alloc] initWithUsername:principalAccountId.displayableId
+                                      homeAccountId:accountId
+                                        environment:accountMetadataCacheItem.principalAccountEnvironment
+                                     tenantProfiles:nil];
+    
+    return account;
 }
 
-- (MSIDAccountIdentifier *)currentPrincipalAccountIdWithError:(NSError **)error
-{
-    return [self.accountMetadataCache principalAccountIdForClientId:self.clientId context:nil error:error];
-}
-
-- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId error:(NSError **)error
+- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId accountEnvironment:(NSString *)accountEnvironment error:(NSError **)error
 {
     return [self.accountMetadataCache updatePrincipalAccountIdForClientId:self.clientId
                                                        principalAccountId:currentAccountId
+                                              principalAccountEnvironment:accountEnvironment
                                                                   context:nil
                                                                     error:error];
 }
