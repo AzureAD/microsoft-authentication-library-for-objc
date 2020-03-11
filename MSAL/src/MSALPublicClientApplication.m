@@ -569,7 +569,7 @@
         MSIDAccountIdentifier *newIdentifier = newAccount.lookupAccountIdentifier ?: nil;
         
         NSError *accountUpdateError;
-        BOOL result = [request setCurrentPrincipalAccountId:newIdentifier error:&accountUpdateError];
+        BOOL result = [request setCurrentPrincipalAccountId:newIdentifier accountEnvironment:newAccount.environment error:&accountUpdateError];
         
         if (!result)
         {
