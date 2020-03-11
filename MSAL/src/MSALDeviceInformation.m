@@ -62,7 +62,7 @@
             return MSALSSOExtensionModeSilentOnly;
             
         default:
-            return MSALSSOExtensionModeModeFull;
+            return MSALSSOExtensionModeFull;
     }
 }
 

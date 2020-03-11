@@ -162,7 +162,7 @@ typedef NS_ENUM(NSUInteger, MSALSSOExtensionMode)
     /*
         Administrator hasn't configured this device into any specific mode.
     */
-    MSALSSOExtensionModeModeFull = 0,
+    MSALSSOExtensionModeFull = 0,
     
     MSALSSOExtensionModeSilentOnly
 };
