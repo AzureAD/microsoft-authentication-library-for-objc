@@ -29,7 +29,12 @@
 #import "MSALDeviceInformation+Internal.h"
 #import "MSIDDeviceInfo.h"
 
+NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
+
 @implementation MSALDeviceInformation
+{
+    NSMutableDictionary *_extraDeviceInformation;
+}
 
 - (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo
 {
@@ -38,9 +43,17 @@
     if (self)
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
+        
+        _extraDeviceInformation = [NSMutableDictionary new];
+        [self initExtraDeviceInformation:deviceInfo];
     }
     
     return self;
+}
+
+- (NSDictionary *)extraDeviceInformation
+{
+    return _extraDeviceInformation;
 }
 
 - (MSALDeviceMode)msalDeviceModeFromMSIDMode:(MSIDDeviceMode)msidDeviceMode
@@ -63,6 +76,12 @@
         default:
             return @"default";
     }
+}
+
+// For readability, both keys and values in the output dictionary are NSString
+- (void) initExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo
+{
+    [_extraDeviceInformation setValue:deviceInfo.ssoExtensionMode == MSIDSSOExtensionModeFull ? @"Yes" : @"No" forKey:MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY];
 }
 
 - (NSString *)description
