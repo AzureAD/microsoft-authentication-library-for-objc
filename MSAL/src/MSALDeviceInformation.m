@@ -29,7 +29,12 @@
 #import "MSALDeviceInformation+Internal.h"
 #import "MSIDDeviceInfo.h"
 
+NSString *const MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY = @"isSSOExtensionInFullMode";
+
 @implementation MSALDeviceInformation
+{
+    NSMutableDictionary *_extraDeviceInformation;
+}
 
 - (instancetype)initWithMSIDDeviceInfo:(MSIDDeviceInfo *)deviceInfo
 {
@@ -38,10 +43,17 @@
     if (self)
     {
         _deviceMode = [self msalDeviceModeFromMSIDMode:deviceInfo.deviceMode];
-        _ssoExtensionMode = [self msalSSOExtensionModeFromMSIDMode:deviceInfo.ssoExtensionMode];
+        
+        _extraDeviceInformation = [NSMutableDictionary new];
+        [self initExtraDeviceInformation:deviceInfo];
     }
     
     return self;
+}
+
+- (NSDictionary *)extraDeviceInformation
+{
+    return _extraDeviceInformation;
 }
 
 - (MSALDeviceMode)msalDeviceModeFromMSIDMode:(MSIDDeviceMode)msidDeviceMode
@@ -52,17 +64,6 @@
             
         default:
             return MSALDeviceModeDefault;
-    }
-}
-
-- (MSALSSOExtensionMode)msalSSOExtensionModeFromMSIDMode:(MSIDSSOExtensionMode)msidSSOExtensionMode
-{
-    switch (msidSSOExtensionMode) {
-        case MSIDSSOExtensionModeSilentOnly:
-            return MSALSSOExtensionModeSilentOnly;
-            
-        default:
-            return MSALSSOExtensionModeFull;
     }
 }
 
@@ -77,20 +78,14 @@
     }
 }
 
-- (NSString *)msalSSOExtensionModeString
+- (void) initExtraDeviceInformation:(MSIDDeviceInfo *)deviceInfo
 {
-    switch (self.ssoExtensionMode) {
-        case MSALSSOExtensionModeSilentOnly:
-            return @"silent_only";
-            
-        default:
-            return @"full";
-    }
+    [_extraDeviceInformation setValue:deviceInfo.ssoExtensionMode == MSIDSSOExtensionModeFull ? @"Yes" : @"No" forKey:MSAL_DEVICE_INFORMATION_SSO_EXTENSION_FULL_MODE_KEY];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"Device mode %@, SSO Extension mode %@", self.msalDeviceModeString, self.msalSSOExtensionModeString];
+    return [NSString stringWithFormat:@"Device mode %@", self.msalDeviceModeString];
 }
 
 @end
