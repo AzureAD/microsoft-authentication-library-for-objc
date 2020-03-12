@@ -81,6 +81,6 @@
 #pragma mark - Principal account id
 
 - (MSALAccount *)currentPrincipalAccount:(NSError **)error;
-- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId error:(NSError **)error;
+- (BOOL)setCurrentPrincipalAccountId:(MSIDAccountIdentifier *)currentAccountId accountEnvironment:(NSString *)accountEnvironment error:(NSError **)error;
 
 @end
