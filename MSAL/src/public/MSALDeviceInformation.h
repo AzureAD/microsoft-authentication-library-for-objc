@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Additional device information
 */
-- (NSDictionary *) extraDeviceInformation;
+@property (nonatomic, readonly) NSDictionary *extraDeviceInformation;
 
 @end
 

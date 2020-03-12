@@ -155,19 +155,6 @@ typedef NS_ENUM(NSUInteger, MSALDeviceMode)
 };
 
 /**
- Device mode configured by the administrator
- */
-typedef NS_ENUM(NSUInteger, MSALSSOExtensionMode)
-{
-    /*
-        Administrator hasn't configured this device into any specific mode.
-    */
-    MSALSSOExtensionModeFull = 0,
-    
-    MSALSSOExtensionModeSilentOnly
-};
-
-/**
     The block that gets invoked after MSAL has finished getting a token silently or interactively.
     @param result       Represents information returned to the application after a successful interactive or silent token acquisition. See `MSALResult` for more information.
     @param error         Provides information about error that prevented MSAL from getting a token. See `MSALError` for possible errors.
