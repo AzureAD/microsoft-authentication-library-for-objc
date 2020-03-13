@@ -119,6 +119,7 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeDefault);
+        XCTAssertEqual(deviceInformation.extraDeviceInformation.count, 0);
         [failExpectation fulfill];
     }];
     
@@ -187,6 +188,7 @@
         MSIDDeviceInfo *deviceInfo = [MSIDDeviceInfo new];
         deviceInfo.brokerVersion = @"test";
         deviceInfo.deviceMode = MSIDDeviceModeShared;
+        deviceInfo.ssoExtensionMode = MSIDSSOExtensionModeSilentOnly;
         
         callback(deviceInfo, nil);
     }];
@@ -202,6 +204,7 @@
         XCTAssertNotNil(deviceInformation);
         XCTAssertNil(error);
         XCTAssertEqual(deviceInformation.deviceMode, MSALDeviceModeShared);
+        XCTAssertEqualObjects(deviceInformation.extraDeviceInformation[@"isSSOExtensionInFullMode"], @"No");
         [successExpectation fulfill];
     }];
     
